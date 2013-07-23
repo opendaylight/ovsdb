@@ -103,7 +103,7 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
             OvsdbMessage msg = new OvsdbMessage("transact", params);
             try {
                 connection.sendMessage(msg);
-                connection.readResponse(String[].class);
+                connection.readResponse(Uuid[].class);
             } catch (Exception e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

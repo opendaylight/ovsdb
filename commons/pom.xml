@@ -312,7 +312,7 @@
         </executions>
         <configuration>
           <failsOnError>true</failsOnError>
-          <configLocation>${project.parent.basedir}/space_and_tabs_checks.xml</configLocation>
+          <configLocation>${project.basedir}/space_and_tabs_checks.xml</configLocation>
           <consoleOutput>true</consoleOutput>
           <includeTestSourceDirectory>true</includeTestSourceDirectory>
           <sourceDirectory>${project.basedir}</sourceDirectory>

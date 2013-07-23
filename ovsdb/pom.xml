@@ -5,7 +5,7 @@
     <groupId>org.opendaylight.ovsdb</groupId>
     <artifactId>commons.ovsdb</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <relativePath>../commons/opendaylight</relativePath>
+    <relativePath>../commons</relativePath>
   </parent>
   <artifactId>ovsdb</artifactId>
   <version>0.4.0-SNAPSHOT</version>

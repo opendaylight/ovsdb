@@ -9,7 +9,7 @@
   <artifactId>commons.ovsdb</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
-  
+
     <repositories>
     <!-- EBR release -->
     <!-- http://repository.springsource.com/maven/bundles/release -->
@@ -30,7 +30,7 @@
       <name>opendaylight.snapshot</name>
       <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
     </repository>
-    
+
     <!-- Maven repo2 mirror -->
     <!-- http://repo2.maven.org/maven2 -->
     <repository>
@@ -86,7 +86,7 @@
       <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
     </repository>
   </repositories>
-  
+
   <properties>
     <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
     <propertymavenplugin.version>1.0-alpha-2</propertymavenplugin.version>
@@ -312,7 +312,7 @@
         </executions>
         <configuration>
           <failsOnError>true</failsOnError>
-          <configLocation>${project.parent.basedir}/space_and_tabs_checks.xml</configLocation>
+          <configLocation>${project.basedir}/space_and_tabs_checks.xml</configLocation>
           <consoleOutput>true</consoleOutput>
           <includeTestSourceDirectory>true</includeTestSourceDirectory>
           <sourceDirectory>${project.basedir}</sourceDirectory>

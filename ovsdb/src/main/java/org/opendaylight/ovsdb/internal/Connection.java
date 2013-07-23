@@ -1,6 +1,7 @@
 package org.opendaylight.ovsdb.internal;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Map;
 
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.Status;
@@ -95,6 +96,10 @@ public class Connection implements RequestListener {
             }
             else if(clazz.equals(Uuid[].class)){
                 Uuid[] result = this.rpcClient.readResponse(Uuid[].class, socket.getInputStream());
+                return result;
+            }
+            else if(clazz.equals(Map.class)){
+                Map result = this.rpcClient.readResponse(Map.class, socket.getInputStream());
                 return result;
             }
             else{

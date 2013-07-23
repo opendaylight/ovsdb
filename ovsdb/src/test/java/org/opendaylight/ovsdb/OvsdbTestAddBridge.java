@@ -30,7 +30,7 @@ public class OvsdbTestAddBridge {
 
         Node node = connectionService.connect(identifier, params);
         if(node == null){
-            logger.error("Could not connecto to ovsdb server");
+            logger.error("Could not connect to ovsdb server");
             return;
         }
         ConfigurationService configurationService = new ConfigurationService();

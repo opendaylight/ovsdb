@@ -17,7 +17,7 @@ public interface IPluginInNetworkConfigurationService {
      * @param node Node serving this configuration service
      * @param bridgeDomainIdentifier String representation of a Bridge Domain
      */
-    public boolean createBridgeDomain(Node node, String bridgeIdentifier);
+    public boolean createBridgeDomain(Node node, String bridgeIdentifier) throws Throwable;
 
     /**
      * Delete a Bridge Domain

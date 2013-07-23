@@ -3,6 +3,7 @@ package org.opendaylight.ovsdb.internal;
 import java.net.InetAddress;
 import java.util.*;
 
+import org.opendaylight.ovsdb.database.OVSInstance;
 import org.opendaylight.ovsdb.sal.configuration.IPluginInNetworkConfigurationService;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -56,63 +57,113 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
         }
     }
 
+    private OvsdbMessage createAddBridgeMonitorMsg(){
+        Map<String, Object> tables = new HashMap<String, Object>();
+        Map<String, Object> row = new HashMap<String, Object>();
+        ArrayList<String> columns = new ArrayList<String>();
+
+        columns.add("_uuid");
+        columns.add("bridges");
+        row.put("columns", columns);
+        tables.put("Open_vSwitch", row);
+
+        Object[] params = {"Open_vSwitch", null, tables};
+
+        OvsdbMessage msg = new OvsdbMessage("monitor", params);
+        return msg;
+    }
+
     @Override
-    public boolean createBridgeDomain(Node node, String bridgeIdentifier){
-        if (connectionService == null) {
-            logger.error("Couldnt refer to the ConnectionService");
-            return false;
-        }
-        Connection connection = connectionService.getConnection(node);
-        String identifier = "TEST";
-
-        if (connection != null) {
-            String newBridge = "new_bridge";
-            String newInterface = "new_interface";
-            String newPort = "new_port";
-            String newSwitch = "new_switch";
-
-            Map<String, Object> bridgeRow = new HashMap<String, Object>();
-            bridgeRow.put("name", "br1");
-            ArrayList<String> ports = new ArrayList<String>();
-            ports.add("named-uuid");
-            ports.add(newPort);
-            bridgeRow.put("ports", ports);
-            InsertRequest addBridgeRequest = new InsertRequest("insert", "Bridge", newBridge, bridgeRow);
-
-            Map<String, Object> portRow = new HashMap<String, Object>();
-            portRow.put("name", "br1");
-            ArrayList<String> interfaces = new ArrayList<String>();
-            interfaces.add("named-uuid");
-            interfaces.add(newInterface);
-            portRow.put("interfaces", interfaces);
-            InsertRequest addPortRequest = new InsertRequest("insert", "Port", newPort, portRow);
-
-            Map<String, Object> interfaceRow = new HashMap<String, Object>();
-            interfaceRow.put("name", "br1");
-            interfaceRow.put("type", "internal");
-            InsertRequest addIntfRequest = new InsertRequest("insert", "Interface", newInterface, interfaceRow);
-
-            Map<String, Object> vswitchRow = new HashMap<String, Object>();
-            ArrayList<String> bridges = new ArrayList<String>();
-            bridges.add("named-uuid");
-            bridges.add(newBridge);
-            vswitchRow.put("bridges", bridges);
-            InsertRequest addSwitchRequest = new InsertRequest("insert", "Open_vSwitch", newSwitch, vswitchRow);
-
-            Object[] params = {"Open_vSwitch", addSwitchRequest, addIntfRequest, addPortRequest, addBridgeRequest};
-            OvsdbMessage msg = new OvsdbMessage("transact", params);
-            try {
-                connection.sendMessage(msg);
-                connection.readResponse(Uuid[].class);
-            } catch (Exception e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-                return false;
-            } catch (Throwable e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+    @SuppressWarnings("unchecked")
+    public boolean createBridgeDomain(Node node, String bridgeIdentifier) throws Throwable{
+        try{
+            if (connectionService == null) {
+                logger.error("Couldn't refer to the ConnectionService");
                 return false;
             }
+
+            Connection connection = connectionService.getConnection(node);
+            String identifier = "TEST";
+
+            if (connection != null) {
+                String newBridge = "new_bridge";
+                String newInterface = "new_interface";
+                String newPort = "new_port";
+                String newSwitch = "new_switch";
+
+                Object addSwitchRequest;
+
+                OvsdbMessage monitorMsg = createAddBridgeMonitorMsg();
+
+                connection.sendMessage(monitorMsg);
+                Map<String, Object> monitorResponse = (Map) connection.readResponse(Map.class);
+
+                if(monitorResponse.get("Open_vSwitch") != null){
+                    Map<String, Object> rows = (Map) monitorResponse.get("Open_vSwitch");
+                    Object[] rowsArray = rows.keySet().toArray();
+                    OVSInstance instance = new OVSInstance((String)rowsArray[0]);
+
+                    Map<String, Object> vswitchRow = new HashMap<String, Object>();
+                    ArrayList<Object> bridges = new ArrayList<Object>();
+                    bridges.add("set");
+                    ArrayList<Object> set = new ArrayList<Object>();
+                    ArrayList<String> newPair = new ArrayList<String>();
+                    newPair.add("named-uuid");
+                    newPair.add(newBridge);
+                    set.add(newPair);
+                    bridges.add(set);
+                    vswitchRow.put("bridges", bridges);
+
+                    ArrayList<Object> where = new ArrayList<Object>();
+                    ArrayList<Object> whereInner = new ArrayList<Object>();
+                    ArrayList<String> uuidPair = new ArrayList<String>();
+                    whereInner.add("_uuid");
+                    whereInner.add("==");
+                    uuidPair.add("uuid");
+                    uuidPair.add(instance.getUuid());
+                    whereInner.add(uuidPair);
+                    where.add(whereInner);
+
+                    addSwitchRequest = new UpdateRequest("update", "Open_vSwitch", where, vswitchRow);
+                }
+                else{
+                    Map<String, Object> vswitchRow = new HashMap<String, Object>();
+                    ArrayList<String> bridges = new ArrayList<String>();
+                    bridges.add("named-uuid");
+                    bridges.add(newBridge);
+                    vswitchRow.put("bridges", bridges);
+                    addSwitchRequest = new InsertRequest("insert", "Open_vSwitch", newSwitch, vswitchRow);
+                }
+
+                Map<String, Object> bridgeRow = new HashMap<String, Object>();
+                bridgeRow.put("name", "br1");
+                ArrayList<String> ports = new ArrayList<String>();
+                ports.add("named-uuid");
+                ports.add(newPort);
+                bridgeRow.put("ports", ports);
+                InsertRequest addBridgeRequest = new InsertRequest("insert", "Bridge", newBridge, bridgeRow);
+
+                Map<String, Object> portRow = new HashMap<String, Object>();
+                portRow.put("name", "br1");
+                ArrayList<String> interfaces = new ArrayList<String>();
+                interfaces.add("named-uuid");
+                interfaces.add(newInterface);
+                portRow.put("interfaces", interfaces);
+                InsertRequest addPortRequest = new InsertRequest("insert", "Port", newPort, portRow);
+
+                Map<String, Object> interfaceRow = new HashMap<String, Object>();
+                interfaceRow.put("name", "br1");
+                interfaceRow.put("type", "internal");
+                InsertRequest addIntfRequest = new InsertRequest("insert", "Interface", newInterface, interfaceRow);
+
+                Object[] params = {"Open_vSwitch", addSwitchRequest, addIntfRequest, addPortRequest, addBridgeRequest};
+                OvsdbMessage msg = new OvsdbMessage("transact", params);
+
+                connection.sendMessage(msg);
+                connection.readResponse(Uuid[].class);
+            }
+        }catch(Exception e){
+            e.printStackTrace();
         }
         return true;
     }

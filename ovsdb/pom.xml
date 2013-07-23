@@ -2,13 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.opendaylight.controller</groupId>
-    <artifactId>commons.opendaylight</artifactId>
-    <version>1.4.0-SNAPSHOT</version>
-    <relativePath>../../commons/opendaylight</relativePath>
+    <groupId>org.opendaylight.ovsdb</groupId>
+    <artifactId>commons.ovsdb</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <relativePath>../commons/opendaylight</relativePath>
   </parent>
-
-  <artifactId>protocol_plugins.ovsdb</artifactId>
+  <artifactId>ovsdb</artifactId>
   <version>0.4.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
@@ -52,7 +51,7 @@
               true
             </Embed-Transitive>
             <Bundle-Activator>
-              org.opendaylight.controller.protocol_plugin.ovsdb.internal.Activator
+              org.opendaylight.ovsdb.internal.Activator
             </Bundle-Activator>
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>

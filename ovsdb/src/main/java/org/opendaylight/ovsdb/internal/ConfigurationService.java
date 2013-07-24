@@ -57,22 +57,6 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
         }
     }
 
-    private OvsdbMessage createAddBridgeMonitorMsg(){
-        Map<String, Object> tables = new HashMap<String, Object>();
-        Map<String, Object> row = new HashMap<String, Object>();
-        ArrayList<String> columns = new ArrayList<String>();
-
-        columns.add("_uuid");
-        columns.add("bridges");
-        row.put("columns", columns);
-        tables.put("Open_vSwitch", row);
-
-        Object[] params = {"Open_vSwitch", null, tables};
-
-        OvsdbMessage msg = new OvsdbMessage("monitor", params);
-        return msg;
-    }
-
     @Override
     @SuppressWarnings("unchecked")
     public boolean createBridgeDomain(Node node, String bridgeIdentifier) throws Throwable{
@@ -93,38 +77,35 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
 
                 Object addSwitchRequest;
 
-                OvsdbMessage monitorMsg = createAddBridgeMonitorMsg();
+                OVSInstance instance = new OVSInstance();
+                instance.monitorOVS(connection);
 
-                connection.sendMessage(monitorMsg);
-                Map<String, Object> monitorResponse = (Map) connection.readResponse(Map.class);
+                if(instance.getUuid() != null){
+                    List<String> bridgeUuidPair = new ArrayList<String>();
+                    bridgeUuidPair.add("named-uuid");
+                    bridgeUuidPair.add(newBridge);
 
-                if(monitorResponse.get("Open_vSwitch") != null){
-                    Map<String, Object> rows = (Map) monitorResponse.get("Open_vSwitch");
-                    Object[] rowsArray = rows.keySet().toArray();
-                    OVSInstance instance = new OVSInstance((String)rowsArray[0]);
+                    List<Object> mutation = new ArrayList<Object>();
+                    mutation.add("bridges");
+                    mutation.add("insert");
+                    mutation.add(bridgeUuidPair);
 
-                    Map<String, Object> vswitchRow = new HashMap<String, Object>();
-                    ArrayList<Object> bridges = new ArrayList<Object>();
-                    bridges.add("set");
-                    ArrayList<Object> set = new ArrayList<Object>();
-                    ArrayList<String> newPair = new ArrayList<String>();
-                    newPair.add("named-uuid");
-                    newPair.add(newBridge);
-                    set.add(newPair);
-                    bridges.add(set);
-                    vswitchRow.put("bridges", bridges);
+                    List<Object> mutations = new ArrayList<Object>();
+                    mutations.add(mutation);
 
-                    ArrayList<Object> where = new ArrayList<Object>();
-                    ArrayList<Object> whereInner = new ArrayList<Object>();
-                    ArrayList<String> uuidPair = new ArrayList<String>();
+                    List<String> ovsUuidPair = new ArrayList<String>();
+                    ovsUuidPair.add("uuid");
+                    ovsUuidPair.add(instance.getUuid());
+
+                    List<Object> whereInner = new ArrayList<Object>();
                     whereInner.add("_uuid");
                     whereInner.add("==");
-                    uuidPair.add("uuid");
-                    uuidPair.add(instance.getUuid());
-                    whereInner.add(uuidPair);
+                    whereInner.add(ovsUuidPair);
+
+                    List<Object> where = new ArrayList<Object>();
                     where.add(whereInner);
 
-                    addSwitchRequest = new UpdateRequest("update", "Open_vSwitch", where, vswitchRow);
+                    addSwitchRequest = new MutateRequest("Open_vSwitch", where, mutations);
                 }
                 else{
                     Map<String, Object> vswitchRow = new HashMap<String, Object>();
@@ -136,7 +117,7 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
                 }
 
                 Map<String, Object> bridgeRow = new HashMap<String, Object>();
-                bridgeRow.put("name", "br1");
+                bridgeRow.put("name", bridgeIdentifier);
                 ArrayList<String> ports = new ArrayList<String>();
                 ports.add("named-uuid");
                 ports.add(newPort);
@@ -144,7 +125,7 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
                 InsertRequest addBridgeRequest = new InsertRequest("insert", "Bridge", newBridge, bridgeRow);
 
                 Map<String, Object> portRow = new HashMap<String, Object>();
-                portRow.put("name", "br1");
+                portRow.put("name", bridgeIdentifier);
                 ArrayList<String> interfaces = new ArrayList<String>();
                 interfaces.add("named-uuid");
                 interfaces.add(newInterface);
@@ -152,7 +133,7 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
                 InsertRequest addPortRequest = new InsertRequest("insert", "Port", newPort, portRow);
 
                 Map<String, Object> interfaceRow = new HashMap<String, Object>();
-                interfaceRow.put("name", "br1");
+                interfaceRow.put("name", bridgeIdentifier);
                 interfaceRow.put("type", "internal");
                 InsertRequest addIntfRequest = new InsertRequest("insert", "Interface", newInterface, interfaceRow);
 

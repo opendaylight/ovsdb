@@ -1,14 +1,15 @@
 package org.opendaylight.ovsdb.internal;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MutateRequest {
     public String op = "mutate";
     public String table;
-    public ArrayList<Object> where;
-    public ArrayList<Object> mutations;
+    public List<Object> where;
+    public List<Object> mutations;
 
-    public MutateRequest(String table, ArrayList<Object> where, ArrayList<Object> mutations){
+    public MutateRequest(String table, List<Object> where, List<Object> mutations){
         this.table = table;
         this.where = where;
         this.mutations = mutations;

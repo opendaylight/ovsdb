@@ -123,6 +123,15 @@ public interface IPluginInNetworkConfigurationService {
      * @return Bridge Connector configurations
      */
     public Map <String, String> getBridgeConnectorConfigs(Node node, String bridgeConnectorIdentifier);
+    
+    /**
+     * Create a Bridge Domain
+     *
+     * @param node Node serving this configuration service
+     * @param bridgeDomainIdentifier String representation of a Bridge Domain
+     * @param portIdentifier String representation of a user defined Port Name
+     */
+	public boolean addPort(Node node, String bridgeIdentifier, String portIdentifier) throws Throwable;
 
     /**
      * Generic Configuration Event/Command. It is not practically possible to define all the possible combinations

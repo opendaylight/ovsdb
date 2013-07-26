@@ -57,6 +57,12 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
         }
     }
 
+    /**
+     * Add a new bridge
+     * @param node Node serving this configuration service
+     * @param bridgeConnectorIdentifier String representation of a Bridge Connector
+     * @return Bridge Connector configurations
+     */
     @Override
     @SuppressWarnings("unchecked")
     public boolean createBridgeDomain(Node node, String bridgeIdentifier) throws Throwable{
@@ -219,6 +225,99 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
     public Map<String, String> getBridgeConnectorConfigs(Node node, String bridgeConnectorIdentifier) {
         // TODO Auto-generated method stub
         return null;
+    }
+    /**
+     * Create a Bridge Domain
+     *
+     * @param node Node serving this configuration service
+     * @param bridgeDomainIdentifier String representation of a Bridge Domain
+     * @param portIdentifier String representation of a user defined Port Name
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public boolean addPort(Node node, String bridgeIdentifier, String portIdentifier) throws Throwable{
+        try{
+            if (connectionService == null) {
+                logger.error("Couldn't refer to the ConnectionService");
+                return false;
+            }
+            Connection connection = connectionService.getConnection(node);
+
+            if (connection != null) {
+                String newBridge = "new_bridge";
+                String newInterface = "new_interface";
+                String newPort = "new_port";
+                String newSwitch = "new_switch";
+                /**
+                 * bridge_uuid is temporary until we get the Bridge table _uuid
+                 *  returned the value of the bridge is located in the 
+                 *  output from ovsdb-client dump tcp:172.16.58.170:6634
+                 *  Replace the one below with that value of the disired bridge.
+                 */
+                String bridge_uuid = "2636c43a-4eb7-4ef0-ab7a-1a95113e05e6";
+
+                Object addSwitchRequest;
+
+                OVSInstance instance = new OVSInstance();
+                instance.monitorOVS(connection);
+
+                if(instance.getUuid() != null){
+                    List<String> bridgeUuidPair = new ArrayList<String>();
+                    bridgeUuidPair.add("named-uuid");
+                    bridgeUuidPair.add(newBridge);
+
+                    List<Object> mutation = new ArrayList<Object>();
+                    mutation.add("ports");
+                    mutation.add("insert");
+                    mutation.add(bridgeUuidPair);
+                    List<Object> mutations = new ArrayList<Object>();
+                    mutations.add(mutation);
+
+                    List<String> ovsUuidPair = new ArrayList<String>();
+                    ovsUuidPair.add("uuid");
+                    ovsUuidPair.add(bridge_uuid);
+
+                    List<Object> whereInner = new ArrayList<Object>();
+                    whereInner.add("_uuid");
+                    whereInner.add("==");
+                    whereInner.add(ovsUuidPair);
+
+                    List<Object> where = new ArrayList<Object>();
+                    where.add(whereInner);
+
+                    addSwitchRequest = new MutateRequest("Bridge", where, mutations);
+                }
+                else{
+                    Map<String, Object> vswitchRow = new HashMap<String, Object>();
+                    ArrayList<String> bridges = new ArrayList<String>();
+                    bridges.add("named-uuid");
+                    bridges.add(newBridge);
+                    vswitchRow.put("bridges", bridges);
+                    addSwitchRequest = new InsertRequest("insert", "Open_vSwitch", newSwitch, vswitchRow);
+                }
+
+                Map<String, Object> portRow = new HashMap<String, Object>();
+                portRow.put("name", portIdentifier);
+                ArrayList<String> interfaces = new ArrayList<String>();
+                interfaces.add("named-uuid");
+                interfaces.add(newInterface);
+                portRow.put("interfaces", interfaces);
+                InsertRequest addPortRequest = new InsertRequest("insert", "Port", newBridge, portRow);
+
+                Map<String, Object> interfaceRow = new HashMap<String, Object>();
+                interfaceRow.put("name", portIdentifier);
+                InsertRequest addIntfRequest = new InsertRequest("insert", "Interface", newInterface, interfaceRow);
+
+                Object[] params = {"Open_vSwitch", addSwitchRequest, addIntfRequest, addPortRequest};
+                OvsdbMessage msg = new OvsdbMessage("transact", params);
+
+                connection.sendMessage(msg);
+                connection.readResponse(Uuid[].class);
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return true;
     }
 
     @Override

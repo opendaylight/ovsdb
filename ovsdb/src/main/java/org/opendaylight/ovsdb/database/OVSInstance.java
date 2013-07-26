@@ -45,8 +45,9 @@ public class OVSInstance {
         }
 
         Map<String, Object> vSwitchTable = (Map) monitorResponse.get("Open_vSwitch");
-
-        this.uuid = (String) vSwitchTable.keySet().toArray()[0];
+        if(vSwitchTable != null){
+            this.uuid = (String) vSwitchTable.keySet().toArray()[0];
+        }
     }
 
     public String getUuid(){

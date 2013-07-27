@@ -368,9 +368,9 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
                 Map<String, Object> interfaceRow = new HashMap<String, Object>();
                 interfaceRow.put("name", portidentifier);
                 interfaceRow.put("type", tunencap);
-                ArrayList intopt = new ArrayList<String>();
+                ArrayList<Object> intopt = new ArrayList<Object>();
                 interfaceRow.put("options", intopt);
-                ArrayList intoptmap = new ArrayList<String>();
+                ArrayList<Object> intoptmap = new ArrayList<Object>();
                 ArrayList<String> intoptep = new ArrayList<String>();
                 intopt.add("map");
                 intopt.add(intoptmap);

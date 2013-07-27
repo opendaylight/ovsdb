@@ -125,7 +125,7 @@ public interface IPluginInNetworkConfigurationService {
     public Map <String, String> getBridgeConnectorConfigs(Node node, String bridgeConnectorIdentifier);
 
     /**
-     * Create a Port Attached to a Bridge 
+     * Create a Port Attached to a Bridge
      * Ex. ovs-vsctl add-port br0 vif0
      * @param node Node serving this configuration service
      * @param bridgeDomainIdentifier String representation of a Bridge Domain

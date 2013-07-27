@@ -19,7 +19,7 @@ import com.googlecode.jsonrpc4j.JsonRpcClient.RequestListener;
 public class OvsdbIO {
     private static final Logger logger = LoggerFactory
             .getLogger(OvsdbIO.class);
-    public static final short defaultOvsdbPort = 6634;
+    public static final short defaultOvsdbPort = 6632;
 
     public static Connection connect (String identifier, InetAddress address, int port) {
         try{

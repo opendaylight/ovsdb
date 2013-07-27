@@ -16,7 +16,7 @@ public class OvsdbClient {
         try{
             String identifier = "TEST";
             InetAddress address = InetAddress.getByName("172.28.30.51");
-            int port = 6634;
+            int port = 6632;
             Connection connection = OvsdbIO.connect(identifier, address, port);
             if (connection != null) {
                 OvsdbMessage message = new OvsdbMessage("list_dbs", null);

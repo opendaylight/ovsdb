@@ -123,15 +123,15 @@ public interface IPluginInNetworkConfigurationService {
      * @return Bridge Connector configurations
      */
     public Map <String, String> getBridgeConnectorConfigs(Node node, String bridgeConnectorIdentifier);
-    
+
     /**
-     * Create a Bridge Domain
-     *
+     * Create a Port Attached to a Bridge 
+     * Ex. ovs-vsctl add-port br0 vif0
      * @param node Node serving this configuration service
      * @param bridgeDomainIdentifier String representation of a Bridge Domain
      * @param portIdentifier String representation of a user defined Port Name
      */
-	public boolean addPort(Node node, String bridgeIdentifier, String portIdentifier) throws Throwable;
+    public boolean addPort(Node node, String bridgeIdentifier, String portIdentifier) throws Throwable;
 
     /**
      * Generic Configuration Event/Command. It is not practically possible to define all the possible combinations

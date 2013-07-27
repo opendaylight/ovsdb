@@ -134,6 +134,19 @@ public interface IPluginInNetworkConfigurationService {
     public boolean addPort(Node node, String bridgeIdentifier, String portIdentifier) throws Throwable;
 
     /**
+     * Create an Encapsulated Tunnel Interface and destination Tunnel Endpoint
+     * Ex. ovs-vsctl add-port br0 vxlan1 -- set interface vxlan1 type=vxlan options:remote_ip=192.168.1.11
+     * @param node Node serving this configuration service
+     * @param bridgeDomainIdentifier String representation of a Bridge Domain
+     * @param portIdentifier String representation of a user defined Port Name
+     * @param tunnelendpoint IP address of the destination Tunnel Endpoint
+     * @param tunencap is the tunnel encapsulation options being CAPWAP, GRE or VXLAN
+     * The Bridge must already be defined before calling addTunnel.
+     */
+    public boolean addTunnel(Node node, String bridgeIdentifier, String portIdentifier,
+            String TunnelEndPoint, String TunEncap) throws Throwable;
+
+    /**
      * Generic Configuration Event/Command. It is not practically possible to define all the possible combinations
      * of configurations across various plugins. Hence having a generic event/command will help bridge the gap until
      * a more abstracted explicit call is defined in Configuration Service.

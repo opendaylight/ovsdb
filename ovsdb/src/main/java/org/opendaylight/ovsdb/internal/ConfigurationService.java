@@ -303,6 +303,95 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
         }
         return true;
     }
+    /**
+     * Create a Bridge Domain
+     *
+     * @param node Node serving this configuration service
+     * @param bridgeDomainIdentifier String representation of a Bridge Domain
+     * @param portIdentifier String representation of a user defined Port Name
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public boolean addTunnel(Node node, String bridgeIdentifier,
+        String portidentifier, String tunnelendpoint, String tunencap)
+                throws Throwable{
+        try{
+            if (connectionService == null) {
+                logger.error("Couldn't refer to the ConnectionService");
+                return false;
+            }
+            Connection connection = connectionService.getConnection(node);
+
+            if (connection != null) {
+                String newBridge = "new_bridge";
+                String newInterface = "new_interface";
+                String newPort = "new_port";
+                String newSwitch = "new_switch";
+
+                Map<String, OVSBridge> existingBridges = OVSBridge.monitorBridge(connection);
+
+                OVSBridge bridge = existingBridges.get(bridgeIdentifier);
+
+                List<String> portUuidPair = new ArrayList<String>();
+                portUuidPair.add("named-uuid");
+                portUuidPair.add(newPort);
+
+                List<Object> mutation = new ArrayList<Object>();
+                mutation.add("ports");
+                mutation.add("insert");
+                mutation.add(portUuidPair);
+                List<Object> mutations = new ArrayList<Object>();
+                mutations.add(mutation);
+
+                List<String> bridgeUuidPair = new ArrayList<String>();
+                bridgeUuidPair.add("uuid");
+                bridgeUuidPair.add(bridge.getUuid());
+
+                List<Object> whereInner = new ArrayList<Object>();
+                whereInner.add("_uuid");
+                whereInner.add("==");
+                whereInner.add(bridgeUuidPair);
+
+                List<Object> where = new ArrayList<Object>();
+                where.add(whereInner);
+
+                MutateRequest mutateBridgeRequest = new MutateRequest("Bridge", where, mutations);
+
+                Map<String, Object> portRow = new HashMap<String, Object>();
+                portRow.put("name", portidentifier);
+                ArrayList<String> interfaces = new ArrayList<String>();
+                interfaces.add("named-uuid");
+                interfaces.add(newInterface);
+                portRow.put("interfaces", interfaces);
+                InsertRequest addPortRequest = new InsertRequest("insert", "Port", newPort, portRow);
+
+                Map<String, Object> interfaceRow = new HashMap<String, Object>();
+                interfaceRow.put("name", portidentifier);
+                interfaceRow.put("type", tunencap);
+                ArrayList intopt = new ArrayList<String>();
+                interfaceRow.put("options", intopt);
+                ArrayList intoptmap = new ArrayList<String>();
+                ArrayList<String> intoptep = new ArrayList<String>();
+                intopt.add("map");
+                intopt.add(intoptmap);
+                intoptmap.add(intoptep);
+                intoptep.add("remote_ip");
+                intoptep.add(tunnelendpoint);
+
+                InsertRequest addIntfRequest = new InsertRequest("insert", "Interface",
+                        newInterface, interfaceRow);
+
+                Object[] params = {"Open_vSwitch", mutateBridgeRequest, addIntfRequest, addPortRequest};
+                OvsdbMessage msg = new OvsdbMessage("transact", params);
+
+                connection.sendMessage(msg);
+                connection.readResponse(Uuid[].class);
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return true;
+    }
 
     @Override
     public Object genericConfigurationEvent(Node node, Map<String, String> config) {

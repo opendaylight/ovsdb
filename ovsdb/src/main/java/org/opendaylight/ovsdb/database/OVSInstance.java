@@ -21,7 +21,7 @@ public class OVSInstance {
     }
 
     @SuppressWarnings("unchecked")
-    public void monitorOVS(Connection connection){
+    public static OVSInstance monitorOVS(Connection connection){
         List<String> columns = new ArrayList<String>();
         columns.add("_uuid");
         columns.add("bridges");
@@ -46,8 +46,10 @@ public class OVSInstance {
 
         Map<String, Object> vSwitchTable = (Map) monitorResponse.get("Open_vSwitch");
         if(vSwitchTable != null){
-            this.uuid = (String) vSwitchTable.keySet().toArray()[0];
+            String uuid = (String) vSwitchTable.keySet().toArray()[0];
+            return new OVSInstance(uuid);
         }
+        return null;
     }
 
     public String getUuid(){

@@ -135,6 +135,7 @@ public interface IPluginInNetworkConfigurationService {
 
     /**
      * Create an Encapsulated Tunnel Interface and destination Tunnel Endpoint
+     *
      * Ex. ovs-vsctl add-port br0 vxlan1 -- set interface vxlan1 type=vxlan options:remote_ip=192.168.1.11
      * @param node Node serving this configuration service
      * @param bridgeDomainIdentifier String representation of a Bridge Domain
@@ -145,6 +146,18 @@ public interface IPluginInNetworkConfigurationService {
      */
     public boolean addTunnel(Node node, String bridgeIdentifier, String portIdentifier,
             String TunnelEndPoint, String TunEncap) throws Throwable;
+
+    /**
+     * Create a Port with a user defined VLAN, and attach it to the specified bridge.
+     *
+     * Ex. ovs-vsctl add-port JUNIT_BRIDGE_TEST Jvlanvif0 tag=100
+     * @param node Node serving this configuration service
+     * @param bridgeDomainIdentifier String representation of a Bridge Domain
+     * @param portIdentifier String representation of a user defined Port Name
+     * @param vlanid Integer note: only one VID is accepted with tag=x method
+     */
+    public boolean addPortVlan(Node node, String bridgeIdentifier, String portIdentifier,
+     int vlanid) throws Throwable;
 
     /**
      * Generic Configuration Event/Command. It is not practically possible to define all the possible combinations

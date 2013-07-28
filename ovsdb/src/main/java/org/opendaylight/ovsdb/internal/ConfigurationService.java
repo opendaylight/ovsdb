@@ -227,9 +227,10 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
         // TODO Auto-generated method stub
         return null;
     }
+
     /**
-     * Create a Bridge Domain
-     *
+     * Create a Port Attached to a Bridge
+     * Ex. ovs-vsctl add-port br0 vif0
      * @param node Node serving this configuration service
      * @param bridgeDomainIdentifier String representation of a Bridge Domain
      * @param portIdentifier String representation of a user defined Port Name
@@ -289,7 +290,6 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
 
                 Map<String, Object> interfaceRow = new HashMap<String, Object>();
                 interfaceRow.put("name", portIdentifier);
-                interfaceRow.put("type", "internal");
                 InsertRequest addIntfRequest = new InsertRequest("insert", "Interface", newInterface, interfaceRow);
 
                 Object[] params = {"Open_vSwitch", mutateBridgeRequest, addIntfRequest, addPortRequest};
@@ -303,12 +303,93 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
         }
         return true;
     }
+
     /**
-     * Create a Bridge Domain
-     *
+     * Create a Port with a VLAN Tag and it to a Bridge
+     * Ex. ovs-vsctl add-port br0 vxlan1 -- set interface vxlan1 type=vxlan options:remote_ip=192.168.1.11
+     * @param node Node serving this configuration service
+     * @param portIdentifier String representation of a user defined Port Name
+     * @param vlanid integer representing the VLAN Tag
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public boolean addPortVlan(Node node, String bridgeIdentifier, String portIdentifier, int vlanid) throws Throwable{
+        try{
+            if (connectionService == null) {
+                logger.error("Couldn't refer to the ConnectionService");
+                return false;
+            }
+            Connection connection = connectionService.getConnection(node);
+
+            if (connection != null) {
+                String newBridge = "new_bridge";
+                String newInterface = "new_interface";
+                String newPort = "new_port";
+                String newSwitch = "new_switch";
+
+                Map<String, OVSBridge> existingBridges = OVSBridge.monitorBridge(connection);
+
+                OVSBridge bridge = existingBridges.get(bridgeIdentifier);
+
+                List<String> portUuidPair = new ArrayList<String>();
+                portUuidPair.add("named-uuid");
+                portUuidPair.add(newPort);
+
+                List<Object> mutation = new ArrayList<Object>();
+                mutation.add("ports");
+                mutation.add("insert");
+                mutation.add(portUuidPair);
+                List<Object> mutations = new ArrayList<Object>();
+                mutations.add(mutation);
+
+                List<String> bridgeUuidPair = new ArrayList<String>();
+                bridgeUuidPair.add("uuid");
+                bridgeUuidPair.add(bridge.getUuid());
+
+                List<Object> whereInner = new ArrayList<Object>();
+                whereInner.add("_uuid");
+                whereInner.add("==");
+                whereInner.add(bridgeUuidPair);
+
+                List<Object> where = new ArrayList<Object>();
+                where.add(whereInner);
+
+                MutateRequest mutateBridgeRequest = new MutateRequest("Bridge", where, mutations);
+
+                Map<String, Object> portRow = new HashMap<String, Object>();
+                portRow.put("name", portIdentifier);
+                portRow.put("tag", vlanid);
+                ArrayList<String> interfaces = new ArrayList<String>();
+                interfaces.add("named-uuid");
+                interfaces.add(newInterface);
+                portRow.put("interfaces", interfaces);
+                InsertRequest addPortRequest = new InsertRequest("insert", "Port", newPort, portRow);
+
+                Map<String, Object> interfaceRow = new HashMap<String, Object>();
+                interfaceRow.put("name", portIdentifier);
+                InsertRequest addIntfRequest = new InsertRequest("insert", "Interface", newInterface, interfaceRow);
+
+                Object[] params = {"Open_vSwitch", mutateBridgeRequest, addIntfRequest, addPortRequest};
+                OvsdbMessage msg = new OvsdbMessage("transact", params);
+
+                connection.sendMessage(msg);
+                connection.readResponse(Uuid[].class);
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return true;
+    }
+
+    /**
+     * Create an Encapsulated Tunnel Interface and destination Tunnel Endpoint
+     * Ex. ovs-vsctl add-port br0 vxlan1 -- set interface vxlan1 type=vxlan options:remote_ip=192.168.1.11
      * @param node Node serving this configuration service
      * @param bridgeDomainIdentifier String representation of a Bridge Domain
      * @param portIdentifier String representation of a user defined Port Name
+     * @param tunnelendpoint IP address of the destination Tunnel Endpoint
+     * @param tunencap is the tunnel encapsulation options being CAPWAP, GRE or VXLAN
+     * The Bridge must already be defined before calling addTunnel.
      */
     @Override
     @SuppressWarnings("unchecked")

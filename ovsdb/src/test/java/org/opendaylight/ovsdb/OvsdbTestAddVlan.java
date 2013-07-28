@@ -11,12 +11,12 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-public class OvsdbTestAddPort {
+public class OvsdbTestAddVlan {
     private static final Logger logger = LoggerFactory
-            .getLogger(OvsdbTestAddPort.class);
+            .getLogger(OvsdbTestAddVlan.class);
 
     @Test
-    public void addPort() throws Throwable{
+    public void addPortVlan() throws Throwable{
         Node.NodeIDType.registerIDType("OVS", String.class);
         NodeConnector.NodeConnectorIDType.registerIDType("OVS", String.class, "OVS");
 
@@ -25,6 +25,7 @@ public class OvsdbTestAddPort {
         String identifier = "TEST";
         Map<ConnectionConstants, String> params = new HashMap<ConnectionConstants, String>();
         params.put(ConnectionConstants.ADDRESS, "172.16.58.170");
+        int vlanid = 100;
 
         Node node = connectionService.connect(identifier, params);
         if(node == null){
@@ -32,14 +33,16 @@ public class OvsdbTestAddPort {
             return;
         }
         /**
-         * Create a Port and attach it to a Bridge
-         * Ex. ovs-vsctl add-port br0 vif0
+         * Create a Port with a user defined VLAN, and attach it to the specified bridge.
+         *
+         * Ex. ovs-vsctl add-port JUNIT_BRIDGE_TEST Jvlanvif0 tag=100
          * @param node Node serving this configuration service
          * @param bridgeDomainIdentifier String representation of a Bridge Domain
          * @param portIdentifier String representation of a user defined Port Name
+         * @param vlanid Integer note: only one VID is accepted with tag=x method
          */
         ConfigurationService configurationService = new ConfigurationService();
         configurationService.setConnectionServiceInternal(connectionService);
-        configurationService.addPort(node, "JUNIT_BRIDGE_TEST", "Jvif0");
+        configurationService.addPortVlan(node, "JUNIT_BRIDGE_TEST", "Jtagvif0", vlanid);
     }
 }

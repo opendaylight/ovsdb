@@ -3,7 +3,6 @@ package org.opendaylight.ovsdb;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -31,7 +30,11 @@ public class OvsdbTestAddTunnel {
          * destination Tunnel Endpoint.
          * tunencap is the tunnel encapsulation
          * options being (CAPWAP, GRE, VXLAN).
+         * Use the following lines to test GRE and CAPWAP
+         * Encapsulation encap = Encapsulation.GRE;
+         * Encapsulation encap = Encapsulation.CAPWAP;
          */
+
         Encapsulation encap = Encapsulation.VXLAN;
         String tunencap = encap.toString();
         String tunnelendpoint = "192.168.100.100";
@@ -46,6 +49,9 @@ public class OvsdbTestAddTunnel {
         }
         /**
          * Create an Encapsulated Tunnel Interface and destination Tunnel Endpoint
+         *
+         * Ex. ovs-vsctl add-port br0 vxlan1 (cont)
+         * -- set interface vxlan1 type=vxlan options:remote_ip=192.168.1.11
          * @param node Node serving this configuration service
          * @param bridgeDomainIdentifier String representation of a Bridge Domain
          * @param portIdentifier String representation of a user defined Port Name
@@ -56,6 +62,6 @@ public class OvsdbTestAddTunnel {
         ConfigurationService configurationService = new ConfigurationService();
         configurationService.setConnectionServiceInternal(connectionService);
         configurationService.addTunnel(node, "JUNIT_BRIDGE_TEST",
-                "tunnel0", tunnelendpoint, tunencap);
+                "Jtunnel0", tunnelendpoint, tunencap);
     }
 }

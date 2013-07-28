@@ -40,7 +40,7 @@ public class OvsdbTestAddTunnel {
         String tunnelendpoint = "192.168.100.100";
 
         Map<ConnectionConstants, String> params = new HashMap<ConnectionConstants, String>();
-        params.put(ConnectionConstants.ADDRESS, "172.16.58.170");
+        params.put(ConnectionConstants.ADDRESS, "192.168.56.101");
 
         Node node = connectionService.connect(identifier, params);
         if(node == null){

@@ -24,7 +24,7 @@ public class OvsdbTestAddVlan {
         connectionService.init();
         String identifier = "TEST";
         Map<ConnectionConstants, String> params = new HashMap<ConnectionConstants, String>();
-        params.put(ConnectionConstants.ADDRESS, "172.16.58.170");
+        params.put(ConnectionConstants.ADDRESS, "192.168.56.101");
         int vlanid = 100;
 
         Node node = connectionService.connect(identifier, params);

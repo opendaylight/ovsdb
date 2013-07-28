@@ -84,8 +84,7 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
 
                 Object addSwitchRequest;
 
-                OVSInstance instance = new OVSInstance();
-                instance.monitorOVS(connection);
+                OVSInstance instance = OVSInstance.monitorOVS(connection);
 
                 if(instance.getUuid() != null){
                     List<String> bridgeUuidPair = new ArrayList<String>();

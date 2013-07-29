@@ -160,6 +160,17 @@ public interface IPluginInNetworkConfigurationService {
      int vlanid) throws Throwable;
 
     /**
+     * Create a Port with a user defined VLAN, and attach it to the specified bridge.
+     *
+     * Ex. ovs-vsctl add-port JUNIT_BRIDGE_TEST Jvlanvif0 tag=100
+     * @param node Node serving this configuration service
+     * @param bridgeDomainIdentifier String representation of a Bridge Domain
+     * @param portIdentifier String representation of a user defined Port Name
+     * @param vlanid Integer note: only one VID is accepted with tag=x method
+     */
+    public boolean setManager(Node node, String managerip) throws Throwable;
+
+    /**
      * Generic Configuration Event/Command. It is not practically possible to define all the possible combinations
      * of configurations across various plugins. Hence having a generic event/command will help bridge the gap until
      * a more abstracted explicit call is defined in Configuration Service.

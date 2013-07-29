@@ -328,7 +328,7 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
 
                 Map<String, OVSBridge> existingBridges = OVSBridge.monitorBridge(connection);
 
-                OVSBridge bridge = existingBridges.get(bridgeIdentifier);
+                OVSBridge ovstableid = existingBridges.get(bridgeIdentifier);
 
                 List<String> portUuidPair = new ArrayList<String>();
                 portUuidPair.add("named-uuid");
@@ -343,7 +343,7 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
 
                 List<String> bridgeUuidPair = new ArrayList<String>();
                 bridgeUuidPair.add("uuid");
-                bridgeUuidPair.add(bridge.getUuid());
+                bridgeUuidPair.add(ovstableid.getUuid());
 
                 List<Object> whereInner = new ArrayList<Object>();
                 whereInner.add("_uuid");
@@ -473,10 +473,74 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
         return true;
     }
 
+    /**
+     * Implements the OVS Connection for Managers
+     *
+     * @param node Node serving this configuration service
+     * @param String with IP and connection types
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public boolean setManager(Node node, String managerip) throws Throwable{
+        try{
+            if (connectionService == null) {
+                logger.error("Couldn't refer to the ConnectionService");
+                return false;
+            }
+            Connection connection = connectionService.getConnection(node);
+
+            if (connection != null) {
+                String newmanager = "new_manager";
+
+                OVSInstance instance = OVSInstance.monitorOVS(connection);
+
+                Map ovsoutter = new LinkedHashMap();
+                Map ovsinner = new LinkedHashMap();
+                ArrayList ovsalist1 = new ArrayList();
+                ArrayList ovsalist2 = new ArrayList();
+                ArrayList ovsalist3 = new ArrayList();
+                ArrayList ovsalist4 = new ArrayList();
+
+                //OVS Table Update
+                ovsoutter.put("where", ovsalist1);
+                ovsalist1.add(ovsalist2);
+                ovsalist2.add("_uuid");
+                ovsalist2.add("==");
+                ovsalist2.add(ovsalist3);
+                ovsalist3.add("uuid");
+                ovsalist3.add(instance.getUuid());
+                ovsoutter.put("op", "update");
+                ovsoutter.put("table", "Open_vSwitch");
+                ovsoutter.put("row", ovsinner);
+                ovsinner.put("manager_options", ovsalist4);
+                ovsalist4.add("named-uuid");
+                ovsalist4.add(newmanager);
+
+                Map mgroutside = new LinkedHashMap();
+                Map mgrinside = new LinkedHashMap();
+
+                //Manager Table Insert
+                mgroutside.put("uuid-name", newmanager);
+                mgroutside.put("op", "insert");
+                mgroutside.put("table","Manager");
+                mgroutside.put("row", mgrinside);
+                mgrinside.put("target", managerip);
+
+                Object[] params = {"Open_vSwitch", ovsoutter, mgroutside};
+                OvsdbMessage msg = new OvsdbMessage("transact", params);
+
+                connection.sendMessage(msg);
+                connection.readResponse(Uuid[].class);
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return true;
+    }
+
     @Override
     public Object genericConfigurationEvent(Node node, Map<String, String> config) {
         // TODO Auto-generated method stub
         return null;
     }
-
   }

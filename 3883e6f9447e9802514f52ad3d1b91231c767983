@@ -1,0 +1,7 @@
+Verified+1: jenkins-ovsdb
+Code-Review+2: Evan Zeller <evanrzeller@gmail.com>
+Submitted-by: Evan Zeller <evanrzeller@gmail.com>
+Submitted-at: Mon, 29 Jul 2013 18:35:39 +0000
+Reviewed-on: http://git.opendaylight.org/gerrit/734
+Project: ovsdb
+Branch: refs/heads/master

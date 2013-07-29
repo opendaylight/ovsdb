@@ -32,6 +32,7 @@ public class Activator extends ComponentActivatorAbstractBase {
     /**
      * Function called when the activator starts just after some initializations
      * are done by the ComponentActivatorAbstractBase.
+     * Here it registers the node Type
      *
      */
     public void init() {

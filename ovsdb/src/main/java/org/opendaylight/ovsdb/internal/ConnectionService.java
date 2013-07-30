@@ -1,10 +1,12 @@
 package org.opendaylight.ovsdb.internal;
 
 import java.net.InetAddress;
+import java.net.Socket;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.googlecode.jsonrpc4j.JsonRpcClient;
 import org.opendaylight.ovsdb.sal.connection.ConnectionConstants;
 import org.opendaylight.ovsdb.sal.connection.IPluginInConnectionService;
 import org.opendaylight.controller.sal.core.Node;
@@ -17,6 +19,7 @@ import org.opendaylight.controller.sal.utils.StatusCode;
  */
 public class ConnectionService implements IPluginInConnectionService, IConnectionServiceInternal
 {
+    private static final Integer defaultOvsdbPort = 6632;
     ConcurrentMap <String, Connection> ovsdbConnections;
     public void init() {
         ovsdbConnections = new ConcurrentHashMap<String, Connection>();
@@ -63,6 +66,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
     @Override
     public Node connect(String identifier, Map<ConnectionConstants, String> params) {
         InetAddress address;
+        Integer port;
 
         try {
             address = InetAddress.getByName(params.get(ConnectionConstants.ADDRESS));
@@ -74,15 +78,15 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
             return null;
         }
 
-        int port = OvsdbIO.defaultOvsdbPort;
-
-        try {
+       try {
             port = Integer.parseInt(params.get(ConnectionConstants.PORT));
         } catch (Exception e) {
-            port = OvsdbIO.defaultOvsdbPort;
+            port = defaultOvsdbPort;
         }
         try {
-            Connection connection = OvsdbIO.connect(identifier, address, port);
+            Socket clientSocket = new Socket(address, port);
+            Connection connection = new Connection(identifier, clientSocket, new JsonRpcClient());
+
             if (connection != null) {
                 ovsdbConnections.put(identifier, connection);
                 return connection.getNode();

@@ -6,7 +6,7 @@ import java.util.Map;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
-import org.opendaylight.ovsdb.database.Uuid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,10 +92,6 @@ public class Connection implements RequestListener {
             if(clazz.equals(String[].class)){
                 String[] result = this.rpcClient.readResponse(String[].class, socket.getInputStream());
                 for (String res : result) logger.info(res);
-                return result;
-            }
-            else if(clazz.equals(Uuid[].class)){
-                Uuid[] result = this.rpcClient.readResponse(Uuid[].class, socket.getInputStream());
                 return result;
             }
             else if(clazz.equals(Map.class)){

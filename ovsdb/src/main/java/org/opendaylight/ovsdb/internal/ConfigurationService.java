@@ -1,14 +1,11 @@
 package org.opendaylight.ovsdb.internal;
 
-import java.net.InetAddress;
 import java.util.*;
 
 import org.opendaylight.ovsdb.database.OVSBridge;
 import org.opendaylight.ovsdb.database.OVSInstance;
 import org.opendaylight.ovsdb.sal.configuration.IPluginInNetworkConfigurationService;
 import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.core.NodeConnector;
-import org.opendaylight.ovsdb.database.Uuid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -147,7 +144,6 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
                 OvsdbMessage msg = new OvsdbMessage("transact", params);
 
                 connection.sendMessage(msg);
-                connection.readResponse(Uuid[].class);
             }
         }catch(Exception e){
             e.printStackTrace();
@@ -295,7 +291,6 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
                 OvsdbMessage msg = new OvsdbMessage("transact", params);
 
                 connection.sendMessage(msg);
-                connection.readResponse(Uuid[].class);
             }
         }catch(Exception e){
             e.printStackTrace();
@@ -372,7 +367,6 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
                 OvsdbMessage msg = new OvsdbMessage("transact", params);
 
                 connection.sendMessage(msg);
-                connection.readResponse(Uuid[].class);
             }
         }catch(Exception e){
             e.printStackTrace();
@@ -465,7 +459,7 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
                 OvsdbMessage msg = new OvsdbMessage("transact", params);
 
                 connection.sendMessage(msg);
-                connection.readResponse(Uuid[].class);
+
             }
         }catch(Exception e){
             e.printStackTrace();
@@ -530,7 +524,7 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
                 OvsdbMessage msg = new OvsdbMessage("transact", params);
 
                 connection.sendMessage(msg);
-                connection.readResponse(Uuid[].class);
+
             }
         }catch(Exception e){
             e.printStackTrace();

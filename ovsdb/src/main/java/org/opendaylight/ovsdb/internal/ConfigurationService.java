@@ -435,8 +435,11 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
 
     @Override
     public List<String> getBridgeDomains(Node node) {
-        // TODO Auto-generated method stub
-        return null;
+
+        Connection connection = connectionService.getConnection(node);
+        Map<String, OVSBridge> existingBridges = OVSBridge.monitorBridge(connection);
+        List<String> bridgeDomains = new ArrayList<String>(existingBridges.keySet());
+        return bridgeDomains;
     }
 
     @Override

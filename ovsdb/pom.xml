@@ -39,14 +39,10 @@
               org.slf4j,
               org.eclipse.osgi.framework.console,
               org.osgi.framework,
-              com.fasterxml.jackson.core,
-              com.fasterxml.jackson.databind,
-              com.fasterxml.jackson.databind.node,
-              com.fasterxml.jackson.annotation,
               javax.net.ssl,
               *
             </Import-Package>
-            <Embed-Dependency>jsonrpc4j,httpclient,commons-codec,httpcore-nio,javax.servlet-api</Embed-Dependency>
+            <Embed-Dependency>jsonrpc4j,httpclient,commons-codec,httpcore-nio,javax.servlet-api,jackson-annotations,jackson-core,jackson-databind,portlet-api;type=!pom;inline=false</Embed-Dependency>
             <Embed-Transitive>
               true
             </Embed-Transitive>
@@ -113,96 +109,17 @@
       <artifactId>portlet-api</artifactId>
       <version>2.0</version>
     </dependency>
-
-<!--
-                 | spring dependencies
-                 +-->
-                <dependency>
-                        <groupId>org.springframework</groupId>
-                        <artifactId>spring-core</artifactId>
-                        <version>${spring.version}</version>
-                        <optional>true</optional>
-                </dependency>
-                <dependency>
-                        <groupId>org.springframework</groupId>
-                        <artifactId>spring-context</artifactId>
-                        <version>${spring.version}</version>
-                        <optional>true</optional>
-                </dependency>
-                <dependency>
-                        <groupId>org.springframework</groupId>
-                        <artifactId>spring-web</artifactId>
-                        <version>${spring.version}</version>
-                        <optional>true</optional>
-                </dependency>
-                <dependency>
-                        <groupId>org.springframework</groupId>
-                        <artifactId>spring-test</artifactId>
-                        <version>${spring.version}</version>
-                        <scope>test</scope>
-                </dependency>
-
-                <!--
-                | apache http client
-                +-->
-                <dependency>
-                        <groupId>commons-codec</groupId>
-                        <artifactId>commons-codec</artifactId>
-                        <version>1.4</version>
-                        <optional>true</optional>
-                </dependency>
-                <dependency>
-                        <groupId>org.apache.httpcomponents</groupId>
-                        <artifactId>httpcore-nio</artifactId>
-                        <version>4.2.1</version>
-                        <optional>true</optional>
-                </dependency>
-
-                <!--
-                 | Servlet
-                 +-->
-                <dependency>
-                        <groupId>javax.servlet</groupId>
-                        <artifactId>javax.servlet-api</artifactId>
-                        <version>3.1-b06</version>
-                        <scope>provided</scope>
-                </dependency>
-
-                <dependency>
-                        <groupId>org.jmock</groupId>
-                        <artifactId>jmock-junit4</artifactId>
-                        <version>2.5.1</version>
-                        <scope>test</scope>
-                </dependency>
-                <dependency>
-                        <groupId>org.jmock</groupId>
-                        <artifactId>jmock</artifactId>
-                        <version>2.5.1</version>
-                        <scope>test</scope>
-                </dependency>
-                <dependency>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-server</artifactId>
-                        <version>9.0.0.RC0</version>
-                        <scope>test</scope>
-                        <exclusions>
-                                <exclusion>
-                                        <artifactId>javax.servlet</artifactId>
-                                        <groupId>org.eclipse.jetty.orbit</groupId>
-                                </exclusion>
-                        </exclusions>
-                </dependency>
-                <dependency>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-servlet</artifactId>
-                        <version>9.0.0.RC0</version>
-                        <scope>test</scope>
-                        <exclusions>
-                                <exclusion>
-                                        <artifactId>javax.servlet</artifactId>
-                                        <groupId>org.eclipse.jetty.orbit</groupId>
-                                </exclusion>
-                        </exclusions>
-                </dependency>
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.4</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpcore-nio</artifactId>
+      <version>4.2.1</version>
+      <optional>true</optional>
+    </dependency>
   </dependencies>
 </project>

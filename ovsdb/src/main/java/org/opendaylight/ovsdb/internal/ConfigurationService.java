@@ -444,7 +444,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         return null;
     }
 
-    public void _connect (CommandInterpreter ci) {
+    public void _ovsconnect (CommandInterpreter ci) {
         String bridgeName = ci.nextArgument();
         if (bridgeName == null) {
             ci.println("Please enter Bridge Name");

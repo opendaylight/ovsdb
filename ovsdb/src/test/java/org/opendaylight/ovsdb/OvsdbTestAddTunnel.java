@@ -7,7 +7,8 @@ import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.ovsdb.internal.*;
-import org.opendaylight.ovsdb.sal.connection.ConnectionConstants;
+import org.opendaylight.controller.sal.connection.ConnectionConstants;
+import org.opendaylight.controller.sal.networkconfig.bridgedomain.ConfigConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.opendaylight.ovsdb.internal.Encapsulation;
@@ -40,7 +41,8 @@ public class OvsdbTestAddTunnel {
         String tunnelendpoint = "192.168.100.100";
 
         Map<ConnectionConstants, String> params = new HashMap<ConnectionConstants, String>();
-        params.put(ConnectionConstants.ADDRESS, "192.168.56.101");
+        params.put(ConnectionConstants.ADDRESS, "172.28.30.51");
+        params.put(ConnectionConstants.PORT, "6634");
 
         Node node = connectionService.connect(identifier, params);
         if(node == null){
@@ -61,8 +63,12 @@ public class OvsdbTestAddTunnel {
          */
         ConfigurationService configurationService = new ConfigurationService();
         configurationService.setConnectionServiceInternal(connectionService);
-        configurationService.addTunnel(node, "JUNIT_BRIDGE_TEST",
-                "Jtunnel0", tunnelendpoint, tunencap);
+        Map<ConfigConstants, Object> configs = new HashMap<ConfigConstants, Object>();
+        configs.put(ConfigConstants.TYPE, "TUNNEL");
+        configs.put(ConfigConstants.TUNNEL_TYPE, tunencap);
+        configs.put(ConfigConstants.DEST_IP, tunnelendpoint);
+
+        configurationService.addPort(node, "JUNIT_BRIDGE_TEST", "Jtunnel0", configs);
 
     }
 }

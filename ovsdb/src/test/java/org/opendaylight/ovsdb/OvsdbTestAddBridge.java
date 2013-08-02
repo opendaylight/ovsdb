@@ -5,7 +5,7 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.ovsdb.internal.ConfigurationService;
 import org.opendaylight.ovsdb.internal.ConnectionService;
-import org.opendaylight.ovsdb.sal.connection.ConnectionConstants;
+import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.HashMap;
@@ -24,7 +24,8 @@ public class OvsdbTestAddBridge {
         connectionService.init();
         String identifier = "TEST";
         Map<ConnectionConstants, String> params = new HashMap<ConnectionConstants, String>();
-        params.put(ConnectionConstants.ADDRESS, "192.168.56.101");
+        params.put(ConnectionConstants.ADDRESS, "172.28.30.51");
+        params.put(ConnectionConstants.PORT, "6634");
 
         Node node = connectionService.connect(identifier, params);
         if(node == null){
@@ -39,7 +40,7 @@ public class OvsdbTestAddBridge {
          */
         ConfigurationService configurationService = new ConfigurationService();
         configurationService.setConnectionServiceInternal(connectionService);
-        configurationService.createBridgeDomain(node, "JUNIT_BRIDGE_TEST");
+        configurationService.createBridgeDomain(node, "JUNIT_BRIDGE_TEST", null);
     }
 
 }

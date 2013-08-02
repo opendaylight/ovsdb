@@ -1,20 +1,33 @@
 package org.opendaylight.ovsdb.internal;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.*;
 
+import org.eclipse.osgi.framework.console.CommandInterpreter;
+import org.eclipse.osgi.framework.console.CommandProvider;
 import org.opendaylight.ovsdb.database.OVSBridge;
 import org.opendaylight.ovsdb.database.OVSInstance;
-import org.opendaylight.ovsdb.sal.configuration.IPluginInNetworkConfigurationService;
+import org.opendaylight.ovsdb.database.OvsdbType;
+import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.networkconfig.bridgedomain.ConfigConstants;
+import org.opendaylight.controller.sal.networkconfig.bridgedomain.IPluginInBridgeDomainConfigService;
+import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConfigurationService implements IPluginInNetworkConfigurationService
+public class ConfigurationService implements IPluginInBridgeDomainConfigService, CommandProvider
 {
     private static final Logger logger = LoggerFactory
             .getLogger(ConfigurationService.class);
 
     IConnectionServiceInternal connectionService;
+    boolean forceConnect = false;
 
     void init() {
     }
@@ -34,6 +47,14 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
      *
      */
     void start() {
+        registerWithOSGIConsole();
+    }
+
+    private void registerWithOSGIConsole() {
+        BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass())
+                .getBundleContext();
+        bundleContext.registerService(CommandProvider.class.getName(), this,
+                null);
     }
 
     /**
@@ -55,6 +76,32 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
         }
     }
 
+    private Connection getConnection (Node node) {
+
+        Connection connection = connectionService.getConnection(node);
+        if (connection == null || connection.getSocket() == null) {
+            return null;
+        }
+
+        /*
+         * This is possible only when the connection is disconnected due to any reason.
+         * But, we have to implement ECHO handling else, it results in timeout and the
+         * connection being partially closed from the server side and the client Socket
+         * seems to be up. Hence forcing the issue for now till we implement the ECHO.
+         */
+        if (connection.getSocket().isClosed() || forceConnect) {
+            String address = connection.getSocket().getInetAddress().getHostAddress();
+            Map<ConnectionConstants, String> params = new HashMap<ConnectionConstants, String>();
+            params.put(ConnectionConstants.ADDRESS, address);
+            params.put(ConnectionConstants.PORT, connection.getSocket().getPort()+"");
+            node = connectionService.connect(connection.getIdentifier(), params);
+            connection = connectionService.getConnection(node);
+        }
+        if (connection == null || connection.getSocket() == null || connection.getSocket().isClosed()) {
+            return null;
+        }
+        return connection;
+    }
     /**
      * Add a new bridge
      * @param node Node serving this configuration service
@@ -62,16 +109,18 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
      * @return Bridge Connector configurations
      */
     @Override
-    @SuppressWarnings("unchecked")
-    public boolean createBridgeDomain(Node node, String bridgeIdentifier) throws Throwable{
+    public Status createBridgeDomain(Node node, String bridgeIdentifier,
+            Map<ConfigConstants, Object> configs) throws Throwable {
         try{
             if (connectionService == null) {
                 logger.error("Couldn't refer to the ConnectionService");
-                return false;
+                return new Status(StatusCode.NOSERVICE);
             }
 
-            Connection connection = connectionService.getConnection(node);
-            String identifier = "TEST";
+            Connection connection = this.getConnection(node);
+            if (connection == null || connection.getSocket() == null) {
+                return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
+            }
 
             if (connection != null) {
                 String newBridge = "new_bridge";
@@ -83,7 +132,7 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
 
                 OVSInstance instance = OVSInstance.monitorOVS(connection);
 
-                if(instance.getUuid() != null){
+                if(instance != null){
                     List<String> bridgeUuidPair = new ArrayList<String>();
                     bridgeUuidPair.add("named-uuid");
                     bridgeUuidPair.add(newBridge);
@@ -148,79 +197,7 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
         }catch(Exception e){
             e.printStackTrace();
         }
-        return true;
-    }
-
-    @Override
-    public boolean deleteBridgeDomain(Node node, String bridgeIdentifier) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public List<String> getBridgeDomains(Node node) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public boolean addBridgeDomainConfig(Node node, String bridgeIdentifier, Map<String, String> config) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean removeBridgeDomainConfig(Node node, String bridgeIdentifier, Map<String, String> config) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public Map<String, String> getBridgeDomainConfigs(Node node, String bridgeIdentifier) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public boolean createBridgeConnector(Node node, String bridgeConnectorIdentifier) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean deleteBridgeConnector(Node node, String bridgeConnectorIdentifier) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean associateBridgeConnector(Node node, String bridgeIdentifier, String bridgeConnectorIdentifier) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean disassociateBridgeConnector(Node node, String bridgeIdentifier, String bridgeConnectorIdentifier) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean addBridgeConnectorConfig(Node node, String bridgeConnectorIdentifier, Map<String, String> config) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean removeBridgeConnectorConfig(Node node, String bridgeConnectorIdentifier, Map<String, String> config) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public Map<String, String> getBridgeConnectorConfigs(Node node, String bridgeConnectorIdentifier) {
-        // TODO Auto-generated method stub
-        return null;
+        return new Status(StatusCode.SUCCESS);
     }
 
     /**
@@ -231,20 +208,20 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
      * @param portIdentifier String representation of a user defined Port Name
      */
     @Override
-    @SuppressWarnings("unchecked")
-    public boolean addPort(Node node, String bridgeIdentifier, String portIdentifier) throws Throwable{
+    public Status addPort(Node node, String bridgeIdentifier, String portIdentifier, Map<ConfigConstants, Object> configs) {
         try{
             if (connectionService == null) {
                 logger.error("Couldn't refer to the ConnectionService");
-                return false;
+                return new Status(StatusCode.NOSERVICE);
             }
-            Connection connection = connectionService.getConnection(node);
+            Connection connection = this.getConnection(node);
+            if (connection == null || connection.getSocket() == null) {
+                return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
+            }
 
             if (connection != null) {
-                String newBridge = "new_bridge";
                 String newInterface = "new_interface";
                 String newPort = "new_port";
-                String newSwitch = "new_switch";
 
                 Map<String, OVSBridge> existingBridges = OVSBridge.monitorBridge(connection);
 
@@ -277,6 +254,16 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
 
                 Map<String, Object> portRow = new HashMap<String, Object>();
                 portRow.put("name", portIdentifier);
+                String portType = null;
+                if (configs != null) {
+                    portType = (String)configs.get(ConfigConstants.TYPE);
+                    if (portType != null && portType.equalsIgnoreCase(OvsdbType.PortType.VLAN.name())) {
+                        try {
+                        portRow.put("tag", Integer.parseInt((String)configs.get(ConfigConstants.VLAN)));
+                        } catch (Exception e) {
+                        }
+                    }
+                }
                 ArrayList<String> interfaces = new ArrayList<String>();
                 interfaces.add("named-uuid");
                 interfaces.add(newInterface);
@@ -285,6 +272,20 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
 
                 Map<String, Object> interfaceRow = new HashMap<String, Object>();
                 interfaceRow.put("name", portIdentifier);
+                //Tunnel specific
+
+                if (portType != null && portType.equalsIgnoreCase(OvsdbType.PortType.TUNNEL.name())) {
+                    interfaceRow.put("type", configs.get(ConfigConstants.TUNNEL_TYPE));
+                    ArrayList<Object> intopt = new ArrayList<Object>();
+                    interfaceRow.put("options", intopt);
+                    ArrayList<Object> intoptmap = new ArrayList<Object>();
+                    ArrayList<String> intoptep = new ArrayList<String>();
+                    intopt.add("map");
+                    intopt.add(intoptmap);
+                    intoptmap.add(intoptep);
+                    intoptep.add("remote_ip");
+                    intoptep.add((String)configs.get(ConfigConstants.DEST_IP));
+                }
                 InsertRequest addIntfRequest = new InsertRequest("insert", "Interface", newInterface, interfaceRow);
 
                 Object[] params = {"Open_vSwitch", mutateBridgeRequest, addIntfRequest, addPortRequest};
@@ -295,185 +296,14 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
         }catch(Exception e){
             e.printStackTrace();
         }
-        return true;
+        return new Status(StatusCode.SUCCESS);
     }
-
-    /**
-     * Create a Port with a VLAN Tag and it to a Bridge
-     * Ex. ovs-vsctl add-port br0 vxlan1 -- set interface vxlan1 type=vxlan options:remote_ip=192.168.1.11
-     * @param node Node serving this configuration service
-     * @param portIdentifier String representation of a user defined Port Name
-     * @param vlanid integer representing the VLAN Tag
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public boolean addPortVlan(Node node, String bridgeIdentifier, String portIdentifier, int vlanid) throws Throwable{
-        try{
-            if (connectionService == null) {
-                logger.error("Couldn't refer to the ConnectionService");
-                return false;
-            }
-            Connection connection = connectionService.getConnection(node);
-
-            if (connection != null) {
-                String newBridge = "new_bridge";
-                String newInterface = "new_interface";
-                String newPort = "new_port";
-                String newSwitch = "new_switch";
-
-                Map<String, OVSBridge> existingBridges = OVSBridge.monitorBridge(connection);
-
-                OVSBridge ovstableid = existingBridges.get(bridgeIdentifier);
-
-                List<String> portUuidPair = new ArrayList<String>();
-                portUuidPair.add("named-uuid");
-                portUuidPair.add(newPort);
-
-                List<Object> mutation = new ArrayList<Object>();
-                mutation.add("ports");
-                mutation.add("insert");
-                mutation.add(portUuidPair);
-                List<Object> mutations = new ArrayList<Object>();
-                mutations.add(mutation);
-
-                List<String> bridgeUuidPair = new ArrayList<String>();
-                bridgeUuidPair.add("uuid");
-                bridgeUuidPair.add(ovstableid.getUuid());
-
-                List<Object> whereInner = new ArrayList<Object>();
-                whereInner.add("_uuid");
-                whereInner.add("==");
-                whereInner.add(bridgeUuidPair);
-
-                List<Object> where = new ArrayList<Object>();
-                where.add(whereInner);
-
-                MutateRequest mutateBridgeRequest = new MutateRequest("Bridge", where, mutations);
-
-                Map<String, Object> portRow = new HashMap<String, Object>();
-                portRow.put("name", portIdentifier);
-                portRow.put("tag", vlanid);
-                ArrayList<String> interfaces = new ArrayList<String>();
-                interfaces.add("named-uuid");
-                interfaces.add(newInterface);
-                portRow.put("interfaces", interfaces);
-                InsertRequest addPortRequest = new InsertRequest("insert", "Port", newPort, portRow);
-
-                Map<String, Object> interfaceRow = new HashMap<String, Object>();
-                interfaceRow.put("name", portIdentifier);
-                InsertRequest addIntfRequest = new InsertRequest("insert", "Interface", newInterface, interfaceRow);
-
-                Object[] params = {"Open_vSwitch", mutateBridgeRequest, addIntfRequest, addPortRequest};
-                OvsdbMessage msg = new OvsdbMessage("transact", params);
-
-                connection.sendMessage(msg);
-            }
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-        return true;
-    }
-
-    /**
-     * Create an Encapsulated Tunnel Interface and destination Tunnel Endpoint
-     * Ex. ovs-vsctl add-port br0 vxlan1 -- set interface vxlan1 type=vxlan options:remote_ip=192.168.1.11
-     * @param node Node serving this configuration service
-     * @param bridgeDomainIdentifier String representation of a Bridge Domain
-     * @param portIdentifier String representation of a user defined Port Name
-     * @param tunnelendpoint IP address of the destination Tunnel Endpoint
-     * @param tunencap is the tunnel encapsulation options being CAPWAP, GRE or VXLAN
-     * The Bridge must already be defined before calling addTunnel.
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public boolean addTunnel(Node node, String bridgeIdentifier,
-        String portidentifier, String tunnelendpoint, String tunencap)
-                throws Throwable{
-        try{
-            if (connectionService == null) {
-                logger.error("Couldn't refer to the ConnectionService");
-                return false;
-            }
-            Connection connection = connectionService.getConnection(node);
-
-            if (connection != null) {
-                String newBridge = "new_bridge";
-                String newInterface = "new_interface";
-                String newPort = "new_port";
-                String newSwitch = "new_switch";
-
-                Map<String, OVSBridge> existingBridges = OVSBridge.monitorBridge(connection);
-
-                OVSBridge bridge = existingBridges.get(bridgeIdentifier);
-
-                List<String> portUuidPair = new ArrayList<String>();
-                portUuidPair.add("named-uuid");
-                portUuidPair.add(newPort);
-
-                List<Object> mutation = new ArrayList<Object>();
-                mutation.add("ports");
-                mutation.add("insert");
-                mutation.add(portUuidPair);
-                List<Object> mutations = new ArrayList<Object>();
-                mutations.add(mutation);
-
-                List<String> bridgeUuidPair = new ArrayList<String>();
-                bridgeUuidPair.add("uuid");
-                bridgeUuidPair.add(bridge.getUuid());
-
-                List<Object> whereInner = new ArrayList<Object>();
-                whereInner.add("_uuid");
-                whereInner.add("==");
-                whereInner.add(bridgeUuidPair);
-
-                List<Object> where = new ArrayList<Object>();
-                where.add(whereInner);
-
-                MutateRequest mutateBridgeRequest = new MutateRequest("Bridge", where, mutations);
-
-                Map<String, Object> portRow = new HashMap<String, Object>();
-                portRow.put("name", portidentifier);
-                ArrayList<String> interfaces = new ArrayList<String>();
-                interfaces.add("named-uuid");
-                interfaces.add(newInterface);
-                portRow.put("interfaces", interfaces);
-                InsertRequest addPortRequest = new InsertRequest("insert", "Port", newPort, portRow);
-
-                Map<String, Object> interfaceRow = new HashMap<String, Object>();
-                interfaceRow.put("name", portidentifier);
-                interfaceRow.put("type", tunencap);
-                ArrayList<Object> intopt = new ArrayList<Object>();
-                interfaceRow.put("options", intopt);
-                ArrayList<Object> intoptmap = new ArrayList<Object>();
-                ArrayList<String> intoptep = new ArrayList<String>();
-                intopt.add("map");
-                intopt.add(intoptmap);
-                intoptmap.add(intoptep);
-                intoptep.add("remote_ip");
-                intoptep.add(tunnelendpoint);
-
-                InsertRequest addIntfRequest = new InsertRequest("insert", "Interface",
-                        newInterface, interfaceRow);
-
-                Object[] params = {"Open_vSwitch", mutateBridgeRequest, addIntfRequest, addPortRequest};
-                OvsdbMessage msg = new OvsdbMessage("transact", params);
-
-                connection.sendMessage(msg);
-
-            }
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-        return true;
-    }
-
     /**
      * Implements the OVS Connection for Managers
      *
      * @param node Node serving this configuration service
      * @param String with IP and connection types
      */
-    @Override
     @SuppressWarnings("unchecked")
     public boolean setManager(Node node, String managerip) throws Throwable{
         try{
@@ -481,7 +311,10 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
                 logger.error("Couldn't refer to the ConnectionService");
                 return false;
             }
-            Connection connection = connectionService.getConnection(node);
+            Connection connection = this.getConnection(node);
+            if (connection == null || connection.getSocket() == null) {
+                return false;
+            }
 
             if (connection != null) {
                 String newmanager = "new_manager";
@@ -533,8 +366,291 @@ public class ConfigurationService implements IPluginInNetworkConfigurationServic
     }
 
     @Override
-    public Object genericConfigurationEvent(Node node, Map<String, String> config) {
+    public Status addBridgeDomainConfig(Node node, String bridgeIdentfier,
+            Map<ConfigConstants, Object> configs) {
+        String mgmt = (String)configs.get(ConfigConstants.MGMT);
+        if (mgmt != null) {
+            try {
+                if (setManager(node, mgmt)) return new Status(StatusCode.SUCCESS);
+            } catch (Throwable e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                return new Status(StatusCode.INTERNALERROR);
+            }
+        }
+        return new Status(StatusCode.BADREQUEST);
+    }
+
+    @Override
+    public Status addPortConfig(Node node, String bridgeIdentifier, String portIdentifier,
+            Map<ConfigConstants, Object> configs) {
         // TODO Auto-generated method stub
         return null;
     }
-  }
+
+    @Override
+    public Status deletePort(Node node, String bridgeIdentifier, String portIdentifier) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Node getBridgeDomainNode(Node node, String bridgeIdentifier) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Map<ConfigConstants, Object> getPortConfigs(Node node, String bridgeIdentifier,
+            String portIdentifier) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Status removeBridgeDomainConfig(Node node, String bridgeIdentifier,
+            Map<ConfigConstants, Object> configs) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Status removePortConfig(Node node, String bridgeIdentifier, String portIdentifier,
+            Map<ConfigConstants, Object> configs) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Status deleteBridgeDomain(Node node, String bridgeIdentifier) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Map<ConfigConstants, Object> getBridgeDomainConfigs(Node node, String bridgeIdentifier) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<String> getBridgeDomains(Node node) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public NodeConnector getNodeConnector(Node arg0, String arg1, String arg2) {
+        return null;
+    }
+
+    public void _connect (CommandInterpreter ci) {
+        String bridgeName = ci.nextArgument();
+        if (bridgeName == null) {
+            ci.println("Please enter Bridge Name");
+            return;
+        }
+
+        String ovsdbserver = ci.nextArgument();
+        if (ovsdbserver == null) {
+            ci.println("Please enter valid IP-Address");
+            return;
+        }
+        try {
+            InetAddress.getByName(ovsdbserver);
+        }  catch (Exception e) {
+            e.printStackTrace();
+            ci.println("Please enter valid IP-Address");
+            return;
+        }
+        String port = ci.nextArgument();
+        if (port == null) {
+            port = "6634";
+        }
+
+        ci.println("connecting to ovsdb server : "+ovsdbserver+":"+port+" ... ");
+        Map<ConnectionConstants, String> params = new HashMap<ConnectionConstants, String>();
+        params.put(ConnectionConstants.ADDRESS, ovsdbserver);
+        params.put(ConnectionConstants.PORT, port);
+        Node node = connectionService.connect(bridgeName, params);
+        if (node != null) ci.println("Node Name: "+node.toString());
+        else ci.println("Could not connect to Node");
+    }
+
+    public void _addBridge (CommandInterpreter ci) {
+        String nodeName = ci.nextArgument();
+        if (nodeName == null) {
+            ci.println("Please enter Node Name");
+            return;
+        }
+
+        String bridgeName = ci.nextArgument();
+        if (bridgeName == null) {
+            ci.println("Please enter Bridge Name");
+            return;
+        }
+        Status status;
+        try {
+            status = this.createBridgeDomain(Node.fromString(nodeName), bridgeName, null);
+            ci.println("Bridge creation status : "+status.toString());
+        } catch (Throwable e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            ci.println("Failed to create Bridge "+bridgeName);
+        }
+    }
+
+    public void _addPort (CommandInterpreter ci) {
+        String nodeName = ci.nextArgument();
+        if (nodeName == null) {
+            ci.println("Please enter Node Name");
+            return;
+        }
+
+        String bridgeName = ci.nextArgument();
+        if (bridgeName == null) {
+            ci.println("Please enter Bridge Name");
+            return;
+        }
+
+        String portName = ci.nextArgument();
+        if (portName == null) {
+            ci.println("Please enter Port Name");
+            return;
+        }
+
+        Status status;
+        try {
+            status = this.addPort(Node.fromString(nodeName), bridgeName, portName, null);
+            ci.println("Port creation status : "+status.toString());
+        } catch (Throwable e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            ci.println("Failed to create Port "+portName+" in Bridge "+bridgeName);
+        }
+    }
+
+    public void _addPortVlan (CommandInterpreter ci) {
+        String nodeName = ci.nextArgument();
+        if (nodeName == null) {
+            ci.println("Please enter Node Name");
+            return;
+        }
+
+        String bridgeName = ci.nextArgument();
+        if (bridgeName == null) {
+            ci.println("Please enter Bridge Name");
+            return;
+        }
+
+        String portName = ci.nextArgument();
+        if (portName == null) {
+            ci.println("Please enter Port Name");
+            return;
+        }
+
+        String vlan = ci.nextArgument();
+        if (vlan == null) {
+            ci.println("Please enter Valid Vlan");
+            return;
+        } else {
+            try {
+            Integer.parseInt(vlan);
+            } catch (Exception e) {
+                ci.println("Please enter Valid Vlan");
+                return;
+            }
+        }
+
+        Map<ConfigConstants, Object> configs = new HashMap<ConfigConstants, Object>();
+        configs.put(ConfigConstants.TYPE, "VLAN");
+        configs.put(ConfigConstants.VLAN, vlan);
+
+        Status status;
+        try {
+            status = this.addPort(Node.fromString(nodeName), bridgeName, portName, configs);
+            ci.println("Port creation status : "+status.toString());
+        } catch (Throwable e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            ci.println("Failed to create Port "+portName+" in Bridge "+bridgeName);
+        }
+    }
+
+    public void _addTunnel (CommandInterpreter ci) {
+        String nodeName = ci.nextArgument();
+        if (nodeName == null) {
+            ci.println("Please enter Node Name");
+            return;
+        }
+
+        String bridgeName = ci.nextArgument();
+        if (bridgeName == null) {
+            ci.println("Please enter Bridge Name");
+            return;
+        }
+
+        String portName = ci.nextArgument();
+        if (portName == null) {
+            ci.println("Please enter Port Name");
+            return;
+        }
+
+        String tunnelType = ci.nextArgument();
+        if (tunnelType == null) {
+            ci.println("Please enter Tunnel Type");
+            return;
+        }
+
+        String remoteIp = ci.nextArgument();
+        if (remoteIp == null) {
+            ci.println("Please enter valid Remote IP Address");
+            return;
+        }
+
+        try {
+            InetAddress.getByName(remoteIp);
+        }  catch (Exception e) {
+            e.printStackTrace();
+            ci.println("Please enter valid Remote IP Address");
+            return;
+        }
+
+        Map<ConfigConstants, Object> configs = new HashMap<ConfigConstants, Object>();
+        configs.put(ConfigConstants.TYPE, "TUNNEL");
+        configs.put(ConfigConstants.TUNNEL_TYPE, tunnelType);
+        configs.put(ConfigConstants.DEST_IP, remoteIp);
+
+        Status status;
+        try {
+            status = this.addPort(Node.fromString(nodeName), bridgeName, portName, configs);
+            ci.println("Port creation status : "+status.toString());
+        } catch (Throwable e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            ci.println("Failed to create Port "+portName+" in Bridge "+bridgeName);
+        }
+    }
+
+    public void _forceConnect (CommandInterpreter ci) {
+        String force = ci.nextArgument();
+        if (force.equalsIgnoreCase("YES")) forceConnect = true;
+        else if (force.equalsIgnoreCase("NO")) forceConnect = false;
+        else ci.println("Please enter YES or NO.");
+        ci.println("Current ForceConnect State : "+forceConnect);
+        return;
+    }
+
+    @Override
+    public String getHelp() {
+        StringBuffer help = new StringBuffer();
+        help.append("---OVSDB CLI---\n");
+        help.append("\t ovsconnect <ConnectionName> <ip-address>                        - Connect to OVSDB\n");
+        help.append("\t addBridge <Node> <BridgeName>                                   - Add Bridge\n");
+        help.append("\t addPort <Node> <BridgeName> <PortName>                          - Add Port\n");
+        help.append("\t addPortVlan <Node> <BridgeName> <PortName> <vlan>               - Add Port, Vlan\n");
+        help.append("\t addTunnel <Node> <Bridge> <Port> <tunnel-type> <remote-ip>      - Add Tunnel\n");
+        help.append("\t forceConnect <yes|no>   - Force a new OVSDB Connection for every command (Workaround)");
+        return help.toString();
+    }
+}

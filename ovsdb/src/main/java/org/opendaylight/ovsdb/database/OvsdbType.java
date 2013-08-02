@@ -4,6 +4,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 public class OvsdbType {
+    public enum PortType {
+        VLAN("vlan"),
+        TUNNEL("Tunnel"),
+        BONDING("Bonding");
+
+        private PortType(String name) {
+            this.name = name;
+        }
+
+        private String name;
+
+        public String toString() {
+            return name;
+        }
+    }
     public OvsdbType(String type){
         this.key = new BaseType(type);
     }

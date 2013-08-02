@@ -5,7 +5,8 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.ovsdb.internal.ConfigurationService;
 import org.opendaylight.ovsdb.internal.ConnectionService;
-import org.opendaylight.ovsdb.sal.connection.ConnectionConstants;
+import org.opendaylight.controller.sal.connection.ConnectionConstants;
+import org.opendaylight.controller.sal.networkconfig.bridgedomain.ConfigConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.HashMap;
@@ -24,7 +25,8 @@ public class OvsdbTestAddVlan {
         connectionService.init();
         String identifier = "TEST";
         Map<ConnectionConstants, String> params = new HashMap<ConnectionConstants, String>();
-        params.put(ConnectionConstants.ADDRESS, "192.168.56.101");
+        params.put(ConnectionConstants.ADDRESS, "172.28.30.51");
+        params.put(ConnectionConstants.PORT, "6634");
         int vlanid = 100;
 
         Node node = connectionService.connect(identifier, params);
@@ -43,6 +45,9 @@ public class OvsdbTestAddVlan {
          */
         ConfigurationService configurationService = new ConfigurationService();
         configurationService.setConnectionServiceInternal(connectionService);
-        configurationService.addPortVlan(node, "JUNIT_BRIDGE_TEST", "Jtagvif0", vlanid);
+        Map<ConfigConstants, Object> configs = new HashMap<ConfigConstants, Object>();
+        configs.put(ConfigConstants.TYPE, "VLAN");
+        configs.put(ConfigConstants.VLAN, vlanid+"");
+        configurationService.addPort(node, "JUNIT_BRIDGE_TEST", "Jtagvif0", configs);
     }
 }

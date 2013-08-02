@@ -1,17 +1,26 @@
 package org.opendaylight.ovsdb.internal;
 
 import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import javax.net.ServerSocketFactory;
+
 import com.googlecode.jsonrpc4j.JsonRpcClient;
-import org.opendaylight.ovsdb.sal.connection.ConnectionConstants;
-import org.opendaylight.ovsdb.sal.connection.IPluginInConnectionService;
+import com.googlecode.jsonrpc4j.JsonRpcServer;
+import com.googlecode.jsonrpc4j.StreamServer;
+
+import org.opendaylight.controller.sal.connection.ConnectionConstants;
+import org.opendaylight.controller.sal.connection.IPluginInConnectionService;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents the openflow plugin component in charge of programming the flows
@@ -19,6 +28,9 @@ import org.opendaylight.controller.sal.utils.StatusCode;
  */
 public class ConnectionService implements IPluginInConnectionService, IConnectionServiceInternal
 {
+    protected static final Logger logger = LoggerFactory
+            .getLogger(ConnectionService.class);
+
     private static final Integer defaultOvsdbPort = 6632;
     ConcurrentMap <String, Connection> ovsdbConnections;
     public void init() {
@@ -80,6 +92,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
 
        try {
             port = Integer.parseInt(params.get(ConnectionConstants.PORT));
+            if (port == 0) port = defaultOvsdbPort;
         } catch (Exception e) {
             port = defaultOvsdbPort;
         }
@@ -92,6 +105,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
                 return connection.getNode();
             }
         } catch (Exception e) {
+            e.printStackTrace();
         }
         return null;
     }
@@ -100,5 +114,13 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
     public Connection getConnection(Node node) {
         String identifier = (String)node.getID();
         return ovsdbConnections.get(identifier);
+    }
+
+    @Override
+    public void notifyClusterViewChanged() {
+    }
+
+    @Override
+    public void notifyNodeDisconnectFromMaster(Node arg0) {
     }
   }

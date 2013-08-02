@@ -5,10 +5,8 @@ import java.util.Hashtable;
 
 import org.apache.felix.dm.Component;
 
-import org.opendaylight.ovsdb.sal.configuration.INetworkConfigurationService;
-import org.opendaylight.ovsdb.sal.configuration.IPluginInNetworkConfigurationService;
-import org.opendaylight.ovsdb.sal.connection.IConnectionService;
-import org.opendaylight.ovsdb.sal.connection.IPluginInConnectionService;
+import org.opendaylight.controller.sal.networkconfig.bridgedomain.IPluginInBridgeDomainConfigService;
+import org.opendaylight.controller.sal.connection.IPluginInConnectionService;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.sal.utils.INodeConnectorFactory;
 import org.opendaylight.controller.sal.utils.INodeFactory;
@@ -50,7 +48,7 @@ public class Activator extends ComponentActivatorAbstractBase {
         NodeConnector.NodeConnectorIDType.unRegisterIDType("OVS");
     }
     public Object[] getGlobalImplementations() {
-        Object[] res = { ConnectionService.class, ConfigurationService.class, FlowProgrammerService.class, NodeFactory.class, NodeConnectorFactory.class };
+        Object[] res = { ConnectionService.class, ConfigurationService.class, NodeFactory.class, NodeConnectorFactory.class };
         return res;
     }
 
@@ -61,7 +59,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             // Set the protocolPluginType property which will be used
             // by SAL
             props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "OVS");
-            c.setInterface(IPluginInNetworkConfigurationService.class.getName(), props);
+            c.setInterface(IPluginInBridgeDomainConfigService.class.getName(), props);
 
             c.add(createServiceDependency()
                     .setService(IConnectionServiceInternal.class)
@@ -80,14 +78,6 @@ public class Activator extends ComponentActivatorAbstractBase {
                                   IConnectionServiceInternal.class.getName()}, props);
         }
 
-        if (imp.equals(FlowProgrammerService.class)) {
-            // export the service to be used by SAL
-            Dictionary<String, Object> props = new Hashtable<String, Object>();
-            // Set the protocolPluginType property which will be used
-            // by SAL
-            props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "OVS");
-            c.setInterface(IPluginInFlowProgrammerService.class.getName(), props);
-        }
         if (imp.equals(NodeFactory.class)) {
             // export the service to be used by SAL
             Dictionary<String, Object> props = new Hashtable<String, Object>();

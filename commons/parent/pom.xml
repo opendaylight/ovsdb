@@ -23,8 +23,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <modules>
-    <module>../ovsdb/</module>
-    <module>../distribution/opendaylight</module>
+    <module>../../ovsdb/</module>
+    <module>../../distribution/opendaylight</module>
   </modules>
   <repositories>
     <!-- jsonrpc4j mirror -->

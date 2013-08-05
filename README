@@ -1,0 +1,38 @@
+DIRECTORY ORGANIZATION
+======================
+
+- commons: contains the parent pom.xml for all ovsdb projects.
+- ovsdb: contains the ovsdb SB plugin
+- distribution/opendaylight: will build a working controller distribution
+  based on the controller + ovsdb modules
+
+HOW TO BUILD
+============
+
+In order to build it's required to have JDK 1.7+ and Maven 3+, to get
+a build going it's needed to:
+
+cd commons/
+mvn clean install
+
+or if you want to avoid SNAPSHOT checking
+
+cd commons/
+mvn clean install -nsu
+
+HOW TO RUN
+============
+
+Upon successful completion of a build
+
+cd distribution/opendaylight/target/distribution.ovsdb-1.0.0-SNAPSHOT-osgipackage/opendaylight/
+./run.sh
+
+Wait for the osgi console to startup and then point a browser at 
+
+http:localhost:8080/
+
+
+
+
+

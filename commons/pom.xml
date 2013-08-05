@@ -14,7 +14,18 @@
   <artifactId>commons.ovsdb</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
-
+  <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
+  <scm>
+    <connection>scm:git:https://git.opendaylight.org/gerrit/p/ovsdb.git</connection>
+  </scm>
+  <properties>
+    <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  <modules>
+    <module>../ovsdb/</module>
+    <module>../distribution/opendaylight</module>
+  </modules>
   <repositories>
     <!-- jsonrpc4j mirror -->
     <repository>

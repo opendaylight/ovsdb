@@ -31,8 +31,7 @@
     <repository>
       <id>jsonrpc4j-webdav-maven-repo</id>
       <name>jsonrpc4j maven repository</name>
-      <url>http://jsonrpc4j.googlecode.com/svn/maven/repo/</url>
-      <layout>default</layout>
+      <url>http://nexus.opendaylight.org/content/repositories/jsonrpc4j-webdav-maven-repo/</url>
     </repository>
     <!-- OpenDayLight Released artifact -->
     <repository>

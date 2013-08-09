@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAE3//+VA\u003d",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/table/Bridge.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-08-09T13:27:44Z",
+      "side": 1,
+      "message": "Can you make the members private in all the POJOs ?\nAlso please add getters, equals and hashcode for these members.\n(eclipse source generator will do).\n\nThough they are not used by the json marshaller, it will be useful quickly once we start to use these objects for any manipulation.",
+      "revId": "eaf227340f41d2204bce7b37b225ec696cec54e9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3//+U4\u003d",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/table/Bridge.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-08-09T13:27:44Z",
+      "side": 1,
+      "message": "I guess we can also make this a private method.\nI think it is better to keep these as immutable objects and not let any other objects (other than the demarshaller) change its states via these add methods.\n\nThis is also applicable to other POJOs defined in the table package.",
+      "revId": "eaf227340f41d2204bce7b37b225ec696cec54e9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAE3//+VI\u003d",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/table/BridgeInfo.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-08-09T13:27:44Z",
+      "side": 1,
+      "message": "unique sounds more professional than fresh :-)\nGood choice.",
+      "revId": "eaf227340f41d2204bce7b37b225ec696cec54e9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

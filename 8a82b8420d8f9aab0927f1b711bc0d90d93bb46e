@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAE3//+Tk\u003d",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/table/BridgeInfo.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-08-11T02:45:03Z",
+      "side": 1,
+      "message": "Minor comment.\nAs i understand, the reason we decided to use a name like unique is because the keyword \"new\" is taken by the programming language and it conflicts with OVSDB\u0027s \u0027new\u0027 directive.\n\nSince, this is an internal issue of the wire-protocol, we can call the accessor/setter as getNew and setNew, while the actual private member variable can be \u0027unique\u0027.\n\nThis way, we need not expose the \u0027unique\u0027 limitation (no pun intended :-) ). If you agree can you please change the getUnique and setUnique to getNew \u0026 setNew (here and other classes as well).",
+      "revId": "8a82b8420d8f9aab0927f1b711bc0d90d93bb46e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

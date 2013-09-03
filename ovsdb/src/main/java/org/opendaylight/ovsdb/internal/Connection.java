@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.Map;
 
+import io.netty.channel.Channel;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
@@ -19,14 +20,24 @@ import com.googlecode.jsonrpc4j.JsonRpcClient.RequestListener;
 public class Connection implements RequestListener {
     private Node node;
     private String identifier;
+    private Channel channel;
+
+    public Socket getSocket() {
+        return socket;
+    }
+
+    public void setSocket(Socket socket) {
+        this.socket = socket;
+    }
+
     private Socket socket;
     private JsonRpcClient rpcClient;
     private static final Logger logger = LoggerFactory.getLogger(Connection.class);
 
-    public Connection(String identifier, Socket socket, JsonRpcClient rpcClient) {
+    public Connection(String identifier, Channel channel, JsonRpcClient rpcClient) {
         super();
         this.identifier = identifier;
-        this.socket = socket;
+        this.channel = channel;
         this.rpcClient = rpcClient;
         rpcClient.setRequestListener(this);
         try {
@@ -44,15 +55,12 @@ public class Connection implements RequestListener {
     public void setIdentifier(String identifier) {
         this.identifier = identifier;
     }
-
-    public Socket getSocket() {
-        return socket;
+    public Channel getChannel(){
+        return this.channel;
     }
-
-    public void setSocket(Socket socket) {
-        this.socket = socket;
+    public void setChannel(Channel channel){
+        this.channel = channel;
     }
-
     public JsonRpcClient getRpcClient() {
         return rpcClient;
     }
@@ -114,8 +122,8 @@ public class Connection implements RequestListener {
 
     public Status disconnect() {
         try {
-            socket.close();
-        } catch (IOException e) {
+            channel.close();
+        } catch (Exception e) {
             e.printStackTrace();
             return new Status(StatusCode.INTERNALERROR, e.getMessage());
         }

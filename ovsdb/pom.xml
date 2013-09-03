@@ -121,5 +121,10 @@
       <version>4.2.1</version>
       <optional>true</optional>
     </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-all</artifactId>
+      <version>4.0.8.Final</version>
+    </dependency>
   </dependencies>
 </project>

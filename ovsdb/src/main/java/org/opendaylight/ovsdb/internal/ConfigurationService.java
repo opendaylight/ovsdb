@@ -4,6 +4,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
 
+import io.netty.channel.Channel;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.opendaylight.ovsdb.database.OVSBridge;
@@ -79,33 +80,12 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     private Connection getConnection (Node node) {
 
         Connection connection = connectionService.getConnection(node);
-        if (connection == null || connection.getSocket() == null) {
-            return null;
-        }
-
-        /*
-         * This is possible only when the connection is disconnected due to any reason.
-         * But, we have to implement ECHO handling else, it results in timeout and the
-         * connection being partially closed from the server side and the client Socket
-         * seems to be up. Hence forcing the issue for now till we implement the ECHO.
-         */
-        if (connection.getSocket().isClosed() || forceConnect) {
-            String address = connection.getSocket().getInetAddress().getHostAddress();
-            Map<ConnectionConstants, String> params = new HashMap<ConnectionConstants, String>();
-            params.put(ConnectionConstants.ADDRESS, address);
-            params.put(ConnectionConstants.PORT, connection.getSocket().getPort()+"");
-            node = connectionService.connect(connection.getIdentifier(), params);
-            connection = connectionService.getConnection(node);
-        }
-        if (connection == null || connection.getSocket() == null || connection.getSocket().isClosed()) {
-            return null;
-        }
         return connection;
     }
     /**
      * Add a new bridge
      * @param node Node serving this configuration service
-     * @param bridgeConnectorIdentifier String representation of a Bridge Connector
+     * @param bridgeIdentifier String representation of a Bridge Connector
      * @return Bridge Connector configurations
      */
     @Override
@@ -118,82 +98,14 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             }
 
             Connection connection = this.getConnection(node);
-            if (connection == null || connection.getSocket() == null) {
-                return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
-            }
 
-            if (connection != null) {
-                String newBridge = "new_bridge";
-                String newInterface = "new_interface";
-                String newPort = "new_port";
-                String newSwitch = "new_switch";
-
-                Object addSwitchRequest;
-
-                OVSInstance instance = OVSInstance.monitorOVS(connection);
-
-                if(instance != null){
-                    List<String> bridgeUuidPair = new ArrayList<String>();
-                    bridgeUuidPair.add("named-uuid");
-                    bridgeUuidPair.add(newBridge);
-
-                    List<Object> mutation = new ArrayList<Object>();
-                    mutation.add("bridges");
-                    mutation.add("insert");
-                    mutation.add(bridgeUuidPair);
-
-                    List<Object> mutations = new ArrayList<Object>();
-                    mutations.add(mutation);
-
-                    List<String> ovsUuidPair = new ArrayList<String>();
-                    ovsUuidPair.add("uuid");
-                    ovsUuidPair.add(instance.getUuid());
-
-                    List<Object> whereInner = new ArrayList<Object>();
-                    whereInner.add("_uuid");
-                    whereInner.add("==");
-                    whereInner.add(ovsUuidPair);
-
-                    List<Object> where = new ArrayList<Object>();
-                    where.add(whereInner);
-
-                    addSwitchRequest = new MutateRequest("Open_vSwitch", where, mutations);
-                }
-                else{
-                    Map<String, Object> vswitchRow = new HashMap<String, Object>();
-                    ArrayList<String> bridges = new ArrayList<String>();
-                    bridges.add("named-uuid");
-                    bridges.add(newBridge);
-                    vswitchRow.put("bridges", bridges);
-                    addSwitchRequest = new InsertRequest("insert", "Open_vSwitch", newSwitch, vswitchRow);
-                }
-
-                Map<String, Object> bridgeRow = new HashMap<String, Object>();
-                bridgeRow.put("name", bridgeIdentifier);
-                ArrayList<String> ports = new ArrayList<String>();
-                ports.add("named-uuid");
-                ports.add(newPort);
-                bridgeRow.put("ports", ports);
-                InsertRequest addBridgeRequest = new InsertRequest("insert", "Bridge", newBridge, bridgeRow);
-
-                Map<String, Object> portRow = new HashMap<String, Object>();
-                portRow.put("name", bridgeIdentifier);
-                ArrayList<String> interfaces = new ArrayList<String>();
-                interfaces.add("named-uuid");
-                interfaces.add(newInterface);
-                portRow.put("interfaces", interfaces);
-                InsertRequest addPortRequest = new InsertRequest("insert", "Port", newPort, portRow);
-
-                Map<String, Object> interfaceRow = new HashMap<String, Object>();
-                interfaceRow.put("name", bridgeIdentifier);
-                interfaceRow.put("type", "internal");
-                InsertRequest addIntfRequest = new InsertRequest("insert", "Interface", newInterface, interfaceRow);
-
-                Object[] params = {"Open_vSwitch", addSwitchRequest, addIntfRequest, addPortRequest, addBridgeRequest};
-                OvsdbMessage msg = new OvsdbMessage("transact", params);
-
-                connection.sendMessage(msg);
-            }
+            Channel channel = connection.getChannel();
+            channel.writeAndFlush("{\"method\":\"transact\",\"params\":[\"Open_vSwitch\",{\"row\":{\"bridges\":[\"named-uuid\",\"new_bridge\"]}," +
+                    "\"table\":\"Open_vSwitch\",\"uuid-name\":\"new_switch\",\"op\":\"insert\"},{\"row\":{\"name\":\"br1\",\"type\":\"internal\"}," +
+                    "\"table\":\"Interface\",\"uuid-name\":\"new_interface\",\"op\":\"insert\"},{\"row\":{\"name\":\"br1\",\"interfaces\":[\"named-uuid\",\"new_interface\"]}," +
+                    "\"table\":\"Port\",\"uuid-name\":\"new_port\",\"op\":\"insert\"},{\"row\":{\"name\":\"br1\",\"ports\":[\"named-uuid\",\"new_port\"]}," +
+                    "\"table\":\"Bridge\",\"uuid-name\":\"new_bridge\",\"op\":\"insert\"}],\"id\":\"0\"}\")");
+            channel.closeFuture().sync();
         }catch(Exception e){
             e.printStackTrace();
         }

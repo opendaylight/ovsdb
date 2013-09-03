@@ -1,19 +1,33 @@
 package org.opendaylight.ovsdb.internal;
 
 import java.net.InetAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
-import javax.net.ServerSocketFactory;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import com.googlecode.jsonrpc4j.JsonRpcClient;
-import com.googlecode.jsonrpc4j.JsonRpcServer;
-import com.googlecode.jsonrpc4j.StreamServer;
 
+
+import io.netty.bootstrap.Bootstrap;
+import io.netty.bootstrap.ChannelFactory;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.local.LocalServerChannel;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.LineBasedFrameDecoder;
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
+import io.netty.util.CharsetUtil;
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.connection.IPluginInConnectionService;
 import org.opendaylight.controller.sal.core.Node;
@@ -83,28 +97,40 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         try {
             address = InetAddress.getByName(params.get(ConnectionConstants.ADDRESS));
         } catch (Exception e) {
-            address = null;
-        }
-
-        if (address == null) {
+            e.printStackTrace();
             return null;
         }
 
-       try {
+        try {
             port = Integer.parseInt(params.get(ConnectionConstants.PORT));
             if (port == 0) port = defaultOvsdbPort;
-        } catch (Exception e) {
+        }catch (Exception e) {
             port = defaultOvsdbPort;
         }
-        try {
-            Socket clientSocket = new Socket(address, port);
-            Connection connection = new Connection(identifier, clientSocket, new JsonRpcClient());
 
-            if (connection != null) {
-                ovsdbConnections.put(identifier, connection);
-                return connection.getNode();
-            }
-        } catch (Exception e) {
+        try {
+            Bootstrap bootstrap = new Bootstrap();
+            bootstrap.group(new NioEventLoopGroup());
+            bootstrap.channel(NioSocketChannel.class);
+            bootstrap.option(ChannelOption.TCP_NODELAY, true);
+            bootstrap.handler(new ChannelInitializer<SocketChannel>() {
+                @Override
+                public void initChannel(SocketChannel channel) throws Exception {
+                    channel.pipeline().addLast(new StringDecoder(CharsetUtil.UTF_8));
+                    channel.pipeline().addLast(new StringEncoder(CharsetUtil.UTF_8));
+                    channel.pipeline().addLast(new MessageHandler());
+                }
+            });
+
+            ChannelFuture future = bootstrap.connect(address, port).sync();
+
+            Channel channel = future.channel();
+            Connection connection = new Connection(identifier, channel, new JsonRpcClient());
+
+            ovsdbConnections.put(identifier, connection);
+            return connection.getNode();
+
+        }catch (Exception e) {
             e.printStackTrace();
         }
         return null;

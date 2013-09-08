@@ -118,7 +118,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
                 public void initChannel(SocketChannel channel) throws Exception {
                     channel.pipeline().addLast(new StringDecoder(CharsetUtil.UTF_8));
                     channel.pipeline().addLast(new StringEncoder(CharsetUtil.UTF_8));
-                    channel.pipeline().addLast(new MessageHandler());
+                    channel.pipeline().addLast("messageHandler", new MessageHandler());
                 }
             });
 

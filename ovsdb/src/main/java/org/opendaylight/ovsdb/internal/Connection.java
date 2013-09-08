@@ -3,7 +3,10 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
@@ -22,6 +25,16 @@ public class Connection implements RequestListener {
     private String identifier;
     private Channel channel;
 
+    public Long getIdCounter() {
+        return idCounter;
+    }
+
+    public void setIdCounter(Long idCounter) {
+        this.idCounter = idCounter;
+    }
+
+    private Long idCounter;
+
     public Socket getSocket() {
         return socket;
     }
@@ -39,6 +52,7 @@ public class Connection implements RequestListener {
         this.identifier = identifier;
         this.channel = channel;
         this.rpcClient = rpcClient;
+        this.idCounter = 0L;
         rpcClient.setRequestListener(this);
         try {
         node = new Node("OVS", identifier);
@@ -87,41 +101,18 @@ public class Connection implements RequestListener {
 
     }
 
-    public void sendMessage(OvsdbMessage message) throws IOException{
+    public void sendMessage(String message) throws IOException{
         try{
-            rpcClient.invoke(message.methodName, message.argument, socket.getOutputStream(), message.id);
+            channel.writeAndFlush(message);
+            this.idCounter++;
         }catch(Exception e){
-            logger.warn("Could not send RPC for {} ({})", message.methodName, e.getMessage());
+            e.printStackTrace();
         }
-    }
-
-    public Object readResponse(Class<?> clazz) throws Throwable{
-        try{
-            if(clazz.equals(String[].class)){
-                String[] result = this.rpcClient.readResponse(String[].class, socket.getInputStream());
-                for (String res : result) logger.info(res);
-                return result;
-            }
-            else if(clazz.equals(Map.class)){
-                Map result = this.rpcClient.readResponse(Map.class, socket.getInputStream());
-                return result;
-            }
-            else{
-                ObjectNode jsonObject = this.rpcClient.readResponse(ObjectNode.class, socket.getInputStream());
-                ObjectMapper mapper = new ObjectMapper();
-                JsonParser parser = mapper.treeAsTokens(jsonObject);
-                Object result = mapper.readValue(parser, clazz);
-                return result;
-            }
-
-        }catch(Exception e){
-            logger.warn("Could not receive RPC response: {}", e.getMessage());
-        }
-        return null;
     }
 
     public Status disconnect() {
         try {
+            channel.pipeline().get("messageHandler");
             channel.close();
         } catch (Exception e) {
             e.printStackTrace();

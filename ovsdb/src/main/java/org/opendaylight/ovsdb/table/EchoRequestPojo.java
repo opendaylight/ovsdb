@@ -1,16 +1,17 @@
+package org.opendaylight.ovsdb.table;
 
-
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonIgnoreProperties(ignoreUnknown=true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
         "method",
@@ -19,9 +20,11 @@ import java.util.Map;
 })
 public class EchoRequestPojo {
 
-    public EchoRequestPojo() {
+  public EchoRequestPojo() {
 
-        this.id = id;
+      this.id = "echo";
+      this.params = params;
+      this.method = "echo";
     }
 
     @JsonProperty("method")
@@ -30,7 +33,6 @@ public class EchoRequestPojo {
     private List<Object> params = new ArrayList<Object>();
     @JsonProperty("id")
     private String id;
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
 
     @JsonProperty("method")
@@ -77,16 +79,4 @@ public class EchoRequestPojo {
     public boolean equals(Object other) {
         return EqualsBuilder.reflectionEquals(this, other);
     }
-
-    @JsonAnyGetter
-    public Map<String, Object> getAdditionalProperties() {
-        return this.additionalProperties;
-    }
-
-    @JsonAnySetter
-    public void setAdditionalProperties(String name, Object value) {
-        this.additionalProperties.put(name, value);
-    }
-
-
 }

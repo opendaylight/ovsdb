@@ -7,6 +7,7 @@ import java.util.*;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.opendaylight.ovsdb.database.OVSBridge;
+import org.opendaylight.ovsdb.database.OVSPort;
 import org.opendaylight.ovsdb.database.OVSInstance;
 import org.opendaylight.ovsdb.database.OvsdbType;
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
@@ -390,8 +391,58 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
 
     @Override
     public Status deletePort(Node node, String bridgeIdentifier, String portIdentifier) {
-        // TODO Auto-generated method stub
-        return null;
+        try{
+            if (connectionService == null) {
+                logger.error("Couldn't refer to the ConnectionService");
+                return new Status(StatusCode.NOSERVICE);
+            }
+            Connection connection = this.getConnection(node);
+            if (connection == null || connection.getSocket() == null) {
+                return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
+            }
+
+            if (connection != null) {
+                Map<String, OVSPort> existingPorts = OVSPort.monitorPort(connection);
+                OVSPort port = existingPorts.get(portIdentifier);
+                String retrievedBridgeUuid = port.getBridgeUuid();
+
+                OVSPort bridgeUuid = existingPorts.get(bridgeIdentifier);
+
+                List<String> portUuidPair = new ArrayList<String>();
+                portUuidPair.add("uuid");
+                portUuidPair.add(port.getUuid());
+
+                List<Object> mutation = new ArrayList<Object>();
+                mutation.add("ports");
+                mutation.add("delete");
+                mutation.add(portUuidPair);
+                List<Object> mutations = new ArrayList<Object>();
+                mutations.add(mutation);
+
+                List<String> bridgeUuidPair = new ArrayList<String>();
+                bridgeUuidPair.add("uuid");
+                bridgeUuidPair.add(retrievedBridgeUuid);
+
+                List<Object> whereInner = new ArrayList<Object>();
+                whereInner.add("_uuid");
+                whereInner.add("==");
+                whereInner.add(bridgeUuidPair);
+
+                List<Object> where = new ArrayList<Object>();
+                where.add(whereInner);
+
+                MutateRequest mutateBridgeRequest = new MutateRequest("Bridge", where, mutations);
+
+                Object[] params = {"Open_vSwitch", mutateBridgeRequest};
+                OvsdbMessage msg = new OvsdbMessage("transact", params);
+
+                connection.sendMessage(msg);
+
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return new Status(StatusCode.SUCCESS);
     }
 
     @Override

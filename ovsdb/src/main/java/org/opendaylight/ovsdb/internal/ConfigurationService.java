@@ -6,6 +6,7 @@ import java.util.*;
 
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
+import org.opendaylight.controller.sal.utils.NetUtils;
 import org.opendaylight.ovsdb.database.OVSBridge;
 import org.opendaylight.ovsdb.database.OVSPort;
 import org.opendaylight.ovsdb.database.OVSInstance;
@@ -491,6 +492,86 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         Map<String, OVSBridge> existingBridges = OVSBridge.monitorBridge(connection);
         List<String> bridgeDomains = new ArrayList<String>(existingBridges.keySet());
         return bridgeDomains;
+    }
+
+    public Boolean setBridgeOFController(Node node, String bridgeIdentifier, Map<ConfigConstants, Object> configs) {
+
+        try{
+            if (connectionService == null) {
+                logger.error("Couldn't refer to the ConnectionService");
+                return false;
+            }
+            Connection connection = this.getConnection(node);
+            if (connection == null || connection.getSocket() == null) {
+                return false;
+            }
+            if (connection != null) {
+                String controllerAddr = (String)configs.get(ConfigConstants.DEST_IP);
+                String ofPort = (String)configs.get(ConfigConstants.CUSTOM);
+
+                try {
+                    controllerAddr = InetAddress.getByName(controllerAddr).getHostAddress();
+                }  catch (Exception e) {
+                    e.printStackTrace();
+                    logger.error("Invalid Address <" + controllerAddr +
+                            "> Please enter valid IP-Address");
+                    return false;
+                }
+                if ((controllerAddr != null) && (controllerAddr.trim().length() > 0) &&
+                        !NetUtils.isIPv4AddressValid(controllerAddr)) {
+                    logger.debug("Invalid ip address " + controllerAddr);
+                }
+
+                Map<String, OVSBridge> existingBridges = OVSBridge.monitorBridge(connection);
+                OVSBridge bridge = existingBridges.get(bridgeIdentifier);
+
+                if (bridge != null) {
+                    Map ctrlouter = new LinkedHashMap();
+                    Map ctrlinner = new LinkedHashMap();
+                    Map brouter = new LinkedHashMap();
+                    Map brinner = new LinkedHashMap();
+                    ArrayList bralist1 = new ArrayList();
+                    ArrayList bralist2 = new ArrayList();
+                    ArrayList bralist3 = new ArrayList();
+                    ArrayList bralist4 = new ArrayList();
+
+                    //Controller Table Insert
+                    ctrlouter.put("table", "Controller");
+                    ctrlouter.put("uuid-name", "row" + bridgeIdentifier);
+                    ctrlouter.put("op", "insert");
+                    ctrlinner.put("target", "tcp:" + controllerAddr + ":" + ofPort);
+                    ctrlouter.put("row", ctrlinner);
+
+                    //Bridge Table Update
+                    brouter.put("table","Bridge");
+                    bralist1.add(bralist2);
+                    bralist2.add("_uuid");
+                    bralist2.add("==");
+                    bralist2.add(bralist3);
+                    bralist3.add("uuid");
+                    bralist3.add(bridge.getUuid());
+                    brouter.put("where",bralist1);
+                    brouter.put("op","update");
+                    brouter.put("row",brinner);
+                    bralist4.add("named-uuid");
+                    bralist4.add("row" + bridgeIdentifier);
+                    brinner.put("controller",bralist4);
+
+                    Object[] params = {"Open_vSwitch", ctrlouter, brouter};
+                    OvsdbMessage msg = new OvsdbMessage("transact", params);
+
+                    //Send the Method and Param
+                    connection.sendMessage(msg);
+                }
+                else {
+                    logger.error(bridgeIdentifier +
+                            " Does not exist on " + connection.getIdentifier());
+                }
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return true;
     }
 
     @Override

@@ -368,20 +368,68 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     }
 
     @Override
-    public Status addBridgeDomainConfig(Node node, String bridgeIdentfier,
-            Map<ConfigConstants, Object> configs) {
-        String mgmt = (String)configs.get(ConfigConstants.MGMT);
-        if (mgmt != null) {
-            try {
-                if (setManager(node, mgmt)) return new Status(StatusCode.SUCCESS);
-            } catch (Throwable e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-                return new Status(StatusCode.INTERNALERROR);
+    public Status addBridgeDomainConfig(Node node, String bridgeIdentifier,
+                                        Map<ConfigConstants, Object> configs) {
+        try{
+            if (connectionService == null) {
+                logger.error("Couldn't refer to the ConnectionService");
+                return new Status(StatusCode.NOSERVICE);
             }
+            Connection connection = this.getConnection(node);
+            if (connection == null || connection.getSocket() == null) {
+                return new Status(StatusCode.NOSERVICE);
+            }
+            if (connection != null) {
+
+                Map<String, OVSBridge> existingBridges = OVSBridge.monitorBridge(connection);
+                OVSBridge bridge = existingBridges.get(bridgeIdentifier);
+
+                ArrayList totalColumn = new ArrayList();
+                Map<String, String> columnPairs = (Map<String, String>) configs.get(ConfigConstants.CUSTOM);
+                int num = columnPairs.size();
+                ArrayList columnArray = new ArrayList();
+                for(String key : columnPairs.keySet())
+                {
+                    ArrayList arg = new ArrayList<String>();
+                    arg.add(key);
+                    arg.add(columnPairs.get(key));
+                    columnArray.add(arg);
+                }
+
+                Map outterbr = new LinkedHashMap();
+                Map brcolumn = new LinkedHashMap();
+                ArrayList brlist1 = new ArrayList();
+                ArrayList brlist2 = new ArrayList();
+                ArrayList brlist3 = new ArrayList();
+                ArrayList brlist4 = new ArrayList();
+                ArrayList brlist5 = new ArrayList();
+                //Bridge Table set w/the extIdValue
+                outterbr.put("table", "Bridge");
+                brlist1.add(brlist2);
+                brlist2.add(brlist3);
+                brlist3.add("_uuid");
+                brlist3.add("==");
+                brlist3.add(brlist4);
+                brlist4.add("uuid");
+                brlist4.add(bridge.getUuid());
+                outterbr.put("where", brlist2);
+                outterbr.put("op", "update");
+                outterbr.put("row", brcolumn);
+                brcolumn.put("external_ids", brlist5);
+                brlist5.add("map");
+                brlist5.add(columnArray);
+
+                Object[] params = {"Open_vSwitch",outterbr};
+                OvsdbMessage msg = new OvsdbMessage("transact", params);
+                connection.sendMessage(msg);
+
+            }
+        }catch(Exception e){
+            e.printStackTrace();
         }
-        return new Status(StatusCode.BADREQUEST);
+        return new Status(StatusCode.SUCCESS);
     }
+
 
     @Override
     public Status addPortConfig(Node node, String bridgeIdentifier, String portIdentifier,

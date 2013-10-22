@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_aeb0fff4",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/internal/ConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 409,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-10-22T22:24:57Z",
+      "side": 1,
+      "message": "Just trying to make it a bit more simpler. Do you think this will satisfy your needs ? \nThe CUSTOM constant is added to make sure we can take such approaches. And also helps to keep the code a bit more simpler as follows :\nhttp://pastebin.com/nJZKD3SL",
+      "revId": "32725983adb957c5638be00f91f6dccbb9b6de2b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

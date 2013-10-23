@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_f9048316",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/internal/ConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-10-23T12:51:54Z",
+      "side": 1,
+      "message": "I didnt verify the proposed patch :-( I didnt also add the null and other safety checks...\ncolumnPairs will be null if the configs doesnt carry a CUSTOM key \u0026 hence the above code will result in a nullpointer exception.\n\nCan you please check for null and return a SUCCESS / FAILURE ?\n\nSame is true for the configs object at the beginning of the method.",
+      "revId": "ba1913a91dea258541d16ca348179bc541a7422f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

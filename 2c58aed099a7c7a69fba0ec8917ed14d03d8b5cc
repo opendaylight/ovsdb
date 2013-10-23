@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_d9abff87",
+        "filename": "ovsdb/src/test/java/org/opendaylight/ovsdb/OvsdbTestBridgeConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-10-23T18:26:47Z",
+      "side": 1,
+      "message": "Since this unit-test has no asserts to check the validity, this is going to pass. But yes, i do understand the intent of this test and hence not a big deal.",
+      "revId": "2c58aed099a7c7a69fba0ec8917ed14d03d8b5cc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

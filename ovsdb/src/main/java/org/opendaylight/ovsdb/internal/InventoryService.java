@@ -38,23 +38,12 @@ import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
  *
  *
  */
-public class InventoryService implements IPluginInInventoryService {
+public class InventoryService implements IPluginInInventoryService, InventoryServiceInternal {
     private static final Logger logger = LoggerFactory
             .getLogger(InventoryService.class);
 
-    private ConcurrentMap<Node, Map<String, Property>> nodeProps; // properties
-                                                                  // are
-                                                                  // maintained
-                                                                  // in global
-                                                                  // container
-                                                                  // only
-    private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps; // properties
-                                                                                    // are
-                                                                                    // maintained
-                                                                                    // in
-                                                                                    // global
-                                                                                    // container
-                                                                                    // only
+    private ConcurrentMap<Node, Map<String, Property>> nodeProps;
+    private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps;
 
     /**
      * Function called by the dependency manager when all the required
@@ -64,97 +53,10 @@ public class InventoryService implements IPluginInInventoryService {
     void init() {
         nodeProps = new ConcurrentHashMap<Node, Map<String, Property>>();
         nodeConnectorProps = new ConcurrentHashMap<NodeConnector, Map<String, Property>>();
-        Node.NodeIDType.registerIDType("STUB", Integer.class);
-        NodeConnector.NodeConnectorIDType.registerIDType("STUB", Integer.class,
-                "STUB");
-
-        setupNodeProps();
-        setupNodeConnectorProps();
+        Node.NodeIDType.registerIDType("OVS", String.class);
+        NodeConnector.NodeConnectorIDType.registerIDType("OVS", String.class, "OVS");
     }
 
-    private void setupNodeConnectorProps() {
-        Map<String, Property> ncPropMap = new HashMap<String, Property>();
-        Capabilities cap = new Capabilities(
-                CapabilitiesType.FLOW_STATS_CAPABILITY.getValue());
-        ncPropMap.put(Capabilities.CapabilitiesPropName, cap);
-        Bandwidth bw = new Bandwidth(Bandwidth.BW1Gbps);
-        ncPropMap.put(Bandwidth.BandwidthPropName, bw);
-        State st = new State(State.EDGE_UP);
-        ncPropMap.put(State.StatePropName, st);
-
-        // setup property map for all node connectors
-        NodeConnector nc;
-        Node node;
-        try {
-            node = new Node("STUB", new Integer(0xCAFE));
-            nc = new NodeConnector("STUB", 0xCAFE, node);
-        } catch (ConstructionException e) {
-            nc = null;
-            node = null;
-        }
-        nodeConnectorProps.put(nc, ncPropMap);
-
-        try {
-            node = new Node("STUB", 3366);
-            nc = new NodeConnector("STUB", 12, node);
-        } catch (ConstructionException e) {
-            nc = null;
-            node = null;
-        }
-        nodeConnectorProps.put(nc, ncPropMap);
-
-        try {
-            node = new Node("STUB", 4477);
-            nc = new NodeConnector("STUB", 34, node);
-        } catch (ConstructionException e) {
-            nc = null;
-            node = null;
-        }
-        nodeConnectorProps.put(nc, ncPropMap);
-
-    }
-
-    private void setupNodeProps() {
-        Map<String, Property> propMap = new HashMap<String, Property>();
-
-        Tables t = new Tables((byte) 1);
-        propMap.put(Tables.TablesPropName, t);
-        Capabilities c = new Capabilities((int) 3);
-        propMap.put(Capabilities.CapabilitiesPropName, c);
-        Actions a = new Actions((int) 2);
-        propMap.put(Actions.ActionsPropName, a);
-        Buffers b = new Buffers((int) 1);
-        propMap.put(Buffers.BuffersPropName, b);
-        Long connectedSinceTime = 100000L;
-        TimeStamp timeStamp = new TimeStamp(connectedSinceTime,
-                "connectedSince");
-        propMap.put(TimeStamp.TimeStampPropName, timeStamp);
-
-        // setup property map for all nodes
-        Node node;
-        try {
-            node = new Node("STUB", new Integer(0xCAFE));
-        } catch (ConstructionException e) {
-            node = null;
-        }
-
-        nodeProps.put(node, propMap);
-
-        try {
-            node = new Node("STUB", 3366);
-        } catch (ConstructionException e) {
-            node = null;
-        }
-        nodeProps.put(node, propMap);
-
-        try {
-            node = new Node("STUB", 4477);
-        } catch (ConstructionException e) {
-            node = null;
-        }
-        nodeProps.put(node, propMap);
-
-    }
 
     /**
      * Function called by the dependency manager when at least one dependency

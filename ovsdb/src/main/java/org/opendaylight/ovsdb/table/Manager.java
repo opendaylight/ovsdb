@@ -1,61 +1,27 @@
 package org.opendaylight.ovsdb.table;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
+import org.opendaylight.ovsdb.table.internal.Table;
 
-import java.util.HashMap;
-import java.util.Map;
+public class Manager  extends Table<Manager> {
 
-public class Manager {
+    public static final Name<Manager> NAME = new Name<Manager>("Manager") {};
+    private String target;
 
-    Map<String, ManagerInfo> managerInfo = new HashMap<String, ManagerInfo>();
-
-    private Map<String, ManagerInfo> getManagerInfo() {
-        return managerInfo;
+    public String getTarget() {
+        return target;
     }
 
-    private void setManagerInfo(Map<String, ManagerInfo> managerInfo) {
-        this.managerInfo = managerInfo;
+    public void setTarget(String target) {
+        this.target = target;
     }
 
-    @JsonAnySetter
-    private void add(String key, ManagerInfo value) {
-        managerInfo.put(key, value);
-    }
-
-    @JsonAnyGetter
-    private Map<String, ManagerInfo> getProperties() {
-        return managerInfo;
+    @Override
+    public Name<Manager> getTableName() {
+        return NAME;
     }
 
     @Override
     public String toString() {
-        return "Manager [managerInfo=" + managerInfo + "]";
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result
-                + ((managerInfo == null) ? 0 : managerInfo.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Manager other = (Manager) obj;
-        if (managerInfo == null) {
-            if (other.managerInfo != null)
-                return false;
-        } else if (!managerInfo.equals(other.managerInfo))
-            return false;
-        return true;
+        return "Manager [target=" + target + "]";
     }
 }

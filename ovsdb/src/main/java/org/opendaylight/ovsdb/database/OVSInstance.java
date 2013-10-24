@@ -36,14 +36,14 @@ public class OVSInstance {
 
         OvsdbMessage msg = new OvsdbMessage("monitor", params);
         Map<String, Object> monitorResponse = new HashMap<String, Object>();
-
+/*
         try{
             connection.sendMessage(msg);
             monitorResponse = (Map<String, Object>) connection.readResponse(Map.class);
         } catch (Throwable e){
             e.printStackTrace();
         }
-
+*/
         Map<String, Object> vSwitchTable = (Map) monitorResponse.get("Open_vSwitch");
         if(vSwitchTable != null){
             String uuid = (String) vSwitchTable.keySet().toArray()[0];

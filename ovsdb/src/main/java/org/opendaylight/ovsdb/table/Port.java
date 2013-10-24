@@ -1,61 +1,113 @@
 package org.opendaylight.ovsdb.table;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
+import java.math.BigInteger;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.opendaylight.ovsdb.datatype.OvsDBMap;
+import org.opendaylight.ovsdb.datatype.OvsDBSet;
+import org.opendaylight.ovsdb.datatype.UUID;
+import org.opendaylight.ovsdb.table.internal.Table;
 
-public class Port {
+public class Port extends Table<Port> {
 
-    Map<String, PortInfo> portInfo = new HashMap<String, PortInfo>();
+    public static final Name<Port> NAME = new Name<Port>("Port") {};
 
-    private Map<String, PortInfo> getPortInfo() {
-        return portInfo;
+    private String name;
+    private OvsDBSet<BigInteger> tag;
+    private OvsDBSet<BigInteger> trunks;
+    private OvsDBSet<UUID> interfaces;
+    private OvsDBSet<String> mac;
+    private OvsDBSet<UUID> qos;
+    private OvsDBMap<String, String> other_config;
+    private OvsDBMap<String, String> external_ids;
+
+    public Port() {
     }
 
-    private void setPortInfo(Map<String, PortInfo> portInfo) {
-        this.portInfo = portInfo;
+    public String getName() {
+        return name;
     }
 
-    @JsonAnySetter
-    private void add(String key, PortInfo value) {
-        portInfo.put(key, value);
+    public void setName(String name) {
+        this.name = name;
     }
 
-    @JsonAnyGetter
-    private Map<String, PortInfo> getProperties() {
-        return portInfo;
+    public OvsDBSet<BigInteger> getTag() {
+        return tag;
+    }
+
+    public void setTag(OvsDBSet<BigInteger> tag) {
+        this.tag = tag;
+    }
+
+    public OvsDBSet<BigInteger> getTrunks() {
+        return trunks;
+    }
+
+    public void setTrunks(OvsDBSet<BigInteger> trunks) {
+        this.trunks = trunks;
+    }
+
+    public OvsDBSet<UUID> getInterfaces() {
+        return interfaces;
+    }
+
+    public void setInterfaces(OvsDBSet<UUID> interfaces) {
+        this.interfaces = interfaces;
+    }
+
+    public OvsDBSet<String> getMac() {
+        return mac;
+    }
+
+    public void setMac(OvsDBSet<String> mac) {
+        this.mac = mac;
+    }
+
+    public OvsDBSet<UUID> getQos() {
+        return qos;
+    }
+
+    public void setQos(OvsDBSet<UUID> qos) {
+        this.qos = qos;
+    }
+
+    public OvsDBMap<String, String> getOther_config() {
+        return other_config;
+    }
+
+    public void setOther_config(OvsDBMap<String, String> other_config) {
+        this.other_config = other_config;
+    }
+
+    public OvsDBMap<String, String> getExternal_ids() {
+        return external_ids;
+    }
+
+    public void setExternal_ids(OvsDBMap<String, String> external_ids) {
+        this.external_ids = external_ids;
+    }
+
+    @Override
+    public Name<Port> getTableName() {
+        return NAME;
     }
 
     @Override
     public String toString() {
-        return "Port [portInfo=" + portInfo + "]";
+        return "Port [name=" + name + ", tag=" + tag + ", trunks=" + trunks
+                + ", interfaces=" + interfaces + ", mac=" + mac + ", qos="
+                + qos + ", other_config=" + other_config + ", external_ids="
+                + external_ids + "]";
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result
-                + ((portInfo == null) ? 0 : portInfo.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Port other = (Port) obj;
-        if (portInfo == null) {
-            if (other.portInfo != null)
-                return false;
-        } else if (!portInfo.equals(other.portInfo))
-            return false;
-        return true;
-    }
+    public enum Column implements org.opendaylight.ovsdb.table.internal.Column<Port> {
+        interfaces,
+        name,
+        tag,
+        trunks,
+        mac,
+        qos,
+        statistics,
+        other_config,
+        external_ids}
 }

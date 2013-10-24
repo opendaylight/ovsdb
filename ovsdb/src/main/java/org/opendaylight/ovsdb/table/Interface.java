@@ -1,62 +1,106 @@
 package org.opendaylight.ovsdb.table;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
+import org.opendaylight.ovsdb.datatype.OvsDBMap;
+import org.opendaylight.ovsdb.datatype.OvsDBSet;
+import org.opendaylight.ovsdb.table.internal.Table;
 
-import java.util.HashMap;
-import java.util.Map;
+public class Interface extends Table<Interface> {
 
-public class Interface {
+    public static Name<Interface> NAME = new Name<Interface>("Interface") {};
 
-    Map<String, InterfaceInfo> interfaceInfo = new HashMap<String, InterfaceInfo>();
+    private String name;
+    private OvsDBMap<String, String> options;
+    private String type;
+    private OvsDBSet<Integer> ofport;
+    private OvsDBSet<String> mac;
+    private OvsDBMap<String, Integer> statistics;
+    private OvsDBMap<String, String> status;
+    private OvsDBMap<String, String> other_config;
+    private OvsDBMap<String, String> external_ids;
 
-    private Map<String, InterfaceInfo> getInterfaceInfo() {
-        return interfaceInfo;
+    public String getName() {
+        return name;
     }
 
-    private void setInterfaceInfo(Map<String, InterfaceInfo> interfaceInfo) {
-        this.interfaceInfo = interfaceInfo;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    @JsonAnySetter
-    private void add(String key, InterfaceInfo value) {
-        interfaceInfo.put(key, value);
+    public OvsDBMap<String, String> getOptions() {
+        return options;
     }
 
-    @JsonAnyGetter
-    private Map<String, InterfaceInfo> getProperties() {
-        return interfaceInfo;
+    public void setOptions(OvsDBMap<String, String> options) {
+        this.options = options;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public OvsDBSet<Integer> getOfport() {
+        return ofport;
+    }
+
+    public void setOfport(OvsDBSet<Integer> ofport) {
+        this.ofport = ofport;
+    }
+
+    public OvsDBSet<String> getMac() {
+        return mac;
+    }
+
+    public void setMac(OvsDBSet<String> mac) {
+        this.mac = mac;
+    }
+
+    public OvsDBMap<String, Integer> getStatistics() {
+        return statistics;
+    }
+
+    public void setStatistics(OvsDBMap<String, Integer> statistics) {
+        this.statistics = statistics;
+    }
+
+    public OvsDBMap<String, String> getStatus() {
+        return status;
+    }
+
+    public void setStatus(OvsDBMap<String, String> status) {
+        this.status = status;
+    }
+
+    public OvsDBMap<String, String> getOther_config() {
+        return other_config;
+    }
+
+    public void setOther_config(OvsDBMap<String, String> other_config) {
+        this.other_config = other_config;
+    }
+
+    public OvsDBMap<String, String> getExternal_ids() {
+        return external_ids;
+    }
+
+    public void setExternal_ids(OvsDBMap<String, String> external_ids) {
+        this.external_ids = external_ids;
+    }
+
+    @Override
+    public Name<Interface> getTableName() {
+        return NAME;
     }
 
     @Override
     public String toString() {
-        return "Interface [interfaceInfo=" + interfaceInfo + "]";
+        return "Interface [name=" + name + ", options=" + options + ", type="
+                + type + ", ofport=" + ofport + ", mac=" + mac
+                + ", statistics=" + statistics + ", status=" + status
+                + ", other_config=" + other_config + ", external_ids="
+                + external_ids + "]";
     }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result
-                + ((interfaceInfo == null) ? 0 : interfaceInfo.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Interface other = (Interface) obj;
-        if (interfaceInfo == null) {
-            if (other.interfaceInfo != null)
-                return false;
-        } else if (!interfaceInfo.equals(other.interfaceInfo))
-            return false;
-        return true;
-    }
-
 }

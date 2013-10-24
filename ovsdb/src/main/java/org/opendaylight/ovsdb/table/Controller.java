@@ -1,61 +1,27 @@
 package org.opendaylight.ovsdb.table;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
+import org.opendaylight.ovsdb.table.internal.Table;
 
-import java.util.HashMap;
-import java.util.Map;
+public class Controller  extends Table<Controller> {
 
-public class Controller {
+    public static final Name<Controller> NAME = new Name<Controller>("Controller") {};
+    private String target;
 
-    Map<String, ControllerInfo> controllerInfo = new HashMap<String, ControllerInfo>();
-
-    private Map<String, ControllerInfo> getControllerInfo() {
-        return controllerInfo;
+    public String getTarget() {
+        return target;
     }
 
-    private void setControllerInfo(Map<String, ControllerInfo> controllerInfo) {
-        this.controllerInfo = controllerInfo;
+    public void setTarget(String target) {
+        this.target = target;
     }
 
-    @JsonAnySetter
-    private void add(String key, ControllerInfo value) {
-        controllerInfo.put(key, value);
-    }
-
-    @JsonAnyGetter
-    private Map<String, ControllerInfo> getProperties() {
-        return controllerInfo;
+    @Override
+    public Name<Controller> getTableName() {
+        return NAME;
     }
 
     @Override
     public String toString() {
-        return "Controller [controllerInfo=" + controllerInfo + "]";
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result
-                + ((controllerInfo == null) ? 0 : controllerInfo.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Controller other = (Controller) obj;
-        if (controllerInfo == null) {
-            if (other.controllerInfo != null)
-                return false;
-        } else if (!controllerInfo.equals(other.controllerInfo))
-            return false;
-        return true;
+        return "Controller [target=" + target + "]";
     }
 }

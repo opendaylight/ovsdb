@@ -77,29 +77,11 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     }
 
     private Connection getConnection (Node node) {
-
         Connection connection = connectionService.getConnection(node);
-        if (connection == null || connection.getSocket() == null) {
+        if (connection == null || !connection.getChannel().isActive()) {
             return null;
         }
 
-        /*
-         * This is possible only when the connection is disconnected due to any reason.
-         * But, we have to implement ECHO handling else, it results in timeout and the
-         * connection being partially closed from the server side and the client Socket
-         * seems to be up. Hence forcing the issue for now till we implement the ECHO.
-         */
-        if (connection.getSocket().isClosed() || forceConnect) {
-            String address = connection.getSocket().getInetAddress().getHostAddress();
-            Map<ConnectionConstants, String> params = new HashMap<ConnectionConstants, String>();
-            params.put(ConnectionConstants.ADDRESS, address);
-            params.put(ConnectionConstants.PORT, connection.getSocket().getPort()+"");
-            node = connectionService.connect(connection.getIdentifier(), params);
-            connection = connectionService.getConnection(node);
-        }
-        if (connection == null || connection.getSocket() == null || connection.getSocket().isClosed()) {
-            return null;
-        }
         return connection;
     }
     /**
@@ -118,7 +100,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             }
 
             Connection connection = this.getConnection(node);
-            if (connection == null || connection.getSocket() == null) {
+            if (connection == null) {
                 return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
             }
 
@@ -192,7 +174,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                 Object[] params = {"Open_vSwitch", addSwitchRequest, addIntfRequest, addPortRequest, addBridgeRequest};
                 OvsdbMessage msg = new OvsdbMessage("transact", params);
 
-                connection.sendMessage(msg);
+                //connection.sendMessage(msg);
             }
         }catch(Exception e){
             e.printStackTrace();
@@ -215,7 +197,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                 return new Status(StatusCode.NOSERVICE);
             }
             Connection connection = this.getConnection(node);
-            if (connection == null || connection.getSocket() == null) {
+            if (connection == null) {
                 return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
             }
 
@@ -291,7 +273,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                 Object[] params = {"Open_vSwitch", mutateBridgeRequest, addIntfRequest, addPortRequest};
                 OvsdbMessage msg = new OvsdbMessage("transact", params);
 
-                connection.sendMessage(msg);
+                //connection.sendMessage(msg);
             }
         }catch(Exception e){
             e.printStackTrace();
@@ -312,7 +294,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                 return false;
             }
             Connection connection = this.getConnection(node);
-            if (connection == null || connection.getSocket() == null) {
+            if (connection == null) {
                 return false;
             }
 
@@ -356,7 +338,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                 Object[] params = {"Open_vSwitch", ovsoutter, mgroutside};
                 OvsdbMessage msg = new OvsdbMessage("transact", params);
 
-                connection.sendMessage(msg);
+                //connection.sendMessage(msg);
 
             }
         }catch(Exception e){

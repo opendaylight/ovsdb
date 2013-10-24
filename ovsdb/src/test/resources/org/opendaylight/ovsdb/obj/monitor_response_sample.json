@@ -1,0 +1,104 @@
+{
+    "Bridge": {
+        "788de61c-0e4f-43d8-a068-259e75aabbba": {
+            "new": {
+                "controller": [
+                    "set",
+                    []
+                ],
+                "fail_mode": [
+                    "set",
+                    []
+                ],
+                "name": "br0",
+                "ports": [
+                    "set",
+                    [
+                        [
+                            "uuid",
+                            "f6018e7a-7ca5-4e72-a744-a9b434f47011"
+                        ],
+                        [
+                            "uuid",
+                            "fe3c89fd-2ff3-44d8-9f27-f9c7ac2a693d"
+                        ]
+                    ]
+                ]
+            }
+        }
+    },
+    "Interface": {
+        "13548b08-dca3-4d4b-9e9b-f50c237dcb9e": {
+            "new": {
+                "name": "vif0",
+                "options": [
+                    "map",
+                    []
+                ],
+                "type": ""
+            }
+        },
+        "88ae29fb-8c91-41a9-a14f-a74126e790c0": {
+            "new": {
+                "name": "br0",
+                "options": [
+                    "map",
+                    []
+                ],
+                "type": "internal"
+            }
+        }
+    },
+    "Open_vSwitch": {
+        "987c42d0-eab0-43d9-a32b-4246973706c2": {
+            "new": {
+                "bridges": [
+                    "uuid",
+                    "788de61c-0e4f-43d8-a068-259e75aabbba"
+                ],
+                "cur_cfg": 7,
+                "manager_options": [
+                    "set",
+                    []
+                ],
+                "ovs_version": "1.4.3"
+            }
+        }
+    },
+    "Port": {
+        "f6018e7a-7ca5-4e72-a744-a9b434f47011": {
+            "new": {
+                "interfaces": [
+                    "uuid",
+                    "13548b08-dca3-4d4b-9e9b-f50c237dcb9e"
+                ],
+                "name": "vif0",
+                "tag": [
+                    "set",
+                    []
+                ],
+                "trunks": [
+                    "set",
+                    []
+                ]
+            }
+        },
+        "fe3c89fd-2ff3-44d8-9f27-f9c7ac2a693d": {
+            "new": {
+                "interfaces": [
+                    "uuid",
+                    "88ae29fb-8c91-41a9-a14f-a74126e790c0"
+                ],
+                "name": "br0",
+                "tag": [
+                    "set",
+                    []
+                ],
+                "trunks": [
+                    "set",
+                    []
+                ]
+            }
+        }
+    }
+}

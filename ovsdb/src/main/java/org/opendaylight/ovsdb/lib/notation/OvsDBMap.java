@@ -1,10 +1,10 @@
-package org.opendaylight.ovsdb.lib.datatype;
+package org.opendaylight.ovsdb.lib.notation;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.ForwardingMap;
 import com.google.common.collect.Maps;
 
-import org.opendaylight.ovsdb.lib.datatype.json.Converter;
+import org.opendaylight.ovsdb.lib.notation.json.Converter;
 
 import java.util.HashMap;
 import java.util.Map;

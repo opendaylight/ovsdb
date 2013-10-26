@@ -2,9 +2,9 @@ package org.opendaylight.ovsdb.lib.table;
 
 import java.math.BigInteger;
 
-import org.opendaylight.ovsdb.lib.datatype.OvsDBMap;
-import org.opendaylight.ovsdb.lib.datatype.OvsDBSet;
-import org.opendaylight.ovsdb.lib.datatype.UUID;
+import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
+import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
+import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 
 public class Port extends Table<Port> {

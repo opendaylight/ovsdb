@@ -17,7 +17,7 @@ public interface OVSDB {
 
     public ListenableFuture<List<String>> list_dbs();
 
-    public ListenableFuture<List<Object>> transact();
+    public ListenableFuture<List<Object>> transact(TransactBuilder transact);
     /*
     public void registerListener(Callback callback);
 

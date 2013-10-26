@@ -1,6 +1,6 @@
 package org.opendaylight.ovsdb.lib.table;
 
-import org.opendaylight.ovsdb.lib.datatype.OvsDBSet;
+import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 
 public class NetFlow  extends Table<NetFlow> {

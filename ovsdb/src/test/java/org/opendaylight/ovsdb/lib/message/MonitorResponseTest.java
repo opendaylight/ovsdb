@@ -10,11 +10,11 @@ import com.google.common.io.Resources;
 
 import junit.framework.TestCase;
 
-import org.opendaylight.ovsdb.lib.datatype.OvsDBMap;
-import org.opendaylight.ovsdb.lib.datatype.OvsDBSet;
-import org.opendaylight.ovsdb.lib.datatype.UUID;
 import org.opendaylight.ovsdb.lib.message.TableUpdate;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
+import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
+import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
+import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.table.Bridge;
 import org.opendaylight.ovsdb.lib.table.Interface;
 import org.opendaylight.ovsdb.lib.table.Port;

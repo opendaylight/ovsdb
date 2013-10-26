@@ -25,10 +25,14 @@ import org.opendaylight.ovsdb.lib.message.EchoResponse;
 import org.opendaylight.ovsdb.lib.message.MonitorRequestBuilder;
 import org.opendaylight.ovsdb.lib.message.OVSDB;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
+import org.opendaylight.ovsdb.lib.message.operations.InsertOperation;
+import org.opendaylight.ovsdb.lib.table.Open_vSwitch;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 import org.opendaylight.ovsdb.lib.table.internal.Tables;
 import org.opendaylight.ovsdb.plugin.ConnectionService;
+import org.opendaylight.ovsdb.plugin.InsertRequest;
 import org.opendaylight.ovsdb.plugin.MessageHandler;
+import org.opendaylight.ovsdb.plugin.MutateRequest;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -92,6 +96,51 @@ public class OVSDBNettyFactoryTest {
             System.out.println(name.getName() +":"+ updates.getUpdate(name).toString());
         }
 
+        // TRANSACT INSERT TEST
+
+        /*
+        Map<String, Object> vswitchRow = new HashMap<String, Object>();
+        Map<String, Object> bridgeRow = new HashMap<String, Object>();
+        bridgeRow.put("name", "br2");
+        TransactBuilder transaction = new TransactBuilder();
+        InsertOperation addBridge = new InsertOperation("Bridge", "br2", bridgeRow);
+
+        transaction.addOperation(addBridge);
+
+        ListenableFuture<List<Object>> transResponse = ovsdb.transact(transaction);
+        System.out.println("Transcation sent :");
+        Object tr = transResponse.get();
+        System.out.println(tr.toString());
+        */
+
+        // TRANSACT MUTATE TEST
+        /*
+        List<String> bridgeUuidPair = new ArrayList<String>();
+        bridgeUuidPair.add("named-uuid");
+        bridgeUuidPair.add(newBridge);
+
+        List<Object> mutation = new ArrayList<Object>();
+        mutation.add("bridges");
+        mutation.add("insert");
+        mutation.add(bridgeUuidPair);
+
+        List<Object> mutations = new ArrayList<Object>();
+        mutations.add(mutation);
+
+        List<String> ovsUuidPair = new ArrayList<String>();
+        ovsUuidPair.add("uuid");
+        ovsUuidPair.add(instance.getUuid());
+
+        List<Object> whereInner = new ArrayList<Object>();
+        whereInner.add("_uuid");
+        whereInner.add("==");
+        whereInner.add(ovsUuidPair);
+
+        List<Object> where = new ArrayList<Object>();
+        where.add(whereInner);
+
+        addSwitchRequest = new MutateRequest("Open_vSwitch", where, mutations);
+         */
         // TEST ECHO
         ListenableFuture<List<String>> some = ovsdb.echo();
         Object s = some.get();

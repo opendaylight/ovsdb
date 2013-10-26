@@ -4,24 +4,25 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import org.opendaylight.ovsdb.lib.jsonrpc.Params;
+import org.opendaylight.ovsdb.lib.message.operations.Operation;
 import org.opendaylight.ovsdb.lib.table.Bridge;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 
 import java.util.List;
 import java.util.Map;
 
-public class MonitorRequestBuilder implements Params {
+public class TransactBuilder implements Params {
 
-    Map<String, MonitorRequest> requests = Maps.newLinkedHashMap();
+    List<Operation> requests = Lists.newArrayList();
 
     @Override
     public List<Object> params() {
-        return Lists.newArrayList("Open_vSwitch", null, requests);
+        List<Object> lists = Lists.newArrayList((Object)"Open_vSwitch");
+        lists.addAll(requests);
+        return lists;
     }
 
-    public <T extends Table> MonitorRequest<T> monitor(T table) {
-        MonitorRequest<T> req = new MonitorRequest<T>();
-        requests.put(table.getTableName().getName(), req);
-        return req;
+    public void addOperation (Operation o) {
+        requests.add(o);
     }
 }

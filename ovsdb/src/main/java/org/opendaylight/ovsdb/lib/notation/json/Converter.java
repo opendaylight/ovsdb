@@ -1,11 +1,11 @@
-package org.opendaylight.ovsdb.lib.datatype.json;
+package org.opendaylight.ovsdb.lib.notation.json;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.util.StdConverter;
 
-import org.opendaylight.ovsdb.lib.datatype.OvsDBMap;
-import org.opendaylight.ovsdb.lib.datatype.OvsDBSet;
-import org.opendaylight.ovsdb.lib.datatype.UUID;
+import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
+import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
+import org.opendaylight.ovsdb.lib.notation.UUID;
 
 public class Converter {
 
@@ -94,7 +94,7 @@ public class Converter {
             }
 
             if (node.isArray() && node.get(0).isTextual()) {
-                if ("uuid".equals(node.get(0).asText())) {
+                if ("uuid".equals(node.get(0).asText()) || "named-uuid".equals(node.get(0).asText())) {
                     return new UUID(node.get(1).asText());
                 }
             }

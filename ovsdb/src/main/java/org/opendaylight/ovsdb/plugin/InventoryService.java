@@ -1,37 +1,23 @@
 package org.opendaylight.ovsdb.plugin;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.apache.felix.dm.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.opendaylight.controller.sal.core.Actions;
-import org.opendaylight.controller.sal.core.Bandwidth;
-import org.opendaylight.controller.sal.core.Buffers;
-import org.opendaylight.controller.sal.core.Capabilities;
-import org.opendaylight.controller.sal.core.Capabilities.CapabilitiesType;
-import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
-import org.opendaylight.controller.sal.core.State;
-import org.opendaylight.controller.sal.core.Tables;
-import org.opendaylight.controller.sal.core.TimeStamp;
 import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
-import org.opendaylight.controller.sal.utils.NodeCreator;
-import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
+import org.opendaylight.ovsdb.lib.message.TableUpdate;
+import org.opendaylight.ovsdb.lib.message.TableUpdate.Row;
+import org.opendaylight.ovsdb.lib.message.TableUpdates;
+import org.opendaylight.ovsdb.lib.table.internal.Table;
+
+import com.google.common.collect.Maps;
 
 /**
  * Stub Implementation for IPluginInReadService used by SAL
@@ -44,6 +30,7 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
 
     private ConcurrentMap<Node, Map<String, Property>> nodeProps;
     private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps;
+    private Map<Node, NodeDB<Table<?>>> dbCache = Maps.newHashMap();
 
     /**
      * Function called by the dependency manager when all the required
@@ -53,10 +40,10 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
     void init() {
         nodeProps = new ConcurrentHashMap<Node, Map<String, Property>>();
         nodeConnectorProps = new ConcurrentHashMap<NodeConnector, Map<String, Property>>();
+        dbCache = new ConcurrentHashMap<Node, NodeDB<Table<?>>>();
         Node.NodeIDType.registerIDType("OVS", String.class);
         NodeConnector.NodeConnectorIDType.registerIDType("OVS", String.class, "OVS");
     }
-
 
     /**
      * Function called by the dependency manager when at least one dependency
@@ -101,4 +88,76 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
         return nodeConnectorProps;
     }
 
+
+    @Override
+    public Map<String, Map<String, Table<?>>> getCache(Node n) {
+        NodeDB<Table<?>> db = dbCache.get(n);
+        if (db == null) return null;
+        return db.getTableCache();
+    }
+
+
+    @Override
+    public Map<String, Table<?>> getTableCache(Node n, String tableName) {
+        NodeDB<Table<?>> db = dbCache.get(n);
+        if (db == null) return null;
+        return db.getTableCache(tableName);
+    }
+
+
+    @Override
+    public Table<?> getRow(Node n, String tableName, String uuid) {
+        NodeDB<Table<?>> db = dbCache.get(n);
+        if (db == null) return null;
+        return db.getRow(tableName, uuid);
+    }
+
+
+    @Override
+    public void updateRow(Node n, String tableName, String uuid, Table<?> row) {
+        NodeDB<Table<?>> db = dbCache.get(n);
+        if (db == null) {
+            db = new NodeDB<Table<?>>();
+            dbCache.put(n, db);
+        }
+        db.updateRow(tableName, uuid, row);
+    }
+
+    @Override
+    public void removeRow(Node n, String tableName, String uuid) {
+        NodeDB<Table<?>> db = dbCache.get(n);
+        if (db != null) db.removeRow(tableName, uuid);
+    }
+
+    @Override
+    public void processTableUpdates(Node n, TableUpdates tableUpdates) {
+        NodeDB<Table<?>> db = dbCache.get(n);
+        if (db == null) {
+            db = new NodeDB<Table<?>>();
+            dbCache.put(n, db);
+        }
+
+        Set<Table.Name> available = tableUpdates.availableUpdates();
+        for (Table.Name name : available) {
+            System.out.println(name.getName() +":"+ tableUpdates.getUpdate(name).toString());
+            TableUpdate tableUpdate = tableUpdates.getUpdate(name);
+            Collection<TableUpdate.Row<?>> rows = tableUpdate.getRows();
+            for (Row<?> row : rows) {
+                String uuid = row.getId();
+                Table<?> newRow = (Table<?>)row.getNew();
+                Table<?> oldRow = (Table<?>)row.getOld();
+                if (newRow != null) {
+                    db.updateRow(name.getName(), uuid, newRow);
+                } else if (oldRow != null) {
+                    db.removeRow(name.getName(), uuid);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void printCache(Node n) {
+        NodeDB<Table<?>> db = dbCache.get(n);
+        if (db != null) db.printTableCache();
+    }
 }

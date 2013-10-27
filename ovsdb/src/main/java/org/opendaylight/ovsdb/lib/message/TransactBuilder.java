@@ -22,6 +22,10 @@ public class TransactBuilder implements Params {
         return lists;
     }
 
+    public void addOperations (List<Operation> o) {
+        requests.addAll(o);
+    }
+
     public void addOperation (Operation o) {
         requests.add(o);
     }

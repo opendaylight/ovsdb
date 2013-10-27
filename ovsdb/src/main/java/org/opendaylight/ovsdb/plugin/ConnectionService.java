@@ -41,6 +41,17 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
     private static final Integer defaultOvsdbPort = 6632;
     ConcurrentMap<String, Connection> ovsdbConnections;
     List<ChannelHandler> handlers = null;
+    InventoryServiceInternal inventoryServiceInternal;
+
+    public void setInventoryServiceInternal(InventoryServiceInternal inventoryServiceInternal) {
+        this.inventoryServiceInternal = inventoryServiceInternal;
+    }
+
+    public void unsetInventoryServiceInternal(InventoryServiceInternal inventoryServiceInternal) {
+        if (this.inventoryServiceInternal == inventoryServiceInternal) {
+            this.inventoryServiceInternal = null;
+        }
+    }
 
     public void init() {
         ovsdbConnections = new ConcurrentHashMap<String, Connection>();

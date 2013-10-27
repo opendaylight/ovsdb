@@ -27,6 +27,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             .getLogger(ConfigurationService.class);
 
     IConnectionServiceInternal connectionService;
+    InventoryServiceInternal inventoryServiceInternal;
     boolean forceConnect = false;
 
     void init() {
@@ -73,6 +74,16 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     public void unsetConnectionServiceInternal(IConnectionServiceInternal connectionService) {
         if (this.connectionService == connectionService) {
             this.connectionService = null;
+        }
+    }
+
+    public void setInventoryServiceInternal(InventoryServiceInternal inventoryServiceInternal) {
+        this.inventoryServiceInternal = inventoryServiceInternal;
+    }
+
+    public void unsetInventoryServiceInternal(InventoryServiceInternal inventoryServiceInternal) {
+        if (this.inventoryServiceInternal == inventoryServiceInternal) {
+            this.inventoryServiceInternal = null;
         }
     }
 

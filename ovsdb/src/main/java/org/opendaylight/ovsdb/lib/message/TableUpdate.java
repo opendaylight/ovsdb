@@ -38,7 +38,7 @@ public  class TableUpdate<T extends Table>  {
         return "TableUpdate [map=" + map + "]";
     }
 
-    static class Row<T> {
+    public static class Row<T> {
 
         @JsonIgnore
         String id;

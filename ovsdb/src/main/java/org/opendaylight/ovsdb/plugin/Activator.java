@@ -4,7 +4,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.apache.felix.dm.Component;
-
 import org.opendaylight.controller.sal.networkconfig.bridgedomain.IPluginInBridgeDomainConfigService;
 import org.opendaylight.controller.sal.connection.IPluginInConnectionService;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
@@ -13,8 +12,8 @@ import org.opendaylight.controller.sal.utils.INodeFactory;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.flowprogrammer.IPluginInFlowProgrammerService;
+import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +47,7 @@ public class Activator extends ComponentActivatorAbstractBase {
         NodeConnector.NodeConnectorIDType.unRegisterIDType("OVS");
     }
     public Object[] getGlobalImplementations() {
-        Object[] res = { ConnectionService.class, ConfigurationService.class, NodeFactory.class, NodeConnectorFactory.class };
+        Object[] res = { ConnectionService.class, ConfigurationService.class, NodeFactory.class, NodeConnectorFactory.class, InventoryService.class };
         return res;
     }
 
@@ -65,6 +64,10 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(IConnectionServiceInternal.class)
                     .setCallbacks("setConnectionServiceInternal", "unsetConnectionServiceInternal")
                     .setRequired(true));
+            c.add(createServiceDependency()
+                    .setService(InventoryServiceInternal.class)
+                    .setCallbacks("setInventoryServiceInternal", "unsetInventoryServiceInternal")
+                    .setRequired(true));
         }
 
         if (imp.equals(ConnectionService.class)) {
@@ -76,6 +79,18 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.setInterface(
                     new String[] {IPluginInConnectionService.class.getName(),
                                   IConnectionServiceInternal.class.getName()}, props);
+            c.add(createServiceDependency()
+                    .setService(InventoryServiceInternal.class)
+                    .setCallbacks("setInventoryServiceInternal", "unsetInventoryServiceInternal")
+                    .setRequired(true));
+        }
+
+        if (imp.equals(InventoryService.class)) {
+            Dictionary<String, Object> props = new Hashtable<String, Object>();
+            props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "OVS");
+            c.setInterface(
+                    new String[] {IPluginInInventoryService.class.getName(),
+                            InventoryServiceInternal.class.getName()}, props);
         }
 
         if (imp.equals(NodeFactory.class)) {

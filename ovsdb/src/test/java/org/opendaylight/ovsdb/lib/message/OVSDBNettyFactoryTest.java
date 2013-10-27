@@ -1,7 +1,5 @@
 package org.opendaylight.ovsdb.lib.message;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
@@ -12,7 +10,6 @@ import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.CharsetUtil;
-import junit.framework.TestCase;
 
 import org.junit.Test;
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
@@ -21,28 +18,32 @@ import org.opendaylight.ovsdb.lib.database.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcDecoder;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcEndpoint;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcServiceBinderHandler;
-import org.opendaylight.ovsdb.lib.message.EchoResponse;
 import org.opendaylight.ovsdb.lib.message.MonitorRequestBuilder;
 import org.opendaylight.ovsdb.lib.message.OVSDB;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.message.operations.InsertOperation;
+import org.opendaylight.ovsdb.lib.message.operations.MutateOperation;
+import org.opendaylight.ovsdb.lib.message.operations.Operation;
+import org.opendaylight.ovsdb.lib.notation.Condition;
+import org.opendaylight.ovsdb.lib.notation.Function;
+import org.opendaylight.ovsdb.lib.notation.Mutation;
+import org.opendaylight.ovsdb.lib.notation.Mutator;
+import org.opendaylight.ovsdb.lib.table.Bridge;
+import org.opendaylight.ovsdb.lib.table.Interface;
 import org.opendaylight.ovsdb.lib.table.Open_vSwitch;
+import org.opendaylight.ovsdb.lib.table.Port;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 import org.opendaylight.ovsdb.lib.table.internal.Tables;
 import org.opendaylight.ovsdb.plugin.ConnectionService;
-import org.opendaylight.ovsdb.plugin.InsertRequest;
-import org.opendaylight.ovsdb.plugin.MessageHandler;
-import org.opendaylight.ovsdb.plugin.MutateRequest;
+import org.opendaylight.ovsdb.plugin.InventoryService;
+import org.opendaylight.ovsdb.plugin.InventoryServiceInternal;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
 
 public class OVSDBNettyFactoryTest {
 
@@ -50,6 +51,7 @@ public class OVSDBNettyFactoryTest {
     public void testSome() throws InterruptedException, ExecutionException {
 
         ConnectionService service = new ConnectionService();
+        InventoryServiceInternal inventoryService = new InventoryService();
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         JsonRpcEndpoint factory = new JsonRpcEndpoint(objectMapper, service);
@@ -76,72 +78,95 @@ public class OVSDBNettyFactoryTest {
         OVSDB ovsdb = factory.getClient(node, OVSDB.class);
 
         //GET DB-SCHEMA
-        List<String> dbNames = Arrays.asList("Open_vSwitch");
+        List<String> dbNames = Arrays.asList(Open_vSwitch.NAME.getName());
         ListenableFuture<DatabaseSchema> dbSchemaF = ovsdb.get_schema(dbNames);
         DatabaseSchema databaseSchema = dbSchemaF.get();
         System.out.println(databaseSchema);
 
         //TEST MONITOR
         MonitorRequestBuilder monitorReq = new MonitorRequestBuilder();
-        for (Table table : Tables.getTables()) {
+        for (Table<?> table : Tables.getTables()) {
             monitorReq.monitor(table);
         }
 
         ListenableFuture<TableUpdates> monResponse = ovsdb.monitor(monitorReq);
         System.out.println("Monitor Request sent :");
         TableUpdates updates = monResponse.get();
-
-        Set<Table.Name> available = updates.availableUpdates();
-        for (Table.Name name : available) {
-            System.out.println(name.getName() +":"+ updates.getUpdate(name).toString());
-        }
-
+        inventoryService.processTableUpdates(node, updates);
+        inventoryService.printCache(node);
         // TRANSACT INSERT TEST
 
-        /*
-        Map<String, Object> vswitchRow = new HashMap<String, Object>();
-        Map<String, Object> bridgeRow = new HashMap<String, Object>();
-        bridgeRow.put("name", "br2");
-        TransactBuilder transaction = new TransactBuilder();
-        InsertOperation addBridge = new InsertOperation("Bridge", "br2", bridgeRow);
+        Map<String, Table<?>> ovsTable = inventoryService.getTableCache(node, Open_vSwitch.NAME.getName());
+        String newBridge = "new_bridge";
+        String newInterface = "new_interface";
+        String newPort = "new_port";
+        String newSwitch = "new_switch";
 
-        transaction.addOperation(addBridge);
+        String bridgeIdentifier = "br6";
+        Operation addSwitchRequest = null;
+
+        if(ovsTable != null){
+            String ovsTableUUID = (String) ovsTable.keySet().toArray()[0];
+            List<String> bridgeUuidPair = new ArrayList<String>();
+            bridgeUuidPair.add("named-uuid");
+            bridgeUuidPair.add(newBridge);
+
+            Mutation bm = new Mutation("bridges", Mutator.INSERT, bridgeUuidPair);
+            List<Mutation> mutations = new ArrayList<Mutation>();
+            mutations.add(bm);
+
+            List<String> uuid = new ArrayList<String>();
+            uuid.add("uuid");
+            uuid.add(ovsTableUUID);
+
+            //UUID uuid = new UUID(ovsTableUUID);
+            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
+
+            List<Condition> where = new ArrayList<Condition>();
+            where.add(condition);
+
+            addSwitchRequest = new MutateOperation(Open_vSwitch.NAME.getName(), where, mutations);
+        }
+        else{
+            Map<String, Object> vswitchRow = new HashMap<String, Object>();
+            ArrayList<String> bridges = new ArrayList<String>();
+            bridges.add("named-uuid");
+            bridges.add(newBridge);
+            vswitchRow.put("bridges", bridges);
+            addSwitchRequest = new InsertOperation(Open_vSwitch.NAME.getName(), newSwitch, vswitchRow);
+        }
+
+        Map<String, Object> bridgeRow = new HashMap<String, Object>();
+        bridgeRow.put("name", bridgeIdentifier);
+        ArrayList<String> ports = new ArrayList<String>();
+        ports.add("named-uuid");
+        ports.add(newPort);
+        bridgeRow.put("ports", ports);
+        InsertOperation addBridgeRequest = new InsertOperation(Bridge.NAME.getName(), newBridge, bridgeRow);
+
+        Map<String, Object> portRow = new HashMap<String, Object>();
+        portRow.put("name", bridgeIdentifier);
+        ArrayList<String> interfaces = new ArrayList<String>();
+        interfaces.add("named-uuid");
+        interfaces.add(newInterface);
+        portRow.put("interfaces", interfaces);
+        InsertOperation addPortRequest = new InsertOperation(Port.NAME.getName(), newPort, portRow);
+
+        Map<String, Object> interfaceRow = new HashMap<String, Object>();
+        interfaceRow.put("name", bridgeIdentifier);
+        interfaceRow.put("type", "internal");
+        InsertOperation addIntfRequest = new InsertOperation(Interface.NAME.getName(), newInterface, interfaceRow);
+
+        TransactBuilder transaction = new TransactBuilder();
+        transaction.addOperations(new ArrayList<Operation>(
+                                  Arrays.asList(addSwitchRequest, addIntfRequest, addPortRequest, addBridgeRequest)));
 
         ListenableFuture<List<Object>> transResponse = ovsdb.transact(transaction);
         System.out.println("Transcation sent :");
         Object tr = transResponse.get();
         System.out.println(tr.toString());
-        */
-
-        // TRANSACT MUTATE TEST
-        /*
-        List<String> bridgeUuidPair = new ArrayList<String>();
-        bridgeUuidPair.add("named-uuid");
-        bridgeUuidPair.add(newBridge);
-
-        List<Object> mutation = new ArrayList<Object>();
-        mutation.add("bridges");
-        mutation.add("insert");
-        mutation.add(bridgeUuidPair);
-
-        List<Object> mutations = new ArrayList<Object>();
-        mutations.add(mutation);
-
-        List<String> ovsUuidPair = new ArrayList<String>();
-        ovsUuidPair.add("uuid");
-        ovsUuidPair.add(instance.getUuid());
-
-        List<Object> whereInner = new ArrayList<Object>();
-        whereInner.add("_uuid");
-        whereInner.add("==");
-        whereInner.add(ovsUuidPair);
-
-        List<Object> where = new ArrayList<Object>();
-        where.add(whereInner);
-
-        addSwitchRequest = new MutateRequest("Open_vSwitch", where, mutations);
-         */
         // TEST ECHO
+
         ListenableFuture<List<String>> some = ovsdb.echo();
         Object s = some.get();
         System.out.printf("Result of echo is %s \n", s);

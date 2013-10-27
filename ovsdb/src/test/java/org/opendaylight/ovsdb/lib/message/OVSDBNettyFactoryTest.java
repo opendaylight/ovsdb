@@ -28,6 +28,7 @@ import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.notation.Function;
 import org.opendaylight.ovsdb.lib.notation.Mutation;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
+import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.table.Bridge;
 import org.opendaylight.ovsdb.lib.table.Interface;
 import org.opendaylight.ovsdb.lib.table.Open_vSwitch;
@@ -46,10 +47,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 public class OVSDBNettyFactoryTest {
-
     @Test
     public void testSome() throws InterruptedException, ExecutionException {
-
         ConnectionService service = new ConnectionService();
         InventoryServiceInternal inventoryService = new InventoryService();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -94,6 +93,7 @@ public class OVSDBNettyFactoryTest {
         TableUpdates updates = monResponse.get();
         inventoryService.processTableUpdates(node, updates);
         inventoryService.printCache(node);
+
         // TRANSACT INSERT TEST
 
         Map<String, Table<?>> ovsTable = inventoryService.getTableCache(node, Open_vSwitch.NAME.getName());
@@ -102,53 +102,38 @@ public class OVSDBNettyFactoryTest {
         String newPort = "new_port";
         String newSwitch = "new_switch";
 
-        String bridgeIdentifier = "br6";
+        String bridgeIdentifier = "br10";
         Operation addSwitchRequest = null;
 
         if(ovsTable != null){
             String ovsTableUUID = (String) ovsTable.keySet().toArray()[0];
-            List<String> bridgeUuidPair = new ArrayList<String>();
-            bridgeUuidPair.add("named-uuid");
-            bridgeUuidPair.add(newBridge);
-
+            UUID bridgeUuidPair = new UUID(newBridge);
             Mutation bm = new Mutation("bridges", Mutator.INSERT, bridgeUuidPair);
             List<Mutation> mutations = new ArrayList<Mutation>();
             mutations.add(bm);
 
-            List<String> uuid = new ArrayList<String>();
-            uuid.add("uuid");
-            uuid.add(ovsTableUUID);
-
-            //UUID uuid = new UUID(ovsTableUUID);
+            UUID uuid = new UUID(ovsTableUUID);
             Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
-
             List<Condition> where = new ArrayList<Condition>();
             where.add(condition);
-
             addSwitchRequest = new MutateOperation(Open_vSwitch.NAME.getName(), where, mutations);
         }
         else{
             Map<String, Object> vswitchRow = new HashMap<String, Object>();
-            ArrayList<String> bridges = new ArrayList<String>();
-            bridges.add("named-uuid");
-            bridges.add(newBridge);
-            vswitchRow.put("bridges", bridges);
+            UUID bridgeUuidPair = new UUID(newBridge);
+            vswitchRow.put("bridges", bridgeUuidPair);
             addSwitchRequest = new InsertOperation(Open_vSwitch.NAME.getName(), newSwitch, vswitchRow);
         }
 
         Map<String, Object> bridgeRow = new HashMap<String, Object>();
         bridgeRow.put("name", bridgeIdentifier);
-        ArrayList<String> ports = new ArrayList<String>();
-        ports.add("named-uuid");
-        ports.add(newPort);
+        UUID ports = new UUID(newPort);
         bridgeRow.put("ports", ports);
         InsertOperation addBridgeRequest = new InsertOperation(Bridge.NAME.getName(), newBridge, bridgeRow);
 
         Map<String, Object> portRow = new HashMap<String, Object>();
         portRow.put("name", bridgeIdentifier);
-        ArrayList<String> interfaces = new ArrayList<String>();
-        interfaces.add("named-uuid");
-        interfaces.add(newInterface);
+        UUID interfaces = new UUID(newInterface);
         portRow.put("interfaces", interfaces);
         InsertOperation addPortRequest = new InsertOperation(Port.NAME.getName(), newPort, portRow);
 

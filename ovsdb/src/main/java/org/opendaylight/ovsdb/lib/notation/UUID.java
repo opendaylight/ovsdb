@@ -9,8 +9,6 @@ import org.opendaylight.ovsdb.lib.notation.json.OVSDBTypesIDResolver;
 import org.opendaylight.ovsdb.lib.notation.json.UUIDSerializer;
 import org.opendaylight.ovsdb.lib.notation.json.UUIDStringConverter;
 
-@JsonTypeIdResolver(OVSDBTypesIDResolver.class)
-@JsonTypeInfo(use = JsonTypeInfo.Id.CUSTOM, include = JsonTypeInfo.As.WRAPPER_ARRAY)
 @JsonDeserialize(contentConverter = UUIDStringConverter.class)
 @JsonSerialize(using = UUIDSerializer.class)
 /*

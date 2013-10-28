@@ -150,6 +150,17 @@ public class OVSDBNettyFactoryTest {
         ListenableFuture<List<OperationResult>> transResponse = ovsdb.transact(transaction);
         System.out.println("Transcation sent :");
         List<OperationResult> tr = transResponse.get();
+        System.out.println("Transaction response : "+transResponse.toString());
+        List<Operation> requests = transaction.getRequests();
+        for (int i = 0; i < tr.size() ; i++) {
+            if (i < requests.size()) requests.get(i).setResult(tr.get(i));
+        }
+
+        System.out.println("Request + Response : "+requests.toString());
+        if (tr.size() > requests.size()) {
+            System.out.println("ERROR : "+tr.get(tr.size()-1).getError());
+        }
+
         // TEST ECHO
 
         ListenableFuture<List<String>> some = ovsdb.echo();

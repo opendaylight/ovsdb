@@ -1,9 +1,11 @@
 package org.opendaylight.ovsdb.lib.jsonrpc;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.Reflection;
 import com.google.common.reflect.TypeToken;
@@ -19,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -103,20 +106,22 @@ public class JsonRpcEndpoint {
         );
     }
 
+    @SuppressWarnings("deprecation")
     public void processResult(JsonNode response) throws NoSuchMethodException {
 
         CallContext returnCtxt = methodContext.get(response.get("id").asText());
         if (returnCtxt == null) return;
 
-        Class<?> returnType = null;
         if (ListenableFuture.class == returnCtxt.getMethod().getReturnType()) {
             TypeToken<?> retType = TypeToken.of(
                     returnCtxt.getMethod().getGenericReturnType())
                     .resolveType(ListenableFuture.class.getMethod("get").getGenericReturnType());
+            JavaType javaType =  TypeFactory.defaultInstance().constructType (retType.getType());
 
             JsonNode result = response.get("result");
             logger.debug("Response : {}", result.toString());
-            Object result1 = objectMapper.convertValue(result, retType.getRawType());
+
+            Object result1 = objectMapper.convertValue(result, javaType);
             JsonNode error = response.get("error");
             if (error != null) {
                 logger.debug("Error : {}", error.toString());
@@ -136,14 +141,16 @@ public class JsonRpcEndpoint {
         // TODO : Take care of listener interested in the async message from ovsdb-server
         // and return a result to be sent back.
         // The following piece of code will help with ECHO handling as is.
-        JsonRpc10Response response = new JsonRpc10Response(request.getId());
-        response.setError(null);
-        try {
-            String s = objectMapper.writeValueAsString(response);
-            Connection connection = service.getConnection(node);
-            connection.getChannel().writeAndFlush(s);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
+        if (request.getMethod().equals("echo")) {
+            JsonRpc10Response response = new JsonRpc10Response(request.getId());
+            response.setError(null);
+            try {
+                String s = objectMapper.writeValueAsString(response);
+                Connection connection = service.getConnection(node);
+                connection.getChannel().writeAndFlush(s);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
         }
     }
 

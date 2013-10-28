@@ -24,6 +24,7 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.message.operations.InsertOperation;
 import org.opendaylight.ovsdb.lib.message.operations.MutateOperation;
 import org.opendaylight.ovsdb.lib.message.operations.Operation;
+import org.opendaylight.ovsdb.lib.message.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.notation.Function;
 import org.opendaylight.ovsdb.lib.notation.Mutation;
@@ -57,7 +58,7 @@ public class OVSDBNettyFactoryTest {
         JsonRpcServiceBinderHandler binderHandler = new JsonRpcServiceBinderHandler(factory);
 
         List<ChannelHandler> _handlers = Lists.newArrayList();
-        _handlers.add(new LoggingHandler(LogLevel.INFO));
+        //_handlers.add(new LoggingHandler(LogLevel.INFO));
         _handlers.add(new JsonRpcDecoder(100000));
         _handlers.add(new StringEncoder(CharsetUtil.UTF_8));
         _handlers.add(binderHandler);
@@ -102,7 +103,7 @@ public class OVSDBNettyFactoryTest {
         String newPort = "new_port";
         String newSwitch = "new_switch";
 
-        String bridgeIdentifier = "br10";
+        String bridgeIdentifier = "br1";
         Operation addSwitchRequest = null;
 
         if(ovsTable != null){
@@ -146,10 +147,9 @@ public class OVSDBNettyFactoryTest {
         transaction.addOperations(new ArrayList<Operation>(
                                   Arrays.asList(addSwitchRequest, addIntfRequest, addPortRequest, addBridgeRequest)));
 
-        ListenableFuture<List<Object>> transResponse = ovsdb.transact(transaction);
+        ListenableFuture<List<OperationResult>> transResponse = ovsdb.transact(transaction);
         System.out.println("Transcation sent :");
-        Object tr = transResponse.get();
-        System.out.println(tr.toString());
+        List<OperationResult> tr = transResponse.get();
         // TEST ECHO
 
         ListenableFuture<List<String>> some = ovsdb.echo();

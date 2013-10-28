@@ -10,7 +10,7 @@ import org.opendaylight.ovsdb.lib.table.*;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 
 
-public  class TableUpdates {
+public  class TableUpdates extends Response {
 
     Map<Table.Name, TableUpdate> map = Maps.newHashMap();
 

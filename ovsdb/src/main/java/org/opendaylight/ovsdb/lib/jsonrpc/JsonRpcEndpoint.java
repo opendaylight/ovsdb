@@ -11,6 +11,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.ovsdb.lib.message.Response;
 import org.opendaylight.ovsdb.plugin.Connection;
 import org.opendaylight.ovsdb.plugin.ConnectionService;
 import org.slf4j.Logger;
@@ -105,16 +106,22 @@ public class JsonRpcEndpoint {
     public void processResult(JsonNode response) throws NoSuchMethodException {
 
         CallContext returnCtxt = methodContext.get(response.get("id").asText());
+        if (returnCtxt == null) return;
 
         Class<?> returnType = null;
-
         if (ListenableFuture.class == returnCtxt.getMethod().getReturnType()) {
             TypeToken<?> retType = TypeToken.of(
                     returnCtxt.getMethod().getGenericReturnType())
                     .resolveType(ListenableFuture.class.getMethod("get").getGenericReturnType());
 
             JsonNode result = response.get("result");
+            logger.debug("Response : {}", result.toString());
             Object result1 = objectMapper.convertValue(result, retType.getRawType());
+            JsonNode error = response.get("error");
+            if (error != null) {
+                logger.debug("Error : {}", error.toString());
+            }
+
             returnCtxt.getFuture().set(result1);
 
         } else {

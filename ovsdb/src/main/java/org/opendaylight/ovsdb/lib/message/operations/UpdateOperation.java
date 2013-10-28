@@ -35,4 +35,9 @@ public class UpdateOperation extends Operation {
     public void setRow(Object row) {
         this.row = row;
     }
+    @Override
+    public String toString() {
+        return "UpdateOperation [table=" + table + ", where=" + where
+                + ", row=" + row + ", toString()=" + super.toString() + "]";
+    }
 }

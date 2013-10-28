@@ -4,8 +4,9 @@ import java.util.List;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
+import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.lib.database.DatabaseSchema;
-
+import org.opendaylight.ovsdb.lib.message.operations.OperationResult;
 
 public interface OVSDB {
 
@@ -17,12 +18,24 @@ public interface OVSDB {
 
     public ListenableFuture<List<String>> list_dbs();
 
-    public ListenableFuture<List<Object>> transact(TransactBuilder transact);
-    /*
+    public ListenableFuture<List<OperationResult>> transact(TransactBuilder transact);
+
+    public ListenableFuture<Response> cancel(String id);
+
+    public ListenableFuture<Object> monitor_cancel(Object json_value);
+
+    public ListenableFuture<Object> lock(List<String> id);
+
+    public ListenableFuture<Object> steal(List<String> id);
+
+    public ListenableFuture<Object> unlock(List<String> id);
+/*
     public void registerListener(Callback callback);
 
     public static interface Callback {
-        public void monitorResponse(TableUpdates upadate);
+        public void update(Node node, TableUpdates upadate);
+        public void locked(Node node, Object json_value);
+        public void echo(Node node, Object json_value);
     }
-    */
+*/
 }

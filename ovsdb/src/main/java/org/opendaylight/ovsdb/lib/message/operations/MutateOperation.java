@@ -37,4 +37,10 @@ public class MutateOperation extends Operation {
     public void setMutations(List<Mutation> mutations) {
         this.mutations = mutations;
     }
+    @Override
+    public String toString() {
+        return "MutateOperation [table=" + table + ", where=" + where
+                + ", mutations=" + mutations + ", toString()="
+                + super.toString() + "]";
+    }
 }

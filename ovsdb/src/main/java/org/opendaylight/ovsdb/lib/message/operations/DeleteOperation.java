@@ -26,4 +26,9 @@ public class DeleteOperation extends Operation {
     public void setWhere(List<Condition> where) {
         this.where = where;
     }
+    @Override
+    public String toString() {
+        return "DeleteOperation [table=" + table + ", where=" + where
+                + ", toString()=" + super.toString() + "]";
+    }
 }

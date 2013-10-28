@@ -46,4 +46,10 @@ public class InsertOperation extends Operation {
     public void setRow(Map<String, Object> row) {
         this.row = row;
     }
+
+    @Override
+    public String toString() {
+        return "InsertOperation [table=" + table + ", uuidName=" + uuidName
+                + ", row=" + row + ", toString()=" + super.toString() + "]";
+    }
 }

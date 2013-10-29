@@ -1,24 +1,10 @@
 package org.opendaylight.ovsdb.lib.message;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
-
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
-import io.netty.handler.codec.string.StringEncoder;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
-import io.netty.util.CharsetUtil;
-
 import org.junit.Test;
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.lib.database.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcDecoder;
-import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcEndpoint;
-import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcServiceBinderHandler;
 import org.opendaylight.ovsdb.lib.message.MonitorRequestBuilder;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
@@ -40,7 +26,6 @@ import org.opendaylight.ovsdb.lib.table.internal.Tables;
 import org.opendaylight.ovsdb.plugin.Connection;
 import org.opendaylight.ovsdb.plugin.ConnectionService;
 import org.opendaylight.ovsdb.plugin.InventoryService;
-import org.opendaylight.ovsdb.plugin.InventoryServiceInternal;
 
 import java.util.ArrayList;
 import java.util.Arrays;

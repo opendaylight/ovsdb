@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.logging.LogLevel;
@@ -50,32 +51,35 @@ import java.util.concurrent.ExecutionException;
 public class OVSDBNettyFactoryTest implements OVSDB.Callback {
     InventoryServiceInternal inventoryService;
     private static String bridgeIdentifier = "br1";
+
     @Test
     public void testSome() throws InterruptedException, ExecutionException {
-        ConnectionService service = new ConnectionService();
-        inventoryService = new InventoryService();
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        JsonRpcEndpoint factory = new JsonRpcEndpoint(objectMapper, service);
-        JsonRpcServiceBinderHandler binderHandler = new JsonRpcServiceBinderHandler(factory);
-
+        ConnectionService connectionService = new ConnectionService();
+        connectionService.init();
         List<ChannelHandler> _handlers = Lists.newArrayList();
         _handlers.add(new LoggingHandler(LogLevel.INFO));
         _handlers.add(new JsonRpcDecoder(100000));
         _handlers.add(new StringEncoder(CharsetUtil.UTF_8));
-        _handlers.add(binderHandler);
+        connectionService.setHandlers(_handlers);
 
-        service.init();
-        service.setHandlers(_handlers);
-        String identifier = "TEST";
+        inventoryService = new InventoryService();
         Node.NodeIDType.registerIDType("OVS", String.class);
         Map<ConnectionConstants, String> params = new HashMap<ConnectionConstants, String>();
         params.put(ConnectionConstants.ADDRESS, "192.168.56.101");
         params.put(ConnectionConstants.PORT, "6634");
-        Node node = service.connect(identifier, params);
-        if (node != null) {
-            binderHandler.setNode(node);
+        Node node = connectionService.connect("TEST", params);
+        if (node == null) {
+            System.out.println("ERROR : Unable to connect to the host");
+            return;
         }
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        Channel channel = connectionService.getConnection(node).getChannel();
+        JsonRpcEndpoint factory = new JsonRpcEndpoint(objectMapper, channel);
+        JsonRpcServiceBinderHandler binderHandler = new JsonRpcServiceBinderHandler(factory);
+        binderHandler.setNode(node);
+        channel.pipeline().addLast(binderHandler);
 
         OVSDB ovsdb = factory.getClient(node, OVSDB.class);
         ovsdb.registerCallback(this);
@@ -161,6 +165,7 @@ public class OVSDBNettyFactoryTest implements OVSDB.Callback {
         System.out.println("Request + Response : "+requests.toString());
         if (tr.size() > requests.size()) {
             System.out.println("ERROR : "+tr.get(tr.size()-1).getError());
+            System.out.println("Details : "+tr.get(tr.size()-1).getDetails());
         }
 
         // TEST ECHO
@@ -170,8 +175,9 @@ public class OVSDBNettyFactoryTest implements OVSDB.Callback {
         System.out.printf("Result of echo is %s \n", s);
 
         // TEST ECHO REQUEST/REPLY
+        Thread.sleep(10000);
 
-        service.disconnect(node);
+        connectionService.disconnect(node);
     }
 
     @Override
@@ -181,7 +187,12 @@ public class OVSDBNettyFactoryTest implements OVSDB.Callback {
     }
 
     @Override
-    public void locked(Node node, Object json_value) {
+    public void locked(Node node, List<String> ids) {
+        // TODO Auto-generated method stub
     }
 
+    @Override
+    public void stolen(Node node, List<String> ids) {
+        // TODO Auto-generated method stub
+    }
 }

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.Reflection;
@@ -14,20 +13,15 @@ import com.google.common.util.concurrent.SettableFuture;
 
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.lib.message.OVSDB;
-import org.opendaylight.ovsdb.lib.message.Response;
-import org.opendaylight.ovsdb.plugin.Connection;
-import org.opendaylight.ovsdb.plugin.ConnectionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import io.netty.channel.Channel;
 
 public class JsonRpcEndpoint {
 
@@ -58,13 +52,13 @@ public class JsonRpcEndpoint {
     }
 
     ObjectMapper objectMapper;
-    ConnectionService service;
+    Channel nettyChannel;
     Map<String, CallContext> methodContext = Maps.newHashMap();
     Map<Node, OVSDB.Callback> requestCallbacks = Maps.newHashMap();
 
-    public JsonRpcEndpoint(ObjectMapper objectMapper, ConnectionService service) {
+    public JsonRpcEndpoint(ObjectMapper objectMapper, Channel channel) {
         this.objectMapper = objectMapper;
-        this.service = service;
+        this.nettyChannel = channel;
     }
 
     public <T> T getClient(final Node node, Class<T> klazz) {
@@ -104,8 +98,7 @@ public class JsonRpcEndpoint {
                 SettableFuture<Object> sf = SettableFuture.create();
                 methodContext.put(request.getId(), new CallContext(request, method, sf));
 
-                Connection connection = service.getConnection(node);
-                connection.getChannel().writeAndFlush(s);
+                nettyChannel.writeAndFlush(s);
 
                 return sf;
             }
@@ -113,7 +106,6 @@ public class JsonRpcEndpoint {
         );
     }
 
-    @SuppressWarnings("deprecation")
     public void processResult(JsonNode response) throws NoSuchMethodException {
 
         CallContext returnCtxt = methodContext.get(response.get("id").asText());
@@ -170,8 +162,7 @@ public class JsonRpcEndpoint {
             response.setError(null);
             try {
                 String s = objectMapper.writeValueAsString(response);
-                Connection connection = service.getConnection(node);
-                connection.getChannel().writeAndFlush(s);
+                nettyChannel.writeAndFlush(s);
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }

@@ -55,15 +55,6 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
 
     public void init() {
         ovsdbConnections = new ConcurrentHashMap<String, Connection>();
-
-        //backward compatability with other tests and stuff
-        if (handlers == null) {
-            List<ChannelHandler> _handlers = Lists.newArrayList();
-            _handlers.add(new LoggingHandler(LogLevel.INFO));
-            _handlers.add(new JsonRpcDecoder(100000));
-            _handlers.add(new StringEncoder(CharsetUtil.UTF_8));
-            _handlers.add(new MessageHandler());
-        }
     }
 
     /**

@@ -35,7 +35,9 @@ public interface OVSDB {
 
     public static interface Callback {
         public void update(Node node, UpdateNotification upadateNotification);
-        public void locked(Node node, Object json_value);
-        // public void echo(Node node, Object json_value);
+        public void locked(Node node, List<String> ids);
+        public void stolen(Node node, List<String> ids);
+        // ECHO is handled by JsonRPCEndpoint directly.
+        // We can add Echo request here if there is a need for clients to handle it.
     }
 }

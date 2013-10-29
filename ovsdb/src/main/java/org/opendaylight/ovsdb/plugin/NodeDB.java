@@ -3,6 +3,8 @@ package org.opendaylight.ovsdb.plugin;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
+
+import org.apache.commons.collections.MapUtils;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 
 public class NodeDB <T extends Table<?>>{
@@ -45,6 +47,6 @@ public class NodeDB <T extends Table<?>>{
     }
 
     public void printTableCache() {
-        System.out.println(cache.toString());
+        MapUtils.debugPrint(System.out, null, cache);
     }
 }

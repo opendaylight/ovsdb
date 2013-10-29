@@ -1,6 +1,7 @@
 package org.opendaylight.ovsdb.plugin;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -158,5 +159,13 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
     public void printCache(Node n) {
         NodeDB<Table<?>> db = dbCache.get(n);
         if (db != null) db.printTableCache();
+    }
+
+    @Override
+    public void addNodeProperty(Node n, Property prop) {
+        Map<String, Property> nProp = nodeProps.get(n);
+        if (nProp == null) nProp = new HashMap<String, Property>();
+        nProp.put(prop.getName(), prop);
+        nodeProps.put(n, nProp);
     }
 }

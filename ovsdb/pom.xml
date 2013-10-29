@@ -43,12 +43,12 @@
                             javax.net.ssl,
                             *
                         </Import-Package>
-                        <Embed-Dependency>jsonrpc4j,httpclient,commons-codec,httpcore-nio,javax.servlet-api,jackson-annotations,jackson-core,jackson-databind,portlet-api;type=!pom;inline=false</Embed-Dependency>
+                        <Embed-Dependency>jsonrpc4j,httpclient,commons-codec,httpcore-nio,javax.servlet-api,jackson-annotations,jackson-core,jackson-databind,portlet-api,commons-collections;type=!pom;inline=false</Embed-Dependency>
                         <Embed-Transitive>
                             true
                         </Embed-Transitive>
                         <Bundle-Activator>
-                            org.opendaylight.ovsdb.internal.Activator
+                            org.opendaylight.ovsdb.plugin.Activator
                         </Bundle-Activator>
                     </instructions>
                     <manifestLocation>${project.basedir}/META-INF</manifestLocation>
@@ -140,6 +140,10 @@
             <artifactId>commons-lang</artifactId>
             <version>2.3</version>
         </dependency>
-
+        <dependency>
+          <groupId>commons-collections</groupId>
+          <artifactId>commons-collections</artifactId>
+          <version>1.0</version>
+        </dependency>
     </dependencies>
 </project>

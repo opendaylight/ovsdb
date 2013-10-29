@@ -18,22 +18,25 @@ import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcDecoder;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcEndpoint;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcServiceBinderHandler;
+import org.opendaylight.ovsdb.lib.message.MonitorRequestBuilder;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
+import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.message.UpdateNotification;
+import org.opendaylight.ovsdb.lib.table.internal.Table;
+import org.opendaylight.ovsdb.lib.table.internal.Tables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.ListenableFuture;
 
 import java.net.InetAddress;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 
 
 /**
@@ -87,6 +90,9 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
      * calls
      */
     void stop() {
+        for (Connection connection : ovsdbConnections.values()) {
+            connection.disconnect();
+        }
     }
 
     @Override
@@ -161,6 +167,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
             connection.setRpc(ovsdb);
             ovsdb.registerCallback(this);
 
+            handleNewConnection(connection, address, port);
             ovsdbConnections.put(identifier, connection);
             return node;
         } catch (Exception e) {
@@ -192,10 +199,28 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
     public void notifyNodeDisconnectFromMaster(Node arg0) {
     }
 
+    private void handleNewConnection (Connection connection, InetAddress address, int port) throws InterruptedException, ExecutionException {
+        IPAddressProperty addressProp = new IPAddressProperty(address);
+        L4PortProperty l4Port = new L4PortProperty(port);
+        inventoryServiceInternal.addNodeProperty(connection.getNode(), addressProp);
+        inventoryServiceInternal.addNodeProperty(connection.getNode(), l4Port);
+
+        MonitorRequestBuilder monitorReq = new MonitorRequestBuilder();
+        for (Table<?> table : Tables.getTables()) {
+            monitorReq.monitor(table);
+        }
+
+        ListenableFuture<TableUpdates> monResponse = connection.getRpc().monitor(monitorReq);
+        System.out.println("Monitor Request sent :");
+        TableUpdates updates = monResponse.get();
+        UpdateNotification monitor = new UpdateNotification();
+        monitor.setUpdate(updates);
+        this.update(connection.getNode(), monitor);
+    }
+
     @Override
     public void update(Node node, UpdateNotification updateNotification) {
         inventoryServiceInternal.processTableUpdates(node, updateNotification.getUpdate());
-        inventoryServiceInternal.printCache(node);
     }
 
     @Override

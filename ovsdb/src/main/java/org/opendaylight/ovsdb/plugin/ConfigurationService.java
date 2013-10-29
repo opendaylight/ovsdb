@@ -1,7 +1,6 @@
 package org.opendaylight.ovsdb.plugin;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.*;
 
 import org.eclipse.osgi.framework.console.CommandInterpreter;
@@ -9,6 +8,21 @@ import org.eclipse.osgi.framework.console.CommandProvider;
 import org.opendaylight.ovsdb.lib.database.OVSBridge;
 import org.opendaylight.ovsdb.lib.database.OVSInstance;
 import org.opendaylight.ovsdb.lib.database.OvsdbType;
+import org.opendaylight.ovsdb.lib.message.TransactBuilder;
+import org.opendaylight.ovsdb.lib.message.operations.InsertOperation;
+import org.opendaylight.ovsdb.lib.message.operations.MutateOperation;
+import org.opendaylight.ovsdb.lib.message.operations.Operation;
+import org.opendaylight.ovsdb.lib.message.operations.OperationResult;
+import org.opendaylight.ovsdb.lib.notation.Condition;
+import org.opendaylight.ovsdb.lib.notation.Function;
+import org.opendaylight.ovsdb.lib.notation.Mutation;
+import org.opendaylight.ovsdb.lib.notation.Mutator;
+import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.table.Bridge;
+import org.opendaylight.ovsdb.lib.table.Interface;
+import org.opendaylight.ovsdb.lib.table.Open_vSwitch;
+import org.opendaylight.ovsdb.lib.table.Port;
+import org.opendaylight.ovsdb.lib.table.internal.Table;
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -20,6 +34,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.util.concurrent.ListenableFuture;
 
 public class ConfigurationService implements IPluginInBridgeDomainConfigService, CommandProvider
 {
@@ -115,82 +131,79 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                 return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
             }
 
-            if (connection != null) {
-                String newBridge = "new_bridge";
-                String newInterface = "new_interface";
-                String newPort = "new_port";
-                String newSwitch = "new_switch";
+            Map<String, Table<?>> ovsTable = inventoryServiceInternal.getTableCache(node, Open_vSwitch.NAME.getName());
+            String newBridge = "new_bridge";
+            String newInterface = "new_interface";
+            String newPort = "new_port";
+            String newSwitch = "new_switch";
 
-                Object addSwitchRequest;
+            Operation addSwitchRequest = null;
 
-                OVSInstance instance = OVSInstance.monitorOVS(connection);
+            if(ovsTable != null){
+                String ovsTableUUID = (String) ovsTable.keySet().toArray()[0];
+                UUID bridgeUuidPair = new UUID(newBridge);
+                Mutation bm = new Mutation("bridges", Mutator.INSERT, bridgeUuidPair);
+                List<Mutation> mutations = new ArrayList<Mutation>();
+                mutations.add(bm);
 
-                if(instance != null){
-                    List<String> bridgeUuidPair = new ArrayList<String>();
-                    bridgeUuidPair.add("named-uuid");
-                    bridgeUuidPair.add(newBridge);
-
-                    List<Object> mutation = new ArrayList<Object>();
-                    mutation.add("bridges");
-                    mutation.add("insert");
-                    mutation.add(bridgeUuidPair);
-
-                    List<Object> mutations = new ArrayList<Object>();
-                    mutations.add(mutation);
-
-                    List<String> ovsUuidPair = new ArrayList<String>();
-                    ovsUuidPair.add("uuid");
-                    ovsUuidPair.add(instance.getUuid());
-
-                    List<Object> whereInner = new ArrayList<Object>();
-                    whereInner.add("_uuid");
-                    whereInner.add("==");
-                    whereInner.add(ovsUuidPair);
-
-                    List<Object> where = new ArrayList<Object>();
-                    where.add(whereInner);
-
-                    addSwitchRequest = new MutateRequest("Open_vSwitch", where, mutations);
-                }
-                else{
-                    Map<String, Object> vswitchRow = new HashMap<String, Object>();
-                    ArrayList<String> bridges = new ArrayList<String>();
-                    bridges.add("named-uuid");
-                    bridges.add(newBridge);
-                    vswitchRow.put("bridges", bridges);
-                    addSwitchRequest = new InsertRequest("insert", "Open_vSwitch", newSwitch, vswitchRow);
-                }
-
-                Map<String, Object> bridgeRow = new HashMap<String, Object>();
-                bridgeRow.put("name", bridgeIdentifier);
-                ArrayList<String> ports = new ArrayList<String>();
-                ports.add("named-uuid");
-                ports.add(newPort);
-                bridgeRow.put("ports", ports);
-                InsertRequest addBridgeRequest = new InsertRequest("insert", "Bridge", newBridge, bridgeRow);
-
-                Map<String, Object> portRow = new HashMap<String, Object>();
-                portRow.put("name", bridgeIdentifier);
-                ArrayList<String> interfaces = new ArrayList<String>();
-                interfaces.add("named-uuid");
-                interfaces.add(newInterface);
-                portRow.put("interfaces", interfaces);
-                InsertRequest addPortRequest = new InsertRequest("insert", "Port", newPort, portRow);
-
-                Map<String, Object> interfaceRow = new HashMap<String, Object>();
-                interfaceRow.put("name", bridgeIdentifier);
-                interfaceRow.put("type", "internal");
-                InsertRequest addIntfRequest = new InsertRequest("insert", "Interface", newInterface, interfaceRow);
-
-                Object[] params = {"Open_vSwitch", addSwitchRequest, addIntfRequest, addPortRequest, addBridgeRequest};
-                OvsdbMessage msg = new OvsdbMessage("transact", params);
-
-                //connection.sendMessage(msg);
+                UUID uuid = new UUID(ovsTableUUID);
+                Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
+                List<Condition> where = new ArrayList<Condition>();
+                where.add(condition);
+                addSwitchRequest = new MutateOperation(Open_vSwitch.NAME.getName(), where, mutations);
             }
-        }catch(Exception e){
+            else{
+                Map<String, Object> vswitchRow = new HashMap<String, Object>();
+                UUID bridgeUuidPair = new UUID(newBridge);
+                vswitchRow.put("bridges", bridgeUuidPair);
+                addSwitchRequest = new InsertOperation(Open_vSwitch.NAME.getName(), newSwitch, vswitchRow);
+            }
+
+            Map<String, Object> bridgeRow = new HashMap<String, Object>();
+            bridgeRow.put("name", bridgeIdentifier);
+            UUID ports = new UUID(newPort);
+            bridgeRow.put("ports", ports);
+            InsertOperation addBridgeRequest = new InsertOperation(Bridge.NAME.getName(), newBridge, bridgeRow);
+
+            Map<String, Object> portRow = new HashMap<String, Object>();
+            portRow.put("name", bridgeIdentifier);
+            UUID interfaces = new UUID(newInterface);
+            portRow.put("interfaces", interfaces);
+            InsertOperation addPortRequest = new InsertOperation(Port.NAME.getName(), newPort, portRow);
+
+            Map<String, Object> interfaceRow = new HashMap<String, Object>();
+            interfaceRow.put("name", bridgeIdentifier);
+            interfaceRow.put("type", "internal");
+            InsertOperation addIntfRequest = new InsertOperation(Interface.NAME.getName(), newInterface, interfaceRow);
+
+            TransactBuilder transaction = new TransactBuilder();
+            transaction.addOperations(new ArrayList<Operation>(
+                                      Arrays.asList(addSwitchRequest, addIntfRequest, addPortRequest, addBridgeRequest)));
+
+            ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
+            List<OperationResult> tr = transResponse.get();
+            List<Operation> requests = transaction.getRequests();
+            Status status = new Status(StatusCode.SUCCESS);
+            for (int i = 0; i < tr.size() ; i++) {
+                if (i < requests.size()) requests.get(i).setResult(tr.get(i));
+                if (tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
+                    OperationResult result = tr.get(i);
+                    status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+                }
+            }
+
+            if (tr.size() > requests.size()) {
+                OperationResult result = tr.get(tr.size()-1);
+                logger.error("Error creating Bridge : {}\n Error : {}\n Details : {}", bridgeIdentifier,
+                                                                                       result.getError(),
+                                                                                       result.getDetails());
+                status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+            }
+            return status;
+        } catch(Exception e){
             e.printStackTrace();
         }
-        return new Status(StatusCode.SUCCESS);
+        return new Status(StatusCode.INTERNALERROR);
     }
 
     /**
@@ -628,6 +641,15 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         }
     }
 
+    public void _printCache (CommandInterpreter ci) {
+        String nodeName = ci.nextArgument();
+        if (nodeName == null) {
+            ci.println("Please enter Node Name");
+            return;
+        }
+        inventoryServiceInternal.printCache(Node.fromString(nodeName));
+    }
+
     public void _forceConnect (CommandInterpreter ci) {
         String force = ci.nextArgument();
         if (force.equalsIgnoreCase("YES")) forceConnect = true;
@@ -646,7 +668,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         help.append("\t addPort <Node> <BridgeName> <PortName>                          - Add Port\n");
         help.append("\t addPortVlan <Node> <BridgeName> <PortName> <vlan>               - Add Port, Vlan\n");
         help.append("\t addTunnel <Node> <Bridge> <Port> <tunnel-type> <remote-ip>      - Add Tunnel\n");
-        help.append("\t forceConnect <yes|no>   - Force a new OVSDB Connection for every command (Workaround)");
+        help.append("\t printCache <Node>                                               - Prints Table Cache");
         return help.toString();
     }
 }

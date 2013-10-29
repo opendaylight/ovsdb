@@ -166,6 +166,7 @@ public class JsonRpcEndpoint {
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
+            return;
         }
 
         logger.error("No handler for Request : {} on {}",requestJson.toString(), node);

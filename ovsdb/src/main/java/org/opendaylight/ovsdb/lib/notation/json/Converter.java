@@ -1,8 +1,12 @@
 package org.opendaylight.ovsdb.lib.notation.json;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.StdConverter;
 
+import org.opendaylight.ovsdb.lib.message.TableUpdates;
+import org.opendaylight.ovsdb.lib.message.UpdateNotification;
 import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
 import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -12,6 +16,7 @@ public class Converter {
     static AtomDeser atomDeser = new AtomDeser();
     static MapDeser mapDeser = new MapDeser();
     static SetDeser setDeser = new SetDeser();
+    static UpdateNotificationDeser unDeser = new UpdateNotificationDeser();
 
     public static class MapConverter extends StdConverter<JsonNode, OvsDBMap<Object, Object>> {
         @Override
@@ -24,6 +29,13 @@ public class Converter {
         @Override
         public OvsDBSet<Object> convert(JsonNode value) {
             return setDeser.deserialize(value);
+        }
+    }
+
+    public static class UpdateNotificationConverter extends StdConverter<JsonNode, UpdateNotification> {
+        @Override
+        public UpdateNotification convert(JsonNode value) {
+            return unDeser.deserialize(value);
         }
     }
 
@@ -74,6 +86,22 @@ public class Converter {
         }
     }
 
+    static class UpdateNotificationDeser {
+        public UpdateNotification deserialize(JsonNode node) {
+            UpdateNotification un = new UpdateNotification();
+            if (node.isArray()) {
+                if (node.size() == 2) {
+                    un.setContext(node.get(0).asText());
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                    TableUpdates updates = objectMapper.convertValue(node.get(1), TableUpdates.class);
+                    un.setUpdate(updates);
+                    return un;
+                }
+            }
+            return null;
+        }
+    }
 
     static class AtomDeser {
 

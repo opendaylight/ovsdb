@@ -13,6 +13,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.ovsdb.lib.message.OVSDB;
 import org.opendaylight.ovsdb.lib.message.Response;
 import org.opendaylight.ovsdb.plugin.Connection;
 import org.opendaylight.ovsdb.plugin.ConnectionService;
@@ -20,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -58,6 +60,7 @@ public class JsonRpcEndpoint {
     ObjectMapper objectMapper;
     ConnectionService service;
     Map<String, CallContext> methodContext = Maps.newHashMap();
+    Map<Node, OVSDB.Callback> requestCallbacks = Maps.newHashMap();
 
     public JsonRpcEndpoint(ObjectMapper objectMapper, ConnectionService service) {
         this.objectMapper = objectMapper;
@@ -69,10 +72,14 @@ public class JsonRpcEndpoint {
         return Reflection.newProxy(klazz, new InvocationHandler() {
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                if (method.getName().equals(OVSDB.REGISTER_CALLBACK_METHOD)) {
+                    if ((args == null) || args.length != 1 || !(args[0] instanceof OVSDB.Callback)) return false;
+                    requestCallbacks.put(node, (OVSDB.Callback)args[0]);
+                    return true;
+                }
 
                 JsonRpc10Request request = new JsonRpc10Request(UUID.randomUUID().toString());
                 request.setMethod(method.getName());
-
 
                 if (args != null && args.length != 0) {
                     List<Object> params = null;
@@ -137,10 +144,27 @@ public class JsonRpcEndpoint {
     public void processRequest(Node node, JsonNode requestJson) {
         JsonRpc10Request request = new JsonRpc10Request(requestJson.get("id").asText());
         request.setMethod(requestJson.get("method").asText());
+        logger.debug("Request : {} {}", requestJson.get("method"), requestJson.get("params"));
+        OVSDB.Callback callback = requestCallbacks.get(node);
+        if (callback != null) {
+            Method[] methods = callback.getClass().getDeclaredMethods();
+            for (Method m : methods) {
+                if (m.getName().equals(request.getMethod())) {
+                    Class<?>[] parameters = m.getParameterTypes();
+                    JsonNode params = requestJson.get("params");
+                    Object param = objectMapper.convertValue(params, parameters[1]);
+                    try {
+                        m.invoke(callback, node, param);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    return;
+                }
+            }
+        }
 
-        // TODO : Take care of listener interested in the async message from ovsdb-server
-        // and return a result to be sent back.
-        // The following piece of code will help with ECHO handling as is.
+        // Echo dont need any special processing. hence handling it internally.
+
         if (request.getMethod().equals("echo")) {
             JsonRpc10Response response = new JsonRpc10Response(request.getId());
             response.setError(null);
@@ -152,6 +176,8 @@ public class JsonRpcEndpoint {
                 e.printStackTrace();
             }
         }
+
+        logger.error("No handler for Request : {} on {}",requestJson.toString(), node);
     }
 
     public Map<String, CallContext> getMethodContext() {

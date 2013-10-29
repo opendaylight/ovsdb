@@ -47,11 +47,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-public class OVSDBNettyFactoryTest {
+public class OVSDBNettyFactoryTest implements OVSDB.Callback {
+    InventoryServiceInternal inventoryService;
+    private static String bridgeIdentifier = "br1";
     @Test
     public void testSome() throws InterruptedException, ExecutionException {
         ConnectionService service = new ConnectionService();
-        InventoryServiceInternal inventoryService = new InventoryService();
+        inventoryService = new InventoryService();
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         JsonRpcEndpoint factory = new JsonRpcEndpoint(objectMapper, service);
@@ -76,6 +78,7 @@ public class OVSDBNettyFactoryTest {
         }
 
         OVSDB ovsdb = factory.getClient(node, OVSDB.class);
+        ovsdb.registerCallback(this);
 
         //GET DB-SCHEMA
         List<String> dbNames = Arrays.asList(Open_vSwitch.NAME.getName());
@@ -103,7 +106,6 @@ public class OVSDBNettyFactoryTest {
         String newPort = "new_port";
         String newSwitch = "new_switch";
 
-        String bridgeIdentifier = "br1";
         Operation addSwitchRequest = null;
 
         if(ovsTable != null){
@@ -169,8 +171,17 @@ public class OVSDBNettyFactoryTest {
 
         // TEST ECHO REQUEST/REPLY
 
-        Thread.sleep(10);
         service.disconnect(node);
+    }
+
+    @Override
+    public void update(Node node, UpdateNotification updateNotification) {
+        inventoryService.processTableUpdates(node, updateNotification.getUpdate());
+        inventoryService.printCache(node);
+    }
+
+    @Override
+    public void locked(Node node, Object json_value) {
     }
 
 }

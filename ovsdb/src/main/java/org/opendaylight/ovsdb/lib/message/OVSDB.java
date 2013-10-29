@@ -9,6 +9,7 @@ import org.opendaylight.ovsdb.lib.database.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.message.operations.OperationResult;
 
 public interface OVSDB {
+    public static final String REGISTER_CALLBACK_METHOD = "registerCallback";
 
     public ListenableFuture<DatabaseSchema> get_schema(List<String> db_names);
 
@@ -29,13 +30,12 @@ public interface OVSDB {
     public ListenableFuture<Object> steal(List<String> id);
 
     public ListenableFuture<Object> unlock(List<String> id);
-/*
-    public void registerListener(Callback callback);
+
+    public boolean registerCallback(Callback callback);
 
     public static interface Callback {
-        public void update(Node node, TableUpdates upadate);
+        public void update(Node node, UpdateNotification upadateNotification);
         public void locked(Node node, Object json_value);
-        public void echo(Node node, Object json_value);
+        // public void echo(Node node, Object json_value);
     }
-*/
 }

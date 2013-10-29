@@ -8,7 +8,7 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.lib.database.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.message.operations.OperationResult;
 
-public interface OVSDB {
+public interface OvsdbRPC {
     public static final String REGISTER_CALLBACK_METHOD = "registerCallback";
 
     public ListenableFuture<DatabaseSchema> get_schema(List<String> db_names);

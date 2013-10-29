@@ -1,9 +1,11 @@
 package org.opendaylight.ovsdb.plugin;
 
 import io.netty.channel.Channel;
+
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
+import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +15,7 @@ public class Connection {
     private Node node;
     private String identifier;
     private Channel channel;
+    private OvsdbRPC rpc;
 
     public Long getIdCounter() {
         return idCounter;
@@ -65,6 +68,14 @@ public class Connection {
         this.node = node;
     }
 
+    public OvsdbRPC getRpc() {
+        return rpc;
+    }
+
+    public void setRpc(OvsdbRPC rpc) {
+        this.rpc = rpc;
+    }
+
     public void sendMessage(String message) throws IOException {
         try {
             channel.writeAndFlush(message);
@@ -76,7 +87,6 @@ public class Connection {
 
     public Status disconnect() {
         try {
-            channel.pipeline().get("messageHandler");
             channel.close();
         } catch (Exception e) {
             e.printStackTrace();

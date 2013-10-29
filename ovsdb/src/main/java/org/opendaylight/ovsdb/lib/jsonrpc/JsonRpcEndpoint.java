@@ -12,7 +12,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
 import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.ovsdb.lib.message.OVSDB;
+import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +54,7 @@ public class JsonRpcEndpoint {
     ObjectMapper objectMapper;
     Channel nettyChannel;
     Map<String, CallContext> methodContext = Maps.newHashMap();
-    Map<Node, OVSDB.Callback> requestCallbacks = Maps.newHashMap();
+    Map<Node, OvsdbRPC.Callback> requestCallbacks = Maps.newHashMap();
 
     public JsonRpcEndpoint(ObjectMapper objectMapper, Channel channel) {
         this.objectMapper = objectMapper;
@@ -66,9 +66,9 @@ public class JsonRpcEndpoint {
         return Reflection.newProxy(klazz, new InvocationHandler() {
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                if (method.getName().equals(OVSDB.REGISTER_CALLBACK_METHOD)) {
-                    if ((args == null) || args.length != 1 || !(args[0] instanceof OVSDB.Callback)) return false;
-                    requestCallbacks.put(node, (OVSDB.Callback)args[0]);
+                if (method.getName().equals(OvsdbRPC.REGISTER_CALLBACK_METHOD)) {
+                    if ((args == null) || args.length != 1 || !(args[0] instanceof OvsdbRPC.Callback)) return false;
+                    requestCallbacks.put(node, (OvsdbRPC.Callback)args[0]);
                     return true;
                 }
 
@@ -137,7 +137,7 @@ public class JsonRpcEndpoint {
         JsonRpc10Request request = new JsonRpc10Request(requestJson.get("id").asText());
         request.setMethod(requestJson.get("method").asText());
         logger.debug("Request : {} {}", requestJson.get("method"), requestJson.get("params"));
-        OVSDB.Callback callback = requestCallbacks.get(node);
+        OvsdbRPC.Callback callback = requestCallbacks.get(node);
         if (callback != null) {
             Method[] methods = callback.getClass().getDeclaredMethods();
             for (Method m : methods) {

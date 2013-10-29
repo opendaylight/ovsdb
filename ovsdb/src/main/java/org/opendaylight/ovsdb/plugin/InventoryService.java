@@ -37,10 +37,9 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
      * dependencies are satisfied
      *
      */
-    void init() {
+    public void init() {
         nodeProps = new ConcurrentHashMap<Node, Map<String, Property>>();
         nodeConnectorProps = new ConcurrentHashMap<NodeConnector, Map<String, Property>>();
-        dbCache = new ConcurrentHashMap<Node, NodeDB<Table<?>>>();
         Node.NodeIDType.registerIDType("OVS", String.class);
         NodeConnector.NodeConnectorIDType.registerIDType("OVS", String.class, "OVS");
     }
@@ -51,7 +50,7 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
      * example bundle is being stopped.
      *
      */
-    void destroy() {
+    public void destroy() {
     }
 
     /**
@@ -59,7 +58,7 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
      * the services provided by the class are registered in the service registry
      *
      */
-    void start() {
+    public void start() {
     }
 
     /**
@@ -68,7 +67,7 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
      * calls
      *
      */
-    void stop() {
+    public void stop() {
     }
 
     /**

@@ -18,15 +18,20 @@ import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcDecoder;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcEndpoint;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcServiceBinderHandler;
+import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
+import org.opendaylight.ovsdb.lib.message.UpdateNotification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 
 import java.net.InetAddress;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -35,13 +40,17 @@ import java.util.concurrent.ConcurrentMap;
  * Represents the openflow plugin component in charge of programming the flows
  * the flow programming and relay them to functional modules above SAL.
  */
-public class ConnectionService implements IPluginInConnectionService, IConnectionServiceInternal {
+public class ConnectionService implements IPluginInConnectionService, IConnectionServiceInternal, OvsdbRPC.Callback {
     protected static final Logger logger = LoggerFactory.getLogger(ConnectionService.class);
 
     private static final Integer defaultOvsdbPort = 6632;
-    ConcurrentMap<String, Connection> ovsdbConnections;
-    List<ChannelHandler> handlers = null;
-    InventoryServiceInternal inventoryServiceInternal;
+    private ConcurrentMap<String, Connection> ovsdbConnections;
+    private List<ChannelHandler> handlers = null;
+    private InventoryServiceInternal inventoryServiceInternal;
+
+    public InventoryServiceInternal getInventoryServiceInternal() {
+        return inventoryServiceInternal;
+    }
 
     public void setInventoryServiceInternal(InventoryServiceInternal inventoryServiceInternal) {
         this.inventoryServiceInternal = inventoryServiceInternal;
@@ -117,20 +126,15 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
             bootstrap.channel(NioSocketChannel.class);
             bootstrap.option(ChannelOption.TCP_NODELAY, true);
             bootstrap.option(ChannelOption.RCVBUF_ALLOCATOR, new AdaptiveRecvByteBufAllocator(65535, 65535, 65535));
+
             bootstrap.handler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 public void initChannel(SocketChannel channel) throws Exception {
-//                  ObjectMapper objectMapper = new ObjectMapper();
-//                  JsonRpcEndpoint factory = new JsonRpcEndpoint(objectMapper, ConnectionService.this);
-                  /*Add new Handlers here.
-                  Break out into todo break out into channel Init Class*/
                     if (handlers == null) {
                         channel.pipeline().addLast(
                                 new LoggingHandler(LogLevel.INFO),
                                 new JsonRpcDecoder(100000),
-                                new StringEncoder(CharsetUtil.UTF_8),
-    //                            new JsonRpcServiceBinderHandler(factory),
-                                new MessageHandler());
+                                new StringEncoder(CharsetUtil.UTF_8));
                     } else {
                         for (ChannelHandler handler : handlers) {
                             channel.pipeline().addLast(handler);
@@ -138,14 +142,27 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
                     }
                 }
             });
+
             ChannelFuture future = bootstrap.connect(address, port).sync();
 
             Channel channel = future.channel();
             Connection connection = new Connection(identifier, channel);
+            Node node = connection.getNode();
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+            JsonRpcEndpoint factory = new JsonRpcEndpoint(objectMapper, channel);
+            JsonRpcServiceBinderHandler binderHandler = new JsonRpcServiceBinderHandler(factory);
+            binderHandler.setNode(node);
+            channel.pipeline().addLast(binderHandler);
+
+            OvsdbRPC ovsdb = factory.getClient(node, OvsdbRPC.class);
+            connection.setRpc(ovsdb);
+            ovsdb.registerCallback(this);
 
             ovsdbConnections.put(identifier, connection);
-            return connection.getNode();
-
+            return node;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -174,4 +191,21 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
     @Override
     public void notifyNodeDisconnectFromMaster(Node arg0) {
     }
+
+    @Override
+    public void update(Node node, UpdateNotification updateNotification) {
+        inventoryServiceInternal.processTableUpdates(node, updateNotification.getUpdate());
+        inventoryServiceInternal.printCache(node);
+    }
+
+    @Override
+    public void locked(Node node, List<String> ids) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void stolen(Node node, List<String> ids) {
+        // TODO Auto-generated method stub
+    }
+
 }

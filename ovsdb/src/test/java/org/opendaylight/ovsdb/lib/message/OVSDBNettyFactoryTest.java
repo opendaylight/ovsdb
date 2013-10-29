@@ -60,7 +60,7 @@ public class OVSDBNettyFactoryTest implements OVSDB.Callback {
         JsonRpcServiceBinderHandler binderHandler = new JsonRpcServiceBinderHandler(factory);
 
         List<ChannelHandler> _handlers = Lists.newArrayList();
-        //_handlers.add(new LoggingHandler(LogLevel.INFO));
+        _handlers.add(new LoggingHandler(LogLevel.INFO));
         _handlers.add(new JsonRpcDecoder(100000));
         _handlers.add(new StringEncoder(CharsetUtil.UTF_8));
         _handlers.add(binderHandler);

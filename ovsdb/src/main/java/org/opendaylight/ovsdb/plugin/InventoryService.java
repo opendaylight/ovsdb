@@ -13,6 +13,7 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
+import org.opendaylight.ovsdb.lib.database.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.message.TableUpdate;
 import org.opendaylight.ovsdb.lib.message.TableUpdate.Row;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
@@ -31,7 +32,7 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
 
     private ConcurrentMap<Node, Map<String, Property>> nodeProps;
     private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps;
-    private Map<Node, NodeDB<Table<?>>> dbCache = Maps.newHashMap();
+    private Map<Node, NodeDB> dbCache = Maps.newHashMap();
 
     /**
      * Function called by the dependency manager when all the required
@@ -91,7 +92,7 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
 
     @Override
     public Map<String, Map<String, Table<?>>> getCache(Node n) {
-        NodeDB<Table<?>> db = dbCache.get(n);
+        NodeDB db = dbCache.get(n);
         if (db == null) return null;
         return db.getTableCache();
     }
@@ -99,7 +100,7 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
 
     @Override
     public Map<String, Table<?>> getTableCache(Node n, String tableName) {
-        NodeDB<Table<?>> db = dbCache.get(n);
+        NodeDB db = dbCache.get(n);
         if (db == null) return null;
         return db.getTableCache(tableName);
     }
@@ -107,17 +108,16 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
 
     @Override
     public Table<?> getRow(Node n, String tableName, String uuid) {
-        NodeDB<Table<?>> db = dbCache.get(n);
+        NodeDB db = dbCache.get(n);
         if (db == null) return null;
         return db.getRow(tableName, uuid);
     }
 
-
     @Override
     public void updateRow(Node n, String tableName, String uuid, Table<?> row) {
-        NodeDB<Table<?>> db = dbCache.get(n);
+        NodeDB db = dbCache.get(n);
         if (db == null) {
-            db = new NodeDB<Table<?>>();
+            db = new NodeDB();
             dbCache.put(n, db);
         }
         db.updateRow(tableName, uuid, row);
@@ -125,15 +125,15 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
 
     @Override
     public void removeRow(Node n, String tableName, String uuid) {
-        NodeDB<Table<?>> db = dbCache.get(n);
+        NodeDB db = dbCache.get(n);
         if (db != null) db.removeRow(tableName, uuid);
     }
 
     @Override
     public void processTableUpdates(Node n, TableUpdates tableUpdates) {
-        NodeDB<Table<?>> db = dbCache.get(n);
+        NodeDB db = dbCache.get(n);
         if (db == null) {
-            db = new NodeDB<Table<?>>();
+            db = new NodeDB();
             dbCache.put(n, db);
         }
 
@@ -156,7 +156,7 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
 
     @Override
     public void printCache(Node n) {
-        NodeDB<Table<?>> db = dbCache.get(n);
+        NodeDB db = dbCache.get(n);
         if (db != null) db.printTableCache();
     }
 
@@ -166,5 +166,22 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
         if (nProp == null) nProp = new HashMap<String, Property>();
         nProp.put(prop.getName(), prop);
         nodeProps.put(n, nProp);
+    }
+
+    @Override
+    public DatabaseSchema getDatabaseSchema(Node n) {
+        NodeDB db = dbCache.get(n);
+        if (db != null) return db.getSchema();
+        return null;
+    }
+
+    @Override
+    public void updateDatabaseSchema(Node n, DatabaseSchema schema) {
+        NodeDB db = dbCache.get(n);
+        if (db == null) {
+            db = new NodeDB();
+            dbCache.put(n, db);
+        }
+        db.setSchema(schema);
     }
 }

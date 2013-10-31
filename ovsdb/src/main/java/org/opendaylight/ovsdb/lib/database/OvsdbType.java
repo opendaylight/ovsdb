@@ -1,5 +1,7 @@
 package org.opendaylight.ovsdb.lib.database;
 
+import java.util.Arrays;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 
@@ -69,7 +71,20 @@ public class OvsdbType {
         public Integer maxLength;
         public String refTable;
         public String refType;
+        @Override
+        public String toString() {
+            return "BaseType [type=" + type + ", ovsdbEnum="
+                    + Arrays.toString(ovsdbEnum) + ", minInteger=" + minInteger
+                    + ", maxInteger=" + maxInteger + ", minReal=" + minReal
+                    + ", maxReal=" + maxReal + ", minLength=" + minLength
+                    + ", maxLength=" + maxLength + ", refTable=" + refTable
+                    + ", refType=" + refType + "]";
+        }
     }
 
-
+    @Override
+    public String toString() {
+        return "OvsdbType [key=" + key + ", value=" + value + ", min=" + min
+                + ", max=" + max + "]";
+    }
 }

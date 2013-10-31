@@ -4,6 +4,9 @@ public abstract class Table<E extends Table> {
 
     public abstract Name<E> getTableName();
     public abstract String toString();
+    public Column<E> getColumns() {
+        return null;
+    }
 
     public static abstract class Name<E extends Table> {
         String name;

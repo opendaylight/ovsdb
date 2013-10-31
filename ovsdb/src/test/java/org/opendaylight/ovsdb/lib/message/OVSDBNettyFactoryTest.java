@@ -1,6 +1,8 @@
 package org.opendaylight.ovsdb.lib.message;
 
 import com.google.common.util.concurrent.ListenableFuture;
+
+import org.apache.commons.collections.MapUtils;
 import org.junit.Test;
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.core.Node;
@@ -71,9 +73,10 @@ public class OVSDBNettyFactoryTest {
         List<String> dbNames = Arrays.asList(Open_vSwitch.NAME.getName());
         ListenableFuture<DatabaseSchema> dbSchemaF = ovsdb.get_schema(dbNames);
         DatabaseSchema databaseSchema = dbSchemaF.get();
-        System.out.println(databaseSchema);
+        MapUtils.debugPrint(System.out, null, databaseSchema.getTables());
 
-        //TEST MONITOR
+        // TEST MONITOR
+        // YES it is expected to fail with "duplicate monitor ID" as we have a perpetual monitor in Inventory Service
         MonitorRequestBuilder monitorReq = new MonitorRequestBuilder();
         for (Table<?> table : Tables.getTables()) {
             monitorReq.monitor(table);

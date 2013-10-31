@@ -6,11 +6,28 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class DatabaseSchema {
     @JsonProperty("name")
-    public String name;
+    private String name;
     @JsonProperty("version")
-    public String version;
+    private String version;
     @JsonProperty("cksum")
-    public String cksum;
+    private String cksum;
     @JsonProperty("tables")
-    public Map<String, TableSchema> tables;
+    private Map<String, TableSchema> tables;
+    public String getName() {
+        return name;
+    }
+    public String getVersion() {
+        return version;
+    }
+    public String getCksum() {
+        return cksum;
+    }
+    public Map<String, TableSchema> getTables() {
+        return tables;
+    }
+    @Override
+    public String toString() {
+        return "DatabaseSchema [name=" + name + ", version=" + version
+                + ", cksum=" + cksum + ", tables=" + tables + "]";
+    }
 }

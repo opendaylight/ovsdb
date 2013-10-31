@@ -15,6 +15,7 @@ import org.opendaylight.controller.sal.connection.IPluginInConnectionService;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
+import org.opendaylight.ovsdb.lib.database.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcDecoder;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcEndpoint;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcServiceBinderHandler;
@@ -22,6 +23,7 @@ import org.opendaylight.ovsdb.lib.message.MonitorRequestBuilder;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.message.UpdateNotification;
+import org.opendaylight.ovsdb.lib.table.Open_vSwitch;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 import org.opendaylight.ovsdb.lib.table.internal.Tables;
 import org.slf4j.Logger;
@@ -32,6 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.net.InetAddress;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -138,7 +141,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
                 public void initChannel(SocketChannel channel) throws Exception {
                     if (handlers == null) {
                         channel.pipeline().addLast(
-                                new LoggingHandler(LogLevel.INFO),
+                                //new LoggingHandler(LogLevel.INFO),
                                 new JsonRpcDecoder(100000),
                                 new StringEncoder(CharsetUtil.UTF_8));
                     } else {
@@ -204,6 +207,11 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         L4PortProperty l4Port = new L4PortProperty(port);
         inventoryServiceInternal.addNodeProperty(connection.getNode(), addressProp);
         inventoryServiceInternal.addNodeProperty(connection.getNode(), l4Port);
+
+        List<String> dbNames = Arrays.asList(Open_vSwitch.NAME.getName());
+        ListenableFuture<DatabaseSchema> dbSchemaF = connection.getRpc().get_schema(dbNames);
+        DatabaseSchema databaseSchema = dbSchemaF.get();
+        inventoryServiceInternal.updateDatabaseSchema(connection.getNode(), databaseSchema);
 
         MonitorRequestBuilder monitorReq = new MonitorRequestBuilder();
         for (Table<?> table : Tables.getTables()) {

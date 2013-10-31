@@ -7,7 +7,7 @@ import org.opendaylight.ovsdb.lib.table.internal.Table;
 
 public class Bridge extends Table<Bridge> {
     public static final Name<Bridge> NAME = new Name<Bridge>("Bridge"){};
-    public enum Column implements org.opendaylight.ovsdb.lib.table.internal.Column<Bridge>{ controller, fail_mode, name, ports}
+    public enum Column implements org.opendaylight.ovsdb.lib.table.internal.Column<Bridge>{controller, fail_mode, name, ports}
 
     private String name;
     private OvsDBSet<UUID> ports;

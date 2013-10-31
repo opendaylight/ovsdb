@@ -6,15 +6,33 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class TableSchema {
     @JsonProperty("columns")
-    public Map<String, ColumnSchema> columns;
+    private Map<String, ColumnSchema> columns;
     @JsonProperty("maxRows")
-    public Integer maxRows;
+    private Integer maxRows;
     @JsonProperty("isRoot")
-    public Boolean isRoot;
+    private Boolean isRoot;
     @JsonProperty("indexes")
-    public Object indexes;
+    private Object indexes;
 
     public Map<String, ColumnSchema> getColumns(){
         return this.columns;
+    }
+
+    public Integer getMaxRows() {
+        return maxRows;
+    }
+
+    public Boolean getIsRoot() {
+        return isRoot;
+    }
+
+    public Object getIndexes() {
+        return indexes;
+    }
+
+    @Override
+    public String toString() {
+        return "TableSchema [columns=" + columns + ", maxRows=" + maxRows
+                + ", isRoot=" + isRoot + ", indexes=" + indexes + "]";
     }
 }

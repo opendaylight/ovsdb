@@ -5,6 +5,8 @@ import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Bridge extends Table<Bridge> {
     public static final Name<Bridge> NAME = new Name<Bridge>("Bridge"){};
     public enum Column implements org.opendaylight.ovsdb.lib.table.internal.Column<Bridge>{controller, fail_mode, name, ports}
@@ -24,6 +26,7 @@ public class Bridge extends Table<Bridge> {
     }
 
     @Override
+    @JsonIgnore
     public Name<Bridge> getTableName() {
         return NAME;
     }

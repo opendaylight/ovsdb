@@ -5,6 +5,8 @@ import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 import org.opendaylight.ovsdb.lib.table.internal.Table.Name;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class SSL  extends Table<SSL> {
 
     public static final Name<SSL> NAME = new Name<SSL>("SSL") {};
@@ -46,6 +48,7 @@ public class SSL  extends Table<SSL> {
     }
 
     @Override
+    @JsonIgnore
     public Name<SSL> getTableName() {
         return NAME;
     }

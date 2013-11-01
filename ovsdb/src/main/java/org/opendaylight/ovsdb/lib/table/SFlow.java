@@ -4,6 +4,8 @@ import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
 import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class SFlow  extends Table<SFlow> {
 
     public static final Name<SFlow> NAME = new Name<SFlow>("sFlow") {};
@@ -23,6 +25,7 @@ public class SFlow  extends Table<SFlow> {
     }
 
     @Override
+    @JsonIgnore
     public Name<SFlow> getTableName() {
         return NAME;
     }

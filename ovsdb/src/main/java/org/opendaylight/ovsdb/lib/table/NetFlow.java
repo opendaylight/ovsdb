@@ -3,6 +3,8 @@ package org.opendaylight.ovsdb.lib.table;
 import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class NetFlow  extends Table<NetFlow> {
 
     public static final Name<NetFlow> NAME = new Name<NetFlow>("NetFlow") {};
@@ -17,6 +19,7 @@ public class NetFlow  extends Table<NetFlow> {
     }
 
     @Override
+    @JsonIgnore
     public Name<NetFlow> getTableName() {
         return NAME;
     }

@@ -5,6 +5,8 @@ import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Mirror  extends Table<Mirror> {
 
     public static final Name<Mirror> NAME = new Name<Mirror>("Mirror") {};
@@ -82,6 +84,7 @@ public class Mirror  extends Table<Mirror> {
     }
 
     @Override
+    @JsonIgnore
     public Name<Mirror> getTableName() {
         return NAME;
     }

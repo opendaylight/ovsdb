@@ -2,13 +2,15 @@ package org.opendaylight.ovsdb.lib.message.operations;
 
 import java.util.Map;
 
+import org.opendaylight.ovsdb.lib.table.internal.Table;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 // TODO Madhu : This is not complete. Getting it in to enable other committers to make progress
 public class InsertOperation extends Operation {
     String table;
     @JsonProperty("uuid-name")
     public String uuidName;
-    public Map<String, Object> row;
+    public Table<?> row;
 
     public InsertOperation() {
         super();
@@ -16,7 +18,7 @@ public class InsertOperation extends Operation {
     }
 
     public InsertOperation(String table, String uuidName,
-            Map<String, Object> row) {
+            Table<?> row) {
         this();
         this.table = table;
         this.uuidName = uuidName;
@@ -39,11 +41,11 @@ public class InsertOperation extends Operation {
         this.uuidName = uuidName;
     }
 
-    public Map<String, Object> getRow() {
+    public Table<?> getRow() {
         return row;
     }
 
-    public void setRow(Map<String, Object> row) {
+    public void setRow(Table<?> row) {
         this.row = row;
     }
 

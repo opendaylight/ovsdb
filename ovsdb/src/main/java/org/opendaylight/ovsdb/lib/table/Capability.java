@@ -3,6 +3,8 @@ package org.opendaylight.ovsdb.lib.table;
 import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Capability extends Table<Capability> {
 
     public static final Name<Capability> NAME = new Name<Capability>("Capability") {};
@@ -18,6 +20,7 @@ public class Capability extends Table<Capability> {
     }
 
     @Override
+    @JsonIgnore
     public Name<Capability> getTableName() {
         return NAME;
     }

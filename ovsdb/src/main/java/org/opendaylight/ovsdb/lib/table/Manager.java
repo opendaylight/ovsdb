@@ -2,6 +2,8 @@ package org.opendaylight.ovsdb.lib.table;
 
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Manager  extends Table<Manager> {
 
     public static final Name<Manager> NAME = new Name<Manager>("Manager") {};
@@ -16,6 +18,7 @@ public class Manager  extends Table<Manager> {
     }
 
     @Override
+    @JsonIgnore
     public Name<Manager> getTableName() {
         return NAME;
     }

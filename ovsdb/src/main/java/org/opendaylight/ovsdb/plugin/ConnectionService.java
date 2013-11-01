@@ -29,6 +29,7 @@ import org.opendaylight.ovsdb.lib.table.internal.Tables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -160,6 +161,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
 
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            objectMapper.setSerializationInclusion(Include.NON_NULL);
 
             JsonRpcEndpoint factory = new JsonRpcEndpoint(objectMapper, channel);
             JsonRpcServiceBinderHandler binderHandler = new JsonRpcServiceBinderHandler(factory);

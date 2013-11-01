@@ -7,6 +7,8 @@ import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Queue extends Table<Queue> {
 
     public static final Name<Queue> NAME = new Name<Queue>("Queue") {};
@@ -43,6 +45,7 @@ public class Queue extends Table<Queue> {
     }
 
     @Override
+    @JsonIgnore
     public Name<Queue> getTableName() {
         return NAME;
     }

@@ -17,6 +17,7 @@ import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.notation.Function;
 import org.opendaylight.ovsdb.lib.notation.Mutation;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
+import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.table.Bridge;
 import org.opendaylight.ovsdb.lib.table.Interface;
@@ -153,27 +154,31 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                 addSwitchRequest = new MutateOperation(Open_vSwitch.NAME.getName(), where, mutations);
             }
             else{
-                Map<String, Object> vswitchRow = new HashMap<String, Object>();
+                Open_vSwitch ovsTableRow = new Open_vSwitch();
+                OvsDBSet<UUID> bridges = new OvsDBSet<UUID>();
                 UUID bridgeUuidPair = new UUID(newBridge);
-                vswitchRow.put("bridges", bridgeUuidPair);
-                addSwitchRequest = new InsertOperation(Open_vSwitch.NAME.getName(), newSwitch, vswitchRow);
+                bridges.add(bridgeUuidPair);
+                ovsTableRow.setBridges(bridges);
+                addSwitchRequest = new InsertOperation(Open_vSwitch.NAME.getName(), newSwitch, ovsTableRow);
             }
 
-            Map<String, Object> bridgeRow = new HashMap<String, Object>();
-            bridgeRow.put("name", bridgeIdentifier);
-            UUID ports = new UUID(newPort);
-            bridgeRow.put("ports", ports);
+            Bridge bridgeRow = new Bridge();
+            OvsDBSet<UUID> ports = new OvsDBSet<UUID>();
+            UUID port = new UUID(newPort);
+            ports.add(port);
+            bridgeRow.setPorts(ports);
             InsertOperation addBridgeRequest = new InsertOperation(Bridge.NAME.getName(), newBridge, bridgeRow);
 
-            Map<String, Object> portRow = new HashMap<String, Object>();
-            portRow.put("name", bridgeIdentifier);
-            UUID interfaces = new UUID(newInterface);
-            portRow.put("interfaces", interfaces);
+            Port portRow = new Port();
+            OvsDBSet<UUID> interfaces = new OvsDBSet<UUID>();
+            UUID interfaceid = new UUID(newInterface);
+            interfaces.add(interfaceid);
+            portRow.setInterfaces(interfaces);
             InsertOperation addPortRequest = new InsertOperation(Port.NAME.getName(), newPort, portRow);
 
-            Map<String, Object> interfaceRow = new HashMap<String, Object>();
-            interfaceRow.put("name", bridgeIdentifier);
-            interfaceRow.put("type", "internal");
+            Interface interfaceRow = new Interface();
+            interfaceRow.setName(bridgeIdentifier);
+            interfaceRow.setType("internal");
             InsertOperation addIntfRequest = new InsertOperation(Interface.NAME.getName(), newInterface, interfaceRow);
 
             TransactBuilder transaction = new TransactBuilder();

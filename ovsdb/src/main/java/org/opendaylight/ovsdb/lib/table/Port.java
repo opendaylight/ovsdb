@@ -7,6 +7,8 @@ import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Port extends Table<Port> {
 
     public static final Name<Port> NAME = new Name<Port>("Port") {};
@@ -88,6 +90,7 @@ public class Port extends Table<Port> {
     }
 
     @Override
+    @JsonIgnore
     public Name<Port> getTableName() {
         return NAME;
     }

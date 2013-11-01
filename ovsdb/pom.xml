@@ -43,7 +43,7 @@
                             javax.net.ssl,
                             *
                         </Import-Package>
-                        <Embed-Dependency>jsonrpc4j,httpclient,commons-codec,httpcore-nio,javax.servlet-api,jackson-annotations,jackson-core,jackson-databind,portlet-api,commons-collections;type=!pom;inline=false</Embed-Dependency>
+                        <Embed-Dependency>httpclient,commons-codec,httpcore-nio,javax.servlet-api,jackson-annotations,jackson-core,jackson-databind,portlet-api,commons-collections;type=!pom;inline=false</Embed-Dependency>
                         <Embed-Transitive>
                             true
                         </Embed-Transitive>
@@ -64,14 +64,6 @@
              </plugin>
         </plugins>
     </build>
-    <repositories>
-        <repository>
-            <id>jsonrpc4j-webdav-maven-repo</id>
-            <name>jsonrpc4j maven repository</name>
-            <url>http://jsonrpc4j.googlecode.com/svn/maven/repo/</url>
-            <layout>default</layout>
-        </repository>
-    </repositories>
     <dependencies>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>

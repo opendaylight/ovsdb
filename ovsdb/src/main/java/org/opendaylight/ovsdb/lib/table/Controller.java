@@ -2,6 +2,8 @@ package org.opendaylight.ovsdb.lib.table;
 
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Controller  extends Table<Controller> {
 
     public static final Name<Controller> NAME = new Name<Controller>("Controller") {};
@@ -16,6 +18,7 @@ public class Controller  extends Table<Controller> {
     }
 
     @Override
+    @JsonIgnore
     public Name<Controller> getTableName() {
         return NAME;
     }

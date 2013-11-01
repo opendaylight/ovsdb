@@ -5,6 +5,8 @@ import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Open_vSwitch extends Table<Open_vSwitch> {
 
     public static final Name<Open_vSwitch> NAME = new Name<Open_vSwitch>("Open_vSwitch"){};
@@ -28,6 +30,7 @@ public class Open_vSwitch extends Table<Open_vSwitch> {
     }
 
     @Override
+    @JsonIgnore
     public Name<Open_vSwitch> getTableName() {
         return NAME;
     }

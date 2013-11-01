@@ -4,6 +4,8 @@ import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
 import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Interface extends Table<Interface> {
 
     public static Name<Interface> NAME = new Name<Interface>("Interface") {};
@@ -91,6 +93,7 @@ public class Interface extends Table<Interface> {
     }
 
     @Override
+    @JsonIgnore
     public Name<Interface> getTableName() {
         return NAME;
     }

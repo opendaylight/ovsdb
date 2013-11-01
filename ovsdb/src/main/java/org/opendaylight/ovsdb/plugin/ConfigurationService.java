@@ -140,7 +140,27 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
 
             Operation addSwitchRequest = null;
 
+            /* 1. Insert the entry in Bridge table */
+            Bridge bridgeRow = new Bridge();
+            bridgeRow.setName(bridgeIdentifier);
+            OvsDBSet<UUID> ports = new OvsDBSet<UUID>();
+            UUID port = new UUID(newPort);
+            ports.add(port);
+            bridgeRow.setPorts(ports);
+            InsertOperation addBridgeRequest = new InsertOperation(Bridge.NAME.getName(), newBridge, bridgeRow);
+
+            /* 2. Insert the entry in Port table */
+            Port portRow = new Port();
+            portRow.setName(bridgeIdentifier);
+            OvsDBSet<UUID> interfaces = new OvsDBSet<UUID>();
+            UUID interfaceid = new UUID(newInterface);
+            interfaces.add(interfaceid);
+            portRow.setInterfaces(interfaces);
+            InsertOperation addPortRequest = new InsertOperation(Port.NAME.getName(), newPort, portRow);
+
+            /* 3. Update the bridge column in Open_vSwitch table */
             if(ovsTable != null){
+                /* Table exists, update */
                 String ovsTableUUID = (String) ovsTable.keySet().toArray()[0];
                 UUID bridgeUuidPair = new UUID(newBridge);
                 Mutation bm = new Mutation("bridges", Mutator.INSERT, bridgeUuidPair);
@@ -154,6 +174,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                 addSwitchRequest = new MutateOperation(Open_vSwitch.NAME.getName(), where, mutations);
             }
             else{
+                /* Table doesn't exists, isn't this an error condition? */
                 Open_vSwitch ovsTableRow = new Open_vSwitch();
                 OvsDBSet<UUID> bridges = new OvsDBSet<UUID>();
                 UUID bridgeUuidPair = new UUID(newBridge);
@@ -162,30 +183,27 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                 addSwitchRequest = new InsertOperation(Open_vSwitch.NAME.getName(), newSwitch, ovsTableRow);
             }
 
-            Bridge bridgeRow = new Bridge();
-            bridgeRow.setName(bridgeIdentifier);
-            OvsDBSet<UUID> ports = new OvsDBSet<UUID>();
-            UUID port = new UUID(newPort);
-            ports.add(port);
-            bridgeRow.setPorts(ports);
-            InsertOperation addBridgeRequest = new InsertOperation(Bridge.NAME.getName(), newBridge, bridgeRow);
-
-            Port portRow = new Port();
-            portRow.setName(bridgeIdentifier);
-            OvsDBSet<UUID> interfaces = new OvsDBSet<UUID>();
-            UUID interfaceid = new UUID(newInterface);
-            interfaces.add(interfaceid);
-            portRow.setInterfaces(interfaces);
-            InsertOperation addPortRequest = new InsertOperation(Port.NAME.getName(), newPort, portRow);
-
+            /* 4. Insert into Interface table */
             Interface interfaceRow = new Interface();
             interfaceRow.setName(bridgeIdentifier);
             interfaceRow.setType("internal");
             InsertOperation addIntfRequest = new InsertOperation(Interface.NAME.getName(), newInterface, interfaceRow);
 
+            /* Update config version */
+            String ovsTableUUID = (String) ovsTable.keySet().toArray()[0];
+            Mutation bm = new Mutation("next_cfg", Mutator.SUM, 1);
+            List<Mutation> mutations = new ArrayList<Mutation>();
+            mutations.add(bm);
+
+            UUID uuid = new UUID(ovsTableUUID);
+            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
+            List<Condition> where = new ArrayList<Condition>();
+            where.add(condition);
+            MutateOperation updateCfgVerRequest = new MutateOperation(Open_vSwitch.NAME.getName(), where, mutations);
+
             TransactBuilder transaction = new TransactBuilder();
             transaction.addOperations(new ArrayList<Operation>(
-                                      Arrays.asList(addSwitchRequest, addIntfRequest, addPortRequest, addBridgeRequest)));
+                                      Arrays.asList(addBridgeRequest, addPortRequest, addSwitchRequest, addIntfRequest, updateCfgVerRequest)));
 
             ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
             List<OperationResult> tr = transResponse.get();
@@ -193,7 +211,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             Status status = new Status(StatusCode.SUCCESS);
             for (int i = 0; i < tr.size() ; i++) {
                 if (i < requests.size()) requests.get(i).setResult(tr.get(i));
-                if (tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
+                if (tr.get(i) != null && tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
                     OperationResult result = tr.get(i);
                     status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
                 }

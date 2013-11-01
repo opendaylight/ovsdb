@@ -215,11 +215,22 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
 
         MonitorRequestBuilder monitorReq = new MonitorRequestBuilder();
         for (Table<?> table : Tables.getTables()) {
-            monitorReq.monitor(table);
+            if (databaseSchema.getTables().keySet().contains(table.getTableName().getName())) {
+                monitorReq.monitor(table);
+            } else {
+                logger.warn("We know about table {} but it is not in the schema of {}", table.getTableName().getName(), connection.getNode().getNodeIDString());
+            }
         }
 
         ListenableFuture<TableUpdates> monResponse = connection.getRpc().monitor(monitorReq);
         TableUpdates updates = monResponse.get();
+        if (updates.getError() != null) {
+            logger.error("Error configuring monitor, error : {}, details : {}",
+                    updates.getError(),
+                    updates.getDetails());
+            /* FIXME: This should be cause for alarm */
+            throw new RuntimeException("Failed to setup a monitor in OVSDB");
+        }
         UpdateNotification monitor = new UpdateNotification();
         monitor.setUpdate(updates);
         this.update(connection.getNode(), monitor);

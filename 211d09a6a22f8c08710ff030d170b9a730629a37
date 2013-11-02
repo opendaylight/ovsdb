@@ -50,6 +50,24 @@
       "revId": "211d09a6a22f8c08710ff030d170b9a730629a37",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_9daa0ad3",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 912
+      },
+      "writtenOn": "2013-11-02T09:24:29Z",
+      "side": 1,
+      "message": "Consider this response to the transact to create the bridge: \n\n{\"id\":\"fc7c680b-3e65-4774-9b3b-d44180cc935c\",\"result\":[{\"error\":\"syntax error\",\"details\":\"Parsing ovsdb operation 1 of 5 failed: Type mismatch for member \u0027uuid-name\u0027.\",\"syntax\":\"{\\\"op\\\":\\\"insert\\\",\\\"row\\\":{\\\"name\\\":\\\"bridge1\\\",\\\"ports\\\":[\\\"named-uuid\\\",\\\"new_port\\\"]},\\\"table\\\":\\\"Bridge\\\",\\\"uuid-name\\\":\\\"new_bridge_1cb8dc02-fee5-4722-8787-2f70fa5a00f5\\\"}\"},null,null,null,null],\"error\":null}\n\nresponse 1 is the syntax error, but response 2 till 5 are also present. It will be deserialized as an array with the first value filled and the next ones set to null. So the get(i) code would return null here, triggering an NPE when getError is called.",
+      "parentUuid": "da6255ed_a25feb71",
+      "revId": "211d09a6a22f8c08710ff030d170b9a730629a37",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

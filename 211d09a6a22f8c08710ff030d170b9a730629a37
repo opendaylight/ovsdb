@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_e265e345",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-11-02T02:10:10Z",
+      "side": 1,
+      "message": "As discussed, Though I certainly see the value in changing the order, it actually is not needed because of the guaranteed transaction support of the transact API. So, all of the operations are executed as an atomic operation with the guarantee to fail or succeed together.\n\nAlso, we just merged a fix now which brings in a better InsertOperation support which works in logical Table Rows compared to the generic Map type.\n\nWe will port such abstractions to other Operations as well.\n\nSo, please make sure this change physically doesnt conflict and cause unnecessary headache.",
+      "revId": "211d09a6a22f8c08710ff030d170b9a730629a37",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_c25adf82",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-11-02T02:10:10Z",
+      "side": 1,
+      "message": "This is a good fix and appreciate it.",
+      "revId": "211d09a6a22f8c08710ff030d170b9a730629a37",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_a25feb71",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-11-02T02:10:10Z",
+      "side": 1,
+      "message": "Curious. Is the NPE possible in this case ?\nSince tr is a List of OperationResult and we are iterating over the size() of tr. tr.get(i) should be not null in this case.\nSo, am not sure if there is infact a NPE seen in here ?",
+      "revId": "211d09a6a22f8c08710ff030d170b9a730629a37",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

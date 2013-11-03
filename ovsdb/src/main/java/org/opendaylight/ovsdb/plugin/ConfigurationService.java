@@ -163,6 +163,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             }
 
             Bridge bridgeRow = new Bridge();
+            bridgeRow.setName(bridgeIdentifier);
             OvsDBSet<UUID> ports = new OvsDBSet<UUID>();
             UUID port = new UUID(newPort);
             ports.add(port);
@@ -170,6 +171,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             InsertOperation addBridgeRequest = new InsertOperation(Bridge.NAME.getName(), newBridge, bridgeRow);
 
             Port portRow = new Port();
+            portRow.setName(bridgeIdentifier);
             OvsDBSet<UUID> interfaces = new OvsDBSet<UUID>();
             UUID interfaceid = new UUID(newInterface);
             interfaces.add(interfaceid);

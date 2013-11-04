@@ -21,10 +21,8 @@ import org.opendaylight.ovsdb.lib.database.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcDecoder;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcEndpoint;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcServiceBinderHandler;
-import org.opendaylight.ovsdb.lib.message.MonitorRequestBuilder;
-import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
-import org.opendaylight.ovsdb.lib.message.TableUpdates;
-import org.opendaylight.ovsdb.lib.message.UpdateNotification;
+import org.opendaylight.ovsdb.lib.jsonrpc.ServiceHandler;
+import org.opendaylight.ovsdb.lib.message.*;
 import org.opendaylight.ovsdb.lib.table.Open_vSwitch;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 import org.opendaylight.ovsdb.lib.table.internal.Tables;
@@ -50,7 +48,7 @@ import java.util.concurrent.ExecutionException;
  * Represents the openflow plugin component in charge of programming the flows
  * the flow programming and relay them to functional modules above SAL.
  */
-public class ConnectionService implements IPluginInConnectionService, IConnectionServiceInternal, OvsdbRPC.Callback {
+public class ConnectionService implements IPluginInConnectionService, IConnectionServiceInternal, OvsdbRPCListener {
     protected static final Logger logger = LoggerFactory.getLogger(ConnectionService.class);
 
     private static final Integer defaultOvsdbPort = 6640;
@@ -59,6 +57,8 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
     private List<ChannelHandler> handlers = null;
     private InventoryServiceInternal inventoryServiceInternal;
     private Channel serverListenChannel = null;
+    private ServiceHandler serviceHandler;
+    private ObjectMapper jacksonObjectMapper;
 
     public InventoryServiceInternal getInventoryServiceInternal() {
         return inventoryServiceInternal;
@@ -201,19 +201,21 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         Connection connection = new Connection(identifier, channel);
         Node node = connection.getNode();
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        objectMapper.setSerializationInclusion(Include.NON_NULL);
+        if (getJacksonObjectMapper() == null) {
+            //todo: should we have this?
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            objectMapper.setSerializationInclusion(Include.NON_NULL);
+            setJacksonObjectMapper(objectMapper);
+        }
 
-        JsonRpcEndpoint factory = new JsonRpcEndpoint(objectMapper, channel);
+        JsonRpcEndpoint factory = new JsonRpcEndpoint(jacksonObjectMapper, channel, serviceHandler);
         JsonRpcServiceBinderHandler binderHandler = new JsonRpcServiceBinderHandler(factory);
         binderHandler.setNode(node);
         channel.pipeline().addLast(binderHandler);
 
         OvsdbRPC ovsdb = factory.getClient(node, OvsdbRPC.class);
         connection.setRpc(ovsdb);
-        ovsdb.registerCallback(instance);
-        ovsdbConnections.put(identifier, connection);
 
         // Keeping the Initial inventory update(s) on its own thread.
         new Thread() {
@@ -223,9 +225,11 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
             public void run() {
                 try {
                     initializeInventoryForNewNode(connection);
-                } catch (Exception e) {
+                    ovsdbConnections.put(identifier, connection);
+                } catch (InterruptedException e) {
                     e.printStackTrace();
-                    ovsdbConnections.remove(identifier);
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
                 }
             }
             public Thread initializeConnectionParams(String identifier, Connection connection) {
@@ -323,9 +327,12 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         }
     }
 
+
+    // ----------------OVSDBRpcListener impl ---------------//
+    // -----------------------------------------------------//
+
     @Override
     public void update(Node node, UpdateNotification updateNotification) {
-        if (updateNotification == null) return;
         inventoryServiceInternal.processTableUpdates(node, updateNotification.getUpdate());
     }
 
@@ -339,4 +346,29 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         // TODO Auto-generated method stub
     }
 
+    @Override
+    public String echo(String echo) {
+        return echo;
+    }
+
+
+    // ------------------- Dependencies  -------------------//
+    // -----------------------------------------------------//
+
+
+    public ServiceHandler getServiceHandler() {
+        return serviceHandler;
+    }
+
+    public void setServiceHandler(ServiceHandler serviceHandler) {
+        this.serviceHandler = serviceHandler;
+    }
+
+    public ObjectMapper getJacksonObjectMapper() {
+        return jacksonObjectMapper;
+    }
+
+    public void setJacksonObjectMapper(ObjectMapper jacksonObjectMapper) {
+        this.jacksonObjectMapper = jacksonObjectMapper;
+    }
 }

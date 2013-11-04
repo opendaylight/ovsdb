@@ -9,6 +9,7 @@ import org.opendaylight.ovsdb.lib.database.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.message.operations.OperationResult;
 
 public interface OvsdbRPC {
+
     public static final String REGISTER_CALLBACK_METHOD = "registerCallback";
 
     public ListenableFuture<DatabaseSchema> get_schema(List<String> db_names);
@@ -31,13 +32,4 @@ public interface OvsdbRPC {
 
     public ListenableFuture<Object> unlock(List<String> id);
 
-    public boolean registerCallback(Callback callback);
-
-    public static interface Callback {
-        public void update(Node node, UpdateNotification upadateNotification);
-        public void locked(Node node, List<String> ids);
-        public void stolen(Node node, List<String> ids);
-        // ECHO is handled by JsonRPCEndpoint directly.
-        // We can add Echo request here if there is a need for clients to handle it.
-    }
 }

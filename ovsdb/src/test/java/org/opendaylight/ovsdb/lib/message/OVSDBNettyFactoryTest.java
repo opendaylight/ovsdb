@@ -1,5 +1,8 @@
 package org.opendaylight.ovsdb.lib.message;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import org.apache.commons.collections.MapUtils;
@@ -7,6 +10,7 @@ import org.junit.Test;
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.lib.database.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.jsonrpc.ServiceHandlerImpl;
 import org.opendaylight.ovsdb.lib.message.MonitorRequestBuilder;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
@@ -43,7 +47,13 @@ public class OVSDBNettyFactoryTest {
 
     @Test
     public void testSome() throws InterruptedException, ExecutionException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         ConnectionService connectionService = new ConnectionService();
+        connectionService.setJacksonObjectMapper(objectMapper);
+        connectionService.setServiceHandler(new ServiceHandlerImpl<OvsdbRPCListener>(OvsdbRPCListener.class,
+                connectionService, objectMapper));
         connectionService.init();
         inventoryService = new InventoryService();
         inventoryService.init();
@@ -61,7 +71,7 @@ public class OVSDBNettyFactoryTest {
         Connection connection = connectionService.getConnection(node);
         if (connection == null) {
             System.out.println("ERROR : Unable to connect to the host");
-            return;
+            throw new RuntimeException("unable to connect");
         }
 
         OvsdbRPC ovsdb = connection.getRpc();
@@ -99,7 +109,7 @@ public class OVSDBNettyFactoryTest {
 
         Operation addSwitchRequest = null;
 
-        if(ovsTable != null){
+        if (ovsTable != null) {
             String ovsTableUUID = (String) ovsTable.keySet().toArray()[0];
             UUID bridgeUuidPair = new UUID(newBridge);
             Mutation bm = new Mutation("bridges", Mutator.INSERT, bridgeUuidPair);
@@ -111,8 +121,7 @@ public class OVSDBNettyFactoryTest {
             List<Condition> where = new ArrayList<Condition>();
             where.add(condition);
             addSwitchRequest = new MutateOperation(Open_vSwitch.NAME.getName(), where, mutations);
-        }
-        else{
+        } else {
             Open_vSwitch ovsTableRow = new Open_vSwitch();
             OvsDBSet<UUID> bridges = new OvsDBSet<UUID>();
             UUID bridgeUuidPair = new UUID(newBridge);
@@ -144,21 +153,21 @@ public class OVSDBNettyFactoryTest {
 
         TransactBuilder transaction = new TransactBuilder();
         transaction.addOperations(new ArrayList<Operation>(
-                                  Arrays.asList(addSwitchRequest, addIntfRequest, addPortRequest, addBridgeRequest)));
+                Arrays.asList(addSwitchRequest, addIntfRequest, addPortRequest, addBridgeRequest)));
 
         ListenableFuture<List<OperationResult>> transResponse = ovsdb.transact(transaction);
         System.out.println("Transcation sent :");
         List<OperationResult> tr = transResponse.get();
-        System.out.println("Transaction response : "+transResponse.toString());
+        System.out.println("Transaction response : " + transResponse.toString());
         List<Operation> requests = transaction.getRequests();
-        for (int i = 0; i < tr.size() ; i++) {
+        for (int i = 0; i < tr.size(); i++) {
             if (i < requests.size()) requests.get(i).setResult(tr.get(i));
         }
 
-        System.out.println("Request + Response : "+requests.toString());
+        System.out.println("Request + Response : " + requests.toString());
         if (tr.size() > requests.size()) {
-            System.out.println("ERROR : "+tr.get(tr.size()-1).getError());
-            System.out.println("Details : "+tr.get(tr.size()-1).getDetails());
+            System.out.println("ERROR : " + tr.get(tr.size() - 1).getError());
+            System.out.println("Details : " + tr.get(tr.size() - 1).getDetails());
         }
 
         // TEST ECHO

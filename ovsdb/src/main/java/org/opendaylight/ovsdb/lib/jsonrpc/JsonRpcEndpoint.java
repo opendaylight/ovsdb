@@ -26,39 +26,16 @@ import io.netty.channel.Channel;
 public class JsonRpcEndpoint {
 
     protected static final Logger logger = LoggerFactory.getLogger(JsonRpcEndpoint.class);
+    private final ServiceHandler serviceInvoker;
 
-    public class CallContext {
-        Method method;
-        JsonRpc10Request request;
-        SettableFuture<Object> future;
+    private ObjectMapper objectMapper;
+    private Channel nettyChannel;
+    private Map<String, CallContext> methodContext = Maps.newHashMap();
 
-        public CallContext(JsonRpc10Request request, Method method, SettableFuture<Object> future) {
-            this.method = method;
-            this.request = request;
-            this.future = future;
-        }
-
-        public Method getMethod() {
-            return method;
-        }
-
-        public JsonRpc10Request getRequest() {
-            return request;
-        }
-
-        public SettableFuture<Object> getFuture() {
-            return future;
-        }
-    }
-
-    ObjectMapper objectMapper;
-    Channel nettyChannel;
-    Map<String, CallContext> methodContext = Maps.newHashMap();
-    Map<Node, OvsdbRPC.Callback> requestCallbacks = Maps.newHashMap();
-
-    public JsonRpcEndpoint(ObjectMapper objectMapper, Channel channel) {
+    public JsonRpcEndpoint(ObjectMapper objectMapper, Channel channel, ServiceHandler handler) {
         this.objectMapper = objectMapper;
         this.nettyChannel = channel;
+        this.serviceInvoker = handler;
     }
 
     public <T> T getClient(final Node node, Class<T> klazz) {
@@ -66,11 +43,6 @@ public class JsonRpcEndpoint {
         return Reflection.newProxy(klazz, new InvocationHandler() {
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                if (method.getName().equals(OvsdbRPC.REGISTER_CALLBACK_METHOD)) {
-                    if ((args == null) || args.length != 1 || !(args[0] instanceof OvsdbRPC.Callback)) return false;
-                    requestCallbacks.put(node, (OvsdbRPC.Callback)args[0]);
-                    return true;
-                }
 
                 JsonRpc10Request request = new JsonRpc10Request(UUID.randomUUID().toString());
                 request.setMethod(method.getName());
@@ -106,6 +78,7 @@ public class JsonRpcEndpoint {
         );
     }
 
+
     public void processResult(JsonNode response) throws NoSuchMethodException {
 
         CallContext returnCtxt = methodContext.get(response.get("id").asText());
@@ -137,42 +110,50 @@ public class JsonRpcEndpoint {
         JsonRpc10Request request = new JsonRpc10Request(requestJson.get("id").asText());
         request.setMethod(requestJson.get("method").asText());
         logger.debug("Request : {} {}", requestJson.get("method"), requestJson.get("params"));
-        OvsdbRPC.Callback callback = requestCallbacks.get(node);
-        if (callback != null) {
-            Method[] methods = callback.getClass().getDeclaredMethods();
-            for (Method m : methods) {
-                if (m.getName().equals(request.getMethod())) {
-                    Class<?>[] parameters = m.getParameterTypes();
-                    JsonNode params = requestJson.get("params");
-                    Object param = objectMapper.convertValue(params, parameters[1]);
-                    try {
-                        m.invoke(callback, node, param);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    return;
-                }
-            }
-        }
 
-        // Echo dont need any special processing. hence handling it internally.
-
-        if (request.getMethod().equals("echo")) {
-            JsonRpc10Response response = new JsonRpc10Response(request.getId());
+        JsonRpc10Response response = new JsonRpc10Response(request.getId());
+        try {
+            List params = serviceInvoker.handleCall(request.getMethod(), requestJson.get("params"));
+            response.setResult(params);
+        } catch (Exception e) {
             response.setError(null);
-            try {
-                String s = objectMapper.writeValueAsString(response);
-                nettyChannel.writeAndFlush(s);
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
-            return;
         }
 
-        logger.error("No handler for Request : {} on {}",requestJson.toString(), node);
+        try {
+            String s = objectMapper.writeValueAsString(response);
+            nettyChannel.writeAndFlush(s);
+        } catch (JsonProcessingException e) {
+            logger.error("unknown exception", e);
+            //todo: we need to close the channel when this happens
+            throw new RuntimeException(e);
+        }
     }
 
     public Map<String, CallContext> getMethodContext() {
         return methodContext;
+    }
+
+    public class CallContext {
+        Method method;
+        JsonRpc10Request request;
+        SettableFuture<Object> future;
+
+        public CallContext(JsonRpc10Request request, Method method, SettableFuture<Object> future) {
+            this.method = method;
+            this.request = request;
+            this.future = future;
+        }
+
+        public Method getMethod() {
+            return method;
+        }
+
+        public JsonRpc10Request getRequest() {
+            return request;
+        }
+
+        public SettableFuture<Object> getFuture() {
+            return future;
+        }
     }
 }

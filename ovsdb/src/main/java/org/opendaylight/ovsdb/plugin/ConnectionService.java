@@ -213,6 +213,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         OvsdbRPC ovsdb = factory.getClient(node, OvsdbRPC.class);
         connection.setRpc(ovsdb);
         ovsdb.registerCallback(instance);
+        ovsdbConnections.put(identifier, connection);
 
         // Keeping the Initial inventory update(s) on its own thread.
         new Thread() {
@@ -222,11 +223,9 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
             public void run() {
                 try {
                     initializeInventoryForNewNode(connection);
-                    ovsdbConnections.put(identifier, connection);
-                } catch (InterruptedException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
+                    ovsdbConnections.remove(identifier);
                 }
             }
             public Thread initializeConnectionParams(String identifier, Connection connection) {

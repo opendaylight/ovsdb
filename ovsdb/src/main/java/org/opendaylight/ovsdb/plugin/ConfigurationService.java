@@ -1,6 +1,8 @@
 package org.opendaylight.ovsdb.plugin;
 
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.*;
 
 import org.eclipse.osgi.framework.console.CommandInterpreter;
@@ -24,11 +26,13 @@ import org.opendaylight.ovsdb.lib.table.Interface;
 import org.opendaylight.ovsdb.lib.table.Open_vSwitch;
 import org.opendaylight.ovsdb.lib.table.Port;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
+import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.networkconfig.bridgedomain.ConfigConstants;
 import org.opendaylight.controller.sal.networkconfig.bridgedomain.IPluginInBridgeDomainConfigService;
+import org.opendaylight.controller.sal.utils.NetUtils;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.osgi.framework.BundleContext;
@@ -45,6 +49,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
 
     IConnectionServiceInternal connectionService;
     InventoryServiceInternal inventoryServiceInternal;
+    private IClusterGlobalServices clusterServices;
     boolean forceConnect = false;
 
     void init() {
@@ -104,6 +109,16 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         }
     }
 
+    public void setClusterServices(IClusterGlobalServices i) {
+        this.clusterServices = i;
+    }
+
+    public void unsetClusterServices(IClusterGlobalServices i) {
+        if (this.clusterServices == i) {
+            this.clusterServices = null;
+        }
+    }
+
     private Connection getConnection (Node node) {
         Connection connection = connectionService.getConnection(node);
         if (connection == null || !connection.getChannel().isActive()) {
@@ -112,6 +127,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
 
         return connection;
     }
+
     /**
      * Add a new bridge
      * @param node Node serving this configuration service
@@ -458,6 +474,57 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     @Override
     public NodeConnector getNodeConnector(Node arg0, String arg1, String arg2) {
         return null;
+    }
+
+    private short getControllerOFPort() {
+        Short defaultOpenFlowPort = 6633;
+        Short openFlowPort = defaultOpenFlowPort;
+        String portString = System.getProperty("of.listenPort");
+        if (portString != null) {
+            try {
+                openFlowPort = Short.decode(portString).shortValue();
+            } catch (NumberFormatException e) {
+                logger.warn("Invalid port:{}, use default({})", portString,
+                        openFlowPort);
+            }
+        }
+        return openFlowPort;
+    }
+
+    private List<InetAddress> getControllerIPAddresses() {
+        List<InetAddress> controllers = null;
+        if (clusterServices != null) {
+            controllers = clusterServices.getClusteredControllers();
+            if (controllers != null && controllers.size() > 0) {
+                if (controllers.size() == 1) {
+                    InetAddress controller = controllers.get(0);
+                    if (!controller.equals(InetAddress.getLoopbackAddress())) {
+                        return controllers;
+                    }
+                } else {
+                    return controllers;
+                }
+            }
+        }
+
+        controllers = new ArrayList<InetAddress>();
+        InetAddress controllerIP;
+        Enumeration<NetworkInterface> nets;
+        try {
+            nets = NetworkInterface.getNetworkInterfaces();
+            for (NetworkInterface netint : Collections.list(nets)) {
+                Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
+                for (InetAddress inetAddress : Collections.list(inetAddresses)) {
+                    if (!inetAddress.isLoopbackAddress() &&
+                            NetUtils.isIPv4AddressValid(inetAddress.getHostAddress())) {
+                        controllers.add(inetAddress);
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            controllers.add(InetAddress.getLoopbackAddress());
+        }
+        return controllers;
     }
 
     public void _ovsconnect (CommandInterpreter ci) {

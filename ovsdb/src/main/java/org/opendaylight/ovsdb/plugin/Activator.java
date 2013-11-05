@@ -4,6 +4,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.apache.felix.dm.Component;
+import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.sal.networkconfig.bridgedomain.IPluginInBridgeDomainConfigService;
 import org.opendaylight.controller.sal.connection.IPluginInConnectionService;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
@@ -67,6 +68,10 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(InventoryServiceInternal.class)
                     .setCallbacks("setInventoryServiceInternal", "unsetInventoryServiceInternal")
                     .setRequired(true));
+            c.add(createServiceDependency()
+                    .setService(IClusterGlobalServices.class)
+                    .setCallbacks("setClusterServices", "unsetClusterServices")
+                    .setRequired(false));
         }
 
         if (imp.equals(ConnectionService.class)) {

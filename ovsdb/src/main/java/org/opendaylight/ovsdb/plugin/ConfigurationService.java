@@ -242,7 +242,8 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
      * @param portIdentifier String representation of a user defined Port Name
      */
     @Override
-    public Status addPort(Node node, String bridgeIdentifier, String portIdentifier, Map<ConfigConstants, Object> configs) {
+    public Status addPort(Node node, String bridgeIdentifier, String portIdentifier,
+                          Map<ConfigConstants, Object> configs) {
         try{
             if (connectionService == null) {
                 logger.error("Couldn't refer to the ConnectionService");
@@ -252,86 +253,79 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             if (connection == null) {
                 return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
             }
-
             if (connection != null) {
+                Map<String, Table<?>> brTable = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
+                String newBridge = "new_bridge";
                 String newInterface = "new_interface";
                 String newPort = "new_port";
 
-                Map<String, OVSBridge> existingBridges = OVSBridge.monitorBridge(connection);
-
-                OVSBridge bridge = existingBridges.get(bridgeIdentifier);
-
-                List<String> portUuidPair = new ArrayList<String>();
-                portUuidPair.add("named-uuid");
-                portUuidPair.add(newPort);
-
-                List<Object> mutation = new ArrayList<Object>();
-                mutation.add("ports");
-                mutation.add("insert");
-                mutation.add(portUuidPair);
-                List<Object> mutations = new ArrayList<Object>();
-                mutations.add(mutation);
-
-                List<String> bridgeUuidPair = new ArrayList<String>();
-                bridgeUuidPair.add("uuid");
-                bridgeUuidPair.add(bridge.getUuid());
-
-                List<Object> whereInner = new ArrayList<Object>();
-                whereInner.add("_uuid");
-                whereInner.add("==");
-                whereInner.add(bridgeUuidPair);
-
-                List<Object> where = new ArrayList<Object>();
-                where.add(whereInner);
-
-                MutateRequest mutateBridgeRequest = new MutateRequest("Bridge", where, mutations);
-
-                Map<String, Object> portRow = new HashMap<String, Object>();
-                portRow.put("name", portIdentifier);
-                String portType = null;
-                if (configs != null) {
-                    portType = (String)configs.get(ConfigConstants.TYPE);
-                    if (portType != null && portType.equalsIgnoreCase(OvsdbType.PortType.VLAN.name())) {
-                        try {
-                        portRow.put("tag", Integer.parseInt((String)configs.get(ConfigConstants.VLAN)));
-                        } catch (Exception e) {
+                if(brTable != null){
+                    Operation addBrMutRequest = null;
+                    String brUuid = null;
+                    for (String uuid : brTable.keySet()) {
+                        Bridge bridge = (Bridge) brTable.get(uuid);
+                        if (bridge.getName().contains(bridgeIdentifier)) {
+                            brUuid = uuid;
                         }
                     }
+
+                    UUID brUuidPair = new UUID(newPort);
+                    Mutation bm = new Mutation("ports", Mutator.INSERT, brUuidPair);
+                    List<Mutation> mutations = new ArrayList<Mutation>();
+                    mutations.add(bm);
+
+                    UUID uuid = new UUID(brUuid);
+                    Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
+                    List<Condition> where = new ArrayList<Condition>();
+                    where.add(condition);
+                    addBrMutRequest = new MutateOperation(Bridge.NAME.getName(), where, mutations);
+
+                    Interface interfaceRow = new Interface();
+                    interfaceRow.setName(portIdentifier);
+                    InsertOperation addIntfRequest = new InsertOperation(Interface.NAME.getName(),
+                            newInterface, interfaceRow);
+
+                    Port portRow = new Port();
+                    portRow.setName(portIdentifier);
+                    OvsDBSet<UUID> interfaces = new OvsDBSet<UUID>();
+                    UUID interfaceid = new UUID(newInterface);
+                    interfaces.add(interfaceid);
+                    portRow.setInterfaces(interfaces);
+                    InsertOperation addPortRequest = new InsertOperation(Port.NAME.getName(), newPort, portRow);
+
+                    TransactBuilder transaction = new TransactBuilder();
+                    transaction.addOperations(new ArrayList<Operation>
+                            (Arrays.asList(addBrMutRequest, addPortRequest, addIntfRequest)));
+
+                    ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
+                    List<OperationResult> tr = transResponse.get();
+                    List<Operation> requests = transaction.getRequests();
+                    Status status = new Status(StatusCode.SUCCESS);
+                    for (int i = 0; i < tr.size() ; i++) {
+                        if (i < requests.size()) requests.get(i).setResult(tr.get(i));
+                        if (tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
+                            OperationResult result = tr.get(i);
+                            status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+                        }
+                    }
+
+                    if (tr.size() > requests.size()) {
+                        OperationResult result = tr.get(tr.size()-1);
+                        logger.error("Error creating Bridge : {}\n Error : {}\n Details : {}", bridgeIdentifier,
+                                result.getError(),
+                                result.getDetails());
+                        status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+                    }
+                    return status;
                 }
-                ArrayList<String> interfaces = new ArrayList<String>();
-                interfaces.add("named-uuid");
-                interfaces.add(newInterface);
-                portRow.put("interfaces", interfaces);
-                InsertRequest addPortRequest = new InsertRequest("insert", "Port", newPort, portRow);
-
-                Map<String, Object> interfaceRow = new HashMap<String, Object>();
-                interfaceRow.put("name", portIdentifier);
-                //Tunnel specific
-
-                if (portType != null && portType.equalsIgnoreCase(OvsdbType.PortType.TUNNEL.name())) {
-                    interfaceRow.put("type", configs.get(ConfigConstants.TUNNEL_TYPE));
-                    ArrayList<Object> intopt = new ArrayList<Object>();
-                    interfaceRow.put("options", intopt);
-                    ArrayList<Object> intoptmap = new ArrayList<Object>();
-                    ArrayList<String> intoptep = new ArrayList<String>();
-                    intopt.add("map");
-                    intopt.add(intoptmap);
-                    intoptmap.add(intoptep);
-                    intoptep.add("remote_ip");
-                    intoptep.add((String)configs.get(ConfigConstants.DEST_IP));
-                }
-                InsertRequest addIntfRequest = new InsertRequest("insert", "Interface", newInterface, interfaceRow);
-
-                Object[] params = {"Open_vSwitch", mutateBridgeRequest, addIntfRequest, addPortRequest};
-                OvsdbMessage msg = new OvsdbMessage("transact", params);
-
-                //connection.sendMessage(msg);
+                return new Status(StatusCode.INTERNALERROR);
             }
-        }catch(Exception e){
+        } catch(Exception e){
             e.printStackTrace();
         }
-        return new Status(StatusCode.SUCCESS);
+        return new Status(StatusCode.INTERNALERROR);
     }
+
     /**
      * Implements the OVS Connection for Managers
      *
@@ -424,8 +418,81 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
 
     @Override
     public Status deletePort(Node node, String bridgeIdentifier, String portIdentifier) {
-        // TODO Auto-generated method stub
-        return null;
+
+        try{
+            if (connectionService == null) {
+                logger.error("Couldn't refer to the ConnectionService");
+                return new Status(StatusCode.NOSERVICE);
+            }
+
+            Connection connection = this.getConnection(node);
+            if (connection == null) {
+                return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
+            }
+
+            Map<String, Table<?>> brTable = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
+            Map<String, Table<?>> portTable = inventoryServiceInternal.getTableCache(node, Port.NAME.getName());
+            Operation delPortRequest = null;
+            String brUuid = null;
+            String portUuid = null;
+            if(brTable != null){
+                for (String uuid : brTable.keySet()) {
+                    Bridge bridge = (Bridge) brTable.get(uuid);
+                    if (bridge.getName().contains(bridgeIdentifier)) {
+                        brUuid = uuid;
+                    }
+                }
+            }
+            if(portTable != null){
+                for (String uuid : portTable.keySet()) {
+                    Port port = (Port) portTable.get(uuid);
+                    if (port.getName().contains(portIdentifier)) {
+                        portUuid = uuid;
+                    }
+                }
+            }
+
+            UUID portUuidPair = new UUID(portUuid);
+            Mutation bm = new Mutation("ports", Mutator.DELETE, portUuidPair);
+            List<Mutation> mutations = new ArrayList<Mutation>();
+            mutations.add(bm);
+
+            UUID uuid = new UUID(brUuid);
+            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
+            List<Condition> where = new ArrayList<Condition>();
+            where.add(condition);
+            delPortRequest = new MutateOperation(Bridge.NAME.getName(), where, mutations);
+
+            TransactBuilder transaction = new TransactBuilder();
+            transaction.addOperations(new ArrayList<Operation>(Arrays.asList(delPortRequest)));
+
+            ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
+            List<OperationResult> tr = transResponse.get();
+            List<Operation> requests = transaction.getRequests();
+            Status status = new Status(StatusCode.SUCCESS);
+            for (int i = 0; i < tr.size() ; i++) {
+                if (i < requests.size()) requests.get(i).setResult(tr.get(i));
+                if (tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
+                    OperationResult result = tr.get(i);
+                    status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+                }
+            }
+
+            if (tr.size() > requests.size()) {
+                OperationResult result = tr.get(tr.size()-1);
+                logger.error("Error creating Bridge : {}\n Error : {}\n Details : {}", bridgeIdentifier,
+                        result.getError(),
+                        result.getDetails());
+                status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+            }
+            if (status.isSuccess()) {
+                setBridgeOFController(node, bridgeIdentifier);
+            }
+            return status;
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+        return new Status(StatusCode.INTERNALERROR);
     }
 
     @Override
@@ -554,7 +621,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                 for (InetAddress ofControllerAddress : ofControllerAddrs) {
                     String cntrlUuid = null;
                     String newController = "tcp:"+ofControllerAddress.getHostAddress()+":"+ofControllerPort;
-                    if (controllerCache != null) {
+                      if (controllerCache != null) {
                         for (String uuid : controllerCache.keySet()) {
                             Controller controller = (Controller)controllerCache.get(uuid);
                             if (controller.getTarget().equals(newController)) {
@@ -710,6 +777,36 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         }
     }
 
+    public void _deletePort (CommandInterpreter ci) {
+        String nodeName = ci.nextArgument();
+        if (nodeName == null) {
+            ci.println("Please enter Node Name");
+            return;
+        }
+
+        String bridgeName = ci.nextArgument();
+        if (bridgeName == null) {
+            ci.println("Please enter Bridge Name");
+            return;
+        }
+
+        String portName = ci.nextArgument();
+        if (portName == null) {
+            ci.println("Please enter Port Name");
+            return;
+        }
+
+        Status status;
+        try {
+            status = this.deletePort(Node.fromString(nodeName), bridgeName, portName);
+            ci.println("Port deletion status : "+status.toString());
+        } catch (Throwable e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            ci.println("Failed to delete Port "+portName+" in Bridge "+bridgeName);
+        }
+    }
+
     public void _addPortVlan (CommandInterpreter ci) {
         String nodeName = ci.nextArgument();
         if (nodeName == null) {
@@ -837,6 +934,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         help.append("\t ovsconnect <ConnectionName> <ip-address>                        - Connect to OVSDB\n");
         help.append("\t addBridge <Node> <BridgeName>                                   - Add Bridge\n");
         help.append("\t addPort <Node> <BridgeName> <PortName>                          - Add Port\n");
+        help.append("\t delPort <Node> <BridgeName> <PortName>                          - Delete Port\n");
         help.append("\t addPortVlan <Node> <BridgeName> <PortName> <vlan>               - Add Port, Vlan\n");
         help.append("\t addTunnel <Node> <Bridge> <Port> <tunnel-type> <remote-ip>      - Add Tunnel\n");
         help.append("\t printCache <Node>                                               - Prints Table Cache");

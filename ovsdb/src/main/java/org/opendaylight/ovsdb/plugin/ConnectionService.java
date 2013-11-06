@@ -326,6 +326,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
 
     @Override
     public void update(Node node, UpdateNotification updateNotification) {
+        if (updateNotification == null) return;
         inventoryServiceInternal.processTableUpdates(node, updateNotification.getUpdate());
     }
 

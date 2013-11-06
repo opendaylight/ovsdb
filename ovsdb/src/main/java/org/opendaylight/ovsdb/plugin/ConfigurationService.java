@@ -566,11 +566,15 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
 
     @Override
     public List<String> getBridgeDomains(Node node) {
-
-        Connection connection = connectionService.getConnection(node);
-        Map<String, OVSBridge> existingBridges = OVSBridge.monitorBridge(connection);
-        List<String> bridgeDomains = new ArrayList<String>(existingBridges.keySet());
-        return bridgeDomains;
+        List<String> brlist = new ArrayList<String>();
+        Map<String, Table<?>> brTableCache = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
+        if(brTableCache != null){
+            for (String uuid : brTableCache.keySet()) {
+                Bridge bridge = (Bridge) brTableCache.get(uuid);
+                brlist.add(bridge.getName());
+            }
+        }
+        return brlist;
     }
 
     @Override
@@ -774,6 +778,23 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             // TODO Auto-generated catch block
             e.printStackTrace();
             ci.println("Failed to create Bridge "+bridgeName);
+        }
+    }
+
+    public void _getBridgeDomains (CommandInterpreter ci) {
+        String nodeName = ci.nextArgument();
+        if (nodeName == null) {
+            ci.println("Please enter Node Name");
+            return;
+        }
+        Status status;
+        List<String> brlist = new ArrayList<String>();
+        try {
+            brlist = this.getBridgeDomains(Node.fromString(nodeName));
+            ci.println("Existing Bridges: "+brlist.toString());
+        } catch (Throwable e) {
+            e.printStackTrace();
+            ci.println("Failed to list Bridges");
         }
     }
 
@@ -985,6 +1006,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         help.append("---OVSDB CLI---\n");
         help.append("\t ovsconnect <ConnectionName> <ip-address>                        - Connect to OVSDB\n");
         help.append("\t addBridge <Node> <BridgeName>                                   - Add Bridge\n");
+        help.append("\t getBridgeDomains                                                - Get Bridges\n");
         help.append("\t addPort <Node> <BridgeName> <PortName> <type> <options pairs>   - Add Port\n");
         help.append("\t delPort <Node> <BridgeName> <PortName>                          - Delete Port\n");
         help.append("\t addPortVlan <Node> <BridgeName> <PortName> <vlan>               - Add Port, Vlan\n");

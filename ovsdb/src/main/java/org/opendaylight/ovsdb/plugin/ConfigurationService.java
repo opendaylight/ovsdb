@@ -19,9 +19,11 @@ import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.notation.Function;
 import org.opendaylight.ovsdb.lib.notation.Mutation;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
+import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
 import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.table.Bridge;
+import org.opendaylight.ovsdb.lib.table.Controller;
 import org.opendaylight.ovsdb.lib.table.Interface;
 import org.opendaylight.ovsdb.lib.table.Open_vSwitch;
 import org.opendaylight.ovsdb.lib.table.Port;
@@ -221,6 +223,9 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                                                                                        result.getError(),
                                                                                        result.getDetails());
                 status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+            }
+            if (status.isSuccess()) {
+                setBridgeOFController(node, bridgeIdentifier);
             }
             return status;
         } catch(Exception e){
@@ -525,6 +530,98 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             controllers.add(InetAddress.getLoopbackAddress());
         }
         return controllers;
+    }
+
+    public Boolean setBridgeOFController(Node node, String bridgeIdentifier) {
+        try{
+            if (connectionService == null) {
+                logger.error("Couldn't refer to the ConnectionService");
+                return false;
+            }
+            Connection connection = this.getConnection(node);
+            if (connection == null) {
+                return false;
+            }
+
+            if (connection != null) {
+                List<InetAddress> ofControllerAddrs = getControllerIPAddresses();
+                short ofControllerPort = getControllerOFPort();
+                OvsDBSet<UUID> controllerUUIDs = new OvsDBSet<UUID>();
+                List<Operation> controllerInsertOperations = new ArrayList<Operation>();
+                Map<String, Table<?>> controllerCache = inventoryServiceInternal.getTableCache(node, Controller.NAME.getName());
+
+                int count = 0;
+                for (InetAddress ofControllerAddress : ofControllerAddrs) {
+                    String cntrlUuid = null;
+                    String newController = "tcp:"+ofControllerAddress.getHostAddress()+":"+ofControllerPort;
+                    if (controllerCache != null) {
+                        for (String uuid : controllerCache.keySet()) {
+                            Controller controller = (Controller)controllerCache.get(uuid);
+                            if (controller.getTarget().equals(newController)) {
+                                cntrlUuid = uuid;
+                                controllerUUIDs.add(new UUID(uuid));
+                                break;
+                            }
+                        }
+                    }
+                    if (cntrlUuid == null) {
+                        count++;
+                        String uuid_name = "new_controller_"+count;
+                        controllerUUIDs.add(new UUID(uuid_name));
+                        Controller controllerRow = new Controller();
+                        controllerRow.setTarget(newController);
+                        InsertOperation addCtlRequest = new InsertOperation(Controller.NAME.getName(), uuid_name, controllerRow);
+                        controllerInsertOperations.add(addCtlRequest);
+                    }
+                }
+                String brCntrlUuid = null;
+                Map<String, Table<?>> brTableCache = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
+                for (String uuid : brTableCache.keySet()) {
+                    Bridge bridge = (Bridge)brTableCache.get(uuid);
+                    if (bridge.getName().contains(bridgeIdentifier)) {
+                        brCntrlUuid = uuid;
+                    }
+                }
+                Operation addControlRequest = null;
+                Mutation bm = new Mutation("controller", Mutator.INSERT, controllerUUIDs);
+                List<Mutation> mutations = new ArrayList<Mutation>();
+                mutations.add(bm);
+
+                UUID uuid = new UUID(brCntrlUuid);
+                Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
+                List<Condition> where = new ArrayList<Condition>();
+                where.add(condition);
+                addControlRequest = new MutateOperation(Bridge.NAME.getName(), where, mutations);
+
+                TransactBuilder transaction = new TransactBuilder();
+                transaction.addOperations(controllerInsertOperations);
+                transaction.addOperation(addControlRequest);
+
+                ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
+                List<OperationResult> tr = transResponse.get();
+                List<Operation> requests = transaction.getRequests();
+                Status status = new Status(StatusCode.SUCCESS);
+                for (int i = 0; i < tr.size() ; i++) {
+                    if (i < requests.size()) requests.get(i).setResult(tr.get(i));
+                    if (tr.get(i) != null && tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
+                        OperationResult result = tr.get(i);
+                        status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+                    }
+                }
+
+                if (tr.size() > requests.size()) {
+                    OperationResult result = tr.get(tr.size()-1);
+                    logger.error("Error creating Bridge : {}\n Error : {}\n Details : {}", bridgeIdentifier,
+                            result.getError(),
+                            result.getDetails());
+                    status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+
+                }
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return true;
     }
 
     public void _ovsconnect (CommandInterpreter ci) {

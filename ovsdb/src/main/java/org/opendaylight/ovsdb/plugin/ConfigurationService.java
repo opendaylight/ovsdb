@@ -1,5 +1,6 @@
 package org.opendaylight.ovsdb.plugin;
 
+import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -280,13 +281,45 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                     where.add(condition);
                     addBrMutRequest = new MutateOperation(Bridge.NAME.getName(), where, mutations);
 
+                    OvsDBMap<String, String> options = null;
+                    String type = null;
+                    OvsDBSet<BigInteger> tags = null;
+                    if (configs != null) {
+                        type = (String) configs.get(ConfigConstants.TYPE);
+                        Map<String, String> customConfigs = (Map<String, String>) configs.get(ConfigConstants.CUSTOM);
+                        if (customConfigs != null) {
+                            options = new OvsDBMap<String, String>();
+                            for (String customConfig : customConfigs.keySet()) {
+                                options.put(customConfig, customConfigs.get(customConfig));
+                            }
+                        }
+                    }
+
                     Interface interfaceRow = new Interface();
                     interfaceRow.setName(portIdentifier);
+
+                    if (type != null) {
+                        if (type.equalsIgnoreCase(OvsdbType.PortType.TUNNEL.name())) {
+                            interfaceRow.setType((String)configs.get(ConfigConstants.TUNNEL_TYPE));
+                            if (options == null) options = new OvsDBMap<String, String>();
+                            options.put("remote_ip", (String)configs.get(ConfigConstants.DEST_IP));
+                        } else if (type.equalsIgnoreCase(OvsdbType.PortType.VLAN.name())) {
+                            tags = new OvsDBSet<BigInteger>();
+                            tags.add(BigInteger.valueOf(Integer.parseInt((String)configs.get(ConfigConstants.VLAN))));
+                        } else if (type.equalsIgnoreCase(OvsdbType.PortType.PATCH.name())) {
+                            interfaceRow.setType(type.toLowerCase());
+                        }
+                    }
+                    if (options != null) {
+                        interfaceRow.setOptions(options);
+                    }
+
                     InsertOperation addIntfRequest = new InsertOperation(Interface.NAME.getName(),
                             newInterface, interfaceRow);
 
                     Port portRow = new Port();
                     portRow.setName(portIdentifier);
+                    if (tags != null) portRow.setTag(tags);
                     OvsDBSet<UUID> interfaces = new OvsDBSet<UUID>();
                     UUID interfaceid = new UUID(newInterface);
                     interfaces.add(interfaceid);
@@ -485,9 +518,6 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                         result.getDetails());
                 status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
             }
-            if (status.isSuccess()) {
-                setBridgeOFController(node, bridgeIdentifier);
-            }
             return status;
         } catch(Exception e){
             e.printStackTrace();
@@ -621,7 +651,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                 for (InetAddress ofControllerAddress : ofControllerAddrs) {
                     String cntrlUuid = null;
                     String newController = "tcp:"+ofControllerAddress.getHostAddress()+":"+ofControllerPort;
-                      if (controllerCache != null) {
+                    if (controllerCache != null) {
                         for (String uuid : controllerCache.keySet()) {
                             Controller controller = (Controller)controllerCache.get(uuid);
                             if (controller.getTarget().equals(newController)) {
@@ -766,9 +796,31 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             return;
         }
 
+        String type = ci.nextArgument();
+
+        Map<String, String> configs = new HashMap<String, String>();
+        while(true) {
+            String configKey = ci.nextArgument();
+            if (configKey == null) break;
+            String configValue = ci.nextArgument();
+            if (configValue == null) break;
+            configs.put(configKey, configValue);
+        }
+
+        Map<ConfigConstants, Object> customConfigs = null;
+        if (type != null) {
+            customConfigs = new HashMap<ConfigConstants, Object>();
+            customConfigs.put(ConfigConstants.TYPE, type);
+        }
+
+        if (configs.size() > 0) {
+            if (customConfigs == null) customConfigs = new HashMap<ConfigConstants, Object>();
+            customConfigs.put(ConfigConstants.CUSTOM, configs);
+            ci.println(customConfigs.toString());
+        }
         Status status;
         try {
-            status = this.addPort(Node.fromString(nodeName), bridgeName, portName, null);
+            status = this.addPort(Node.fromString(nodeName), bridgeName, portName, customConfigs);
             ci.println("Port creation status : "+status.toString());
         } catch (Throwable e) {
             // TODO Auto-generated catch block
@@ -933,7 +985,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         help.append("---OVSDB CLI---\n");
         help.append("\t ovsconnect <ConnectionName> <ip-address>                        - Connect to OVSDB\n");
         help.append("\t addBridge <Node> <BridgeName>                                   - Add Bridge\n");
-        help.append("\t addPort <Node> <BridgeName> <PortName>                          - Add Port\n");
+        help.append("\t addPort <Node> <BridgeName> <PortName> <type> <options pairs>   - Add Port\n");
         help.append("\t delPort <Node> <BridgeName> <PortName>                          - Delete Port\n");
         help.append("\t addPortVlan <Node> <BridgeName> <PortName> <vlan>               - Add Port, Vlan\n");
         help.append("\t addTunnel <Node> <Bridge> <Port> <tunnel-type> <remote-ip>      - Add Tunnel\n");

@@ -9,7 +9,9 @@ public class OvsdbType {
     public enum PortType {
         VLAN("vlan"),
         TUNNEL("Tunnel"),
-        BONDING("Bonding");
+        BONDING("Bonding"),
+        PATCH("patch"),
+        INTERNAL("internal");
 
         private PortType(String name) {
             this.name = name;

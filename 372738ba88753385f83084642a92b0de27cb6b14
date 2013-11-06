@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_fff33008",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 580,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-11-06T19:32:25Z",
+      "side": 1,
+      "message": "We dont have to check for ConnectionService or connection availability for this function to succeed.\n\nSo, i would rather remove all the above checks and just do the simple act of getting the cache info and return it :)",
+      "revId": "372738ba88753385f83084642a92b0de27cb6b14",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

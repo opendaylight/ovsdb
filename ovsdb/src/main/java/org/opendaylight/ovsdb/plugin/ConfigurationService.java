@@ -202,9 +202,21 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             interfaceRow.setType("internal");
             InsertOperation addIntfRequest = new InsertOperation(Interface.NAME.getName(), newInterface, interfaceRow);
 
+            /* Update config version */
+            String ovsTableUUID = (String) ovsTable.keySet().toArray()[0];
+            Mutation bm = new Mutation("next_cfg", Mutator.SUM, 1);
+            List<Mutation> mutations = new ArrayList<Mutation>();
+            mutations.add(bm);
+
+            UUID uuid = new UUID(ovsTableUUID);
+            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
+            List<Condition> where = new ArrayList<Condition>();
+            where.add(condition);
+            MutateOperation updateCfgVerRequest = new MutateOperation(Open_vSwitch.NAME.getName(), where, mutations);
+
             TransactBuilder transaction = new TransactBuilder();
             transaction.addOperations(new ArrayList<Operation>(
-                                      Arrays.asList(addSwitchRequest, addIntfRequest, addPortRequest, addBridgeRequest)));
+                                      Arrays.asList(addSwitchRequest, addIntfRequest, addPortRequest, addBridgeRequest, updateCfgVerRequest)));
 
             ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
             List<OperationResult> tr = transResponse.get();

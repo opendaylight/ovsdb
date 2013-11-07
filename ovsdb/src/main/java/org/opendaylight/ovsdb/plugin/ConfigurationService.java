@@ -212,7 +212,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             Status status = new Status(StatusCode.SUCCESS);
             for (int i = 0; i < tr.size() ; i++) {
                 if (i < requests.size()) requests.get(i).setResult(tr.get(i));
-                if (tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
+                if (tr.get(i) != null && tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
                     OperationResult result = tr.get(i);
                     status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
                 }

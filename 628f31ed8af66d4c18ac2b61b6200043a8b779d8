@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_e644c575",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 606,
+      "author": {
+        "id": 912
+      },
+      "writtenOn": "2013-11-08T09:26:35Z",
+      "side": 1,
+      "message": "With openvswitch it is possible that a transaction returns an array with null elements. As there is only one transaction here it is not a big risk. But for safety we should check if tr.get(i) !\u003d null",
+      "revId": "628f31ed8af66d4c18ac2b61b6200043a8b779d8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_6658d556",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 877,
+      "author": {
+        "id": 912
+      },
+      "writtenOn": "2013-11-08T09:26:35Z",
+      "side": 1,
+      "message": "Node.fromString can return null. deleteBridgeDomain doesn\u0027t check this resulting in an NPE. Should we check for this even though this is a debug function?",
+      "revId": "628f31ed8af66d4c18ac2b61b6200043a8b779d8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

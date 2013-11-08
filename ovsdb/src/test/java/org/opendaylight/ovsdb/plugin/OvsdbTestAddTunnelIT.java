@@ -6,26 +6,22 @@ import java.util.Map;
 
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.core.NodeConnector;
-import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.networkconfig.bridgedomain.ConfigConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.opendaylight.ovsdb.plugin.*;
 
-public class OvsdbTestAddTunnel {
+import com.google.gson.internal.Pair;
+
+public class OvsdbTestAddTunnelIT extends OvsdbTestBase {
     private static final Logger logger = LoggerFactory
-            .getLogger(OvsdbTestAddTunnel.class);
+            .getLogger(OvsdbTestAddTunnelIT.class);
 
     @Test
     public void addTunnel() throws Throwable{
-        Node.NodeIDType.registerIDType("OVS", String.class);
-        NodeConnector.NodeConnectorIDType.registerIDType("OVS", String.class, "OVS");
+        Pair<ConnectionService, Node> connection = getTestConnection();
+        ConnectionService connectionService = connection.first;
+        Node node = connection.second;
 
-        ConnectionService connectionService = new ConnectionService();
-        connectionService.init();
-
-        String identifier = "TEST";
         /**
          * tunnelendpoint IP address of the
          * destination Tunnel Endpoint.
@@ -40,15 +36,6 @@ public class OvsdbTestAddTunnel {
         String tunencap = encap.toString();
         String tunnelendpoint = "192.168.100.100";
 
-        Map<ConnectionConstants, String> params = new HashMap<ConnectionConstants, String>();
-        params.put(ConnectionConstants.ADDRESS, "172.28.30.51");
-        params.put(ConnectionConstants.PORT, "6634");
-
-        Node node = connectionService.connect(identifier, params);
-        if(node == null){
-            logger.error("Could not connect to ovsdb server");
-            return;
-        }
         /**
          * Create an Encapsulated Tunnel Interface and destination Tunnel Endpoint
          *

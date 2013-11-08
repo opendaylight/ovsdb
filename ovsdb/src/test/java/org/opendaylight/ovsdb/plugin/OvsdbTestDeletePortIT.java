@@ -1,24 +1,23 @@
 package org.opendaylight.ovsdb.plugin;
 
 import org.junit.Test;
-import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
-import org.opendaylight.controller.sal.networkconfig.bridgedomain.ConfigConstants;
 import org.opendaylight.ovsdb.plugin.ConfigurationService;
 import org.opendaylight.ovsdb.plugin.ConnectionService;
+import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class OvsdbTestBridgeConfig {
+public class OvsdbTestDeletePortIT {
     private static final Logger logger = LoggerFactory
-            .getLogger(OvsdbTestSetManager.class);
+            .getLogger(OvsdbTestAddPortIT.class);
 
     @Test
-    public void setBridgeConfig() throws Throwable{
+    public void deletePort() throws Throwable{
         Node.NodeIDType.registerIDType("OVS", String.class);
         NodeConnector.NodeConnectorIDType.registerIDType("OVS", String.class, "OVS");
 
@@ -26,25 +25,23 @@ public class OvsdbTestBridgeConfig {
         connectionService.init();
         String identifier = "TEST";
         Map<ConnectionConstants, String> params = new HashMap<ConnectionConstants, String>();
-        params.put(ConnectionConstants.ADDRESS, "192.168.254.128");
-        params.put(ConnectionConstants.PORT, "6640");
-
-        Map<ConfigConstants, Object> configs = new HashMap<ConfigConstants, Object>();
-
-        Map<String, String> exterIDPairs = new HashMap<String, String>();
-        exterIDPairs.put("bridge-foo", "bri-bar");
-        //Will accept multiple array pairs. Pairs must be arrays not maps.
-        configs.put(ConfigConstants.CUSTOM, exterIDPairs);
+        params.put(ConnectionConstants.ADDRESS, "10.12.0.78");
+        params.put(ConnectionConstants.PORT, "6634");
 
         Node node = connectionService.connect(identifier, params);
         if(node == null){
             logger.error("Could not connect to ovsdb server");
             return;
         }
-
+        /**
+         * Deletes an existing port from an existing bridge
+         * Ex. ovs-vsctl del-port ovsbr0 tap0
+         * @param node Node serving this configuration service
+         * @param bridgeDomainIdentifier String representation of a Bridge Domain
+         * @param portIdentifier String representation of a user defined Port Name
+         */
         ConfigurationService configurationService = new ConfigurationService();
         configurationService.setConnectionServiceInternal(connectionService);
-        configurationService.addBridgeDomainConfig(node, "br0", configs);
+        configurationService.deletePort(node, "ovsbr0", "tap2");
     }
-
 }

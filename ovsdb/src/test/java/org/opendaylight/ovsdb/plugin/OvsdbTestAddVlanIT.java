@@ -1,40 +1,28 @@
 package org.opendaylight.ovsdb.plugin;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.core.NodeConnector;
-import org.opendaylight.ovsdb.plugin.ConfigurationService;
-import org.opendaylight.ovsdb.plugin.ConnectionService;
-import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.networkconfig.bridgedomain.ConfigConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.google.gson.internal.Pair;
 
-public class OvsdbTestAddVlan {
+public class OvsdbTestAddVlanIT extends OvsdbTestBase {
     private static final Logger logger = LoggerFactory
-            .getLogger(OvsdbTestAddVlan.class);
+            .getLogger(OvsdbTestAddVlanIT.class);
 
     @Test
     public void addPortVlan() throws Throwable{
-        Node.NodeIDType.registerIDType("OVS", String.class);
-        NodeConnector.NodeConnectorIDType.registerIDType("OVS", String.class, "OVS");
+        Pair<ConnectionService, Node> connection = getTestConnection();
+        ConnectionService connectionService = connection.first;
+        Node node = connection.second;
 
-        ConnectionService connectionService = new ConnectionService();
-        connectionService.init();
-        String identifier = "TEST";
-        Map<ConnectionConstants, String> params = new HashMap<ConnectionConstants, String>();
-        params.put(ConnectionConstants.ADDRESS, "172.28.30.51");
-        params.put(ConnectionConstants.PORT, "6634");
         int vlanid = 100;
 
-        Node node = connectionService.connect(identifier, params);
-        if(node == null){
-            logger.error("Could not connect to ovsdb server");
-            return;
-        }
         /**
          * Create a Port with a user defined VLAN, and attach it to the specified bridge.
          *

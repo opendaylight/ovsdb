@@ -11,6 +11,11 @@
     <version>0.5.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
+    <properties>
+        <java.version.source>1.7</java.version.source>
+        <java.version.target>1.7</java.version.target>
+    </properties>
+
     <build>
         <plugins>
             <plugin>
@@ -62,6 +67,16 @@
                  <skipTests>true</skipTests>
                </configuration>
              </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${java.version.source}</source>
+                    <target>${java.version.target}</target>
+                    <testSource>${java.version.source}</testSource>
+                    <testTarget>${java.version.target}</testTarget>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <dependencies>

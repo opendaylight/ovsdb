@@ -15,9 +15,18 @@
         <java.version.source>1.7</java.version.source>
         <java.version.target>1.7</java.version.target>
         <skip.integrationtest>true</skip.integrationtest>
+        <!-- used for filtering the integration test resource -->
+        <ovsdbserver.ipaddress>192.168.56.10</ovsdbserver.ipaddress>
+        <ovsdbserver.port>6640</ovsdbserver.port>
     </properties>
 
     <build>
+      <testResources>
+        <testResource>
+          <directory>src/test/resources</directory>
+          <filtering>true</filtering>
+        </testResource>
+      </testResources>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>

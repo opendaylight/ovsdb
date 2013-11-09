@@ -1,15 +1,21 @@
 package org.opendaylight.ovsdb.lib.message;
 
-import com.google.common.util.concurrent.ListenableFuture;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.collections.MapUtils;
+import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.lib.database.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.message.MonitorRequestBuilder;
-import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
-import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.message.operations.InsertOperation;
 import org.opendaylight.ovsdb.lib.message.operations.MutateOperation;
 import org.opendaylight.ovsdb.lib.message.operations.Operation;
@@ -30,19 +36,29 @@ import org.opendaylight.ovsdb.plugin.Connection;
 import org.opendaylight.ovsdb.plugin.ConnectionService;
 import org.opendaylight.ovsdb.plugin.InventoryService;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
+import com.google.common.util.concurrent.ListenableFuture;
 
-public class OVSDBNettyFactoryTest {
+public class OVSDBNettyFactoryIT {
     InventoryService inventoryService;
     private static String bridgeIdentifier = "br1";
+    private Properties props;
+
+    @Before
+    public void initialize() throws IOException {
+        InputStream is = this.getClass().getClassLoader()
+                .getResourceAsStream(
+                        "org/opendaylight/ovsdb/lib/message/integration-test.properties");
+        if (is == null) {
+            throw new IOException("Unable to load integration-test.properties");
+        }
+        props = new Properties();
+        props.load(is);
+
+    }
 
     @Test
-    public void testSome() throws InterruptedException, ExecutionException {
+    public void testSome() throws InterruptedException, ExecutionException,
+            IOException {
         ConnectionService connectionService = new ConnectionService();
         connectionService.init();
         inventoryService = new InventoryService();
@@ -50,24 +66,23 @@ public class OVSDBNettyFactoryTest {
         connectionService.setInventoryServiceInternal(inventoryService);
         Node.NodeIDType.registerIDType("OVS", String.class);
         Map<ConnectionConstants, String> params = new HashMap<ConnectionConstants, String>();
-        params.put(ConnectionConstants.ADDRESS, "192.168.56.101");
-        params.put(ConnectionConstants.PORT, "6634");
+        params.put(ConnectionConstants.ADDRESS,
+                props.getProperty("ovsdbserver.ipaddress"));
+        params.put(ConnectionConstants.PORT,
+                props.getProperty("ovsdbserver.port", "6640"));
         Node node = connectionService.connect("TEST", params);
         if (node == null) {
-            System.out.println("ERROR : Unable to connect to the host");
-            return;
+            throw new IOException("Unable to connect to the host");
         }
 
         Connection connection = connectionService.getConnection(node);
         if (connection == null) {
-            System.out.println("ERROR : Unable to connect to the host");
-            return;
+            throw new IOException("Unable to connect to the host");
         }
 
         OvsdbRPC ovsdb = connection.getRpc();
         if (ovsdb == null) {
-            System.out.println("ERROR : Unable to obtain RPC instance");
-            return;
+            throw new IOException("Unable to obtain RPC instance");
         }
 
         //GET DB-SCHEMA
@@ -144,7 +159,7 @@ public class OVSDBNettyFactoryTest {
 
         TransactBuilder transaction = new TransactBuilder();
         transaction.addOperations(new ArrayList<Operation>(
-                                  Arrays.asList(addSwitchRequest, addIntfRequest, addPortRequest, addBridgeRequest)));
+                Arrays.asList(addSwitchRequest, addIntfRequest, addPortRequest, addBridgeRequest)));
 
         ListenableFuture<List<OperationResult>> transResponse = ovsdb.transact(transaction);
         System.out.println("Transcation sent :");

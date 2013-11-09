@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_d1497cb8",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 487,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-11-09T01:59:32Z",
+      "side": 1,
+      "message": "Why is this changed, I thought portUuid is the valid UUID to use here ?",
+      "revId": "4f5b005b706be872bc7976a7a2555c843e94e64d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_b1c84823",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 492,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-11-09T01:59:32Z",
+      "side": 1,
+      "message": "Why is this changed, I thought brUuid is the valid UUID to use here ?",
+      "revId": "4f5b005b706be872bc7976a7a2555c843e94e64d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_713c10e3",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 581,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-11-09T01:59:32Z",
+      "side": 1,
+      "message": "We dont need this for loop. Being an single entry table, you can just do OvsTable.keySet().get(0) ?",
+      "revId": "4f5b005b706be872bc7976a7a2555c843e94e64d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

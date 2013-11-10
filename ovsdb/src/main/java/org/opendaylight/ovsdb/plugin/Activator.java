@@ -13,6 +13,7 @@ import org.opendaylight.controller.sal.utils.INodeFactory;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
+import org.opendaylight.controller.sal.inventory.IPluginOutInventoryService;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,6 +96,11 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.setInterface(
                     new String[] {IPluginInInventoryService.class.getName(),
                             InventoryServiceInternal.class.getName()}, props);
+            c.add(createServiceDependency()
+                    .setService(IPluginOutInventoryService.class, "(scope=Global)")
+                    .setCallbacks("setPluginOutInventoryServices",
+                            "unsetPluginOutInventoryServices")
+                    .setRequired(true));
         }
 
         if (imp.equals(NodeFactory.class)) {

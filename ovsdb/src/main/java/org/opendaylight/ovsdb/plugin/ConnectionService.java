@@ -15,6 +15,7 @@ import io.netty.util.CharsetUtil;
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.connection.IPluginInConnectionService;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.lib.database.DatabaseSchema;
@@ -39,8 +40,10 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
@@ -215,6 +218,11 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         ovsdb.registerCallback(instance);
         ovsdbConnections.put(identifier, connection);
 
+        ChannelConnectionHandler handler = new ChannelConnectionHandler();
+        handler.setNode(node);
+        handler.setConnectionService(this);
+        ChannelFuture closeFuture = channel.closeFuture();
+        closeFuture.addListener(handler);
         // Keeping the Initial inventory update(s) on its own thread.
         new Thread() {
             Connection connection;
@@ -237,14 +245,21 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         return node;
     }
 
+    public void channelClosed(Node node) throws Exception {
+        logger.error("Connection to Node : {} closed", node);
+        inventoryServiceInternal.removeNode(node);
+    }
+
     private void initializeInventoryForNewNode (Connection connection) throws InterruptedException, ExecutionException {
         Channel channel = connection.getChannel();
         InetAddress address = ((InetSocketAddress)channel.remoteAddress()).getAddress();
         int port = ((InetSocketAddress)channel.remoteAddress()).getPort();
         IPAddressProperty addressProp = new IPAddressProperty(address);
         L4PortProperty l4Port = new L4PortProperty(port);
-        inventoryServiceInternal.addNodeProperty(connection.getNode(), addressProp);
-        inventoryServiceInternal.addNodeProperty(connection.getNode(), l4Port);
+        Set<Property> props = new HashSet<Property>();
+        props.add(addressProp);
+        props.add(l4Port);
+        inventoryServiceInternal.addNode(connection.getNode(), props);
 
         List<String> dbNames = Arrays.asList(Open_vSwitch.NAME.getName());
         ListenableFuture<DatabaseSchema> dbSchemaF = connection.getRpc().get_schema(dbNames);

@@ -6,13 +6,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
+import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
+import org.opendaylight.controller.sal.inventory.IPluginOutInventoryService;
 import org.opendaylight.ovsdb.lib.database.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.message.TableUpdate;
 import org.opendaylight.ovsdb.lib.message.TableUpdate.Row;
@@ -29,7 +32,8 @@ import com.google.common.collect.Maps;
 public class InventoryService implements IPluginInInventoryService, InventoryServiceInternal {
     private static final Logger logger = LoggerFactory
             .getLogger(InventoryService.class);
-
+    private final Set<IPluginOutInventoryService> pluginOutInventoryServices =
+            new CopyOnWriteArraySet<IPluginOutInventoryService>();
     private ConcurrentMap<Node, Map<String, Property>> nodeProps;
     private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps;
     private Map<Node, NodeDB> dbCache = Maps.newHashMap();
@@ -70,6 +74,19 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
      *
      */
     public void stop() {
+    }
+
+    public void setPluginOutInventoryServices(IPluginOutInventoryService service) {
+        if (this.pluginOutInventoryServices != null) {
+            this.pluginOutInventoryServices.add(service);
+        }
+    }
+
+    public void unsetPluginOutInventoryServices(
+            IPluginOutInventoryService service) {
+        if (this.pluginOutInventoryServices != null) {
+            this.pluginOutInventoryServices.remove(service);
+        }
     }
 
     /**
@@ -161,11 +178,21 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
     }
 
     @Override
-    public void addNodeProperty(Node n, Property prop) {
-        Map<String, Property> nProp = nodeProps.get(n);
+    public void addNode(Node node, Set<Property> props) {
+        addNodeProperty(node, UpdateType.ADDED, props);
+    }
+
+    @Override
+    public void addNodeProperty(Node node, UpdateType type, Set<Property> props) {
+        Map<String, Property> nProp = nodeProps.get(node);
         if (nProp == null) nProp = new HashMap<String, Property>();
-        nProp.put(prop.getName(), prop);
-        nodeProps.put(n, nProp);
+        for (Property prop : props) {
+            nProp.put(prop.getName(), prop);
+        }
+        nodeProps.put(node, nProp);
+        for (IPluginOutInventoryService service : pluginOutInventoryServices) {
+            service.updateNode(node, type, props);
+        }
     }
 
     @Override
@@ -183,5 +210,14 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
             dbCache.put(n, db);
         }
         db.setSchema(schema);
+    }
+
+    @Override
+    public void removeNode(Node node) {
+        for (IPluginOutInventoryService service : pluginOutInventoryServices) {
+            service.updateNode(node, UpdateType.REMOVED, null);
+        }
+        nodeProps.remove(node);
+        dbCache.remove(node);
     }
 }

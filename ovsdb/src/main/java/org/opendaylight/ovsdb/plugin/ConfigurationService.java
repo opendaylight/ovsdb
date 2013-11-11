@@ -4,10 +4,26 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
+import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
+import org.opendaylight.controller.sal.connection.ConnectionConstants;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.networkconfig.bridgedomain.ConfigConstants;
+import org.opendaylight.controller.sal.networkconfig.bridgedomain.IPluginInBridgeDomainConfigService;
+import org.opendaylight.controller.sal.utils.NetUtils;
+import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.lib.database.OVSInstance;
 import org.opendaylight.ovsdb.lib.database.OvsdbType;
 import org.opendaylight.ovsdb.lib.message.TransactBuilder;
@@ -28,15 +44,6 @@ import org.opendaylight.ovsdb.lib.table.Interface;
 import org.opendaylight.ovsdb.lib.table.Open_vSwitch;
 import org.opendaylight.ovsdb.lib.table.Port;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
-import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
-import org.opendaylight.controller.sal.connection.ConnectionConstants;
-import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.core.NodeConnector;
-import org.opendaylight.controller.sal.networkconfig.bridgedomain.ConfigConstants;
-import org.opendaylight.controller.sal.networkconfig.bridgedomain.IPluginInBridgeDomainConfigService;
-import org.opendaylight.controller.sal.utils.NetUtils;
-import org.opendaylight.controller.sal.utils.Status;
-import org.opendaylight.controller.sal.utils.StatusCode;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
@@ -687,7 +694,20 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         }
 
         controllers = new ArrayList<InetAddress>();
-        InetAddress controllerIP;
+        String addressString = System.getProperty("of.address");
+        if (addressString != null) {
+            InetAddress controllerIP = null;
+            try {
+                controllerIP = InetAddress.getByName(addressString);
+                if (controllerIP != null) {
+                    controllers.add(controllerIP);
+                    return controllers;
+                }
+            } catch (Exception e) {
+                logger.debug("Invalid IP: {}, use wildcard *", addressString);
+            }
+        }
+
         Enumeration<NetworkInterface> nets;
         try {
             nets = NetworkInterface.getNetworkInterfaces();

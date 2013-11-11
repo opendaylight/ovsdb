@@ -145,4 +145,31 @@ public  class TableUpdates extends Response {
     public void setSSLUpdate(TableUpdate<SSL> sslUpdate) {
         put(SSL.NAME, sslUpdate);
     }
+
+    @JsonProperty("Flow_Table")
+    public TableUpdate<Flow_Table> getFlow_TableUpdate() {
+        return getUpdate(Flow_Table.NAME);
+    }
+
+    public void setFlow_TableUpdate(TableUpdate<Flow_Table> Flow_TableUpdate) {
+        put(Flow_Table.NAME, Flow_TableUpdate);
+    }
+
+    @JsonProperty("Flow_Sample_Collector_Set")
+    public TableUpdate<Flow_Sample_Collector_Set> getFlow_Sample_Collector_SetUpdate() {
+        return getUpdate(Flow_Sample_Collector_Set.NAME);
+    }
+
+    public void setFlow_Sample_Collector_SetUpdate(TableUpdate<Flow_Sample_Collector_Set> Flow_Sample_Collector_SetUpdate) {
+        put(Flow_Sample_Collector_Set.NAME, Flow_Sample_Collector_SetUpdate);
+    }
+
+    @JsonProperty("IPFIX")
+    public TableUpdate<IPFIX> getIPFIXUpdate() {
+        return getUpdate(IPFIX.NAME);
+    }
+
+    public void setIPFIXUpdate(TableUpdate<IPFIX> IPFIXUpdate) {
+        put(IPFIX.NAME, IPFIXUpdate);
+    }
 }

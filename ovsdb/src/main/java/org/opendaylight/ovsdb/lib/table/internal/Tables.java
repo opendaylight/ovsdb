@@ -21,6 +21,9 @@ public class Tables {
         tables.add(new Queue());
         tables.add(new SFlow());
         tables.add(new SSL());
+        tables.add(new Flow_Sample_Collector_Set());
+        tables.add(new Flow_Table());
+        tables.add(new IPFIX());
     }
     public static List<Table> getTables() {
         return tables;

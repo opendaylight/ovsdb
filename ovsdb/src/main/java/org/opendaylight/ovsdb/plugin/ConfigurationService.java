@@ -39,10 +39,18 @@ import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
 import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.table.Bridge;
+import org.opendaylight.ovsdb.lib.table.Capability;
 import org.opendaylight.ovsdb.lib.table.Controller;
 import org.opendaylight.ovsdb.lib.table.Interface;
+import org.opendaylight.ovsdb.lib.table.Manager;
+import org.opendaylight.ovsdb.lib.table.Mirror;
+import org.opendaylight.ovsdb.lib.table.NetFlow;
 import org.opendaylight.ovsdb.lib.table.Open_vSwitch;
 import org.opendaylight.ovsdb.lib.table.Port;
+import org.opendaylight.ovsdb.lib.table.Qos;
+import org.opendaylight.ovsdb.lib.table.Queue;
+import org.opendaylight.ovsdb.lib.table.SFlow;
+import org.opendaylight.ovsdb.lib.table.SSL;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -51,7 +59,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
-public class ConfigurationService implements IPluginInBridgeDomainConfigService, CommandProvider
+public class ConfigurationService implements IPluginInBridgeDomainConfigService, OVSDBConfigService,
+                                             CommandProvider
 {
     private static final Logger logger = LoggerFactory
             .getLogger(ConfigurationService.class);
@@ -222,7 +231,11 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
 
             TransactBuilder transaction = new TransactBuilder();
             transaction.addOperations(new ArrayList<Operation>(
-                                      Arrays.asList(addSwitchRequest, addIntfRequest, addPortRequest, addBridgeRequest, updateCfgVerRequest)));
+                                      Arrays.asList(addSwitchRequest,
+                                                    addIntfRequest,
+                                                    addPortRequest,
+                                                    addBridgeRequest,
+                                                    updateCfgVerRequest)));
 
             ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
             List<OperationResult> tr = transResponse.get();
@@ -816,6 +829,279 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             e.printStackTrace();
         }
         return true;
+    }
+
+    @Override
+    public Status insertRow(Node node, String tableName, String parent_uuid, Table<?> row) {
+        logger.error("tableName : {}, parent_uuid : {} Row : {}", tableName, parent_uuid, row.toString());
+        Status statusWithUUID = null;
+
+        // Schema based Table handling will help fix this static Table handling.
+
+        if (row.getTableName().getName().equalsIgnoreCase("Bridge")) {
+            statusWithUUID = insertBridgeRow(node, parent_uuid, (Bridge)row);
+        }
+        else if (row.getTableName().getName().equalsIgnoreCase("Capbility")) {
+            statusWithUUID = insertCapabilityRow(node, parent_uuid, (Capability)row);
+        }
+        else if (row.getTableName().getName().equalsIgnoreCase("Controller")) {
+            statusWithUUID = insertControllerRow(node, parent_uuid, (Controller)row);
+        }
+        else if (row.getTableName().getName().equalsIgnoreCase("Interface")) {
+            statusWithUUID = insertInterfaceRow(node, parent_uuid, (Interface)row);
+        }
+        else if (row.getTableName().getName().equalsIgnoreCase("Manager")) {
+            statusWithUUID = insertManagerRow(node, parent_uuid, (Manager)row);
+        }
+        else if (row.getTableName().getName().equalsIgnoreCase("Mirror")) {
+            statusWithUUID = insertMirrorRow(node, parent_uuid, (Mirror)row);
+        }
+        else if (row.getTableName().getName().equalsIgnoreCase("NetFlow")) {
+            statusWithUUID = insertNetFlowRow(node, parent_uuid, (NetFlow)row);
+        }
+        else if (row.getTableName().getName().equalsIgnoreCase("Open_vSwitch")) {
+            statusWithUUID = insertOpen_vSwitchRow(node, (Open_vSwitch)row);
+        }
+        else if (row.getTableName().getName().equalsIgnoreCase("Port")) {
+            statusWithUUID = insertPortRow(node, parent_uuid, (Port)row);
+        }
+        else if (row.getTableName().getName().equalsIgnoreCase("QoS")) {
+            statusWithUUID = insertQosRow(node, parent_uuid, (Qos)row);
+        }
+        else if (row.getTableName().getName().equalsIgnoreCase("Queue")) {
+            statusWithUUID = insertQueueRow(node, parent_uuid, (Queue)row);
+        }
+        else if (row.getTableName().getName().equalsIgnoreCase("sFlow")) {
+            statusWithUUID = insertSflowRow(node, parent_uuid, (SFlow)row);
+        }
+        else if (row.getTableName().getName().equalsIgnoreCase("SSL")) {
+            statusWithUUID = insertSSLRow(node, parent_uuid, (SSL)row);
+        }
+        return statusWithUUID;
+    }
+
+    private Status insertBridgeRow(Node node, String open_VSwitch_uuid, Bridge bridgeRow) {
+        try{
+            if (connectionService == null) {
+                logger.error("Couldn't refer to the ConnectionService");
+                return new Status(StatusCode.NOSERVICE);
+            }
+
+            Connection connection = this.getConnection(node);
+            if (connection == null) {
+                return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
+            }
+
+            Map<String, Table<?>> ovsTable = inventoryServiceInternal.getTableCache(node, Open_vSwitch.NAME.getName());
+
+            if (ovsTable == null) {
+                return new Status(StatusCode.NOTFOUND, "There are no Open_vSwitch instance in the Open_vSwitch table");
+            }
+
+            String newBridge = "new_bridge";
+
+            Operation addSwitchRequest = null;
+
+            String ovsTableUUID = open_VSwitch_uuid;
+            if (ovsTableUUID == null) ovsTableUUID = (String) ovsTable.keySet().toArray()[0];
+            UUID bridgeUuidPair = new UUID(newBridge);
+            Mutation bm = new Mutation("bridges", Mutator.INSERT, bridgeUuidPair);
+            List<Mutation> mutations = new ArrayList<Mutation>();
+            mutations.add(bm);
+
+            UUID uuid = new UUID(ovsTableUUID);
+            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
+            List<Condition> where = new ArrayList<Condition>();
+            where.add(condition);
+            addSwitchRequest = new MutateOperation(Open_vSwitch.NAME.getName(), where, mutations);
+
+            InsertOperation addBridgeRequest = new InsertOperation(Bridge.NAME.getName(), newBridge, bridgeRow);
+
+            TransactBuilder transaction = new TransactBuilder();
+            transaction.addOperations(new ArrayList<Operation>(
+                                      Arrays.asList(addSwitchRequest,
+                                                    addBridgeRequest)));
+
+            int bridgeInsertIndex = transaction.getRequests().indexOf(addBridgeRequest);
+
+            ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
+            List<OperationResult> tr = transResponse.get();
+            List<Operation> requests = transaction.getRequests();
+            Status status = new Status(StatusCode.SUCCESS);
+            for (int i = 0; i < tr.size() ; i++) {
+                if (i < requests.size()) requests.get(i).setResult(tr.get(i));
+                if (tr.get(i) != null && tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
+                    OperationResult result = tr.get(i);
+                    status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+                }
+            }
+
+            if (tr.size() > requests.size()) {
+                OperationResult result = tr.get(tr.size()-1);
+                logger.error("Error creating Bridge : {}\n Error : {}\n Details : {}", bridgeRow.getName(),
+                                                                                       result.getError(),
+                                                                                       result.getDetails());
+                status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+            }
+            if (status.isSuccess()) {
+                UUID bridgeUUID = tr.get(bridgeInsertIndex).getUuid();
+                status = new Status(StatusCode.SUCCESS, bridgeUUID.toString());
+            }
+            return status;
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+        return new Status(StatusCode.INTERNALERROR);
+    }
+
+    private Status insertPortRow(Node node, String bridge_uuid, Port portRow) {
+        try{
+            if (connectionService == null) {
+                logger.error("Couldn't refer to the ConnectionService");
+                return new Status(StatusCode.NOSERVICE);
+            }
+            Connection connection = this.getConnection(node);
+            if (connection == null) {
+                return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
+            }
+
+            Map<String, Table<?>> brTable = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
+            if (brTable == null ||  brTable.get(bridge_uuid) == null) {
+                return new Status(StatusCode.NOTFOUND, "Bridge with UUID "+bridge_uuid+" Not found");
+            }
+            String newPort = "new_port";
+            UUID portUUID = new UUID(newPort);
+            Mutation bm = new Mutation("ports", Mutator.INSERT, portUUID);
+            List<Mutation> mutations = new ArrayList<Mutation>();
+            mutations.add(bm);
+
+            UUID uuid = new UUID(bridge_uuid);
+            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
+            List<Condition> where = new ArrayList<Condition>();
+            where.add(condition);
+            Operation addBrMutRequest = new MutateOperation(Bridge.NAME.getName(), where, mutations);
+
+            // Default OVS schema is to have 1 or more interface part of Bridge. Hence it is mandatory to
+            // Insert an Interface in a Port add case :-(.
+
+            String newInterface = "new_interface";
+            Interface interfaceRow = new Interface();
+            interfaceRow.setName(portRow.getName());
+            InsertOperation addIntfRequest = new InsertOperation(Interface.NAME.getName(),
+                    newInterface, interfaceRow);
+
+            OvsDBSet<UUID> interfaces = new OvsDBSet<UUID>();
+            UUID interfaceid = new UUID(newInterface);
+            interfaces.add(interfaceid);
+            portRow.setInterfaces(interfaces);
+
+            InsertOperation addPortRequest = new InsertOperation(Port.NAME.getName(), newPort, portRow);
+
+            TransactBuilder transaction = new TransactBuilder();
+            transaction.addOperations(new ArrayList<Operation>
+            (Arrays.asList(addBrMutRequest, addPortRequest, addIntfRequest)));
+            int portInsertIndex = transaction.getRequests().indexOf(addPortRequest);
+            ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
+            List<OperationResult> tr = transResponse.get();
+            List<Operation> requests = transaction.getRequests();
+            Status status = new Status(StatusCode.SUCCESS);
+            for (int i = 0; i < tr.size() ; i++) {
+                if (i < requests.size()) requests.get(i).setResult(tr.get(i));
+                if (tr.get(i) != null && tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
+                    OperationResult result = tr.get(i);
+                    status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+                }
+            }
+
+            if (tr.size() > requests.size()) {
+                OperationResult result = tr.get(tr.size()-1);
+                logger.error("Error creating port : {}\n Error : {}\n Details : {}", portRow.getName(),
+                        result.getError(),
+                        result.getDetails());
+                status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+            }
+            if (status.isSuccess()) {
+                uuid = tr.get(portInsertIndex).getUuid();
+                status = new Status(StatusCode.SUCCESS, uuid.toString());
+            }
+
+            return status;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new Status(StatusCode.INTERNALERROR);
+    }
+
+    private Status insertInterfaceRow(Node node, String port_uuid, Interface row) {
+        return new Status(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+    }
+
+    private Status insertOpen_vSwitchRow(Node node, Open_vSwitch row) {
+        return new Status(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+    }
+
+    private Status insertControllerRow(Node node, String bridge_uuid, Controller row) {
+        return new Status(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+    }
+
+    private Status insertSSLRow(Node node, String parent_uuid, SSL row) {
+        return new Status(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+    }
+
+    private Status insertSflowRow(Node node, String parent_uuid, SFlow row) {
+        return new Status(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+    }
+
+    private Status insertQueueRow(Node node, String parent_uuid, Queue row) {
+        return new Status(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+    }
+
+    private Status insertQosRow(Node node, String parent_uuid, Qos row) {
+        return new Status(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+    }
+
+    private Status insertNetFlowRow(Node node, String parent_uuid, NetFlow row) {
+        return new Status(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+    }
+
+    private Status insertMirrorRow(Node node, String parent_uuid, Mirror row) {
+        return new Status(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+    }
+
+    private Status insertManagerRow(Node node, String parent_uuid, Manager row) {
+        return new Status(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+    }
+
+    private Status insertCapabilityRow(Node node, String parent_uuid, Capability row) {
+        return new Status(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+    }
+
+    @Override
+    public Status updateRow(Node node, String rowUUID, Table<?> row) {
+        return new Status(StatusCode.NOTIMPLEMENTED, "Update Row functionality is not implemented yet.");
+    }
+
+    @Override
+    public Status deleteRow(Node node, String tableName, String uuid) {
+        return new Status(StatusCode.NOTIMPLEMENTED, "Delete Row functionality is not implemented yet.");
+    }
+
+    @Override
+    public List<Table<?>> getRows(Node node, String tableName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Table<?> getRow(Node node, String tableName, String uuid) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<String> getTables(Node node) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     public void _ovsconnect (CommandInterpreter ci) {

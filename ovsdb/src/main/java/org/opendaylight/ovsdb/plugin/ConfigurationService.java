@@ -31,6 +31,7 @@ import org.opendaylight.ovsdb.lib.message.operations.InsertOperation;
 import org.opendaylight.ovsdb.lib.message.operations.MutateOperation;
 import org.opendaylight.ovsdb.lib.message.operations.Operation;
 import org.opendaylight.ovsdb.lib.message.operations.OperationResult;
+import org.opendaylight.ovsdb.lib.message.operations.UpdateOperation;
 import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.notation.Function;
 import org.opendaylight.ovsdb.lib.notation.Mutation;
@@ -57,6 +58,7 @@ import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ListenableFuture;
 
 public class ConfigurationService implements IPluginInBridgeDomainConfigService, OVSDBConfigService,
@@ -833,7 +835,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
 
     @Override
     public Status insertRow(Node node, String tableName, String parent_uuid, Table<?> row) {
-        logger.error("tableName : {}, parent_uuid : {} Row : {}", tableName, parent_uuid, row.toString());
+        logger.info("tableName : {}, parent_uuid : {} Row : {}", tableName, parent_uuid, row.toString());
         Status statusWithUUID = null;
 
         // Schema based Table handling will help fix this static Table handling.
@@ -878,6 +880,145 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             statusWithUUID = insertSSLRow(node, parent_uuid, (SSL)row);
         }
         return statusWithUUID;
+    }
+
+
+    @Override
+    public Status updateRow (Node node, String tableName, String parentUUID, String rowUUID, Table<?> row) {
+        try{
+            if (connectionService == null) {
+                logger.error("Couldn't refer to the ConnectionService");
+                return new Status(StatusCode.NOSERVICE);
+            }
+
+            Connection connection = this.getConnection(node);
+            if (connection == null) {
+                return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
+            }
+
+            Map<String, Table<?>> ovsTable = inventoryServiceInternal.getTableCache(node, Open_vSwitch.NAME.getName());
+
+            if (ovsTable == null) {
+                return new Status(StatusCode.NOTFOUND, "There are no Open_vSwitch instance in the Open_vSwitch table");
+            }
+
+            UUID uuid = new UUID(rowUUID);
+            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
+            List<Condition> where = new ArrayList<Condition>();
+            where.add(condition);
+            Operation updateRequest = new UpdateOperation(tableName, where, row);
+
+            TransactBuilder transaction = new TransactBuilder();
+            transaction.addOperations(new ArrayList<Operation>(
+                                      Arrays.asList(updateRequest)));
+
+            ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
+            List<OperationResult> tr = transResponse.get();
+            List<Operation> requests = transaction.getRequests();
+            Status status = new Status(StatusCode.SUCCESS);
+            for (int i = 0; i < tr.size() ; i++) {
+                if (i < requests.size()) requests.get(i).setResult(tr.get(i));
+                if (tr.get(i) != null && tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
+                    OperationResult result = tr.get(i);
+                    status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+                }
+            }
+
+            if (tr.size() > requests.size()) {
+                OperationResult result = tr.get(tr.size()-1);
+                logger.error("Error Updating Row : {}/{}\n Error : {}\n Details : {}", tableName, row,
+                                                                                       result.getError(),
+                                                                                       result.getDetails());
+                status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+            }
+            if (status.isSuccess()) {
+                status = new Status(StatusCode.SUCCESS);
+            }
+            return status;
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+        return new Status(StatusCode.INTERNALERROR);
+    }
+
+    @Override
+    public Status deleteRow(Node node, String tableName, String uuid) {
+        if (tableName.equalsIgnoreCase("Bridge")) {
+            return deleteBridgeRow(node, uuid);
+        }
+        else if (tableName.equalsIgnoreCase("Capbility")) {
+            return deleteCapabilityRow(node, uuid);
+        }
+        else if (tableName.equalsIgnoreCase("Controller")) {
+            return deleteControllerRow(node, uuid);
+        }
+        else if (tableName.equalsIgnoreCase("Interface")) {
+            return deleteInterfaceRow(node, uuid);
+        }
+        else if (tableName.equalsIgnoreCase("Manager")) {
+            return deleteManagerRow(node, uuid);
+        }
+        else if (tableName.equalsIgnoreCase("Mirror")) {
+            return deleteMirrorRow(node, uuid);
+        }
+        else if (tableName.equalsIgnoreCase("NetFlow")) {
+            return deleteNetFlowRow(node, uuid);
+        }
+        else if (tableName.equalsIgnoreCase("Open_vSwitch")) {
+            return deleteOpen_vSwitchRow(node, uuid);
+        }
+        else if (tableName.equalsIgnoreCase("Port")) {
+            return deletePortRow(node, uuid);
+        }
+        else if (tableName.equalsIgnoreCase("QoS")) {
+            return deleteQosRow(node, uuid);
+        }
+        else if (tableName.equalsIgnoreCase("Queue")) {
+            return deleteQueueRow(node, uuid);
+        }
+        else if (tableName.equalsIgnoreCase("sFlow")) {
+            return deleteSflowRow(node, uuid);
+        }
+        else if (tableName.equalsIgnoreCase("SSL")) {
+            return deleteSSLRow(node, uuid);
+        }
+        return new Status(StatusCode.NOTFOUND, "Table "+tableName+" not supported");
+    }
+
+    @Override
+    public String getRows(Node node, String tableName) throws Exception{
+        try{
+            if (inventoryServiceInternal == null) {
+                throw new Exception("Inventory Service is Unavailable.");
+            }
+            Map<String, Table<?>> ovsTable = inventoryServiceInternal.getTableCache(node, tableName);
+            if (ovsTable == null) return null;
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.writeValueAsString(ovsTable);
+        } catch(Exception e){
+            throw new Exception("Unable to read table due to "+e.getMessage());
+        }
+    }
+
+    @Override
+    public String getRow(Node node, String tableName, String uuid) throws Exception {
+        try{
+            if (inventoryServiceInternal == null) {
+                throw new Exception("Inventory Service is Unavailable.");
+            }
+            Map<String, Table<?>> ovsTable = inventoryServiceInternal.getTableCache(node, tableName);
+            if (ovsTable == null) return null;
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.writeValueAsString(ovsTable.get(uuid));
+        } catch(Exception e){
+            throw new Exception("Unable to read table due to "+e.getMessage());
+        }
+    }
+
+    @Override
+    public List<String> getTables(Node node) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     private Status insertBridgeRow(Node node, String open_VSwitch_uuid, Bridge bridgeRow) {
@@ -1076,32 +1217,110 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         return new Status(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
     }
 
-    @Override
-    public Status updateRow(Node node, String rowUUID, Table<?> row) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "Update Row functionality is not implemented yet.");
+    private Status deleteBridgeRow(Node node, String uuid) {
+
+        try {
+            if (connectionService == null) {
+                logger.error("Couldn't refer to the ConnectionService");
+                return new Status(StatusCode.NOSERVICE);
+            }
+            Connection connection = this.getConnection(node);
+            if (connection == null) {
+                return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
+            }
+            Map<String, Table<?>> ovsTable = inventoryServiceInternal.getTableCache(node, Open_vSwitch.NAME.getName());
+            Map<String, Table<?>> brTable = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
+            Operation delBrRequest = null;
+
+            if (ovsTable == null || brTable == null || uuid == null || brTable.get(uuid) == null) {
+                return new Status(StatusCode.NOTFOUND, "");
+            }
+
+            UUID bridgeUuidPair = new UUID(uuid);
+            Mutation bm = new Mutation("bridges", Mutator.DELETE, bridgeUuidPair);
+            List<Mutation> mutations = new ArrayList<Mutation>();
+            mutations.add(bm);
+
+            UUID ovsUuid = new UUID((String) ovsTable.keySet().toArray()[0]);
+            Condition condition = new Condition("_uuid", Function.EQUALS, ovsUuid);
+            List<Condition> where = new ArrayList<Condition>();
+            where.add(condition);
+            delBrRequest = new MutateOperation(Open_vSwitch.NAME.getName(), where, mutations);
+
+            TransactBuilder transaction = new TransactBuilder();
+            transaction.addOperations(new ArrayList<Operation>(Arrays.asList(delBrRequest)));
+
+            ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
+            List<OperationResult> tr = transResponse.get();
+            List<Operation> requests = transaction.getRequests();
+            Status status = new Status(StatusCode.SUCCESS);
+            for (int i = 0; i < tr.size(); i++) {
+                if (i < requests.size()) requests.get(i).setResult(tr.get(i));
+                if (tr.get(i) != null && tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
+                    OperationResult result = tr.get(i);
+                    status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+                }
+            }
+
+            if (tr.size() > requests.size()) {
+                OperationResult result = tr.get(tr.size() - 1);
+                logger.error("Error creating Bridge : {}\n Error : {}\n Details : {}",
+                        uuid, result.getError(), result.getDetails());
+                status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+            }
+            return status;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new Status(StatusCode.INTERNALERROR);
     }
 
-    @Override
-    public Status deleteRow(Node node, String tableName, String uuid) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "Delete Row functionality is not implemented yet.");
+    private Status deletePortRow(Node node, String uuid) {
+        return new Status(StatusCode.INTERNALERROR);
     }
 
-    @Override
-    public List<Table<?>> getRows(Node node, String tableName) {
-        // TODO Auto-generated method stub
-        return null;
+    private Status deleteInterfaceRow(Node node, String uuid) {
+        return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");
     }
 
-    @Override
-    public Table<?> getRow(Node node, String tableName, String uuid) {
-        // TODO Auto-generated method stub
-        return null;
+    private Status deleteOpen_vSwitchRow(Node node, String uuid) {
+        return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");
     }
 
-    @Override
-    public List<String> getTables(Node node) {
-        // TODO Auto-generated method stub
-        return null;
+    private Status deleteControllerRow(Node node, String uuid) {
+        return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");
+    }
+
+    private Status deleteSSLRow(Node node, String uuid) {
+        return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");
+    }
+
+    private Status deleteSflowRow(Node node, String uuid) {
+        return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");
+    }
+
+    private Status deleteQueueRow(Node node, String uuid) {
+        return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");
+    }
+
+    private Status deleteQosRow(Node node, String uuid) {
+        return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");
+    }
+
+    private Status deleteNetFlowRow(Node node, String uuid) {
+        return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");
+    }
+
+    private Status deleteMirrorRow(Node node, String uuid) {
+        return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");
+    }
+
+    private Status deleteManagerRow(Node node, String uuid) {
+        return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");
+    }
+
+    private Status deleteCapabilityRow(Node node, String uuid) {
+        return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");
     }
 
     public void _ovsconnect (CommandInterpreter ci) {

@@ -3,14 +3,14 @@ package org.opendaylight.ovsdb.lib.message.operations;
 import java.util.List;
 
 import org.opendaylight.ovsdb.lib.notation.Condition;
-import org.opendaylight.ovsdb.lib.notation.Mutation;
+import org.opendaylight.ovsdb.lib.table.internal.Table;
 //TODO Madhu : This is not complete. Getting it in to enable other committers to make progress
 public class UpdateOperation extends Operation {
     String table;
     List<Condition> where;
-    Object row;
+    Table<?> row;
 
-    public UpdateOperation(String table, List<Condition> where, Object row) {
+    public UpdateOperation(String table, List<Condition> where, Table<?> row) {
         super();
         super.setOp("update");
         this.table = table;
@@ -29,10 +29,10 @@ public class UpdateOperation extends Operation {
     public void setWhere(List<Condition> where) {
         this.where = where;
     }
-    public Object getRow() {
+    public Table<?> getRow() {
         return row;
     }
-    public void setRow(Object row) {
+    public void setRow(Table<?> row) {
         this.row = row;
     }
     @Override

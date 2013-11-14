@@ -52,6 +52,7 @@
               org.apache.catalina.filters,
               org.codehaus.jackson.jaxrs,
               org.codehaus.jackson.annotate,
+              org.codehaus.jackson.map.annotate,
               !org.codehaus.enunciate.jaxrs
             </Import-Package>
             <Export-Package>

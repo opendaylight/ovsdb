@@ -2,6 +2,7 @@ package org.opendaylight.ovsdb.northbound;
 
 import org.codehaus.jackson.annotate.JsonSubTypes;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.opendaylight.ovsdb.lib.table.Bridge;
 import org.opendaylight.ovsdb.lib.table.Capability;
 import org.opendaylight.ovsdb.lib.table.Controller;
@@ -17,6 +18,7 @@ import org.opendaylight.ovsdb.lib.table.SFlow;
 import org.opendaylight.ovsdb.lib.table.SSL;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 
+@JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
 public class OVSDBRow {
     String parent_uuid;
     /*
@@ -53,6 +55,12 @@ public class OVSDBRow {
 
     public OVSDBRow() {
     }
+
+    public OVSDBRow(String parent_uuid, Table row) {
+        this.parent_uuid = parent_uuid;
+        this.row = row;
+    }
+
     public String getParent_uuid() {
         return parent_uuid;
     }

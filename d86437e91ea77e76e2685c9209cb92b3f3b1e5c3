@@ -53,6 +53,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_c451ab0f",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/table/Flow_Table.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 207
+      },
+      "writtenOn": "2013-11-17T02:01:23Z",
+      "side": 1,
+      "message": "I read the schema the same as you but when I had flow_limit and overflow_policy but they appear to be Arrays. Jackson fails deserialization with a start of Array token error. That was why I populated rows with data and tested it prior to committing. Let\u0027s review when you have a few in channel. I will show you what is happening there. Ty for review buddy.",
+      "parentUuid": "da6255ed_0930fce6",
+      "revId": "d86437e91ea77e76e2685c9209cb92b3f3b1e5c3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_895bcc2d",
         "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/table/IPFIX.java",
         "patchSetId": 1
@@ -64,6 +82,24 @@
       "writtenOn": "2013-11-15T08:33:00Z",
       "side": 1,
       "message": "As per the schema definitions, I think you have to remove the OvsDBSet\u003c\u003e from the above 5 fields (sampling -\u003e cache_max_flows)",
+      "revId": "d86437e91ea77e76e2685c9209cb92b3f3b1e5c3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_a458f732",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/table/IPFIX.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 207
+      },
+      "writtenOn": "2013-11-17T02:01:23Z",
+      "side": 1,
+      "message": "I read the schema the same as you but when I had those 5 as anything other then array set they will fail. Jackson fails deserialization with a start of Array token error. That was why I populated rows with data and tested it prior to committing. Let\u0027s review when you have a few in channel. I will show you what is happening there. Ty for review buddy.",
+      "parentUuid": "da6255ed_895bcc2d",
       "revId": "d86437e91ea77e76e2685c9209cb92b3f3b1e5c3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

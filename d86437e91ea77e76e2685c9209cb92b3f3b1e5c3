@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "da6255ed_c4640b4b",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/table/Flow_Sample_Collector_Set.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-11-18T10:37:18Z",
+      "side": 1,
+      "message": "having underscores in java class name is very uncommon.\nPlease fix.\njava naming conventions:\nhttp://www.oracle.com/technetwork/java/javase/documentation/codeconventions-135099.html#15411",
+      "revId": "d86437e91ea77e76e2685c9209cb92b3f3b1e5c3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_4936f4e8",
         "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/table/Flow_Sample_Collector_Set.java",
         "patchSetId": 1
@@ -30,6 +47,23 @@
       "writtenOn": "2013-11-15T08:33:00Z",
       "side": 1,
       "message": "During serialization, I found that the OVSDB-server is case-sensitive (atleast for the table names). If that holds true for the column names, then you have to change the IPFIX to ipfix as per the schema.",
+      "revId": "d86437e91ea77e76e2685c9209cb92b3f3b1e5c3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_845e1375",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/table/Flow_Table.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-11-18T10:37:18Z",
+      "side": 1,
+      "message": "same comment here regarding underscore in class name",
       "revId": "d86437e91ea77e76e2685c9209cb92b3f3b1e5c3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

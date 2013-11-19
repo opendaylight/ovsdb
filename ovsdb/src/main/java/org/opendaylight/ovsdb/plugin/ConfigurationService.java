@@ -1173,8 +1173,74 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         return new Status(StatusCode.INTERNALERROR);
     }
 
-    private Status insertInterfaceRow(Node node, String port_uuid, Interface row) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+    private Status insertInterfaceRow(Node node, String port_uuid, Interface interfaceRow) {
+        try{
+            if (connectionService == null) {
+                logger.error("Couldn't refer to the ConnectionService");
+                return new Status(StatusCode.NOSERVICE);
+            }
+            Connection connection = this.getConnection(node);
+            if (connection == null) {
+                return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
+            }
+
+            // Interface table must have entry in Port table, checking port table for port
+            Map<String, Table<?>> portTable = inventoryServiceInternal.getTableCache(node, Port.NAME.getName());
+            if (portTable == null ||  portTable.get(port_uuid) == null) {
+                return new Status(StatusCode.NOTFOUND, "Port with UUID "+port_uuid+" Not found");
+            }
+            // MUTATOR, need to insert the interface UUID to LIST of interfaces in PORT TABLE for port_uuid
+            String newInterface = "new_interface";
+            UUID interfaceUUID = new UUID(newInterface);
+            Mutation portTableMutation = new Mutation("interfaces", Mutator.INSERT, interfaceUUID); // field name to append is "interfaces"
+            List<Mutation> mutations = new ArrayList<Mutation>();
+            mutations.add(portTableMutation);
+
+            // Create the Operation which will be used in Transact to perform the PORT TABLE mutation
+            UUID uuid = new UUID(port_uuid);
+            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
+            List<Condition> where = new ArrayList<Condition>();
+            where.add(condition);
+            Operation addPortMutationRequest = new MutateOperation(Port.NAME.getName(), where, mutations);
+
+            // Create the interface row request
+            InsertOperation addIntfRequest = new InsertOperation(Interface.NAME.getName(),newInterface, interfaceRow);
+
+            // Transaction to insert/modify tables - validate using "sudo ovsdb-client dump" on host running OVSDB process
+            TransactBuilder transaction = new TransactBuilder();
+            transaction.addOperations(new ArrayList<Operation>(Arrays.asList(addIntfRequest,addPortMutationRequest)));
+
+            // Check the results. Iterates over the results of the Array of transaction Operations, and reports STATUS
+            int intInsertIndex = transaction.getRequests().indexOf(addIntfRequest);
+            ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
+            List<OperationResult> tr = transResponse.get();
+            List<Operation> requests = transaction.getRequests();
+            Status status = new Status(StatusCode.SUCCESS);
+            System.out.print(tr.size());
+            for (int i = 0; i < tr.size() ; i++) {
+                if (i < requests.size()) requests.get(i).setResult(tr.get(i));
+                if (tr.get(i) != null && tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
+                    OperationResult result = tr.get(i);
+                    status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+                }
+            }
+            if (tr.size() > requests.size()) {
+                OperationResult result = tr.get(tr.size()-1);
+                logger.error("Error creating interface : {}\n Error : {}\n Details : {}", interfaceRow.getName(),
+                        result.getError(),
+                        result.getDetails());
+                status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+            }
+            if (status.isSuccess()) {
+                uuid = tr.get(intInsertIndex).getUuid();
+                status = new Status(StatusCode.SUCCESS, uuid.toString());
+            }
+            return status;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new Status(StatusCode.INTERNALERROR);
     }
 
     private Status insertOpen_vSwitchRow(Node node, Open_vSwitch row) {

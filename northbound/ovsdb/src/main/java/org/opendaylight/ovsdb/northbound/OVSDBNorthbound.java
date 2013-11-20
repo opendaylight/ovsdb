@@ -192,7 +192,7 @@ public class OVSDBNorthbound {
         //Table<?> row = null;
         String row = null;
         try {
-            row = ovsdbTable.getRow(node, ovsTableName, rowUuid);
+            row = ovsdbTable.getSerializedRow(node, ovsTableName, rowUuid);
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
         }
@@ -242,7 +242,7 @@ public class OVSDBNorthbound {
         //Map<String, Table<?>> rows = null;
         String rows = null;
         try {
-            rows = ovsdbTable.getRows(node, ovsTableName);
+            rows = ovsdbTable.getSerializedRows(node, ovsTableName);
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
         }

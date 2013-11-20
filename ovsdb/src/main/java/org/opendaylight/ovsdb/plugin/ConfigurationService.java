@@ -986,12 +986,36 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     }
 
     @Override
-    public String getRows(Node node, String tableName) throws Exception{
+    public Map<String, Table<?>> getRows(Node node, String tableName) throws Exception{
         try{
             if (inventoryServiceInternal == null) {
                 throw new Exception("Inventory Service is Unavailable.");
             }
             Map<String, Table<?>> ovsTable = inventoryServiceInternal.getTableCache(node, tableName);
+            return ovsTable;
+        } catch(Exception e){
+            throw new Exception("Unable to read table due to "+e.getMessage());
+        }
+    }
+
+    @Override
+    public Table<?> getRow(Node node, String tableName, String uuid) throws Exception {
+        try{
+            if (inventoryServiceInternal == null) {
+                throw new Exception("Inventory Service is Unavailable.");
+            }
+            Map<String, Table<?>> ovsTable = inventoryServiceInternal.getTableCache(node, tableName);
+            if (ovsTable == null) return null;
+            return ovsTable.get(uuid);
+        } catch(Exception e){
+            throw new Exception("Unable to read table due to "+e.getMessage());
+        }
+    }
+
+    @Override
+    public String getSerializedRows(Node node, String tableName) throws Exception{
+        try{
+            Map<String, Table<?>> ovsTable = this.getRows(node, tableName);
             if (ovsTable == null) return null;
             ObjectMapper mapper = new ObjectMapper();
             return mapper.writeValueAsString(ovsTable);
@@ -1001,15 +1025,12 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     }
 
     @Override
-    public String getRow(Node node, String tableName, String uuid) throws Exception {
+    public String getSerializedRow(Node node, String tableName, String uuid) throws Exception {
         try{
-            if (inventoryServiceInternal == null) {
-                throw new Exception("Inventory Service is Unavailable.");
-            }
-            Map<String, Table<?>> ovsTable = inventoryServiceInternal.getTableCache(node, tableName);
-            if (ovsTable == null) return null;
+            Table<?> row = this.getRow(node, tableName, uuid);
+            if (row == null) return null;
             ObjectMapper mapper = new ObjectMapper();
-            return mapper.writeValueAsString(ovsTable.get(uuid));
+            return mapper.writeValueAsString(row);
         } catch(Exception e){
             throw new Exception("Unable to read table due to "+e.getMessage());
         }
@@ -1248,7 +1269,67 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     }
 
     private Status insertControllerRow(Node node, String bridge_uuid, Controller row) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+        try{
+            if (connectionService == null) {
+                logger.error("Couldn't refer to the ConnectionService");
+                return new Status(StatusCode.NOSERVICE);
+            }
+            Connection connection = this.getConnection(node);
+            if (connection == null) {
+                return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
+            }
+
+            Map<String, Table<?>> brTable = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
+            if (brTable == null ||  brTable.get(bridge_uuid) == null) {
+                return new Status(StatusCode.NOTFOUND, "Bridge with UUID "+bridge_uuid+" Not found");
+            }
+            String newController = "new_controller";
+            UUID controllerUUID = new UUID(newController);
+            Mutation bm = new Mutation("controller", Mutator.INSERT, controllerUUID);
+            List<Mutation> mutations = new ArrayList<Mutation>();
+            mutations.add(bm);
+
+            UUID uuid = new UUID(bridge_uuid);
+            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
+            List<Condition> where = new ArrayList<Condition>();
+            where.add(condition);
+            Operation addBrMutRequest = new MutateOperation(Bridge.NAME.getName(), where, mutations);
+
+            InsertOperation addControllerRequest = new InsertOperation(Controller.NAME.getName(), newController, row);
+
+            TransactBuilder transaction = new TransactBuilder();
+            transaction.addOperations(new ArrayList<Operation>
+            (Arrays.asList(addBrMutRequest, addControllerRequest)));
+            int portInsertIndex = transaction.getRequests().indexOf(addControllerRequest);
+            ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
+            List<OperationResult> tr = transResponse.get();
+            List<Operation> requests = transaction.getRequests();
+            Status status = new Status(StatusCode.SUCCESS);
+            for (int i = 0; i < tr.size() ; i++) {
+                if (i < requests.size()) requests.get(i).setResult(tr.get(i));
+                if (tr.get(i) != null && tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
+                    OperationResult result = tr.get(i);
+                    status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+                }
+            }
+
+            if (tr.size() > requests.size()) {
+                OperationResult result = tr.get(tr.size()-1);
+                logger.error("Error creating port : {}\n Error : {}\n Details : {}", row.getTarget(),
+                        result.getError(),
+                        result.getDetails());
+                status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+            }
+            if (status.isSuccess()) {
+                uuid = tr.get(portInsertIndex).getUuid();
+                status = new Status(StatusCode.SUCCESS, uuid.toString());
+            }
+
+            return status;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new Status(StatusCode.INTERNALERROR);
     }
 
     private Status insertSSLRow(Node node, String parent_uuid, SSL row) {

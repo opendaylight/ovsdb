@@ -2,12 +2,8 @@ package org.opendaylight.ovsdb.plugin;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -15,13 +11,11 @@ import java.util.Map;
 
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
-import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.networkconfig.bridgedomain.ConfigConstants;
 import org.opendaylight.controller.sal.networkconfig.bridgedomain.IPluginInBridgeDomainConfigService;
-import org.opendaylight.controller.sal.utils.NetUtils;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.lib.database.OVSInstance;
@@ -69,7 +63,6 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
 
     IConnectionServiceInternal connectionService;
     InventoryServiceInternal inventoryServiceInternal;
-    private IClusterGlobalServices clusterServices;
     boolean forceConnect = false;
 
     void init() {
@@ -126,16 +119,6 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     public void unsetInventoryServiceInternal(InventoryServiceInternal inventoryServiceInternal) {
         if (this.inventoryServiceInternal == inventoryServiceInternal) {
             this.inventoryServiceInternal = null;
-        }
-    }
-
-    public void setClusterServices(IClusterGlobalServices i) {
-        this.clusterServices = i;
-    }
-
-    public void unsetClusterServices(IClusterGlobalServices i) {
-        if (this.clusterServices == i) {
-            this.clusterServices = null;
         }
     }
 
@@ -677,160 +660,24 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         return null;
     }
 
-    private short getControllerOFPort() {
-        Short defaultOpenFlowPort = 6633;
-        Short openFlowPort = defaultOpenFlowPort;
-        String portString = System.getProperty("of.listenPort");
-        if (portString != null) {
-            try {
-                openFlowPort = Short.decode(portString).shortValue();
-            } catch (NumberFormatException e) {
-                logger.warn("Invalid port:{}, use default({})", portString,
-                        openFlowPort);
-            }
-        }
-        return openFlowPort;
-    }
-
-    private List<InetAddress> getControllerIPAddresses() {
-        List<InetAddress> controllers = null;
-        if (clusterServices != null) {
-            controllers = clusterServices.getClusteredControllers();
-            if (controllers != null && controllers.size() > 0) {
-                if (controllers.size() == 1) {
-                    InetAddress controller = controllers.get(0);
-                    if (!controller.equals(InetAddress.getLoopbackAddress())) {
-                        return controllers;
-                    }
-                } else {
-                    return controllers;
-                }
-            }
+    private Boolean setBridgeOFController(Node node, String bridgeIdentifier) {
+        if (connectionService == null) {
+            logger.error("Couldn't refer to the ConnectionService");
+            return false;
         }
 
-        controllers = new ArrayList<InetAddress>();
-        String addressString = System.getProperty("of.address");
-        if (addressString != null) {
-            InetAddress controllerIP = null;
-            try {
-                controllerIP = InetAddress.getByName(addressString);
-                if (controllerIP != null) {
-                    controllers.add(controllerIP);
-                    return controllers;
-                }
-            } catch (Exception e) {
-                logger.debug("Invalid IP: {}, use wildcard *", addressString);
-            }
-        }
-
-        Enumeration<NetworkInterface> nets;
-        try {
-            nets = NetworkInterface.getNetworkInterfaces();
-            for (NetworkInterface netint : Collections.list(nets)) {
-                Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
-                for (InetAddress inetAddress : Collections.list(inetAddresses)) {
-                    if (!inetAddress.isLoopbackAddress() &&
-                            NetUtils.isIPv4AddressValid(inetAddress.getHostAddress())) {
-                        controllers.add(inetAddress);
-                    }
-                }
-            }
-        } catch (SocketException e) {
-            controllers.add(InetAddress.getLoopbackAddress());
-        }
-        return controllers;
-    }
-
-    public Boolean setBridgeOFController(Node node, String bridgeIdentifier) {
         try{
-            if (connectionService == null) {
-                logger.error("Couldn't refer to the ConnectionService");
-                return false;
-            }
-            Connection connection = this.getConnection(node);
-            if (connection == null) {
-                return false;
-            }
-
-            if (connection != null) {
-                List<InetAddress> ofControllerAddrs = getControllerIPAddresses();
-                short ofControllerPort = getControllerOFPort();
-                OvsDBSet<UUID> controllerUUIDs = new OvsDBSet<UUID>();
-                List<Operation> controllerInsertOperations = new ArrayList<Operation>();
-                Map<String, Table<?>> controllerCache = inventoryServiceInternal.getTableCache(node, Controller.NAME.getName());
-
-                int count = 0;
-                for (InetAddress ofControllerAddress : ofControllerAddrs) {
-                    String cntrlUuid = null;
-                    String newController = "tcp:"+ofControllerAddress.getHostAddress()+":"+ofControllerPort;
-                    if (controllerCache != null) {
-                        for (String uuid : controllerCache.keySet()) {
-                            Controller controller = (Controller)controllerCache.get(uuid);
-                            if (controller.getTarget().equals(newController)) {
-                                cntrlUuid = uuid;
-                                controllerUUIDs.add(new UUID(uuid));
-                                break;
-                            }
-                        }
-                    }
-                    if (cntrlUuid == null) {
-                        count++;
-                        String uuid_name = "new_controller_"+count;
-                        controllerUUIDs.add(new UUID(uuid_name));
-                        Controller controllerRow = new Controller();
-                        controllerRow.setTarget(newController);
-                        InsertOperation addCtlRequest = new InsertOperation(Controller.NAME.getName(), uuid_name, controllerRow);
-                        controllerInsertOperations.add(addCtlRequest);
-                    }
-                }
-                String brCntrlUuid = null;
-                Map<String, Table<?>> brTableCache = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
-                for (String uuid : brTableCache.keySet()) {
-                    Bridge bridge = (Bridge)brTableCache.get(uuid);
-                    if (bridge.getName().contains(bridgeIdentifier)) {
-                        brCntrlUuid = uuid;
-                    }
-                }
-                Operation addControlRequest = null;
-                Mutation bm = new Mutation("controller", Mutator.INSERT, controllerUUIDs);
-                List<Mutation> mutations = new ArrayList<Mutation>();
-                mutations.add(bm);
-
-                UUID uuid = new UUID(brCntrlUuid);
-                Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
-                List<Condition> where = new ArrayList<Condition>();
-                where.add(condition);
-                addControlRequest = new MutateOperation(Bridge.NAME.getName(), where, mutations);
-
-                TransactBuilder transaction = new TransactBuilder();
-                transaction.addOperations(controllerInsertOperations);
-                transaction.addOperation(addControlRequest);
-
-                ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
-                List<OperationResult> tr = transResponse.get();
-                List<Operation> requests = transaction.getRequests();
-                Status status = new Status(StatusCode.SUCCESS);
-                for (int i = 0; i < tr.size() ; i++) {
-                    if (i < requests.size()) requests.get(i).setResult(tr.get(i));
-                    if (tr.get(i) != null && tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
-                        OperationResult result = tr.get(i);
-                        status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
-                    }
-                }
-
-                if (tr.size() > requests.size()) {
-                    OperationResult result = tr.get(tr.size()-1);
-                    logger.error("Error creating Bridge : {}\n Error : {}\n Details : {}", bridgeIdentifier,
-                            result.getError(),
-                            result.getDetails());
-                    status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
-
+            Map<String, Table<?>> brTableCache = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
+            for (String uuid : brTableCache.keySet()) {
+                Bridge bridge = (Bridge)brTableCache.get(uuid);
+                if (bridge.getName().contains(bridgeIdentifier)) {
+                    return connectionService.setOFController(node, uuid);
                 }
             }
-        }catch(Exception e){
+        } catch(Exception e) {
             e.printStackTrace();
         }
-        return true;
+        return false;
     }
 
     @Override
@@ -1283,8 +1130,23 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             if (brTable == null ||  brTable.get(bridge_uuid) == null) {
                 return new Status(StatusCode.NOTFOUND, "Bridge with UUID "+bridge_uuid+" Not found");
             }
-            String newController = "new_controller";
-            UUID controllerUUID = new UUID(newController);
+
+            Map<String, Table<?>> controllerCache = inventoryServiceInternal.getTableCache(node, Controller.NAME.getName());
+
+            String uuid_name = "new_controller";
+            boolean controllerExists = false;
+            if (controllerCache != null) {
+                for (String uuid : controllerCache.keySet()) {
+                    Controller controller = (Controller)controllerCache.get(uuid);
+                    if (controller.getTarget().equals(row.getTarget())) {
+                        uuid_name = uuid;
+                        controllerExists = true;
+                        break;
+                    }
+                }
+            }
+
+            UUID controllerUUID = new UUID(uuid_name);
             Mutation bm = new Mutation("controller", Mutator.INSERT, controllerUUID);
             List<Mutation> mutations = new ArrayList<Mutation>();
             mutations.add(bm);
@@ -1294,13 +1156,17 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             List<Condition> where = new ArrayList<Condition>();
             where.add(condition);
             Operation addBrMutRequest = new MutateOperation(Bridge.NAME.getName(), where, mutations);
-
-            InsertOperation addControllerRequest = new InsertOperation(Controller.NAME.getName(), newController, row);
+            InsertOperation addControllerRequest = null;
 
             TransactBuilder transaction = new TransactBuilder();
-            transaction.addOperations(new ArrayList<Operation>
-            (Arrays.asList(addBrMutRequest, addControllerRequest)));
-            int portInsertIndex = transaction.getRequests().indexOf(addControllerRequest);
+            transaction.addOperation(addBrMutRequest);
+            int portInsertIndex = -1;
+            if (!controllerExists) {
+                addControllerRequest = new InsertOperation(Controller.NAME.getName(), uuid_name, row);
+                transaction.addOperation(addControllerRequest);
+                portInsertIndex = transaction.getRequests().indexOf(addControllerRequest);
+            }
+
             ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
             List<OperationResult> tr = transResponse.get();
             List<Operation> requests = transaction.getRequests();
@@ -1321,10 +1187,13 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                 status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
             }
             if (status.isSuccess()) {
-                uuid = tr.get(portInsertIndex).getUuid();
-                status = new Status(StatusCode.SUCCESS, uuid.toString());
+                if (controllerExists) {
+                    status = new Status(StatusCode.SUCCESS, uuid_name);
+                } else {
+                    uuid = tr.get(portInsertIndex).getUuid();
+                    status = new Status(StatusCode.SUCCESS, uuid.toString());
+                }
             }
-
             return status;
         } catch (Exception e) {
             e.printStackTrace();

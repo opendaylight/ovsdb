@@ -20,7 +20,12 @@ import io.netty.util.CharsetUtil;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -29,10 +34,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 
+import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.connection.IPluginInConnectionService;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.Property;
+import org.opendaylight.controller.sal.utils.NetUtils;
+import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.lib.database.DatabaseSchema;
@@ -43,6 +51,8 @@ import org.opendaylight.ovsdb.lib.message.MonitorRequestBuilder;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.message.UpdateNotification;
+import org.opendaylight.ovsdb.lib.table.Bridge;
+import org.opendaylight.ovsdb.lib.table.Controller;
 import org.opendaylight.ovsdb.lib.table.Open_vSwitch;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 import org.opendaylight.ovsdb.lib.table.internal.Tables;
@@ -294,6 +304,8 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         UpdateNotification monitor = new UpdateNotification();
         monitor.setUpdate(updates);
         this.update(connection.getNode(), monitor);
+        // With the existing bridges learnt, now it is time to update the OF Controller connections.
+        this.updateOFControllers(connection.getNode());
     }
 
     private void startOvsdbManager() {
@@ -343,6 +355,118 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
             // Shut down all event loops to terminate all threads.
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
+        }
+    }
+
+    private IClusterGlobalServices clusterServices;
+
+    public void setClusterServices(IClusterGlobalServices i) {
+        this.clusterServices = i;
+    }
+
+    public void unsetClusterServices(IClusterGlobalServices i) {
+        if (this.clusterServices == i) {
+            this.clusterServices = null;
+        }
+    }
+
+    private List<InetAddress> getControllerIPAddresses() {
+        List<InetAddress> controllers = null;
+        if (clusterServices != null) {
+            controllers = clusterServices.getClusteredControllers();
+            if (controllers != null && controllers.size() > 0) {
+                if (controllers.size() == 1) {
+                    InetAddress controller = controllers.get(0);
+                    if (!controller.equals(InetAddress.getLoopbackAddress())) {
+                        return controllers;
+                    }
+                } else {
+                    return controllers;
+                }
+            }
+        }
+
+        controllers = new ArrayList<InetAddress>();
+        String addressString = System.getProperty("ovsdb.controller.address");
+        if (addressString == null) addressString = System.getProperty("of.address");
+
+        if (addressString != null) {
+            InetAddress controllerIP = null;
+            try {
+                controllerIP = InetAddress.getByName(addressString);
+                if (controllerIP != null) {
+                    controllers.add(controllerIP);
+                    return controllers;
+                }
+            } catch (Exception e) {
+                logger.debug("Invalid IP: {}, use wildcard *", addressString);
+            }
+        }
+
+        Enumeration<NetworkInterface> nets;
+        try {
+            nets = NetworkInterface.getNetworkInterfaces();
+            for (NetworkInterface netint : Collections.list(nets)) {
+                Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
+                for (InetAddress inetAddress : Collections.list(inetAddresses)) {
+                    if (!inetAddress.isLoopbackAddress() &&
+                            NetUtils.isIPv4AddressValid(inetAddress.getHostAddress())) {
+                        controllers.add(inetAddress);
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            controllers.add(InetAddress.getLoopbackAddress());
+        }
+        return controllers;
+    }
+
+    private short getControllerOFPort() {
+        Short defaultOpenFlowPort = 6633;
+        Short openFlowPort = defaultOpenFlowPort;
+        String portString = System.getProperty("of.listenPort");
+        if (portString != null) {
+            try {
+                openFlowPort = Short.decode(portString).shortValue();
+            } catch (NumberFormatException e) {
+                logger.warn("Invalid port:{}, use default({})", portString,
+                        openFlowPort);
+            }
+        }
+        return openFlowPort;
+    }
+
+    @Override
+    public Boolean setOFController(Node node, String bridgeUUID) throws InterruptedException, ExecutionException {
+        Connection connection = this.getConnection(node);
+        if (connection == null) {
+            return false;
+        }
+
+        if (connection != null) {
+            List<InetAddress> ofControllerAddrs = this.getControllerIPAddresses();
+            short ofControllerPort = getControllerOFPort();
+            for (InetAddress ofControllerAddress : ofControllerAddrs) {
+                String newController = "tcp:"+ofControllerAddress.getHostAddress()+":"+ofControllerPort;
+                Controller controllerRow = new Controller();
+                controllerRow.setTarget(newController);
+                OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+                if (ovsdbTable != null) {
+                    ovsdbTable.insertRow(node, Controller.NAME.getName(), bridgeUUID, controllerRow);
+                }
+            }
+        }
+        return true;
+    }
+
+    private void updateOFControllers (Node node) {
+        Map<String, Table<?>> bridges = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
+        for (String bridgeUUID : bridges.keySet()) {
+            try {
+                this.setOFController(node, bridgeUUID);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

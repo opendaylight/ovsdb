@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_42b12ae0",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1378,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-11-20T04:48:19Z",
+      "side": 1,
+      "message": "This logic needs some attention.\nI think the correct way to identify a Bridge entry to remove is to look for this portUUID in the ports table.\nAny Bridge entry that contains port must be considered for mutation.\n\nCan you please try if OVSDB allows multiple bridges referencing to the same port ?\nIf that works, then my comment would make sense :)\n\nBTW, The reason we used this logic of obtaining the 0th index in open_vSwitch table is that, as per the spec, there can be only one instance of open_vSwitch active and hence the assumption is \"kinda\" valid :), but it is not true for other tables.",
+      "revId": "38218cf5d8699499f8524a31f5ecf11d19fd5aeb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_22b4f6cf",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1445,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-11-20T04:48:19Z",
+      "side": 1,
+      "message": "Same comment as above.",
+      "revId": "38218cf5d8699499f8524a31f5ecf11d19fd5aeb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_02cb3254",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1516,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-11-20T04:48:19Z",
+      "side": 1,
+      "message": "Same comment as above.",
+      "revId": "38218cf5d8699499f8524a31f5ecf11d19fd5aeb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

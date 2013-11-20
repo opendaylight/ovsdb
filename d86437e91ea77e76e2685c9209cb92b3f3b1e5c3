@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_42592afd",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/table/Flow_Sample_Collector_Set.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-11-20T01:00:12Z",
+      "side": 1,
+      "message": "Alissa,\n\nThese tables exactly reflects the DB Tables as defined in OVSDB schema specification (http://openvswitch.org/ovs-vswitchd.conf.db.5.pdf) . Changing this will have some readability issues when folks want to compare and contrast.\n\nAlso, these tables are short lived classes. These will go away once we have the Schema based database definition task that is tracked in \nhttps://trello.com/c/sq19900Z/8-remove-the-hard-coded-tables-and-databases-into-schema-driven-mechanism-click-here-to-download-the-json-schema-for-ovsdb\n\n-Madhu",
+      "parentUuid": "da6255ed_c4640b4b",
+      "revId": "d86437e91ea77e76e2685c9209cb92b3f3b1e5c3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_4936f4e8",
         "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/table/Flow_Sample_Collector_Set.java",
         "patchSetId": 1
@@ -99,6 +117,24 @@
       "side": 1,
       "message": "I read the schema the same as you but when I had flow_limit and overflow_policy but they appear to be Arrays. Jackson fails deserialization with a start of Array token error. That was why I populated rows with data and tested it prior to committing. Let\u0027s review when you have a few in channel. I will show you what is happening there. Ty for review buddy.",
       "parentUuid": "da6255ed_0930fce6",
+      "revId": "d86437e91ea77e76e2685c9209cb92b3f3b1e5c3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_02fa12bd",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/table/Flow_Table.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-11-20T01:00:12Z",
+      "side": 1,
+      "message": "I made a mistake in my comment earlier. overflow_policy seems to be okay. the problem is with name and flow_limit which needs to be non-list.",
+      "parentUuid": "da6255ed_c451ab0f",
       "revId": "d86437e91ea77e76e2685c9209cb92b3f3b1e5c3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

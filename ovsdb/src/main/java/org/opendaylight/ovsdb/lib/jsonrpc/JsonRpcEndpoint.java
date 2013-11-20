@@ -1,5 +1,18 @@
 package org.opendaylight.ovsdb.lib.jsonrpc;
 
+import io.netty.channel.Channel;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -10,18 +23,6 @@ import com.google.common.reflect.Reflection;
 import com.google.common.reflect.TypeToken;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
-
-import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import io.netty.channel.Channel;
 
 public class JsonRpcEndpoint {
 
@@ -93,7 +94,7 @@ public class JsonRpcEndpoint {
                 }
 
                 String s = objectMapper.writeValueAsString(request);
-                logger.debug("{}", s);
+                logger.trace("{}", s);
 
                 SettableFuture<Object> sf = SettableFuture.create();
                 methodContext.put(request.getId(), new CallContext(request, method, sf));
@@ -118,12 +119,12 @@ public class JsonRpcEndpoint {
             JavaType javaType =  TypeFactory.defaultInstance().constructType (retType.getType());
 
             JsonNode result = response.get("result");
-            logger.debug("Response : {}", result.toString());
+            logger.trace("Response : {}", result.toString());
 
             Object result1 = objectMapper.convertValue(result, javaType);
             JsonNode error = response.get("error");
             if (error != null) {
-                logger.debug("Error : {}", error.toString());
+                logger.error("Error : {}", error.toString());
             }
 
             returnCtxt.getFuture().set(result1);
@@ -136,7 +137,7 @@ public class JsonRpcEndpoint {
     public void processRequest(Node node, JsonNode requestJson) {
         JsonRpc10Request request = new JsonRpc10Request(requestJson.get("id").asText());
         request.setMethod(requestJson.get("method").asText());
-        logger.debug("Request : {} {}", requestJson.get("method"), requestJson.get("params"));
+        logger.trace("Request : {} {}", requestJson.get("method"), requestJson.get("params"));
         OvsdbRPC.Callback callback = requestCallbacks.get(node);
         if (callback != null) {
             Method[] methods = callback.getClass().getDeclaredMethods();

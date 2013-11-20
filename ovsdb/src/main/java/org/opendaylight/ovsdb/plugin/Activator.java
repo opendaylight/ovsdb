@@ -74,10 +74,6 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(InventoryServiceInternal.class)
                     .setCallbacks("setInventoryServiceInternal", "unsetInventoryServiceInternal")
                     .setRequired(true));
-            c.add(createServiceDependency()
-                    .setService(IClusterGlobalServices.class)
-                    .setCallbacks("setClusterServices", "unsetClusterServices")
-                    .setRequired(false));
         }
 
         if (imp.equals(ConnectionService.class)) {
@@ -93,6 +89,10 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(InventoryServiceInternal.class)
                     .setCallbacks("setInventoryServiceInternal", "unsetInventoryServiceInternal")
                     .setRequired(true));
+            c.add(createServiceDependency()
+                    .setService(IClusterGlobalServices.class)
+                    .setCallbacks("setClusterServices", "unsetClusterServices")
+                    .setRequired(false));
         }
 
         if (imp.equals(InventoryService.class)) {

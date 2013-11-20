@@ -1,6 +1,18 @@
 package org.opendaylight.ovsdb.lib.jsonrpc;
 
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.ByteToMessageDecoder;
+import io.netty.handler.codec.TooLongFrameException;
+
+import java.io.IOException;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
@@ -9,16 +21,6 @@ import com.fasterxml.jackson.core.json.ByteSourceJsonBootstrapper;
 import com.fasterxml.jackson.core.util.BufferRecycler;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MappingJsonFactory;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufInputStream;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.ByteToMessageDecoder;
-import io.netty.handler.codec.TooLongFrameException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.List;
 
 /**
  * JSON RPC 1.0 compatible decoder capable of decoding JSON messages from a TCP stream.
@@ -55,7 +57,7 @@ public class JsonRpcDecoder extends ByteToMessageDecoder {
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf buf, List<Object> out) throws Exception {
 
-        logger.debug("readable bytes {}, records read {}, incomplete record bytes {}",
+        logger.trace("readable bytes {}, records read {}, incomplete record bytes {}",
                 buf.readableBytes(), recordsRead, lastRecordBytes);
 
         if (lastRecordBytes == 0) {
@@ -118,7 +120,7 @@ public class JsonRpcDecoder extends ByteToMessageDecoder {
 
     private static void skipSpaces(ByteBuf b) throws IOException {
         while (b.isReadable()) {
-            int ch = (int) b.getByte(b.readerIndex()) & 0xFF;
+            int ch = b.getByte(b.readerIndex()) & 0xFF;
             if (!(ch == ' ' || ch == '\r' || ch == '\n' || ch == '\t')) {
                 return;
             } else {
@@ -135,11 +137,11 @@ public class JsonRpcDecoder extends ByteToMessageDecoder {
     private void print(ByteBuf buf, int startPos, int chars, String message) {
         if (null == message) message = "";
         if (startPos > buf.writerIndex()) {
-            logger.debug("startPos out of bounds");
+            logger.trace("startPos out of bounds");
         }
         byte[] b = new byte[startPos + chars <= buf.writerIndex() ? chars : buf.writerIndex() - startPos];
         buf.getBytes(startPos, b);
-        logger.debug("{} ={}", message, new String(b));
+        logger.trace("{} ={}", message, new String(b));
     }
 
     // copied from Netty decoder

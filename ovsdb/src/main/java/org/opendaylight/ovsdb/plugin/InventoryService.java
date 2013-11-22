@@ -167,6 +167,7 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
             dbCache.put(n, db);
         }
 
+        OVSDBInventoryListener inventoryListener = (OVSDBInventoryListener)ServiceHelper.getGlobalInstance(OVSDBInventoryListener.class, this);
         Set<Table.Name> available = tableUpdates.availableUpdates();
         for (Table.Name name : available) {
             TableUpdate tableUpdate = tableUpdates.getUpdate(name);
@@ -185,7 +186,13 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
                         // Updating the Openflow bridge name via the SAL Description update.
                         updateOFBridgeName(n, (Bridge)newRow);
                     }
+                    if ((oldRow == null) && (inventoryListener != null)) {
+                        inventoryListener.rowAdded(n, name.getName(), newRow);
+                    }
                 } else if (oldRow != null) {
+                    if (inventoryListener != null) {
+                        inventoryListener.rowRemoved(n, name.getName(), oldRow);
+                    }
                     db.removeRow(name.getName(), uuid);
                 }
             }
@@ -237,6 +244,10 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
     @Override
     public void addNode(Node node, Set<Property> props) {
         addNodeProperty(node, UpdateType.ADDED, props);
+        OVSDBInventoryListener inventoryListener = (OVSDBInventoryListener)ServiceHelper.getGlobalInstance(OVSDBInventoryListener.class, this);
+        if (inventoryListener != null) {
+            inventoryListener.nodeAdded(node);
+        }
     }
 
     @Override
@@ -271,6 +282,11 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
 
     @Override
     public void removeNode(Node node) {
+        OVSDBInventoryListener inventoryListener = (OVSDBInventoryListener)ServiceHelper.getGlobalInstance(OVSDBInventoryListener.class, this);
+        if (inventoryListener != null) {
+            inventoryListener.nodeRemoved(node);
+        }
+
         for (IPluginOutInventoryService service : pluginOutInventoryServices) {
             service.updateNode(node, UpdateType.REMOVED, null);
         }

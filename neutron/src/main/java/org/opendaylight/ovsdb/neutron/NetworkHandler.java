@@ -6,7 +6,6 @@ import java.util.List;
 import org.opendaylight.controller.containermanager.ContainerConfig;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkAware;
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
-import org.opendaylight.controller.sal.utils.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,14 +58,9 @@ public class NetworkHandler extends BaseHandler
             logger.debug("Network creation failed {} ", result);
             return;
         }
-
-        logger.debug("Neutron Network Creation : {}", network.toString());
-        String networkID = convertNeutronIDToKey(network.getID());
-
-        ContainerConfig config = new ContainerConfig();
-        config.setContainer(networkID);
-        Status status = containerManager.addContainer(config);
-        logger.debug("Network Creation Status : {}", status.toString());
+        String networkId = convertNeutronIDToKey(network.getID());
+        result = TenantNetworkManager.getManager().networkCreated(networkId);
+        logger.debug("Neutron Network {} Created with Internal Vlan : {}", network.toString(), result);
     }
 
     /**

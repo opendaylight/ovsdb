@@ -21,6 +21,9 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
     @Override
     public void rowAdded(Node node, String tableName, Table<?> row) {
         logger.debug("ROW ADDED {} , {}", node, row);
+        if (AdminConfigManager.getManager().getTunnelEndpointConfigTable().equalsIgnoreCase(tableName)) {
+            AdminConfigManager.getManager().populateTunnelEndpoint(node, tableName, row);
+        }
 
     }
 

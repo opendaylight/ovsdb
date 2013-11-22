@@ -72,7 +72,7 @@
                             org.opendaylight.ovsdb.plugin.Activator
                         </Bundle-Activator>
                         <Export-Package>
-                            org.opendaylight.ovsdb.lib.table, org.opendaylight.ovsdb.lib.table.internal, org.opendaylight.ovsdb.plugin
+                            org.opendaylight.ovsdb.lib.table, org.opendaylight.ovsdb.lib.table.internal, org.opendaylight.ovsdb.plugin, org.opendaylight.ovsdb.lib.notation
                         </Export-Package>
                     </instructions>
                     <manifestLocation>${project.basedir}/META-INF</manifestLocation>

@@ -34,6 +34,8 @@
               org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.utils,
               org.opendaylight.ovsdb.plugin,
+              org.opendaylight.ovsdb.lib.notation,
+              org.opendaylight.ovsdb.lib.table,
               org.opendaylight.ovsdb.lib.table.internal,
               org.apache.felix.dm,
               org.slf4j,

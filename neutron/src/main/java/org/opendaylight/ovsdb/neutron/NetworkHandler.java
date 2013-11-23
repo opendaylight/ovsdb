@@ -59,8 +59,13 @@ public class NetworkHandler extends BaseHandler
             return;
         }
         String networkId = convertNeutronIDToKey(network.getID());
+
+        // Get Network Tenant ready - Containers and Internal Vlans.
         result = TenantNetworkManager.getManager().networkCreated(networkId);
         logger.debug("Neutron Network {} Created with Internal Vlan : {}", network.toString(), result);
+
+        // Get internal network ready for Overlays
+        InternalNetworkManager.getManager().prepareInternalNetwork(network);
     }
 
     /**

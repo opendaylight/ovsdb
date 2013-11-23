@@ -209,6 +209,15 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
     }
 
     @Override
+    public List<Node> getNodes() {
+        List<Node> nodes = new ArrayList<Node>();
+        for (Connection connection : ovsdbConnections.values()) {
+            nodes.add(connection.getNode());
+        }
+        return nodes;
+    }
+
+    @Override
     public void notifyClusterViewChanged() {
     }
 
@@ -306,6 +315,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         this.update(connection.getNode(), monitor);
         // With the existing bridges learnt, now it is time to update the OF Controller connections.
         this.updateOFControllers(connection.getNode());
+        inventoryServiceInternal.notifyNodeAdded(connection.getNode());
     }
 
     private void startOvsdbManager() {

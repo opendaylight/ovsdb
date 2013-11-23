@@ -22,6 +22,7 @@ public interface InventoryServiceInternal {
     public void printCache(Node n);
 
     public void addNode(Node n, Set<Property> props);
+    public void notifyNodeAdded(Node n);
     public void removeNode(Node n);
     public void addNodeProperty(Node node, UpdateType type, Set<Property> props);
 }

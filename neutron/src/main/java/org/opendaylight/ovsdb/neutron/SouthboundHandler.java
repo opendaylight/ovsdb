@@ -11,6 +11,8 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
     @Override
     public void nodeAdded(Node node) {
         logger.debug("NODE ADDED {}", node);
+        AdminConfigManager.getManager().populateTunnelEndpoint(node);
+        InternalNetworkManager.getManager().prepareInternalNetwork(node);
     }
 
     @Override
@@ -21,10 +23,13 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
     @Override
     public void rowAdded(Node node, String tableName, Table<?> row) {
         logger.debug("ROW ADDED {} , {}", node, row);
-        if (AdminConfigManager.getManager().getTunnelEndpointConfigTable().equalsIgnoreCase(tableName)) {
+        /*
+         * Should we support dynamic update of the Tunnel endpoint configuration ?
+         *
+        if (AdminConfigManager.getManager().isInterested(tableName)) {
             AdminConfigManager.getManager().populateTunnelEndpoint(node, tableName, row);
         }
-
+        */
     }
 
     @Override

@@ -1084,7 +1084,6 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             List<OperationResult> tr = transResponse.get();
             List<Operation> requests = transaction.getRequests();
             Status status = new Status(StatusCode.SUCCESS);
-            System.out.print(tr.size());
             for (int i = 0; i < tr.size() ; i++) {
                 if (i < requests.size()) requests.get(i).setResult(tr.get(i));
                 if (tr.get(i) != null && tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
@@ -1292,11 +1291,154 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     }
 
     private Status deletePortRow(Node node, String uuid) {
+        try {
+            // Check there is a connectionService
+            if (connectionService == null) {
+                logger.error("Couldn't refer to the ConnectionService");
+                return new Status(StatusCode.NOSERVICE);
+            }
+
+            // Establish the connection
+            Connection connection = this.getConnection(node);
+            if (connection == null) {
+                return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
+            }
+
+            // Ports have a 0:n relationship with Bridges, so need to MUTATE BRIDGE row and DELETE PORT row
+            Map<String, Table<?>> bridgeTable = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
+            Map<String, Table<?>> portTable = inventoryServiceInternal.getTableCache(node, Port.NAME.getName());
+
+            // Initialise the actual request var
+            Operation delPortRequest = null;
+
+            // Check that the UUID exists
+            if (bridgeTable == null || portTable == null || uuid == null || portTable.get(uuid) == null) {
+                return new Status(StatusCode.NOTFOUND, "");
+            }
+
+            // Prepare the mutator to remove the port UUID from the "ports" list in the BRIDGE TABLE
+            UUID portUuid = new UUID(uuid);
+            Mutation portMutator = new Mutation("ports", Mutator.DELETE, portUuid);
+            List<Mutation> mutations = new ArrayList<Mutation>();
+            mutations.add(portMutator);
+
+            //Iterate over the list of bridgeUUIDs that contain the portUUID and add them to the mutator
+            Status status = new Status(StatusCode.SUCCESS);
+
+            Condition condition = new Condition("ports", Function.INCLUDES, portUuid);
+            List<Condition> where = new ArrayList<Condition>();
+            where.add(condition);
+            delPortRequest = new MutateOperation(Bridge.NAME.getName(), where, mutations);
+
+            TransactBuilder transaction = new TransactBuilder();
+            transaction.addOperations(new ArrayList<Operation>(Arrays.asList(delPortRequest)));
+
+            // This executes the transaction.
+            ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
+
+            // Pull the responses
+            List<OperationResult> tr = transResponse.get();
+            List<Operation> requests = transaction.getRequests();
+
+            for (int i = 0; i < tr.size(); i++) {
+                if (i < requests.size()) requests.get(i).setResult(tr.get(i));
+                if (tr.get(i) != null && tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
+                    OperationResult result = tr.get(i);
+                    status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+                }
+            }
+
+            if (tr.size() > requests.size()) {
+                OperationResult result = tr.get(tr.size() - 1);
+                logger.error("Error deleting Port: {}\n Error : {}\n Details : {}",
+                        uuid, result.getError(), result.getDetails());
+                status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+            }
+            return status;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return new Status(StatusCode.INTERNALERROR);
     }
 
     private Status deleteInterfaceRow(Node node, String uuid) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");
+        // INTERFACE is a leaf table with no sub-ordinates, it's upstream is PORT
+        try {
+            // Check there is a connectionService
+            if (connectionService == null) {
+                logger.error("Couldn't refer to the ConnectionService");
+                return new Status(StatusCode.NOSERVICE);
+            }
+
+            // Establish the connection
+            Connection connection = this.getConnection(node);
+            if (connection == null) {
+                return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
+            }
+
+            // Pull the entire Port and Interface TABLES, to get a ROW, they will need to be cast to their Table type
+            Map<String, Table<?>> portTable = inventoryServiceInternal.getTableCache(node, Port.NAME.getName());
+            Map<String, Table<?>> interfaceTable = inventoryServiceInternal.getTableCache(node, Interface.NAME.getName());
+
+            // Initialise the actual request var
+            Operation delInterfaceRequest = null;
+            Operation findInterfaceRequest = null;
+
+            // Check that the UUID exists
+            if (portTable == null || interfaceTable == null || uuid == null || interfaceTable.get(uuid) == null) {
+                return new Status(StatusCode.NOTFOUND, "");
+            }
+
+            UUID interfaceUuid = new UUID(uuid);
+            // Need to check if this is the last interface for that port. Cannot delete last interface.
+            for (int i=0 ; i < portTable.values().size(); i++){
+                Port port = (Port)portTable.values().toArray()[i];
+                if ((port.getInterfaces().size() == 1) && (port.getInterfaces().toString().contains(uuid))){
+                    return new Status(StatusCode.BADREQUEST, "Cannot delete last interface from port");
+                }
+            }
+            // End Select
+            // Prepare the mutator to remove the INTERFACE UUID from the "interfaces" list in the PORT TABLE
+            // This will be combined with a WHERE operator to narrow down rows to Mutate.
+            // This mutator looks in column "interfaces" to DELETE occurences of "interfaceUuid"
+
+            Mutation interfaceMutator = new Mutation("interfaces", Mutator.DELETE, interfaceUuid);
+            List<Mutation> mutations = new ArrayList<Mutation>();
+            mutations.add(interfaceMutator);
+
+            //As per the OVSDB spec, a Mutate can be performed across a number of row, so look for instances
+            // of the interfaceUuid that are in the Port table
+            Condition condition = new Condition("interfaces", Function.INCLUDES, interfaceUuid);
+            List<Condition>where = new ArrayList<Condition>();
+            where.add(condition);
+            delInterfaceRequest = new MutateOperation(Port.NAME.getName(), where, mutations);
+
+            TransactBuilder transaction = new TransactBuilder();
+            transaction.addOperations(new ArrayList<Operation>(Arrays.asList(delInterfaceRequest)));
+
+            ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
+            List<OperationResult> tr = transResponse.get();
+            List<Operation> requests = transaction.getRequests();
+            Status status = new Status(StatusCode.SUCCESS);
+            for (int i = 0; i < tr.size(); i++) {
+                if (i < requests.size()) requests.get(i).setResult(tr.get(i));
+                if (tr.get(i) != null && tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
+                    OperationResult result = tr.get(i);
+                    status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+                }
+            }
+
+            if (tr.size() > requests.size()) {
+                OperationResult result = tr.get(tr.size() - 1);
+                logger.error("Error deleting Port: {}\n Error : {}\n Details : {}",
+                        uuid, result.getError(), result.getDetails());
+                status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+            }
+            return status;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new Status(StatusCode.INTERNALERROR);
     }
 
     private Status deleteOpen_vSwitchRow(Node node, String uuid) {
@@ -1304,7 +1446,75 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     }
 
     private Status deleteControllerRow(Node node, String uuid) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");
+        try {
+            // Check there is a connectionService
+            if (connectionService == null) {
+                logger.error("Couldn't refer to the ConnectionService");
+                return new Status(StatusCode.NOSERVICE);
+            }
+
+            // Establish the connection
+            Connection connection = this.getConnection(node);
+            if (connection == null) {
+                return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
+            }
+
+            // Controllers have a 0:n relationship with Bridges, so need to MUTATE BRIDGE row and DELETE PORT row
+            Map<String, Table<?>> bridgeTable = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
+            Map<String, Table<?>> controllerTable = inventoryServiceInternal.getTableCache(node, Controller.NAME.getName());
+
+            // Initialise the actual request var
+            Operation delControllerRequest = null;
+
+            // Check that the UUID exists
+            if (bridgeTable == null || controllerTable == null || uuid == null || controllerTable.get(uuid) == null) {
+                return new Status(StatusCode.NOTFOUND, "");
+            }
+
+            // Prepare the mutator to remove the controller UUID from the "ports" list in the BRIDGE TABLE
+            UUID controllerUuid = new UUID(uuid);
+            Mutation controllerMutator = new Mutation("controller", Mutator.DELETE, controllerUuid);
+            List<Mutation> mutations = new ArrayList<Mutation>();
+            mutations.add(controllerMutator);
+
+            //Iterate over the list of bridgeUUIDs that contain the portUUID and add them to the mutator
+            Status status = new Status(StatusCode.SUCCESS);
+
+            Condition condition = new Condition("controller", Function.INCLUDES, controllerUuid);
+            List<Condition> where = new ArrayList<Condition>();
+            where.add(condition);
+            delControllerRequest = new MutateOperation(Bridge.NAME.getName(), where, mutations);
+
+            TransactBuilder transaction = new TransactBuilder();
+            transaction.addOperations(new ArrayList<Operation>(Arrays.asList(delControllerRequest)));
+
+            // This executes the transaction.
+            ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
+
+            // Pull the responses
+            List<OperationResult> tr = transResponse.get();
+            List<Operation> requests = transaction.getRequests();
+
+            for (int i = 0; i < tr.size(); i++) {
+                if (i < requests.size()) requests.get(i).setResult(tr.get(i));
+                if (tr.get(i) != null && tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
+                    OperationResult result = tr.get(i);
+                    status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+                }
+            }
+
+            if (tr.size() > requests.size()) {
+                OperationResult result = tr.get(tr.size() - 1);
+                logger.error("Error deleting Controller : {}\n Error : {}\n Details : {}",
+                        uuid, result.getError(), result.getDetails());
+                status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+            }
+            return status;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new Status(StatusCode.INTERNALERROR);
+
     }
 
     private Status deleteSSLRow(Node node, String uuid) {
@@ -1692,3 +1902,4 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         return help.toString();
     }
 }
+

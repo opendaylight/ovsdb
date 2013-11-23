@@ -244,6 +244,10 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
     @Override
     public void addNode(Node node, Set<Property> props) {
         addNodeProperty(node, UpdateType.ADDED, props);
+    }
+
+    @Override
+    public void notifyNodeAdded(Node node) {
         OVSDBInventoryListener inventoryListener = (OVSDBInventoryListener)ServiceHelper.getGlobalInstance(OVSDBInventoryListener.class, this);
         if (inventoryListener != null) {
             inventoryListener.nodeAdded(node);

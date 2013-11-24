@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_d9f3cd9d",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1396,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-11-24T18:34:40Z",
+      "side": 1,
+      "message": "the above contains() will work most of the cases \u0026 even all the time :-), But the logic is not as elegant as rest of your implementation. Thats because you are doing a contains check on a String that is an output of toString() for a Arraylist with UUID as the element.",
+      "revId": "226620dc5ddf59616d4728f6d97b02ec86e13c01",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

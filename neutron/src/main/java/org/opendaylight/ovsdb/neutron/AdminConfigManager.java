@@ -84,7 +84,7 @@ public class AdminConfigManager {
     }
 
     public boolean isInterested (String tableName) {
-        return tableName.equalsIgnoreCase("Open_vSwitch");
+        return tableName.equalsIgnoreCase(Open_vSwitch.NAME.getName());
     }
 
     private void populateTunnelEndpoint (Node node, Open_vSwitch row) {
@@ -106,7 +106,7 @@ public class AdminConfigManager {
     public void populateTunnelEndpoint (Node node) {
         OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
         try {
-            Map<String, Table<?>> openvswitchTable = ovsdbTable.getRows(node, "Open_vSwitch");
+            Map<String, Table<?>> openvswitchTable = ovsdbTable.getRows(node, Open_vSwitch.NAME.getName());
             if (openvswitchTable == null) {
                 logger.debug("Open_vSwitch table is null for Node {} ", node);
                 return;

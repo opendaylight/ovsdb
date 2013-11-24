@@ -129,7 +129,7 @@ public class InternalNetworkManager {
         String interfaceUUID = null;
         int timeout = 6;
         while ((interfaceUUID == null) && (timeout > 0)) {
-            patchPort = (Port)ovsdbTable.getRow(node, Port.NAME.getName(), status.getDescription());
+            patchPort = (Port)ovsdbTable.getRow(node, Port.NAME.getName(), patchPortUUID);
             OvsDBSet<UUID> interfaces = patchPort.getInterfaces();
             if (interfaces == null || interfaces.size() == 0) {
                 // Wait for the OVSDB update to sync up the Local cache.

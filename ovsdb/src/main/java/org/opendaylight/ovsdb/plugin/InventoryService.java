@@ -187,11 +187,13 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
                         updateOFBridgeName(n, (Bridge)newRow);
                     }
                     if ((oldRow == null) && (inventoryListener != null)) {
-                        inventoryListener.rowAdded(n, name.getName(), newRow);
+                        inventoryListener.rowAdded(n, name.getName(), uuid, newRow);
+                    } else if (inventoryListener != null) {
+                        inventoryListener.rowUpdated(n, name.getName(), uuid, newRow);
                     }
                 } else if (oldRow != null) {
                     if (inventoryListener != null) {
-                        inventoryListener.rowRemoved(n, name.getName(), oldRow);
+                        inventoryListener.rowRemoved(n, name.getName(), uuid, oldRow);
                     }
                     db.removeRow(name.getName(), uuid);
                 }

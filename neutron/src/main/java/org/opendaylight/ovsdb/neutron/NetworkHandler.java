@@ -1,7 +1,6 @@
 package org.opendaylight.ovsdb.neutron;
 
 import java.net.HttpURLConnection;
-import java.util.List;
 
 import org.opendaylight.controller.containermanager.ContainerConfig;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkAware;
@@ -33,14 +32,6 @@ public class NetworkHandler extends BaseHandler
             return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
         }
 
-        String networkID = convertNeutronIDToKey(network.getID());
-
-        List<String> containers = containerManager.getContainerNames();
-        if (containers.contains(networkID)) {
-            logger.debug("Container with name {} exists", networkID);
-            return HttpURLConnection.HTTP_CONFLICT;
-        }
-
         return HttpURLConnection.HTTP_CREATED;
     }
 
@@ -58,14 +49,8 @@ public class NetworkHandler extends BaseHandler
             logger.debug("Network creation failed {} ", result);
             return;
         }
-        String networkId = convertNeutronIDToKey(network.getID());
 
-        // Get Network Tenant ready - Containers and Internal Vlans.
-        result = TenantNetworkManager.getManager().networkCreated(networkId);
-        logger.debug("Neutron Network {} Created with Internal Vlan : {}", network.toString(), result);
-
-        // Get internal network ready for Overlays
-        InternalNetworkManager.getManager().prepareInternalNetwork(network);
+        TenantNetworkManager.getManager().networkCreated(network.getID());
     }
 
     /**

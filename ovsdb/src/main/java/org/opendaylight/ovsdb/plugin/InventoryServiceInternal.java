@@ -6,11 +6,12 @@ import java.util.Set;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.UpdateType;
+import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
 import org.opendaylight.ovsdb.lib.database.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 
-public interface InventoryServiceInternal {
+public interface InventoryServiceInternal extends IPluginInInventoryService {
     public Map<String, Map<String, Table<?>>> getCache(Node n);
     public Map<String, Table<?>> getTableCache(Node n, String tableName);
     public Table<?> getRow (Node n, String tableName, String uuid);

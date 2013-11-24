@@ -49,27 +49,16 @@ public class PortHandler extends BaseHandler
         String portID = convertNeutronIDToKey(port.getID());
         String portDesc = port.getName();
         Boolean portAdminState = port.getAdminStateUp();
-/*
- * Add the Corresponding OF NodeConnector to the Container
- *
-        ContainerConfig config = new ContainerConfig();
-        config.setContainer(networkID);
-        logger.debug("Adding Port {} to Container : {}", port.toString(), config.getContainer());
-        List<String> ncList = new ArrayList<String>();
-        ncList.add("OVS|"+ portID +"@OVS|"+networkID);
-        config.addNodeConnectors(ncList);
-        Status status = containerManager.addContainerEntry(networkID, ncList);
 
-        if (!status.isSuccess()) {
-            logger.error(" Port-ADD failed for tenant-id - {}," +
-                    " bridge-id - {}, port-id - {}, result - {} ",
-                    tenantID, networkID, portID, result);
-        } else {
-            logger.debug(" Port-ADD successful for tenant-id - {}," +
-                    " bridge-id - {}, port-id - {}, result - {} ",
-                    tenantID, networkID, portID, result);
-        }
-*/
+        // Create Full Mesh Tunnels
+        /*
+         * Is this required ?
+         * The Tunnel Creation logic is completely owned by the Southbound handler at this point.
+
+        NeutronNetwork network = this.neutronNetworkCache.getNetwork(port.getNetworkUUID());
+        ProviderNetworkManager.getManager().createTunnels(network.getProviderNetworkType(),
+                                                          network.getProviderSegmentationID());
+         */
         logger.debug(" Port-ADD successful for tenant-id - {}," +
                 " network-id - {}, port-id - {}, result - {} ",
                 tenantID, networkID, portID, result);

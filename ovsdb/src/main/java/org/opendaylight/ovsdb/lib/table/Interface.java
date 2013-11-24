@@ -1,5 +1,7 @@
 package org.opendaylight.ovsdb.lib.table;
 
+import java.math.BigInteger;
+
 import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
 import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
@@ -13,7 +15,7 @@ public class Interface extends Table<Interface> {
     private String name;
     private OvsDBMap<String, String> options;
     private String type;
-    private OvsDBSet<Integer> ofport;
+    private OvsDBSet<BigInteger> ofport;
     private OvsDBSet<String> mac;
     private OvsDBMap<String, Integer> statistics;
     private OvsDBMap<String, String> status;
@@ -44,11 +46,11 @@ public class Interface extends Table<Interface> {
         this.type = type;
     }
 
-    public OvsDBSet<Integer> getOfport() {
+    public OvsDBSet<BigInteger> getOfport() {
         return ofport;
     }
 
-    public void setOfport(OvsDBSet<Integer> ofport) {
+    public void setOfport(OvsDBSet<BigInteger> ofport) {
         this.ofport = ofport;
     }
 

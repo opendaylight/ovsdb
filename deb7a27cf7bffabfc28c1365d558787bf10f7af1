@@ -16,6 +16,24 @@
       "revId": "deb7a27cf7bffabfc28c1365d558787bf10f7af1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_ab831a55",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1264,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-11-26T17:06:43Z",
+      "side": 1,
+      "message": "Hi Alissa,\n\nWe have custom serializers and deserializers for many of the OVSDB notations.\nPlease refer to the OVSDB spec\u0027s notation section :\nhttp://tools.ietf.org/html/draft-pfaff-ovsdb-proto-02#section-5.1\n\nThis UUID class refers to this deserialized form of the OVSDB UUID notation. \n\nThe key to this class is the JsonDeserialize and JsonSerialize annotations on top. Which takes of JSON parsing and serializing.\n\nThanks,\nMadhu",
+      "parentUuid": "da6255ed_c89ad46d",
+      "revId": "deb7a27cf7bffabfc28c1365d558787bf10f7af1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

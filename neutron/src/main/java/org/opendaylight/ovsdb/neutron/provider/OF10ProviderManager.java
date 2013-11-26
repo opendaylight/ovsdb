@@ -1,11 +1,17 @@
 package org.opendaylight.ovsdb.neutron.provider;
 
+import java.math.BigInteger;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.opendaylight.controller.forwardingrulesmanager.FlowConfig;
+import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManager;
+import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
@@ -57,8 +63,150 @@ class OF10ProviderManager extends ProviderNetworkManager {
         return new Status(StatusCode.SUCCESS);
     }
 
+    private void programLocalIngressTunnelBridgeRules(Node node, int tunnelOFPort, String attachedMac,
+                                                      int internalVlan, int patchPort) {
+        String brIntId = InternalNetworkManager.getManager().getInternalBridgeUUID(node, AdminConfigManager.getManager().getTunnelBridgeName());
+        if (brIntId == null) {
+            logger.error("Failed to initialize Flow Rules for {}", node);
+            return;
+        }
+        try {
+            OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brIntId);
+            Set<String> dpids = bridge.getDatapath_id();
+            if (dpids == null || dpids.size() ==  0) return;
+            Long dpidLong = Long.valueOf(HexEncode.stringToLong((String)dpids.toArray()[0]));
+            Node ofNode = new Node(Node.NodeIDType.OPENFLOW, dpidLong);
+            IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper.getInstance(
+                    IForwardingRulesManager.class, "default", this);
+            FlowConfig flow = new FlowConfig();
+            flow.setName("TepMatch"+tunnelOFPort+""+internalVlan+""+HexEncode.stringToLong(attachedMac));
+            flow.setNode(ofNode);
+            flow.setPriority("100");
+            flow.setDstMac(attachedMac);
+            flow.setIngressPort(tunnelOFPort+"");
+            List<String> actions = new ArrayList<String>();
+            actions.add(ActionType.SET_VLAN_ID+"="+internalVlan);
+            actions.add(ActionType.OUTPUT.toString()+"="+patchPort);
+            flow.setActions(actions);
+            Status status = frm.addStaticFlow(flow);
+            logger.debug("Local Ingress Flow Programming Status {} for Flow {} on {} / {}", status, flow, ofNode, node);
+        } catch (Exception e) {
+            logger.error("Failed to initialize Flow Rules for {}", node, e);
+        }
+    }
+
+    private void programRemoteEgressTunnelBridgeRules(Node node, int patchPort, String attachedMac,
+            int internalVlan, int tunnelOFPort) {
+        String brIntId = InternalNetworkManager.getManager().getInternalBridgeUUID(node, AdminConfigManager.getManager().getTunnelBridgeName());
+        if (brIntId == null) {
+            logger.error("Failed to initialize Flow Rules for {}", node);
+            return;
+        }
+        try {
+            OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brIntId);
+            Set<String> dpids = bridge.getDatapath_id();
+            if (dpids == null || dpids.size() ==  0) return;
+            Long dpidLong = Long.valueOf(HexEncode.stringToLong((String)dpids.toArray()[0]));
+            Node ofNode = new Node(Node.NodeIDType.OPENFLOW, dpidLong);
+            IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper.getInstance(
+                    IForwardingRulesManager.class, "default", this);
+            FlowConfig flow = new FlowConfig();
+            flow.setName("TepMatch"+tunnelOFPort+""+internalVlan+""+HexEncode.stringToLong(attachedMac));
+            flow.setNode(ofNode);
+            flow.setPriority("100");
+            flow.setDstMac(attachedMac);
+            flow.setIngressPort(patchPort+"");
+            flow.setVlanId(internalVlan+"");
+            List<String> actions = new ArrayList<String>();
+            actions.add(ActionType.POP_VLAN.toString());
+            actions.add(ActionType.OUTPUT.toString()+"="+tunnelOFPort);
+            flow.setActions(actions);
+            Status status = frm.addStaticFlow(flow);
+            logger.debug("Remote Egress Flow Programming Status {} for Flow {} on {} / {}", status, flow, ofNode, node);
+        } catch (Exception e) {
+            logger.error("Failed to initialize Flow Rules for {}", node, e);
+        }
+    }
+
+    private void programTunnelRules (String tunnelType, String segmentationId, InetAddress dst, Node node,
+                                     Interface intf, boolean local) {
+        String networkId = TenantNetworkManager.getManager().getNetworkIdForSegmentationId(segmentationId);
+        if (networkId == null) {
+            logger.debug("Tenant Network not found with Segmenation-id {}",segmentationId);
+            return;
+        }
+        int internalVlan = TenantNetworkManager.getManager().getInternalVlan(networkId);
+        if (internalVlan == 0) {
+            logger.debug("No InternalVlan provisioned for Tenant Network {}",networkId);
+            return;
+        }
+        Map<String, String> externalIds = intf.getExternal_ids();
+        if (externalIds == null) {
+            logger.error("No external_ids seen in {}", intf);
+            return;
+        }
+
+        String attachedMac = externalIds.get(TenantNetworkManager.EXTERNAL_ID_VM_MAC);
+        if (attachedMac == null) {
+            logger.error("No AttachedMac seen in {}", intf);
+            return;
+        }
+        String patchInt = "";
+        if (local) {
+            patchInt = AdminConfigManager.getManager().getPatchToIntegration();
+        } else {
+            patchInt = AdminConfigManager.getManager().getPatchToTunnel();
+        }
+
+        int patchOFPort = -1;
+        try {
+            OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+            Map<String, Table<?>> intfs = ovsdbTable.getRows(node, Interface.NAME.getName());
+            if (intfs != null) {
+                for (Table<?> row : intfs.values()) {
+                    Interface patchIntf = (Interface)row;
+                    if (patchIntf.getName().equalsIgnoreCase(patchInt)) {
+                        Set<BigInteger> of_ports = patchIntf.getOfport();
+                        if (of_ports == null || of_ports.size() <= 0) {
+                            logger.error("Could NOT Identified Patch port {} -> OF ({}) on {}", patchInt, node);
+                            continue;
+                        }
+                        patchOFPort = Long.valueOf(((BigInteger)of_ports.toArray()[0]).longValue()).intValue();
+                        logger.debug("Identified Patch port {} -> OF ({}) on {}", patchInt, patchOFPort, node);
+                        break;
+                    }
+                }
+                if (patchOFPort == -1) {
+                    logger.error("Cannot identify {} interface on {}", patchInt, node);
+                }
+                for (Table<?> row : intfs.values()) {
+                    Interface tunIntf = (Interface)row;
+                    if (tunIntf.getName().equals(this.getTunnelName(tunnelType, segmentationId, dst))) {
+                        Set<BigInteger> of_ports = tunIntf.getOfport();
+                        if (of_ports == null || of_ports.size() <= 0) {
+                            logger.error("Could NOT Identified Tunnel port {} -> OF ({}) on {}", tunIntf.getName(), node);
+                            continue;
+                        }
+                        int tunnelOFPort = Long.valueOf(((BigInteger)of_ports.toArray()[0]).longValue()).intValue();
+                        logger.debug("Identified Tunnel port {} -> OF ({}) on {}", tunIntf.getName(), tunnelOFPort, node);
+
+                        if (local) {
+                            programLocalIngressTunnelBridgeRules(node, tunnelOFPort, attachedMac, internalVlan, patchOFPort);
+                        } else {
+                            programRemoteEgressTunnelBridgeRules(node, patchOFPort, attachedMac, internalVlan, tunnelOFPort);
+                        }
+                        return;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error("", e);
+        }
+    }
     @Override
-    public Status createTunnels(String tunnelType, String tunnelKey, Node srcNode) {
+    public Status createTunnels(String tunnelType, String tunnelKey, Node srcNode, Interface intf) {
         Status status = getTunnelReadinessStatus(srcNode, tunnelKey);
         if (!status.isSuccess()) return status;
 
@@ -70,10 +218,40 @@ class OF10ProviderManager extends ProviderNetworkManager {
             if (!status.isSuccess()) continue;
             InetAddress src = AdminConfigManager.getManager().getTunnelEndPoint(srcNode);
             InetAddress dst = AdminConfigManager.getManager().getTunnelEndPoint(dstNode);
-            addTunnelPort(srcNode, tunnelType, src, dst, tunnelKey);
+            status = addTunnelPort(srcNode, tunnelType, src, dst, tunnelKey);
+            if (status.isSuccess()) {
+                this.programTunnelRules(tunnelType, tunnelKey, dst, srcNode, intf, true);
+            }
             addTunnelPort(dstNode, tunnelType, dst, src, tunnelKey);
+            if (status.isSuccess()) {
+                this.programTunnelRules(tunnelType, tunnelKey, src, dstNode, intf, false);
+            }
         }
         return new Status(StatusCode.SUCCESS);
+    }
+
+
+    private String getTunnelName(String tunnelType, String key, InetAddress dst) {
+        return tunnelType+"-"+key+"-"+dst.getHostAddress();
+    }
+
+    private Interface getTunnelInterface (Node node, String tunnelType, InetAddress dst, String key) {
+        try {
+            OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+            String portName = getTunnelName(tunnelType, key, dst);
+
+            Map<String, Table<?>> tunIntfs = ovsdbTable.getRows(node, Interface.NAME.getName());
+            if (tunIntfs != null) {
+                for (Table<?> row : tunIntfs.values()) {
+                    Interface tunIntf = (Interface)row;
+                    if (tunIntf.getName().equals(portName)) return tunIntf;
+                }
+
+            }
+        } catch (Exception e) {
+            logger.error("", e);
+        }
+        return null;
     }
 
     private boolean isTunnelPresent(Node node, String tunnelName, String bridgeUUID) throws Exception {
@@ -108,7 +286,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
                 logger.error("Could not find Bridge {} in {}", tunnelBridgeName, node);
                 return new Status(StatusCode.NOTFOUND, "Could not find "+tunnelBridgeName+" in "+node);
             }
-            String portName = tunnelType+"-"+key+"-"+dst.getHostAddress();
+            String portName = getTunnelName(tunnelType, key, dst);
 
             if (this.isTunnelPresent(node, portName, bridgeUUID)) {
                 logger.trace("Tunnel {} is present in {} of {}", portName, tunnelBridgeName, node);
@@ -167,8 +345,8 @@ class OF10ProviderManager extends ProviderNetworkManager {
         IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
         List<Node> nodes = connectionService.getNodes();
         for (Node srcNode : nodes) {
-            this.createTunnels(tunnelType, tunnelKey, srcNode);
+            this.createTunnels(tunnelType, tunnelKey, srcNode, null);
         }
-        return null;
+        return new Status(StatusCode.SUCCESS);
     }
 }

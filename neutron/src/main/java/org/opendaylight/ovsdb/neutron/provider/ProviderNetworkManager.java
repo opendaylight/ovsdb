@@ -2,6 +2,7 @@ package org.opendaylight.ovsdb.neutron.provider;
 
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.ovsdb.lib.table.Interface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,5 +22,5 @@ public abstract class ProviderNetworkManager {
 
     public abstract boolean hasPerTenantTunneling();
     public abstract Status createTunnels(String tunnelType, String tunnelKey);
-    public abstract Status createTunnels(String tunnelType, String tunnelKey, Node source);
+    public abstract Status createTunnels(String tunnelType, String tunnelKey, Node source, Interface intf);
 }

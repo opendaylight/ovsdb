@@ -35,9 +35,9 @@ public class TenantNetworkManager {
     static final Logger logger = LoggerFactory.getLogger(TenantNetworkManager.class);
 
     private static final int MAX_VLAN = 4096;
-    private static final String EXTERNAL_ID_VM_ID = "vm-id";
-    private static final String EXTERNAL_ID_INTERFACE_ID = "iface-id";
-    private static final String EXTERNAL_ID_VM_MAC = "attached-mac";
+    public static final String EXTERNAL_ID_VM_ID = "vm-id";
+    public static final String EXTERNAL_ID_INTERFACE_ID = "iface-id";
+    public static final String EXTERNAL_ID_VM_MAC = "attached-mac";
     private static TenantNetworkManager tenantHelper = new TenantNetworkManager();
     private Queue<Integer> internalVlans = new LinkedList<Integer>();
     private Map<String, Integer> tenantVlanMap = new HashMap<String, Integer>();
@@ -162,7 +162,7 @@ public class TenantNetworkManager {
         return false;
     }
 
-    private String getNetworkIdForSegmentationId (String segmentationId) {
+    public String getNetworkIdForSegmentationId (String segmentationId) {
         INeutronNetworkCRUD neutronNetworkService = (INeutronNetworkCRUD)ServiceHelper.getGlobalInstance(INeutronNetworkCRUD.class, this);
         List <NeutronNetwork> networks = neutronNetworkService.getAllNetworks();
         for (NeutronNetwork network : networks) {

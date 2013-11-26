@@ -152,7 +152,7 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
         NeutronNetwork network = TenantNetworkManager.getManager().getTenantNetworkForInterface(intf);
         if (network != null) {
             ProviderNetworkManager.getManager().createTunnels(network.getProviderNetworkType(),
-                    network.getProviderSegmentationID());
+                    network.getProviderSegmentationID(), node, intf);
         }
     }
 

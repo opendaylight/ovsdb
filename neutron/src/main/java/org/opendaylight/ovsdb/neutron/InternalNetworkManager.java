@@ -1,11 +1,18 @@
 package org.opendaylight.ovsdb.neutron;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.opendaylight.controller.forwardingrulesmanager.FlowConfig;
+import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManager;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
+import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
@@ -40,28 +47,35 @@ public class InternalNetworkManager {
         return internalNetwork;
     }
 
-    public boolean isInternalNetworkNeutronReady(Node node) throws Exception {
-        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-        Map<String, Table<?>> bridgeTable = ovsdbTable.getRows(node, Bridge.NAME.getName());
-        if (bridgeTable != null) {
-            for (Table<?> row : bridgeTable.values()) {
-                Bridge bridge = (Bridge)row;
-                if (bridge.getName().equals(AdminConfigManager.getManager().getIntegrationBridgeName())) return true;
+    public String getInternalBridgeUUID (Node node, String bridgeName) {
+        try {
+            OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+            Map<String, Table<?>> bridgeTable = ovsdbTable.getRows(node, Bridge.NAME.getName());
+            if (bridgeTable == null) return null;
+            for (String key : bridgeTable.keySet()) {
+                Bridge bridge = (Bridge)bridgeTable.get(key);
+                if (bridge.getName().equals(bridgeName)) return key;
             }
+        } catch (Exception e) {
+            logger.error("Error getting Bridge Identifier for {} / {}", node, bridgeName, e);
         }
-        return false;
+        return null;
+    }
+
+    public boolean isInternalNetworkNeutronReady(Node node) throws Exception {
+        if (this.getInternalBridgeUUID(node, AdminConfigManager.getManager().getIntegrationBridgeName()) != null) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public boolean isInternalNetworkOverlayReady(Node node) throws Exception {
-        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-        Map<String, Table<?>> bridgeTable = ovsdbTable.getRows(node, Bridge.NAME.getName());
-        if (bridgeTable != null) {
-            for (Table<?> row : bridgeTable.values()) {
-                Bridge bridge = (Bridge)row;
-                if (bridge.getName().equals(AdminConfigManager.getManager().getTunnelBridgeName())) return true;
-            }
+        if (this.getInternalBridgeUUID(node, AdminConfigManager.getManager().getTunnelBridgeName()) != null) {
+            return true;
+        } else {
+            return false;
         }
-        return false;
     }
 
     public Status createInternalNetworkForOverlay(Node node) throws Exception {
@@ -102,7 +116,10 @@ public class InternalNetworkManager {
         port.setName(brTun.getName());
         status = ovsdbTable.insertRow(node, Port.NAME.getName(), bridgeUUID, port);
 
-        status = addPatchPort(node, bridgeUUID, "patch-int", "patch-tun");
+        String patchInt = AdminConfigManager.getManager().getPatchToIntegration();
+        String patchTun = AdminConfigManager.getManager().getPatchToTunnel();
+
+        status = addPatchPort(node, bridgeUUID, patchInt, patchTun);
         if (!status.isSuccess()) return status;
 
         // Create the corresponding patch-tun port in br-int
@@ -110,7 +127,7 @@ public class InternalNetworkManager {
         for (String brIntUUID : bridges.keySet()) {
             Bridge brInt = (Bridge) bridges.get(brIntUUID);
             if (brInt.getName().equalsIgnoreCase(AdminConfigManager.getManager().getIntegrationBridgeName())) {
-                return addPatchPort(node, brIntUUID, "patch-tun", "patch-int");
+                return addPatchPort(node, brIntUUID, patchTun, patchInt);
             }
         }
 
@@ -180,6 +197,37 @@ public class InternalNetworkManager {
                 e.printStackTrace();
             }
         }
+
+        this.initializeFlowRules(node, AdminConfigManager.getManager().getIntegrationBridgeName());
+    }
+
+    private void initializeFlowRules(Node node, String bridgeName) {
+        String brIntId = this.getInternalBridgeUUID(node, bridgeName);
+        if (brIntId == null) {
+            logger.error("Failed to initialize Flow Rules for {}", node);
+            return;
+        }
+        try {
+            OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brIntId);
+            Set<String> dpids = bridge.getDatapath_id();
+            if (dpids == null || dpids.size() ==  0) return;
+            Long dpidLong = Long.valueOf(HexEncode.stringToLong((String)dpids.toArray()[0]));
+            Node ofNode = new Node(Node.NodeIDType.OPENFLOW, dpidLong);
+            IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper.getInstance(
+                    IForwardingRulesManager.class, "default", this);
+            FlowConfig flow = new FlowConfig();
+            flow.setName("IntegrationBridgeNormal");
+            flow.setNode(ofNode);
+            flow.setPriority("1");
+            List<String> normalAction = new ArrayList<String>();
+            normalAction.add(ActionType.HW_PATH.toString());
+            flow.setActions(normalAction);
+            Status status = frm.addStaticFlow(flow);
+            logger.debug("Flow Programming Status {} for Flow {} on {} / {}", status, flow, ofNode, node);
+        } catch (Exception e) {
+            logger.error("Failed to initialize Flow Rules for {}", node, e);
+        }
     }
 
     public void prepareInternalNetwork(NeutronNetwork network) {
@@ -198,4 +246,7 @@ public class InternalNetworkManager {
         }
     }
 
+    public static List safe( List other ) {
+        return other == null ? Collections.EMPTY_LIST : other;
+    }
 }

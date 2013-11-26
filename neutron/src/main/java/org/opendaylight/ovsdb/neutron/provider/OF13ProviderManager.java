@@ -2,6 +2,7 @@ package org.opendaylight.ovsdb.neutron.provider;
 
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.ovsdb.lib.table.Interface;
 
 
 class OF13ProviderManager extends ProviderNetworkManager {
@@ -11,7 +12,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
     }
 
     @Override
-    public Status createTunnels(String tunnelType, String tunnelKey, Node source) {
+    public Status createTunnels(String tunnelType, String tunnelKey, Node source, Interface intf) {
         // TODO Auto-generated method stub
         return null;
     }

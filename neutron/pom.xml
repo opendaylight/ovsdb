@@ -31,8 +31,10 @@
             <Import-Package>
               org.opendaylight.controller.networkconfig.neutron,
               org.opendaylight.controller.containermanager,
+              org.opendaylight.controller.forwardingrulesmanager,
               org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.utils,
+              org.opendaylight.controller.sal.action,
               org.opendaylight.ovsdb.plugin,
               org.opendaylight.ovsdb.lib.notation,
               org.opendaylight.ovsdb.lib.table,
@@ -55,6 +57,11 @@
       <groupId>org.opendaylight.controller</groupId>
       <version>0.4.1-SNAPSHOT</version>
       <artifactId>networkconfig.neutron</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>forwardingrulesmanager</artifactId>
+      <version>0.4.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>

@@ -890,17 +890,11 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     }
 
     private Status insertBridgeRow(Node node, String open_VSwitch_uuid, Bridge bridgeRow) {
+
+        String insertErrorMsg = "bridge";
+        String rowName=bridgeRow.getName();
+
         try{
-            if (connectionService == null) {
-                logger.error("Couldn't refer to the ConnectionService");
-                return new Status(StatusCode.NOSERVICE);
-            }
-
-            Connection connection = this.getConnection(node);
-            if (connection == null) {
-                return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
-            }
-
             Map<String, Table<?>> ovsTable = inventoryServiceInternal.getTableCache(node, Open_vSwitch.NAME.getName());
 
             if (ovsTable == null) {
@@ -933,47 +927,21 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
 
             int bridgeInsertIndex = transaction.getRequests().indexOf(addBridgeRequest);
 
-            ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
-            List<OperationResult> tr = transResponse.get();
-            List<Operation> requests = transaction.getRequests();
-            Status status = new Status(StatusCode.SUCCESS);
-            for (int i = 0; i < tr.size() ; i++) {
-                if (i < requests.size()) requests.get(i).setResult(tr.get(i));
-                if (tr.get(i) != null && tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
-                    OperationResult result = tr.get(i);
-                    status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
-                }
-            }
+            return _insertTableRow(node,transaction,bridgeInsertIndex,insertErrorMsg,rowName);
 
-            if (tr.size() > requests.size()) {
-                OperationResult result = tr.get(tr.size()-1);
-                logger.error("Error creating Bridge : {}\n Error : {}\n Details : {}", bridgeRow.getName(),
-                                                                                       result.getError(),
-                                                                                       result.getDetails());
-                status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
-            }
-            if (status.isSuccess()) {
-                UUID bridgeUUID = tr.get(bridgeInsertIndex).getUuid();
-                status = new Status(StatusCode.SUCCESS, bridgeUUID.toString());
-            }
-            return status;
         } catch(Exception e){
             e.printStackTrace();
         }
         return new Status(StatusCode.INTERNALERROR);
     }
 
-    private Status insertPortRow(Node node, String bridge_uuid, Port portRow) {
-        try{
-            if (connectionService == null) {
-                logger.error("Couldn't refer to the ConnectionService");
-                return new Status(StatusCode.NOSERVICE);
-            }
-            Connection connection = this.getConnection(node);
-            if (connection == null) {
-                return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
-            }
 
+    private Status insertPortRow(Node node, String bridge_uuid, Port portRow) {
+
+        String insertErrorMsg = "port";
+        String rowName=portRow.getName();
+
+        try{
             Map<String, Table<?>> brTable = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
             if (brTable == null ||  brTable.get(bridge_uuid) == null) {
                 return new Status(StatusCode.NOTFOUND, "Bridge with UUID "+bridge_uuid+" Not found");
@@ -1010,47 +978,21 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             transaction.addOperations(new ArrayList<Operation>
             (Arrays.asList(addBrMutRequest, addPortRequest, addIntfRequest)));
             int portInsertIndex = transaction.getRequests().indexOf(addPortRequest);
-            ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
-            List<OperationResult> tr = transResponse.get();
-            List<Operation> requests = transaction.getRequests();
-            Status status = new Status(StatusCode.SUCCESS);
-            for (int i = 0; i < tr.size() ; i++) {
-                if (i < requests.size()) requests.get(i).setResult(tr.get(i));
-                if (tr.get(i) != null && tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
-                    OperationResult result = tr.get(i);
-                    status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
-                }
-            }
 
-            if (tr.size() > requests.size()) {
-                OperationResult result = tr.get(tr.size()-1);
-                logger.error("Error creating port : {}\n Error : {}\n Details : {}", portRow.getName(),
-                        result.getError(),
-                        result.getDetails());
-                status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
-            }
-            if (status.isSuccess()) {
-                uuid = tr.get(portInsertIndex).getUuid();
-                status = new Status(StatusCode.SUCCESS, uuid.toString());
-            }
+            return _insertTableRow(node,transaction,portInsertIndex,insertErrorMsg,rowName);
 
-            return status;
-        } catch (Exception e) {
+            } catch (Exception e) {
             e.printStackTrace();
         }
         return new Status(StatusCode.INTERNALERROR);
     }
 
     private Status insertInterfaceRow(Node node, String port_uuid, Interface interfaceRow) {
+
+        String insertErrorMsg = "interface";
+        String rowName=interfaceRow.getName();
+
         try{
-            if (connectionService == null) {
-                logger.error("Couldn't refer to the ConnectionService");
-                return new Status(StatusCode.NOSERVICE);
-            }
-            Connection connection = this.getConnection(node);
-            if (connection == null) {
-                return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
-            }
 
             // Interface table must have entry in Port table, checking port table for port
             Map<String, Table<?>> portTable = inventoryServiceInternal.getTableCache(node, Port.NAME.getName());
@@ -1079,30 +1021,9 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             transaction.addOperations(new ArrayList<Operation>(Arrays.asList(addIntfRequest,addPortMutationRequest)));
 
             // Check the results. Iterates over the results of the Array of transaction Operations, and reports STATUS
-            int intInsertIndex = transaction.getRequests().indexOf(addIntfRequest);
-            ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
-            List<OperationResult> tr = transResponse.get();
-            List<Operation> requests = transaction.getRequests();
-            Status status = new Status(StatusCode.SUCCESS);
-            for (int i = 0; i < tr.size() ; i++) {
-                if (i < requests.size()) requests.get(i).setResult(tr.get(i));
-                if (tr.get(i) != null && tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
-                    OperationResult result = tr.get(i);
-                    status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
-                }
-            }
-            if (tr.size() > requests.size()) {
-                OperationResult result = tr.get(tr.size()-1);
-                logger.error("Error creating interface : {}\n Error : {}\n Details : {}", interfaceRow.getName(),
-                        result.getError(),
-                        result.getDetails());
-                status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
-            }
-            if (status.isSuccess()) {
-                uuid = tr.get(intInsertIndex).getUuid();
-                status = new Status(StatusCode.SUCCESS, uuid.toString());
-            }
-            return status;
+            int interfaceInsertIndex = transaction.getRequests().indexOf(addIntfRequest);
+
+            return _insertTableRow(node,transaction,interfaceInsertIndex,insertErrorMsg,rowName);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -1115,15 +1036,11 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     }
 
     private Status insertControllerRow(Node node, String bridge_uuid, Controller row) {
+
+        String insertErrorMsg = "controller";
+        String rowName=row.getTableName().toString();
+
         try{
-            if (connectionService == null) {
-                logger.error("Couldn't refer to the ConnectionService");
-                return new Status(StatusCode.NOSERVICE);
-            }
-            Connection connection = this.getConnection(node);
-            if (connection == null) {
-                return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
-            }
 
             Map<String, Table<?>> brTable = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
             if (brTable == null ||  brTable.get(bridge_uuid) == null) {
@@ -1166,34 +1083,8 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                 portInsertIndex = transaction.getRequests().indexOf(addControllerRequest);
             }
 
-            ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
-            List<OperationResult> tr = transResponse.get();
-            List<Operation> requests = transaction.getRequests();
-            Status status = new Status(StatusCode.SUCCESS);
-            for (int i = 0; i < tr.size() ; i++) {
-                if (i < requests.size()) requests.get(i).setResult(tr.get(i));
-                if (tr.get(i) != null && tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
-                    OperationResult result = tr.get(i);
-                    status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
-                }
-            }
+            return _insertTableRow(node,transaction,portInsertIndex,insertErrorMsg,rowName);
 
-            if (tr.size() > requests.size()) {
-                OperationResult result = tr.get(tr.size()-1);
-                logger.error("Error creating port : {}\n Error : {}\n Details : {}", row.getTarget(),
-                        result.getError(),
-                        result.getDetails());
-                status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
-            }
-            if (status.isSuccess()) {
-                if (controllerExists) {
-                    status = new Status(StatusCode.SUCCESS, uuid_name);
-                } else {
-                    uuid = tr.get(portInsertIndex).getUuid();
-                    status = new Status(StatusCode.SUCCESS, uuid.toString());
-                }
-            }
-            return status;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1232,6 +1123,52 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         return new Status(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
     }
 
+    private Status _insertTableRow(Node node, TransactBuilder transaction, Integer insertIndex, String insertErrorMsg,String rowName){
+
+        try{
+            //Check for connection before calling RPC to perform transaction
+            if (connectionService == null) {
+                logger.error("Couldn't refer to the ConnectionService");
+                return new Status(StatusCode.NOSERVICE);
+            }
+
+            Connection connection = this.getConnection(node);
+            if (connection == null) {
+                return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
+            }
+
+            ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
+            List<OperationResult> tr = transResponse.get();
+            List<Operation> requests = transaction.getRequests();
+            Status status = new Status(StatusCode.SUCCESS);
+            for (int i = 0; i < tr.size() ; i++) {
+                if (i < requests.size()) requests.get(i).setResult(tr.get(i));
+                if (tr.get(i) != null && tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
+                    OperationResult result = tr.get(i);
+                    status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+                }
+            }
+
+            if (tr.size() > requests.size()) {
+                OperationResult result = tr.get(tr.size()-1);
+                logger.error("Error creating {} : {}\n Error : {}\n Details : {}",     insertErrorMsg,
+                                                                                       rowName,
+                                                                                       result.getError(),
+                                                                                       result.getDetails());
+                status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+            }
+            if (status.isSuccess()) {
+                UUID bridgeUUID = tr.get(insertIndex).getUuid();
+                status = new Status(StatusCode.SUCCESS, bridgeUUID.toString());
+            }
+            return status;
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+        return new Status(StatusCode.INTERNALERROR);
+    }
+
+
     private Status deleteBridgeRow(Node node, String uuid) {
         // Set up variables for generic _deleteTableRow()
         String parentTableName=Open_vSwitch.NAME.getName();
@@ -1261,9 +1198,10 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         }
 
         // Need to check if this is the last interface for that port. Cannot delete last interface.
+        UUID compareUuid = new UUID(uuid);
         for (int i=0 ; i < portTable.values().size(); i++){
             Port port = (Port)portTable.values().toArray()[i];
-            if ((port.getInterfaces().size() == 1) && (port.getInterfaces().toString().contains(uuid))){
+            if ((port.getInterfaces().size() == 1) && (port.getInterfaces().contains(compareUuid))){
                 return new Status(StatusCode.BADREQUEST, "Cannot delete last interface from port");
             }
         }

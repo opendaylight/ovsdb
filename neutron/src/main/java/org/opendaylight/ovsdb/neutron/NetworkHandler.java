@@ -2,7 +2,6 @@ package org.opendaylight.ovsdb.neutron;
 
 import java.net.HttpURLConnection;
 
-import org.opendaylight.controller.containermanager.ContainerConfig;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkAware;
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.slf4j.Logger;
@@ -105,10 +104,6 @@ public class NetworkHandler extends BaseHandler
                     result);
             return;
         }
-        String networkID = convertNeutronIDToKey(network.getID());
-
-        ContainerConfig config = new ContainerConfig();
-        config.setContainer(networkID);
-        containerManager.removeContainer(config);
+        TenantNetworkManager.getManager().networkDeleted(network.getID());
     }
 }

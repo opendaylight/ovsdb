@@ -94,6 +94,9 @@ public class InternalNetworkManager {
         Status status = ovsdbTable.insertRow(node, Bridge.NAME.getName(), null, brTun);
         if (!status.isSuccess()) return status;
         String bridgeUUID = status.getDescription();
+        // Set OF Controller
+        IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+        connectionService.setOFController(node, bridgeUUID);
 
         Port port = new Port();
         port.setName(brTun.getName());

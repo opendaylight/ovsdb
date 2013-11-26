@@ -128,25 +128,6 @@ public class PortHandler extends BaseHandler
         String tenantID = convertNeutronIDToKey(port.getTenantID());
         String networkID = convertNeutronIDToKey(port.getNetworkUUID());
         String portID = convertNeutronIDToKey(port.getID());
-/*
- * Delete the Corresponding OF NodeConnector from the Container
- *
-        ContainerConfig config = new ContainerConfig();
-        config.setContainer(networkID);
-        List<String> ncList = new ArrayList<String>();
-        ncList.add("OVS|"+ portID +"@OVS|"+networkID);
-        config.addNodeConnectors(ncList);
-        Status status = containerManager.removeContainerEntry(networkID, ncList);
-        if (!status.isSuccess()) {
-            logger.error(" PORT delete failed for tenant-id - {}, " +
-                    " bridge-id - {}, port-id - {}, result - {} ",
-                    tenantID, networkID, portID, status);
-        } else {
-            logger.error(" PORT delete successful for tenant-id - {}, " +
-                    " bridge-id - {}, port-id - {}, result - {} ",
-                    tenantID, networkID, portID, status);
-        }
-*/
         logger.debug(" PORT delete successful for tenant-id - {}, " +
                      " network-id - {}, port-id - {}", tenantID, networkID, portID);
 

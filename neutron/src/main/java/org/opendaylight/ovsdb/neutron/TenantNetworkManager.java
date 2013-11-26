@@ -41,9 +41,14 @@ public class TenantNetworkManager {
     private static TenantNetworkManager tenantHelper = new TenantNetworkManager();
     private Queue<Integer> internalVlans = new LinkedList<Integer>();
     private Map<String, Integer> tenantVlanMap = new HashMap<String, Integer>();
+    private boolean enableContainer = false;
     private TenantNetworkManager() {
         for (int i = 1; i < MAX_VLAN ; i++) {
             internalVlans.add(i);
+        }
+        String isTenantContainer = System.getProperty("TenantIsContainer");
+        if (isTenantContainer != null && isTenantContainer.equalsIgnoreCase("true")) {
+            enableContainer =  true;
         }
     }
 
@@ -70,13 +75,14 @@ public class TenantNetworkManager {
     }
 
     public int networkCreated (String networkId) {
-        IContainerManager containerManager = (IContainerManager)ServiceHelper.getGlobalInstance(IContainerManager.class, this);
-        if (containerManager == null) {
-            logger.error("ContainerManager is null. Failed to create Container for {}", networkId);
-            return 0;
-        }
         int internalVlan = this.assignInternalVlan(networkId);
-        if (internalVlan != 0) {
+        if (enableContainer && internalVlan != 0) {
+            IContainerManager containerManager = (IContainerManager)ServiceHelper.getGlobalInstance(IContainerManager.class, this);
+            if (containerManager == null) {
+                logger.error("ContainerManager is null. Failed to create Container for {}", networkId);
+                return 0;
+            }
+
             ContainerConfig config = new ContainerConfig();
             config.setContainer(BaseHandler.convertNeutronIDToKey(networkId));
             Status status = containerManager.addContainer(config);
@@ -203,7 +209,7 @@ public class TenantNetworkManager {
         tags.add(BigInteger.valueOf(vlan));
         port.setTag(tags);
         ovsdbTable.updateRow(node, Port.NAME.getName(), null, portUUID, port);
-        this.addPortToTenantNetworkContainer(node, portUUID, network);
+        if (enableContainer) this.addPortToTenantNetworkContainer(node, portUUID, network);
     }
 
     private void addPortToTenantNetworkContainer(Node node, String portUUID, NeutronNetwork network) {
@@ -287,6 +293,21 @@ public class TenantNetworkManager {
             logger.debug("Failed to get BridgeId port {} in Node {}", uuid, node);
         }
         return null;
+    }
+
+    public void networkDeleted(String id) {
+        if (!enableContainer) return;
+
+        IContainerManager containerManager = (IContainerManager)ServiceHelper.getGlobalInstance(IContainerManager.class, this);
+        if (containerManager == null) {
+            logger.error("ContainerManager is not accessible");
+            return;
+        }
+
+        String networkID = BaseHandler.convertNeutronIDToKey(id);
+        ContainerConfig config = new ContainerConfig();
+        config.setContainer(networkID);
+        containerManager.removeContainer(config);
     }
 
 }

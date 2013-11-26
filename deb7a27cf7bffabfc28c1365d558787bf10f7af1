@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_c89ad46d",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1264,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-11-26T11:05:04Z",
+      "side": 1,
+      "message": "Although not directly related to the patch, but important for my understanding - what is UUID representing? Why isn\u0027t java\u0027s built in UUID class is used, and instead a custom UUID class was creating, just wrapping a single String member ? What is the purpose?\nthanks for clarification.",
+      "revId": "deb7a27cf7bffabfc28c1365d558787bf10f7af1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

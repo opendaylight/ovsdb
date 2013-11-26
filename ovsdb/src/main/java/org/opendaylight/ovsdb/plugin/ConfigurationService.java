@@ -1261,9 +1261,10 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         }
 
         // Need to check if this is the last interface for that port. Cannot delete last interface.
+        UUID compareUuid = new UUID(uuid);
         for (int i=0 ; i < portTable.values().size(); i++){
             Port port = (Port)portTable.values().toArray()[i];
-            if ((port.getInterfaces().size() == 1) && (port.getInterfaces().toString().contains(uuid))){
+            if ((port.getInterfaces().size() == 1) && (port.getInterfaces().contains(compareUuid))){
                 return new Status(StatusCode.BADREQUEST, "Cannot delete last interface from port");
             }
         }

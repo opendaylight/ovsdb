@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_0bcd865d",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1126,
+      "author": {
+        "id": 912
+      },
+      "writtenOn": "2013-11-27T06:53:52Z",
+      "side": 1,
+      "message": "I was thinking to extend the Status class within our module by creating a StatusWithUuid class. That class would have a uuid property to store the uuid. That way we don\u0027t have to reuse the description field to store our uuid and we retain the type safety of the UUID.",
+      "revId": "8615f44e8dd98302d5ddc54b548640a1f969ef0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_2bd28a00",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1165,
+      "author": {
+        "id": 912
+      },
+      "writtenOn": "2013-11-27T06:53:52Z",
+      "side": 1,
+      "message": "I\u0027m personally of the opinion that we should make our try/catch blocks as small as possible and only catch the exceptions that are declared. But thats up for debate.",
+      "revId": "8615f44e8dd98302d5ddc54b548640a1f969ef0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_4beb7eb0",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1166,
+      "author": {
+        "id": 912
+      },
+      "writtenOn": "2013-11-27T06:53:52Z",
+      "side": 1,
+      "message": "Can you replace this with a logger.error(String, Throwable)? That way we know that the error will be logged in a place the admin will be able to find it.",
+      "revId": "8615f44e8dd98302d5ddc54b548640a1f969ef0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

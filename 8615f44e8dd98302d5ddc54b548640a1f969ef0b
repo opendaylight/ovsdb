@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_4bba5e6f",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1126,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-11-27T12:39:21Z",
+      "side": 1,
+      "message": "Good idea Hugo. I was being \"smart\" ;) in reusing the Status class. And ofcourse time-pressure blinded my clean implementation judgement.",
+      "parentUuid": "da6255ed_0bcd865d",
+      "revId": "8615f44e8dd98302d5ddc54b548640a1f969ef0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_2bd28a00",
         "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
         "patchSetId": 1
@@ -47,6 +65,23 @@
       "writtenOn": "2013-11-27T06:53:52Z",
       "side": 1,
       "message": "Can you replace this with a logger.error(String, Throwable)? That way we know that the error will be logged in a place the admin will be able to find it.",
+      "revId": "8615f44e8dd98302d5ddc54b548640a1f969ef0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_0bac6634",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1204,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-11-27T12:39:21Z",
+      "side": 1,
+      "message": "Can you please confirm if this contains() works ?\nI was trying to do the same during the neutron integration and infact added the hashCode() and equals() in UUID.java, but the contains() failed.\nDidnt get a chance to debug that, Can you confirm if this indeed works ?",
       "revId": "8615f44e8dd98302d5ddc54b548640a1f969ef0b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

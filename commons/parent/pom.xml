@@ -25,6 +25,7 @@
   <modules>
     <module>../../ovsdb/</module>
     <module>../../northbound/ovsdb</module>
+    <module>../../neutron</module>
     <module>../../distribution/opendaylight</module>
   </modules>
   <repositories>

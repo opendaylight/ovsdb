@@ -24,6 +24,7 @@
   </properties>
   <modules>
     <module>../../ovsdb/</module>
+    <module>../../northbound/ovsdb</module>
     <module>../../distribution/opendaylight</module>
   </modules>
   <repositories>

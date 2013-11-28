@@ -1158,8 +1158,8 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                 status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
             }
             if (status.isSuccess()) {
-                UUID bridgeUUID = tr.get(insertIndex).getUuid();
-                status = new Status(StatusCode.SUCCESS, bridgeUUID.toString());
+                UUID uuid = tr.get(insertIndex).getUuid();
+                status = new StatusWithUuid(StatusCode.SUCCESS, uuid);
             }
             return status;
         } catch(Exception e){

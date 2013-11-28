@@ -22,6 +22,7 @@
     <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+  <!-- modules should go once the jenkins job is updated to use the root pom -->
   <modules>
     <module>../../ovsdb/</module>
     <module>../../northbound/ovsdb</module>

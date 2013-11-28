@@ -26,6 +26,7 @@ import org.opendaylight.ovsdb.lib.table.Port;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
+import org.opendaylight.ovsdb.plugin.StatusWithUuid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,7 +109,12 @@ public class InternalNetworkManager {
         // Create br-tun bridge
         Status status = ovsdbTable.insertRow(node, Bridge.NAME.getName(), null, brTun);
         if (!status.isSuccess()) return status;
-        String bridgeUUID = status.getDescription();
+        String bridgeUUID = null;
+        if (status instanceof StatusWithUuid)
+            bridgeUUID = ((StatusWithUuid)status).getUuid().toString();
+        else
+            logger.warn("insertRow returned success without a UUID");
+
         // Set OF Controller
         IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
         connectionService.setOFController(node, bridgeUUID);
@@ -145,7 +151,11 @@ public class InternalNetworkManager {
         status = ovsdbTable.insertRow(node, Port.NAME.getName(), bridgeUUID, patchPort);
         if (!status.isSuccess()) return status;
 
-        String patchPortUUID = status.getDescription();
+        String patchPortUUID = null;
+        if (status instanceof StatusWithUuid)
+            patchPortUUID = ((StatusWithUuid)status).getUuid().toString();
+        else
+            logger.warn("insertRow returned success without a UUID");
 
         String interfaceUUID = null;
         int timeout = 6;

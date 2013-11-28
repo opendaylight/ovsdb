@@ -28,6 +28,7 @@ import org.opendaylight.ovsdb.neutron.InternalNetworkManager;
 import org.opendaylight.ovsdb.neutron.TenantNetworkManager;
 import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
+import org.opendaylight.ovsdb.plugin.StatusWithUuid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -387,7 +388,12 @@ class OF10ProviderManager extends ProviderNetworkManager {
                 return status;
             }
 
-            String tunnelPortUUID = status.getDescription();
+            String tunnelPortUUID = null;
+            if (status instanceof StatusWithUuid)
+                tunnelPortUUID = ((StatusWithUuid)status).getUuid().toString();
+            else
+                logger.warn("insertRow returned success without a UUID");
+
 
             String interfaceUUID = null;
             int timeout = 6;

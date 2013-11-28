@@ -12,6 +12,7 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.utils.EtherTypes;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
@@ -198,10 +199,12 @@ public class InternalNetworkManager {
             }
         }
 
-        this.initializeFlowRules(node, AdminConfigManager.getManager().getIntegrationBridgeName());
+        this.initializeLLDPFlowRules(node, AdminConfigManager.getManager().getTunnelBridgeName());
+        this.initializeOFNormalFlowRules(node, AdminConfigManager.getManager().getIntegrationBridgeName());
+        this.initializeLLDPFlowRules(node, AdminConfigManager.getManager().getIntegrationBridgeName());
     }
 
-    private void initializeFlowRules(Node node, String bridgeName) {
+    private void initializeOFNormalFlowRules(Node node, String bridgeName) {
         String brIntId = this.getInternalBridgeUUID(node, bridgeName);
         if (brIntId == null) {
             logger.error("Failed to initialize Flow Rules for {}", node);
@@ -216,15 +219,59 @@ public class InternalNetworkManager {
             Node ofNode = new Node(Node.NodeIDType.OPENFLOW, dpidLong);
             IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper.getInstance(
                     IForwardingRulesManager.class, "default", this);
+            String flowName = ActionType.HW_PATH.toString();
+            if (frm.getStaticFlow(flowName, ofNode) != null) {
+                logger.debug("Static Flow {} already programmed in the node {}", flowName, ofNode);
+                return;
+            }
             FlowConfig flow = new FlowConfig();
             flow.setName("IntegrationBridgeNormal");
             flow.setNode(ofNode);
             flow.setPriority("1");
             List<String> normalAction = new ArrayList<String>();
-            normalAction.add(ActionType.HW_PATH.toString());
+            normalAction.add(flowName);
             flow.setActions(normalAction);
             Status status = frm.addStaticFlow(flow);
             logger.debug("Flow Programming Status {} for Flow {} on {} / {}", status, flow, ofNode, node);
+        } catch (Exception e) {
+            logger.error("Failed to initialize Flow Rules for {}", node, e);
+        }
+    }
+
+    private void initializeLLDPFlowRules(Node node, String bridgeName) {
+        String brIntId = this.getInternalBridgeUUID(node, bridgeName);
+        if (brIntId == null) {
+            logger.error("Failed to initialize Flow Rules for {}", node);
+            return;
+        }
+        try {
+            OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brIntId);
+            Set<String> dpids = bridge.getDatapath_id();
+            if (dpids == null || dpids.size() ==  0) return;
+            Long dpidLong = Long.valueOf(HexEncode.stringToLong((String)dpids.toArray()[0]));
+            Node ofNode = new Node(Node.NodeIDType.OPENFLOW, dpidLong);
+            IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper.getInstance(
+                    IForwardingRulesManager.class, "default", this);
+            String flowName = "PuntLLDP";
+            if (frm.getStaticFlow(flowName, ofNode) != null) {
+                logger.debug("Static Flow {} already programmed in the node {}", flowName, ofNode);
+                return;
+            }
+
+            List<String> puntAction = new ArrayList<String>();
+            puntAction.add(ActionType.CONTROLLER.toString());
+
+            FlowConfig allowLLDP = new FlowConfig();
+            allowLLDP.setInstallInHw(true);
+            allowLLDP.setName(flowName);
+            allowLLDP.setPriority("10");
+            allowLLDP.setNode(ofNode);
+            allowLLDP.setEtherType("0x" + Integer.toHexString(EtherTypes.LLDP.intValue())
+                    .toUpperCase());
+            allowLLDP.setActions(puntAction);
+            Status status = frm.addStaticFlow(allowLLDP);
+            logger.debug("Flow Programming Status {} for Flow {} on {} / {}", status, allowLLDP, ofNode, node);
         } catch (Exception e) {
             logger.error("Failed to initialize Flow Rules for {}", node, e);
         }

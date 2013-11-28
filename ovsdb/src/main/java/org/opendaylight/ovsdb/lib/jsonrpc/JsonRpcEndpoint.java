@@ -109,6 +109,7 @@ public class JsonRpcEndpoint {
 
     public void processResult(JsonNode response) throws NoSuchMethodException {
 
+        logger.trace("Response : {}", response.toString());
         CallContext returnCtxt = methodContext.get(response.get("id").asText());
         if (returnCtxt == null) return;
 
@@ -119,11 +120,11 @@ public class JsonRpcEndpoint {
             JavaType javaType =  TypeFactory.defaultInstance().constructType (retType.getType());
 
             JsonNode result = response.get("result");
-            logger.trace("Response : {}", result.toString());
+            logger.trace("Result : {}", result.toString());
 
             Object result1 = objectMapper.convertValue(result, javaType);
             JsonNode error = response.get("error");
-            if (error != null) {
+            if (error != null && !error.isNull()) {
                 logger.error("Error : {}", error.toString());
             }
 

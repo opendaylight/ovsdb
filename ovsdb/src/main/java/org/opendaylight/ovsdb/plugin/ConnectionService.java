@@ -272,7 +272,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
     }
 
     public void channelClosed(Node node) throws Exception {
-        logger.error("Connection to Node : {} closed", node);
+        logger.info("Connection to Node : {} closed", node);
         inventoryServiceInternal.removeNode(node);
     }
 

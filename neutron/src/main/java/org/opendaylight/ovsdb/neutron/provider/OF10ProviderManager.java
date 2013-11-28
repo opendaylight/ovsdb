@@ -132,7 +132,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
             IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper.getInstance(
                     IForwardingRulesManager.class, "default", this);
             if (frm.getStaticFlow(flowName, ofNode) != null) {
-                logger.debug("Remove Egress Flow exists : {} for Flow {} on {} / {}", flowName, ofNode, node);
+                logger.debug("Remote Egress Flow exists : {} for Flow {} on {} / {}", flowName, ofNode, node);
                 return;
             }
             FlowConfig flow = new FlowConfig();

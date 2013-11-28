@@ -200,16 +200,8 @@ public class InternalNetworkManager {
         }
 
         this.initializeOFNormalFlowRules(node, AdminConfigManager.getManager().getIntegrationBridgeName());
-        /*
-         * Disabling LLDP Punt rules to Controller for now.
-         * In a multi-node setup, it seems to cause issues with the Controller (CPU spike and some OF message timeouts).
-         * It is better to debug that and once we have an idea, we can enable this.
-         * There is NO functional impact to the Neutron integration with OVSDB by disabling LLDP flow installation.
-         */
-        /*
         this.initializeLLDPFlowRules(node, AdminConfigManager.getManager().getTunnelBridgeName());
         this.initializeLLDPFlowRules(node, AdminConfigManager.getManager().getIntegrationBridgeName());
-        */
     }
 
     private void initializeOFNormalFlowRules(Node node, String bridgeName) {

@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_4d6eee02",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1086,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-11-29T18:27:18Z",
+      "side": 1,
+      "message": "With the changes that is merged, _insertTableRow returns StatusWithUUID now. Please change this.",
+      "revId": "28f8700ab5355377a147bb9b3af3930a92b35674",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_2d717ae0",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1170,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-11-29T18:27:18Z",
+      "side": 1,
+      "message": "Lets not put the burden on the applications.\nIf the Id is known, then it is better to fill it in the StausWithUuid structure and reply to the caller.\n(Similar to what has been done for Controller table).",
+      "revId": "28f8700ab5355377a147bb9b3af3930a92b35674",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -471,6 +471,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
 
     private void updateOFControllers (Node node) {
         Map<String, Table<?>> bridges = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
+        if (bridges == null) return;
         for (String bridgeUUID : bridges.keySet()) {
             try {
                 this.setOFController(node, bridgeUUID);

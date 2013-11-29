@@ -1083,7 +1083,11 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                 portInsertIndex = transaction.getRequests().indexOf(addControllerRequest);
             }
 
-            return _insertTableRow(node,transaction,portInsertIndex,insertErrorMsg,rowName);
+            Status status = _insertTableRow(node,transaction,portInsertIndex,insertErrorMsg,rowName);
+            if (status.isSuccess() && controllerExists) {
+                status = new StatusWithUuid(status.getCode(), controllerUUID);
+            }
+            return status;
 
         } catch (Exception e) {
             logger.error("Error in insertControllerRow(): ",e);
@@ -1158,8 +1162,13 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                 status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
             }
             if (status.isSuccess()) {
-                UUID uuid = tr.get(insertIndex).getUuid();
-                status = new StatusWithUuid(StatusCode.SUCCESS, uuid);
+                if (insertIndex >0 && insertIndex < tr.size() && tr.get(insertIndex) != null) {
+                    UUID uuid = tr.get(insertIndex).getUuid();
+                    status = new StatusWithUuid(StatusCode.SUCCESS, uuid);
+                } else {
+                    // Maybe the id we want is already known, don't mention this and leave it up to the higher functions to deal with the null UUID
+                    status = new StatusWithUuid(StatusCode.SUCCESS, (UUID) null);
+                }
             }
             return status;
         } catch(Exception e){

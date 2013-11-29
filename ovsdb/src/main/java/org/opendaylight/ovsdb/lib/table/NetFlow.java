@@ -9,9 +9,14 @@ public class NetFlow  extends Table<NetFlow> {
 
     public static final Name<NetFlow> NAME = new Name<NetFlow>("NetFlow") {};
     private OvsDBSet<String> targets;
+    private Integer active_timeout;
 
     public OvsDBSet<String> getTargets() {
         return targets;
+    }
+
+    public Integer getActiveTimeout() {
+        return active_timeout;
     }
 
     public void setTargets(OvsDBSet<String> targets) {

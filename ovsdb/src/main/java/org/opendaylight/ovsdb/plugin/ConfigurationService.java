@@ -681,9 +681,9 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     }
 
     @Override
-    public Status insertRow(Node node, String tableName, String parent_uuid, Table<?> row) {
+    public StatusWithUuid insertRow(Node node, String tableName, String parent_uuid, Table<?> row) {
         logger.info("tableName : {}, parent_uuid : {} Row : {}", tableName, parent_uuid, row.toString());
-        Status statusWithUUID = null;
+        StatusWithUuid statusWithUUID = null;
 
         // Schema based Table handling will help fix this static Table handling.
 
@@ -889,7 +889,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         return null;
     }
 
-    private Status insertBridgeRow(Node node, String open_VSwitch_uuid, Bridge bridgeRow) {
+    private StatusWithUuid insertBridgeRow(Node node, String open_VSwitch_uuid, Bridge bridgeRow) {
 
         String insertErrorMsg = "bridge";
         String rowName=bridgeRow.getName();
@@ -898,7 +898,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             Map<String, Table<?>> ovsTable = inventoryServiceInternal.getTableCache(node, Open_vSwitch.NAME.getName());
 
             if (ovsTable == null) {
-                return new Status(StatusCode.NOTFOUND, "There are no Open_vSwitch instance in the Open_vSwitch table");
+                return new StatusWithUuid(StatusCode.NOTFOUND, "There are no Open_vSwitch instance in the Open_vSwitch table");
             }
 
             String newBridge = "new_bridge";
@@ -932,11 +932,11 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         } catch(Exception e){
             logger.error("Error in insertBridgeRow(): ",e);
         }
-        return new Status(StatusCode.INTERNALERROR);
+        return new StatusWithUuid(StatusCode.INTERNALERROR);
     }
 
 
-    private Status insertPortRow(Node node, String bridge_uuid, Port portRow) {
+    private StatusWithUuid insertPortRow(Node node, String bridge_uuid, Port portRow) {
 
         String insertErrorMsg = "port";
         String rowName=portRow.getName();
@@ -944,7 +944,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         try{
             Map<String, Table<?>> brTable = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
             if (brTable == null ||  brTable.get(bridge_uuid) == null) {
-                return new Status(StatusCode.NOTFOUND, "Bridge with UUID "+bridge_uuid+" Not found");
+                return new StatusWithUuid(StatusCode.NOTFOUND, "Bridge with UUID "+bridge_uuid+" Not found");
             }
             String newPort = "new_port";
             UUID portUUID = new UUID(newPort);
@@ -984,10 +984,10 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             } catch (Exception e) {
             logger.error("Error in insertPortRow(): ",e);
         }
-        return new Status(StatusCode.INTERNALERROR);
+        return new StatusWithUuid(StatusCode.INTERNALERROR);
     }
 
-    private Status insertInterfaceRow(Node node, String port_uuid, Interface interfaceRow) {
+    private StatusWithUuid insertInterfaceRow(Node node, String port_uuid, Interface interfaceRow) {
 
         String insertErrorMsg = "interface";
         String rowName=interfaceRow.getName();
@@ -997,7 +997,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             // Interface table must have entry in Port table, checking port table for port
             Map<String, Table<?>> portTable = inventoryServiceInternal.getTableCache(node, Port.NAME.getName());
             if (portTable == null ||  portTable.get(port_uuid) == null) {
-                return new Status(StatusCode.NOTFOUND, "Port with UUID "+port_uuid+" Not found");
+                return new StatusWithUuid(StatusCode.NOTFOUND, "Port with UUID "+port_uuid+" Not found");
             }
             // MUTATOR, need to insert the interface UUID to LIST of interfaces in PORT TABLE for port_uuid
             String newInterface = "new_interface";
@@ -1028,14 +1028,14 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         } catch (Exception e) {
             logger.error("Error in insertInterfaceRow(): ",e);
         }
-        return new Status(StatusCode.INTERNALERROR);
+        return new StatusWithUuid(StatusCode.INTERNALERROR);
     }
 
-    private Status insertOpen_vSwitchRow(Node node, Open_vSwitch row) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+    private StatusWithUuid insertOpen_vSwitchRow(Node node, Open_vSwitch row) {
+        return new StatusWithUuid(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
     }
 
-    private Status insertControllerRow(Node node, String bridge_uuid, Controller row) {
+    private StatusWithUuid insertControllerRow(Node node, String bridge_uuid, Controller row) {
 
         String insertErrorMsg = "controller";
         String rowName=row.getTableName().toString();
@@ -1044,7 +1044,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
 
             Map<String, Table<?>> brTable = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
             if (brTable == null ||  brTable.get(bridge_uuid) == null) {
-                return new Status(StatusCode.NOTFOUND, "Bridge with UUID "+bridge_uuid+" Not found");
+                return new StatusWithUuid(StatusCode.NOTFOUND, "Bridge with UUID "+bridge_uuid+" Not found");
             }
 
             Map<String, Table<?>> controllerCache = inventoryServiceInternal.getTableCache(node, Controller.NAME.getName());
@@ -1088,64 +1088,64 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         } catch (Exception e) {
             logger.error("Error in insertControllerRow(): ",e);
         }
-        return new Status(StatusCode.INTERNALERROR);
+        return new StatusWithUuid(StatusCode.INTERNALERROR);
     }
 
-    private Status insertSSLRow(Node node, String parent_uuid, SSL row) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+    private StatusWithUuid insertSSLRow(Node node, String parent_uuid, SSL row) {
+        return new StatusWithUuid(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
     }
 
-    private Status insertSflowRow(Node node, String parent_uuid, SFlow row) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+    private StatusWithUuid insertSflowRow(Node node, String parent_uuid, SFlow row) {
+        return new StatusWithUuid(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
     }
 
-    private Status insertQueueRow(Node node, String parent_uuid, Queue row) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+    private StatusWithUuid insertQueueRow(Node node, String parent_uuid, Queue row) {
+        return new StatusWithUuid(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
     }
 
-    private Status insertQosRow(Node node, String parent_uuid, Qos row) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+    private StatusWithUuid insertQosRow(Node node, String parent_uuid, Qos row) {
+        return new StatusWithUuid(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
     }
 
-    private Status insertNetFlowRow(Node node, String parent_uuid, NetFlow row) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+    private StatusWithUuid insertNetFlowRow(Node node, String parent_uuid, NetFlow row) {
+        return new StatusWithUuid(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
     }
 
-    private Status insertMirrorRow(Node node, String parent_uuid, Mirror row) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+    private StatusWithUuid insertMirrorRow(Node node, String parent_uuid, Mirror row) {
+        return new StatusWithUuid(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
     }
 
-    private Status insertManagerRow(Node node, String parent_uuid, Manager row) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+    private StatusWithUuid insertManagerRow(Node node, String parent_uuid, Manager row) {
+        return new StatusWithUuid(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
     }
 
-    private Status insertCapabilityRow(Node node, String parent_uuid, Capability row) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+    private StatusWithUuid insertCapabilityRow(Node node, String parent_uuid, Capability row) {
+        return new StatusWithUuid(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
     }
 
-    private Status _insertTableRow(Node node, TransactBuilder transaction, Integer insertIndex, String insertErrorMsg,String rowName){
+    private StatusWithUuid _insertTableRow(Node node, TransactBuilder transaction, Integer insertIndex, String insertErrorMsg,String rowName){
 
         try{
             //Check for connection before calling RPC to perform transaction
             if (connectionService == null) {
                 logger.error("Couldn't refer to the ConnectionService");
-                return new Status(StatusCode.NOSERVICE);
+                return new StatusWithUuid(StatusCode.NOSERVICE);
             }
 
             Connection connection = this.getConnection(node);
             if (connection == null) {
-                return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
+                return new StatusWithUuid(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
             }
 
             ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
             List<OperationResult> tr = transResponse.get();
             List<Operation> requests = transaction.getRequests();
-            Status status = new Status(StatusCode.SUCCESS);
+            StatusWithUuid status = new StatusWithUuid(StatusCode.SUCCESS);
             for (int i = 0; i < tr.size() ; i++) {
                 if (i < requests.size()) requests.get(i).setResult(tr.get(i));
                 if (tr.get(i) != null && tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
                     OperationResult result = tr.get(i);
-                    status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+                    status = new StatusWithUuid(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
                 }
             }
 
@@ -1155,17 +1155,17 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                                                                                        rowName,
                                                                                        result.getError(),
                                                                                        result.getDetails());
-                status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+                status = new StatusWithUuid(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
             }
             if (status.isSuccess()) {
-                UUID bridgeUUID = tr.get(insertIndex).getUuid();
-                status = new Status(StatusCode.SUCCESS, bridgeUUID.toString());
+                UUID uuid = tr.get(insertIndex).getUuid();
+                status = new StatusWithUuid(StatusCode.SUCCESS, uuid);
             }
             return status;
         } catch(Exception e){
             logger.error("Error in _insertTableRow(): ",e);
         }
-        return new Status(StatusCode.INTERNALERROR);
+        return new StatusWithUuid(StatusCode.INTERNALERROR);
     }
 
 

@@ -8,7 +8,7 @@ import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 
 public interface OVSDBConfigService {
-    public Status insertRow (Node node, String tableName, String parentUUID, Table<?> row);
+    public StatusWithUuid insertRow (Node node, String tableName, String parentUUID, Table<?> row);
     public Status deleteRow (Node node, String tableName, String rowUUID);
     public Status updateRow (Node node, String tableName, String parentUUID, String rowUUID, Table<?> row);
     public String getSerializedRow(Node node, String tableName, String uuid) throws Exception;

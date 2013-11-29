@@ -43,6 +43,7 @@
               org.opendaylight.controller.sal.authorization,
               org.opendaylight.ovsdb.lib.table,
               org.opendaylight.ovsdb.lib.table.internal,
+              org.opendaylight.ovsdb.lib.notation,
               org.opendaylight.ovsdb.plugin,
               javax.ws.rs,
               javax.ws.rs.core,

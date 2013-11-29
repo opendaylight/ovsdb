@@ -26,6 +26,7 @@ import org.opendaylight.ovsdb.lib.table.Port;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
+import org.opendaylight.ovsdb.plugin.StatusWithUuid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,21 +107,22 @@ public class InternalNetworkManager {
         Bridge brTun = new Bridge();
         brTun.setName(AdminConfigManager.getManager().getTunnelBridgeName());
         // Create br-tun bridge
-        Status status = ovsdbTable.insertRow(node, Bridge.NAME.getName(), null, brTun);
-        if (!status.isSuccess()) return status;
-        String bridgeUUID = status.getDescription();
+        StatusWithUuid statusWithUuid = ovsdbTable.insertRow(node, Bridge.NAME.getName(), null, brTun);
+        if (!statusWithUuid.isSuccess()) return statusWithUuid;
+        String bridgeUUID = statusWithUuid.getUuid().toString();
+
         // Set OF Controller
         IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
         connectionService.setOFController(node, bridgeUUID);
 
         Port port = new Port();
         port.setName(brTun.getName());
-        status = ovsdbTable.insertRow(node, Port.NAME.getName(), bridgeUUID, port);
+        statusWithUuid = ovsdbTable.insertRow(node, Port.NAME.getName(), bridgeUUID, port);
 
         String patchInt = AdminConfigManager.getManager().getPatchToIntegration();
         String patchTun = AdminConfigManager.getManager().getPatchToTunnel();
 
-        status = addPatchPort(node, bridgeUUID, patchInt, patchTun);
+        Status status = addPatchPort(node, bridgeUUID, patchInt, patchTun);
         if (!status.isSuccess()) return status;
 
         // Create the corresponding patch-tun port in br-int
@@ -136,16 +138,15 @@ public class InternalNetworkManager {
     }
 
     private Status addPatchPort (Node node, String bridgeUUID, String portName, String patchName) throws Exception {
-        Status status = null;
         OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
 
         Port patchPort = new Port();
         patchPort.setName(portName);
         // Create patch-int port and interface
-        status = ovsdbTable.insertRow(node, Port.NAME.getName(), bridgeUUID, patchPort);
-        if (!status.isSuccess()) return status;
+        StatusWithUuid statusWithUuid = ovsdbTable.insertRow(node, Port.NAME.getName(), bridgeUUID, patchPort);
+        if (!statusWithUuid.isSuccess()) return statusWithUuid;
 
-        String patchPortUUID = status.getDescription();
+        String patchPortUUID = statusWithUuid.getUuid().toString();
 
         String interfaceUUID = null;
         int timeout = 6;
@@ -170,9 +171,7 @@ public class InternalNetworkManager {
         OvsDBMap<String, String> options = new OvsDBMap<String, String>();
         options.put("peer", patchName);
         tunInterface.setOptions(options);
-        status = ovsdbTable.updateRow(node, Interface.NAME.getName(), patchPortUUID, interfaceUUID, tunInterface);
-
-        return status;
+        return ovsdbTable.updateRow(node, Interface.NAME.getName(), patchPortUUID, interfaceUUID, tunInterface);
     }
 
     private void prepareInternalNetwork (NeutronNetwork network, Node node) {

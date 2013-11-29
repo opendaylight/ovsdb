@@ -28,6 +28,7 @@ import org.opendaylight.ovsdb.neutron.InternalNetworkManager;
 import org.opendaylight.ovsdb.neutron.TenantNetworkManager;
 import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
+import org.opendaylight.ovsdb.plugin.StatusWithUuid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -381,14 +382,13 @@ class OF10ProviderManager extends ProviderNetworkManager {
 
             Port tunnelPort = new Port();
             tunnelPort.setName(portName);
-            Status status = ovsdbTable.insertRow(node, Port.NAME.getName(), bridgeUUID, tunnelPort);
-            if (!status.isSuccess()) {
+            StatusWithUuid statusWithUuid = ovsdbTable.insertRow(node, Port.NAME.getName(), bridgeUUID, tunnelPort);
+            if (!statusWithUuid.isSuccess()) {
                 logger.error("Failed to insert Tunnel port {} in {}", portName, bridgeUUID);
-                return status;
+                return statusWithUuid;
             }
 
-            String tunnelPortUUID = status.getDescription();
-
+            String tunnelPortUUID = statusWithUuid.getUuid().toString();
             String interfaceUUID = null;
             int timeout = 6;
             while ((interfaceUUID == null) && (timeout > 0)) {
@@ -417,7 +417,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
             options.put("local_ip", src.getHostAddress());
             options.put("remote_ip", dst.getHostAddress());
             tunInterface.setOptions(options);
-            status = ovsdbTable.updateRow(node, Interface.NAME.getName(), tunnelPortUUID, interfaceUUID, tunInterface);
+            Status status = ovsdbTable.updateRow(node, Interface.NAME.getName(), tunnelPortUUID, interfaceUUID, tunInterface);
             logger.debug("Tunnel {} add status : {}", tunInterface, status);
             return status;
         } catch (Exception e) {

@@ -36,9 +36,11 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
+import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 import org.opendaylight.ovsdb.lib.table.internal.Tables;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
+import org.opendaylight.ovsdb.plugin.StatusWithUuid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -133,13 +135,14 @@ public class OVSDBNorthbound {
         if (row != null && row.getRow() != null) {
             handleNameMismatch(tableName, row.getRow().getTableName().getName());
             Node node = Node.fromString(nodeType, nodeId);
-            Status statusWithUUID = ovsdbTable.insertRow(node, ovsTableName, row.getParent_uuid(), row.getRow());
+            StatusWithUuid statusWithUUID = ovsdbTable.insertRow(node, ovsTableName, row.getParent_uuid(), row.getRow());
 
             if (statusWithUUID.isSuccess()) {
+                UUID uuid = statusWithUUID.getUuid();
                 return Response.status(Response.Status.CREATED)
                         .header("Location", String.format("%s/%s", _uriInfo.getAbsolutePath().toString(),
-                                                                    statusWithUUID.getDescription()))
-                        .entity(statusWithUUID.getDescription())
+                                                                    uuid.toString()))
+                        .entity(uuid.toString())
                         .build();
             } else {
                 return NorthboundUtils.getResponse(statusWithUUID);

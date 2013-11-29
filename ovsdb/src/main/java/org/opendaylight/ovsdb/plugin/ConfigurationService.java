@@ -1092,7 +1092,48 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     }
 
     private StatusWithUuid insertSSLRow(Node node, String parent_uuid, SSL row) {
-        return new StatusWithUuid(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+        String insertErrorMsg = "SSL";
+        String rowName=row.getTableName().toString();
+
+        try{
+            Map<String, Table<?>> ovsTable = inventoryServiceInternal.getTableCache(node, Open_vSwitch.NAME.getName());
+
+            if (ovsTable == null) {
+                return new StatusWithUuid(StatusCode.NOTFOUND, "There are no Open_vSwitch instance in the Open_vSwitch table");
+            }
+
+            String newSSL = "new_SSL";
+
+            Operation addSSLRequest = null;
+
+            String ovsTableUUID = parent_uuid;
+            if (ovsTableUUID == null) ovsTableUUID = (String) ovsTable.keySet().toArray()[0];
+            UUID sslUuid = new UUID(newSSL);
+            Mutation sslMutation = new Mutation("ssl", Mutator.INSERT, sslUuid);
+            List<Mutation> mutations = new ArrayList<Mutation>();
+            mutations.add(sslMutation);
+
+            UUID uuid = new UUID(ovsTableUUID);
+            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
+            List<Condition> where = new ArrayList<Condition>();
+            where.add(condition);
+            addSSLRequest = new MutateOperation(Open_vSwitch.NAME.getName(), where, mutations);
+
+            InsertOperation addOpen_vSwitchRequest = new InsertOperation(SSL.NAME.getName(), newSSL, row);
+
+            TransactBuilder transaction = new TransactBuilder();
+            transaction.addOperations(new ArrayList<Operation>(
+                                      Arrays.asList(addSSLRequest,
+                                                    addOpen_vSwitchRequest)));
+
+            int sslInsertIndex = transaction.getRequests().indexOf(addSSLRequest);
+
+            return _insertTableRow(node,transaction,sslInsertIndex,insertErrorMsg,rowName);
+
+        } catch(Exception e){
+            logger.error("Error in insertBridgeRow(): ",e);
+        }
+        return new StatusWithUuid(StatusCode.INTERNALERROR);
     }
 
     private StatusWithUuid insertSflowRow(Node node, String parent_uuid, SFlow row) {

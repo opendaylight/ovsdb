@@ -476,7 +476,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
             try {
                 this.setOFController(node, bridgeUUID);
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("Failed updateOFControllers", e);
             }
         }
     }

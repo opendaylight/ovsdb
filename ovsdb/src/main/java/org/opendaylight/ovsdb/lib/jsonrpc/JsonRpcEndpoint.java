@@ -17,6 +17,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.Reflection;
@@ -123,7 +124,7 @@ public class JsonRpcEndpoint {
 
             Object result1 = objectMapper.convertValue(result, javaType);
             JsonNode error = response.get("error");
-            if (error != null) {
+            if (error != null && !(error instanceof NullNode)) {
                 logger.error("Error : {}", error.toString());
             }
 

@@ -1102,6 +1102,13 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                 return new StatusWithUuid(StatusCode.NOTFOUND, "There are no Open_vSwitch instance in the Open_vSwitch table");
             }
 
+            // Check SSL exists in parent (Open_vSwitch) as there can be 0|1
+            for (int i=0 ; i < ovsTable.values().size(); i++){
+                Open_vSwitch openVswitch = (Open_vSwitch)ovsTable.values().toArray()[i];
+                if (openVswitch.getSsl().size() == 1) {
+                    return new StatusWithUuid(StatusCode.BADREQUEST, "Cannot insert more than one SSL entry per Open_vSwitch.");
+                }
+            }
             String newSSL = "new_SSL";
 
             Operation addSSLRequest = null;
@@ -1142,37 +1149,47 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         String rowName=row.NAME.getName();
 
         try{
-            // Take my time and do this bit properly alagalah
-            // Bridge table can have 0 or 1 sFlow entries
-            Map<String, Table<?>> portTable = inventoryServiceInternal.getTableCache(node, Port.NAME.getName());
-            if (portTable == null ||  portTable.get(port_uuid) == null) {
-                return new StatusWithUuid(StatusCode.NOTFOUND, "Port with UUID "+port_uuid+" Not found");
+            Map<String, Table<?>> brTable = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
+            if (brTable == null ||  brTable.get(parent_uuid) == null) {
+                return new StatusWithUuid(StatusCode.NOTFOUND, "Bridge with UUID "+parent_uuid+" Not found");
             }
-            // MUTATOR, need to insert the interface UUID to LIST of interfaces in PORT TABLE for port_uuid
-            String newInterface = "new_interface";
-            UUID interfaceUUID = new UUID(newInterface);
-            Mutation portTableMutation = new Mutation("interfaces", Mutator.INSERT, interfaceUUID); // field name to append is "interfaces"
-            List<Mutation> mutations = new ArrayList<Mutation>();
-            mutations.add(portTableMutation);
 
-            // Create the Operation which will be used in Transact to perform the PORT TABLE mutation
-            UUID uuid = new UUID(port_uuid);
+            // Check SSL exists in parent (Open_vSwitch) as there can be 0|1
+            for (int i=0 ; i < brTable.values().size(); i++){
+                Bridge bridge = (Bridge)brTable.values().toArray()[i];
+                if (bridge.getSflow().size() == 1) {
+                    return new StatusWithUuid(StatusCode.BADREQUEST, "Cannot insert more than one sFlow entry per Bridge.");
+                }
+            }
+            String newSflow = "new_sflow";
+
+            Operation addBridgeRequest = null;
+
+            if (parent_uuid == null) {
+                return new StatusWithUuid(StatusCode.BADREQUEST, "Require parent Bridge UUID.");
+            }
+            UUID sflowUuid = new UUID(newSflow);
+            Mutation sflowMutation = new Mutation("sflow", Mutator.INSERT, sflowUuid);
+            List<Mutation> mutations = new ArrayList<Mutation>();
+            mutations.add(sflowMutation);
+
+            UUID uuid = new UUID(parent_uuid);
             Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
             List<Condition> where = new ArrayList<Condition>();
             where.add(condition);
-            Operation addPortMutationRequest = new MutateOperation(Port.NAME.getName(), where, mutations);
+            addBridgeRequest = new MutateOperation(Bridge.NAME.getName(), where, mutations);
 
-            // Create the interface row request
-            InsertOperation addIntfRequest = new InsertOperation(Interface.NAME.getName(),newInterface, interfaceRow);
+            InsertOperation addSflowRequest = new InsertOperation(SFlow.NAME.getName(), newSflow, row);
 
-            // Transaction to insert/modify tables - validate using "sudo ovsdb-client dump" on host running OVSDB process
             TransactBuilder transaction = new TransactBuilder();
-            transaction.addOperations(new ArrayList<Operation>(Arrays.asList(addIntfRequest,addPortMutationRequest)));
+            transaction.addOperations(new ArrayList<Operation>(
+                                      Arrays.asList(addSflowRequest,
+                                                    addBridgeRequest)));
 
-            // Check the results. Iterates over the results of the Array of transaction Operations, and reports STATUS
-            int interfaceInsertIndex = transaction.getRequests().indexOf(addIntfRequest);
+            int sflowInsertIndex = transaction.getRequests().indexOf(addSflowRequest);
 
-            return _insertTableRow(node,transaction,interfaceInsertIndex,insertErrorMsg,rowName);
+
+            return _insertTableRow(node,transaction,sflowInsertIndex,insertErrorMsg,rowName);
 
         } catch (Exception e) {
             logger.error("Error in insertInterfaceRow(): ",e);
@@ -1319,7 +1336,12 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     }
 
     private Status deleteSflowRow(Node node, String uuid) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");
+        // Set up variables for generic _deleteTableRow()
+        String parentTableName=Bridge.NAME.getName();
+        String childTableName=SFlow.NAME.getName();
+        String parentColumn = "sflow";
+
+        return _deleteTableRow(node,uuid,parentTableName,childTableName,parentColumn);
     }
 
     private Status deleteQueueRow(Node node, String uuid) {

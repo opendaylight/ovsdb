@@ -18,6 +18,7 @@ public class Bridge extends Table<Bridge> {
     private String datapath_type;
     private OvsDBSet<String> fail_mode;
     private OvsDBSet<String> sflow;
+    private OvsDBSet<String> netflow;
     private OvsDBMap<String, String> status;
     private Boolean stp_enable;
     private OvsDBMap<String, String> other_config;
@@ -83,6 +84,10 @@ public class Bridge extends Table<Bridge> {
 
     public OvsDBSet<String> getSflow() {
         return sflow;
+    }
+
+    public OvsDBSet<String> getNetflow() {
+        return netflow;
     }
 
     public OvsDBMap<String, String> getStatus() {

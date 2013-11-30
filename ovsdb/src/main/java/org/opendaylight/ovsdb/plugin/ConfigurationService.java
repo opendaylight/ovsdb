@@ -21,6 +21,7 @@ import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.lib.database.OVSInstance;
 import org.opendaylight.ovsdb.lib.database.OvsdbType;
 import org.opendaylight.ovsdb.lib.message.TransactBuilder;
+import org.opendaylight.ovsdb.lib.message.operations.DeleteOperation;
 import org.opendaylight.ovsdb.lib.message.operations.InsertOperation;
 import org.opendaylight.ovsdb.lib.message.operations.MutateOperation;
 import org.opendaylight.ovsdb.lib.message.operations.Operation;
@@ -1198,12 +1199,102 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     }
 
     private StatusWithUuid insertQueueRow(Node node, String parent_uuid, Queue row) {
-        return new StatusWithUuid(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
-    }
+        String insertErrorMsg = "Queue";
+        String rowName=row.NAME.getName();
+
+        try{
+//            Map<String, Table<?>> qosTable = inventoryServiceInternal.getTableCache(node, Qos.NAME.getName());
+//            if (qosTable == null ||  qosTable.get(parent_uuid) == null) {
+//                return new StatusWithUuid(StatusCode.NOTFOUND, "QoS entry with UUID "+parent_uuid+" Not found");
+//            }
+
+//            if (parent_uuid == null) {
+//                return new StatusWithUuid(StatusCode.BADREQUEST, "Require parent QoS UUID.");
+//            }
+
+            String newQueue = "new_queue";
+//            UUID queueUuid = new UUID(newQueue);
+//            Mutation queueMutation = new Mutation("queues", Mutator.INSERT, queueUuid);
+//            List<Mutation> mutations = new ArrayList<Mutation>();
+//            mutations.add(queueMutation);
+
+//            Operation addQosRequest = null;
+//            UUID uuid = new UUID(parent_uuid);
+//            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
+//            List<Condition> where = new ArrayList<Condition>();
+//            where.add(condition);
+//            addQosRequest = new MutateOperation(Qos.NAME.getName(), where, mutations);
+
+            InsertOperation addQueueRequest = new InsertOperation(Queue.NAME.getName(), newQueue, row);
+
+            TransactBuilder transaction = new TransactBuilder();
+//            transaction.addOperations(new ArrayList<Operation>(
+//                                      Arrays.asList(addQueueRequest,
+//                                                    addQosRequest)));
+            transaction.addOperations(new ArrayList<Operation>(Arrays.asList(addQueueRequest)));
+
+            int queueInsertIndex = transaction.getRequests().indexOf(addQueueRequest);
+
+            return _insertTableRow(node,transaction,queueInsertIndex,insertErrorMsg,rowName);
+
+        } catch (Exception e) {
+            logger.error("Error in insertInterfaceRow(): ",e);
+        }
+        return new StatusWithUuid(StatusCode.INTERNALERROR);    }
 
     private StatusWithUuid insertQosRow(Node node, String parent_uuid, Qos row) {
-        return new StatusWithUuid(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+        String insertErrorMsg = "Qos";
+        String rowName=row.NAME.getName();
+
+        try{
+            Map<String, Table<?>> portTable = inventoryServiceInternal.getTableCache(node, Port.NAME.getName());
+            if (portTable == null ||  portTable.get(parent_uuid) == null) {
+                return new StatusWithUuid(StatusCode.NOTFOUND, "Port with UUID "+parent_uuid+" Not found");
+            }
+
+            // Check QoS already exists in parent (Port) as there can be 0|1
+            for (int i=0 ; i < portTable.values().size(); i++){
+                Port port = (Port)portTable.values().toArray()[i];
+                if (port.getQos().size() == 1) {
+                    return new StatusWithUuid(StatusCode.BADREQUEST, "Cannot insert more than one QoS entry per Port.");
+                }
+            }
+
+            if (parent_uuid == null) {
+                return new StatusWithUuid(StatusCode.BADREQUEST, "Require parent Port UUID.");
+            }
+
+            String newQos = "new_qos";
+            UUID qosUuid = new UUID(newQos);
+            Mutation qosMutation = new Mutation("qos", Mutator.INSERT, qosUuid);
+            List<Mutation> mutations = new ArrayList<Mutation>();
+            mutations.add(qosMutation);
+
+            Operation addPortRequest = null;
+            UUID uuid = new UUID(parent_uuid);
+            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
+            List<Condition> where = new ArrayList<Condition>();
+            where.add(condition);
+            addPortRequest = new MutateOperation(Port.NAME.getName(), where, mutations);
+
+            InsertOperation addQosRequest = new InsertOperation(Qos.NAME.getName(), newQos, row);
+
+            TransactBuilder transaction = new TransactBuilder();
+            transaction.addOperations(new ArrayList<Operation>(
+                                      Arrays.asList(addQosRequest,
+                                                    addPortRequest)));
+
+            int sflowInsertIndex = transaction.getRequests().indexOf(addQosRequest);
+
+
+            return _insertTableRow(node,transaction,sflowInsertIndex,insertErrorMsg,rowName);
+
+        } catch (Exception e) {
+            logger.error("Error in insertInterfaceRow(): ",e);
+        }
+        return new StatusWithUuid(StatusCode.INTERNALERROR);
     }
+
 
     private StatusWithUuid insertNetFlowRow(Node node, String parent_uuid, NetFlow row) {
         return new StatusWithUuid(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
@@ -1345,11 +1436,15 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     }
 
     private Status deleteQueueRow(Node node, String uuid) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");
+        // Set up variables for generic _deleteRootTableRow() --- ALAGALAH: special case because it's a root table?
+        String childTableName=Queue.NAME.getName();
+        return _deleteRootTableRow(node,uuid,childTableName);
     }
 
     private Status deleteQosRow(Node node, String uuid) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");
+        // Set up variables for generic _deleteRootTableRow() --- ALAGALAH: special case because it's a root table?
+        String childTableName=Qos.NAME.getName();
+        return _deleteRootTableRow(node,uuid,childTableName);
     }
 
     private Status deleteNetFlowRow(Node node, String uuid) {
@@ -1434,6 +1529,73 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             return status;
         } catch (Exception e) {
             logger.error("Error in _deleteTableRow",e);
+        }
+        return new Status(StatusCode.INTERNALERROR);
+    }
+
+    private Status _deleteRootTableRow(Node node,String uuid,String TableName) {
+        try {
+            // Check there is a connectionService
+            if (connectionService == null) {
+                logger.error("Couldn't refer to the ConnectionService");
+                return new Status(StatusCode.NOSERVICE);
+            }
+
+            // Establish the connection
+            Connection connection = this.getConnection(node);
+            if (connection == null) {
+                return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
+            }
+
+            // Ports have a 0:n relationship with Bridges, so need to MUTATE BRIDGE row and DELETE PORT row
+            Map<String, Table<?>> table = inventoryServiceInternal.getTableCache(node, TableName);
+
+            // Check that the UUID exists
+            if (table == null || table.get(uuid) == null) {
+                return new Status(StatusCode.NOTFOUND, "");
+            }
+
+            // Initialise the actual request var
+            Operation delRequest = null;
+
+            // Prepare the mutator to remove the port UUID from the "ports" list in the BRIDGE TABLE
+            UUID rowUuid = new UUID(uuid);
+
+            Status status = new Status(StatusCode.SUCCESS);
+
+            // INCLUDES condition ensures that it captures all rows in the parent table (ie duplicates) that have the child UUID
+            Condition condition = new Condition("_uuid", Function.EQUALS, rowUuid);
+            List<Condition> where = new ArrayList<Condition>();
+            where.add(condition);
+            delRequest = new DeleteOperation(TableName, where);
+
+            TransactBuilder transaction = new TransactBuilder();
+            transaction.addOperations(new ArrayList<Operation>(Arrays.asList(delRequest)));
+
+            // This executes the transaction.
+            ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
+
+            // Pull the responses
+            List<OperationResult> tr = transResponse.get();
+            List<Operation> requests = transaction.getRequests();
+
+            for (int i = 0; i < tr.size(); i++) {
+                if (i < requests.size()) requests.get(i).setResult(tr.get(i));
+                if (tr.get(i) != null && tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
+                    OperationResult result = tr.get(i);
+                    status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+                }
+            }
+
+            if (tr.size() > requests.size()) {
+                OperationResult result = tr.get(tr.size() - 1);
+                logger.error("Error deleting: {}\n Error : {}\n Details : {}",
+                        uuid, result.getError(), result.getDetails());
+                status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+            }
+            return status;
+        } catch (Exception e) {
+            logger.error("Error in _deleteRootTableRow",e);
         }
         return new Status(StatusCode.INTERNALERROR);
     }

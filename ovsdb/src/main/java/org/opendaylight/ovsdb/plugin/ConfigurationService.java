@@ -1203,37 +1203,37 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         String rowName=row.NAME.getName();
 
         try{
-            Map<String, Table<?>> qosTable = inventoryServiceInternal.getTableCache(node, Qos.NAME.getName());
-            if (qosTable == null ||  qosTable.get(parent_uuid) == null) {
-                return new StatusWithUuid(StatusCode.NOTFOUND, "QoS entry with UUID "+parent_uuid+" Not found");
-            }
+//            Map<String, Table<?>> qosTable = inventoryServiceInternal.getTableCache(node, Qos.NAME.getName());
+//            if (qosTable == null ||  qosTable.get(parent_uuid) == null) {
+//                return new StatusWithUuid(StatusCode.NOTFOUND, "QoS entry with UUID "+parent_uuid+" Not found");
+//            }
 
-            if (parent_uuid == null) {
-                return new StatusWithUuid(StatusCode.BADREQUEST, "Require parent Port UUID.");
-            }
+//            if (parent_uuid == null) {
+//                return new StatusWithUuid(StatusCode.BADREQUEST, "Require parent QoS UUID.");
+//            }
 
             String newQueue = "new_queue";
-            UUID queueUuid = new UUID(newQueue);
-            Mutation queueMutation = new Mutation("queue", Mutator.INSERT, queueUuid);
-            List<Mutation> mutations = new ArrayList<Mutation>();
-            mutations.add(queueMutation);
+//            UUID queueUuid = new UUID(newQueue);
+//            Mutation queueMutation = new Mutation("queues", Mutator.INSERT, queueUuid);
+//            List<Mutation> mutations = new ArrayList<Mutation>();
+//            mutations.add(queueMutation);
 
-            Operation addQosRequest = null;
-            UUID uuid = new UUID(parent_uuid);
-            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
-            List<Condition> where = new ArrayList<Condition>();
-            where.add(condition);
-            addQosRequest = new MutateOperation(Qos.NAME.getName(), where, mutations);
+//            Operation addQosRequest = null;
+//            UUID uuid = new UUID(parent_uuid);
+//            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
+//            List<Condition> where = new ArrayList<Condition>();
+//            where.add(condition);
+//            addQosRequest = new MutateOperation(Qos.NAME.getName(), where, mutations);
 
             InsertOperation addQueueRequest = new InsertOperation(Queue.NAME.getName(), newQueue, row);
 
             TransactBuilder transaction = new TransactBuilder();
-            transaction.addOperations(new ArrayList<Operation>(
-                                      Arrays.asList(addQueueRequest,
-                                                    addQosRequest)));
+//            transaction.addOperations(new ArrayList<Operation>(
+//                                      Arrays.asList(addQueueRequest,
+//                                                    addQosRequest)));
+            transaction.addOperations(new ArrayList<Operation>(Arrays.asList(addQueueRequest)));
 
             int queueInsertIndex = transaction.getRequests().indexOf(addQueueRequest);
-
 
             return _insertTableRow(node,transaction,queueInsertIndex,insertErrorMsg,rowName);
 

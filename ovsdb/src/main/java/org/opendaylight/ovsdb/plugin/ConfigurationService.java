@@ -1297,7 +1297,56 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
 
 
     private StatusWithUuid insertNetFlowRow(Node node, String parent_uuid, NetFlow row) {
-        return new StatusWithUuid(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+        String insertErrorMsg = "netFlow";
+        String rowName=row.NAME.getName();
+
+        try{
+            Map<String, Table<?>> brTable = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
+            if (brTable == null ||  brTable.get(parent_uuid) == null) {
+                return new StatusWithUuid(StatusCode.NOTFOUND, "Bridge with UUID "+parent_uuid+" Not found");
+            }
+
+            // Check SSL exists in parent (Open_vSwitch) as there can be 0|1
+            for (int i=0 ; i < brTable.values().size(); i++){
+                Bridge bridge = (Bridge)brTable.values().toArray()[i];
+                if (bridge.getNetflow().size() == 1) {
+                    return new StatusWithUuid(StatusCode.BADREQUEST, "Cannot insert more than one netFlow entry per Bridge.");
+                }
+            }
+            String newNetflow = "new_netflow";
+
+            Operation addBridgeRequest = null;
+
+            if (parent_uuid == null) {
+                return new StatusWithUuid(StatusCode.BADREQUEST, "Require parent Bridge UUID.");
+            }
+            UUID netFlowUuid = new UUID(newNetflow);
+            Mutation netFlowMutation = new Mutation("netflow", Mutator.INSERT, netFlowUuid);
+            List<Mutation> mutations = new ArrayList<Mutation>();
+            mutations.add(netFlowMutation);
+
+            UUID uuid = new UUID(parent_uuid);
+            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
+            List<Condition> where = new ArrayList<Condition>();
+            where.add(condition);
+            addBridgeRequest = new MutateOperation(Bridge.NAME.getName(), where, mutations);
+
+            InsertOperation addNetflowRequest = new InsertOperation(SFlow.NAME.getName(), newNetflow, row);
+
+            TransactBuilder transaction = new TransactBuilder();
+            transaction.addOperations(new ArrayList<Operation>(
+                                      Arrays.asList(addNetflowRequest,
+                                                    addBridgeRequest)));
+
+            int netflowInsertIndex = transaction.getRequests().indexOf(addNetflowRequest);
+
+
+            return _insertTableRow(node,transaction,netflowInsertIndex,insertErrorMsg,rowName);
+
+        } catch (Exception e) {
+            logger.error("Error in insertInterfaceRow(): ",e);
+        }
+        return new StatusWithUuid(StatusCode.INTERNALERROR);
     }
 
     private StatusWithUuid insertMirrorRow(Node node, String parent_uuid, Mirror row) {
@@ -1448,7 +1497,12 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     }
 
     private Status deleteNetFlowRow(Node node, String uuid) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");
+        // Set up variables for generic _deleteTableRow()
+        String parentTableName=Bridge.NAME.getName();
+        String childTableName=NetFlow.NAME.getName();
+        String parentColumn = "netflow";
+
+        return _deleteTableRow(node,uuid,parentTableName,childTableName,parentColumn);
     }
 
     private Status deleteMirrorRow(Node node, String uuid) {

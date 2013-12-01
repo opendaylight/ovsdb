@@ -762,6 +762,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
 
             ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
             List<OperationResult> tr = transResponse.get();
+            System.out.println(" **************** ALAGALAH ***** tr.size()== "+tr.size());
             List<Operation> requests = transaction.getRequests();
             Status status = new Status(StatusCode.SUCCESS);
             for (int i = 0; i < tr.size() ; i++) {
@@ -1331,7 +1332,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             where.add(condition);
             addBridgeRequest = new MutateOperation(Bridge.NAME.getName(), where, mutations);
 
-            InsertOperation addNetflowRequest = new InsertOperation(SFlow.NAME.getName(), newNetflow, row);
+            InsertOperation addNetflowRequest = new InsertOperation(NetFlow.NAME.getName(), newNetflow, row);
 
             TransactBuilder transaction = new TransactBuilder();
             transaction.addOperations(new ArrayList<Operation>(

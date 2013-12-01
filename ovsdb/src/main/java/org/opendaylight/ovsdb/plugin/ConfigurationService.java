@@ -764,6 +764,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             List<OperationResult> tr = transResponse.get();
             System.out.println(" **************** ALAGALAH ***** tr.size()== "+tr.size());
             List<Operation> requests = transaction.getRequests();
+            System.out.println(" **************** ALAGALAH ***** requests.toString()== "+requests.toString());
             Status status = new Status(StatusCode.SUCCESS);
             for (int i = 0; i < tr.size() ; i++) {
                 if (i < requests.size()) requests.get(i).setResult(tr.get(i));
@@ -1355,7 +1356,48 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     }
 
     private StatusWithUuid insertManagerRow(Node node, String parent_uuid, Manager row) {
-        return new StatusWithUuid(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+        String insertErrorMsg = "manager";
+        String rowName=row.NAME.getName();
+
+        try{
+            Map<String, Table<?>> ovsTable = inventoryServiceInternal.getTableCache(node, Open_vSwitch.NAME.getName());
+
+            if (ovsTable == null) {
+                return new StatusWithUuid(StatusCode.NOTFOUND, "There are no Open_vSwitch instance in the Open_vSwitch table");
+            }
+
+            String newManager = "new_manager";
+
+            Operation addSwitchRequest = null;
+
+            String ovsTableUUID = parent_uuid;
+            if (ovsTableUUID == null) ovsTableUUID = (String) ovsTable.keySet().toArray()[0];
+            UUID managerUuid = new UUID(newManager);
+            Mutation managerMutation = new Mutation("manager_options", Mutator.INSERT, managerUuid);
+            List<Mutation> mutations = new ArrayList<Mutation>();
+            mutations.add(managerMutation);
+
+            UUID uuid = new UUID(ovsTableUUID);
+            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
+            List<Condition> where = new ArrayList<Condition>();
+            where.add(condition);
+            addSwitchRequest = new MutateOperation(Open_vSwitch.NAME.getName(), where, mutations);
+
+            InsertOperation addManagerRequest = new InsertOperation(Manager.NAME.getName(), newManager, row);
+
+            TransactBuilder transaction = new TransactBuilder();
+            transaction.addOperations(new ArrayList<Operation>(
+                                      Arrays.asList(addSwitchRequest,
+                                                    addManagerRequest)));
+
+            int managerInsertIndex = transaction.getRequests().indexOf(addManagerRequest);
+
+            return _insertTableRow(node,transaction,managerInsertIndex,insertErrorMsg,rowName);
+
+        } catch(Exception e){
+            logger.error("Error in insertBridgeRow(): ",e);
+        }
+        return new StatusWithUuid(StatusCode.INTERNALERROR);
     }
 
     private StatusWithUuid insertCapabilityRow(Node node, String parent_uuid, Capability row) {
@@ -1511,8 +1553,12 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     }
 
     private Status deleteManagerRow(Node node, String uuid) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");
-    }
+        // Set up variables for generic _deleteTableRow()
+        String parentTableName=Open_vSwitch.NAME.getName();
+        String childTableName=Manager.NAME.getName();
+        String parentColumn = "manager_options";
+
+        return _deleteTableRow(node,uuid,parentTableName,childTableName,parentColumn);    }
 
     private Status deleteCapabilityRow(Node node, String uuid) {
         return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");

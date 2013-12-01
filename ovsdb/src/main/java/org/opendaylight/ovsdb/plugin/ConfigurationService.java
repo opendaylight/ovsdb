@@ -1205,34 +1205,12 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         String rowName=row.NAME.getName();
 
         try{
-//            Map<String, Table<?>> qosTable = inventoryServiceInternal.getTableCache(node, Qos.NAME.getName());
-//            if (qosTable == null ||  qosTable.get(parent_uuid) == null) {
-//                return new StatusWithUuid(StatusCode.NOTFOUND, "QoS entry with UUID "+parent_uuid+" Not found");
-//            }
-
-//            if (parent_uuid == null) {
-//                return new StatusWithUuid(StatusCode.BADREQUEST, "Require parent QoS UUID.");
-//            }
 
             String newQueue = "new_queue";
-//            UUID queueUuid = new UUID(newQueue);
-//            Mutation queueMutation = new Mutation("queues", Mutator.INSERT, queueUuid);
-//            List<Mutation> mutations = new ArrayList<Mutation>();
-//            mutations.add(queueMutation);
-
-//            Operation addQosRequest = null;
-//            UUID uuid = new UUID(parent_uuid);
-//            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
-//            List<Condition> where = new ArrayList<Condition>();
-//            where.add(condition);
-//            addQosRequest = new MutateOperation(Qos.NAME.getName(), where, mutations);
 
             InsertOperation addQueueRequest = new InsertOperation(Queue.NAME.getName(), newQueue, row);
 
             TransactBuilder transaction = new TransactBuilder();
-//            transaction.addOperations(new ArrayList<Operation>(
-//                                      Arrays.asList(addQueueRequest,
-//                                                    addQosRequest)));
             transaction.addOperations(new ArrayList<Operation>(Arrays.asList(addQueueRequest)));
 
             int queueInsertIndex = transaction.getRequests().indexOf(addQueueRequest);
@@ -1401,8 +1379,50 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     }
 
     private StatusWithUuid insertCapabilityRow(Node node, String parent_uuid, Capability row) {
-        return new StatusWithUuid(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+        String insertErrorMsg = "capability";
+        String rowName=row.NAME.getName();
+
+        try{
+            Map<String, Table<?>> ovsTable = inventoryServiceInternal.getTableCache(node, Open_vSwitch.NAME.getName());
+
+            if (ovsTable == null) {
+                return new StatusWithUuid(StatusCode.NOTFOUND, "There are no Open_vSwitch instance in the Open_vSwitch table");
+            }
+
+            String newCapability = "new_capability";
+
+            Operation addSwitchRequest = null;
+
+            String ovsTableUUID = parent_uuid;
+            if (ovsTableUUID == null) ovsTableUUID = (String) ovsTable.keySet().toArray()[0];
+            UUID capabilityUuid = new UUID(newCapability);
+            Mutation capabilityMutation = new Mutation("capabilities", Mutator.INSERT, capabilityUuid);
+            List<Mutation> mutations = new ArrayList<Mutation>();
+            mutations.add(capabilityMutation);
+
+            UUID uuid = new UUID(ovsTableUUID);
+            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
+            List<Condition> where = new ArrayList<Condition>();
+            where.add(condition);
+            addSwitchRequest = new MutateOperation(Open_vSwitch.NAME.getName(), where, mutations);
+
+            InsertOperation addCapabilityRequest = new InsertOperation(Capability.NAME.getName(), newCapability, row);
+
+            TransactBuilder transaction = new TransactBuilder();
+            transaction.addOperations(new ArrayList<Operation>(
+                                      Arrays.asList(addSwitchRequest,
+                                                    addCapabilityRequest)));
+
+            int capabilityInsertIndex = transaction.getRequests().indexOf(addCapabilityRequest);
+
+            return _insertTableRow(node,transaction,capabilityInsertIndex,insertErrorMsg,rowName);
+
+        } catch(Exception e){
+            logger.error("Error in insertBridgeRow(): ",e);
+        }
+        return new StatusWithUuid(StatusCode.INTERNALERROR);
     }
+
 
     private StatusWithUuid _insertTableRow(Node node, TransactBuilder transaction, Integer insertIndex, String insertErrorMsg,String rowName){
 
@@ -1558,11 +1578,18 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         String childTableName=Manager.NAME.getName();
         String parentColumn = "manager_options";
 
-        return _deleteTableRow(node,uuid,parentTableName,childTableName,parentColumn);    }
+        return _deleteTableRow(node,uuid,parentTableName,childTableName,parentColumn);
+    }
 
     private Status deleteCapabilityRow(Node node, String uuid) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");
+        // Set up variables for generic _deleteTableRow()
+        String parentTableName=Open_vSwitch.NAME.getName();
+        String childTableName=Capability.NAME.getName();
+        String parentColumn = "capabilities";
+
+        return _deleteTableRow(node,uuid,parentTableName,childTableName,parentColumn);
     }
+
     private Status _deleteTableRow(Node node,String uuid,String parentTableName, String childTableName, String parentColumn) {
         try {
             // Check there is a connectionService

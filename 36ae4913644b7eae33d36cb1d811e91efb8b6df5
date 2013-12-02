@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_306312b3",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/table/Bridge.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-12-02T04:29:01Z",
+      "side": 1,
+      "message": "Both sFlow and Netflow seems to be OvsDBSet\u003cUUID\u003e types as per the schema spec. Is String type really working ?",
+      "revId": "36ae4913644b7eae33d36cb1d811e91efb8b6df5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_105a4ef3",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/table/Bridge.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-12-02T04:29:01Z",
+      "side": 1,
+      "message": "Can you please also add setters for the above which can be used by the callers to create a Bridge and update these variables using the setters.",
+      "revId": "36ae4913644b7eae33d36cb1d811e91efb8b6df5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_f05c5aef",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/table/NetFlow.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-12-02T04:29:01Z",
+      "side": 1,
+      "message": "Please add setter as well.",
+      "revId": "36ae4913644b7eae33d36cb1d811e91efb8b6df5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_d073967e",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 767,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-12-02T04:29:01Z",
+      "side": 1,
+      "message": "Please remove these System.out.printlns.",
+      "revId": "36ae4913644b7eae33d36cb1d811e91efb8b6df5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_b06ee294",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1160,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-12-02T04:29:01Z",
+      "side": 1,
+      "message": "Please change the comment to reflect SFlow and Bridge.",
+      "revId": "36ae4913644b7eae33d36cb1d811e91efb8b6df5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_906d1e9b",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1163,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-12-02T04:29:01Z",
+      "side": 1,
+      "message": "This is NOT the correct logic here.\nThis logic should be applied ONLY to the bridge that corresponds to the parent_uuid \u003d bridge-id.\nessentially you can use the getRow() function to get the corresponding Bridge row for this parent_uuid and check for the getSflow().size() on that bridge alone.",
+      "revId": "36ae4913644b7eae33d36cb1d811e91efb8b6df5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

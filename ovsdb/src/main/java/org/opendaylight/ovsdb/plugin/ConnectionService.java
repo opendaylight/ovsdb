@@ -151,7 +151,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         try {
             address = InetAddress.getByName(params.get(ConnectionConstants.ADDRESS));
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Unable to resolve " + params.get(ConnectionConstants.ADDRESS), e);
             return null;
         }
 
@@ -188,8 +188,10 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
             ChannelFuture future = bootstrap.connect(address, port).sync();
             Channel channel = future.channel();
             return handleNewConnection(identifier, channel, this);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (InterruptedException e) {
+            logger.error("Thread was interrupted during connect", e);
+        } catch (ExecutionException e) {
+            logger.error("ExecutionException in handleNewConnection for identifier " + identifier, e);
         }
         return null;
     }
@@ -257,8 +259,8 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
             public void run() {
                 try {
                     initializeInventoryForNewNode(connection);
-                } catch (Exception e) {
-                    e.printStackTrace();
+                } catch (InterruptedException | ExecutionException e) {
+                    logger.error("Failed to initialize inventory for node with identifier " + identifier, e);
                     ovsdbConnections.remove(identifier);
                 }
             }
@@ -360,7 +362,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
             // Wait until the server socket is closed.
             serverListenChannel.closeFuture().sync();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            logger.error("Thread interrupted", e);
         } finally {
             // Shut down all event loops to terminate all threads.
             bossGroup.shutdownGracefully();

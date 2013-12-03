@@ -225,7 +225,7 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
                             logger.error("Error accessing SAL Inventory plugin");
                         }
                     } catch (ConstructionException e) {
-                        e.printStackTrace();
+                        logger.error("Failed to construct node for " + dpid, e);
                     }
                 }
             }

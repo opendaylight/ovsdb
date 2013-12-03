@@ -421,7 +421,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
             logger.debug("Tunnel {} add status : {}", tunInterface, status);
             return status;
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception in addTunnelPort", e);
             return new Status(StatusCode.INTERNALERROR);
         }
     }

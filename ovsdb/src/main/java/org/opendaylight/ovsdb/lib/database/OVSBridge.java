@@ -40,14 +40,7 @@ public class OVSBridge {
 
         OvsdbMessage msg = new OvsdbMessage("monitor", params);
         Map<String, Object> monitorResponse = new HashMap<String, Object>();
-/*
-        try{
-            connection.sendMessage(msg);
-            monitorResponse = (Map<String, Object>) connection.readResponse(Map.class);
-        } catch (Throwable e){
-            e.printStackTrace();
-        }
-*/
+
         Map<String, Object> bridgeTable = (Map) monitorResponse.get("Bridge");
 
         Object[] uuidObjects = bridgeTable.keySet().toArray();

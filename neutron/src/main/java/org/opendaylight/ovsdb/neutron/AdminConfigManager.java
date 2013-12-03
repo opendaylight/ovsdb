@@ -123,7 +123,7 @@ public class AdminConfigManager {
                     addTunnelEndpoint(node, address);
                     logger.debug("Tunnel Endpoint for Node {} {}", node, address.getHostAddress());
                 } catch (UnknownHostException e) {
-                    e.printStackTrace();
+                    logger.error("Unable to add tunnel endpoint for node " + node, e);
                 }
             }
         }

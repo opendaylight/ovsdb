@@ -2,6 +2,7 @@ package org.opendaylight.ovsdb.plugin;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -139,7 +140,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
      */
     @Override
     public Status createBridgeDomain(Node node, String bridgeIdentifier,
-            Map<ConfigConstants, Object> configs) throws Throwable {
+            Map<ConfigConstants, Object> configs) {
         try{
             if (connectionService == null) {
                 logger.error("Couldn't refer to the ConnectionService");
@@ -382,7 +383,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
      * @param String with IP and connection types
      */
     @SuppressWarnings("unchecked")
-    public boolean setManager(Node node, String managerip) throws Throwable{
+    public boolean setManager(Node node, String managerip) {
         try{
             if (connectionService == null) {
                 logger.error("Couldn't refer to the ConnectionService");
@@ -447,13 +448,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             Map<ConfigConstants, Object> configs) {
         String mgmt = (String)configs.get(ConfigConstants.MGMT);
         if (mgmt != null) {
-            try {
-                if (setManager(node, mgmt)) return new Status(StatusCode.SUCCESS);
-            } catch (Throwable e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-                return new Status(StatusCode.INTERNALERROR);
-            }
+            if (setManager(node, mgmt)) return new Status(StatusCode.SUCCESS);
         }
         return new Status(StatusCode.BADREQUEST);
     }
@@ -1355,8 +1350,8 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         }
         try {
             InetAddress.getByName(ovsdbserver);
-        }  catch (Exception e) {
-            e.printStackTrace();
+        }  catch (UnknownHostException e) {
+            logger.error("Unable to resolve " + ovsdbserver, e);
             ci.println("Please enter valid IP-Address");
             return;
         }
@@ -1387,19 +1382,13 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         }
         Status status;
 
-        try {
-            Node node = Node.fromString(nodeName);
-            if (node == null) {
-                ci.println("Invalid Node");
-                return;
-            }
-            status = this.createBridgeDomain(node, bridgeName, null);
-            ci.println("Bridge creation status : "+status.toString());
-        } catch (Throwable e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            ci.println("Failed to create Bridge "+bridgeName);
+        Node node = Node.fromString(nodeName);
+        if (node == null) {
+            ci.println("Invalid Node");
+            return;
         }
+        status = this.createBridgeDomain(node, bridgeName, null);
+        ci.println("Bridge creation status : "+status.toString());
     }
 
     public void _getBridgeDomains (CommandInterpreter ci) {
@@ -1408,21 +1397,15 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             ci.println("Please enter Node Name");
             return;
         }
-        Status status;
 
         List<String> brlist = new ArrayList<String>();
-        try {
-            Node node = Node.fromString(nodeName);
-            brlist = this.getBridgeDomains(node);
-            if (node == null) {
-                ci.println("Invalid Node");
-                return;
-            }
-            ci.println("Existing Bridges: "+brlist.toString());
-        } catch (Throwable e) {
-            e.printStackTrace();
-            ci.println("Failed to list Bridges");
+        Node node = Node.fromString(nodeName);
+        brlist = this.getBridgeDomains(node);
+        if (node == null) {
+            ci.println("Invalid Node");
+            return;
         }
+        ci.println("Existing Bridges: "+brlist.toString());
     }
 
     public void _deleteBridgeDomain (CommandInterpreter ci) {
@@ -1437,18 +1420,13 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             return;
         }
         Status status;
-        try {
-            Node node = Node.fromString(nodeName);
-            if (node == null) {
-                ci.println("Invalid Node");
-                return;
-            }
-            status = this.deleteBridgeDomain(node, bridgeName);
-            ci.println("Bridge deletion status : "+status.toString());
-        } catch (Throwable e) {
-            e.printStackTrace();
-            ci.println("Failed to delete Bridge "+bridgeName);
+        Node node = Node.fromString(nodeName);
+        if (node == null) {
+            ci.println("Invalid Node");
+            return;
         }
+        status = this.deleteBridgeDomain(node, bridgeName);
+        ci.println("Bridge deletion status : "+status.toString());
     }
 
     public void _addPort (CommandInterpreter ci) {
@@ -1493,19 +1471,13 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             ci.println(customConfigs.toString());
         }
         Status status;
-        try {
-            Node node = Node.fromString(nodeName);
-            if (node == null) {
-                ci.println("Invalid Node");
-                return;
-            }
-            status = this.addPort(node, bridgeName, portName, customConfigs);
-            ci.println("Port creation status : "+status.toString());
-        } catch (Throwable e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            ci.println("Failed to create Port "+portName+" in Bridge "+bridgeName);
+        Node node = Node.fromString(nodeName);
+        if (node == null) {
+            ci.println("Invalid Node");
+            return;
         }
+        status = this.addPort(node, bridgeName, portName, customConfigs);
+        ci.println("Port creation status : "+status.toString());
     }
 
     public void _deletePort (CommandInterpreter ci) {
@@ -1528,19 +1500,13 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         }
 
         Status status;
-        try {
-            Node node = Node.fromString(nodeName);
-            if (node == null) {
-                ci.println("Invalid Node");
-                return;
-            }
-            status = this.deletePort(node, bridgeName, portName);
-            ci.println("Port deletion status : "+status.toString());
-        } catch (Throwable e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            ci.println("Failed to delete Port "+portName+" in Bridge "+bridgeName);
+        Node node = Node.fromString(nodeName);
+        if (node == null) {
+            ci.println("Invalid Node");
+            return;
         }
+        status = this.deletePort(node, bridgeName, portName);
+        ci.println("Port deletion status : "+status.toString());
     }
 
     public void _addPortVlan (CommandInterpreter ci) {
@@ -1569,7 +1535,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         } else {
             try {
             Integer.parseInt(vlan);
-            } catch (Exception e) {
+            } catch (NumberFormatException e) {
                 ci.println("Please enter Valid Vlan");
                 return;
             }
@@ -1580,19 +1546,13 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         configs.put(ConfigConstants.VLAN, vlan);
 
         Status status;
-        try {
-            Node node = Node.fromString(nodeName);
-            if (node == null) {
-                ci.println("Invalid Node");
-                return;
-            }
-            status = this.addPort(node, bridgeName, portName, configs);
-            ci.println("Port creation status : "+status.toString());
-        } catch (Throwable e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            ci.println("Failed to create Port "+portName+" in Bridge "+bridgeName);
+        Node node = Node.fromString(nodeName);
+        if (node == null) {
+            ci.println("Invalid Node");
+            return;
         }
+        status = this.addPort(node, bridgeName, portName, configs);
+        ci.println("Port creation status : "+status.toString());
     }
 
     public void _addTunnel (CommandInterpreter ci) {
@@ -1629,7 +1589,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         try {
             InetAddress.getByName(remoteIp);
         }  catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Unable to resolve " + remoteIp, e);
             ci.println("Please enter valid Remote IP Address");
             return;
         }
@@ -1640,19 +1600,13 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         configs.put(ConfigConstants.DEST_IP, remoteIp);
 
         Status status;
-        try {
-            Node node = Node.fromString(nodeName);
-            if (node == null) {
-                ci.println("Invalid Node");
-                return;
-            }
-            status = this.addPort(node, bridgeName, portName, configs);
-            ci.println("Port creation status : "+status.toString());
-        } catch (Throwable e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            ci.println("Failed to create Port "+portName+" in Bridge "+bridgeName);
+        Node node = Node.fromString(nodeName);
+        if (node == null) {
+            ci.println("Invalid Node");
+            return;
         }
+        status = this.addPort(node, bridgeName, portName, configs);
+        ci.println("Port creation status : "+status.toString());
     }
 
     public void _printCache (CommandInterpreter ci) {

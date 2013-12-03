@@ -152,7 +152,7 @@ public class TenantNetworkManager {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error while trying to determine if network is present on node", e);
             return false;
         }
 
@@ -268,8 +268,7 @@ public class TenantNetworkManager {
                 }
             }
         } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error("Exception in addPortToTenantNetworkContainer", e);
         }
     }
 

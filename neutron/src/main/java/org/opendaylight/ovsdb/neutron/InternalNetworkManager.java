@@ -185,7 +185,7 @@ public class InternalNetworkManager {
                     this.createInternalNetworkForOverlay(node);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("Failed to create internal network for overlay on node " + node, e);
             }
         } else {
             try {
@@ -194,7 +194,7 @@ public class InternalNetworkManager {
                     // this.createInternalNetworkForNeutron(node);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("Failed to create internal network for overlay on node " + node, e);
             }
         }
 

@@ -2,6 +2,7 @@ package org.opendaylight.ovsdb.plugin;
 
 import io.netty.channel.Channel;
 
+import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
@@ -38,9 +39,8 @@ public class Connection {
         this.idCounter = 0L;
         try {
             node = new Node("OVS", identifier);
-        } catch (Exception e) {
-            e.printStackTrace();
-            logger.error("Error creating Node {}", e);
+        } catch (ConstructionException e) {
+            logger.error("Error creating OVS node with identifier " + identifier, e);
         }
     }
 
@@ -76,23 +76,13 @@ public class Connection {
         this.rpc = rpc;
     }
 
-    public void sendMessage(String message) throws IOException {
-        try {
-            channel.writeAndFlush(message);
-            this.idCounter++;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public void sendMessage(String message) {
+        channel.writeAndFlush(message);
+        this.idCounter++;
     }
 
     public Status disconnect() {
-        try {
-            channel.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new Status(StatusCode.INTERNALERROR, e.getMessage());
-        }
-
+        channel.close();
         return new Status(StatusCode.SUCCESS);
     }
 

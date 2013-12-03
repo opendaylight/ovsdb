@@ -63,7 +63,7 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
         try {
             events.put(event);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            logger.error("Thread was interrupted while trying to enqueue event ", e);
         }
 
     }
@@ -80,8 +80,8 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
                         ProcessRowUpdate(ev.getNode(), ev.getTableName(), ev.getUuid(), ev.getRow(), ev.getAction());
                         break;
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    logger.error("Thread was interrupted while taking an evet from the queue", e);
                 }
             }
         }
@@ -124,7 +124,7 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
                         TenantNetworkManager.getManager().programTenantNetworkInternalVlan(node, uuid, network);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.error("Failed to process row update", e);
                 }
             }
         } else if (Open_vSwitch.NAME.getName().equalsIgnoreCase(tableName)) {
@@ -139,7 +139,7 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
                     }
                 }
             } catch (Exception e) {
-                logger.error("Error fetching Interface Rows for node {}", node);
+                logger.error("Error fetching Interface Rows for node " + node, e);
             }
         }
     }

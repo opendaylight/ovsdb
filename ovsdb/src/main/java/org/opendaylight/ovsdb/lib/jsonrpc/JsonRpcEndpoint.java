@@ -3,6 +3,7 @@ package org.opendaylight.ovsdb.lib.jsonrpc;
 import io.netty.channel.Channel;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
@@ -149,8 +150,8 @@ public class JsonRpcEndpoint {
                     Object param = objectMapper.convertValue(params, parameters[1]);
                     try {
                         m.invoke(callback, node, param);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        logger.error("Unable to invoke callback " + m.getName(), e);
                     }
                     return;
                 }
@@ -162,11 +163,12 @@ public class JsonRpcEndpoint {
         if (request.getMethod().equals("echo")) {
             JsonRpc10Response response = new JsonRpc10Response(request.getId());
             response.setError(null);
+            String s = null;
             try {
-                String s = objectMapper.writeValueAsString(response);
+                s = objectMapper.writeValueAsString(response);
                 nettyChannel.writeAndFlush(s);
             } catch (JsonProcessingException e) {
-                e.printStackTrace();
+                logger.error("Exception while processing JSON string " + s, e );
             }
             return;
         }

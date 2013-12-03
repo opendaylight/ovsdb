@@ -3,6 +3,8 @@ package org.opendaylight.ovsdb.neutron;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
@@ -19,21 +21,54 @@ import org.slf4j.LoggerFactory;
 
 public class SouthboundHandler extends BaseHandler implements OVSDBInventoryListener {
     static final Logger logger = LoggerFactory.getLogger(SouthboundHandler.class);
-    private Thread eventThread;
+    //private Thread eventThread;
+    private ExecutorService eventHandler;
     private BlockingQueue<SouthboundEvent> events;
 
     void init() {
-        eventThread = new Thread(new EventHandler(), "SouthBound Event Thread");
+        eventHandler = Executors.newSingleThreadExecutor();
         this.events = new LinkedBlockingQueue<SouthboundEvent>();
     }
 
     void start() {
-        eventThread.start();
+        eventHandler.submit(new Runnable()  {
+            @Override
+            public void run() {
+                while (true) {
+                    SouthboundEvent ev;
+                    try {
+                        ev = events.take();
+                    } catch (InterruptedException e) {
+                        logger.info("The event handler thread was interrupted, shutting down", e);
+                        return;
+                    }
+                    switch (ev.getType()) {
+                    case NODE:
+                        try {
+                            processNodeUpdate(ev.getNode(), ev.getAction());
+                        } catch (Exception e) {
+                            logger.error("Exception caught in ProcessNodeUpdate for node " + ev.getNode(), e);
+                        }
+                        break;
+                    case ROW:
+                        try {
+                            processRowUpdate(ev.getNode(), ev.getTableName(), ev.getUuid(), ev.getRow(), ev.getAction());
+                        } catch (Exception e) {
+                            logger.error("Exception caught in ProcessRowUpdate for node " + ev.getNode(), e);
+                        }
+                        break;
+                    default:
+                        logger.warn("Unable to process action " + ev.getAction() + " for node " + ev.getNode());
+                    }
+                }
+            }
+        });
     }
 
     void stop() {
-        eventThread.interrupt();
+        eventHandler.shutdownNow();
     }
+
     @Override
     public void nodeAdded(Node node) {
         this.enqueueEvent(new SouthboundEvent(node, SouthboundEvent.Action.ADD));
@@ -67,33 +102,14 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
         }
 
     }
-    private class EventHandler implements Runnable {
-        @Override
-        public void run() {
-            while (true) {
-                try {
-                    SouthboundEvent ev = events.take();
-                    switch (ev.getType()) {
-                    case NODE:
-                        ProcessNodeUpdate(ev.getNode(), ev.getAction());
-                    case ROW:
-                        ProcessRowUpdate(ev.getNode(), ev.getTableName(), ev.getUuid(), ev.getRow(), ev.getAction());
-                        break;
-                    }
-                } catch (InterruptedException e) {
-                    logger.error("Thread was interrupted while taking an evet from the queue", e);
-                }
-            }
-        }
-    }
 
-    public void ProcessNodeUpdate(Node node, SouthboundEvent.Action action) {
+    public void processNodeUpdate(Node node, SouthboundEvent.Action action) {
         if (action == SouthboundEvent.Action.DELETE) return;
         logger.trace("Process Node added {}", node);
         InternalNetworkManager.getManager().prepareInternalNetwork(node);
     }
 
-    private void ProcessRowUpdate(Node node, String tableName, String uuid, Table<?> row,
+    private void processRowUpdate(Node node, String tableName, String uuid, Table<?> row,
                                   SouthboundEvent.Action action) {
         if (action == SouthboundEvent.Action.DELETE) return;
 

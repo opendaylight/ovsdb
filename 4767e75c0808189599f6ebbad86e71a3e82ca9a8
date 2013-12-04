@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_5c7b3df5",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1109,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-12-04T13:13:02Z",
+      "side": 1,
+      "message": "This is certainly a good check for the SSL table. But I would not encourage add such checks here. Especially because the ovsdb-server will fail if the user decides to program more than one SSL entry.\nEven when it comes to schema based handling, we can handle a few and let others handled by the server.\n\nThis way, we get the needed functionality of validation (done at the right place) and our code doesnt assume anything extra (than we should).",
+      "revId": "4767e75c0808189599f6ebbad86e71a3e82ca9a8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_3c7e49e5",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1130,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-12-04T13:13:02Z",
+      "side": 1,
+      "message": "The names of the local variables addSSLRequest and addOpen_vSwitchRequest seems switched and will cause confusion for code browsing.",
+      "revId": "4767e75c0808189599f6ebbad86e71a3e82ca9a8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_fc5e7175",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1169,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-12-04T13:13:02Z",
+      "side": 1,
+      "message": "Can u please move the parent_uuid null check to the top. This is too late to check for Null after the parent_uuid is already used. \nThis comment is applicable for all the methods. please take care of it.",
+      "revId": "4767e75c0808189599f6ebbad86e71a3e82ca9a8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_bc691927",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1211,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-12-04T13:13:02Z",
+      "side": 1,
+      "message": "I understand your intention of not updating the QoS table in this method. Especially when the isRoot is true for Queue, there is no referential integrity issue \u0026 hence this row can independently exist on its own (without an explicit reference from QoS parent table).\n\nBut, for the sake of consistency with other insertRow, it would be good to use the parent_uuid and update the same upon inserting the Queue table.",
+      "revId": "4767e75c0808189599f6ebbad86e71a3e82ca9a8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_9c7895f3",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1233,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-12-04T13:13:02Z",
+      "side": 1,
+      "message": "Same here. Lets not add this check here. Lets fails from the ovsdb-server,",
+      "revId": "4767e75c0808189599f6ebbad86e71a3e82ca9a8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_1c5ca57d",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1290,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-12-04T13:13:02Z",
+      "side": 1,
+      "message": "Same here.",
+      "revId": "4767e75c0808189599f6ebbad86e71a3e82ca9a8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_1cd385d7",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1548,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-12-04T13:13:02Z",
+      "side": 1,
+      "message": "Please remove user-ids from comments :)",
+      "revId": "4767e75c0808189599f6ebbad86e71a3e82ca9a8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_5cc9fd24",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1549,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-12-04T13:13:02Z",
+      "side": 1,
+      "message": "Again. I see a value in this. But would like to understand the behavior of deleting just the row in its table while leaving the parent table (such as QoS) left dangling ?",
+      "revId": "4767e75c0808189599f6ebbad86e71a3e82ca9a8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_fcd551b9",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1554,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-12-04T13:13:02Z",
+      "side": 1,
+      "message": "Same here.",
+      "revId": "4767e75c0808189599f6ebbad86e71a3e82ca9a8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_3ccc0935",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1556,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-12-04T13:13:02Z",
+      "side": 1,
+      "message": "Sam here.",
+      "revId": "4767e75c0808189599f6ebbad86e71a3e82ca9a8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_7ce16199",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1675,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-12-04T13:13:02Z",
+      "side": 1,
+      "message": "Please remove references to Bridge and port from the above comment. Applicable to other comments in this method as well.",
+      "revId": "4767e75c0808189599f6ebbad86e71a3e82ca9a8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

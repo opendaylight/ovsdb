@@ -40,6 +40,8 @@ import org.slf4j.LoggerFactory;
  */
 public class InternalNetworkManager {
     static final Logger logger = LoggerFactory.getLogger(InternalNetworkManager.class);
+    private static final int LLDP_PRIORITY = 1000;
+    private static final int NORMAL_PRIORITY = 500;
 
     private static InternalNetworkManager internalNetwork = new InternalNetworkManager();
     private InternalNetworkManager() {
@@ -226,7 +228,7 @@ public class InternalNetworkManager {
             FlowConfig flow = new FlowConfig();
             flow.setName("IntegrationBridgeNormal");
             flow.setNode(ofNode);
-            flow.setPriority("1");
+            flow.setPriority(NORMAL_PRIORITY+"");
             List<String> normalAction = new ArrayList<String>();
             normalAction.add(flowName);
             flow.setActions(normalAction);
@@ -264,7 +266,7 @@ public class InternalNetworkManager {
             FlowConfig allowLLDP = new FlowConfig();
             allowLLDP.setInstallInHw(true);
             allowLLDP.setName(flowName);
-            allowLLDP.setPriority("10");
+            allowLLDP.setPriority(LLDP_PRIORITY+"");
             allowLLDP.setNode(ofNode);
             allowLLDP.setEtherType("0x" + Integer.toHexString(EtherTypes.LLDP.intValue())
                     .toUpperCase());

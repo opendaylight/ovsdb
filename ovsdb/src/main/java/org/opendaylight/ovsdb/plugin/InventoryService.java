@@ -189,7 +189,7 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
                     if ((oldRow == null) && (inventoryListener != null)) {
                         inventoryListener.rowAdded(n, name.getName(), uuid, newRow);
                     } else if (inventoryListener != null) {
-                        inventoryListener.rowUpdated(n, name.getName(), uuid, newRow);
+                        inventoryListener.rowUpdated(n, name.getName(), uuid, oldRow, newRow);
                     }
                 } else if (oldRow != null) {
                     if (inventoryListener != null) {

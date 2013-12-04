@@ -50,8 +50,39 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
     }
 
     @Override
-    public void rowUpdated(Node node, String tableName, String uuid, Table<?> row) {
-        this.enqueueEvent(new SouthboundEvent(node, tableName, uuid, row, SouthboundEvent.Action.UPDATE));
+    public void rowUpdated(Node node, String tableName, String uuid, Table<?> oldRow, Table<?> newRow) {
+        if (this.isUpdateOfInterest(oldRow, newRow)) {
+            this.enqueueEvent(new SouthboundEvent(node, tableName, uuid, newRow, SouthboundEvent.Action.UPDATE));
+        }
+    }
+
+    /*
+     * Ignore unneccesary updates to be even considered for processing.
+     * (Especially stats update are fast and furious).
+     */
+
+    private boolean isUpdateOfInterest(Table<?> oldRow, Table<?> newRow) {
+        if (oldRow == null) return true;
+        if (newRow.getTableName().equals(Interface.NAME)) {
+            // We are NOT interested in Stats only updates
+            Interface oldIntf = (Interface)oldRow;
+            if (oldIntf.getName() == null && oldIntf.getExternal_ids() == null && oldIntf.getMac() == null &&
+                oldIntf.getOfport() == null && oldIntf.getOptions() == null && oldIntf.getOther_config() == null &&
+                oldIntf.getType() == null) {
+                logger.trace("IGNORING Interface Update : "+newRow.toString());
+                return false;
+            }
+        } else if (newRow.getTableName().equals(Port.NAME)) {
+            // We are NOT interested in Stats only updates
+            Port oldPort = (Port)oldRow;
+            if (oldPort.getName() == null && oldPort.getExternal_ids() == null && oldPort.getMac() == null &&
+                oldPort.getInterfaces() == null && oldPort.getTag() == null && oldPort.getTrunks() == null) {
+                logger.trace("IGNORING Port Update : "+newRow.toString());
+                return false;
+            }
+        }
+
+        return true;
     }
 
     @Override

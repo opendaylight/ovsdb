@@ -142,7 +142,7 @@ public class TenantNetworkManager {
             for (Table<?> row : ifTable.values()) {
                 Interface intf = (Interface)row;
                 Map<String, String> externalIds = intf.getExternal_ids();
-                if (externalIds != null) {
+                if (externalIds != null && externalIds.get(EXTERNAL_ID_INTERFACE_ID) != null) {
                     if (this.isInterfacePresentInTenantNetwork(externalIds.get(EXTERNAL_ID_INTERFACE_ID), networkId)) {
                         logger.debug("Tenant Network {} with Segmenation-id {} is present in Node {} / Interface {}",
                                       networkId, segmentationId, node, intf);

@@ -36,6 +36,9 @@ import org.slf4j.LoggerFactory;
 class OF10ProviderManager extends ProviderNetworkManager {
     private static final Logger logger = LoggerFactory.getLogger(OF10ProviderManager.class);
     Map<NodeVlan, FlowConfig> floodEntries = new HashMap<NodeVlan, FlowConfig>();
+    private static final int INGRESS_TUNNEL_FLOW_PRIORITY = 100;
+    private static final int EGRESS_TUNNEL_FLOW_PRIORITY = 100;
+    private static final int FLOOD_TUNNEL_FLOW_PRIORITY = 1;
 
     @Override
     public boolean hasPerTenantTunneling() {
@@ -95,7 +98,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
             FlowConfig flow = new FlowConfig();
             flow.setName(flowName);
             flow.setNode(ofNode);
-            flow.setPriority("100");
+            flow.setPriority(INGRESS_TUNNEL_FLOW_PRIORITY+"");
             flow.setIngressPort(tunnelOFPort+"");
             List<String> actions = new ArrayList<String>();
             actions.add(ActionType.SET_VLAN_ID+"="+internalVlan);
@@ -139,7 +142,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
             FlowConfig flow = new FlowConfig();
             flow.setName(flowName);
             flow.setNode(ofNode);
-            flow.setPriority("100");
+            flow.setPriority(EGRESS_TUNNEL_FLOW_PRIORITY+"");
             flow.setDstMac(attachedMac);
             flow.setIngressPort(patchPort+"");
             flow.setVlanId(internalVlan+"");
@@ -184,7 +187,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
                 flow = new FlowConfig();
                 flow.setName("TepFlood"+internalVlan);
                 flow.setNode(ofNode);
-                flow.setPriority("1");
+                flow.setPriority(FLOOD_TUNNEL_FLOW_PRIORITY+"");
                 flow.setIngressPort(patchPort+"");
                 flow.setVlanId(internalVlan+"");
                 List<String> actions = new ArrayList<String>();
@@ -252,7 +255,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
                     if (patchIntf.getName().equalsIgnoreCase(patchInt)) {
                         Set<BigInteger> of_ports = patchIntf.getOfport();
                         if (of_ports == null || of_ports.size() <= 0) {
-                            logger.error("Could NOT Identified Patch port {} -> OF ({}) on {}", patchInt, node);
+                            logger.error("Could NOT Identified Patch port {} on {}", patchInt, node);
                             continue;
                         }
                         patchOFPort = Long.valueOf(((BigInteger)of_ports.toArray()[0]).longValue()).intValue();

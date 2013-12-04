@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_216f42ff",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/SouthboundHandler.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-12-04T12:29:43Z",
+      "side": 1,
+      "message": "I had a defensive idea in mind when added the Exception to make sure we dont end up breaking out of the Handler completely for a silly null pointer somewhere inside the processing code.\n\nBut, such defensive programming is bad :) and we need to think of better alternative to get back to shape in such error conditions,",
+      "revId": "5f365314336ae5f29c81b7203f34cc877d9d7fdc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

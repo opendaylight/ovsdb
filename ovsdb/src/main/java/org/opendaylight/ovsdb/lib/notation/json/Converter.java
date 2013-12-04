@@ -1,15 +1,15 @@
 package org.opendaylight.ovsdb.lib.notation.json;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.util.StdConverter;
-
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.message.UpdateNotification;
 import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
 import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.util.StdConverter;
 
 public class Converter {
 
@@ -52,7 +52,7 @@ public class Converter {
                                 map.put(key, value);
                             }
                         }
-                        return map.isEmpty() ? null : map;
+                        return map;
                     } else if (node.size() == 0) {
                         return null;
                     }

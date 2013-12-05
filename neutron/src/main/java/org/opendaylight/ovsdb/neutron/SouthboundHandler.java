@@ -145,7 +145,7 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
         if (action == SouthboundEvent.Action.DELETE) return;
 
         if (Interface.NAME.getName().equalsIgnoreCase(tableName)) {
-            logger.debug("trace {} Added / Updated {} , {}, {}", tableName, node, uuid, row);
+            logger.debug("{} Added / Updated {} , {}, {}", tableName, node, uuid, row);
             Interface intf = (Interface)row;
             NeutronNetwork network = TenantNetworkManager.getManager().getTenantNetworkForInterface(intf);
             if (network != null) {
@@ -159,7 +159,7 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
                 this.createTunnels(node, uuid, intf);
             }
         } else if (Port.NAME.getName().equalsIgnoreCase(tableName)) {
-            logger.debug("trace {} Added / Updated {} , {}, {}", tableName, node, uuid, row);
+            logger.debug("{} Added / Updated {} , {}, {}", tableName, node, uuid, row);
             Port port = (Port)row;
             Set<UUID> interfaceUUIDs = port.getInterfaces();
             for (UUID intfUUID : interfaceUUIDs) {
@@ -175,7 +175,7 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
                 }
             }
         } else if (Open_vSwitch.NAME.getName().equalsIgnoreCase(tableName)) {
-            logger.debug("trace {} Added / Updated {} , {}, {}", tableName, node, uuid, row);
+            logger.debug("{} Added / Updated {} , {}, {}", tableName, node, uuid, row);
             AdminConfigManager.getManager().populateTunnelEndpoint(node);
             try {
                 Map<String, Table<?>> interfaces = this.ovsdbConfigService.getRows(node, Interface.NAME.getName());

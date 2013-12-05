@@ -1,7 +1,6 @@
 package org.opendaylight.ovsdb.neutron;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -66,7 +65,7 @@ public class InternalNetworkManager {
         return null;
     }
 
-    public boolean isInternalNetworkNeutronReady(Node node) throws Exception {
+    public boolean isInternalNetworkNeutronReady(Node node) {
         if (this.getInternalBridgeUUID(node, AdminConfigManager.getManager().getIntegrationBridgeName()) != null) {
             return true;
         } else {
@@ -74,7 +73,10 @@ public class InternalNetworkManager {
         }
     }
 
-    public boolean isInternalNetworkOverlayReady(Node node) throws Exception {
+    public boolean isInternalNetworkOverlayReady(Node node) {
+        if (!this.isInternalNetworkNeutronReady(node)) {
+            return false;
+        }
         if (this.getInternalBridgeUUID(node, AdminConfigManager.getManager().getTunnelBridgeName()) != null) {
             return true;
         } else {
@@ -82,61 +84,76 @@ public class InternalNetworkManager {
         }
     }
 
-    public Status createInternalNetworkForOverlay(Node node) throws Exception {
-        if (!isInternalNetworkNeutronReady(node)) {
-            logger.error("Integration Bridge is not available in Node {}", node);
-            return new Status(StatusCode.NOTACCEPTABLE, "Integration Bridge is not avaialble in Node " + node);
-        }
-        if (isInternalNetworkOverlayReady(node)) {
-            logger.error("Network Overlay Bridge is already present in Node {}", node);
-            return new Status(StatusCode.NOTACCEPTABLE, "Network Overlay Bridge is already present in Node " + node);
-        }
-
-        /*
-         * Lets create this :
-         *
-         * Bridge br-tun
-                Port patch-int
-                    Interface patch-int
-                        type: patch
-                        options: {peer=patch-tun}
-                Port br-tun
-                    Interface br-tun
-                        type: internal
-         */
-
-        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-        Bridge brTun = new Bridge();
-        brTun.setName(AdminConfigManager.getManager().getTunnelBridgeName());
-        // Create br-tun bridge
-        StatusWithUuid statusWithUuid = ovsdbTable.insertRow(node, Bridge.NAME.getName(), null, brTun);
-        if (!statusWithUuid.isSuccess()) return statusWithUuid;
-        String bridgeUUID = statusWithUuid.getUuid().toString();
-
-        // Set OF Controller
-        IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
-        connectionService.setOFController(node, bridgeUUID);
-
-        Port port = new Port();
-        port.setName(brTun.getName());
-        statusWithUuid = ovsdbTable.insertRow(node, Port.NAME.getName(), bridgeUUID, port);
-
+    /*
+     * Lets create these if not already present :
+     *
+       Bridge br-int
+            Port patch-tun
+                Interface patch-tun
+                    type: patch
+                    options: {peer=patch-int}
+            Port br-int
+                Interface br-int
+                    type: internal
+      Bridge br-tun
+            Port patch-int
+                Interface patch-int
+                    type: patch
+                    options: {peer=patch-tun}
+            Port br-tun
+                Interface br-tun
+                    type: internal
+     */
+    public void createInternalNetworkForOverlay(Node node) throws Exception {
+        String brTun = AdminConfigManager.getManager().getTunnelBridgeName();
+        String brInt = AdminConfigManager.getManager().getIntegrationBridgeName();
         String patchInt = AdminConfigManager.getManager().getPatchToIntegration();
         String patchTun = AdminConfigManager.getManager().getPatchToTunnel();
 
-        Status status = addPatchPort(node, bridgeUUID, patchInt, patchTun);
-        if (!status.isSuccess()) return status;
+        Status status = this.addInternalBridge(node, brInt, patchTun, patchInt);
+        if (!status.isSuccess()) logger.debug("Integration Bridge Creation Status : "+status.toString());
+        status = this.addInternalBridge(node, brTun, patchInt, patchTun);
+        if (!status.isSuccess()) logger.debug("Tunnel Bridge Creation Status : "+status.toString());
+    }
 
-        // Create the corresponding patch-tun port in br-int
-        Map<String, Table<?>> bridges = ovsdbTable.getRows(node, Bridge.NAME.getName());
-        for (String brIntUUID : bridges.keySet()) {
-            Bridge brInt = (Bridge) bridges.get(brIntUUID);
-            if (brInt.getName().equalsIgnoreCase(AdminConfigManager.getManager().getIntegrationBridgeName())) {
-                return addPatchPort(node, brIntUUID, patchTun, patchInt);
-            }
+    /*
+     * Lets create these if not already present :
+     *
+       Bridge br-int
+            Port br-int
+                Interface br-int
+                    type: internal
+     */
+    public void createInternalNetworkForNeutron(Node node) throws Exception {
+        String brInt = AdminConfigManager.getManager().getIntegrationBridgeName();
+
+        Status status = this.addInternalBridge(node, brInt, null, null);
+        if (!status.isSuccess()) logger.debug("Integration Bridge Creation Status : "+status.toString());
+    }
+
+    private Status addInternalBridge (Node node, String bridgeName, String localPathName, String remotePatchName) throws Exception {
+        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+
+        String bridgeUUID = this.getInternalBridgeUUID(node, bridgeName);
+        if (bridgeUUID == null) {
+            Bridge bridge = new Bridge();
+            bridge.setName(bridgeName);
+
+            StatusWithUuid statusWithUuid = ovsdbTable.insertRow(node, Bridge.NAME.getName(), null, bridge);
+            if (!statusWithUuid.isSuccess()) return statusWithUuid;
+            bridgeUUID = statusWithUuid.getUuid().toString();
+            Port port = new Port();
+            port.setName(bridgeName);
+            ovsdbTable.insertRow(node, Port.NAME.getName(), bridgeUUID, port);
         }
 
-        return status;
+        IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+        connectionService.setOFController(node, bridgeUUID);
+
+        if (localPathName != null && remotePatchName != null) {
+            return addPatchPort(node, bridgeUUID, localPathName, remotePatchName);
+        }
+        return new Status(StatusCode.SUCCESS);
     }
 
     private Status addPatchPort (Node node, String bridgeUUID, String portName, String patchName) throws Exception {
@@ -144,7 +161,7 @@ public class InternalNetworkManager {
 
         Port patchPort = new Port();
         patchPort.setName(portName);
-        // Create patch-int port and interface
+        // Create patch port and interface
         StatusWithUuid statusWithUuid = ovsdbTable.insertRow(node, Port.NAME.getName(), bridgeUUID, patchPort);
         if (!statusWithUuid.isSuccess()) return statusWithUuid;
 
@@ -183,18 +200,13 @@ public class InternalNetworkManager {
                 network.getProviderNetworkType().equalsIgnoreCase("vlan")) {
 
             try {
-                if (!this.isInternalNetworkOverlayReady(node)) {
-                    this.createInternalNetworkForOverlay(node);
-                }
+                this.createInternalNetworkForOverlay(node);
             } catch (Exception e) {
                 logger.error("Failed to create internal network for overlay on node " + node, e);
             }
         } else {
             try {
-                if (!this.isInternalNetworkNeutronReady(node)) {
-                    // TODO : FILL IN
-                    // this.createInternalNetworkForNeutron(node);
-                }
+                this.createInternalNetworkForNeutron(node);
             } catch (Exception e) {
                 logger.error("Failed to create internal network for overlay on node " + node, e);
             }
@@ -292,9 +304,5 @@ public class InternalNetworkManager {
         for (NeutronNetwork network : networks) {
             prepareInternalNetwork(network, node);
         }
-    }
-
-    public static List safe( List other ) {
-        return other == null ? Collections.EMPTY_LIST : other;
     }
 }

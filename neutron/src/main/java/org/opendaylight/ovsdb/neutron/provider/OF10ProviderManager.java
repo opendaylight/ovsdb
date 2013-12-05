@@ -52,13 +52,8 @@ class OF10ProviderManager extends ProviderNetworkManager {
             return new Status(StatusCode.NOTFOUND, "Tunnel Endpoint not configured for "+ node);
         }
 
-        try {
-            if (!InternalNetworkManager.getManager().isInternalNetworkOverlayReady(node)) {
-                logger.error(node+" is not Overlay ready");
-                return new Status(StatusCode.NOTACCEPTABLE, node+" is not Overlay ready");
-            }
-        } catch (Exception e) {
-            logger.error(node+" is not Overlay ready due to exception", e);
+        if (!InternalNetworkManager.getManager().isInternalNetworkOverlayReady(node)) {
+            logger.error(node+" is not Overlay ready");
             return new Status(StatusCode.NOTACCEPTABLE, node+" is not Overlay ready");
         }
 

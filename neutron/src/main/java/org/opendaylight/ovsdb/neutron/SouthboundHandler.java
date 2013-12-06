@@ -148,7 +148,7 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
             logger.debug("{} Added / Updated {} , {}, {}", tableName, node, uuid, row);
             Interface intf = (Interface)row;
             NeutronNetwork network = TenantNetworkManager.getManager().getTenantNetworkForInterface(intf);
-            if (network != null) {
+            if (network != null && !network.getRouterExternal()) {
                 int vlan = TenantNetworkManager.getManager().networkCreated(network.getID());
                 logger.trace("Neutron Network {} Created with Internal Vlan : {}", network.toString(), vlan);
 
@@ -167,7 +167,7 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
                 try {
                     Interface intf = (Interface)this.ovsdbConfigService.getRow(node, Interface.NAME.getName(), intfUUID.toString());
                     NeutronNetwork network = TenantNetworkManager.getManager().getTenantNetworkForInterface(intf);
-                    if (network != null) {
+                    if (network != null && !network.getRouterExternal()) {
                         TenantNetworkManager.getManager().programTenantNetworkInternalVlan(node, uuid, network);
                     }
                 } catch (Exception e) {

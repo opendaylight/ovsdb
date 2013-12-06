@@ -14,7 +14,7 @@ public class Qos extends Table<Qos> {
     public static final Name<Qos> NAME = new Name<Qos>("QoS") {};
 
     private OvsDBMap<Integer, UUID> queues;
-    private Integer type;
+    private String type;
     private OvsDBMap<String, String> other_config;
     private OvsDBMap<String, String> external_ids;
 
@@ -29,11 +29,11 @@ public class Qos extends Table<Qos> {
         this.queues = queues;
     }
 
-    public Integer getType() {
+    public String getType() {
         return type;
     }
 
-    public void setType(Integer type) {
+    public void setType(String type) {
         this.type = type;
     }
 

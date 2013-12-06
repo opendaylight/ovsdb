@@ -22,6 +22,7 @@ import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.lib.database.OVSInstance;
 import org.opendaylight.ovsdb.lib.database.OvsdbType;
 import org.opendaylight.ovsdb.lib.message.TransactBuilder;
+import org.opendaylight.ovsdb.lib.message.operations.DeleteOperation;
 import org.opendaylight.ovsdb.lib.message.operations.InsertOperation;
 import org.opendaylight.ovsdb.lib.message.operations.MutateOperation;
 import org.opendaylight.ovsdb.lib.message.operations.Operation;
@@ -685,8 +686,8 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         if (row.getTableName().getName().equalsIgnoreCase("Bridge")) {
             statusWithUUID = insertBridgeRow(node, parent_uuid, (Bridge)row);
         }
-        else if (row.getTableName().getName().equalsIgnoreCase("Capbility")) {
-            statusWithUUID = insertCapabilityRow(node, parent_uuid, (Capability)row);
+        else if (row.getTableName().getName().equalsIgnoreCase("Capability")) {
+            return new StatusWithUuid(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
         }
         else if (row.getTableName().getName().equalsIgnoreCase("Controller")) {
             statusWithUUID = insertControllerRow(node, parent_uuid, (Controller)row);
@@ -789,7 +790,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             return deleteBridgeRow(node, uuid);
         }
         else if (tableName.equalsIgnoreCase("Capbility")) {
-            return deleteCapabilityRow(node, uuid);
+            return new Status(StatusCode.NOTIMPLEMENTED, "Delete operation for this Table is not implemented yet.");
         }
         else if (tableName.equalsIgnoreCase("Controller")) {
             return deleteControllerRow(node, uuid);
@@ -902,8 +903,8 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
 
             String ovsTableUUID = open_VSwitch_uuid;
             if (ovsTableUUID == null) ovsTableUUID = (String) ovsTable.keySet().toArray()[0];
-            UUID bridgeUuidPair = new UUID(newBridge);
-            Mutation bm = new Mutation("bridges", Mutator.INSERT, bridgeUuidPair);
+            UUID bridgeUuid = new UUID(newBridge);
+            Mutation bm = new Mutation("bridges", Mutator.INSERT, bridgeUuid);
             List<Mutation> mutations = new ArrayList<Mutation>();
             mutations.add(bm);
 
@@ -954,7 +955,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             Operation addBrMutRequest = new MutateOperation(Bridge.NAME.getName(), where, mutations);
 
             // Default OVS schema is to have 1 or more interface part of Bridge. Hence it is mandatory to
-            // Insert an Interface in a Port add case :-(.
+            // Insert an Interface in a Port add case
 
             String newInterface = "new_interface";
             Interface interfaceRow = new Interface();
@@ -1092,23 +1093,232 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     }
 
     private StatusWithUuid insertSSLRow(Node node, String parent_uuid, SSL row) {
-        return new StatusWithUuid(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+        String insertErrorMsg = "SSL";
+        String rowName=row.NAME.getName();
+
+        try{
+            Map<String, Table<?>> ovsTable = inventoryServiceInternal.getTableCache(node, Open_vSwitch.NAME.getName());
+
+            if (ovsTable == null) {
+                return new StatusWithUuid(StatusCode.NOTFOUND, "There are no Open_vSwitch instance in the Open_vSwitch table");
+            }
+
+            String newSSL = "new_SSL";
+
+            Operation addOpen_vSwitchRequest = null;
+
+            String ovsTableUUID = parent_uuid;
+            if (ovsTableUUID == null) ovsTableUUID = (String) ovsTable.keySet().toArray()[0];
+            UUID sslUuid = new UUID(newSSL);
+            Mutation sslMutation = new Mutation("ssl", Mutator.INSERT, sslUuid);
+            List<Mutation> mutations = new ArrayList<Mutation>();
+            mutations.add(sslMutation);
+
+            UUID uuid = new UUID(ovsTableUUID);
+            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
+            List<Condition> where = new ArrayList<Condition>();
+            where.add(condition);
+            addOpen_vSwitchRequest = new MutateOperation(Open_vSwitch.NAME.getName(), where, mutations);
+
+            InsertOperation addSSLRequest = new InsertOperation(SSL.NAME.getName(), newSSL, row);
+
+            TransactBuilder transaction = new TransactBuilder();
+            transaction.addOperations(new ArrayList<Operation>(
+                                      Arrays.asList(addSSLRequest,
+                                                    addOpen_vSwitchRequest)));
+
+            int sslInsertIndex = transaction.getRequests().indexOf(addSSLRequest);
+
+            return _insertTableRow(node,transaction,sslInsertIndex,insertErrorMsg,rowName);
+
+        } catch(Exception e){
+            logger.error("Error in insertSSLRow(): ",e);
+        }
+        return new StatusWithUuid(StatusCode.INTERNALERROR);
     }
 
     private StatusWithUuid insertSflowRow(Node node, String parent_uuid, SFlow row) {
-        return new StatusWithUuid(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+
+        String insertErrorMsg = "sFlow";
+        String rowName=row.NAME.getName();
+
+        try{
+            Map<String, Table<?>> brTable = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
+            if (brTable == null ||  brTable.get(parent_uuid) == null) {
+                return new StatusWithUuid(StatusCode.NOTFOUND, "Bridge with UUID "+parent_uuid+" Not found");
+            }
+
+            if (parent_uuid == null) {
+                return new StatusWithUuid(StatusCode.BADREQUEST, "Require parent Bridge UUID.");
+            }
+
+            UUID uuid = new UUID(parent_uuid);
+
+            String newSflow = "new_sflow";
+
+            Operation addBridgeRequest = null;
+
+            UUID sflowUuid = new UUID(newSflow);
+            Mutation sflowMutation = new Mutation("sflow", Mutator.INSERT, sflowUuid);
+            List<Mutation> mutations = new ArrayList<Mutation>();
+            mutations.add(sflowMutation);
+
+            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
+            List<Condition> where = new ArrayList<Condition>();
+            where.add(condition);
+            addBridgeRequest = new MutateOperation(Bridge.NAME.getName(), where, mutations);
+
+            InsertOperation addSflowRequest = new InsertOperation(SFlow.NAME.getName(), newSflow, row);
+
+            TransactBuilder transaction = new TransactBuilder();
+            transaction.addOperations(new ArrayList<Operation>(
+                                      Arrays.asList(addSflowRequest,
+                                                    addBridgeRequest)));
+
+            int sflowInsertIndex = transaction.getRequests().indexOf(addSflowRequest);
+
+
+            return _insertTableRow(node,transaction,sflowInsertIndex,insertErrorMsg,rowName);
+
+        } catch (Exception e) {
+            logger.error("Error in insertInterfaceRow(): ",e);
+        }
+        return new StatusWithUuid(StatusCode.INTERNALERROR);
     }
 
     private StatusWithUuid insertQueueRow(Node node, String parent_uuid, Queue row) {
-        return new StatusWithUuid(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
-    }
+        String insertErrorMsg = "Queue";
+        String rowName=row.NAME.getName();
+
+        try{
+            Map<String, Table<?>> qosTable = inventoryServiceInternal.getTableCache(node, Qos.NAME.getName());
+            if (qosTable == null ||  qosTable.get(parent_uuid) == null) {
+                return new StatusWithUuid(StatusCode.NOTFOUND, "QoS with UUID "+parent_uuid+" Not found");
+            }
+
+            if (parent_uuid == null) {
+                return new StatusWithUuid(StatusCode.BADREQUEST, "Require parent QoS UUID.");
+            }
+
+            // NOTE: Queue Table is "isroot" meaning it can have a hanging reference. This is different from
+            // standing insertRow due to the parent column type being a map, where one of the items may not be known
+            // at time of insert. Therefore this is a simple insert, rather than mutate/insert.
+            String newQueue = "new_queue";
+            InsertOperation addQueueRequest = new InsertOperation(Queue.NAME.getName(), newQueue, row);
+
+            TransactBuilder transaction = new TransactBuilder();
+            transaction.addOperations(new ArrayList<Operation>(Arrays.asList(addQueueRequest)));
+
+            int queueInsertIndex = transaction.getRequests().indexOf(addQueueRequest);
+
+            return _insertTableRow(node,transaction,queueInsertIndex,insertErrorMsg,rowName);
+
+        } catch (Exception e) {
+            logger.error("Error in insertQueueRow(): ",e);
+        }
+        return new StatusWithUuid(StatusCode.INTERNALERROR);    }
 
     private StatusWithUuid insertQosRow(Node node, String parent_uuid, Qos row) {
-        return new StatusWithUuid(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+        String insertErrorMsg = "Qos";
+        String rowName=row.NAME.getName();
+
+        try{
+
+            String newQos = "new_qos";
+
+            // QoS Table "isroot" meaning it can have hanging references. If parent_uuid is not supplied in API call this becomes a simple
+            // insert operation, rather than the typical mutate/insert parent/child insert.
+            if (parent_uuid != null) {
+                // Port (parent) table check for UUID existance.
+                Map<String, Table<?>> portTable = inventoryServiceInternal.getTableCache(node, Port.NAME.getName());
+                if (portTable == null ||  portTable.get(parent_uuid) == null) {
+                    return new StatusWithUuid(StatusCode.NOTFOUND, "Port with UUID "+parent_uuid+" Not found");
+                }
+
+                UUID qosUuid = new UUID(newQos);
+                Mutation qosMutation = new Mutation("qos", Mutator.INSERT, qosUuid);
+                List<Mutation> mutations = new ArrayList<Mutation>();
+                mutations.add(qosMutation);
+
+                Operation addPortRequest = null;
+                UUID uuid = new UUID(parent_uuid);
+                Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
+                List<Condition> where = new ArrayList<Condition>();
+                where.add(condition);
+                addPortRequest = new MutateOperation(Port.NAME.getName(), where, mutations);
+
+                InsertOperation addQosRequest = new InsertOperation(Qos.NAME.getName(), newQos, row);
+
+                TransactBuilder transaction = new TransactBuilder();
+                transaction.addOperations(new ArrayList<Operation>(Arrays.asList(addQosRequest,addPortRequest)));
+
+                int qosInsertIndex = transaction.getRequests().indexOf(addQosRequest);
+
+                return _insertTableRow(node,transaction,qosInsertIndex,insertErrorMsg,rowName);
+
+            } else {
+                InsertOperation addQosRequest = new InsertOperation(Qos.NAME.getName(), newQos, row);
+
+                TransactBuilder transaction = new TransactBuilder();
+                transaction.addOperations(new ArrayList<Operation>(Arrays.asList(addQosRequest)));
+
+                int qosInsertIndex = transaction.getRequests().indexOf(addQosRequest);
+
+                return _insertTableRow(node,transaction,qosInsertIndex,insertErrorMsg,rowName);
+            }
+
+        } catch (Exception e) {
+            logger.error("Error in insertQosRow(): ",e);
+        }
+        return new StatusWithUuid(StatusCode.INTERNALERROR);
     }
 
+
     private StatusWithUuid insertNetFlowRow(Node node, String parent_uuid, NetFlow row) {
-        return new StatusWithUuid(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+        String insertErrorMsg = "netFlow";
+        String rowName=row.NAME.getName();
+
+        try{
+            Map<String, Table<?>> brTable = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
+            if (brTable == null ||  brTable.get(parent_uuid) == null) {
+                return new StatusWithUuid(StatusCode.NOTFOUND, "Bridge with UUID "+parent_uuid+" Not found");
+            }
+
+            if (parent_uuid == null) {
+                return new StatusWithUuid(StatusCode.BADREQUEST, "Require parent Bridge UUID.");
+            }
+
+            UUID uuid = new UUID(parent_uuid);
+            String newNetflow = "new_netflow";
+
+            Operation addBridgeRequest = null;
+
+            UUID netFlowUuid = new UUID(newNetflow);
+            Mutation netFlowMutation = new Mutation("netflow", Mutator.INSERT, netFlowUuid);
+            List<Mutation> mutations = new ArrayList<Mutation>();
+            mutations.add(netFlowMutation);
+
+            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
+            List<Condition> where = new ArrayList<Condition>();
+            where.add(condition);
+            addBridgeRequest = new MutateOperation(Bridge.NAME.getName(), where, mutations);
+
+            InsertOperation addNetflowRequest = new InsertOperation(NetFlow.NAME.getName(), newNetflow, row);
+
+            TransactBuilder transaction = new TransactBuilder();
+            transaction.addOperations(new ArrayList<Operation>(
+                                      Arrays.asList(addNetflowRequest,
+                                                    addBridgeRequest)));
+
+            int netflowInsertIndex = transaction.getRequests().indexOf(addNetflowRequest);
+
+
+            return _insertTableRow(node,transaction,netflowInsertIndex,insertErrorMsg,rowName);
+
+        } catch (Exception e) {
+            logger.error("Error in insertNetFlowRow(): ",e);
+        }
+        return new StatusWithUuid(StatusCode.INTERNALERROR);
     }
 
     private StatusWithUuid insertMirrorRow(Node node, String parent_uuid, Mirror row) {
@@ -1116,11 +1326,48 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     }
 
     private StatusWithUuid insertManagerRow(Node node, String parent_uuid, Manager row) {
-        return new StatusWithUuid(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
-    }
+        String insertErrorMsg = "manager";
+        String rowName=row.NAME.getName();
 
-    private StatusWithUuid insertCapabilityRow(Node node, String parent_uuid, Capability row) {
-        return new StatusWithUuid(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+        try{
+            Map<String, Table<?>> ovsTable = inventoryServiceInternal.getTableCache(node, Open_vSwitch.NAME.getName());
+
+            if (ovsTable == null) {
+                return new StatusWithUuid(StatusCode.NOTFOUND, "There are no Open_vSwitch instance in the Open_vSwitch table");
+            }
+
+            String newManager = "new_manager";
+
+            Operation addSwitchRequest = null;
+
+            String ovsTableUUID = parent_uuid;
+            if (ovsTableUUID == null) ovsTableUUID = (String) ovsTable.keySet().toArray()[0];
+            UUID managerUuid = new UUID(newManager);
+            Mutation managerMutation = new Mutation("manager_options", Mutator.INSERT, managerUuid);
+            List<Mutation> mutations = new ArrayList<Mutation>();
+            mutations.add(managerMutation);
+
+            UUID uuid = new UUID(ovsTableUUID);
+            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
+            List<Condition> where = new ArrayList<Condition>();
+            where.add(condition);
+            addSwitchRequest = new MutateOperation(Open_vSwitch.NAME.getName(), where, mutations);
+
+            InsertOperation addManagerRequest = new InsertOperation(Manager.NAME.getName(), newManager, row);
+
+            TransactBuilder transaction = new TransactBuilder();
+            transaction.addOperations(new ArrayList<Operation>(
+                                      Arrays.asList(addSwitchRequest,
+                                                    addManagerRequest)));
+
+            int managerInsertIndex = transaction.getRequests().indexOf(addManagerRequest);
+
+            return _insertTableRow(node,transaction,managerInsertIndex,insertErrorMsg,rowName);
+
+        } catch(Exception e){
+            logger.error("Error in insertManagerRow(): ",e);
+        }
+        return new StatusWithUuid(StatusCode.INTERNALERROR);
     }
 
     private StatusWithUuid _insertTableRow(Node node, TransactBuilder transaction, Integer insertIndex, String insertErrorMsg,String rowName){
@@ -1203,15 +1450,6 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             return new Status(StatusCode.NOTFOUND, "");
         }
 
-        // Need to check if this is the last interface for that port. Cannot delete last interface.
-        UUID compareUuid = new UUID(uuid);
-        for (int i=0 ; i < portTable.values().size(); i++){
-            Port port = (Port)portTable.values().toArray()[i];
-            if ((port.getInterfaces().size() == 1) && (port.getInterfaces().contains(compareUuid))){
-                return new Status(StatusCode.BADREQUEST, "Cannot delete last interface from port");
-            }
-        }
-
         // Since the above past, it's safe to use the generic _deleteTableRow method
         // Set up variables for generic _deleteTableRow()
         String parentTableName=Port.NAME.getName();
@@ -1235,23 +1473,47 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     }
 
     private Status deleteSSLRow(Node node, String uuid) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");
+        // Set up variables for generic _deleteTableRow()
+        String parentTableName=Open_vSwitch.NAME.getName();
+        String childTableName=SSL.NAME.getName();
+        String parentColumn = "ssl";
+
+        return _deleteTableRow(node,uuid,parentTableName,childTableName,parentColumn);
     }
 
     private Status deleteSflowRow(Node node, String uuid) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");
+        // Set up variables for generic _deleteTableRow()
+        String parentTableName=Bridge.NAME.getName();
+        String childTableName=SFlow.NAME.getName();
+        String parentColumn = "sflow";
+
+        return _deleteTableRow(node,uuid,parentTableName,childTableName,parentColumn);
     }
 
     private Status deleteQueueRow(Node node, String uuid) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");
+        // Set up variables for _deleteRootTableRow()
+        // This doesn't do a mutate on parent, but simply deletes row
+        String childTableName=Queue.NAME.getName();
+
+        return _deleteRootTableRow(node,uuid,childTableName);
     }
 
     private Status deleteQosRow(Node node, String uuid) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");
+        // Set up variables for generic _deleteTableRow()
+        String parentTableName=Port.NAME.getName();
+        String childTableName=Qos.NAME.getName();
+        String parentColumn = "qos";
+
+        return _deleteTableRow(node,uuid,parentTableName,childTableName,parentColumn);
     }
 
     private Status deleteNetFlowRow(Node node, String uuid) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");
+        // Set up variables for generic _deleteTableRow()
+        String parentTableName=Bridge.NAME.getName();
+        String childTableName=NetFlow.NAME.getName();
+        String parentColumn = "netflow";
+
+        return _deleteTableRow(node,uuid,parentTableName,childTableName,parentColumn);
     }
 
     private Status deleteMirrorRow(Node node, String uuid) {
@@ -1259,12 +1521,14 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     }
 
     private Status deleteManagerRow(Node node, String uuid) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");
+        // Set up variables for generic _deleteTableRow()
+        String parentTableName=Open_vSwitch.NAME.getName();
+        String childTableName=Manager.NAME.getName();
+        String parentColumn = "manager_options";
+
+        return _deleteTableRow(node,uuid,parentTableName,childTableName,parentColumn);
     }
 
-    private Status deleteCapabilityRow(Node node, String uuid) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");
-    }
     private Status _deleteTableRow(Node node,String uuid,String parentTableName, String childTableName, String parentColumn) {
         try {
             // Check there is a connectionService
@@ -1279,7 +1543,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                 return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
             }
 
-            // Ports have a 0:n relationship with Bridges, so need to MUTATE BRIDGE row and DELETE PORT row
+            // Remove from Parent and Child
             Map<String, Table<?>> parentTable = inventoryServiceInternal.getTableCache(node, parentTableName);
             Map<String, Table<?>> childTable = inventoryServiceInternal.getTableCache(node, childTableName);
 
@@ -1291,7 +1555,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             // Initialise the actual request var
             Operation delRequest = null;
 
-            // Prepare the mutator to remove the port UUID from the "ports" list in the BRIDGE TABLE
+            // Prepare the mutator to remove the child UUID from the parentColumn list in the parent TABLE
             UUID rowUuid = new UUID(uuid);
             Mutation mutator = new Mutation(parentColumn, Mutator.DELETE, rowUuid);
             List<Mutation> mutations = new ArrayList<Mutation>();
@@ -1332,6 +1596,70 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             return status;
         } catch (Exception e) {
             logger.error("Error in _deleteTableRow",e);
+        }
+        return new Status(StatusCode.INTERNALERROR);
+    }
+
+    private Status _deleteRootTableRow(Node node,String uuid,String TableName) {
+        try {
+            // Check there is a connectionService
+            if (connectionService == null) {
+                logger.error("Couldn't refer to the ConnectionService");
+                return new Status(StatusCode.NOSERVICE);
+            }
+
+            // Establish the connection
+            Connection connection = this.getConnection(node);
+            if (connection == null) {
+                return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
+            }
+
+            Map<String, Table<?>> table = inventoryServiceInternal.getTableCache(node, TableName);
+
+            // Check that the UUID exists
+            if (table == null || table.get(uuid) == null) {
+                return new Status(StatusCode.NOTFOUND, "");
+            }
+
+            // Initialise the actual request var
+            Operation delRequest = null;
+
+            UUID rowUuid = new UUID(uuid);
+
+            Status status = new Status(StatusCode.SUCCESS);
+
+            Condition condition = new Condition("_uuid", Function.EQUALS, rowUuid);
+            List<Condition> where = new ArrayList<Condition>();
+            where.add(condition);
+            delRequest = new DeleteOperation(TableName, where);
+
+            TransactBuilder transaction = new TransactBuilder();
+            transaction.addOperations(new ArrayList<Operation>(Arrays.asList(delRequest)));
+
+            // This executes the transaction.
+            ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
+
+            // Pull the responses
+            List<OperationResult> tr = transResponse.get();
+            List<Operation> requests = transaction.getRequests();
+
+            for (int i = 0; i < tr.size(); i++) {
+                if (i < requests.size()) requests.get(i).setResult(tr.get(i));
+                if (tr.get(i) != null && tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
+                    OperationResult result = tr.get(i);
+                    status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+                }
+            }
+
+            if (tr.size() > requests.size()) {
+                OperationResult result = tr.get(tr.size() - 1);
+                logger.error("Error deleting: {}\n Error : {}\n Details : {}",
+                        uuid, result.getError(), result.getDetails());
+                status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+            }
+            return status;
+        } catch (Exception e) {
+            logger.error("Error in _deleteRootTableRow",e);
         }
         return new Status(StatusCode.INTERNALERROR);
     }

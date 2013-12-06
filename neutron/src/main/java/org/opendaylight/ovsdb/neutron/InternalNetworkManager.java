@@ -7,8 +7,6 @@ import java.util.Set;
 
 import org.opendaylight.controller.forwardingrulesmanager.FlowConfig;
 import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManager;
-import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
-import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.EtherTypes;
@@ -40,7 +38,7 @@ import org.slf4j.LoggerFactory;
 public class InternalNetworkManager {
     static final Logger logger = LoggerFactory.getLogger(InternalNetworkManager.class);
     private static final int LLDP_PRIORITY = 1000;
-    private static final int NORMAL_PRIORITY = 500;
+    private static final int NORMAL_PRIORITY = 0;
 
     private static InternalNetworkManager internalNetwork = new InternalNetworkManager();
     private InternalNetworkManager() {
@@ -193,30 +191,6 @@ public class InternalNetworkManager {
         return ovsdbTable.updateRow(node, Interface.NAME.getName(), patchPortUUID, interfaceUUID, tunInterface);
     }
 
-    private void prepareInternalNetwork (NeutronNetwork network, Node node) {
-        // vlan, vxlan, and gre
-        if (network.getProviderNetworkType().equalsIgnoreCase("gre") ||
-                network.getProviderNetworkType().equalsIgnoreCase("vxlan") ||
-                network.getProviderNetworkType().equalsIgnoreCase("vlan")) {
-
-            try {
-                this.createInternalNetworkForOverlay(node);
-            } catch (Exception e) {
-                logger.error("Failed to create internal network for overlay on node " + node, e);
-            }
-        } else {
-            try {
-                this.createInternalNetworkForNeutron(node);
-            } catch (Exception e) {
-                logger.error("Failed to create internal network for overlay on node " + node, e);
-            }
-        }
-
-        this.initializeOFNormalFlowRules(node, AdminConfigManager.getManager().getIntegrationBridgeName());
-        this.initializeLLDPFlowRules(node, AdminConfigManager.getManager().getTunnelBridgeName());
-        this.initializeLLDPFlowRules(node, AdminConfigManager.getManager().getIntegrationBridgeName());
-    }
-
     private void initializeOFNormalFlowRules(Node node, String bridgeName) {
         String brIntId = this.getInternalBridgeUUID(node, bridgeName);
         if (brIntId == null) {
@@ -233,19 +207,22 @@ public class InternalNetworkManager {
             IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper.getInstance(
                     IForwardingRulesManager.class, "default", this);
             String flowName = ActionType.HW_PATH.toString();
-            if (frm.getStaticFlow(flowName, ofNode) != null) {
-                logger.debug("Static Flow {} already programmed in the node {}", flowName, ofNode);
-                return;
-            }
             FlowConfig flow = new FlowConfig();
-            flow.setName("IntegrationBridgeNormal");
+            flow.setName("NORMAL");
             flow.setNode(ofNode);
             flow.setPriority(NORMAL_PRIORITY+"");
+            flow.setInstallInHw(true);
             List<String> normalAction = new ArrayList<String>();
             normalAction.add(flowName);
             flow.setActions(normalAction);
-            Status status = frm.addStaticFlow(flow);
-            logger.debug("Flow Programming Status {} for Flow {} on {} / {}", status, flow, ofNode, node);
+            Status status = null;
+            if (frm.getStaticFlow(flowName, ofNode) == null) {
+                status = frm.addStaticFlow(flow);
+                logger.debug("Flow Programming Add Status {} for Flow {} on {} / {}", status, flow, ofNode, node);
+            } else {
+                status = frm.modifyStaticFlow(flow);
+                logger.debug("Flow Programming Modify Status {} for Flow {} on {} / {}", status, flow, ofNode, node);
+            }
         } catch (Exception e) {
             logger.error("Failed to initialize Flow Rules for {}", node, e);
         }
@@ -267,11 +244,6 @@ public class InternalNetworkManager {
             IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper.getInstance(
                     IForwardingRulesManager.class, "default", this);
             String flowName = "PuntLLDP";
-            if (frm.getStaticFlow(flowName, ofNode) != null) {
-                logger.debug("Static Flow {} already programmed in the node {}", flowName, ofNode);
-                return;
-            }
-
             List<String> puntAction = new ArrayList<String>();
             puntAction.add(ActionType.CONTROLLER.toString());
 
@@ -280,29 +252,34 @@ public class InternalNetworkManager {
             allowLLDP.setName(flowName);
             allowLLDP.setPriority(LLDP_PRIORITY+"");
             allowLLDP.setNode(ofNode);
+            allowLLDP.setInstallInHw(true);
             allowLLDP.setEtherType("0x" + Integer.toHexString(EtherTypes.LLDP.intValue())
                     .toUpperCase());
             allowLLDP.setActions(puntAction);
-            Status status = frm.addStaticFlow(allowLLDP);
-            logger.debug("Flow Programming Status {} for Flow {} on {} / {}", status, allowLLDP, ofNode, node);
+            Status status = null;
+            if (frm.getStaticFlow(flowName, ofNode) == null) {
+                status = frm.addStaticFlow(allowLLDP);
+                logger.debug("LLDP Flow Add Status {} for Flow {} on {} / {}", status, allowLLDP, ofNode, node);
+            } else {
+                status = frm.modifyStaticFlow(allowLLDP);
+                logger.debug("LLDP Flow Modify Status {} for Flow {} on {} / {}", status, allowLLDP, ofNode, node);
+            }
         } catch (Exception e) {
             logger.error("Failed to initialize Flow Rules for {}", node, e);
         }
     }
 
-    public void prepareInternalNetwork(NeutronNetwork network) {
-        IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
-        List<Node> nodes = connectionService.getNodes();
-        for (Node node : nodes) {
-            prepareInternalNetwork(network, node);
-        }
-    }
-
     public void prepareInternalNetwork(Node node) {
-        INeutronNetworkCRUD neutronNetworkService = (INeutronNetworkCRUD)ServiceHelper.getGlobalInstance(INeutronNetworkCRUD.class, this);
-        List <NeutronNetwork> networks = neutronNetworkService.getAllNetworks();
-        for (NeutronNetwork network : networks) {
-            prepareInternalNetwork(network, node);
+        try {
+            this.createInternalNetworkForOverlay(node);
+        } catch (Exception e) {
+            logger.error("Error creating internal network "+node.toString(), e);
         }
+        //Install NORMAL flows on all the bridges to make sure that we dont end up punting traffic to the OF Controller
+        this.initializeOFNormalFlowRules(node, AdminConfigManager.getManager().getIntegrationBridgeName());
+        this.initializeOFNormalFlowRules(node, AdminConfigManager.getManager().getExternalBridgeName());
+        this.initializeOFNormalFlowRules(node, AdminConfigManager.getManager().getTunnelBridgeName());
+        this.initializeLLDPFlowRules(node, AdminConfigManager.getManager().getTunnelBridgeName());
+        this.initializeLLDPFlowRules(node, AdminConfigManager.getManager().getIntegrationBridgeName());
     }
 }

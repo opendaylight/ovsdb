@@ -1,0 +1,69 @@
+
+## RENAME THIS FILE TO local.conf BEFORE USING IT IN THE CONTROLLER NODE##
+
+[[local|localrc]]
+LOGFILE=stack.sh.log
+SCREEN_LOGDIR=/opt/stack/data/log
+LOG_COLOR=False
+#OFFLINE=True
+RECLONE=yes
+ 
+disable_service rabbit
+enable_service qpid
+ 
+enable_service n-cond
+disable_service n-net
+enable_service q-svc
+enable_service q-agt
+enable_service q-dhcp
+enable_service q-l3
+enable_service q-meta
+enable_service quantum
+ 
+# ODL WITH ML2
+# #enable_service odl
+Q_PLUGIN=ml2
+Q_ML2_TENANT_NETWORK_TYPE=vxlan
+Q_AGENT_EXTRA_AGENT_OPTS=(tunnel_types=vxlan)
+
+#Q_ML2_TENANT_NETWORK_TYPE=gre
+#ENABLE_TENANT_TUNNELS=True
+#ENABLE_TENANT_VLANS=True
+#TENANT_VLAN_RANGE=500:510
+Q_ML2_PLUGIN_MECHANISM_DRIVERS=opendaylight,logger
+NEUTRON_REPO=https://github.com/CiscoSystems/neutron.git
+NEUTRON_BRANCH=odl_ml2
+
+Q_HOST=$SERVICE_HOST
+HOST_IP=192.168.56.101
+
+#Q_PLUGIN=ml2
+#Q_AGENT=openvswitch
+#Q_ML2_PLUGIN_MECHANISM_DRIVERS=openvswitch,linuxbridge,l2population
+#Q_USE_SECGROUP=True
+#Q_AGENT_EXTRA_SRV_OPTS=(local_ip=$HOST_IP)
+
+HOST_NAME=fedora1
+SERVICE_HOST_NAME=${HOST_NAME}
+SERVICE_HOST=192.168.56.101
+ 
+FLOATING_RANGE=192.168.100.0/24
+#PUBLIC_NETWORK_GATEWAY=192.168.75.254
+MYSQL_HOST=$SERVICE_HOST
+RABBIT_HOST=$SERVICE_HOST
+GLANCE_HOSTPORT=$SERVICE_HOST:9292
+KEYSTONE_AUTH_HOST=$SERVICE_HOST
+KEYSTONE_SERVICE_HOST=$SERVICE_HOST
+ 
+MYSQL_PASSWORD=mysql
+RABBIT_PASSWORD=rabbit
+QPID_PASSWORD=rabbit
+SERVICE_TOKEN=service
+SERVICE_PASSWORD=admin
+ADMIN_PASSWORD=admin
+
+[[post-config|/etc/neutron/plugins/ml2/ml2_conf.ini]]
+[ml2_odl]
+url=http://192.168.56.1:8080/controller/nb/v2/neutron
+username=admin
+password=admin

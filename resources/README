@@ -1,0 +1,6 @@
+
+The resources/ directory contains all the associated scripts and configuration files that can be used by 
+developers and administrators under various use-cases.
+
+It is subdivided into multiple directories addressing each of the deployment scenarios.
+Each of these sub-directories contains its own README.

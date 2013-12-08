@@ -1,0 +1,10 @@
+
+This directory contains all the associated scripts and configuration files that can be used by developers and
+administrators working on ovsdb project in general.
+
+Contents 
+--------
+
+1. Mininet_Demo_OVSDB_OF.json.postman_collection : Collection of REST-APIs used in the Mininet demo (http://www.youtube.com/watch?v=8iWhMVlflwE)
+
+2. OVSDB_Northbound_APIs.json.postman_collection : Collection of REST-APIs detailing on all the ovsdb.northbound APIs.

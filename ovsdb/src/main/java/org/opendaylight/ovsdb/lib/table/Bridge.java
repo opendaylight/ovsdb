@@ -13,6 +13,7 @@ public class Bridge extends Table<Bridge> {
 
     private String name;
     private OvsDBSet<UUID> ports;
+    private OvsDBSet<UUID> mirrors;
     private OvsDBSet<UUID> controller;
     private OvsDBSet<String> datapath_id;
     private String datapath_type;
@@ -48,6 +49,14 @@ public class Bridge extends Table<Bridge> {
 
     public void setPorts(OvsDBSet<UUID> ports) {
         this.ports = ports;
+    }
+
+    public OvsDBSet<UUID> getMirrors() {
+        return mirrors;
+    }
+
+    public void setMirrors(OvsDBSet<UUID> mirrors) {
+        this.mirrors = mirrors;
     }
 
     public OvsDBSet<UUID> getController() {

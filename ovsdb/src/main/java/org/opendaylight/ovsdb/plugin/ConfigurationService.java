@@ -1322,7 +1322,48 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     }
 
     private StatusWithUuid insertMirrorRow(Node node, String parent_uuid, Mirror row) {
-        return new StatusWithUuid(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
+        String insertErrorMsg = "mirror";
+        String rowName=row.NAME.getName();
+
+        try{
+            Map<String, Table<?>> brTable = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
+            if (brTable == null ||  brTable.get(parent_uuid) == null) {
+                return new StatusWithUuid(StatusCode.NOTFOUND, "Bridge with UUID "+parent_uuid+" Not found");
+            }
+
+            if (parent_uuid == null) {
+                return new StatusWithUuid(StatusCode.BADREQUEST, "Require parent Bridge UUID.");
+            }
+
+            UUID uuid = new UUID(parent_uuid);
+            String newMirror = "new_mirror";
+
+            Operation addBridgeRequest = null;
+
+            UUID mirrorUuid = new UUID(newMirror);
+            Mutation mirrorMutation = new Mutation("mirrors", Mutator.INSERT, mirrorUuid);
+            List<Mutation> mutations = new ArrayList<Mutation>();
+            mutations.add(mirrorMutation);
+
+            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
+            List<Condition> where = new ArrayList<Condition>();
+            where.add(condition);
+            addBridgeRequest = new MutateOperation(Bridge.NAME.getName(), where, mutations);
+
+            InsertOperation addMirrorRequest = new InsertOperation(Mirror.NAME.getName(), newMirror, row);
+
+            TransactBuilder transaction = new TransactBuilder();
+            transaction.addOperations(new ArrayList<Operation>(
+                                      Arrays.asList(addBridgeRequest, addMirrorRequest)));
+
+            int mirrorInsertIndex = transaction.getRequests().indexOf(addMirrorRequest);
+
+            return _insertTableRow(node,transaction,mirrorInsertIndex,insertErrorMsg,rowName);
+
+            } catch (Exception e) {
+            logger.error("Error in insertMirrorRow(): ",e);
+        }
+        return new StatusWithUuid(StatusCode.INTERNALERROR);
     }
 
     private StatusWithUuid insertManagerRow(Node node, String parent_uuid, Manager row) {
@@ -1405,15 +1446,20 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                 status = new StatusWithUuid(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
             }
             if (status.isSuccess()) {
-                if (insertIndex >0 && insertIndex < tr.size() && tr.get(insertIndex) != null) {
+                System.out.println("*********** ALAGALAH: Status is success. InsertIndex=" + insertIndex + " tr.size()="+tr.size()+" "
+                        + "tr.get(insertIndex)="+tr.get(insertIndex));
+                if (insertIndex >= 0 && insertIndex < tr.size() && tr.get(insertIndex) != null) {
                     UUID uuid = tr.get(insertIndex).getUuid();
+                    System.out.println("*********** ALAGALAH: UUID=" + uuid);
                     status = new StatusWithUuid(StatusCode.SUCCESS, uuid);
                 } else {
                     // We can't get the uuid from the transact as the insertIndex is invalid or -1
                     // return null uuid.
+                    System.out.println("*********** ALAGALAH: No UUID");
                     status = new StatusWithUuid(StatusCode.SUCCESS, (UUID) null);
                 }
             }
+            System.out.println("*********** ALAGALAH: Status is " + status);
             return status;
         } catch(Exception e){
             logger.error("Error in _insertTableRow(): ",e);
@@ -1517,7 +1563,11 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     }
 
     private Status deleteMirrorRow(Node node, String uuid) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");
+        // Set up variables for generic _deleteTableRow()
+        String parentTableName=Bridge.NAME.getName();
+        String childTableName=Mirror.NAME.getName();
+        String parentColumn = "mirrors";
+        return _deleteTableRow(node,uuid,parentTableName,childTableName,parentColumn);
     }
 
     private Status deleteManagerRow(Node node, String uuid) {

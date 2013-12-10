@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_de271763",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1450,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-12-10T18:48:49Z",
+      "side": 1,
+      "message": "As discussed, please remove these prints.",
+      "revId": "797d83dec0ac13077cffbcebe2881373f99fa11c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -1,3 +1,12 @@
+/*
+ * Copyright (C) 2013 of individual owners listed as Authors
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Authors : Brent Salisbury, Hugo Trippaers
+ */
 package org.opendaylight.ovsdb.plugin;
 
 

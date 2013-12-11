@@ -51,8 +51,8 @@ LOG_COLOR=False
 SCREEN_LOGDIR=/opt/stack/logs
 EXTRA_OPTS=(scheduler_default_filters=AllHostsFilter)
 
-#[[post-config|/etc/neutron/plugins/ml2/ml2_conf.ini]]
-#[ml2_odl]
-#url=http://192.168.56.1:8080/controller/nb/v2/neutron
-#username=admin
-#password=admin
+[[post-config|/etc/neutron/plugins/ml2/ml2_conf.ini]]
+[ml2_odl]
+url=http://192.168.56.1:8080/controller/nb/v2/neutron
+username=admin
+password=admin

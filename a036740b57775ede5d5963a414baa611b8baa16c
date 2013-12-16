@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_d8784291",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 392,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2013-12-16T10:51:39Z",
+      "side": 1,
+      "message": "Looks like there is some duplication here... see line 420",
+      "revId": "a036740b57775ede5d5963a414baa611b8baa16c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_b86fcec4",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2013-12-16T10:51:39Z",
+      "side": 1,
+      "message": "Is there a more specific Exception you can catch?",
+      "revId": "a036740b57775ede5d5963a414baa611b8baa16c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_9872caab",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 436,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2013-12-16T10:51:39Z",
+      "side": 1,
+      "message": "Again, catching a more specific exception would be preferred.",
+      "revId": "a036740b57775ede5d5963a414baa611b8baa16c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

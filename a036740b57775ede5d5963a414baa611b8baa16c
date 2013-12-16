@@ -36,6 +36,23 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_f89c26c2",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 400,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-12-16T10:55:29Z",
+      "side": 1,
+      "message": "I understand that this is carried over from existing code. But It is prefered to be a specific exception and logger.error.\nAlso the text can improve. Please remove the \"use wildcard *\".",
+      "revId": "a036740b57775ede5d5963a414baa611b8baa16c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_9872caab",
         "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConnectionService.java",
         "patchSetId": 1
@@ -47,6 +64,23 @@
       "writtenOn": "2013-12-16T10:51:39Z",
       "side": 1,
       "message": "Again, catching a more specific exception would be preferred.",
+      "revId": "a036740b57775ede5d5963a414baa611b8baa16c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_b8a6ae0e",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-12-16T10:55:29Z",
+      "side": 1,
+      "message": "Same here. Specific Exception and logger.error.",
       "revId": "a036740b57775ede5d5963a414baa611b8baa16c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

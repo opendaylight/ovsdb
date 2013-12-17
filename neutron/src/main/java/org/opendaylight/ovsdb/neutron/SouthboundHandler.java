@@ -18,6 +18,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.Property;
+import org.opendaylight.controller.sal.core.UpdateType;
+import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.table.Interface;
 import org.opendaylight.ovsdb.lib.table.Open_vSwitch;
@@ -28,7 +32,7 @@ import org.opendaylight.ovsdb.plugin.OVSDBInventoryListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SouthboundHandler extends BaseHandler implements OVSDBInventoryListener {
+public class SouthboundHandler extends BaseHandler implements OVSDBInventoryListener, IInventoryListener {
     static final Logger logger = LoggerFactory.getLogger(SouthboundHandler.class);
     //private Thread eventThread;
     private ExecutorService eventHandler;
@@ -231,5 +235,18 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
             logger.debug("Failed to add Port tag for for Intf {}",intf, e);
         }
         return null;
+    }
+
+    @Override
+    public void notifyNode(Node node, UpdateType type, Map<String, Property> propMap) {
+        if (node.getType().equals(Node.NodeIDType.OPENFLOW) && type.equals(UpdateType.ADDED)) {
+            logger.debug("OpenFlow node {} added. Initialize Basic flows", node);
+            ProviderNetworkManager.getManager().initializeOFFlowRules(node);
+        }
+    }
+
+    @Override
+    public void notifyNodeConnector(NodeConnector nodeConnector, UpdateType type, Map<String, Property> propMap) {
+        //We are not interested in the nodeConnectors at this moment
     }
 }

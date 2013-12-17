@@ -31,4 +31,12 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // TODO Auto-generated method stub
         return null;
     }
+
+    @Override
+    public void initializeFlowRules(Node node) {
+    }
+
+    @Override
+    public void initializeOFFlowRules(Node openflowNode) {
+    }
 }

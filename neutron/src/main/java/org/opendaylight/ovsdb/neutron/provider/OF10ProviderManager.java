@@ -21,10 +21,13 @@ import org.opendaylight.controller.forwardingrulesmanager.FlowConfig;
 import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManager;
 import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.utils.EtherTypes;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
+import org.opendaylight.controller.switchmanager.ISwitchManager;
+import org.opendaylight.controller.switchmanager.Switch;
 import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
 import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -85,30 +88,24 @@ class OF10ProviderManager extends ProviderNetworkManager {
             return;
         }
         try {
-            String flowName = "TepMatch"+tunnelOFPort+""+internalVlan;
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
             Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brIntId);
             Set<String> dpids = bridge.getDatapath_id();
             if (dpids == null || dpids.size() ==  0) return;
             Long dpidLong = Long.valueOf(HexEncode.stringToLong((String)dpids.toArray()[0]));
             Node ofNode = new Node(Node.NodeIDType.OPENFLOW, dpidLong);
-            IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper.getInstance(
-                    IForwardingRulesManager.class, "default", this);
-            if (frm.getStaticFlow(flowName, ofNode) != null) {
-                logger.debug("Local Ingress Flow exists : {} for Flow {} on {} / {}", flowName, ofNode, node);
-                return;
-            }
-
+            String flowName = "TepMatch"+tunnelOFPort+""+internalVlan;
             FlowConfig flow = new FlowConfig();
             flow.setName(flowName);
             flow.setNode(ofNode);
+            flow.setInstallInHw(true);
             flow.setPriority(INGRESS_TUNNEL_FLOW_PRIORITY+"");
             flow.setIngressPort(tunnelOFPort+"");
             List<String> actions = new ArrayList<String>();
             actions.add(ActionType.SET_VLAN_ID+"="+internalVlan);
             actions.add(ActionType.OUTPUT.toString()+"="+patchPort);
             flow.setActions(actions);
-            Status status = frm.addStaticFlow(flow);
+            Status status = this.addStaticFlow(ofNode, flow);
             logger.debug("Local Ingress Flow Programming Status {} for Flow {} on {} / {}", status, flow, ofNode, node);
         } catch (Exception e) {
             logger.error("Failed to initialize Flow Rules for {}", node, e);
@@ -137,15 +134,10 @@ class OF10ProviderManager extends ProviderNetworkManager {
             Long dpidLong = Long.valueOf(HexEncode.stringToLong((String)dpids.toArray()[0]));
             Node ofNode = new Node(Node.NodeIDType.OPENFLOW, dpidLong);
             String flowName = "TepMatch"+tunnelOFPort+""+internalVlan+""+HexEncode.stringToLong(attachedMac);
-            IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper.getInstance(
-                    IForwardingRulesManager.class, "default", this);
-            if (frm.getStaticFlow(flowName, ofNode) != null) {
-                logger.debug("Remote Egress Flow exists : {} for Flow {} on {} / {}", flowName, ofNode, node);
-                return;
-            }
             FlowConfig flow = new FlowConfig();
             flow.setName(flowName);
             flow.setNode(ofNode);
+            flow.setInstallInHw(true);
             flow.setPriority(EGRESS_TUNNEL_FLOW_PRIORITY+"");
             flow.setDstMac(attachedMac);
             flow.setIngressPort(patchPort+"");
@@ -154,7 +146,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
             actions.add(ActionType.POP_VLAN.toString());
             actions.add(ActionType.OUTPUT.toString()+"="+tunnelOFPort);
             flow.setActions(actions);
-            Status status = frm.addStaticFlow(flow);
+            Status status = this.addStaticFlow(ofNode, flow);
             logger.debug("Remote Egress Flow Programming Status {} for Flow {} on {} / {}", status, flow, ofNode, node);
         } catch (Exception e) {
             logger.error("Failed to initialize Flow Rules for {}", node, e);
@@ -441,6 +433,92 @@ class OF10ProviderManager extends ProviderNetworkManager {
             this.createTunnels(tunnelType, tunnelKey, srcNode, null);
         }
         return new Status(StatusCode.SUCCESS);
+    }
+
+    @Override
+    public void initializeFlowRules(Node node) {
+        this.initializeFlowRules(node, AdminConfigManager.getManager().getIntegrationBridgeName());
+        this.initializeFlowRules(node, AdminConfigManager.getManager().getTunnelBridgeName());
+        this.initializeFlowRules(node, AdminConfigManager.getManager().getExternalBridgeName());
+    }
+
+    private void initializeFlowRules(Node node, String bridgeName) {
+        String brIntId = this.getInternalBridgeUUID(node, bridgeName);
+        if (brIntId == null) {
+            logger.error("Failed to initialize Flow Rules for {}", node);
+            return;
+        }
+
+        try {
+            OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brIntId);
+            Set<String> dpids = bridge.getDatapath_id();
+            if (dpids == null || dpids.size() ==  0) return;
+            Long dpidLong = Long.valueOf(HexEncode.stringToLong((String)dpids.toArray()[0]));
+            Node ofNode = new Node(Node.NodeIDType.OPENFLOW, dpidLong);
+            ISwitchManager switchManager = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, "default", this);
+            List<Switch> nodes = switchManager.getNetworkDevices();
+            if (nodes == null) {
+                logger.debug("No OF nodes learned yet in {}", node);
+                return;
+            }
+            for (Switch device : nodes) {
+                if (device.getNode().equals(ofNode)) {
+                    logger.debug("Initialize OF Flows on {}", ofNode);
+                    return;
+                }
+            }
+            logger.debug("Could not identify OF node {} for bridge {} in {}", ofNode.toString(), bridgeName, node.toString());
+        } catch (Exception e) {
+            logger.error("Failed to initialize Flow Rules for "+node.toString(), e);
+        }
+    }
+
+    @Override
+    public void initializeOFFlowRules(Node openflowNode) {
+        this.initializeNormalFlowRules(openflowNode);
+        this.initializeLLDPFlowRules(openflowNode);
+    }
+
+    private void initializeNormalFlowRules(Node ofNode) {
+        String flowName = ActionType.HW_PATH.toString();
+        FlowConfig flow = new FlowConfig();
+        flow.setName("NORMAL");
+        flow.setNode(ofNode);
+        flow.setPriority(NORMAL_PRIORITY+"");
+        flow.setInstallInHw(true);
+        List<String> normalAction = new ArrayList<String>();
+        normalAction.add(flowName);
+        flow.setActions(normalAction);
+        Status status = this.addStaticFlow(ofNode, flow);
+        logger.debug("Flow Programming Add Status {} for Flow {} on {}", status, flow, ofNode);
+    }
+
+    private void initializeLLDPFlowRules(Node ofNode) {
+        String flowName = "PuntLLDP";
+        List<String> puntAction = new ArrayList<String>();
+        puntAction.add(ActionType.CONTROLLER.toString());
+
+        FlowConfig allowLLDP = new FlowConfig();
+        allowLLDP.setName(flowName);
+        allowLLDP.setPriority(LLDP_PRIORITY+"");
+        allowLLDP.setNode(ofNode);
+        allowLLDP.setInstallInHw(true);
+        allowLLDP.setEtherType("0x" + Integer.toHexString(EtherTypes.LLDP.intValue()).toUpperCase());
+        allowLLDP.setActions(puntAction);
+        Status status = this.addStaticFlow(ofNode, allowLLDP);
+        logger.debug("LLDP Flow Add Status {} for Flow {} on {}", status, allowLLDP, ofNode);
+    }
+
+    private Status addStaticFlow (Node ofNode, FlowConfig flowConfig) {
+        IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper.getInstance(
+                IForwardingRulesManager.class, "default", this);
+        String flowName = flowConfig.getName();
+        if (frm.getStaticFlow(flowName, ofNode) != null) {
+            logger.debug("Flow already exists {} on {}. Skipping installation.", flowName, ofNode);
+            return new Status(StatusCode.CONFLICT, "Flow with name "+flowName+" exists in node "+ofNode.toString());
+        }
+        return frm.addStaticFlow(flowConfig);
     }
 
     private class NodeVlan {

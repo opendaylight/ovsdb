@@ -19,6 +19,7 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
+import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
 import org.opendaylight.ovsdb.plugin.OVSDBInventoryListener;
 
@@ -90,7 +91,7 @@ public class Activator extends ComponentActivatorAbstractBase {
         }
 
         if (imp.equals(SouthboundHandler.class)) {
-            c.setInterface(OVSDBInventoryListener.class.getName(), null);
+            c.setInterface(new String[] {OVSDBInventoryListener.class.getName(), IInventoryListener.class.getName()}, null);
         }
 
         c.add(createServiceDependency().

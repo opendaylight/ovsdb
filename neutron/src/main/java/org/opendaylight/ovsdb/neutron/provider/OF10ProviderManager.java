@@ -12,7 +12,6 @@ package org.opendaylight.ovsdb.neutron.provider;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,7 +46,6 @@ import org.slf4j.LoggerFactory;
 
 class OF10ProviderManager extends ProviderNetworkManager {
     private static final Logger logger = LoggerFactory.getLogger(OF10ProviderManager.class);
-    Map<NodeVlan, FlowConfig> floodEntries = new HashMap<NodeVlan, FlowConfig>();
     private static final int INGRESS_TUNNEL_FLOW_PRIORITY = 100;
     private static final int EGRESS_TUNNEL_FLOW_PRIORITY = 100;
     private static final int FLOOD_TUNNEL_FLOW_PRIORITY = 1;
@@ -173,15 +171,15 @@ class OF10ProviderManager extends ProviderNetworkManager {
             if (dpids == null || dpids.size() ==  0) return;
             Long dpidLong = Long.valueOf(HexEncode.stringToLong((String)dpids.toArray()[0]));
             Node ofNode = new Node(Node.NodeIDType.OPENFLOW, dpidLong);
-            NodeVlan nv = new NodeVlan(ofNode, internalVlan);
-            FlowConfig existingFlowConfig = floodEntries.get(nv);
+            String flowName = "TepFlood"+internalVlan;
             IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper.getInstance(
                     IForwardingRulesManager.class, "default", this);
+            FlowConfig existingFlowConfig = frm.getStaticFlow(flowName, ofNode);
             FlowConfig flow = existingFlowConfig;
             Status status = null;
             if (flow == null) {
                 flow = new FlowConfig();
-                flow.setName("TepFlood"+internalVlan);
+                flow.setName(flowName);
                 flow.setNode(ofNode);
                 flow.setPriority(FLOOD_TUNNEL_FLOW_PRIORITY+"");
                 flow.setIngressPort(patchPort+"");
@@ -201,16 +199,14 @@ class OF10ProviderManager extends ProviderNetworkManager {
                     actions.add(outputPort);
                     flow.setActions(actions);
                 } else {
+                    logger.debug("Flood Egress Flow already exists. Skipping modify for Flow {} on {} / {}",
+                                 flow, ofNode, node);
                     return;
                 }
                 status = frm.modifyStaticFlow(flow);
                 logger.debug("Modify Flood Egress Flow Programming Status {} for Flow {} on {} / {}",
                               status, flow, ofNode, node);
             }
-            if (status.isSuccess()) {
-                floodEntries.put(nv, flow);
-            }
-
         } catch (Exception e) {
             logger.error("Failed to initialize Flow Rules for {}", node, e);
         }
@@ -519,51 +515,5 @@ class OF10ProviderManager extends ProviderNetworkManager {
             return new Status(StatusCode.CONFLICT, "Flow with name "+flowName+" exists in node "+ofNode.toString());
         }
         return frm.addStaticFlow(flowConfig);
-    }
-
-    private class NodeVlan {
-        Node node;
-        int vlan;
-        public NodeVlan(Node node, int vlan) {
-            super();
-            this.node = node;
-            this.vlan = vlan;
-        }
-        public Node getNode() {
-            return node;
-        }
-        public int getVlan() {
-            return vlan;
-        }
-        @Override
-        public String toString() {
-            return "NodeVlan [node=" + node + ", vlan=" + vlan + "]";
-        }
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((node == null) ? 0 : node.hashCode());
-            result = prime * result + vlan;
-            return result;
-        }
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
-            NodeVlan other = (NodeVlan) obj;
-            if (node == null) {
-                if (other.node != null)
-                    return false;
-            } else if (!node.equals(other.node))
-                return false;
-            if (vlan != other.vlan)
-                return false;
-            return true;
-        }
     }
 }

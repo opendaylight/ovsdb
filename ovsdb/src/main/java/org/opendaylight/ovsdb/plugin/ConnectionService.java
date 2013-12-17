@@ -31,6 +31,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -391,8 +392,25 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         }
     }
 
-    private List<InetAddress> getControllerIPAddresses() {
+    private List<InetAddress> getControllerIPAddresses(Connection connection) {
         List<InetAddress> controllers = null;
+        InetAddress controllerIP = null;
+
+        controllers = new ArrayList<InetAddress>();
+        String addressString = System.getProperty("ovsdb.controller.address");
+
+        if (addressString != null) {
+            try {
+                controllerIP = InetAddress.getByName(addressString);
+                if (controllerIP != null) {
+                    controllers.add(controllerIP);
+                    return controllers;
+                }
+            } catch (UnknownHostException e) {
+                logger.error("Host {} is invalid", addressString);
+            }
+        }
+
         if (clusterServices != null) {
             controllers = clusterServices.getClusteredControllers();
             if (controllers != null && controllers.size() > 0) {
@@ -407,37 +425,26 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
             }
         }
 
-        controllers = new ArrayList<InetAddress>();
-        String addressString = System.getProperty("ovsdb.controller.address");
-        if (addressString == null) addressString = System.getProperty("of.address");
+        addressString = System.getProperty("of.address");
 
         if (addressString != null) {
-            InetAddress controllerIP = null;
             try {
                 controllerIP = InetAddress.getByName(addressString);
                 if (controllerIP != null) {
                     controllers.add(controllerIP);
                     return controllers;
                 }
-            } catch (Exception e) {
-                logger.debug("Invalid IP: {}, use wildcard *", addressString);
+            } catch (UnknownHostException e) {
+                logger.error("Host {} is invalid", addressString);
             }
         }
 
-        Enumeration<NetworkInterface> nets;
         try {
-            nets = NetworkInterface.getNetworkInterfaces();
-            for (NetworkInterface netint : Collections.list(nets)) {
-                Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
-                for (InetAddress inetAddress : Collections.list(inetAddresses)) {
-                    if (!inetAddress.isLoopbackAddress() &&
-                            NetUtils.isIPv4AddressValid(inetAddress.getHostAddress())) {
-                        controllers.add(inetAddress);
-                    }
-                }
-            }
-        } catch (SocketException e) {
-            controllers.add(InetAddress.getLoopbackAddress());
+            controllerIP = ((InetSocketAddress)connection.getChannel().localAddress()).getAddress();
+            controllers.add(controllerIP);
+            return controllers;
+        } catch (Exception e) {
+            logger.debug("Invalid connection provided to getControllerIPAddresses", e);
         }
         return controllers;
     }
@@ -465,7 +472,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         }
 
         if (connection != null) {
-            List<InetAddress> ofControllerAddrs = this.getControllerIPAddresses();
+            List<InetAddress> ofControllerAddrs = this.getControllerIPAddresses(connection);
             short ofControllerPort = getControllerOFPort();
             for (InetAddress ofControllerAddress : ofControllerAddrs) {
                 String newController = "tcp:"+ofControllerAddress.getHostAddress()+":"+ofControllerPort;

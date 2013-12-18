@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_4e85a8ab",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/table/Flow_Sample_Collector_Set.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-12-18T10:20:43Z",
+      "side": 1,
+      "message": "Since the class name ends with set (which is a collection of some entities) - what does a single id represent here?",
+      "revId": "0f798c4bb47cda07b81a64cbc99026d4ad96e961",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_6e8aacc0",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/table/Flow_Sample_Collector_Set.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-12-18T10:20:43Z",
+      "side": 1,
+      "message": "Java naming conventions is usually without space in member names.",
+      "revId": "0f798c4bb47cda07b81a64cbc99026d4ad96e961",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_ce999820",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/table/IPFIX.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-12-18T10:20:43Z",
+      "side": 1,
+      "message": "why does this enum implement something?",
+      "revId": "0f798c4bb47cda07b81a64cbc99026d4ad96e961",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_ee969cef",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/table/internal/Tables.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-12-18T10:20:43Z",
+      "side": 1,
+      "message": "please avoid using star imports, import just the specific classes that are in use.",
+      "revId": "0f798c4bb47cda07b81a64cbc99026d4ad96e961",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_8ea3a04e",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/table/internal/Tables.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-12-18T10:20:43Z",
+      "side": 1,
+      "message": "it\u0027s not a very good practice to have a static initialization block.\nwhy isn\u0027t it part of constructor for example, or an init method? (leave this comment here FYI , I am aware it is not part of this current patch code changes)",
+      "revId": "0f798c4bb47cda07b81a64cbc99026d4ad96e961",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

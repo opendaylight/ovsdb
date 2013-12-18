@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_491c8213",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/table/Flow_Sample_Collector_Set.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-12-18T20:40:12Z",
+      "side": 1,
+      "message": "These are mapping directly from the Tables defined under : http://openvswitch.org/ovs-vswitchd.conf.db.5.pdf\n\nIncluding the naming convention and the member variables.",
+      "parentUuid": "da6255ed_4e85a8ab",
+      "revId": "0f798c4bb47cda07b81a64cbc99026d4ad96e961",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_6e8aacc0",
         "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/table/Flow_Sample_Collector_Set.java",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_291b8e1c",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/table/Flow_Sample_Collector_Set.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-12-18T20:40:12Z",
+      "side": 1,
+      "message": "Same as above.\n\nThe long-term idea is to completely do away with these classes and do entirely with dynamic schema based approach.",
+      "parentUuid": "da6255ed_6e8aacc0",
+      "revId": "0f798c4bb47cda07b81a64cbc99026d4ad96e961",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_ce999820",
         "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/table/IPFIX.java",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2013-12-18T10:20:43Z",
       "side": 1,
       "message": "why does this enum implement something?",
+      "revId": "0f798c4bb47cda07b81a64cbc99026d4ad96e961",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_69cf4680",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/table/IPFIX.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-12-18T20:40:12Z",
+      "side": 1,
+      "message": "I dont see the need for this enum as well.\nWe can remove it.",
+      "parentUuid": "da6255ed_ce999820",
       "revId": "0f798c4bb47cda07b81a64cbc99026d4ad96e961",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -81,6 +135,24 @@
       "writtenOn": "2013-12-18T10:20:43Z",
       "side": 1,
       "message": "it\u0027s not a very good practice to have a static initialization block.\nwhy isn\u0027t it part of constructor for example, or an init method? (leave this comment here FYI , I am aware it is not part of this current patch code changes)",
+      "revId": "0f798c4bb47cda07b81a64cbc99026d4ad96e961",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_697d061c",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/table/internal/Tables.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2013-12-18T20:40:12Z",
+      "side": 1,
+      "message": "I added this code long back knowing the fact that this will go away after the Schema driven OVSDB :).\nWe can fix it. But not using this commit though.",
+      "parentUuid": "da6255ed_8ea3a04e",
       "revId": "0f798c4bb47cda07b81a64cbc99026d4ad96e961",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

@@ -9,13 +9,14 @@
  */
 package org.opendaylight.ovsdb.lib.table.internal;
 
+import org.opendaylight.ovsdb.lib.table.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendaylight.ovsdb.lib.table.*;
-
 public class Tables {
     public static List<Table> tables = new ArrayList<Table>();
+
     static {
         tables.add(new Bridge());
         tables.add(new Port());
@@ -30,7 +31,11 @@ public class Tables {
         tables.add(new Queue());
         tables.add(new SFlow());
         tables.add(new SSL());
+        tables.add(new Flow_Sample_Collector_Set());
+        tables.add(new Flow_Table());
+        tables.add(new IPFIX());
     }
+
     public static List<Table> getTables() {
         return tables;
     }

@@ -11,15 +11,29 @@ package org.opendaylight.ovsdb.lib.message;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Maps;
+import org.opendaylight.ovsdb.lib.table.Bridge;
+import org.opendaylight.ovsdb.lib.table.Capability;
+import org.opendaylight.ovsdb.lib.table.Interface;
+import org.opendaylight.ovsdb.lib.table.Port;
+import org.opendaylight.ovsdb.lib.table.Controller;
+import org.opendaylight.ovsdb.lib.table.Manager;
+import org.opendaylight.ovsdb.lib.table.Mirror;
+import org.opendaylight.ovsdb.lib.table.NetFlow;
+import org.opendaylight.ovsdb.lib.table.Open_vSwitch;
+import org.opendaylight.ovsdb.lib.table.Qos;
+import org.opendaylight.ovsdb.lib.table.Queue;
+import org.opendaylight.ovsdb.lib.table.SFlow;
+import org.opendaylight.ovsdb.lib.table.SSL;
+import org.opendaylight.ovsdb.lib.table.Flow_Sample_Collector_Set;
+import org.opendaylight.ovsdb.lib.table.Flow_Table;
+import org.opendaylight.ovsdb.lib.table.IPFIX;
+import org.opendaylight.ovsdb.lib.table.internal.Table;
 
 import java.util.Map;
 import java.util.Set;
 
-import org.opendaylight.ovsdb.lib.table.*;
-import org.opendaylight.ovsdb.lib.table.internal.Table;
 
-
-public  class TableUpdates extends Response {
+public class TableUpdates extends Response {
 
     Map<Table.Name, TableUpdate> map = Maps.newHashMap();
 
@@ -32,11 +46,9 @@ public  class TableUpdates extends Response {
         return map.get(name);
     }
 
-
     private <T extends Table> void put(Table.Name<T> name, TableUpdate<T> update) {
         map.put(name, update);
     }
-
 
     @JsonProperty("Interface")
     public TableUpdate<Interface> getInterfaceUpdate() {
@@ -153,5 +165,32 @@ public  class TableUpdates extends Response {
 
     public void setSSLUpdate(TableUpdate<SSL> sslUpdate) {
         put(SSL.NAME, sslUpdate);
+    }
+
+    @JsonProperty("Flow_Table")
+    public TableUpdate<Flow_Table> getFlow_TableUpdate() {
+        return getUpdate(Flow_Table.NAME);
+    }
+
+    public void setFlow_TableUpdate(TableUpdate<Flow_Table> Flow_TableUpdate) {
+        put(Flow_Table.NAME, Flow_TableUpdate);
+    }
+
+    @JsonProperty("Flow_Sample_Collector_Set")
+    public TableUpdate<Flow_Sample_Collector_Set> getFlow_Sample_Collector_SetUpdate() {
+        return getUpdate(Flow_Sample_Collector_Set.NAME);
+    }
+
+    public void setFlow_Sample_Collector_SetUpdate(TableUpdate<Flow_Sample_Collector_Set> Flow_Sample_Collector_SetUpdate) {
+        put(Flow_Sample_Collector_Set.NAME, Flow_Sample_Collector_SetUpdate);
+    }
+
+    @JsonProperty("IPFIX")
+    public TableUpdate<IPFIX> getIPFIXUpdate() {
+        return getUpdate(IPFIX.NAME);
+    }
+
+    public void setIPFIXUpdate(TableUpdate<IPFIX> IPFIXUpdate) {
+        put(IPFIX.NAME, IPFIXUpdate);
     }
 }

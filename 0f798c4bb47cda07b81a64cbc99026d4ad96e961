@@ -107,6 +107,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_59cd7384",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/table/IPFIX.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 207
+      },
+      "writtenOn": "2013-12-20T04:51:56Z",
+      "side": 1,
+      "message": "Done - Thanks Alissa, I removed this.",
+      "parentUuid": "da6255ed_69cf4680",
+      "revId": "0f798c4bb47cda07b81a64cbc99026d4ad96e961",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_ee969cef",
         "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/table/internal/Tables.java",
         "patchSetId": 2
@@ -118,6 +136,24 @@
       "writtenOn": "2013-12-18T10:20:43Z",
       "side": 1,
       "message": "please avoid using star imports, import just the specific classes that are in use.",
+      "revId": "0f798c4bb47cda07b81a64cbc99026d4ad96e961",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_39c63f69",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/table/internal/Tables.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 207
+      },
+      "writtenOn": "2013-12-20T04:51:56Z",
+      "side": 1,
+      "message": "Done - Thanks Alissa, removed the wildcard import.",
+      "parentUuid": "da6255ed_ee969cef",
       "revId": "0f798c4bb47cda07b81a64cbc99026d4ad96e961",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

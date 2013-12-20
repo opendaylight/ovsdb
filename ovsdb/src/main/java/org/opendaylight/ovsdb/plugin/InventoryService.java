@@ -10,6 +10,7 @@
 package org.opendaylight.ovsdb.plugin;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -307,5 +308,10 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
         }
         nodeProps.remove(node);
         dbCache.remove(node);
+    }
+
+    @Override
+    public Set<Node> getConfiguredNotConnectedNodes() {
+        return Collections.emptySet();
     }
 }

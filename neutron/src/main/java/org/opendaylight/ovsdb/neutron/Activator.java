@@ -18,6 +18,7 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronPortAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
@@ -58,7 +59,8 @@ public class Activator extends ComponentActivatorAbstractBase {
         Object[] res = {NetworkHandler.class,
                         SubnetHandler.class,
                         PortHandler.class,
-                        SouthboundHandler.class};
+                        SouthboundHandler.class,
+                        MDSALConsumer.class};
         return res;
     }
 
@@ -94,6 +96,14 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.setInterface(new String[] {OVSDBInventoryListener.class.getName(), IInventoryListener.class.getName()}, null);
         }
 
+        if (imp.equals(MDSALConsumer.class)) {
+            c.setInterface(IMDSALConsumer.class.getName(), null);
+
+            c.add(createServiceDependency()
+                    .setService(BindingAwareBroker.class)
+                    .setCallbacks("setBindingAwareBroker", "unsetBindingAwareBroker")
+                    .setRequired(true));
+        }
         c.add(createServiceDependency().
                 setService(OVSDBConfigService.class).
                 setCallbacks("setOVSDBConfigService", "unsetOVSDBConfigService").

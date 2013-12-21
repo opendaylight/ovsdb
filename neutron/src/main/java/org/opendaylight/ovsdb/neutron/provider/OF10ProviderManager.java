@@ -461,6 +461,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
             for (Switch device : nodes) {
                 if (device.getNode().equals(ofNode)) {
                     logger.debug("Initialize OF Flows on {}", ofNode);
+                    initializeNormalFlowRules(ofNode);
                     return;
                 }
             }

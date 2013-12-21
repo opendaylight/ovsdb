@@ -112,8 +112,10 @@ public class InternalNetworkManager {
 
         Status status = this.addInternalBridge(node, brInt, patchTun, patchInt);
         if (!status.isSuccess()) logger.debug("Integration Bridge Creation Status : "+status.toString());
-        status = this.addInternalBridge(node, brTun, patchInt, patchTun);
-        if (!status.isSuccess()) logger.debug("Tunnel Bridge Creation Status : "+status.toString());
+        if (ProviderNetworkManager.getManager().hasPerTenantTunneling()) {
+            status = this.addInternalBridge(node, brTun, patchInt, patchTun);
+            if (!status.isSuccess()) logger.debug("Tunnel Bridge Creation Status : "+status.toString());
+        }
     }
 
     /*
@@ -138,6 +140,11 @@ public class InternalNetworkManager {
         if (bridgeUUID == null) {
             Bridge bridge = new Bridge();
             bridge.setName(bridgeName);
+            if (!ProviderNetworkManager.getManager().hasPerTenantTunneling()) {
+                OvsDBSet<String> protocols = new OvsDBSet<String>();
+                protocols.add("OpenFlow13");
+                bridge.setProtocols(protocols);
+            }
 
             StatusWithUuid statusWithUuid = ovsdbTable.insertRow(node, Bridge.NAME.getName(), null, bridge);
             if (!statusWithUuid.isSuccess()) return statusWithUuid;
@@ -150,7 +157,7 @@ public class InternalNetworkManager {
         IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
         connectionService.setOFController(node, bridgeUUID);
 
-        if (localPathName != null && remotePatchName != null) {
+        if (localPathName != null && remotePatchName != null && ProviderNetworkManager.getManager().hasPerTenantTunneling()) {
             return addPatchPort(node, bridgeUUID, localPathName, remotePatchName);
         }
         return new Status(StatusCode.SUCCESS);

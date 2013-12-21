@@ -29,6 +29,7 @@ public class Bridge extends Table<Bridge> {
     private OvsDBSet<String> fail_mode;
     private OvsDBSet<UUID> sflow;
     private OvsDBSet<UUID> netflow;
+    private OvsDBSet<String> protocols;
     private OvsDBMap<String, String> status;
     private Boolean stp_enable;
     private OvsDBMap<String, String> other_config;
@@ -126,6 +127,14 @@ public class Bridge extends Table<Bridge> {
 
     public Boolean getStp_enable() {
         return stp_enable;
+    }
+
+    public OvsDBSet<String> getProtocols() {
+        return protocols;
+    }
+
+    public void setProtocols(OvsDBSet<String> protocols) {
+        this.protocols = protocols;
     }
 
     public void setStp_enable(Boolean stp_enable) {

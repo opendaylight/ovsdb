@@ -1,0 +1,74 @@
+= OpenDaylight OVSDB Guide
+Colin McNamara 
+:doctype: book:
+:toc:
+:numbered:
+
+OpenDaylight OVSDB Guide
+
+[dedication]
+== Dedication
+
+TBD
+
+[preface]
+== Preface
+
+TBD
+
+include::OVSDB_Integration-Main.asciidoc[]
+
+include::OVSDB_Integration-Design.asciidoc[]
+
+include::OVSDB_Integration-Release_Plan.asciidoc[]
+
+:numbered!:
+
+[appendix]
+== Example Appendix
+
+One or more optional appendixes go here at section level 1.
+
+=== Appendix Sub-section
+
+Sub-section body.
+
+[bibliography]
+== Example Bibliography
+
+The bibliography list is a style of AsciiDoc bulleted list.
+
+[bibliography]
+.Books
+- [[[walsh-muellner]]] Norman Walsh & Leonard Muellner.
+'DocBook - The Definitive Guide'. O'Reilly & Associates. 1999.
+ISBN 1-56592-580-7.
+
+[bibliography]
+.Articles
+- [[[abc2003]]] Gall Anonim. 'An article', Whatever. 2003.
+
+[glossary]
+== Example Glossary
+
+Glossaries are optional. Glossaries entries are an example of a style
+of AsciiDoc labeled lists.
+
+[glossary]
+A glossary term::
+The corresponding (indented) definition.
+
+A second glossary term::
+The corresponding (indented) definition.
+
+[colophon]
+== Example Colophon
+
+Text at the end of a book describing facts about its production.
+
+[index]
+== Index
+////////////////////////////////////////////////////////////////
+The index is normally left completely empty, it's contents being
+generated automatically by the DocBook toolchain.
+////////////////////////////////////////////////////////////////

@@ -1,0 +1,184 @@
+== OpenDaylight Integration - Main
+
+:doctype: book
+:toc:
+:numbered:
+
+include::common-attributes.asciidoc[]
+
+=== Introduction
+
+OVSDB Integration is a bundle for OpenDaylight that will implement the
+Open vSwitch Database management protocol, allowing southbound
+configuration of vSwitches. Please join us and clone our repository:
+
+=== High-Level Design
+
+* link:OVSDB_Integration-Design[High-Level architecture and design]
+
+* OVSDB Integration:Mininet OVSDB Tutorial[OVSDB Integration:Mininet and
+OVSDB Tutorial]
+
+* http://www.youtube.com/channel/UCMYntfZ255XGgYFrxCNcAzA[OVSDB Hangout
+Recording Weekly Calls and Informational]
+
+* https://wiki.opendaylight.org/view/OVSDB_Integration:Design[OVSDB
+Integration Architecture]
+
+=== Example Usage
+
+OVSDB is a critical protocol for Network Virtualization with Open
+vSwitch forwarding elements.
+
+.OVSDB Architecture
+[[figure-OVSDB-Architecture]]
+image:images/Ovsdb-architecture.png ["OVSDB-Architecture",align="center"]
+
+(((OpenDaylight)))
+(((OpenDaylight,OVSDB)))
+
+
+=== Clone The OVSDB repository
+
+---------------------------------------------------------------
+git clone https://git.opendaylight.org/gerrit/p/ovsdb.git
+
+OR
+
+git clone ssh://<username>@git.opendaylight.org:29418/ovsdb.git
+---------------------------------------------------------------
+
+=== People
+
+* Brent Salisbury networkstatic on irc.freenode.net
+* Evan Zeller evanz on irc.freenode.net
+* Madhu Venugopal Madhu on irc.freenode.net
+* Giovanni Meo
+* Kyle Mestery
+
+=== Issues
+
+* jsonrpc4j does not provide the bidirectional capabilities that we need
+to create calls, and respond to echo as well. There are several options
+being investigated:
+
+* integration of http://deavid.github.io/bjsonrpc/[bjsonrpc] via Jython
+
+* Create our own json-rpc implementation.
+
+* Add the functionality needed to jsonrpc4j
+
+* Continue working on fully integrating the full functionality of the
+protocol OVSDB.
+
+== Technical Overview
+
+
+=== JSON-RPC Overview
+
+JSON-RPC is a remote procedure protocol which allows our ovsdb client to
+call methods that exist on the ovsdb server, allowing us to provision
+bridges, ports, interfaces, tunnels, and more in the database. Any rpc
+request is formatted as follows:
+
+----
+{
+    "method":<string>,
+    "params":[<object>],
+    "id":<string> or <integer>
+}
+----
+
+This will invoke the value given in "method" on the server, passing in
+the parameters specified in order. Parameters can be simple strings, or
+complicated json objects. RPC response messages also have a standard
+formatting:
+
+----
+{
+    "result":[<object>],
+    "error":<error>,
+    "id":<string> or <integer>
+}
+----
+
+The library https://code.google.com/p/jsonrpc4j/[jsonrpc4j] will take
+care of serializing and deserializing these standard messages for us,
+but for most situations we will need to deserialize the "result" value
+ourselves as it is most likely a complicated json object. Also, for many
+methods the "params" array will contain json objects, we define these as
+actual java objects which then get deserialized into json strings on the
+server side. Using the jackson streaming API it is possible to call
+methods and process responses using only string manipulation, but it is
+less convenient and as of now we are not using this method. The
+http://tools.ietf.org/html/draft-pfaff-ovsdb-proto-02#section-4.1[ovsdb
+protocol draft] describes the methods and their responses in detail.
+
+=== Example: add bridge and associated port and interface
+
+--------------------------------------
+{
+    "method":"transact",
+    "params":[
+        "Open_vSwitch",
+        {
+            "row": {
+                "bridges": [
+                    "named-uuid",
+                    "new_bridge"
+                ]
+            },
+            "table": "Open_vSwitch",
+            "uuid-name": "new_switch",
+            "op": "insert"
+        },
+        {
+            "row": {
+                "name": "br1",
+                "type": "internal"
+            },
+            "table": "Interface",
+            "uuid-name": "new_interface",
+            "op": "insert"
+        },
+        {
+            "row": {
+                "name": "br1",
+                "interfaces": [
+                    "named-uuid",
+                    "new_interface"
+                ]
+            },
+            "table": "Port",
+            "uuid-name": "new_port",
+            "op": "insert"
+        },
+        {
+            "row": {
+                "name": "br1",
+                "ports": [
+                    "named-uuid",
+                    "new_port"
+                ]
+            },
+            "table": "Bridge",
+            "uuid-name": "new_bridge",
+            "op": "insert"
+        }
+    ],
+    "id":1234
+}
+--------------------------------------
+
+=== See also
+
+
+Project Proposals:OVSDB-Integration[OVSDB Integration project proposal
+page]
+
+http://tools.ietf.org/html/draft-pfaff-ovsdb-proto-02#section-4.1[OVSDB
+Protocol Draft]
+
+http://www.jsoneditoronline.org/[JSON Editor - Very useful]
+
+OVSDB_Integration:Release_Plan[Release Plan]

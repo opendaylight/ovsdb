@@ -1,0 +1,137 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.opendaylight.ovsdb</groupId>
+    <artifactId>OpenDaylight-OSVDB-Docs</artifactId>
+    <version>Hydrogen</version>
+    <name>OpenDaylight OSVDB Docs</name>
+    <description>Documentation for OVSDB sub project of OpenDaylight</description>
+    <url>https://wiki.opendaylight.org/view/Project_Proposals:OVSDB-Integration</url>
+    <organization>
+        <name>OpenDaylight</name>
+        <url>http://www.OpenDaylight.org</url>
+    </organization>
+        <licenses>
+        <license>
+            <name>Eclipse Public License – v 1.0</name>
+            <url>http://www.eclipse.org/legal/epl-v10.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    
+    <scm>
+        <connection>scm:git://git.opendaylight.org/gerrit/ovsdb</connection>
+        <developerConnection>scm:git@git.opendaylight.org/gerrit/ovsdb</developerConnection>
+        <url>https://git.opendaylight.org</url>
+    </scm>
+    
+    <developers>
+        <developer>
+            <name>Colin McNamara</name>
+            <id>colinmcnamara</id>
+            <email>colin@2cups.com</email>
+            <organization>Nexus IS</organization>
+            <roles>
+                <role>architect</role>
+                <role>developer</role>
+            </roles>
+        </developer>
+    </developers>
+    <properties>
+      <dir.input>${project.basedir}/Guide/en-US</dir.input>
+    </properties>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.asciidoctor</groupId>
+                <artifactId>asciidoctor-maven-plugin</artifactId>
+                <version>0.1.3.1</version>
+                <configuration>
+                            <sourceDirectory>Guide/en-US</sourceDirectory>
+                            <sourceHighlighter>coderay</sourceHighlighter>
+                            <imagesDir>images</imagesDir>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>output-docbook</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>process-asciidoc</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>target/docbook/en-US</outputDirectory>
+                            <synchronizations>
+                                <synchronization>
+                                <source>${dir.input}/css</source>
+                                <target>${project.build.directory}/docbook/en-US/css</target>
+                              </synchronization>
+                              <synchronization>
+                                <source>${dir.input}/js</source>
+                                <target>${project.build.directory}/docbook/en-US/js</target>
+                              </synchronization>
+                              <synchronization>
+                                <source>${project.basedir}/images</source>
+                                <target>${project.build.directory}/docbook/en-US/images</target>
+                              </synchronization>
+                            </synchronizations>
+                            <backend>docbook</backend>
+                            <!-- doctype not honored until plugin version 0.1.2 -->
+                            <!-- until then, set the doctype in the document -->
+                            <attributes>
+                                <toc2>true</toc2>
+                                <toc-position>left</toc-position>
+                                <icons>font</icons>
+                                <sectanchors>true</sectanchors>
+                                <idprefix/>
+                                <idseparator>-</idseparator>
+                                <docinfo1>true</docinfo1>
+                                <linkcss>true</linkcss>
+                                <revdate>${maven.build.timestamp}</revdate>
+                                <revnumber>${project.version}</revnumber>
+                            </attributes>
+                            <doctype>book</doctype>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>output-html</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>process-asciidoc</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirectory>Guide/en-US</sourceDirectory>
+                            <outputDirectory>target/html/en-US</outputDirectory>
+                            <synchronizations>
+                              <synchronization>
+                                <source>${dir.input}/css</source>
+                                <target>${project.build.directory}/html/en-US/css</target>
+                              </synchronization>
+                              <synchronization>
+                                <source>${dir.input}/js</source>
+                                <target>${project.build.directory}/html/en-US/js</target>
+                              </synchronization>
+                              <synchronization>
+                                <source>${project.basedir}/images</source>
+                                <target>${project.build.directory}/html/en-US/images</target>
+                              </synchronization>
+                            </synchronizations>
+                            <backend>html</backend>
+                            <attributes>
+                                <toc2>true</toc2>
+                                <toc-position>left</toc-position>
+                                <icons>font</icons>
+                                <sectanchors>true</sectanchors>
+                                <idprefix/>
+                                <idseparator>-</idseparator>
+                                <docinfo1>true</docinfo1>
+                                <linkcss>true</linkcss>
+                                <revdate>${maven.build.timestamp}</revdate>
+                                <revnumber>${project.version}</revnumber>
+                            </attributes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

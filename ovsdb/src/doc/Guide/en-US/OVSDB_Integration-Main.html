@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="generator" content="Asciidoctor 0.1.4">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenDaylight Integration - Main</title>
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>OpenDaylight Integration - Main</h1>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>include::common-attributes.asciidoc</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_introduction">Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>OVSDB Integration is a bundle for OpenDaylight that will implement the
+Open vSwitch Database management protocol, allowing southbound
+configuration of vSwitches. Please join us and clone our repository:</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_high_level_design">High-Level Design</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="OVSDB_Integration-Design">High-Level architecture and design</a></p>
+</li>
+<li>
+<p>OVSDB Integration:Mininet OVSDB Tutorial[OVSDB Integration:Mininet and
+OVSDB Tutorial]</p>
+</li>
+<li>
+<p><a href="http://www.youtube.com/channel/UCMYntfZ255XGgYFrxCNcAzA">OVSDB Hangout
+Recording Weekly Calls and Informational</a></p>
+</li>
+<li>
+<p><a href="https://wiki.opendaylight.org/view/OVSDB_Integration:Design">OVSDB
+Integration Architecture</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_example_usage">Example Usage</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>OVSDB is a critical protocol for Network Virtualization with Open
+vSwitch forwarding elements.</p>
+</div>
+<div id="figure-OVSDB-Architecture" class="paragraph">
+<div class="title">OVSDB Architecture</div>
+<p><span class="image"><img src="images/Ovsdb-architecture.png " alt="OVSDB-Architecture"></span></p>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_clone_the_ovsdb_repository">Clone The OVSDB repository</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre>git clone https://git.opendaylight.org/gerrit/p/ovsdb.git
+
+OR
+
+git clone ssh://&lt;username&gt;@git.opendaylight.org:29418/ovsdb.git</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_people">People</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Brent Salisbury networkstatic on irc.freenode.net</p>
+</li>
+<li>
+<p>Evan Zeller evanz on irc.freenode.net</p>
+</li>
+<li>
+<p>Madhu Venugopal Madhu on irc.freenode.net</p>
+</li>
+<li>
+<p>Giovanni Meo</p>
+</li>
+<li>
+<p>Kyle Mestery</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_issues">Issues</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>jsonrpc4j does not provide the bidirectional capabilities that we need
+to create calls, and respond to echo as well. There are several options
+being investigated:</p>
+</li>
+<li>
+<p>integration of <a href="http://deavid.github.io/bjsonrpc/">bjsonrpc</a> via Jython</p>
+</li>
+<li>
+<p>Create our own json-rpc implementation.</p>
+</li>
+<li>
+<p>Add the functionality needed to jsonrpc4j</p>
+</li>
+<li>
+<p>Continue working on fully integrating the full functionality of the
+protocol OVSDB.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_technical_overview">Technical Overview</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_json_rpc_overview">JSON-RPC Overview</h3>
+<div class="paragraph">
+<p>JSON-RPC is a remote procedure protocol which allows our ovsdb client to
+call methods that exist on the ovsdb server, allowing us to provision
+bridges, ports, interfaces, tunnels, and more in the database. Any rpc
+request is formatted as follows:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>{
+    "method":&lt;string&gt;,
+    "params":[&lt;object&gt;],
+    "id":&lt;string&gt; or &lt;integer&gt;
+}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This will invoke the value given in "method" on the server, passing in
+the parameters specified in order. Parameters can be simple strings, or
+complicated json objects. RPC response messages also have a standard
+formatting:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>{
+    "result":[&lt;object&gt;],
+    "error":&lt;error&gt;,
+    "id":&lt;string&gt; or &lt;integer&gt;
+}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The library <a href="https://code.google.com/p/jsonrpc4j/">jsonrpc4j</a> will take
+care of serializing and deserializing these standard messages for us,
+but for most situations we will need to deserialize the "result" value
+ourselves as it is most likely a complicated json object. Also, for many
+methods the "params" array will contain json objects, we define these as
+actual java objects which then get deserialized into json strings on the
+server side. Using the jackson streaming API it is possible to call
+methods and process responses using only string manipulation, but it is
+less convenient and as of now we are not using this method. The
+<a href="http://tools.ietf.org/html/draft-pfaff-ovsdb-proto-02#section-4.1">ovsdb
+protocol draft</a> describes the methods and their responses in detail.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_example_add_bridge_and_associated_port_and_interface">Example: add bridge and associated port and interface</h3>
+<div class="listingblock">
+<div class="content">
+<pre>{
+    "method":"transact",
+    "params":[
+        "Open_vSwitch",
+        {
+            "row": {
+                "bridges": [
+                    "named-uuid",
+                    "new_bridge"
+                ]
+            },
+            "table": "Open_vSwitch",
+            "uuid-name": "new_switch",
+            "op": "insert"
+        },
+        {
+            "row": {
+                "name": "br1",
+                "type": "internal"
+            },
+            "table": "Interface",
+            "uuid-name": "new_interface",
+            "op": "insert"
+        },
+        {
+            "row": {
+                "name": "br1",
+                "interfaces": [
+                    "named-uuid",
+                    "new_interface"
+                ]
+            },
+            "table": "Port",
+            "uuid-name": "new_port",
+            "op": "insert"
+        },
+        {
+            "row": {
+                "name": "br1",
+                "ports": [
+                    "named-uuid",
+                    "new_port"
+                ]
+            },
+            "table": "Bridge",
+            "uuid-name": "new_bridge",
+            "op": "insert"
+        }
+    ],
+    "id":1234
+}</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_see_also">See also</h3>
+<div class="paragraph">
+<p>Project Proposals:OVSDB-Integration[OVSDB Integration project proposal
+page]</p>
+</div>
+<div class="paragraph">
+<p><a href="http://tools.ietf.org/html/draft-pfaff-ovsdb-proto-02#section-4.1">OVSDB
+Protocol Draft</a></p>
+</div>
+<div class="paragraph">
+<p><a href="http://www.jsoneditoronline.org/">JSON Editor - Very useful</a></p>
+</div>
+<div class="paragraph">
+<p>OVSDB_Integration:Release_Plan[Release Plan]</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2013-12-28 09:13:29 PST
+</div>
+</div>
+</body>
+</html>

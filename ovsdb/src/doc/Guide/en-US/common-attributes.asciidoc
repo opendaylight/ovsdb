@@ -1,0 +1,2 @@
+imagesdir:
+iconsdir:./image/icons

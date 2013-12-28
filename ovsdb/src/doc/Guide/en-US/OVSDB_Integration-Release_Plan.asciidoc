@@ -1,0 +1,16 @@
+Release Milestones
+~~~~~~~~~~~~~~~~~~
+
+[cols=",,",options="header",]
+|====================================================
+|Milestone |Offset 0 Date |Deliverables
+|M1 |7/22/2013 |[multiblock cell omitted]
+|M2 |8/19/2013 |[multiblock cell omitted]
+|M3 |9/16/2013 |[multiblock cell omitted]
+|M4 |10/14//2013 |[multiblock cell omitted]
+|M5 |11/11/2013 |[multiblock cell omitted]
+|RC0 |11/18/2013 |[multiblock cell omitted]
+|RC1 |11/25/2013 |[multiblock cell omitted]
+|RC2 |12/2/2013 |[multiblock cell omitted]
+|Formal Release |12/9/2013 |[multiblock cell omitted]
+|====================================================

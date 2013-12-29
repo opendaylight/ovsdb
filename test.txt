@@ -1,0 +1,10 @@
+verifying git-review works properly with the ODL toolchain
+
+verifying patches work correctly
+
+Again
+
+added commit message
+
+again
+1

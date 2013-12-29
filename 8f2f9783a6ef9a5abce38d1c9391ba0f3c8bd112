@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_28fee3ae",
+        "filename": "neutron/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2013-12-29T17:46:24Z",
+      "side": 1,
+      "message": "It\u0027s a dependency for Mockito.\nThis isn\u0027t in the pom in the controller project as they are the mockito-all artifact. Decision to use core vs all is based on this https://code.google.com/p/mockito/wiki/DeclaringMockitoDependency",
+      "parentUuid": "da6255ed_8874af68",
+      "revId": "8f2f9783a6ef9a5abce38d1c9391ba0f3c8bd112",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_a85bf3f4",
         "filename": "neutron/src/test/java/org/opendaylight/ovsdb/neutron/BaseHandlerTest.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2013-12-29T16:31:05Z",
       "side": 1,
       "message": "AFAIK no need to specify this annotation, it\u0027s detected anyway.\nAnd leaving it here may cause incompatible problems and manual refactor when junit will be updated to a newer version.",
+      "revId": "8f2f9783a6ef9a5abce38d1c9391ba0f3c8bd112",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_88fb8fc0",
+        "filename": "neutron/src/test/java/org/opendaylight/ovsdb/neutron/BaseHandlerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2013-12-29T17:46:24Z",
+      "side": 1,
+      "message": "I was just following https://github.com/junit-team/junit/wiki/Getting-started",
+      "parentUuid": "da6255ed_a85bf3f4",
       "revId": "8f2f9783a6ef9a5abce38d1c9391ba0f3c8bd112",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_68f85bc3",
+        "filename": "neutron/src/test/java/org/opendaylight/ovsdb/neutron/BaseHandlerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2013-12-29T17:46:24Z",
+      "side": 1,
+      "message": "Laziness on my part. I wasn\u0027t looking in the controller source for the implementation. It seemed somewhat easier at the time to mock it rather than instantiate a new one each time. I can change it if you\u0027d rather.",
+      "parentUuid": "da6255ed_486a3782",
+      "revId": "8f2f9783a6ef9a5abce38d1c9391ba0f3c8bd112",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_286703b9",
         "filename": "neutron/src/test/java/org/opendaylight/ovsdb/neutron/NetworkHandlerTest.java",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2013-12-29T16:31:05Z",
       "side": 1,
       "message": "what is the purpose of adding an empty test that does nothing? will its content be added in future patchsets of this patch?\nRight now it\u0027s a test that always passes, no indication of that it\u0027s missing or empty and it doesn\u0027t measure a thing.",
+      "revId": "8f2f9783a6ef9a5abce38d1c9391ba0f3c8bd112",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_480117ae",
+        "filename": "neutron/src/test/java/org/opendaylight/ovsdb/neutron/NetworkHandlerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2013-12-29T17:46:24Z",
+      "side": 1,
+      "message": "No purpose. It was a note to myself that the implementation of this NeutronNetworkUpdate is missing... If you\u0027d rather I could comment out the test with a note to write it when NeutronNetworkUpdate has been implemented.",
+      "parentUuid": "da6255ed_286703b9",
       "revId": "8f2f9783a6ef9a5abce38d1c9391ba0f3c8bd112",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_8874af68",
+        "filename": "neutron/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-12-29T16:31:05Z",
+      "side": 1,
+      "message": "Why is this lib needed?\nAnd where is it used? I didn\u0027t see its imports in the changed code in the patch (perhaps I missed it)",
+      "revId": "8f2f9783a6ef9a5abce38d1c9391ba0f3c8bd112",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_a85bf3f4",
+        "filename": "neutron/src/test/java/org/opendaylight/ovsdb/neutron/BaseHandlerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-12-29T16:31:05Z",
+      "side": 1,
+      "message": "AFAIK no need to specify this annotation, it\u0027s detected anyway.\nAnd leaving it here may cause incompatible problems and manual refactor when junit will be updated to a newer version.",
+      "revId": "8f2f9783a6ef9a5abce38d1c9391ba0f3c8bd112",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_486a3782",
+        "filename": "neutron/src/test/java/org/opendaylight/ovsdb/neutron/BaseHandlerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-12-29T16:31:05Z",
+      "side": 1,
+      "message": "Why is there a need to mock this class?\nisn\u0027t it a simple pojo that has a public constructor, and you can pass directly status code to it in order to create a new instance?",
+      "revId": "8f2f9783a6ef9a5abce38d1c9391ba0f3c8bd112",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_286703b9",
+        "filename": "neutron/src/test/java/org/opendaylight/ovsdb/neutron/NetworkHandlerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-12-29T16:31:05Z",
+      "side": 1,
+      "message": "what is the purpose of adding an empty test that does nothing? will its content be added in future patchsets of this patch?\nRight now it\u0027s a test that always passes, no indication of that it\u0027s missing or empty and it doesn\u0027t measure a thing.",
+      "revId": "8f2f9783a6ef9a5abce38d1c9391ba0f3c8bd112",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_0808bfd8",
+        "filename": "neutron/src/test/java/org/opendaylight/ovsdb/neutron/NetworkHandlerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-12-29T16:31:05Z",
+      "side": 1,
+      "message": "you can use // for Java comments.",
+      "revId": "8f2f9783a6ef9a5abce38d1c9391ba0f3c8bd112",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

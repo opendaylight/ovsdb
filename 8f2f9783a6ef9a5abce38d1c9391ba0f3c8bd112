@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_a829b338",
+        "filename": "neutron/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-12-29T18:37:54Z",
+      "side": 1,
+      "message": "But isn\u0027t the mockito pom declaring those dependencies itself so they will be brought transactively?\nand BTW, they declare a different version of objenesis and harmcrest...\nhttp://central.maven.org/maven2/org/mockito/mockito-core/1.9.5/mockito-core-1.9.5.pom\nif I\u0027m missing something, please explain :)",
+      "parentUuid": "da6255ed_28fee3ae",
+      "revId": "8f2f9783a6ef9a5abce38d1c9391ba0f3c8bd112",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_a85bf3f4",
         "filename": "neutron/src/test/java/org/opendaylight/ovsdb/neutron/BaseHandlerTest.java",
         "patchSetId": 2
@@ -66,6 +84,24 @@
       "side": 1,
       "message": "I was just following https://github.com/junit-team/junit/wiki/Getting-started",
       "parentUuid": "da6255ed_a85bf3f4",
+      "revId": "8f2f9783a6ef9a5abce38d1c9391ba0f3c8bd112",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_c824e761",
+        "filename": "neutron/src/test/java/org/opendaylight/ovsdb/neutron/BaseHandlerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-12-29T18:37:54Z",
+      "side": 1,
+      "message": "there\u0027s no need to do it, unless you have some specific runner you\u0027d like to explicitly enforce.\nLeaving it empty will select the current default runner supported by junit.\nYou can also see other *Test classes in the controller that have no runner specified.\nAnd for example, one of my latest patches here as well:\nhttps://git.opendaylight.org/gerrit/#/c/3919/\n\nSee here:\nhttps://github.com/junit-team/junit/wiki/Test-runners",
+      "parentUuid": "da6255ed_88fb8fc0",
       "revId": "8f2f9783a6ef9a5abce38d1c9391ba0f3c8bd112",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -107,6 +143,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_88226f50",
+        "filename": "neutron/src/test/java/org/opendaylight/ovsdb/neutron/BaseHandlerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-12-29T18:37:54Z",
+      "side": 1,
+      "message": "We can wait to hear other reviewers opinion.\nIn my own code I try not to use mocking where it\u0027s not needed.\nAnd I\u0027m just making sure that we are not bringing whole set of new dependencies for nothing.",
+      "parentUuid": "da6255ed_68f85bc3",
+      "revId": "8f2f9783a6ef9a5abce38d1c9391ba0f3c8bd112",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_286703b9",
         "filename": "neutron/src/test/java/org/opendaylight/ovsdb/neutron/NetworkHandlerTest.java",
         "patchSetId": 2
@@ -136,6 +190,24 @@
       "side": 1,
       "message": "No purpose. It was a note to myself that the implementation of this NeutronNetworkUpdate is missing... If you\u0027d rather I could comment out the test with a note to write it when NeutronNetworkUpdate has been implemented.",
       "parentUuid": "da6255ed_286703b9",
+      "revId": "8f2f9783a6ef9a5abce38d1c9391ba0f3c8bd112",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_e8332ba9",
+        "filename": "neutron/src/test/java/org/opendaylight/ovsdb/neutron/NetworkHandlerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2013-12-29T18:37:54Z",
+      "side": 1,
+      "message": "I would recommend 2 ways of doing this:\n\n1. mark test with @Ignore (instead of commenting it out which leaves no signs of it anywhere and becomes a dead code)\n\n2. (preferred IMHO) - remove it, and in the same future patch where NeutronNetworkUpdate will be added, add its relevant tests along with it. It\u0027s a better practice, and anyway you don\u0027t know who will implement the logic, and there\u0027s no guarantee that person will see the commented/ignored empty test here.",
+      "parentUuid": "da6255ed_480117ae",
       "revId": "8f2f9783a6ef9a5abce38d1c9391ba0f3c8bd112",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

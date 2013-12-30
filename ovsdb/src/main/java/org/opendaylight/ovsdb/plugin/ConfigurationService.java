@@ -2007,16 +2007,21 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
 
     public void _forceConnect (CommandInterpreter ci) {
         String force = ci.nextArgument();
-        if (force.equalsIgnoreCase("YES")) forceConnect = true;
-        else if (force.equalsIgnoreCase("NO")) forceConnect = false;
-        else ci.println("Please enter YES or NO.");
+        if (force.equalsIgnoreCase("YES")) {
+            forceConnect = true;
+        }
+        else if (force.equalsIgnoreCase("NO")) {
+            forceConnect = false;
+        }
+        else {
+            ci.println("Please enter YES or NO.");
+        }
         ci.println("Current ForceConnect State : "+forceConnect);
-        return;
     }
 
     @Override
     public String getHelp() {
-        StringBuffer help = new StringBuffer();
+        StringBuilder help = new StringBuilder();
         help.append("---OVSDB CLI---\n");
         help.append("\t ovsconnect <ConnectionName> <ip-address>                        - Connect to OVSDB\n");
         help.append("\t addBridge <Node> <BridgeName>                                   - Add Bridge\n");

@@ -100,16 +100,11 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
     }
 
     public void setPluginOutInventoryServices(IPluginOutInventoryService service) {
-        if (this.pluginOutInventoryServices != null) {
             this.pluginOutInventoryServices.add(service);
-        }
     }
 
-    public void unsetPluginOutInventoryServices(
-            IPluginOutInventoryService service) {
-        if (this.pluginOutInventoryServices != null) {
+    public void unsetPluginOutInventoryServices(IPluginOutInventoryService service) {
             this.pluginOutInventoryServices.remove(service);
-        }
     }
 
     /**

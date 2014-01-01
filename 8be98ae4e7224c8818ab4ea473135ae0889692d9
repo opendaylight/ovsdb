@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_d3f13c02",
+        "filename": "neutron/src/test/java/org/opendaylight/ovsdb/neutron/InternalNetworkManagerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-01-01T11:10:13Z",
+      "side": 1,
+      "message": "in junit4, no need to call the before method setup. it belongs to junit3 convention.\nit doesn\u0027t hurt, it\u0027s just not doing anything, the annotation explains what the method does. it can be called any other name.",
+      "revId": "8be98ae4e7224c8818ab4ea473135ae0889692d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_13ec7429",
+        "filename": "neutron/src/test/java/org/opendaylight/ovsdb/neutron/SouthboundEventTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-01-01T11:10:13Z",
+      "side": 1,
+      "message": "Hi, what is this test exactly testing?\n\n1. All tests are empty.\n\n2. Unless you are going to explicitly implement tostring/hashcode/equals methods, there\u0027s no need to test the default Java implementation (nor the default IDE completions of implementations).",
+      "revId": "8be98ae4e7224c8818ab4ea473135ae0889692d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_f3f0c0ff",
+        "filename": "neutron/src/test/java/org/opendaylight/ovsdb/neutron/SubnetHandlerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-01-01T11:10:13Z",
+      "side": 1,
+      "message": "Several questions regarding those tests ( and implementation as well)\n\n1. why update and delete expected to return code 201 created? What is created during deletion?\n\n2. currently the subnet handler class implementation is doing nothing. what is tested here?\n\n3. shall the implementation become more than a simple \"return\" statement, are the tests in this class independent? by independent I mean each test method can stand on its own? please keep in mind that junit doesn\u0027t specify nor promise tests execution order, and as such, for example, delete can run before create. so, the deletion/update test need to independently create (and cleanup of course) the entities they are going to change during the test.",
+      "revId": "8be98ae4e7224c8818ab4ea473135ae0889692d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

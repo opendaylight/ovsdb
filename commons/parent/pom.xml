@@ -21,6 +21,7 @@
   <properties>
     <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <jackson.new.version>2.3.0</jackson.new.version>
   </properties>
   <!-- modules should go once the jenkins job is updated to use the root pom -->
   <modules>

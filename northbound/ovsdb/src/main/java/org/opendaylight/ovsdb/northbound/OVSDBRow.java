@@ -9,9 +9,6 @@
  */
 package org.opendaylight.ovsdb.northbound;
 
-import org.codehaus.jackson.annotate.JsonSubTypes;
-import org.codehaus.jackson.annotate.JsonTypeInfo;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.opendaylight.ovsdb.lib.table.Bridge;
 import org.opendaylight.ovsdb.lib.table.Capability;
 import org.opendaylight.ovsdb.lib.table.Controller;
@@ -26,6 +23,10 @@ import org.opendaylight.ovsdb.lib.table.Queue;
 import org.opendaylight.ovsdb.lib.table.SFlow;
 import org.opendaylight.ovsdb.lib.table.SSL;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
+
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
 public class OVSDBRow {

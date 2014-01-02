@@ -10,6 +10,7 @@
 package org.opendaylight.ovsdb.northbound;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -176,8 +177,8 @@ public class OVSDBNorthbound {
         @ResponseCode(code = 400, condition = "Invalid data passed"),
         @ResponseCode(code = 401, condition = "User not authorized to perform this operation")})
     @Consumes({ MediaType.APPLICATION_JSON})
-    @TypeHint(String.class)
-    public String getRow(@PathParam("nodeType") String nodeType, @PathParam("nodeId") String nodeId,
+    @TypeHint(OVSDBRow.class)
+    public OVSDBRow getRow(@PathParam("nodeType") String nodeType, @PathParam("nodeId") String nodeId,
                            @PathParam("tableName") String tableName, @PathParam("rowUuid") String rowUuid) {
 
         if (!NorthboundUtils.isAuthorized(getUserName(), "default", Privilege.WRITE, this)) {
@@ -194,15 +195,13 @@ public class OVSDBNorthbound {
         }
 
         Node node = Node.fromString(nodeType, nodeId);
-        //Table<?> row = null;
-        String row = null;
+        Table<?> row = null;
         try {
-            row = ovsdbTable.getSerializedRow(node, ovsTableName, rowUuid);
+            row = ovsdbTable.getRow(node, ovsTableName, rowUuid);
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
         }
-        //return new OVSDBRow(null, row);
-        return row;
+        return new OVSDBRow(null, row);
     }
 
     /**
@@ -227,8 +226,8 @@ public class OVSDBNorthbound {
         @ResponseCode(code = 400, condition = "Invalid data passed"),
         @ResponseCode(code = 401, condition = "User not authorized to perform this operation")})
     @Consumes({ MediaType.APPLICATION_JSON})
-    @TypeHint(String.class)
-    public String getAllRows(@PathParam("nodeType") String nodeType, @PathParam("nodeId") String nodeId,
+    @TypeHint(OVSDBRows.class)
+    public OVSDBRows getAllRows(@PathParam("nodeType") String nodeType, @PathParam("nodeId") String nodeId,
                                @PathParam("tableName") String tableName) {
         if (!NorthboundUtils.isAuthorized(getUserName(), "default", Privilege.WRITE, this)) {
             throw new UnauthorizedException("User is not authorized to perform this operation");
@@ -244,15 +243,13 @@ public class OVSDBNorthbound {
         }
 
         Node node = Node.fromString(nodeType, nodeId);
-        //Map<String, Table<?>> rows = null;
-        String rows = null;
+        Map<String, Table<?>> rows = null;
         try {
-            rows = ovsdbTable.getSerializedRows(node, ovsTableName);
+            rows = ovsdbTable.getRows(node, ovsTableName);
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
         }
-        //return new OVSDBRows(rows);
-        return rows;
+        return new OVSDBRows(rows);
     }
 
     /**

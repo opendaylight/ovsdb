@@ -64,7 +64,7 @@
                             javax.net.ssl,
                             *
                         </Import-Package>
-                        <Embed-Dependency>httpclient,commons-codec,httpcore-nio,javax.servlet-api,jackson-annotations,jackson-core,jackson-databind,portlet-api,commons-collections;type=!pom;inline=false</Embed-Dependency>
+                        <Embed-Dependency>httpclient,commons-codec,httpcore-nio,javax.servlet-api,portlet-api,commons-collections;type=!pom;inline=false</Embed-Dependency>
                         <Embed-Transitive>
                             true
                         </Embed-Transitive>
@@ -137,17 +137,17 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.2.2</version>
+            <version>${jackson.new.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.2.2</version>
+            <version>${jackson.new.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.2.2</version>
+            <version>${jackson.new.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.portlet</groupId>

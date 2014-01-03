@@ -82,6 +82,10 @@ import com.google.common.util.concurrent.ListenableFuture;
 public class ConnectionService implements IPluginInConnectionService, IConnectionServiceInternal, OvsdbRPC.Callback {
     protected static final Logger logger = LoggerFactory.getLogger(ConnectionService.class);
 
+    // Properties that can be set in config.ini
+    private static final String OVSDB_LISTENPORT = "ovsdb.listenPort";
+    private static final String OVSDB_AUTOCONFIGURECONTROLLER = "ovsdb.autoconfigurecontroller";
+
     private static final Integer defaultOvsdbPort = 6640;
     private static Integer ovsdbListenPort = defaultOvsdbPort;
     private ConcurrentMap<String, Connection> ovsdbConnections;
@@ -106,11 +110,12 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
     public void init() {
         ovsdbConnections = new ConcurrentHashMap<String, Connection>();
         int listenPort = defaultOvsdbPort;
-        String portString = System.getProperty("ovsdb.listenPort");
+        String portString = System.getProperty(OVSDB_LISTENPORT);
         if (portString != null) {
             listenPort = Integer.decode(portString).intValue();
         }
         ovsdbListenPort = listenPort;
+        autoConfigureController = Boolean.getBoolean(OVSDB_AUTOCONFIGURECONTROLLER);
     }
 
     /**
@@ -325,8 +330,9 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         UpdateNotification monitor = new UpdateNotification();
         monitor.setUpdate(updates);
         this.update(connection.getNode(), monitor);
-        // With the existing bridges learnt, now it is time to update the OF Controller connections.
-        this.updateOFControllers(connection.getNode());
+        if (autoConfigureController) {
+            this.updateOFControllers(connection.getNode());
+        }
         inventoryServiceInternal.notifyNodeAdded(connection.getNode());
     }
 

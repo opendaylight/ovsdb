@@ -326,7 +326,8 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         monitor.setUpdate(updates);
         this.update(connection.getNode(), monitor);
         // With the existing bridges learnt, now it is time to update the OF Controller connections.
-        this.updateOFControllers(connection.getNode());
+        // Not doing this as it might interrupt communication over the bridges to the controller
+        // this.updateOFControllers(connection.getNode());
         inventoryServiceInternal.notifyNodeAdded(connection.getNode());
     }
 

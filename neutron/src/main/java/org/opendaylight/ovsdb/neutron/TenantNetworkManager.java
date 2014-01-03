@@ -85,6 +85,9 @@ public class TenantNetworkManager {
 
     public int networkCreated (String networkId) {
         int internalVlan = this.assignInternalVlan(networkId);
+
+        // We are not using containers at the moment...
+        /*
         if (enableContainer && internalVlan != 0) {
             IContainerManager containerManager = (IContainerManager)ServiceHelper.getGlobalInstance(IContainerManager.class, this);
             if (containerManager == null) {
@@ -103,6 +106,7 @@ public class TenantNetworkManager {
             containerFlowConfigs.add(flowConfig);
             containerManager.addContainerFlows(BaseHandler.convertNeutronIDToKey(networkId), containerFlowConfigs);
         }
+        */
         return internalVlan;
     }
 
@@ -218,9 +222,13 @@ public class TenantNetworkManager {
         tags.add(BigInteger.valueOf(vlan));
         port.setTag(tags);
         ovsdbTable.updateRow(node, Port.NAME.getName(), null, portUUID, port);
-        if (enableContainer) this.addPortToTenantNetworkContainer(node, portUUID, network);
+
+        // We are not using containers at the moment...
+        // if (enableContainer) this.addPortToTenantNetworkContainer(node, portUUID, network);
     }
 
+    // We are not using containers at the moment...
+    /*
     private void addPortToTenantNetworkContainer(Node node, String portUUID, NeutronNetwork network) {
         IContainerManager containerManager = (IContainerManager)ServiceHelper.getGlobalInstance(IContainerManager.class, this);
         if (containerManager == null) {
@@ -302,10 +310,12 @@ public class TenantNetworkManager {
         }
         return null;
     }
+    */
 
     public void networkDeleted(String id) {
         if (!enableContainer) return;
 
+        /*
         IContainerManager containerManager = (IContainerManager)ServiceHelper.getGlobalInstance(IContainerManager.class, this);
         if (containerManager == null) {
             logger.error("ContainerManager is not accessible");
@@ -316,6 +326,7 @@ public class TenantNetworkManager {
         ContainerConfig config = new ContainerConfig();
         config.setContainer(networkID);
         containerManager.removeContainer(config);
+        */
     }
 
 }

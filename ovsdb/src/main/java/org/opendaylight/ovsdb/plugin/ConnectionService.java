@@ -77,8 +77,15 @@ import com.google.common.util.concurrent.ListenableFuture;
 public class ConnectionService implements IPluginInConnectionService, IConnectionServiceInternal, OvsdbRPC.Callback {
     protected static final Logger logger = LoggerFactory.getLogger(ConnectionService.class);
 
+    // Properties that can be set in config.ini
+    private static final String OVSDB_LISTENPORT = "ovsdb.listenPort";
+    private static final String OVSDB_AUTOCONFIGURECONTROLLER = "ovsdb.autoconfigurecontroller";
+
     private static final Integer defaultOvsdbPort = 6640;
+    private static final boolean defaultAutoConfigureController = true;
+
     private static Integer ovsdbListenPort = defaultOvsdbPort;
+    private static boolean autoConfigureController = defaultAutoConfigureController;
     private ConcurrentMap<String, Connection> ovsdbConnections;
     private List<ChannelHandler> handlers = null;
     private InventoryServiceInternal inventoryServiceInternal;
@@ -101,11 +108,15 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
     public void init() {
         ovsdbConnections = new ConcurrentHashMap<String, Connection>();
         int listenPort = defaultOvsdbPort;
-        String portString = System.getProperty("ovsdb.listenPort");
+        String portString = System.getProperty(OVSDB_LISTENPORT);
         if (portString != null) {
-            listenPort = Integer.decode(portString);
+            listenPort = Integer.decode(portString).intValue();
         }
         ovsdbListenPort = listenPort;
+
+        // Keep the default value if the property is not set
+        if (System.getProperty(OVSDB_AUTOCONFIGURECONTROLLER) != null)
+            autoConfigureController = Boolean.getBoolean(OVSDB_AUTOCONFIGURECONTROLLER);
     }
 
     /**
@@ -320,8 +331,9 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         UpdateNotification monitor = new UpdateNotification();
         monitor.setUpdate(updates);
         this.update(connection.getNode(), monitor);
-        // With the existing bridges learnt, now it is time to update the OF Controller connections.
-        this.updateOFControllers(connection.getNode());
+        if (autoConfigureController) {
+            this.updateOFControllers(connection.getNode());
+        }
         inventoryServiceInternal.notifyNodeAdded(connection.getNode());
     }
 
@@ -450,7 +462,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         String portString = System.getProperty("of.listenPort");
         if (portString != null) {
             try {
-                openFlowPort = Short.decode(portString);
+                openFlowPort = Short.decode(portString).shortValue();
             } catch (NumberFormatException e) {
                 logger.warn("Invalid port:{}, use default({})", portString,
                         openFlowPort);

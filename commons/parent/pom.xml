@@ -21,7 +21,27 @@
   <properties>
     <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <java.version.source>1.7</java.version.source>
+    <java.version.target>1.7</java.version.target>
   </properties>
+  
+    <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <configuration>
+            <source>${java.version.source}</source>
+            <target>${java.version.target}</target>
+            <testSource>${java.version.source}</testSource>
+            <testTarget>${java.version.target}</testTarget>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+  
   <!-- modules should go once the jenkins job is updated to use the root pom -->
   <modules>
     <module>../../ovsdb/</module>
@@ -29,6 +49,7 @@
     <module>../../neutron</module>
     <module>../../distribution/opendaylight</module>
   </modules>
+  
   <repositories>
     <!-- jsonrpc4j mirror -->
     <repository>

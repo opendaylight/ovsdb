@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_f158b38b",
+        "filename": "neutron/src/test/java/org/opendaylight/ovsdb/neutron/NetworkHandlerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-01-05T10:35:57Z",
+      "side": 1,
+      "message": "what is this test testing? 2 identical empty objects are created, one is being  updated by an empty implementation of NetworkHandler?",
+      "revId": "df19f30a978d6fb55c42e899c66905a072a1393f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

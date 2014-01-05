@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_f1331360",
+        "filename": "commons/parent/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-01-05T10:04:13Z",
+      "side": 1,
+      "message": "2 questions about this property:\n\n1. why call it \"new\"? today it\u0027s new, in a month it won\u0027t be new anymore, anyone who will see this property will wonder about its name.\n\n2. all poms that declare this jackson.new.version have the odl commons pom as their parent, thus they already inherit the jackson.version property. Now it creates a duplicity and 3 more places of version management to maintain. is this really necessary? \n\nplease explain, thank you!",
+      "revId": "11429a7040965fe2b4429aa05c636c0944fb5c2e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_71f04391",
+        "filename": "northbound/ovsdb/src/main/java/org/opendaylight/ovsdb/northbound/OVSDBNorthbound.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-01-05T10:04:13Z",
+      "side": 1,
+      "message": "Guys, how is this change considered part of jackson upgrade? In other words, why is this in the same patch that upgrades jackson - what am I missing here?",
+      "revId": "11429a7040965fe2b4429aa05c636c0944fb5c2e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

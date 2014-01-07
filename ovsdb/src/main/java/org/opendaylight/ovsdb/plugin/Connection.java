@@ -19,8 +19,6 @@ import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-
 public class Connection {
     private Node node;
     private String identifier;

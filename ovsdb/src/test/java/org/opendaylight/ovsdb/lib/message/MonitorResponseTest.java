@@ -19,8 +19,6 @@ import com.google.common.io.Resources;
 
 import junit.framework.TestCase;
 
-import org.opendaylight.ovsdb.lib.message.TableUpdate;
-import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
 import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -28,7 +26,6 @@ import org.opendaylight.ovsdb.lib.table.Bridge;
 import org.opendaylight.ovsdb.lib.table.Interface;
 import org.opendaylight.ovsdb.lib.table.Port;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
-import org.sonatype.inject.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -99,7 +96,7 @@ public class MonitorResponseTest extends TestCase {
         assertEquals(2, rows.size());
         List<TableUpdate.Row<Port>> sorted = Ordering.natural().onResultOf(new Function<TableUpdate.Row<Port>, String>() {
             @Override
-            public String apply(@Nullable org.opendaylight.ovsdb.lib.message.TableUpdate.Row<Port> input) {
+            public String apply(org.opendaylight.ovsdb.lib.message.TableUpdate.Row<Port> input) {
                 return input.getId();
             }
         }).sortedCopy(rows);

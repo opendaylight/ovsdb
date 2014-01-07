@@ -45,7 +45,6 @@ import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
 import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.table.Bridge;
-import org.opendaylight.ovsdb.lib.table.Capability;
 import org.opendaylight.ovsdb.lib.table.Controller;
 import org.opendaylight.ovsdb.lib.table.Interface;
 import org.opendaylight.ovsdb.lib.table.Manager;

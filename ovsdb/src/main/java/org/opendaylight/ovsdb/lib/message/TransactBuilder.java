@@ -10,15 +10,10 @@
 package org.opendaylight.ovsdb.lib.message;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 import org.opendaylight.ovsdb.lib.jsonrpc.Params;
 import org.opendaylight.ovsdb.lib.message.operations.Operation;
-import org.opendaylight.ovsdb.lib.table.Bridge;
-import org.opendaylight.ovsdb.lib.table.internal.Table;
-
 import java.util.List;
-import java.util.Map;
 
 public class TransactBuilder implements Params {
 

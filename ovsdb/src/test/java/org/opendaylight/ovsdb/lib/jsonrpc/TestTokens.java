@@ -12,10 +12,7 @@ package org.opendaylight.ovsdb.lib.jsonrpc;
 import com.google.common.reflect.Invokable;
 import com.google.common.reflect.TypeToken;
 import com.google.common.util.concurrent.ListenableFuture;
-
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 
 
 public class TestTokens {

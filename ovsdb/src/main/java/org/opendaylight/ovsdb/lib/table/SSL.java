@@ -10,9 +10,7 @@
 package org.opendaylight.ovsdb.lib.table;
 
 import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
-import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
-import org.opendaylight.ovsdb.lib.table.internal.Table.Name;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_3371b844",
+        "filename": "neutron/src/test/java/org/opendaylight/ovsdb/neutron/InternalNetworkManagerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-01-09T01:40:52Z",
+      "side": 1,
+      "message": "Thanks for the explanation... I\u0027d like to leave it there. While it doesn\u0027t \"do\" anything I think it helps with readability.",
+      "parentUuid": "da6255ed_d3f13c02",
+      "revId": "8be98ae4e7224c8818ab4ea473135ae0889692d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_13ec7429",
         "filename": "neutron/src/test/java/org/opendaylight/ovsdb/neutron/SouthboundEventTest.java",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "da6255ed_1392344c",
+        "filename": "neutron/src/test/java/org/opendaylight/ovsdb/neutron/SouthboundEventTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-01-09T01:40:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da6255ed_13ec7429",
+      "revId": "8be98ae4e7224c8818ab4ea473135ae0889692d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da6255ed_f3f0c0ff",
         "filename": "neutron/src/test/java/org/opendaylight/ovsdb/neutron/SubnetHandlerTest.java",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2014-01-01T11:10:13Z",
       "side": 1,
       "message": "Several questions regarding those tests ( and implementation as well)\n\n1. why update and delete expected to return code 201 created? What is created during deletion?\n\n2. currently the subnet handler class implementation is doing nothing. what is tested here?\n\n3. shall the implementation become more than a simple \"return\" statement, are the tests in this class independent? by independent I mean each test method can stand on its own? please keep in mind that junit doesn\u0027t specify nor promise tests execution order, and as such, for example, delete can run before create. so, the deletion/update test need to independently create (and cleanup of course) the entities they are going to change during the test.",
+      "revId": "8be98ae4e7224c8818ab4ea473135ae0889692d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_73dcd073",
+        "filename": "neutron/src/test/java/org/opendaylight/ovsdb/neutron/SubnetHandlerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-01-09T01:40:52Z",
+      "side": 1,
+      "message": "I\u0027ve removed the UT\u0027s for this class.... \nHaving spoken to Madhu, I\u0027m going to edit the implementation to look more like a placeholder (which it is), removing the rogue Status Codes and replacing with return 0;",
+      "parentUuid": "da6255ed_f3f0c0ff",
       "revId": "8be98ae4e7224c8818ab4ea473135ae0889692d9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

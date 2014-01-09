@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_b0a8eb20",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/SubnetHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-01-09T02:16:30Z",
+      "side": 1,
+      "message": "When reviewing this code, i just realized that it is better to leave the HTTP_CREATED as the return type.\n\nThough we dont handle subnet creation, it is okay to return success. This is because returning a failure will result in a failure to the user on the OpenStack side. Actually, even though we dont handle the Subnet creation, we can still handle traffic bridging within this subnet.\n\nYes, We dont support Routing and we dont even handle that, so it will certainly result in a failure which is correct.\nBut I think leaving Subnet returning a success is correct at this point even though we dont do anything specific.\n\nWhen we support Routing functionalities, I think we can beef up the functionality here.",
+      "revId": "a35e7c84b984fff4876b7911c1ef721b7cdd9c44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_90a5e748",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/TenantNetworkManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-01-09T02:16:30Z",
+      "side": 1,
+      "message": "Sorry about commenting late on this.\nYes, we dont support Containers at this moment, I just realized that I added a enableContainer flag, which can be toggled by config.\nI kept it in the code to test behaviour by enabling this flag during development phase.\n\nI feel that keeping this code (without commenting will come in handy when we want to try out how the code behaves in the presence of Containers).\n\nBut am not opposed to commenting it out if you think that is the better approach from a testing point of view.",
+      "revId": "a35e7c84b984fff4876b7911c1ef721b7cdd9c44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_7066f32b",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/TenantNetworkManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 318,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-01-09T02:16:30Z",
+      "side": 1,
+      "message": "Depending on the above comment, if we agree that it is okay to retain the enableContainer flag, then we can add that flag here instead of the comment.\n\nenableContainer will be false for Hydrogen release and can be\nturned ON only for development purposes ?",
+      "revId": "a35e7c84b984fff4876b7911c1ef721b7cdd9c44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

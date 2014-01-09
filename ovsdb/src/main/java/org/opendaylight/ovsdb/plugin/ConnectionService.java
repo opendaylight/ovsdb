@@ -108,7 +108,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         int listenPort = defaultOvsdbPort;
         String portString = System.getProperty("ovsdb.listenPort");
         if (portString != null) {
-            listenPort = Integer.decode(portString).intValue();
+            listenPort = Integer.decode(portString);
         }
         ovsdbListenPort = listenPort;
     }
@@ -455,7 +455,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         String portString = System.getProperty("of.listenPort");
         if (portString != null) {
             try {
-                openFlowPort = Short.decode(portString).shortValue();
+                openFlowPort = Short.decode(portString);
             } catch (NumberFormatException e) {
                 logger.warn("Invalid port:{}, use default({})", portString,
                         openFlowPort);

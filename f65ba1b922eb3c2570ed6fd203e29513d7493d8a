@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_1048d785",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 330,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-01-09T02:36:44Z",
+      "side": 1,
+      "message": "Well. there is a conflicting requirement for this for other cases and in such cases, i depend on a configuration flag which the user can enable/disable based on deployment need.\n\nCan you please add one instead of commenting this out ?",
+      "revId": "f65ba1b922eb3c2570ed6fd203e29513d7493d8a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -12,8 +12,6 @@ package org.opendaylight.ovsdb.plugin;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
-import org.opendaylight.ovsdb.plugin.ConfigurationService;
-import org.opendaylight.ovsdb.plugin.ConnectionService;
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

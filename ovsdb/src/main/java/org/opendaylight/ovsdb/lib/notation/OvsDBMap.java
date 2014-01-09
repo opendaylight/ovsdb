@@ -14,7 +14,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ForwardingMap;
 import com.google.common.collect.Maps;
 
-import org.opendaylight.ovsdb.lib.notation.json.ConditionSerializer;
 import org.opendaylight.ovsdb.lib.notation.json.Converter;
 import org.opendaylight.ovsdb.lib.notation.json.OvsDBMapSerializer;
 

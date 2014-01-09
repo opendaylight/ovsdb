@@ -9,8 +9,6 @@
  */
 package org.opendaylight.ovsdb.lib.message.operations;
 
-import java.util.Map;
-
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 
 import com.fasterxml.jackson.annotation.JsonProperty;

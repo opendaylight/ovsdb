@@ -11,28 +11,30 @@
 
 package org.opendaylight.ovsdb.neutron;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
-import org.opendaylight.ovsdb.lib.table.Open_vSwitch;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-
-import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.ovsdb.plugin.ConfigurationService;
-import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.utils.ServiceHelper;
+import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
+import org.opendaylight.ovsdb.lib.table.Open_vSwitch;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
+import org.opendaylight.ovsdb.plugin.ConfigurationService;
+import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(ServiceHelper.class)

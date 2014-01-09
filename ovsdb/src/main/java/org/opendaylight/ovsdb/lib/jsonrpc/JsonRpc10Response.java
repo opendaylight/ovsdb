@@ -11,7 +11,6 @@ package org.opendaylight.ovsdb.lib.jsonrpc;
 
 import java.util.List;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 
 public class JsonRpc10Response {

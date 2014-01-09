@@ -12,12 +12,13 @@
 
 package org.opendaylight.ovsdb.neutron;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.net.HttpURLConnection;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
-
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 

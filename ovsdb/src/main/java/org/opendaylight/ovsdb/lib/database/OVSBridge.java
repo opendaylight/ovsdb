@@ -10,10 +10,14 @@
 package org.opendaylight.ovsdb.lib.database;
 
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.opendaylight.ovsdb.plugin.Connection;
 import org.opendaylight.ovsdb.plugin.OvsdbMessage;
-
-import java.util.*;
 
 public class OVSBridge {
 

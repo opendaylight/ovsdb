@@ -12,13 +12,10 @@ package org.opendaylight.ovsdb.lib.jsonrpc;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import junit.framework.TestCase;
-
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcDecoder;
 
-import java.io.*;
+import java.io.OutputStream;
+import java.io.IOException;
 import java.net.Socket;
 
 public class TestClient extends TestCase {

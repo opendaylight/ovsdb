@@ -9,7 +9,6 @@
  */
 package org.opendaylight.ovsdb.plugin;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MutateRequest {

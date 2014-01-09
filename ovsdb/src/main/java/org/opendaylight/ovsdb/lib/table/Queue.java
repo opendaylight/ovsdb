@@ -9,11 +9,9 @@
  */
 package org.opendaylight.ovsdb.lib.table;
 
-import java.math.BigInteger;
 
 import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
 import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
-import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;

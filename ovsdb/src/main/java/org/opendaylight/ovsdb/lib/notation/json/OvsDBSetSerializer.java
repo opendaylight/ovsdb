@@ -12,7 +12,6 @@ package org.opendaylight.ovsdb.lib.notation.json;
 import java.io.IOException;
 import java.util.Set;
 
-import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 
 import com.fasterxml.jackson.core.JsonGenerator;

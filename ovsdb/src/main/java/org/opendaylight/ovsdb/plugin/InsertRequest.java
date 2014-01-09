@@ -9,12 +9,8 @@
  */
 package org.opendaylight.ovsdb.plugin;
 
-import java.util.ArrayList;
 import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import org.opendaylight.ovsdb.lib.database.OvsdbType;
 
 public class InsertRequest {
     public String op;

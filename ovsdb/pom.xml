@@ -18,8 +18,6 @@
     <packaging>bundle</packaging>
 
     <properties>
-        <java.version.source>1.7</java.version.source>
-        <java.version.target>1.7</java.version.target>
         <skip.integrationtest>true</skip.integrationtest>
         <!-- used for filtering the integration test resource -->
         <ovsdbserver.ipaddress>192.168.56.10</ovsdbserver.ipaddress>
@@ -96,16 +94,6 @@
                 <skipITs>${skip.integrationtest}</skipITs>
                </configuration>
              </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>${java.version.source}</source>
-                    <target>${java.version.target}</target>
-                    <testSource>${java.version.source}</testSource>
-                    <testTarget>${java.version.target}</testTarget>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
     <dependencies>

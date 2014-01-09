@@ -183,7 +183,7 @@ public class TenantNetworkManager {
     private boolean isInterfacePresentInTenantNetwork (String portId, String networkId) {
         INeutronPortCRUD neutronPortService = (INeutronPortCRUD)ServiceHelper.getGlobalInstance(INeutronPortCRUD.class, this);
         NeutronPort neutronPort = neutronPortService.getPort(portId);
-        if (neutronPort.getNetworkUUID().equalsIgnoreCase(networkId)) return true;
+        if (neutronPort != null && neutronPort.getNetworkUUID().equalsIgnoreCase(networkId)) return true;
         return false;
     }
 

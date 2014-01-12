@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
@@ -28,6 +27,7 @@ import org.opendaylight.ovsdb.lib.table.Interface;
 import org.opendaylight.ovsdb.neutron.AdminConfigManager;
 import org.opendaylight.ovsdb.neutron.IMDSALConsumer;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.DropActionCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.OutputActionCaseBuilder;
@@ -55,8 +55,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.ethernet.match.fields.EthernetSourceBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.TunnelBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.VlanMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.TcpMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.UdpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanIdBuilder;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
@@ -68,7 +69,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherTyp
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
@@ -78,7 +78,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.I
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.EthernetMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.ethernet.match.fields.EthernetTypeBuilder;
-
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.output.action._case.OutputActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
@@ -188,6 +187,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
             * table=0,in_port=2,dl_src=00:00:00:00:00:01 actions=set_field:5->tun_id,goto_table=1
             * #3 -------------------------------------------
             * table=0,priority=16384,in_port=1 actions=drop"
+            *
+            * Parameter Order: DPID, flowmod TABLE, GotoTABLE, TunnelID, [TunnelPort||LocalPort], IPv4_src/dst, L4src/dst, L2 src/dst, VID
             */
 
            /*
@@ -197,9 +198,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
             * Action: Packet_In to Controller Reserved Port
             */
 
+            writeLLDPRule(dpidLong);
 
-//            writeLLDPRule(dpidLong);
-//            writeLocalInPort(dpidLong, table0, table1, localPort, tunnelId, sMacAddr);
             /*
             * Table(0) Rule #2
             * ----------------
@@ -207,7 +207,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
             * Action: GOTO Local Table (10)
             */
 
-//            writeTunnelIn(dpidLong, table0, tunnelId, table2, OFPortOut);
+            writeTunnelIn(dpidLong, table0, table2, tunnelId, OFPortOut);
 
             /*
             * Table(0) Rule #3
@@ -216,13 +216,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
             * Action:Action: Set Tunnel ID and GOTO Local Table (5)
             */
 
-            // ** Test for Madhu **
-            // *** First Run this against OVS ***
-            writeTunnelMiss(dpidLong, table0, tunnelId, table1);
-            writeTunnelMiss(dpidLong, table2, tunnelId, table3);
-            writeLocalInPort(dpidLong, table0, table1, localPort, tunnelId, sMacAddr);
-            writeTunnelMiss(dpidLong, table1, tunnelId, table2);
-            writeTunnelMiss(dpidLong, table1, tunnelId, table2);
+            writeLocalInPort(dpidLong, table0, table1, tunnelId, localPort, sMacAddr);
 
            /*
             * Table(0) Rule #4
@@ -231,7 +225,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
             * Action: Drop w/ a low priority
             */
 
-//            writeDropSrcIface(dpidLong, localPort);
+            writeDropSrcIface(dpidLong, localPort);
 
             /*
             * (NOTES ONLY, DO NOT COMMIT)
@@ -256,7 +250,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
             * actions=output:11,goto_table:2
             */
 
-//            writeTunnelOut(dpidLong, table1, table2, tunnelId, dMacAddr, OFPortOut);
+            writeTunnelOut(dpidLong, table1, table2, tunnelId, OFPortOut, dMacAddr);
 
            /*
             * Table(1) Rule #2
@@ -268,7 +262,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
             * actions=output:10,output:11,goto_table:2
             */
 
-//            writeTunnelFloodOut(dpidLong, table1, tunnelId, dMacAddr, OFPortOut);
+            writeTunnelFloodOut(dpidLong, table1, table2, tunnelId, OFPortOut, dMacAddr);
 
            /*
             * Table(1) Rule #3
@@ -279,7 +273,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
             * table=1,priority=8192,tun_id=0x5 actions=goto_table:2
             */
 
-//            writeTunnelMiss(dpidLong, table0, tunnelId, table2);
+            writeTunnelMiss(dpidLong, table1, table2, tunnelId);
 
            /*
             * (NOTES ONLY, DO NOT COMMIT)
@@ -299,7 +293,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
             * table=2,tun_id=0x5,dl_dst=00:00:00:00:00:01 actions=output:2
             */
 
-//            writeLocalUcastOut(dpidLong, localPort, tunnelId, dMacAddr);
+            writeLocalUcastOut(dpidLong, table2, tunnelId, localPort, dMacAddr);
 
            /*
             * Table(2) Rule #2
@@ -310,7 +304,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
             * actions=output:2
             */
 
-//            writeLocalBcastOut(dpidLong, localPort, tunnelId, dMacAddr);
+            writeLocalBcastOut(dpidLong, table2, tunnelId, localPort, dMacAddr);
 
            /*
             * Table(2) Rule #3
@@ -320,7 +314,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
             * table=2,priority=8192,tun_id=0x5 actions=drop
             */
 
-//            writeLocalTableMiss(dpidLong, tunnelId);
+            writeLocalTableMiss(dpidLong, table2, tunnelId);
 
         } catch (Exception e) {
             logger.error("Failed to initialize Flow Rules for " + node.toString(), e);
@@ -379,7 +373,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
      * table=0,tun_id=0x5,in_port=10, actions=goto_table:2
      */
 
-    private void writeTunnelIn(Long dpidLong, Short writeTable, BigInteger tunnelId, Short goToTableId,  Long ofPort) {
+    private void writeTunnelIn(Long dpidLong, Short writeTable, Short goToTableId, BigInteger tunnelId,  Long ofPort) {
 
         String nodeName = "openflow:" + dpidLong;
 
@@ -389,7 +383,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         // Create Match(es) and Set them in the FlowBuilder Object
         flowBuilder.setMatch(createTunnelIDMatch(matchBuilder, tunnelId).build());
-//        flowBuilder.setMatch(createInPortMatch(matchBuilder, ofPort).build());
+        flowBuilder.setMatch(createInPortMatch(matchBuilder, dpidLong, ofPort).build());
 
         // Create the OF Actions and Instructions
         InstructionBuilder ib = new InstructionBuilder();
@@ -412,7 +406,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
         flowBuilder.setBarrier(false);
         flowBuilder.setTableId(writeTable);
         flowBuilder.setKey(key);
-        flowBuilder.setPriority(8192);
         flowBuilder.setFlowName("TUNIN_" + nodeName);
         writeFlow(flowBuilder, nodeBuilder);
     }
@@ -425,7 +418,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
     * actions=set_field:5->tun_id,goto_table=1"
     */
 
-    private void writeLocalInPort(Long dpidLong, Short writeTable, Short goToTableId, Long inPort, BigInteger tunnelId, MacAddress sMacAddr) {
+    private void writeLocalInPort(Long dpidLong, Short writeTable, Short goToTableId, BigInteger tunnelId, Long inPort, MacAddress sMacAddr) {
 
         String nodeName = "openflow:" + dpidLong;
 
@@ -446,7 +439,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
         List<Instruction> instructions = new ArrayList<Instruction>();
 
         // GOTO Instuctions Need to be added first to the List
-        //** Madhu Uncomment here **
         createGotoTableInstructions(ib, goToTableId);
         instructions.add(ib.build());
         // TODO Broken SetTunID
@@ -521,7 +513,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
     * actions=output:10,goto_table:2"
     */
 
-    private void writeTunnelOut(Long dpidLong, Short writeTable, Short goToTableId, BigInteger tunnelId, MacAddress dMacAddr, Long OFPortOut) {
+    private void writeTunnelOut(Long dpidLong, Short writeTable, Short goToTableId, BigInteger tunnelId , Long OFPortOut, MacAddress dMacAddr) {
 
         String nodeName = "openflow:" + dpidLong;
 
@@ -540,10 +532,10 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // Instructions List Stores Individual Instructions
         List<Instruction> instructions = new ArrayList<Instruction>();
 
-        // GOTO Instuctions Need to be added first to the List
+        // GOTO Instuctions
         createGotoTableInstructions(ib, goToTableId);
         instructions.add(ib.build());
-        // Broken OutPort
+        // Set the Output Port/Iface
         createOutputPortInstructions(ib, dpidLong, OFPortOut);
         instructions.add(ib.build());
 
@@ -569,7 +561,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
     * actions=output:10,output:11,goto_table:2
     */
 
-    private void writeTunnelFloodOut(Long dpidLong, Short localTable, BigInteger tunnelId, MacAddress dMacAddr, Long OFPortOut) {
+    private void writeTunnelFloodOut(Long dpidLong, Short writeTable, Short localTable, BigInteger tunnelId,  Long OFPortOut, MacAddress dMacAddr) {
 
         String nodeName = "openflow:" + dpidLong;
 
@@ -578,7 +570,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Create the OF Match using MatchBuilder
+        // Match TunnelID
         flowBuilder.setMatch(createTunnelIDMatch(matchBuilder, tunnelId).build());
+        // Match DMAC
         flowBuilder.setMatch(createDestEthMatch(matchBuilder, dMacAddr).build());
 
         // Instantiate the Builders for the OF Actions and Instructions
@@ -588,10 +582,10 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // Instructions List Stores Individual Instructions
         List<Instruction> instructions = new ArrayList<Instruction>();
 
-        // GOTO Instuctions Need to be added first to the List
+        // GOTO Instuction
         createGotoTableInstructions(ib, localTable);
         instructions.add(ib.build());
-        // Broken OutPort
+        // Set the Output Port/Iface
         createOutputPortInstructions(ib, dpidLong, OFPortOut);
         instructions.add(ib.build());
 
@@ -603,10 +597,10 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         FlowKey key = new FlowKey(new FlowId((long) 150));
         flowBuilder.setBarrier(false);
-        flowBuilder.setTableId((short) 1);
+        flowBuilder.setTableId(writeTable);
         flowBuilder.setKey(key);
         flowBuilder.setPriority(16384);
-        flowBuilder.setFlowName("TUNOUT_" + nodeName);
+        flowBuilder.setFlowName("TUNFLOODOUT_" + nodeName);
         writeFlow(flowBuilder, nodeBuilder);
     }
 
@@ -618,7 +612,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
     * table=2,priority=8192,tun_id=0x5 actions=drop
     */
 
-    private void writeTunnelMiss(Long dpidLong, Short writeTable, BigInteger tunnelId, Short goToTableId) {
+    private void writeTunnelMiss(Long dpidLong, Short writeTable, Short goToTableId, BigInteger tunnelId) {
 
         String nodeName = "openflow:" + dpidLong;
 
@@ -650,7 +644,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
         flowBuilder.setBarrier(false);
         flowBuilder.setTableId(writeTable);
         flowBuilder.setKey(key);
-        flowBuilder.setPriority(50192);
+        flowBuilder.setPriority(8192);
         flowBuilder.setFlowName("TUNMISS_" + nodeName);
         writeFlow(flowBuilder, nodeBuilder);
     }
@@ -662,7 +656,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
      * table=2,tun_id=0x5,dl_dst=00:00:00:00:00:01 actions=output:2
      */
 
-    private void writeLocalUcastOut(Long dpidLong, Long localPort, BigInteger tunnelId, MacAddress dMacAddr) {
+    private void writeLocalUcastOut(Long dpidLong, Short writeTable, BigInteger tunnelId, Long localPort, MacAddress dMacAddr) {
 
         String nodeName = "openflow:" + dpidLong;
 
@@ -681,7 +675,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // Instructions List Stores Individual Instructions
         List<Instruction> instructions = new ArrayList<Instruction>();
 
-        // Broken OutPort
+        // Set the Output Port/Iface
         createOutputPortInstructions(ib, dpidLong, localPort);
         instructions.add(ib.build());
 
@@ -693,7 +687,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         FlowKey key = new FlowKey(new FlowId((long) 170));
         flowBuilder.setBarrier(false);
-        flowBuilder.setTableId((short) 2);
+        flowBuilder.setTableId(writeTable);
         flowBuilder.setKey(key);
         flowBuilder.setFlowName("LOCALHOSTUCAST_" + nodeName);
         writeFlow(flowBuilder, nodeBuilder);
@@ -706,7 +700,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
      * actions=output:2,3,4,5
      */
 
-    private void writeLocalBcastOut(Long dpidLong, Long localPort, BigInteger tunnelId, MacAddress dMacAddr) {
+    private void writeLocalBcastOut(Long dpidLong, Short writeTable, BigInteger tunnelId, Long localPort, MacAddress dMacAddr) {
 
         String nodeName = "openflow:" + dpidLong;
 
@@ -725,7 +719,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // Instructions List Stores Individual Instructions
         List<Instruction> instructions = new ArrayList<Instruction>();
 
-        // Broken OutPort TODO: locaPort needs to be a list of Ports)
+        // Broken OutPort TODO: localPort needs to be a list of Ports)
         createOutputPortInstructions(ib, dpidLong, localPort);
         instructions.add(ib.build());
 
@@ -737,7 +731,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         FlowKey key = new FlowKey(new FlowId((long) 180));
         flowBuilder.setBarrier(false);
-        flowBuilder.setTableId((short) 2);
+        flowBuilder.setTableId(writeTable);
         flowBuilder.setKey(key);
         flowBuilder.setPriority(16384);
         flowBuilder.setFlowName("LOCALHOSTBCAST_" + nodeName);
@@ -751,7 +745,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
      * table=2,priority=8192,tun_id=0x5 actions=drop
      */
 
-    private void writeLocalTableMiss(Long dpidLong, BigInteger tunnelId) {
+    private void writeLocalTableMiss(Long dpidLong, Short writeTable, BigInteger tunnelId) {
 
         String nodeName = "openflow:" + dpidLong;
 
@@ -781,7 +775,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         FlowKey key = new FlowKey(new FlowId((long) 190));
         flowBuilder.setBarrier(false);
-        flowBuilder.setTableId((short) 2);
+        flowBuilder.setTableId(writeTable);
         flowBuilder.setKey(key);
         flowBuilder.setPriority(8192);
         flowBuilder.setFlowName("TUNMISS_" + nodeName);
@@ -826,13 +820,10 @@ class OF13ProviderManager extends ProviderNetworkManager {
      */
     private static MatchBuilder createInPortMatch(MatchBuilder matchBuilder, Long dpidLong, Long inPort) {
 
-        NodeConnectorId ncid = new NodeConnectorId("openflow:" + dpidLong + ":2");
-
+        NodeConnectorId ncid = new NodeConnectorId("openflow:" + dpidLong + ":" + inPort);
+        logger.debug("createInPortMatch() Node Connector ID is - Type=openflow: DPID={} inPort={} ",dpidLong, inPort);
         matchBuilder.setInPort(NodeConnectorId.getDefaultInstance(ncid.getValue()));
-        logger.error("ERROR ====>"+ ncid.toString()+ " " + ncid.getValue());
         matchBuilder.setInPort(ncid);
-//6       matchBuilder.setInPort(Long.valueOf(2));
-//        matchBuilder.setInPort(inPort);
 
         return matchBuilder;
     }
@@ -942,32 +933,25 @@ class OF13ProviderManager extends ProviderNetworkManager {
     /*
      * Create Output Port Instruction
      */
-    private InstructionBuilder createOutputPortInstructions(InstructionBuilder ib, Long dpidLong, Long outPort) {
+    private InstructionBuilder createOutputPortInstructions(InstructionBuilder ib, Long dpidLong, Long port) {
 
-        // TODO Broken Output Port Action
-        // NodeConnectorId ncid = new NodeConnectorId(String.valueOf(Long.valueOf(2)));
-        //  Uri value = new Uri(String.valueOf(Long.valueOf(10)));
-        // oab.setOutputNodeConnector(value);
-        // Uri value = new Uri(outputType);
+        NodeConnectorId ncid = new NodeConnectorId("openflow:" + dpidLong + ":" + port);
+        logger.debug("createOutputPortInstructions() Node Connector ID is - Type=openflow: DPID={} inPort={} ",dpidLong, port);
 
         List<Action> actionList = new ArrayList<Action>();
         ActionBuilder ab = new ActionBuilder();
         OutputActionBuilder oab = new OutputActionBuilder();
-
-
-        //Long portNo = Long.valueOf(2);
-        NodeConnectorId ncid = new NodeConnectorId("openflow:" + dpidLong + ":2");
         oab.setOutputNodeConnector(ncid);
 
-
         ab.setAction(new OutputActionCaseBuilder().setOutputAction(oab.build()).build());
-        ab.setOrder(0);
-        ab.setKey(new ActionKey(0));
+        ab.setOrder(5);
+        ab.setKey(new ActionKey(5));
         actionList.add(ab.build());
 
         // Create an Apply Action
         ApplyActionsBuilder aab = new ApplyActionsBuilder();
         aab.setAction(actionList);
+        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
 
         return ib;
     }
@@ -998,9 +982,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
         return ib;
     }
 
-    /*
-* Create Set IPv4 Destination Instruction
-*/
+   /*
+    * Create Set IPv4 Destination Instruction
+    */
     private static InstructionBuilder createStripVlanInstructions(InstructionBuilder ib) {
 
         StripVlanActionBuilder stripVlanActionBuilder = new StripVlanActionBuilder();
@@ -1121,7 +1105,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
     /*
      *  Create Set Tunnel ID Instruction Builder
      */
-
     private static InstructionBuilder createSetTunnelIdInstructions(InstructionBuilder ib, BigInteger tunnelId) {
 
         List<Action> actionList = new ArrayList<Action>();
@@ -1141,6 +1124,61 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // Wrap the Apply Action in an InstructionBuilder and return
         ib.setOrder(0);
         ib.setKey(new InstructionKey(0));
+        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+
+        return ib;
+    }
+
+   /*
+    *  Create Set Destination TCP Port
+    */
+    private static InstructionBuilder createSetDestinationTCPPort(InstructionBuilder ib, Short tcpport) {
+
+        List<Action> actionList = new ArrayList<Action>();
+        ActionBuilder ab = new ActionBuilder();
+        SetFieldBuilder setFieldBuilder = new SetFieldBuilder();
+
+        // Destination TCP Port
+        PortNumber tcpdstport = new PortNumber(Integer.valueOf(tcpport));
+        TcpMatchBuilder tcpmatch = new TcpMatchBuilder();
+        tcpmatch.setTcpDestinationPort(tcpdstport);
+
+        setFieldBuilder.setLayer4Match(tcpmatch.build());
+        ab.setAction(new SetFieldCaseBuilder().setSetField(setFieldBuilder.build()).build());
+        ab.setKey(new ActionKey(0));
+        actionList.add(ab.build());
+
+        ApplyActionsBuilder aab = new ApplyActionsBuilder();
+        aab.setAction(actionList);
+        ib.setKey(new InstructionKey(3));
+        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+
+        return ib;
+    }
+
+
+    /*
+     *  Create Set Destination UDP Port
+     */
+    private static InstructionBuilder createSetDestinationUDPPort(InstructionBuilder ib, Short udpport) {
+
+        List<Action> actionList = new ArrayList<Action>();
+        ActionBuilder ab = new ActionBuilder();
+        SetFieldBuilder setFieldBuilder = new SetFieldBuilder();
+
+        // Destination UDP Port
+        PortNumber udpdstport = new PortNumber(Integer.valueOf(udpport));
+        UdpMatchBuilder udpmatch = new UdpMatchBuilder();
+        udpmatch.setUdpDestinationPort(udpdstport);
+
+        setFieldBuilder.setLayer4Match(udpmatch.build());
+        ab.setAction(new SetFieldCaseBuilder().setSetField(setFieldBuilder.build()).build());
+        ab.setKey(new ActionKey(0));
+        actionList.add(ab.build());
+
+        ApplyActionsBuilder aab = new ApplyActionsBuilder();
+        aab.setAction(actionList);
+        ib.setKey(new InstructionKey(3));
         ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
 
         return ib;

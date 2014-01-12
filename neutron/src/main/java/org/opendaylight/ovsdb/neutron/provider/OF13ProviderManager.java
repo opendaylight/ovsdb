@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2013 Red Hat, Inc.
  *
  * This program and the accompanying materials are made available under the
@@ -53,6 +53,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeCon
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.ethernet.match.fields.EthernetDestinationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.ethernet.match.fields.EthernetSourceBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.IpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.TunnelBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.VlanMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.TcpMatchBuilder;
@@ -118,13 +119,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
     private void initializeFlowRules(Node node, String bridgeName) {
 
-             /*
-             * OVS flow table makeup is as follows:
-             * Table(0) - Classifier
-             * Table(5) - Non-Local Packet Processing
-             * Table(10) - Local Packet Processing
-             */
-
         try {
             // TODO : 3 second sleep hack is to make sure the OF connection is established.
             // Correct fix is to check the MD-SAL inventory before proceeding and listen
@@ -146,188 +140,26 @@ class OF13ProviderManager extends ProviderNetworkManager {
             if (dpids == null || dpids.size() == 0) return;
             Long dpidLong = Long.valueOf(HexEncode.stringToLong((String) dpids.toArray()[0]));
 
-            // TEMPORARY Variables :-)
-            // Table 0,1,2 are passed for writing the table ID and GotoTable
-            Short table0 = 0;
-            Short table1 = 1;
-            Short table2 = 2;
-            Short table3 = 3;
-            //
-            Long OFPortOut = (long) 29;
-            MacAddress sMacAddr = new MacAddress("00:00:00:00:00:01");
-            Long localPort = Long.valueOf(2);
-            BigInteger tunnelId = new BigInteger(String.valueOf(100));
-            MacAddress dMacAddr = new MacAddress("00:00:00:00:00:01");
-
-
-            /*
-            //Example Flow Rules
-            table=0,tun_id=0x5,in_port=10, actions=goto_table:2
-            table=0,tun_id=0x5,in_port=11 actions=goto_table:2
-            table=0,in_port=2,dl_src=00:00:00:00:00:01 actions=set_field:5->tun_id,goto_table=1
-            table=0,priority=16384,in_port=2 actions=drop
-
-            table=1,tun_id=0x5,dl_dst=00:00:00:00:00:08 actions=output:11,goto_table:2
-            table=1,tun_id=0x5,dl_dst=00:00:00:00:00:04 actions=output:10,goto_table:2
-            table=1,tun_id=0x5,dl_dst=00:00:00:00:00:05 actions=output:10,goto_table:2
-            table=1,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff actions=output:10,output:11,goto_table:2
-            table=1,priority=8192,tun_id=0x5 actions=goto_table:2
-
-            table=2,tun_id=0x5,dl_dst=00:00:00:00:00:01 actions=output:2
-            table=2,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff actions=output:2
-            table=2,priority=8192,tun_id=0x5 actions=drop
-            */
-
-           /*
-            * (NOTES ONLY, DO NOT COMMIT)
-            * Table #0 Flow Rules (Classifier Table):
-            * #1 -------------------------------------------
-            * table=0,tun_id=0x5,in_port=10, actions=goto_table:2
-            * #2 -------------------------------------------
-            * table=0,in_port=2,dl_src=00:00:00:00:00:01 actions=set_field:5->tun_id,goto_table=1
-            * #3 -------------------------------------------
-            * table=0,priority=16384,in_port=1 actions=drop"
-            *
-            * Parameter Order: DPID, flowmod TABLE, GotoTABLE, TunnelID, [TunnelPort||LocalPort], IPv4_src/dst, L4src/dst, L2 src/dst, VID
-            */
-
-           /*
-            * Table(0) Rule #1
-            * ----------------
-            * Match: LLDP (0x88CCL)
-            * Action: Packet_In to Controller Reserved Port
-            */
-
-            writeLLDPRule(dpidLong);
-
-            /*
-            * Table(0) Rule #2
-            * ----------------
-            * Match: Ingress Port, Tunnel ID
-            * Action: GOTO Local Table (10)
-            */
-
-            writeTunnelIn(dpidLong, table0, table2, tunnelId, OFPortOut);
-
-            /*
-            * Table(0) Rule #3
-            * ----------------
-            * Match: VM sMac and Local Ingress Port
-            * Action:Action: Set Tunnel ID and GOTO Local Table (5)
-            */
-
-            writeLocalInPort(dpidLong, table0, table1, tunnelId, localPort, sMacAddr);
-
-           /*
-            * Table(0) Rule #4
-            * ----------------
-            * Match: Drop any remaining Ingress Local VM Packets
-            * Action: Drop w/ a low priority
-            */
-
-            writeDropSrcIface(dpidLong, localPort);
-
-            /*
-            * (NOTES ONLY, DO NOT COMMIT)
-            * Table #1 Rules (Tunnel Related Flows):
-            * #1 -------------------------------------------
-            * table=1,tun_id=0x5,dl_dst=00:00:00:00:00:08 \
-            * actions=output:11,goto_table:2
-            * #2 -------------------------------------------
-            * table=1,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
-            * actions=output:10,output:11,goto_table:2
-            * #3 -------------------------------------------
-            * table=1,priority=8192,tun_id=0x5 actions=goto_table:2
-            */
-
-           /*
-            * Table(1) Rule #1
-            * ----------------
-            * Match: Drop any remaining Ingress Local VM Packets
-            * Action: Drop w/ a low priority
-            * -------------------------------------------
-            * table=1,tun_id=0x5,dl_dst=00:00:00:00:00:08 \
-            * actions=output:11,goto_table:2
-            */
-
-            writeTunnelOut(dpidLong, table1, table2, tunnelId, OFPortOut, dMacAddr);
-
-           /*
-            * Table(1) Rule #2
-            * ----------------
-            * Match: Match Tunnel ID and L2 ::::FF:FF Flooding
-            * Action: Flood to selected destination TEPs
-            * -------------------------------------------
-            * table=1,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
-            * actions=output:10,output:11,goto_table:2
-            */
-
-            writeTunnelFloodOut(dpidLong, table1, table2, tunnelId, OFPortOut, dMacAddr);
-
-           /*
-            * Table(1) Rule #3
-            * ----------------
-            * Match:  Any remaining Ingress Local VM Packets
-            * Action: Drop w/ a low priority
-            * -------------------------------------------
-            * table=1,priority=8192,tun_id=0x5 actions=goto_table:2
-            */
-
-            writeTunnelMiss(dpidLong, table1, table2, tunnelId);
-
-           /*
-            * (NOTES ONLY, DO NOT COMMIT)
-            * Table 2 Rules (Local to Hypervisor)
-            * -----------------------------------
-            * table=2,tun_id=0x5,dl_dst=00:00:00:00:00:01 actions=output:2
-            * table=2,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
-            * actions=output:2
-            * table=2,priority=8192,tun_id=0x5 actions=drop
-            */
-
-           /*
-            * Table(2) Rule #1
-            * ----------------
-            * Match: Match TunID and Destination DL/dMAC Addr
-            * Action: Output Port
-            * table=2,tun_id=0x5,dl_dst=00:00:00:00:00:01 actions=output:2
-            */
-
-            writeLocalUcastOut(dpidLong, table2, tunnelId, localPort, dMacAddr);
-
-           /*
-            * Table(2) Rule #2
-            * ----------------
-            * Match: Drop any remaining Ingress Local VM Packets
-            * Action: Forward to Local VMs
-            * table=2,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
-            * actions=output:2
-            */
-
-            writeLocalBcastOut(dpidLong, table2, tunnelId, localPort, dMacAddr);
-
-           /*
-            * Table(2) Rule #3
-            * ----------------
-            * Match: Any Remaining Flows w/a TunID
-            * Action: Drop w/ a low priority
-            * table=2,priority=8192,tun_id=0x5 actions=drop
-            */
-
-            writeLocalTableMiss(dpidLong, table2, tunnelId);
 
         } catch (Exception e) {
             logger.error("Failed to initialize Flow Rules for " + node.toString(), e);
         }
     }
 
-    /*
-    * Create an LLDP Flow Rule to encapsulate into
-    * a packet_in that is sent to the controller
-    * for topology handling.
-    * Match: Ethertype 0x88CCL
-    * Action: Punt to Controller in a Packet_In msg
-    */
+    /**
+     * Table makeup is as follows:
+     * Table(x) - Classifier
+     * Table(y) - Non-Local Packet Processing
+     * Table(z) - Local Packet Processing
+     */
+
+    /**
+     * Create an LLDP Flow Rule to encapsulate into
+     * a packet_in that is sent to the controller
+     * for topology handling.
+     * Match: Ethertype 0x88CCL
+     * Action: Punt to Controller in a Packet_In msg
+     */
 
     private void writeLLDPRule(Long dpidLong) {
 
@@ -366,11 +198,10 @@ class OF13ProviderManager extends ProviderNetworkManager {
         writeFlow(flowBuilder, nodeBuilder);
     }
 
-    /*
+    /**
      * (Table:0) Ingress Tunnel Traffic
      * Match: OpenFlow InPort and Tunnel ID
-     * Action: GOTO Local Table (10)
-     * table=0,tun_id=0x5,in_port=10, actions=goto_table:2
+     * Action: GOTO Local Table (n)
      */
 
     private void writeTunnelIn(Long dpidLong, Short writeTable, Short goToTableId, BigInteger tunnelId,  Long ofPort) {
@@ -410,13 +241,11 @@ class OF13ProviderManager extends ProviderNetworkManager {
         writeFlow(flowBuilder, nodeBuilder);
     }
 
-   /*
-    * (Table:0) Egress VM Traffic Towards TEP
-    * Match: Destination Ethernet Addr and OpenFlow InPort
-    * Instruction: Set TunnelID and GOTO Table Tunnel Table (n)
-    * table=0,in_port=2,dl_src=00:00:00:00:00:01 \
-    * actions=set_field:5->tun_id,goto_table=1"
-    */
+    /**
+     * (Table:0) Egress VM Traffic Towards TEP
+     * Match: Destination Ethernet Addr and OpenFlow InPort
+     * Instruction: Set TunnelID and GOTO Table Tunnel Table (n)
+     */
 
     private void writeLocalInPort(Long dpidLong, Short writeTable, Short goToTableId, BigInteger tunnelId, Long inPort, MacAddress sMacAddr) {
 
@@ -428,7 +257,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         // Create the OF Match using MatchBuilder
         flowBuilder.setMatch(createEthSrcMatch(matchBuilder, sMacAddr).build());
-        // TODO Broken In_Port Match
+        // Set the Output Port/Iface
         flowBuilder.setMatch(createInPortMatch(matchBuilder, dpidLong, inPort).build());
 
         // Instantiate the Builders for the OF Actions and Instructions
@@ -460,12 +289,11 @@ class OF13ProviderManager extends ProviderNetworkManager {
         writeFlow(flowBuilder, nodeBuilder);
     }
 
-    /*
+    /**
      * (Table:0) Drop frames sourced from a VM that do not
      * match the associated MAC address of the local VM.
      * Match: Low priority anything not matching the VM SMAC
      * Instruction: Drop
-     * table=0,priority=16384,in_port=1 actions=drop"
      */
 
     private void writeDropSrcIface(Long dpidLong, Long inPort) {
@@ -505,13 +333,11 @@ class OF13ProviderManager extends ProviderNetworkManager {
         writeFlow(flowBuilder, nodeBuilder);
     }
 
-   /*
-    * (Table:1) Egress Tunnel Traffic
-    * Match: Destination Ethernet Addr and Local InPort
-    * Instruction: Set TunnelID and GOTO Table Tunnel Table (n)
-    * table=1,tun_id=0x5,dl_dst=00:00:00:00:00:08 \
-    * actions=output:10,goto_table:2"
-    */
+    /**
+     * (Table:1) Egress Tunnel Traffic
+     * Match: Destination Ethernet Addr and Local InPort
+     * Instruction: Set TunnelID and GOTO Table Tunnel Table (n)
+     */
 
     private void writeTunnelOut(Long dpidLong, Short writeTable, Short goToTableId, BigInteger tunnelId , Long OFPortOut, MacAddress dMacAddr) {
 
@@ -553,13 +379,13 @@ class OF13ProviderManager extends ProviderNetworkManager {
         writeFlow(flowBuilder, nodeBuilder);
     }
 
-       /*
-    * (Table:1) Egress Tunnel Traffic
-    * Match: Destination Ethernet Addr and Local InPort
-    * Instruction: Set TunnelID and GOTO Table Tunnel Table (n)
-    * table=1,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
-    * actions=output:10,output:11,goto_table:2
-    */
+    /**
+     * (Table:1) Egress Tunnel Traffic
+     * Match: Destination Ethernet Addr and Local InPort
+     * Instruction: Set TunnelID and GOTO Table Tunnel Table (n)
+     * table=1,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
+     * actions=output:10,output:11,goto_table:2
+     */
 
     private void writeTunnelFloodOut(Long dpidLong, Short writeTable, Short localTable, BigInteger tunnelId,  Long OFPortOut, MacAddress dMacAddr) {
 
@@ -605,12 +431,11 @@ class OF13ProviderManager extends ProviderNetworkManager {
     }
 
 
-   /*
-    * (Table:1) Table Drain w/ Catch All
-    * Match: Tunnel ID
-    * Action: GOTO Local Table (10)
-    * table=2,priority=8192,tun_id=0x5 actions=drop
-    */
+    /**
+     * (Table:1) Table Drain w/ Catch All
+     * Match: Tunnel ID
+     * Action: GOTO Local Table (10)
+     */
 
     private void writeTunnelMiss(Long dpidLong, Short writeTable, Short goToTableId, BigInteger tunnelId) {
 
@@ -649,13 +474,11 @@ class OF13ProviderManager extends ProviderNetworkManager {
         writeFlow(flowBuilder, nodeBuilder);
     }
 
-    /*
+    /**
      * (Table:1) Local Broadcast Flood
      * Match: Tunnel ID and dMAC
      * Action: Output Port
-     * table=2,tun_id=0x5,dl_dst=00:00:00:00:00:01 actions=output:2
      */
-
     private void writeLocalUcastOut(Long dpidLong, Short writeTable, BigInteger tunnelId, Long localPort, MacAddress dMacAddr) {
 
         String nodeName = "openflow:" + dpidLong;
@@ -693,13 +516,11 @@ class OF13ProviderManager extends ProviderNetworkManager {
         writeFlow(flowBuilder, nodeBuilder);
     }
 
-    /*
+    /**
      * (Table:1) Local Broadcast Flood
      * Match: Tunnel ID and dMAC (::::FF:FF)
-     * table=2,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
-     * actions=output:2,3,4,5
+     * Action: Forward to appropriate TEPs
      */
-
     private void writeLocalBcastOut(Long dpidLong, Short writeTable, BigInteger tunnelId, Long localPort, MacAddress dMacAddr) {
 
         String nodeName = "openflow:" + dpidLong;
@@ -719,7 +540,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // Instructions List Stores Individual Instructions
         List<Instruction> instructions = new ArrayList<Instruction>();
 
-        // Broken OutPort TODO: localPort needs to be a list of Ports)
+        // Set the Output Port/Iface
         createOutputPortInstructions(ib, dpidLong, localPort);
         instructions.add(ib.build());
 
@@ -738,13 +559,11 @@ class OF13ProviderManager extends ProviderNetworkManager {
         writeFlow(flowBuilder, nodeBuilder);
     }
 
-    /*
+    /**
      * (Table:1) Local Table Miss
      * Match: Any Remaining Flows w/a TunID
      * Action: Drop w/ a low priority
-     * table=2,priority=8192,tun_id=0x5 actions=drop
      */
-
     private void writeLocalTableMiss(Long dpidLong, Short writeTable, BigInteger tunnelId) {
 
         String nodeName = "openflow:" + dpidLong;
@@ -815,7 +634,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
         }
     }
 
-    /*
+    /**
      *  Create Ingress Port Match dpidLong, inPort
      */
     private static MatchBuilder createInPortMatch(MatchBuilder matchBuilder, Long dpidLong, Long inPort) {
@@ -828,7 +647,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
         return matchBuilder;
     }
 
-    /*
+    /**
      *  Create EtherType Match
      */
     private static MatchBuilder createEtherTypeMatch(MatchBuilder matchBuilder, EtherType etherType) {
@@ -842,7 +661,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
         return matchBuilder;
     }
 
-    /*
+    /**
      *  Create Ethernet Source Match
      */
     private static MatchBuilder createEthSrcMatch(MatchBuilder matchBuilder, MacAddress sMacAddr) {
@@ -856,10 +675,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
         return matchBuilder;
     }
 
-    /*
+    /**
      *  Create Ethernet Destination Match
      */
-
     private static MatchBuilder createVlanIdMatch(MatchBuilder matchBuilder, VlanId vlanId) {
 
         VlanMatchBuilder vlanMatchBuilder = new VlanMatchBuilder();
@@ -871,10 +689,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
         return matchBuilder;
     }
 
-        /*
+    /**
      *  Create Ethernet Destination Match
      */
-
     private static MatchBuilder createDestEthMatch(MatchBuilder matchBuilder, MacAddress sMacAddr) {
 
         EthernetMatchBuilder ethernetMatch = new EthernetMatchBuilder();
@@ -886,11 +703,33 @@ class OF13ProviderManager extends ProviderNetworkManager {
         return matchBuilder;
     }
 
+    /**
+     * Create TCP Destination Port ID Match Builder
+     */
+    private static MatchBuilder createDestTCPPortMatch(MatchBuilder matchBuilder, PortNumber dstport) {
 
-    /*
+        TcpMatchBuilder tcpMatchBuilder = new TcpMatchBuilder(); // tcp match
+        tcpMatchBuilder.setTcpDestinationPort(dstport);
+        matchBuilder.setLayer4Match(tcpMatchBuilder.build());
+
+        return matchBuilder;
+    }
+
+    /**
+     * Create UDP Destination Port Match Builder
+     */
+    private static MatchBuilder createDestUDPPortMatch(MatchBuilder matchBuilder, PortNumber dstport) {
+
+        UdpMatchBuilder udpMatchBuilder = new UdpMatchBuilder();
+        udpMatchBuilder.setUdpDestinationPort(dstport);
+        matchBuilder.setLayer4Match(udpMatchBuilder.build());
+
+        return matchBuilder;
+    }
+
+    /**
      * Tunnel ID Match Builder
      */
-
     private static MatchBuilder createTunnelIDMatch(MatchBuilder matchBuilder, BigInteger tunnelId) {
 
         TunnelBuilder tunnelBuilder = new TunnelBuilder();
@@ -900,10 +739,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
         return matchBuilder;
     }
 
-   /*
-    * Create Send to Controller Reserved Port Instruction
-    */
-
+    /**
+     * Create Send to Controller Reserved Port Instruction
+     */
     private InstructionBuilder createSendToControllerInstructions(InstructionBuilder ib) {
 
         List<Action> actionList = new ArrayList<Action>();
@@ -930,7 +768,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
         return ib;
     }
 
-    /*
+    /**
      * Create Output Port Instruction
      */
     private InstructionBuilder createOutputPortInstructions(InstructionBuilder ib, Long dpidLong, Long port) {
@@ -956,7 +794,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
         return ib;
     }
 
-    /*
+    /**
      * Create Set Vlan ID Instruction
      */
     private static InstructionBuilder createSetVlanInstructions(InstructionBuilder ib) {
@@ -982,9 +820,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
         return ib;
     }
 
-   /*
-    * Create Set IPv4 Destination Instruction
-    */
+    /**
+     * Create Set IPv4 Destination Instruction
+     */
     private static InstructionBuilder createStripVlanInstructions(InstructionBuilder ib) {
 
         StripVlanActionBuilder stripVlanActionBuilder = new StripVlanActionBuilder();
@@ -1008,9 +846,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
         return ib;
     }
 
-    /*
-    * Create Set IPv4 Source Instruction
-    */
+    /**
+     * Create Set IPv4 Source Instruction
+     */
     private static InstructionBuilder createNwSrcInstructions(InstructionBuilder ib) {
 
         SetNwSrcActionBuilder SetNwSrcActionBuilder = new SetNwSrcActionBuilder();
@@ -1034,9 +872,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
         return ib;
     }
 
-    /*
-    * Create Set IPv4 Destination Instruction
-    */
+    /**
+     * Create Set IPv4 Destination Instruction
+     */
     private static InstructionBuilder createNwDstInstructions(InstructionBuilder ib) {
 
         SetNwDstActionBuilder SetNwDstActionBuilder = new SetNwDstActionBuilder();
@@ -1060,7 +898,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
         return ib;
     }
 
-    /*
+    /**
      * Create Drop Instruction
      */
     private static InstructionBuilder createDropInstructions(InstructionBuilder ib) {
@@ -1086,7 +924,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
         return ib;
     }
 
-    /*
+    /**
      *  Create GOTO Table Instruction Builder
      */
     private static InstructionBuilder createGotoTableInstructions(InstructionBuilder ib, Short tableId) {
@@ -1102,7 +940,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
         return ib;
     }
 
-    /*
+    /**
      *  Create Set Tunnel ID Instruction Builder
      */
     private static InstructionBuilder createSetTunnelIdInstructions(InstructionBuilder ib, BigInteger tunnelId) {
@@ -1129,9 +967,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
         return ib;
     }
 
-   /*
-    *  Create Set Destination TCP Port
-    */
+    /**
+     *  Create Set Destination TCP Port
+     */
     private static InstructionBuilder createSetDestinationTCPPort(InstructionBuilder ib, Short tcpport) {
 
         List<Action> actionList = new ArrayList<Action>();
@@ -1156,8 +994,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
         return ib;
     }
 
-
-    /*
+    /**
      *  Create Set Destination UDP Port
      */
     private static InstructionBuilder createSetDestinationUDPPort(InstructionBuilder ib, Short udpport) {

@@ -122,7 +122,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
         flow.setMatch(createLLDPMatch().build());
         flow.setInstructions(this.createSentToControllerInstructions().build());
         // TODO : Investigate the need for this.
-        FlowKey key = new FlowKey(new FlowId(new Long(123)));
+        long flowKey = 123;
+        FlowKey key = new FlowKey(new FlowId(Long.toString(flowKey)));
         flow.setBarrier(false);
         flow.setTableId((short)0);
         flow.setKey(key);

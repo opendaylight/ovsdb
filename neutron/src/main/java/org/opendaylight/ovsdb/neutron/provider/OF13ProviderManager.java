@@ -14,6 +14,14 @@ import java.util.List;
 import java.util.Set;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
+
+
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.concurrent.ExecutionException;
@@ -81,8 +89,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.apply.actions._case.ApplyActionsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
+
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableKey;
@@ -142,7 +149,46 @@ class OF13ProviderManager extends ProviderNetworkManager {
         }
     }
 
-    public void testFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
+
+    public void writeLLDPRule(Long dpidLong) {
+
+        String nodeName = "openflow:" + dpidLong;
+        EtherType etherType = new EtherType(0x88CCL);
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        // Create Match(es) and Set them in the FlowBuilder Object
+        flowBuilder.setMatch(createEtherTypeMatch(matchBuilder, etherType).build());
+
+        // Create the OF Actions and Instructions
+        InstructionBuilder ib = new InstructionBuilder();
+        InstructionsBuilder isb = new InstructionsBuilder();
+
+        // Instructions List Stores Individual Instructions
+        List<Instruction> instructions = new ArrayList<Instruction>();
+
+        // Call the InstructionBuilder Methods Containing Actions
+        createSendToControllerInstructions(ib);
+        instructions.add(ib.build());
+
+        // Add InstructionBuilder to the Instruction(s)Builder List
+        isb.setInstruction(instructions);
+
+        // Add InstructionsBuilder to FlowBuilder
+        flowBuilder.setInstructions(isb.build());
+
+        FlowKey key = new FlowId("ovsdb:<whatever you want>");
+
+        flowBuilder.setBarrier(true);
+        flowBuilder.setTableId((short) 0);
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName("LLDP_" + nodeName);
+        writeFlow(flowBuilder, nodeBuilder);
+    }
+
+    public void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
         IMDSALConsumer mdsalConsumer = (IMDSALConsumer) ServiceHelper.getInstance(IMDSALConsumer.class, "default", this);
         if (mdsalConsumer == null) {
             logger.error("ERROR finding MDSAL Service. Its possible that writeFlow is called too soon ?");
@@ -213,8 +259,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
     /**
      * Create Ethernet Source Match
      *
-     * @param sMacAddr Source MAC addressr
-     * @return matchBuilder with an Ethertype match
+     * @param matchBuilder matchBuilder object
      */
     protected static MatchBuilder createEthSrcMatch(MatchBuilder matchBuilder, MacAddress sMacAddr) {
 
@@ -229,6 +274,10 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
     /**
      * Create Ethernet Destination Match
+     *
+     * @param matchBuilder matchBuilder object
+     * @param vlanId       Integer representing a VLAN ID
+     * @return MatchBuilder with a Dest MAC match
      */
     protected static MatchBuilder createVlanIdMatch(MatchBuilder matchBuilder, VlanId vlanId) {
 
@@ -244,9 +293,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
     /**
      * Create Ethernet Destination Match
      *
-     * @param matchBuilder with an Ethertype match
-     * @param sMacAddr     Source MAC address
-     * @return matchBuilder with an Dest MAC match
+     * @param matchBuilder MatchBuilder object
+     * @param sMacAddr     MacAddress Source MAC address
      */
     protected static MatchBuilder createDestEthMatch(MatchBuilder matchBuilder, MacAddress sMacAddr) {
 
@@ -262,9 +310,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
     /**
      * Create TCP Destination Port ID Match Builder
      *
-     * @param dstport      Destination
-     * @param matchBuilder with an Ethertype match
-     * @return matchBuilder with an Dest TCP match
+     * @param matchBuilder MatchBuilder object
+     * @param dstport      Integer representing Destination TCP PortNumber
      */
     protected static MatchBuilder createDestTCPPortMatch(MatchBuilder matchBuilder, PortNumber dstport) {
 
@@ -277,6 +324,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
     /**
      * Create UDP Destination Port Match Builder
+     *
+     * @param matchBuilder MatchBuilder object
+     * @param dstport      Integer representing Destination UDP PortNumber
      */
     protected static MatchBuilder createDestUDPPortMatch(MatchBuilder matchBuilder, PortNumber dstport) {
 
@@ -289,6 +339,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
     /**
      * Tunnel ID Match Builder
+     *
+     * @param matchBuilder MatchBuilder object
+     * @param tunnelId     BigInteger Represents a TunnelID value
      */
     protected static MatchBuilder createTunnelIDMatch(MatchBuilder matchBuilder, BigInteger tunnelId) {
 
@@ -301,6 +354,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
     /**
      * Create Send to Controller Reserved Port Instruction
+     *
+     * @param ib InstructionBuilder creates a instruction
      */
     protected static InstructionBuilder createSendToControllerInstructions(InstructionBuilder ib) {
 
@@ -330,6 +385,10 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
     /**
      * Create Output Port Instruction
+     *
+     * @param ib       InstructionBuilder creates a instruction
+     * @param dpidLong Long value
+     * @param port     Long switch port/interface
      */
     protected static InstructionBuilder createOutputPortInstructions(InstructionBuilder ib, Long dpidLong, Long port) {
 
@@ -356,6 +415,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
     /**
      * Create Set Vlan ID Instruction
+     *
+     * @param ib InstructionBuilder creates a instruction
      */
     protected static InstructionBuilder createSetVlanInstructions(InstructionBuilder ib) {
 
@@ -382,6 +443,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
     /**
      * Create Set IPv4 Destination Instruction
+     *
+     * @param ib InstructionBuilder creates a instruction
      */
     protected static InstructionBuilder createStripVlanInstructions(InstructionBuilder ib) {
 
@@ -408,6 +471,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
     /**
      * Create Set IPv4 Source Instruction
+     *
+     * @param ib InstructionBuilder creates a instruction
      */
     protected static InstructionBuilder createNwSrcInstructions(InstructionBuilder ib) {
 
@@ -434,6 +499,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
     /**
      * Create Set IPv4 Destination Instruction
+     *
+     * @param ib InstructionBuilder creates a instruction
      */
     protected static InstructionBuilder createNwDstInstructions(InstructionBuilder ib) {
 
@@ -460,6 +527,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
     /**
      * Create Drop Instruction
+     *
+     * @param ib InstructionBuilder creates a instruction
      */
     protected static InstructionBuilder createDropInstructions(InstructionBuilder ib) {
 
@@ -486,6 +555,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
     /**
      * Create GOTO Table Instruction Builder
+     *
+     * @param ib      InstructionBuilder creates a instruction
+     * @param tableId Short representing an OVS table
      */
     protected static InstructionBuilder createGotoTableInstructions(InstructionBuilder ib, Short tableId) {
 
@@ -502,6 +574,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
     /**
      * Create Set Tunnel ID Instruction Builder
+     *
+     * @param ib       InstructionBuilder creates a instruction
+     * @param tunnelId
      */
     protected static InstructionBuilder createSetTunnelIdInstructions(InstructionBuilder ib, BigInteger tunnelId) {
 
@@ -529,6 +604,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
     /**
      * Create Set Destination TCP Port
+     *
+     * @param ib      InstructionBuilder creates a instruction
+     * @param tcpport Short Destination TCP Port
      */
     protected static InstructionBuilder createSetDestinationTCPPort(InstructionBuilder ib, Short tcpport) {
 
@@ -556,6 +634,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
     /**
      * Create Set Destination UDP Port
+     *
+     * @param ib      InstructionBuilder creates a instruction
+     * @param udpport Short Destination UDP Port
      */
     protected static InstructionBuilder createSetDestinationUDPPort(InstructionBuilder ib, Short udpport) {
 

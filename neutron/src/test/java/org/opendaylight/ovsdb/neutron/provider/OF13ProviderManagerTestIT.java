@@ -29,7 +29,7 @@ import static org.opendaylight.ovsdb.neutron.provider.OF13ProviderManager.create
 import static org.opendaylight.ovsdb.neutron.provider.OF13ProviderManager.createTunnelIDMatch;
 
 public class OF13ProviderManagerTestIT {
-    private static final Logger logger = LoggerFactory.getLogger(OvsdbOF13ProviderManagerLLDPTestIT.class);
+    private static final Logger logger = LoggerFactory.getLogger(OF13ProviderManagerTestIT.class);
 
     /**
      * Create an LLDP Flow Rule to encapsulate into
@@ -153,10 +153,9 @@ public class OF13ProviderManagerTestIT {
         // Instructions List Stores Individual Instructions
         List<Instruction> instructions = new ArrayList<Instruction>();
 
-        // GOTO Instuctions Need to be added first to the List
         createGotoTableInstructions(ib, goToTableId);
         instructions.add(ib.build());
-        // TODO Broken SetTunID
+        // Set Tunnel ID Instruction
         createSetTunnelIdInstructions(ib, tunnelId);
         instructions.add(ib.build());
 
@@ -187,7 +186,7 @@ public class OF13ProviderManagerTestIT {
         Long ofPort = (long) 1;
         String dpid = "00:00:00:00:00:01";
         Long dpidLong = HexEncode.stringToLong(dpid);
-        ;
+
         String nodeName = "openflow:" + dpidLong;
         MatchBuilder matchBuilder = new MatchBuilder();
         FlowBuilder flowBuilder = new FlowBuilder();

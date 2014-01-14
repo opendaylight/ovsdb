@@ -9,7 +9,7 @@
     </parent>
     <scm>
       <connection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</connection>
-      <developerConnection>scm:git:ssh://git.opendaylight.org:29418/ovsdt.git</developerConnection>
+      <developerConnection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</developerConnection>
       <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
       <tag>HEAD</tag>
     </scm>

@@ -17,6 +17,9 @@
   <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
   <scm>
     <connection>scm:git:https://git.opendaylight.org/gerrit/p/ovsdb.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</developerConnection>
+    <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
+    <tag>HEAD</tag>
   </scm>
   <properties>
     <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>

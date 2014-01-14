@@ -18,6 +18,12 @@ http://maven.apache.org/maven-v4_0_0.xsd">
   <packaging>pom</packaging>
   <name>ovsdb Distribution</name>
 
+  <scm>
+    <connection>scm:git:https://git.opendaylight.org/gerrit/p/ovsdb.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</developerConnection>
+    <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
+    <tag>HEAD</tag>
+  </scm>
   <dependencies>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>

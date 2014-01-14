@@ -123,7 +123,8 @@ public class OF13ProviderManagerTestIT {
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
 
-        FlowKey key = new FlowKey(new FlowId(String.valueOf((long) 110)));
+        long flowKey = 110;
+        FlowKey key = new FlowKey(new FlowId(Long.toString(flowKey)));
         flowBuilder.setBarrier(false);
         flowBuilder.setTableId(writeTable);
         flowBuilder.setKey(key);
@@ -175,7 +176,8 @@ public class OF13ProviderManagerTestIT {
         flowBuilder.setInstructions(isb.build());
 
         // Add Flow Attributes
-        FlowKey key = new FlowKey(new FlowId(String.valueOf((long)120)));
+        long flowKey = 120;
+        FlowKey key = new FlowKey(new FlowId(Long.toString(flowKey)));
         flowBuilder.setBarrier(false);
         flowBuilder.setTableId(writeTable);
         flowBuilder.setKey(key);
@@ -220,7 +222,8 @@ public class OF13ProviderManagerTestIT {
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
 
-        FlowKey key = new FlowKey(new FlowId(String.valueOf((long)130)));
+        long flowKey = 130;
+        FlowKey key = new FlowKey(new FlowId(Long.toString(flowKey)));
         flowBuilder.setBarrier(false);
         flowBuilder.setTableId((short) 0);
         flowBuilder.setKey(key);
@@ -273,7 +276,8 @@ public class OF13ProviderManagerTestIT {
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
 
-        FlowKey key = new FlowKey(new FlowId(String.valueOf((long)140)));
+        long flowKey = 140;
+        FlowKey key = new FlowKey(new FlowId(Long.toString(flowKey)));
         flowBuilder.setBarrier(false);
         flowBuilder.setTableId(writeTable);
         flowBuilder.setKey(key);
@@ -326,7 +330,8 @@ public class OF13ProviderManagerTestIT {
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
 
-        FlowKey key = new FlowKey(new FlowId(String.valueOf((long)150)));
+        long flowKey = 150;
+        FlowKey key = new FlowKey(new FlowId(Long.toString(flowKey)));
         flowBuilder.setBarrier(false);
         flowBuilder.setTableId(writeTable);
         flowBuilder.setKey(key);
@@ -372,7 +377,8 @@ public class OF13ProviderManagerTestIT {
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
 
-        FlowKey key = new FlowKey(new FlowId(String.valueOf((long)160)));
+        long flowKey = 160;
+        FlowKey key = new FlowKey(new FlowId(Long.toString(flowKey)));
         flowBuilder.setBarrier(false);
         flowBuilder.setTableId(writeTable);
         flowBuilder.setKey(key);
@@ -420,7 +426,8 @@ public class OF13ProviderManagerTestIT {
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
 
-        FlowKey key = new FlowKey(new FlowId(String.valueOf((long)170)));
+        long flowKey = 170;
+        FlowKey key = new FlowKey(new FlowId(Long.toString(flowKey)));
         flowBuilder.setBarrier(false);
         flowBuilder.setTableId(writeTable);
         flowBuilder.setKey(key);
@@ -467,7 +474,8 @@ public class OF13ProviderManagerTestIT {
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
 
-        FlowKey key = new FlowKey(new FlowId(String.valueOf((long)180)));
+        long flowKey = 180;
+        FlowKey key = new FlowKey(new FlowId(Long.toString(flowKey)));
         flowBuilder.setBarrier(false);
         flowBuilder.setTableId(writeTable);
         flowBuilder.setKey(key);
@@ -512,7 +520,8 @@ public class OF13ProviderManagerTestIT {
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
 
-        FlowKey key = new FlowKey(new FlowId(String.valueOf((long)190)));
+        long flowKey = 190;
+        FlowKey key = new FlowKey(new FlowId(Long.toString(flowKey)));
         flowBuilder.setBarrier(false);
         flowBuilder.setTableId(writeTable);
         flowBuilder.setKey(key);

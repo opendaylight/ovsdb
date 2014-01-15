@@ -14,17 +14,15 @@ import org.opendaylight.controller.sal.core.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.internal.Pair;
-
 public class OvsdbTestSetManagerIT extends OvsdbTestBase {
     private static final Logger logger = LoggerFactory
             .getLogger(OvsdbTestSetManagerIT.class);
 
     @Test
     public void setManager() throws Throwable{
-        Pair<ConnectionService, Node> connection = getTestConnection();
-        ConnectionService connectionService = connection.first;
-        Node node = connection.second;
+        TestObjects testObjects = getTestConnection();
+        ConnectionService connectionService = testObjects.connectionService;
+        Node node = testObjects.node;
 
         /**
          * Implements the OVS Connection for Managers

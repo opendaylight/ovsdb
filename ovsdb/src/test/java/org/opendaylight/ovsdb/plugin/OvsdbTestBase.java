@@ -19,8 +19,6 @@ import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 
-import com.google.gson.internal.Pair;
-
 public abstract class OvsdbTestBase {
     private final static String identifier = "TEST";
 
@@ -39,7 +37,17 @@ public abstract class OvsdbTestBase {
         return props;
     }
 
-    public Pair<ConnectionService, Node> getTestConnection() throws IOException {
+    public class TestObjects {
+        public final ConnectionService connectionService;
+        public final Node node;
+
+        public TestObjects(ConnectionService connectionService, Node node) {
+            this.connectionService = connectionService;
+            this.node = node;
+        }
+    }
+
+    public TestObjects getTestConnection() throws IOException {
         Node.NodeIDType.registerIDType("OVS", String.class);
         NodeConnector.NodeConnectorIDType.registerIDType("OVS", String.class,
                 "OVS");
@@ -57,7 +65,7 @@ public abstract class OvsdbTestBase {
         if (node == null) {
             throw new IOException("Failed to connecto to ovsdb server");
         }
-        return new Pair<ConnectionService, Node>(connectionService, node);
+        return new TestObjects(connectionService, node);
     }
 
 }

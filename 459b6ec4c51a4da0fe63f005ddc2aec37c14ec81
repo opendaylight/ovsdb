@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_daa5b6a2",
+        "filename": "neutron/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-01-15T00:51:53Z",
+      "side": 1,
+      "message": "This comment may not matter much. But, since this is used directly for the RELEASE bundle, i want to be extra cautious.\nAnd consistency is also important.\nIn Controller project, the connection is ssh based.While we are consistently changing it to use https.\n(am fine with that personally, but am not too sure if this will cause any issues with maven-release-plugin when we get there).\n\nCan you please confirm ?",
+      "revId": "459b6ec4c51a4da0fe63f005ddc2aec37c14ec81",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

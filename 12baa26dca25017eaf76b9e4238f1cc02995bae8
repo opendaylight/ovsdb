@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_5ab9c6ca",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConnectionService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-01-15T00:54:33Z",
+      "side": 1,
+      "message": "We had a lengthy discussion about this in today\u0027s meeting and the general opinion is to keep this by default true to maintain today\u0027s behavior and let it be configured as \"false\" from the config.ini for certain deployment needs, such as CloudStack.\n\nShall we make this true ?",
+      "revId": "12baa26dca25017eaf76b9e4238f1cc02995bae8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_7aa80a77",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConnectionService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-01-15T00:54:33Z",
+      "side": 1,
+      "message": ":-) System.getPropery(OVSDB_AUTOCONFIGURECONTROLLER) is missing ?",
+      "revId": "12baa26dca25017eaf76b9e4238f1cc02995bae8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

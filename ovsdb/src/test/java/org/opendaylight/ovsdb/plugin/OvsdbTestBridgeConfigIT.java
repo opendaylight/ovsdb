@@ -18,17 +18,15 @@ import org.opendaylight.controller.sal.networkconfig.bridgedomain.ConfigConstant
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.internal.Pair;
-
 public class OvsdbTestBridgeConfigIT extends OvsdbTestBase {
     private static final Logger logger = LoggerFactory
             .getLogger(OvsdbTestSetManagerIT.class);
 
     @Test
     public void setBridgeConfig() throws Throwable{
-        Pair<ConnectionService, Node> connection = getTestConnection();
-        ConnectionService connectionService = connection.first;
-        Node node = connection.second;
+        TestObjects testObjects = getTestConnection();
+        ConnectionService connectionService = testObjects.connectionService;
+        Node node = testObjects.node;
 
         Map<ConfigConstants, Object> configs = new HashMap<ConfigConstants, Object>();
 

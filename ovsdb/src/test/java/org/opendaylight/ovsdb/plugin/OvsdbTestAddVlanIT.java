@@ -18,17 +18,15 @@ import org.opendaylight.controller.sal.networkconfig.bridgedomain.ConfigConstant
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.internal.Pair;
-
 public class OvsdbTestAddVlanIT extends OvsdbTestBase {
     private static final Logger logger = LoggerFactory
             .getLogger(OvsdbTestAddVlanIT.class);
 
     @Test
     public void addPortVlan() throws Throwable{
-        Pair<ConnectionService, Node> connection = getTestConnection();
-        ConnectionService connectionService = connection.first;
-        Node node = connection.second;
+        TestObjects testObjects = getTestConnection();
+        ConnectionService connectionService = testObjects.connectionService;
+        Node node = testObjects.node;
 
         int vlanid = 100;
 

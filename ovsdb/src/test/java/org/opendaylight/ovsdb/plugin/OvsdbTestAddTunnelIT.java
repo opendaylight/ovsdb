@@ -19,17 +19,15 @@ import org.opendaylight.controller.sal.networkconfig.bridgedomain.ConfigConstant
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.internal.Pair;
-
 public class OvsdbTestAddTunnelIT extends OvsdbTestBase {
     private static final Logger logger = LoggerFactory
             .getLogger(OvsdbTestAddTunnelIT.class);
 
     @Test
     public void addTunnel() throws Throwable{
-        Pair<ConnectionService, Node> connection = getTestConnection();
-        ConnectionService connectionService = connection.first;
-        Node node = connection.second;
+        TestObjects testObjects = getTestConnection();
+        ConnectionService connectionService = testObjects.connectionService;
+        Node node = testObjects.node;
 
         /**
          * tunnelendpoint IP address of the

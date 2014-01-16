@@ -16,18 +16,16 @@ import org.opendaylight.controller.sal.core.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.internal.Pair;
-
-public class OVSDBTestGetBridgeDomainsIT extends OvsdbTestBase {
+public class OvsdbTestGetBridgeDomainsIT extends OvsdbTestBase {
     private static final Logger logger = LoggerFactory
-            .getLogger(OVSDBTestGetBridgeDomainsIT.class);
+            .getLogger(OvsdbTestGetBridgeDomainsIT.class);
 
     @Test
     public void getBridgeDomains() throws Throwable{
 
-        Pair<ConnectionService, Node> connection = getTestConnection();
-        ConnectionService connectionService = connection.first;
-        Node node = connection.second;
+        TestObjects testObjects = getTestConnection();
+        ConnectionService connectionService = testObjects.connectionService;
+        Node node = testObjects.node;
 
         /**
          * List a Bridge Domain

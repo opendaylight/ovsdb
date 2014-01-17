@@ -35,8 +35,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class MonitorResponseTest extends TestCase {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+public class MonitorResponseTest extends TestCase {
+    protected static final Logger logger = LoggerFactory.getLogger(MonitorResponseTest.class);
     public void testDeser() throws IOException {
         URL resource = Resources.getResource(MonitorResponseTest.class, "monitor_response1.json");
         InputSupplier<InputStream> inputStreamInputSupplier = Resources.newInputStreamSupplier(resource);
@@ -60,14 +63,14 @@ public class MonitorResponseTest extends TestCase {
     private void verifyInterface(TableUpdates updates) {
         TableUpdate<Interface> update = updates.getUpdate(Interface.NAME);
         for (TableUpdate.Row<Interface> interfaceRow : update.getRows()) {
-            System.out.println("interfaceRow = " + interfaceRow);
+            logger.info("interfaceRow = " , interfaceRow);
             Interface aNew = interfaceRow.getNew();
             if (null != aNew) {
                 OvsDBMap<String, String> options = aNew.getOptions();
                 if (options != null) {
                     for (Map.Entry<String, String> optE : options.entrySet()) {
-                        System.out.println("optE.getKey() = " + optE.getKey());
-                        System.out.println("optE.getValue() = " + optE.getValue());
+                        logger.info("optE.getKey() = " , optE.getKey());
+                        logger.info("optE.getValue() = " , optE.getValue());
                     }
                 }
             }

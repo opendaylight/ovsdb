@@ -14,9 +14,11 @@ import com.google.common.reflect.TypeToken;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.lang.reflect.Method;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TestTokens {
-
+    protected static final Logger logger = LoggerFactory.getLogger(TestTokens.class);
     public ListenableFuture<String> getString() {
         return null;
     }
@@ -27,11 +29,9 @@ public class TestTokens {
         Invokable<?, Object> from = Invokable.from(getString);
         //TypeToken<?> get = from.getReturnType().resolveType(ListenableFuture.class.getMethod("get").getGenericReturnType());
         TypeToken<?> get = from.getReturnType().resolveType(ListenableFuture.class.getMethod("get").getGenericReturnType());
-        System.out.println(get.getRawType());
-
-
+        logger.info("",get.getRawType());
         TypeToken<?> get1 = TypeToken.of(getString.getGenericReturnType()).resolveType(ListenableFuture.class.getMethod("get").getGenericReturnType());
-        System.out.println("get1 = " + get1);
+        logger.info("get1 = ",get1);
     }
 
 }

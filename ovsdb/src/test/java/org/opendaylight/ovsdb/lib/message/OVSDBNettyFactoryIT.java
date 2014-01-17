@@ -47,7 +47,11 @@ import org.opendaylight.ovsdb.plugin.InventoryService;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class OVSDBNettyFactoryIT {
+    protected static final Logger logger = LoggerFactory.getLogger(OVSDBNettyFactoryIT.class);
     InventoryService inventoryService;
     private static String bridgeIdentifier = "br1";
     private Properties props;
@@ -108,7 +112,7 @@ public class OVSDBNettyFactoryIT {
         }
 
         ListenableFuture<TableUpdates> monResponse = ovsdb.monitor(monitorReq);
-        System.out.println("Monitor Request sent :");
+        logger.info("Monitor Request sent :");
         TableUpdates updates = monResponse.get();
         inventoryService.processTableUpdates(node, updates);
         inventoryService.printCache(node);
@@ -171,25 +175,25 @@ public class OVSDBNettyFactoryIT {
                 Arrays.asList(addSwitchRequest, addIntfRequest, addPortRequest, addBridgeRequest)));
 
         ListenableFuture<List<OperationResult>> transResponse = ovsdb.transact(transaction);
-        System.out.println("Transcation sent :");
+        logger.info("Transcation sent :");
         List<OperationResult> tr = transResponse.get();
-        System.out.println("Transaction response : "+transResponse.toString());
+        logger.info("Transcation response :" ,transResponse.toString() );
         List<Operation> requests = transaction.getRequests();
         for (int i = 0; i < tr.size() ; i++) {
             if (i < requests.size()) requests.get(i).setResult(tr.get(i));
         }
 
-        System.out.println("Request + Response : "+requests.toString());
+        logger.info("Request + Response : ",requests.toString());
         if (tr.size() > requests.size()) {
-            System.out.println("ERROR : "+tr.get(tr.size()-1).getError());
-            System.out.println("Details : "+tr.get(tr.size()-1).getDetails());
+            logger.info("ERROR : ", tr.get(tr.size()-1).getError());
+            logger.info("Details : ",tr.get(tr.size()-1).getDetails());
         }
 
         // TEST ECHO
 
         ListenableFuture<List<String>> some = ovsdb.echo();
         Object s = some.get();
-        System.out.printf("Result of echo is %s \n", s);
+        logger.info("Result of echo is %s \n", s);
 
         // TEST ECHO REQUEST/REPLY
         Thread.sleep(10000);

@@ -18,8 +18,11 @@ import java.io.OutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-public class TestClient extends TestCase {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+public class TestClient extends TestCase {
+    protected static final Logger logger = LoggerFactory.getLogger(TestClient.class);
         String serverurl = "127.0.0.1";
         int serverport = 8080;
 
@@ -70,7 +73,7 @@ public class TestClient extends TestCase {
             String s = ",\"key1"+ counter +"\":\"planet of apes" + counter +
                     "\", \"key2"+ counter +"\":{\"k1\":\"ovs-db rocks the world\"}";
             outputStream.write(s.substring(i == 0 ? 1 : 0).getBytes("UTF-8"));
-            System.out.println("data counter = " + counter);
+            logger.info("data counter = ",counter);
         }
         outputStream.write("}".getBytes("UTF-8"));
     }
@@ -83,7 +86,7 @@ public class TestClient extends TestCase {
         counter++;
         String s  = "                       {\"part"+ counter+"\":";
         outputStream.write(s.getBytes("UTF-8"));
-        System.out.println("partial first half counter = " + counter);
+        logger.info("partial first half counter = ",counter);
     }
 
     /*
@@ -92,7 +95,7 @@ public class TestClient extends TestCase {
     private void writePartialLast(OutputStream outputStream) throws IOException {
         String s  = "\"val"+ counter+"\"}";
         outputStream.write(s.getBytes("UTF-8"));
-        System.out.println("partial second half counter = " + counter);
+        logger.info("partial second half counter = ",counter);
     }
 
 }

@@ -9,6 +9,7 @@
  */
 package org.opendaylight.ovsdb.neutron;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -76,6 +77,7 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
                 }
             }
         });
+        this.triggerUpdates();
     }
 
     void stop() {
@@ -248,5 +250,26 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
     @Override
     public void notifyNodeConnector(NodeConnector nodeConnector, UpdateType type, Map<String, Property> propMap) {
         //We are not interested in the nodeConnectors at this moment
+    }
+
+    private void triggerUpdates() {
+        List<Node> nodes = this.getConnectionService().getNodes();
+        if (nodes == null) return;
+        for (Node node : nodes) {
+            try {
+                List<String> tableNames = this.getOVSDBConfigService().getTables(node);
+                if (tableNames == null) continue;
+                for (String tableName : tableNames) {
+                    Map<String, Table<?>> rows = this.getOVSDBConfigService().getRows(node, tableName);
+                    if (rows == null) continue;
+                    for (String uuid : rows.keySet()) {
+                        Table<?> row = rows.get(uuid);
+                        this.rowAdded(node, tableName, uuid, row);
+                    }
+                }
+            } catch (Exception e) {
+                logger.error("Exception during OVSDB Southbound update trigger", e);
+            }
+        }
     }
 }

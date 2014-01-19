@@ -889,8 +889,9 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
 
     @Override
     public List<String> getTables(Node node) {
-        // TODO Auto-generated method stub
-        return null;
+        Map<String, Map<String, Table<?>>> cache  = inventoryServiceInternal.getCache(node);
+        if (cache == null) return null;
+        return new ArrayList<String>(cache.keySet());
     }
 
     private StatusWithUuid insertBridgeRow(Node node, String open_VSwitch_uuid, Bridge bridgeRow) {

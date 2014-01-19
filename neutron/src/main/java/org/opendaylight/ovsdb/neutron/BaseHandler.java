@@ -13,11 +13,13 @@ import java.net.HttpURLConnection;
 import java.util.UUID;
 
 import org.opendaylight.controller.containermanager.IContainerManager;
+import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManager;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
+import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -279,6 +281,22 @@ public class BaseHandler {
         this.containerManager = s;
     }
 
+    protected IForwardingRulesManager frm;
+
+    public IForwardingRulesManager getForwardingRulesManager() {
+        return frm;
+    }
+
+    public void unsetForwardingRulesManager(IForwardingRulesManager s) {
+        if (s == this.frm) {
+            this.frm = null;
+        }
+    }
+
+    public void setForwardingRulesManager(IForwardingRulesManager s) {
+        this.frm = s;
+    }
+
     protected OVSDBConfigService ovsdbConfigService;
 
     public OVSDBConfigService getOVSDBConfigService() {
@@ -295,6 +313,21 @@ public class BaseHandler {
         this.ovsdbConfigService = s;
     }
 
+    protected IConnectionServiceInternal connectionService;
+
+    public IConnectionServiceInternal getConnectionService() {
+        return connectionService;
+    }
+
+    public void unsetConnectionService(IConnectionServiceInternal s) {
+        if (s == this.connectionService) {
+            this.connectionService = null;
+        }
+    }
+
+    public void setConnectionService(IConnectionServiceInternal s) {
+        this.connectionService = s;
+    }
 
     protected INeutronPortCRUD neutronPortCache;
     public INeutronPortCRUD getNeutronPortCRUD() {

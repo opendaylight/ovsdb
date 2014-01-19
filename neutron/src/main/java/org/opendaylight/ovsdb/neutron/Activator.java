@@ -12,6 +12,7 @@ package org.opendaylight.ovsdb.neutron;
 
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.containermanager.IContainerManager;
+import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManager;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortAware;
@@ -21,6 +22,7 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.switchmanager.IInventoryListener;
+import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
 import org.opendaylight.ovsdb.plugin.OVSDBInventoryListener;
 
@@ -98,15 +100,15 @@ public class Activator extends ComponentActivatorAbstractBase {
 
         if (imp.equals(MDSALConsumer.class)) {
             c.setInterface(IMDSALConsumer.class.getName(), null);
-
-            c.add(createServiceDependency()
-                    .setService(BindingAwareBroker.class)
-                    .setCallbacks("setBindingAwareBroker", "unsetBindingAwareBroker")
-                    .setRequired(true));
         }
         c.add(createServiceDependency().
                 setService(OVSDBConfigService.class).
                 setCallbacks("setOVSDBConfigService", "unsetOVSDBConfigService").
+                setRequired(true));
+
+        c.add(createServiceDependency().
+                setService(IConnectionServiceInternal.class).
+                setCallbacks("setConnectionService", "unsetConnectionService").
                 setRequired(true));
 
         // Create service dependencies.
@@ -114,6 +116,16 @@ public class Activator extends ComponentActivatorAbstractBase {
               setService(IContainerManager.class).
               setCallbacks("setContainerManager", "unsetContainerManager").
               setRequired(true));
+
+        c.add(createServiceDependency().
+                setService(IForwardingRulesManager.class).
+                setCallbacks("setForwardingRulesManager", "unsetForwardingRulesManager").
+                setRequired(true));
+
+        c.add(createServiceDependency()
+                .setService(BindingAwareBroker.class)
+                .setCallbacks("setBindingAwareBroker", "unsetBindingAwareBroker")
+                .setRequired(true));
 
         c.add(createServiceDependency().
                 setService(INeutronNetworkCRUD.class).

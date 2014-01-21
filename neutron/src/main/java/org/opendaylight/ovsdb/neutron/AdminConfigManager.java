@@ -111,17 +111,33 @@ public class AdminConfigManager {
     }
 
     public InetAddress getTunnelEndPoint(Node node) {
-        return tunnelEndpoints.get(node);
-    }
+        OVSDBConfigService ovsdbConfig = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+        try {
+            Open_vSwitch ovsTable = (Open_vSwitch)ovsdbConfig.getRows(node, Open_vSwitch.NAME.getName());
+            Map<String, String> configs = ovsTable.getOther_config();
 
-    public void addTunnelEndpoint (Node node, InetAddress address) {
-        tunnelEndpoints.put(node, address);
+            if (configs == null) {
+                logger.debug("Open_vSwitch table is null for Node {} ", node);
+                return null;
+            }
+
+            String tunnelEndpoint = configs.get(tunnelEndpointConfigName);
+            InetAddress address = InetAddress.getByName(tunnelEndpoint);
+            logger.debug("Tunnel Endpoint for Node {} {}", node, address.getHostAddress());
+
+            return address;
+
+        } catch (Exception e) {
+            logger.error("Error populating Tunnel Endpoint for Node {} ", node, e);
+        }
+        return null;
     }
 
     public boolean isInterested (String tableName) {
         return tableName.equalsIgnoreCase(Open_vSwitch.NAME.getName());
     }
 
+    /*
     private void populateTunnelEndpoint (Node node, Open_vSwitch row) {
         Map<String, String> configs = row.getOther_config();
         if (configs != null) {
@@ -129,7 +145,6 @@ public class AdminConfigManager {
             if (tunnelEndpoint != null) {
                 try {
                     InetAddress address = InetAddress.getByName(tunnelEndpoint);
-                    addTunnelEndpoint(node, address);
                     logger.debug("Tunnel Endpoint for Node {} {}", node, address.getHostAddress());
                 } catch (UnknownHostException e) {
                     logger.error("Unable to add tunnel endpoint for node " + node, e);
@@ -154,6 +169,7 @@ public class AdminConfigManager {
             logger.error("Error populating Tunnel Endpoint for Node {} ", node, e);
         }
     }
+    */
 
     // Use this later if there is a need to update the tunnel-endpoint dynamically
     public void populateTunnelEndpoint (Node node, String tableName, Table<?> row) {

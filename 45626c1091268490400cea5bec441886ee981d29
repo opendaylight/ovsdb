@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da6255ed_49d0cff5",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-01-21T23:51:39Z",
+      "side": 1,
+      "message": "Can you please add a null check for ovsTable in cases where it is an incorrect node or other cases where the table may not be learnt yet.",
+      "revId": "45626c1091268490400cea5bec441886ee981d29",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_09d657f1",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-01-21T23:51:39Z",
+      "side": 1,
+      "message": "I think it is safe to return the address right from here if it is not NULL. I understand that as per the spec there can be only one row. But we are at an application space and that assumption need not be kept. So, you can add a null check for the tunnelEndPoint and if it is not null, you can return the address.\n\nEssentially, first observed Address is returned. In practical terms it will be just that only 1 address in the table.",
+      "revId": "45626c1091268490400cea5bec441886ee981d29",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6255ed_e9066385",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-01-21T23:51:39Z",
+      "side": 1,
+      "message": "Shall we go ahead and remove these populateTunnelEndpoint methods and also the cache,",
+      "revId": "45626c1091268490400cea5bec441886ee981d29",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

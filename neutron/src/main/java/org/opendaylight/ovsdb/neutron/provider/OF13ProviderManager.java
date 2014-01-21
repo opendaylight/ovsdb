@@ -13,9 +13,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.UdpMatchBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
@@ -67,7 +64,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.ArpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.TcpMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.UdpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanIdBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
@@ -80,6 +80,9 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.EthernetMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.ethernet.match.fields.EthernetTypeBuilder;
@@ -88,11 +91,13 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.apply.actions._case.ApplyActionsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableKey;
+
 
 /**
  *
@@ -133,7 +138,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
             // TODO : 3 second sleep hack is to make sure the OF connection is established.
             // Correct fix is to check the MD-SAL inventory before proceeding and listen
             // to Inventory update for processing.
-            Thread.sleep(5000);
+            Thread.sleep(3000);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -150,9 +155,658 @@ class OF13ProviderManager extends ProviderNetworkManager {
             if (dpids == null || dpids.size() == 0) return;
             Long dpidLong = Long.valueOf(HexEncode.stringToLong((String) dpids.toArray()[0]));
 
+
+
+            // TEMPORARY Variables :-)
+            // Table 0,1,2 are passed for writing the table ID and GotoTable
+            final short TABLE_0_DEFAULT_INGRESS = 0;
+            final short TABLE_1_ISOLATE_TENANT = 10;
+            final short TABLE_2_LOCAL_FORWARD = 20;
+
+            Long OFPortOut = (long) 29;
+            Long localPort = Long.valueOf(2);
+            BigInteger tunnelId = new BigInteger(String.valueOf(100));
+            MacAddress dMacAddr = new MacAddress("00:00:00:00:00:02");
+            MacAddress sMacAddr = new MacAddress("00:00:00:00:00:01");
+            MacAddress bcastAddr = new MacAddress("FF:FF:FF:FF:FF:FF");
+
+            /*
+            //Example Flow Rules
+            table=0,tun_id=0x5,in_port=10, actions=goto_table:2
+            table=0,tun_id=0x5,in_port=11 actions=goto_table:2
+            table=0,in_port=2,dl_src=00:00:00:00:00:01 actions=set_field:5->tun_id,goto_table=1
+            table=0,priority=16384,in_port=2 actions=drop
+
+            table=1,tun_id=0x5,dl_dst=00:00:00:00:00:08 actions=output:11,goto_table:2
+            table=1,tun_id=0x5,dl_dst=00:00:00:00:00:04 actions=output:10,goto_table:2
+            table=1,tun_id=0x5,dl_dst=00:00:00:00:00:05 actions=output:10,goto_table:2
+            table=1,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff actions=output:10,output:11,goto_table:2
+            table=1,priority=8192,tun_id=0x5 actions=goto_table:2
+
+            table=2,tun_id=0x5,dl_dst=00:00:00:00:00:01 actions=output:2
+            table=2,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff actions=output:2
+            table=2,priority=8192,tun_id=0x5 actions=drop
+            */
+
+           /*
+            * (NOTES ONLY, DO NOT COMMIT)
+            * Table #0 Flow Rules (Classifier Table):
+            * #1 -------------------------------------------
+            * table=0,tun_id=0x5,in_port=10, actions=goto_table:2
+            * #2 -------------------------------------------
+            * table=0,in_port=2,dl_src=00:00:00:00:00:01 actions=set_field:5->tun_id,goto_table=1
+            * #3 -------------------------------------------
+            * table=0,priority=16384,in_port=1 actions=drop"
+            *
+            * Parameter Order: DPID, flowmod TABLE, GotoTABLE, TunnelID, [TunnelPort||LocalPort], IPv4_src/dst, L4src/dst, L2 src/dst, VID
+            */
+
+           /*
+            * Table(0) Rule #1
+            * ----------------
+            * Match: LLDP (0x88CCL)
+            * Action: Packet_In to Controller Reserved Port
+            */
+
+            writeLLDPRule(dpidLong);
+
+            /*
+            * Table(0) Rule #2
+            * ----------------
+            * Match: Ingress Port, Tunnel ID
+            * Action: GOTO Local Table (10)
+            */
+
+            writeTunnelIn(dpidLong, TABLE_0_DEFAULT_INGRESS, TABLE_2_LOCAL_FORWARD, tunnelId, OFPortOut);
+
+            /*
+            * Table(0) Rule #3
+            * ----------------
+            * Match: VM sMac and Local Ingress Port
+            * Action:Action: Set Tunnel ID and GOTO Local Table (5)
+            */
+
+            writeLocalInPort(dpidLong, TABLE_0_DEFAULT_INGRESS, TABLE_1_ISOLATE_TENANT, tunnelId, localPort, bcastAddr);
+
+           /*
+            * Table(0) Rule #4
+            * ----------------
+            * Match: Drop any remaining Ingress Local VM Packets
+            * Action: Drop w/ a low priority
+            */
+
+            writeDropSrcIface(dpidLong, localPort);
+
+            /*
+            * (NOTES ONLY, DO NOT COMMIT)
+            * Table #1 Rules (Tunnel Related Flows):
+            * #1 -------------------------------------------
+            * table=1,tun_id=0x5,dl_dst=00:00:00:00:00:08 \
+            * actions=output:11,goto_table:2
+            * #2 -------------------------------------------
+            * table=1,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
+            * actions=output:10,output:11,goto_table:2
+            * #3 -------------------------------------------
+            * table=1,priority=8192,tun_id=0x5 actions=goto_table:2
+            */
+
+           /*
+            * Table(1) Rule #1
+            * ----------------
+            * Match: Drop any remaining Ingress Local VM Packets
+            * Action: Drop w/ a low priority
+            * -------------------------------------------
+            * table=1,tun_id=0x5,dl_dst=00:00:00:00:00:08 \
+            * actions=output:11,goto_table:2
+            */
+
+            writeTunnelOut(dpidLong, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, tunnelId, OFPortOut, dMacAddr);
+
+           /*
+            * Table(1) Rule #2
+            * ----------------
+            * Match: Match Tunnel ID and L2 ::::FF:FF Flooding
+            * Action: Flood to selected destination TEPs
+            * -------------------------------------------
+            * table=1,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
+            * actions=output:10,output:11,goto_table:2
+            */
+
+            writeTunnelFloodOut(dpidLong, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, tunnelId, OFPortOut, dMacAddr);
+
+           /*
+            * Table(1) Rule #3
+            * ----------------
+            * Match:  Any remaining Ingress Local VM Packets
+            * Action: Drop w/ a low priority
+            * -------------------------------------------
+            * table=1,priority=8192,tun_id=0x5 actions=goto_table:2
+            */
+
+            writeTunnelMiss(dpidLong, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, tunnelId);
+
+           /*
+            * (NOTES ONLY, DO NOT COMMIT)
+            * Table 2 Rules (Local to Hypervisor)
+            * -----------------------------------
+            * table=2,tun_id=0x5,dl_dst=00:00:00:00:00:01 actions=output:2
+            * table=2,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
+            * actions=output:2
+            * table=2,priority=8192,tun_id=0x5 actions=drop
+            */
+
+           /*
+            * Table(2) Rule #1
+            * ----------------
+            * Match: Match TunID and Destination DL/dMAC Addr
+            * Action: Output Port
+            * table=2,tun_id=0x5,dl_dst=00:00:00:00:00:01 actions=output:2
+            */
+
+            writeLocalUcastOut(dpidLong, TABLE_2_LOCAL_FORWARD, tunnelId, localPort, dMacAddr);
+
+           /*
+            * Table(2) Rule #2
+            * ----------------
+            * Match: Drop any remaining Ingress Local VM Packets
+            * Action: Forward to Local VMs
+            * table=2,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
+            * actions=output:2
+            */
+
+            writeLocalBcastOut(dpidLong, TABLE_2_LOCAL_FORWARD, tunnelId, localPort, dMacAddr);
+
+           /*
+            * Table(2) Rule #3
+            * ----------------
+            * Match: Any Remaining Flows w/a TunID
+            * Action: Drop w/ a low priority
+            * table=2,priority=8192,tun_id=0x5 actions=drop
+            */
+
+            writeLocalTableMiss(dpidLong, TABLE_2_LOCAL_FORWARD, tunnelId);
+
         } catch (Exception e) {
             logger.error("Failed to initialize Flow Rules for " + node.toString(), e);
         }
+    }
+
+    /*
+    * Create an LLDP Flow Rule to encapsulate into
+    * a packet_in that is sent to the controller
+    * for topology handling.
+    * Match: Ethertype 0x88CCL
+    * Action: Punt to Controller in a Packet_In msg
+    */
+
+    private void writeLLDPRule(Long dpidLong) {
+
+        String nodeName = "openflow:" + dpidLong;
+        EtherType etherType = new EtherType(0x88CCL);
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        // Create Match(es) and Set them in the FlowBuilder Object
+        flowBuilder.setMatch(createEtherTypeMatch(matchBuilder, etherType).build());
+
+        // Create the OF Actions and Instructions
+        InstructionBuilder ib = new InstructionBuilder();
+        InstructionsBuilder isb = new InstructionsBuilder();
+
+        // Instructions List Stores Individual Instructions
+        List<Instruction> instructions = new ArrayList<Instruction>();
+
+        // Call the InstructionBuilder Methods Containing Actions
+        createSendToControllerInstructions(ib);
+        instructions.add(ib.build());
+
+        // Add InstructionBuilder to the Instruction(s)Builder List
+        isb.setInstruction(instructions);
+
+        // Add InstructionsBuilder to FlowBuilder
+        flowBuilder.setInstructions(isb.build());
+
+        flowBuilder.setId(new FlowId("10"));
+        FlowKey key = new FlowKey(new FlowId(String.valueOf((long) 110)));
+        flowBuilder.setBarrier(true);
+        flowBuilder.setTableId((short) 0);
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName("LLDP_" + nodeName);
+        writeFlow(flowBuilder, nodeBuilder);
+    }
+
+    /*
+     * (Table:0) Ingress Tunnel Traffic
+     * Match: OpenFlow InPort and Tunnel ID
+     * Action: GOTO Local Table (10)
+     * table=0,tun_id=0x5,in_port=10, actions=goto_table:2
+     */
+
+    private void writeTunnelIn(Long dpidLong, Short writeTable, Short goToTableId, BigInteger tunnelId,  Long ofPort) {
+
+        String nodeName = "openflow:" + dpidLong;
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        // Create Match(es) and Set them in the FlowBuilder Object
+        flowBuilder.setMatch(createTunnelIDMatch(matchBuilder, tunnelId).build());
+        flowBuilder.setMatch(createInPortMatch(matchBuilder, dpidLong, ofPort).build());
+
+        // Create the OF Actions and Instructions
+        InstructionBuilder ib = new InstructionBuilder();
+        InstructionsBuilder isb = new InstructionsBuilder();
+
+        // Instructions List Stores Individual Instructions
+        List<Instruction> instructions = new ArrayList<Instruction>();
+
+        // Call the InstructionBuilder Methods Containing Actions
+        createGotoTableInstructions(ib, goToTableId);
+        instructions.add(ib.build());
+
+        // Add InstructionBuilder to the Instruction(s)Builder List
+        isb.setInstruction(instructions);
+
+        // Add InstructionsBuilder to FlowBuilder
+        flowBuilder.setInstructions(isb.build());
+
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId("20"));
+        FlowKey key = new FlowKey(new FlowId(String.valueOf((long) 120)));
+        flowBuilder.setBarrier(false);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName("TUNIN_" + nodeName);
+        writeFlow(flowBuilder, nodeBuilder);
+    }
+
+   /*
+    * (Table:0) Egress VM Traffic Towards TEP
+    * Match: Destination Ethernet Addr and OpenFlow InPort
+    * Instruction: Set TunnelID and GOTO Table Tunnel Table (n)
+    * table=0,in_port=2,dl_src=00:00:00:00:00:01 \
+    * actions=set_field:5->tun_id,goto_table=1"
+    */
+
+    private void writeLocalInPort(Long dpidLong, Short writeTable, Short goToTableId, BigInteger tunnelId, Long inPort, MacAddress sMacAddr) {
+
+        String nodeName = "openflow:" + dpidLong;
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        // Create the OF Match using MatchBuilder
+        flowBuilder.setMatch(createEthSrcMatch(matchBuilder, sMacAddr).build());
+        // TODO Broken In_Port Match
+        flowBuilder.setMatch(createInPortMatch(matchBuilder, dpidLong, inPort).build());
+
+        // Instantiate the Builders for the OF Actions and Instructions
+        InstructionBuilder ib = new InstructionBuilder();
+        InstructionsBuilder isb = new InstructionsBuilder();
+
+        // Instructions List Stores Individual Instructions
+        List<Instruction> instructions = new ArrayList<Instruction>();
+
+        // GOTO Instuctions Need to be added first to the List
+        createGotoTableInstructions(ib, goToTableId);
+        instructions.add(ib.build());
+        // TODO Broken SetTunID
+        createSetTunnelIdInstructions(ib, tunnelId);
+        instructions.add(ib.build());
+
+        // Add InstructionBuilder to the Instruction(s)Builder List
+        isb.setInstruction(instructions);
+
+        // Add InstructionsBuilder to FlowBuilder
+        flowBuilder.setInstructions(isb.build());
+
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId("30"));
+        FlowKey key = new FlowKey(new FlowId(String.valueOf((long) 130)));
+        flowBuilder.setBarrier(false);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName("LOCALSMAC_" + nodeName);
+        writeFlow(flowBuilder, nodeBuilder);
+    }
+
+    /*
+     * (Table:0) Drop frames sourced from a VM that do not
+     * match the associated MAC address of the local VM.
+     * Match: Low priority anything not matching the VM SMAC
+     * Instruction: Drop
+     * table=0,priority=16384,in_port=1 actions=drop"
+     */
+
+    private void writeDropSrcIface(Long dpidLong, Long inPort) {
+
+        String nodeName = "openflow:" + dpidLong;
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        // Create the OF Match using MatchBuilder
+        flowBuilder.setMatch(createInPortMatch(matchBuilder, dpidLong, inPort).build());
+
+        // Instantiate the Builders for the OF Actions and Instructions
+        InstructionBuilder ib = new InstructionBuilder();
+        InstructionsBuilder isb = new InstructionsBuilder();
+
+        // Instructions List Stores Individual Instructions
+        List<Instruction> instructions = new ArrayList<Instruction>();
+
+        // Call the InstructionBuilder Methods Containing Actions
+        createDropInstructions(ib);
+        instructions.add(ib.build());
+
+        // Add InstructionBuilder to the Instruction(s)Builder List
+        isb.setInstruction(instructions);
+
+        // Add InstructionsBuilder to FlowBuilder
+        flowBuilder.setInstructions(isb.build());
+
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId("40"));
+        FlowKey key = new FlowKey(new FlowId(String.valueOf((long) 140)));
+        flowBuilder.setBarrier(false);
+        flowBuilder.setTableId((short) 0);
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName("LOCALDROP_" + nodeName);
+        flowBuilder.setPriority(8192);
+        writeFlow(flowBuilder, nodeBuilder);
+    }
+
+   /*
+    * (Table:1) Egress Tunnel Traffic
+    * Match: Destination Ethernet Addr and Local InPort
+    * Instruction: Set TunnelID and GOTO Table Tunnel Table (n)
+    * table=1,tun_id=0x5,dl_dst=00:00:00:00:00:08 \
+    * actions=output:10,goto_table:2"
+    */
+
+    private void writeTunnelOut(Long dpidLong, Short writeTable, Short goToTableId, BigInteger tunnelId , Long OFPortOut, MacAddress dMacAddr) {
+
+        String nodeName = "openflow:" + dpidLong;
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        // Create the OF Match using MatchBuilder
+        flowBuilder.setMatch(createTunnelIDMatch(matchBuilder, tunnelId).build());
+        flowBuilder.setMatch(createDestEthMatch(matchBuilder, dMacAddr).build());
+
+        // Instantiate the Builders for the OF Actions and Instructions
+        InstructionBuilder ib = new InstructionBuilder();
+        InstructionsBuilder isb = new InstructionsBuilder();
+
+        // Instructions List Stores Individual Instructions
+        List<Instruction> instructions = new ArrayList<Instruction>();
+
+        // GOTO Instuctions
+        createGotoTableInstructions(ib, goToTableId);
+        instructions.add(ib.build());
+        // Set the Output Port/Iface
+        createOutputPortInstructions(ib, dpidLong, OFPortOut);
+        instructions.add(ib.build());
+
+        // Add InstructionBuilder to the Instruction(s)Builder List
+        isb.setInstruction(instructions);
+
+        // Add InstructionsBuilder to FlowBuilder
+        flowBuilder.setInstructions(isb.build());
+
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId("50"));
+        FlowKey key = new FlowKey(new FlowId(String.valueOf((long) 150)));
+        flowBuilder.setBarrier(false);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName("TUNOUT_" + nodeName);
+        writeFlow(flowBuilder, nodeBuilder);
+    }
+
+       /*
+    * (Table:1) Egress Tunnel Traffic
+    * Match: Destination Ethernet Addr and Local InPort
+    * Instruction: Set TunnelID and GOTO Table Tunnel Table (n)
+    * table=1,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
+    * actions=output:10,output:11,goto_table:2
+    */
+
+    private void writeTunnelFloodOut(Long dpidLong, Short writeTable, Short localTable, BigInteger tunnelId,  Long OFPortOut, MacAddress dMacAddr) {
+
+        String nodeName = "openflow:" + dpidLong;
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        // Create the OF Match using MatchBuilder
+        // Match TunnelID
+        flowBuilder.setMatch(createTunnelIDMatch(matchBuilder, tunnelId).build());
+        // Match DMAC
+        flowBuilder.setMatch(createDestEthMatch(matchBuilder, dMacAddr).build());
+
+        // Instantiate the Builders for the OF Actions and Instructions
+        InstructionBuilder ib = new InstructionBuilder();
+        InstructionsBuilder isb = new InstructionsBuilder();
+
+        // Instructions List Stores Individual Instructions
+        List<Instruction> instructions = new ArrayList<Instruction>();
+
+        // GOTO Instuction
+        createGotoTableInstructions(ib, localTable);
+        instructions.add(ib.build());
+        // Set the Output Port/Iface
+        createOutputPortInstructions(ib, dpidLong, OFPortOut);
+        instructions.add(ib.build());
+
+        // Add InstructionBuilder to the Instruction(s)Builder List
+        isb.setInstruction(instructions);
+
+        // Add InstructionsBuilder to FlowBuilder
+        flowBuilder.setInstructions(isb.build());
+
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId("60"));
+        FlowKey key = new FlowKey(new FlowId(String.valueOf((long) 160)));
+        flowBuilder.setBarrier(true);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setPriority(16384);
+        flowBuilder.setFlowName("TUNFLOODOUT_" + nodeName);
+        writeFlow(flowBuilder, nodeBuilder);
+    }
+
+   /*
+    * (Table:1) Table Drain w/ Catch All
+    * Match: Tunnel ID
+    * Action: GOTO Local Table (10)
+    * table=2,priority=8192,tun_id=0x5 actions=drop
+    */
+
+    private void writeTunnelMiss(Long dpidLong, Short writeTable, Short goToTableId, BigInteger tunnelId) {
+
+        String nodeName = "openflow:" + dpidLong;
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        // Create Match(es) and Set them in the FlowBuilder Object
+        flowBuilder.setMatch(createTunnelIDMatch(matchBuilder, tunnelId).build());
+
+        // Create the OF Actions and Instructions
+        InstructionBuilder ib = new InstructionBuilder();
+        InstructionsBuilder isb = new InstructionsBuilder();
+
+        // Instructions List Stores Individual Instructions
+        List<Instruction> instructions = new ArrayList<Instruction>();
+
+        // Call the InstructionBuilder Methods Containing Actions
+        createGotoTableInstructions(ib, goToTableId);
+        instructions.add(ib.build());
+
+        // Add InstructionBuilder to the Instruction(s)Builder List
+        isb.setInstruction(instructions);
+
+        // Add InstructionsBuilder to FlowBuilder
+        flowBuilder.setInstructions(isb.build());
+
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId("70"));
+        FlowKey key = new FlowKey(new FlowId(String.valueOf((long) 170)));
+        flowBuilder.setBarrier(false);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setPriority(8192);
+        flowBuilder.setFlowName("TUNMISS_" + nodeName);
+        writeFlow(flowBuilder, nodeBuilder);
+    }
+
+    /*
+     * (Table:1) Local Broadcast Flood
+     * Match: Tunnel ID and dMAC
+     * Action: Output Port
+     * table=2,tun_id=0x5,dl_dst=00:00:00:00:00:01 actions=output:2
+     */
+
+    private void writeLocalUcastOut(Long dpidLong, Short writeTable, BigInteger tunnelId, Long localPort, MacAddress dMacAddr) {
+
+        String nodeName = "openflow:" + dpidLong;
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        // Create the OF Match using MatchBuilder
+        flowBuilder.setMatch(createTunnelIDMatch(matchBuilder, tunnelId).build());
+        flowBuilder.setMatch(createDestEthMatch(matchBuilder, dMacAddr).build());
+
+        // Instantiate the Builders for the OF Actions and Instructions
+        InstructionBuilder ib = new InstructionBuilder();
+        InstructionsBuilder isb = new InstructionsBuilder();
+
+        // Instructions List Stores Individual Instructions
+        List<Instruction> instructions = new ArrayList<Instruction>();
+
+        // Set the Output Port/Iface
+        createOutputPortInstructions(ib, dpidLong, localPort);
+        instructions.add(ib.build());
+
+        // Add InstructionBuilder to the Instruction(s)Builder List
+        isb.setInstruction(instructions);
+
+        // Add InstructionsBuilder to FlowBuilder
+        flowBuilder.setInstructions(isb.build());
+
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId("80"));
+        FlowKey key = new FlowKey(new FlowId(String.valueOf((long) 180)));
+        flowBuilder.setBarrier(false);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName("LOCALHOSTUCAST_" + nodeName);
+        writeFlow(flowBuilder, nodeBuilder);
+    }
+
+    /*
+     * (Table:1) Local Broadcast Flood
+     * Match: Tunnel ID and dMAC (::::FF:FF)
+     * table=2,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
+     * actions=output:2,3,4,5
+     */
+
+    private void writeLocalBcastOut(Long dpidLong, Short writeTable, BigInteger tunnelId, Long localPort, MacAddress dMacAddr) {
+
+        String nodeName = "openflow:" + dpidLong;
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        // Create the OF Match using MatchBuilder
+        flowBuilder.setMatch(createTunnelIDMatch(matchBuilder, tunnelId).build());
+        flowBuilder.setMatch(createDestEthMatch(matchBuilder, dMacAddr).build());
+
+        // Instantiate the Builders for the OF Actions and Instructions
+        InstructionBuilder ib = new InstructionBuilder();
+        InstructionsBuilder isb = new InstructionsBuilder();
+
+        // Instructions List Stores Individual Instructions
+        List<Instruction> instructions = new ArrayList<Instruction>();
+
+        // Broken OutPort TODO: localPort needs to be a list of Ports)
+        createOutputPortInstructions(ib, dpidLong, localPort);
+        instructions.add(ib.build());
+
+        // Add InstructionBuilder to the Instruction(s)Builder List
+        isb.setInstruction(instructions);
+
+        // Add InstructionsBuilder to FlowBuilder
+        flowBuilder.setInstructions(isb.build());
+
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId("90"));
+        FlowKey key = new FlowKey(new FlowId(String.valueOf((long) 190)));
+        flowBuilder.setBarrier(false);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setPriority(16384);
+        flowBuilder.setFlowName("LOCALHOSTBCAST_" + nodeName);
+        writeFlow(flowBuilder, nodeBuilder);
+    }
+
+    /*
+     * (Table:1) Local Table Miss
+     * Match: Any Remaining Flows w/a TunID
+     * Action: Drop w/ a low priority
+     * table=2,priority=8192,tun_id=0x5 actions=drop
+     */
+
+    private void writeLocalTableMiss(Long dpidLong, Short writeTable, BigInteger tunnelId) {
+
+        String nodeName = "openflow:" + dpidLong;
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        // Create Match(es) and Set them in the FlowBuilder Object
+        flowBuilder.setMatch(createTunnelIDMatch(matchBuilder, tunnelId).build());
+
+        // Create the OF Actions and Instructions
+        InstructionBuilder ib = new InstructionBuilder();
+        InstructionsBuilder isb = new InstructionsBuilder();
+
+        // Instructions List Stores Individual Instructions
+        List<Instruction> instructions = new ArrayList<Instruction>();
+
+        // Call the InstructionBuilder Methods Containing Actions
+        createDropInstructions(ib);
+        instructions.add(ib.build());
+
+        // Add InstructionBuilder to the Instruction(s)Builder List
+        isb.setInstruction(instructions);
+
+        // Add InstructionsBuilder to FlowBuilder
+        flowBuilder.setInstructions(isb.build());
+
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId("100"));
+        FlowKey key = new FlowKey(new FlowId(String.valueOf((long) 200)));
+        flowBuilder.setBarrier(false);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setPriority(8192);
+        flowBuilder.setFlowName("TUNMISS_" + nodeName);
+        writeFlow(flowBuilder, nodeBuilder);
     }
 
     private void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {

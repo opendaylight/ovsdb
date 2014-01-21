@@ -65,7 +65,7 @@ public class PortHandler extends BaseHandler
          * The Tunnel Creation logic is completely owned by the Southbound handler at this point.
 
         NeutronNetwork network = this.neutronNetworkCache.getNetwork(port.getNetworkUUID());
-        ProviderNetworkManager.getManager().createTunnels(network.getProviderNetworkType(),
+        ProviderNetworkManager.getManager().handleInterfaceUpdate(network.getProviderNetworkType(),
                                                           network.getProviderSegmentationID());
          */
         logger.debug(" Port-ADD successful for tenant-id - {}," +

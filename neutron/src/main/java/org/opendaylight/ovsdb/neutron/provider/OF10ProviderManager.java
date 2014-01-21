@@ -289,7 +289,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
     }
 
     @Override
-    public Status createTunnels(String tunnelType, String tunnelKey, Node srcNode, Interface intf) {
+    public Status handleInterfaceUpdate(String tunnelType, String tunnelKey, Node srcNode, Interface intf) {
         Status status = getTunnelReadinessStatus(srcNode, tunnelKey);
         if (!status.isSuccess()) return status;
 
@@ -422,11 +422,11 @@ class OF10ProviderManager extends ProviderNetworkManager {
     }
 
     @Override
-    public Status createTunnels(String tunnelType, String tunnelKey) {
+    public Status handleInterfaceUpdate(String tunnelType, String tunnelKey) {
         IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
         List<Node> nodes = connectionService.getNodes();
         for (Node srcNode : nodes) {
-            this.createTunnels(tunnelType, tunnelKey, srcNode, null);
+            this.handleInterfaceUpdate(tunnelType, tunnelKey, srcNode, null);
         }
         return new Status(StatusCode.SUCCESS);
     }

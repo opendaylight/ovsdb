@@ -164,14 +164,16 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
             Interface intf = (Interface)row;
             NeutronNetwork network = TenantNetworkManager.getManager().getTenantNetworkForInterface(intf);
             if (network != null && !network.getRouterExternal()) {
-                int vlan = TenantNetworkManager.getManager().networkCreated(network.getID());
-                logger.trace("Neutron Network {} Created with Internal Vlan : {}", network.toString(), vlan);
+                if (ProviderNetworkManager.getManager().hasPerTenantTunneling()) {
+                    int vlan = TenantNetworkManager.getManager().networkCreated(network.getID());
+                    logger.trace("Neutron Network {} Created with Internal Vlan : {}", network.toString(), vlan);
 
-                String portUUID = this.getPortIdForInterface(node, uuid, intf);
-                if (portUUID != null) {
-                    TenantNetworkManager.getManager().programTenantNetworkInternalVlan(node, portUUID, network);
+                    String portUUID = this.getPortIdForInterface(node, uuid, intf);
+                    if (portUUID != null) {
+                        TenantNetworkManager.getManager().programTenantNetworkInternalVlan(node, portUUID, network);
+                    }
                 }
-                this.createTunnels(node, uuid, intf);
+                this.handleInterfaceUpdate(node, uuid, intf);
             }
         } else if (Port.NAME.getName().equalsIgnoreCase(tableName)) {
             logger.debug("{} Added / Updated {} , {}, {}", tableName, node, uuid, row);
@@ -197,7 +199,7 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
                 if (interfaces != null) {
                     for (String intfUUID : interfaces.keySet()) {
                         Interface intf = (Interface) interfaces.get(intfUUID);
-                        createTunnels(node, intfUUID, intf);
+                        this.handleInterfaceUpdate(node, intfUUID, intf);
                     }
                 }
             } catch (Exception e) {
@@ -206,14 +208,14 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
         }
     }
 
-    private void createTunnels (Node node, String uuid, Interface intf) {
+    private void handleInterfaceUpdate (Node node, String uuid, Interface intf) {
         if (AdminConfigManager.getManager().getTunnelEndPoint(node) == null) {
             logger.error("Tunnel end-point configuration missing. Please configure it in Open_vSwitch Table");
             return;
         }
         NeutronNetwork network = TenantNetworkManager.getManager().getTenantNetworkForInterface(intf);
         if (network != null) {
-            ProviderNetworkManager.getManager().createTunnels(network.getProviderNetworkType(),
+            ProviderNetworkManager.getManager().handleInterfaceUpdate(network.getProviderNetworkType(),
                     network.getProviderSegmentationID(), node, intf);
         }
     }

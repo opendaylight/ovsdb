@@ -36,6 +36,7 @@ import org.opendaylight.ovsdb.lib.table.Bridge;
 import org.opendaylight.ovsdb.lib.table.Interface;
 import org.opendaylight.ovsdb.lib.table.Port;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
+import org.opendaylight.ovsdb.neutron.provider.ProviderNetworkManager;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,10 +117,12 @@ public class TenantNetworkManager {
             logger.debug("Tenant Network not found with Segmenation-id {}",segmentationId);
             return false;
         }
-        int internalVlan = this.getInternalVlan(networkId);
-        if (internalVlan == 0) {
-            logger.debug("No InternalVlan provisioned for Tenant Network {}",networkId);
-            return false;
+        if (ProviderNetworkManager.getManager().hasPerTenantTunneling()) {
+            int internalVlan = this.getInternalVlan(networkId);
+            if (internalVlan == 0) {
+                logger.debug("No InternalVlan provisioned for Tenant Network {}",networkId);
+                return false;
+            }
         }
         OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
         try {

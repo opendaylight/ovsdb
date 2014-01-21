@@ -137,8 +137,8 @@ public class InternalNetworkManager {
         OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
 
         String bridgeUUID = this.getInternalBridgeUUID(node, bridgeName);
+        Bridge bridge = new Bridge();
         if (bridgeUUID == null) {
-            Bridge bridge = new Bridge();
             bridge.setName(bridgeName);
             if (!ProviderNetworkManager.getManager().hasPerTenantTunneling()) {
                 OvsDBSet<String> protocols = new OvsDBSet<String>();
@@ -152,6 +152,11 @@ public class InternalNetworkManager {
             Port port = new Port();
             port.setName(bridgeName);
             ovsdbTable.insertRow(node, Port.NAME.getName(), bridgeUUID, port);
+        } else if (!ProviderNetworkManager.getManager().hasPerTenantTunneling()) {
+            OvsDBSet<String> protocols = new OvsDBSet<String>();
+            protocols.add("OpenFlow13");
+            bridge.setProtocols(protocols);
+            ovsdbTable.updateRow(node, Bridge.NAME.getName(), null, bridgeUUID, bridge);
         }
 
         IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);

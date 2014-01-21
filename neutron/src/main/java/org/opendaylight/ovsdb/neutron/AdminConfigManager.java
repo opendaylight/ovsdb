@@ -10,8 +10,6 @@
 package org.opendaylight.ovsdb.neutron;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.opendaylight.controller.sal.core.Node;
@@ -31,7 +29,6 @@ public class AdminConfigManager {
     private String tunnelEndpointConfigName;
     private String patchToIntegration;
     private String patchToTunnel;
-    private Map<Node, InetAddress> tunnelEndpoints;
 
     // Refer to /etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini
     private static String DEFAULT_TUNNEL_ENDPOINT_CONFIG_STRING = "local_ip";
@@ -50,7 +47,6 @@ public class AdminConfigManager {
     private static AdminConfigManager adminConfiguration = new AdminConfigManager();
 
     private AdminConfigManager() {
-        tunnelEndpoints = new HashMap<Node, InetAddress>();
         tunnelEndpointConfigName = System.getProperty(CONFIG_TUNNEL_ENDPOINT_CONFIG);
         integrationBridgeName = System.getProperty(CONFIG_INTEGRATION_BRIDGENAME);
         tunnelBridgeName = System.getProperty(CONFIG_TUNNEL_BRIDGENAME);
@@ -111,59 +107,41 @@ public class AdminConfigManager {
     }
 
     public InetAddress getTunnelEndPoint(Node node) {
-        return tunnelEndpoints.get(node);
-    }
+        InetAddress address = null;
+        OVSDBConfigService ovsdbConfig = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+        try {
+            Map<String, Table<?>> ovsTable = ovsdbConfig.getRows(node, Open_vSwitch.NAME.getName());
 
-    public void addTunnelEndpoint (Node node, InetAddress address) {
-        tunnelEndpoints.put(node, address);
+            if (ovsTable == null) {
+                logger.error("Open_vSwitch table is null for Node {} ", node);
+                return null;
+            }
+
+            // While there is only one entry in the HashMap, we can't access it by index...
+            for (Table<?> row : ovsTable.values()) {
+                Open_vSwitch ovsRow = (Open_vSwitch)row;
+                Map<String, String> configs = ovsRow.getOther_config();
+
+                if (configs == null) {
+                    logger.debug("Open_vSwitch table is null for Node {} ", node);
+                    continue;
+                }
+
+                String tunnelEndpoint = configs.get(tunnelEndpointConfigName);
+                address = InetAddress.getByName(tunnelEndpoint);
+                logger.debug("Tunnel Endpoint for Node {} {}", node, address.getHostAddress());
+                break;
+            }
+        }
+        catch (Exception e) {
+            logger.error("Error populating Tunnel Endpoint for Node {} ", node, e);
+        }
+
+        return address;
     }
 
     public boolean isInterested (String tableName) {
         return tableName.equalsIgnoreCase(Open_vSwitch.NAME.getName());
     }
 
-    private void populateTunnelEndpoint (Node node, Open_vSwitch row) {
-        Map<String, String> configs = row.getOther_config();
-        if (configs != null) {
-            String tunnelEndpoint = configs.get(tunnelEndpointConfigName);
-            if (tunnelEndpoint != null) {
-                try {
-                    InetAddress address = InetAddress.getByName(tunnelEndpoint);
-                    addTunnelEndpoint(node, address);
-                    logger.debug("Tunnel Endpoint for Node {} {}", node, address.getHostAddress());
-                } catch (UnknownHostException e) {
-                    logger.error("Unable to add tunnel endpoint for node " + node, e);
-                }
-            }
-        }
-    }
-
-    public void populateTunnelEndpoint (Node node) {
-        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-        try {
-            Map<String, Table<?>> openvswitchTable = ovsdbTable.getRows(node, Open_vSwitch.NAME.getName());
-            if (openvswitchTable == null) {
-                logger.debug("Open_vSwitch table is null for Node {} ", node);
-                return;
-            }
-
-            for (Table<?> row : openvswitchTable.values()) {
-                populateTunnelEndpoint(node, (Open_vSwitch)row);
-            }
-        } catch (Exception e) {
-            logger.error("Error populating Tunnel Endpoint for Node {} ", node, e);
-        }
-    }
-
-    // Use this later if there is a need to update the tunnel-endpoint dynamically
-    public void populateTunnelEndpoint (Node node, String tableName, Table<?> row) {
-        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-        try {
-            if (isInterested(tableName)) {
-                populateTunnelEndpoint(node, (Open_vSwitch)row);
-            }
-        } catch (Exception e) {
-            logger.error("Error populating Tunnel Endpoint for Node {} ", node, e);
-        }
-    }
 }

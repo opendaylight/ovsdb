@@ -39,8 +39,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(ServiceHelper.class)
 public class AdminConfigManagerTest {
+
     @Test
-    public void testPopulateTunnelEndpoint() throws Exception {
+    public void testGetTunnelEndpoint() throws Exception {
         InetAddress testAddress = InetAddress.getByName("10.10.10.10");
 
         Node mockNode = mock(Node.class);
@@ -59,8 +60,8 @@ public class AdminConfigManagerTest {
         PowerMockito.mockStatic(ServiceHelper.class);
         when(ServiceHelper.getGlobalInstance(eq(OVSDBConfigService.class), anyObject())).thenReturn(ovsdbConfig);
 
-        AdminConfigManager.getManager().populateTunnelEndpoint(mockNode);
+        InetAddress endpointAddress = AdminConfigManager.getManager().getTunnelEndPoint(mockNode);
 
-        assertEquals(testAddress, AdminConfigManager.getManager().getTunnelEndPoint(mockNode));
+        assertEquals(testAddress, endpointAddress);
     }
 }

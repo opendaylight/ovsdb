@@ -111,11 +111,33 @@ public class AdminConfigManager {
     }
 
     public InetAddress getTunnelEndPoint(Node node) {
-        return tunnelEndpoints.get(node);
-    }
+        InetAddress address = null;
+        OVSDBConfigService ovsdbConfig = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+        try {
+            Map<String, Table<?>> ovsTable = ovsdbConfig.getRows(node, Open_vSwitch.NAME.getName());
 
-    public void addTunnelEndpoint (Node node, InetAddress address) {
-        tunnelEndpoints.put(node, address);
+            // While there is only one entry in the HashMap, we can't access it by index...
+
+            for (Table<?> row : ovsTable.values()) {
+                Open_vSwitch ovsRow = (Open_vSwitch)row;
+                Map<String, String> configs = ovsRow.getOther_config();
+
+                if (configs == null) {
+                    logger.debug("Open_vSwitch table is null for Node {} ", node);
+                    continue;
+                }
+
+                String tunnelEndpoint = configs.get(tunnelEndpointConfigName);
+                address = InetAddress.getByName(tunnelEndpoint);
+                logger.debug("Tunnel Endpoint for Node {} {}", node, address.getHostAddress());
+
+            }
+        }
+        catch (Exception e) {
+            logger.error("Error populating Tunnel Endpoint for Node {} ", node, e);
+        }
+
+        return address;
     }
 
     public boolean isInterested (String tableName) {
@@ -129,7 +151,6 @@ public class AdminConfigManager {
             if (tunnelEndpoint != null) {
                 try {
                     InetAddress address = InetAddress.getByName(tunnelEndpoint);
-                    addTunnelEndpoint(node, address);
                     logger.debug("Tunnel Endpoint for Node {} {}", node, address.getHostAddress());
                 } catch (UnknownHostException e) {
                     logger.error("Unable to add tunnel endpoint for node " + node, e);

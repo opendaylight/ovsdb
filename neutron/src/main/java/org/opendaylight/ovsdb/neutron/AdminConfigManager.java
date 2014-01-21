@@ -111,11 +111,25 @@ public class AdminConfigManager {
     }
 
     public InetAddress getTunnelEndPoint(Node node) {
-        return tunnelEndpoints.get(node);
-    }
+        InetAddress address = null;
+        OVSDBConfigService ovsdbConfig = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+        try {
+            Open_vSwitch ovsTable = (Open_vSwitch)ovsdbConfig.getRows(node, Open_vSwitch.NAME.getName());
+            Map<String, String> configs = ovsTable.getOther_config();
 
-    public void addTunnelEndpoint (Node node, InetAddress address) {
-        tunnelEndpoints.put(node, address);
+            if (configs == null) {
+                logger.debug("Open_vSwitch table is null for Node {} ", node);
+                return null;
+            }
+
+            String tunnelEndpoint = configs.get(tunnelEndpointConfigName);
+            address = InetAddress.getByName(tunnelEndpoint);
+            logger.debug("Tunnel Endpoint for Node {} {}", node, address.getHostAddress());
+
+        } catch (Exception e) {
+            logger.error("Error populating Tunnel Endpoint for Node {} ", node, e);
+        }
+        return address;
     }
 
     public boolean isInterested (String tableName) {
@@ -129,7 +143,6 @@ public class AdminConfigManager {
             if (tunnelEndpoint != null) {
                 try {
                     InetAddress address = InetAddress.getByName(tunnelEndpoint);
-                    addTunnelEndpoint(node, address);
                     logger.debug("Tunnel Endpoint for Node {} {}", node, address.getHostAddress());
                 } catch (UnknownHostException e) {
                     logger.error("Unable to add tunnel endpoint for node " + node, e);

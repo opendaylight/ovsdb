@@ -23,6 +23,7 @@ import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.sal.core.Node;
@@ -39,6 +40,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(ServiceHelper.class)
 public class AdminConfigManagerTest {
+    @Ignore
     @Test
     public void testPopulateTunnelEndpoint() throws Exception {
         InetAddress testAddress = InetAddress.getByName("10.10.10.10");

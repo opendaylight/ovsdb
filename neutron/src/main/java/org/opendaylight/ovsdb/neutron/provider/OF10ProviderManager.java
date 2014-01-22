@@ -219,7 +219,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
             logger.debug("Tenant Network not found with Segmenation-id {}",segmentationId);
             return;
         }
-        int internalVlan = TenantNetworkManager.getManager().getInternalVlan(networkId);
+        int internalVlan = TenantNetworkManager.getManager().getInternalVlan(node, networkId);
         if (internalVlan == 0) {
             logger.debug("No InternalVlan provisioned for Tenant Network {}",networkId);
             return;

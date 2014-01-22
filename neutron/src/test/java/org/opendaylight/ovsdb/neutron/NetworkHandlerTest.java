@@ -47,21 +47,6 @@ public class NetworkHandlerTest {
     }
 
     @Test
-    public void testNeutronNetworkCreated() {
-        String netId = "6cfdb7";
-        NeutronNetwork mockNet = mock(NeutronNetwork.class);
-        when(mockNet.isShared()).thenReturn(false);
-        when(mockNet.getID()).thenReturn(netId);
-
-        TenantNetworkManager tenantNetworkManager = mock(TenantNetworkManager.class);
-        Whitebox.setInternalState(TenantNetworkManager.class, "tenantHelper", tenantNetworkManager);
-
-        testNetworkHandler.neutronNetworkCreated(mockNet);
-
-        verify(tenantNetworkManager).networkCreated(netId);
-    }
-
-    @Test
     public void testCanUpdateNetwork() {
         NeutronNetwork delta = new NeutronNetwork();
         NeutronNetwork original = new NeutronNetwork();

@@ -138,13 +138,20 @@ public class InternalNetworkManager {
 
         String bridgeUUID = this.getInternalBridgeUUID(node, bridgeName);
         Bridge bridge = new Bridge();
+        OvsDBSet<String> failMode = new OvsDBSet<String>();
+        failMode.add("secure");
+        bridge.setFail_mode(failMode);
+
+        OvsDBSet<String> protocols = new OvsDBSet<String>();
+        if (!ProviderNetworkManager.getManager().hasPerTenantTunneling()) {
+            protocols.add("OpenFlow13");
+        } else {
+            protocols.add("OpenFlow10");
+        }
+        bridge.setProtocols(protocols);
+
         if (bridgeUUID == null) {
             bridge.setName(bridgeName);
-            if (!ProviderNetworkManager.getManager().hasPerTenantTunneling()) {
-                OvsDBSet<String> protocols = new OvsDBSet<String>();
-                protocols.add("OpenFlow13");
-                bridge.setProtocols(protocols);
-            }
 
             StatusWithUuid statusWithUuid = ovsdbTable.insertRow(node, Bridge.NAME.getName(), null, bridge);
             if (!statusWithUuid.isSuccess()) return statusWithUuid;
@@ -152,10 +159,7 @@ public class InternalNetworkManager {
             Port port = new Port();
             port.setName(bridgeName);
             ovsdbTable.insertRow(node, Port.NAME.getName(), bridgeUUID, port);
-        } else if (!ProviderNetworkManager.getManager().hasPerTenantTunneling()) {
-            OvsDBSet<String> protocols = new OvsDBSet<String>();
-            protocols.add("OpenFlow13");
-            bridge.setProtocols(protocols);
+        } else {
             ovsdbTable.updateRow(node, Bridge.NAME.getName(), null, bridgeUUID, bridge);
         }
 

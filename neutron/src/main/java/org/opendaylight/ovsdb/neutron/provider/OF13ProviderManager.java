@@ -442,14 +442,15 @@ class OF13ProviderManager extends ProviderNetworkManager {
      */
     private void initializeFlowRules(Node node, String bridgeName) {
 
+        // TODO : 3 second sleep hack is to make sure the OF connection is established.
+        // Correct fix is to check the MD-SAL inventory before proceeding and listen
+        // to Inventory update for processing.
         try {
-            // TODO : 3 second sleep hack is to make sure the OF connection is established.
-            // Correct fix is to check the MD-SAL inventory before proceeding and listen
-            // to Inventory update for processing.
             Thread.sleep(3000);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (InterruptedException e1) {
+            logger.error("Sleep Thread interrupted ",e1);
         }
+
         String brIntId = this.getInternalBridgeUUID(node, bridgeName);
         if (brIntId == null) {
             logger.error("Failed to initialize Flow Rules for {}", node);

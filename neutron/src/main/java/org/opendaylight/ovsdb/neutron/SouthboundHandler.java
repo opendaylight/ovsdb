@@ -193,7 +193,6 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
             }
         } else if (Open_vSwitch.NAME.getName().equalsIgnoreCase(tableName)) {
             logger.debug("{} Added / Updated {} , {}, {}", tableName, node, uuid, row);
-            AdminConfigManager.getManager().populateTunnelEndpoint(node);
             try {
                 Map<String, Table<?>> interfaces = this.ovsdbConfigService.getRows(node, Interface.NAME.getName());
                 if (interfaces != null) {

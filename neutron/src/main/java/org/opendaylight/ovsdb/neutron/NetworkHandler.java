@@ -58,7 +58,7 @@ public class NetworkHandler extends BaseHandler
             return;
         }
 
-        TenantNetworkManager.getManager().networkCreated(network.getID());
+       TenantNetworkManager.getManager().networkCreated(network.getID());
     }
 
     /**

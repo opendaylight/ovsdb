@@ -165,7 +165,7 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
             NeutronNetwork network = TenantNetworkManager.getManager().getTenantNetworkForInterface(intf);
             if (network != null && !network.getRouterExternal()) {
                 if (ProviderNetworkManager.getManager().hasPerTenantTunneling()) {
-                    int vlan = TenantNetworkManager.getManager().networkCreated(network.getID());
+                    int vlan = TenantNetworkManager.getManager().networkCreated(node, network.getID());
                     logger.trace("Neutron Network {} Created with Internal Vlan : {}", network.toString(), vlan);
 
                     String portUUID = this.getPortIdForInterface(node, uuid, intf);

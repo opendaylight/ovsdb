@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 
 import java.net.HttpURLConnection;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
@@ -44,21 +45,6 @@ public class NetworkHandlerTest {
         assertEquals(HttpURLConnection.HTTP_NOT_ACCEPTABLE, testNetworkHandler.canCreateNetwork(mockNet));
         assertEquals(HttpURLConnection.HTTP_CREATED, testNetworkHandler.canCreateNetwork(mockNet));
 
-    }
-
-    @Test
-    public void testNeutronNetworkCreated() {
-        String netId = "6cfdb7";
-        NeutronNetwork mockNet = mock(NeutronNetwork.class);
-        when(mockNet.isShared()).thenReturn(false);
-        when(mockNet.getID()).thenReturn(netId);
-
-        TenantNetworkManager tenantNetworkManager = mock(TenantNetworkManager.class);
-        Whitebox.setInternalState(TenantNetworkManager.class, "tenantHelper", tenantNetworkManager);
-
-        testNetworkHandler.neutronNetworkCreated(mockNet);
-
-        verify(tenantNetworkManager).networkCreated(netId);
     }
 
     @Test

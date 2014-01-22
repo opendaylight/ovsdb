@@ -1,21 +1,19 @@
 /*
- * Copyright (C) 2013 Red Hat, Inc.
+ * Copyright (C) 2013 Red Hat, Inc. and others...
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Authors : Madhu Venugopal, Brent Salisbury
+ * Authors : Madhu Venugopal, Brent Salisbury, Dave Tucker
  */
 package org.opendaylight.ovsdb.neutron;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 
 import org.opendaylight.controller.containermanager.ContainerConfig;
@@ -37,6 +35,7 @@ import org.opendaylight.ovsdb.lib.table.Interface;
 import org.opendaylight.ovsdb.lib.table.Port;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 import org.opendaylight.ovsdb.neutron.provider.ProviderNetworkManager;
+import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,18 +43,16 @@ import org.slf4j.LoggerFactory;
 public class TenantNetworkManager {
     static final Logger logger = LoggerFactory.getLogger(TenantNetworkManager.class);
 
-    private static final int MAX_VLAN = 4096;
     public static final String EXTERNAL_ID_VM_ID = "vm-id";
     public static final String EXTERNAL_ID_INTERFACE_ID = "iface-id";
     public static final String EXTERNAL_ID_VM_MAC = "attached-mac";
     private static TenantNetworkManager tenantHelper = new TenantNetworkManager();
-    private Queue<Integer> internalVlans = new LinkedList<Integer>();
-    private Map<String, Integer> tenantVlanMap = new HashMap<String, Integer>();
+
+    // This is our new map... maps nodes to a NodeConfiguration object
+    private Map<Node, NodeConfiguration> nodeConfigurationMap = new HashMap<>();
+
     private boolean enableContainer = false;
     private TenantNetworkManager() {
-        for (int i = 1; i < MAX_VLAN ; i++) {
-            internalVlans.add(i);
-        }
         String isTenantContainer = System.getProperty("TenantIsContainer");
         if (isTenantContainer != null && isTenantContainer.equalsIgnoreCase("true")) {
             enableContainer =  true;
@@ -66,26 +63,41 @@ public class TenantNetworkManager {
         return tenantHelper;
     }
 
-    private int assignInternalVlan (String networkId) {
-        Integer mappedVlan = tenantVlanMap.get(networkId);
-        if (mappedVlan != null) return mappedVlan;
-        mappedVlan = internalVlans.poll();
-        if (mappedVlan != null) tenantVlanMap.put(networkId, mappedVlan);
-        return mappedVlan;
-    }
-
-    public void internalVlanInUse (int vlan) {
-        internalVlans.remove(vlan);
-    }
-
-    public int getInternalVlan (String networkId) {
-        Integer vlan = tenantVlanMap.get(networkId);
+    public int getInternalVlan(Node node, String networkId) {
+        NodeConfiguration nodeConfiguration = nodeConfigurationMap.get(node);
+        Integer vlan = nodeConfiguration.getInternalVlan(networkId);
         if (vlan == null) return 0;
         return vlan.intValue();
     }
 
-    public int networkCreated (String networkId) {
-        int internalVlan = this.assignInternalVlan(networkId);
+    private NodeConfiguration addNodeToMap(Node node) {
+        NodeConfiguration nodeConfiguration = new NodeConfiguration();
+        this.nodeConfigurationMap.put(node, nodeConfiguration);
+        return nodeConfigurationMap.get(node);
+    }
+
+    public void networkCreated (String networkId) {
+        IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+        List<Node> nodes = connectionService.getNodes();
+
+        for (Node node : nodes) {
+            this.networkCreated(node, networkId);
+        }
+
+    }
+
+
+    public int networkCreated (Node node, String networkId) {
+
+        NodeConfiguration nodeConfiguration = nodeConfigurationMap.get(node);
+
+        // Cache miss
+        if (nodeConfiguration == null)
+        {
+            nodeConfiguration = addNodeToMap(node);
+        }
+
+        int internalVlan = nodeConfiguration.assignInternalVlan(networkId);
         if (enableContainer && internalVlan != 0) {
             IContainerManager containerManager = (IContainerManager)ServiceHelper.getGlobalInstance(IContainerManager.class, this);
             if (containerManager == null) {
@@ -118,7 +130,17 @@ public class TenantNetworkManager {
             return false;
         }
         if (ProviderNetworkManager.getManager().hasPerTenantTunneling()) {
-            int internalVlan = this.getInternalVlan(networkId);
+
+            NodeConfiguration nodeConfiguration = nodeConfigurationMap.get(node);
+
+            // Cache miss
+            if (nodeConfiguration == null)
+            {
+                logger.error("Configuration data unavailable for Node {} ", node);
+                return false;
+            }
+
+            int internalVlan = nodeConfiguration.getInternalVlan(networkId);
             if (internalVlan == 0) {
                 logger.debug("No InternalVlan provisioned for Tenant Network {}",networkId);
                 return false;
@@ -209,7 +231,17 @@ public class TenantNetworkManager {
     }
 
     public void programTenantNetworkInternalVlan(Node node, String portUUID, NeutronNetwork network) {
-        int vlan = this.getInternalVlan(network.getID());
+
+        NodeConfiguration nodeConfiguration = nodeConfigurationMap.get(node);
+
+        // Cache miss
+        if (nodeConfiguration == null)
+        {
+            logger.error("Configuration data unavailable for Node {} ", node);
+            return;
+        }
+
+        int vlan = nodeConfiguration.getInternalVlan(network.getID());
         logger.debug("Programming Vlan {} on {}", vlan, portUUID);
         if (vlan <= 0) {
             logger.error("Unable to get an internalVlan for Network {}", network);

@@ -432,6 +432,12 @@ class OF13ProviderManager extends ProviderNetworkManager {
     }
 
     @Override
+    public Status deleteTunnels(String tunnelType, String tunnelKey, Node source, Interface intf) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
     public void initializeFlowRules(Node node) {
         this.initializeFlowRules(node, AdminConfigManager.getManager().getIntegrationBridgeName());
     }

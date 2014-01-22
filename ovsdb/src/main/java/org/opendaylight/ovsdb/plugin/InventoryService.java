@@ -199,8 +199,9 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
                 } else if (oldRow != null) {
                     if (inventoryListener != null) {
                         inventoryListener.rowRemoved(n, name.getName(), uuid, oldRow);
+                    } else {
+                        db.removeRow(name.getName(), uuid);
                     }
-                    db.removeRow(name.getName(), uuid);
                 }
             }
         }

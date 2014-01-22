@@ -17,11 +17,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.UpdateType;
+import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.table.Interface;
@@ -29,6 +31,7 @@ import org.opendaylight.ovsdb.lib.table.Open_vSwitch;
 import org.opendaylight.ovsdb.lib.table.Port;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 import org.opendaylight.ovsdb.neutron.provider.ProviderNetworkManager;
+import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
 import org.opendaylight.ovsdb.plugin.OVSDBInventoryListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,9 +160,33 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
 
     private void processRowUpdate(Node node, String tableName, String uuid, Table<?> row,
                                   SouthboundEvent.Action action) {
-        if (action == SouthboundEvent.Action.DELETE) return;
+        if (action == SouthboundEvent.Action.DELETE) {
+            OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
 
-        if (Interface.NAME.getName().equalsIgnoreCase(tableName)) {
+            if (Interface.NAME.getName().equalsIgnoreCase(tableName)) {
+                Interface intf = (Interface)row;
+                NeutronNetwork network = TenantNetworkManager.getManager().getTenantNetworkForInterface(intf);
+                if (network != null && !network.getRouterExternal()) {
+                    List<NeutronPort> ports = network.getPortsOnNetwork();
+                    if (ports != null) {
+                        int novaCounter = 0;
+                        for (NeutronPort port : ports) {
+                            String portOwner = port.getDeviceOwner();
+                            if (portOwner.equalsIgnoreCase("compute:nova")) novaCounter++;
+                        }
+                        /*
+                         * Make sure we don't delete the tunnel unless there are no more
+                         * compute nodes using it
+                         */
+                        if (novaCounter<=1) {
+                            this.deleteTunnels(node, uuid, intf);
+                        }
+                    }
+                }
+            }
+            ovsdbTable.deleteRow(node, tableName, uuid);
+        }
+        else if (Interface.NAME.getName().equalsIgnoreCase(tableName)) {
             logger.debug("{} Added / Updated {} , {}, {}", tableName, node, uuid, row);
             Interface intf = (Interface)row;
             NeutronNetwork network = TenantNetworkManager.getManager().getTenantNetworkForInterface(intf);
@@ -216,6 +243,17 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
         NeutronNetwork network = TenantNetworkManager.getManager().getTenantNetworkForInterface(intf);
         if (network != null) {
             ProviderNetworkManager.getManager().handleInterfaceUpdate(network.getProviderNetworkType(),
+                    network.getProviderSegmentationID(), node, intf);
+        }
+    }
+    private void deleteTunnels (Node node, String uuid, Interface intf) {
+        if (AdminConfigManager.getManager().getTunnelEndPoint(node) == null) {
+            logger.error("Tunnel end-point configuration missing. Please configure it in Open_vSwitch Table");
+            return;
+        }
+        NeutronNetwork network = TenantNetworkManager.getManager().getTenantNetworkForInterface(intf);
+        if (network != null) {
+            ProviderNetworkManager.getManager().deleteTunnels(network.getProviderNetworkType(),
                     network.getProviderSegmentationID(), node, intf);
         }
     }

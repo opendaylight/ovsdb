@@ -56,7 +56,7 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
             new CopyOnWriteArraySet<IPluginOutInventoryService>();
     private ConcurrentMap<Node, Map<String, Property>> nodeProps;
     private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps;
-    private Map<Node, NodeDB> dbCache = Maps.newHashMap();
+    private Map<Node, NodeDB> dbCache = Maps.newConcurrentMap();
     private ScheduledExecutorService executor;
 
     /**

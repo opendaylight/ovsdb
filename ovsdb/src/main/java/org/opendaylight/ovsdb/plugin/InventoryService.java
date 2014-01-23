@@ -56,7 +56,7 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
             new CopyOnWriteArraySet<IPluginOutInventoryService>();
     private ConcurrentMap<Node, Map<String, Property>> nodeProps;
     private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps;
-    private Map<Node, NodeDB> dbCache = Maps.newHashMap();
+    private ConcurrentMap<Node, NodeDB> dbCache = Maps.newConcurrentMap();
     private ScheduledExecutorService executor;
 
     /**
@@ -126,7 +126,7 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
 
 
     @Override
-    public Map<String, Map<String, Table<?>>> getCache(Node n) {
+    public ConcurrentMap<String, ConcurrentMap<String, Table<?>>> getCache(Node n) {
         NodeDB db = dbCache.get(n);
         if (db == null) return null;
         return db.getTableCache();
@@ -134,7 +134,7 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
 
 
     @Override
-    public Map<String, Table<?>> getTableCache(Node n, String tableName) {
+    public ConcurrentMap<String, Table<?>> getTableCache(Node n, String tableName) {
         NodeDB db = dbCache.get(n);
         if (db == null) return null;
         return db.getTableCache(tableName);

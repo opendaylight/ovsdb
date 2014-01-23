@@ -10,6 +10,7 @@
 package org.opendaylight.ovsdb.plugin;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 import com.google.common.collect.Maps;
 
@@ -19,7 +20,7 @@ import org.opendaylight.ovsdb.lib.table.internal.Table;
 
 public class NodeDB {
     private DatabaseSchema schema;
-    Map<String, Map<String, Table<?>>> cache = Maps.newHashMap();
+    ConcurrentMap<String, ConcurrentMap<String, Table<?>>> cache = Maps.newConcurrentMap();
 
     public DatabaseSchema getSchema() {
         return schema;
@@ -29,15 +30,15 @@ public class NodeDB {
         this.schema = schema;
     }
 
-    public Map<String, Map<String, Table<?>>> getTableCache() {
+    public ConcurrentMap<String, ConcurrentMap<String, Table<?>>> getTableCache() {
         return cache;
     }
 
-    public Map<String, Table<?>> getTableCache(String tableName) {
+    public ConcurrentMap<String, Table<?>> getTableCache(String tableName) {
         return cache.get(tableName);
     }
 
-    private void setTableCache(String tableName,  Map<String, Table<?>> tableCache) {
+    private void setTableCache(String tableName,  ConcurrentMap<String, Table<?>> tableCache) {
         cache.put(tableName, tableCache);
     }
 
@@ -50,9 +51,9 @@ public class NodeDB {
     }
 
     public void updateRow(String tableName, String uuid, Table<?> row) {
-        Map<String, Table<?>> tableCache = getTableCache(tableName);
+        ConcurrentMap<String, Table<?>> tableCache = getTableCache(tableName);
         if (tableCache == null) {
-            tableCache = Maps.newHashMap();
+            tableCache = Maps.newConcurrentMap();
             setTableCache(tableName, tableCache);
         }
         tableCache.put(uuid, row);

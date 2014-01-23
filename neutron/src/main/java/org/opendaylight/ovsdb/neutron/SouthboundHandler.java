@@ -12,8 +12,9 @@ package org.opendaylight.ovsdb.neutron;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -194,7 +195,7 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
         } else if (Open_vSwitch.NAME.getName().equalsIgnoreCase(tableName)) {
             logger.debug("{} Added / Updated {} , {}, {}", tableName, node, uuid, row);
             try {
-                Map<String, Table<?>> interfaces = this.ovsdbConfigService.getRows(node, Interface.NAME.getName());
+                ConcurrentMap<String, Table<?>> interfaces = this.ovsdbConfigService.getRows(node, Interface.NAME.getName());
                 if (interfaces != null) {
                     for (String intfUUID : interfaces.keySet()) {
                         Interface intf = (Interface) interfaces.get(intfUUID);

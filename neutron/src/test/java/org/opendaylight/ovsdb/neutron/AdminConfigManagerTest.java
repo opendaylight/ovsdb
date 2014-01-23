@@ -20,8 +20,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.net.InetAddress;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,7 +46,7 @@ public class AdminConfigManagerTest {
 
         Node mockNode = mock(Node.class);
 
-        Map<String, Table<?>> ovsMap = new HashMap<String, Table<?>>();
+        ConcurrentMap<String, Table<?>> ovsMap = new ConcurrentHashMap<>();
 
         Open_vSwitch ovsTable = new Open_vSwitch();
         OvsDBMap localIp = new OvsDBMap();
@@ -74,7 +74,7 @@ public class AdminConfigManagerTest {
 
         Node mockNode = mock(Node.class);
 
-        Map<String, Table<?>> ovsMap = new HashMap<String, Table<?>>();
+        ConcurrentMap<String, Table<?>> ovsMap = new ConcurrentHashMap<>();
 
         Open_vSwitch nullRow = new Open_vSwitch();
         Open_vSwitch ovsRow1 = new Open_vSwitch();

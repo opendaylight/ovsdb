@@ -10,7 +10,7 @@
 package org.opendaylight.ovsdb.plugin;
 
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.Status;
@@ -23,6 +23,6 @@ public interface OVSDBConfigService {
     public String getSerializedRow(Node node, String tableName, String uuid) throws Exception;
     public String getSerializedRows(Node node, String tableName) throws Exception;
     public Table<?> getRow(Node node, String tableName, String uuid) throws Exception;
-    public Map<String, Table<?>> getRows(Node node, String tableName) throws Exception;
+    public ConcurrentMap<String, Table<?>> getRows(Node node, String tableName) throws Exception;
     public List<String> getTables(Node node) throws Exception;
 }

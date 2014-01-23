@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
@@ -837,12 +838,12 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     }
 
     @Override
-    public Map<String, Table<?>> getRows(Node node, String tableName) throws Exception{
+    public ConcurrentMap<String, Table<?>> getRows(Node node, String tableName) throws Exception{
         try{
             if (inventoryServiceInternal == null) {
                 throw new Exception("Inventory Service is Unavailable.");
             }
-            Map<String, Table<?>> ovsTable = inventoryServiceInternal.getTableCache(node, tableName);
+            ConcurrentMap<String, Table<?>> ovsTable = inventoryServiceInternal.getTableCache(node, tableName);
             return ovsTable;
         } catch(Exception e){
             throw new Exception("Unable to read table due to "+e.getMessage());

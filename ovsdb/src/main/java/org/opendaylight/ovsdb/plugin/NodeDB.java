@@ -10,6 +10,7 @@
 package org.opendaylight.ovsdb.plugin;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 import com.google.common.collect.Maps;
 
@@ -19,7 +20,7 @@ import org.opendaylight.ovsdb.lib.table.internal.Table;
 
 public class NodeDB {
     private DatabaseSchema schema;
-    Map<String, Map<String, Table<?>>> cache = Maps.newHashMap();
+    ConcurrentMap<String, Map<String, Table<?>>> cache = Maps.newConcurrentMap();
 
     public DatabaseSchema getSchema() {
         return schema;

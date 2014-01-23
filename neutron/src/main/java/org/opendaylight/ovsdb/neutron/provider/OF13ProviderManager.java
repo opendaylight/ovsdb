@@ -234,16 +234,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
         }
     }
 
-    private void programLocalIngressTunnelBridgeRules(Node node, Long dpid, String segmentationId, String attachedMac, long tunnelOFPort, long localPort) {
-        /*
-         * Table(0) Rule #2
-         * ----------------
-         * Match: Ingress Port, Tunnel ID
-         * Action: GOTO Local Table (10)
-         */
-
-         writeTunnelIn(dpid, TABLE_0_DEFAULT_INGRESS, TABLE_2_LOCAL_FORWARD, segmentationId, tunnelOFPort);
-
+    private void programLocalBridgeRules(Node node, Long dpid, String segmentationId, String attachedMac, long localPort) {
          /*
          * Table(0) Rule #3
          * ----------------
@@ -261,6 +252,61 @@ class OF13ProviderManager extends ProviderNetworkManager {
          */
 
          writeDropSrcIface(dpid, localPort);
+
+         /*
+          * Table(2) Rule #1
+          * ----------------
+          * Match: Match TunID and Destination DL/dMAC Addr
+          * Action: Output Port
+          * table=2,tun_id=0x5,dl_dst=00:00:00:00:00:01 actions=output:2
+          */
+
+          writeLocalUcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId, localPort, attachedMac);
+
+         /*
+          * Table(2) Rule #2
+          * ----------------
+          * Match: Tunnel ID and dMAC (::::FF:FF)
+          * table=2,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
+          * actions=output:2,3,4,5
+          */
+
+          writeLocalBcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId, localPort);
+
+          /*
+           * TODO : Optimize the following 2 writes to be restricted only for the very first port known in a segment.
+           */
+          /*
+           * Table(1) Rule #3
+           * ----------------
+           * Match:  Any remaining Ingress Local VM Packets
+           * Action: Drop w/ a low priority
+           * -------------------------------------------
+           * table=1,priority=8192,tun_id=0x5 actions=goto_table:2
+           */
+
+           writeTunnelMiss(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId);
+
+          /*
+           * Table(2) Rule #3
+           * ----------------
+           * Match: Any Remaining Flows w/a TunID
+           * Action: Drop w/ a low priority
+           * table=2,priority=8192,tun_id=0x5 actions=drop
+           */
+
+           writeLocalTableMiss(dpid, TABLE_2_LOCAL_FORWARD, segmentationId);
+    }
+
+    private void programLocalIngressTunnelBridgeRules(Node node, Long dpid, String segmentationId, String attachedMac, long tunnelOFPort, long localPort) {
+        /*
+         * Table(0) Rule #2
+         * ----------------
+         * Match: Ingress Port, Tunnel ID
+         * Action: GOTO Local Table (10)
+         */
+
+         writeTunnelIn(dpid, TABLE_0_DEFAULT_INGRESS, TABLE_2_LOCAL_FORWARD, segmentationId, tunnelOFPort);
     }
 
     private void programRemoteEgressTunnelBridgeRules(Node node, Long dpid, String segmentationId, String attachedMac, long tunnelOFPort, long localPort) {
@@ -287,49 +333,47 @@ class OF13ProviderManager extends ProviderNetworkManager {
          */
 
         writeTunnelFloodOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, tunnelOFPort);
-
-        /*
-         * Table(2) Rule #1
-         * ----------------
-         * Match: Match TunID and Destination DL/dMAC Addr
-         * Action: Output Port
-         * table=2,tun_id=0x5,dl_dst=00:00:00:00:00:01 actions=output:2
-         */
-
-         writeLocalUcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId, localPort, attachedMac);
-
-        /*
-         * Table(2) Rule #2
-         * ----------------
-         * Match: Tunnel ID and dMAC (::::FF:FF)
-         * table=2,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
-         * actions=output:2,3,4,5
-         */
-
-         writeLocalBcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId, localPort);
     }
 
-    private void programFloodEgressTunnelBridgeRules(Long dpid, String segmentationId) {
-        /*
-         * Table(1) Rule #3
-         * ----------------
-         * Match:  Any remaining Ingress Local VM Packets
-         * Action: Drop w/ a low priority
-         * -------------------------------------------
-         * table=1,priority=8192,tun_id=0x5 actions=goto_table:2
-         */
+    private void programLocalRules (String tunnelType, String segmentationId, Node node, Interface intf) {
+        try {
 
-         writeTunnelMiss(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId);
+            String bridgeName = AdminConfigManager.getManager().getIntegrationBridgeName();
+            String brIntId = this.getInternalBridgeUUID(node, bridgeName);
+            if (brIntId == null) {
+                logger.error("Unable to spot Bridge Identifier for {} in {}", bridgeName, node);
+                return;
+            }
 
-        /*
-         * Table(2) Rule #3
-         * ----------------
-         * Match: Any Remaining Flows w/a TunID
-         * Action: Drop w/ a low priority
-         * table=2,priority=8192,tun_id=0x5 actions=drop
-         */
+            OVSDBConfigService ovsdbTable = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brIntId);
+            Set<String> dpids = bridge.getDatapath_id();
+            if (dpids == null || dpids.size() == 0) return;
+            Long dpid = Long.valueOf(HexEncode.stringToLong((String) dpids.toArray()[0]));
 
-         writeLocalTableMiss(dpid, TABLE_2_LOCAL_FORWARD, segmentationId);
+            Set<BigInteger> of_ports = intf.getOfport();
+            if (of_ports == null || of_ports.size() <= 0) {
+                logger.error("Could NOT Identify OF value for port {} on {}", intf.getName(), node);
+                return;
+            }
+            long localPort = ((BigInteger)of_ports.toArray()[0]).longValue();
+
+            Map<String, String> externalIds = intf.getExternal_ids();
+            if (externalIds == null) {
+                logger.error("No external_ids seen in {}", intf);
+                return;
+            }
+
+            String attachedMac = externalIds.get(TenantNetworkManager.EXTERNAL_ID_VM_MAC);
+            if (attachedMac == null) {
+                logger.error("No AttachedMac seen in {}", intf);
+                return;
+            }
+
+            programLocalBridgeRules(node, dpid, segmentationId, attachedMac, localPort);
+        } catch (Exception e) {
+            logger.error("Exception in programming Local Rules for "+intf+" on "+node, e);
+        }
     }
 
     private void programTunnelRules (String tunnelType, String segmentationId, InetAddress dst, Node node,
@@ -390,7 +434,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
                             programRemoteEgressTunnelBridgeRules(node, dpid, segmentationId, attachedMac, tunnelOFPort, localPort);
                         }
                         programLocalIngressTunnelBridgeRules(node, dpid, segmentationId, attachedMac, tunnelOFPort, localPort);
-                        programFloodEgressTunnelBridgeRules(dpid, segmentationId);
                         return;
                     }
                 }
@@ -402,14 +445,12 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
     @Override
     public Status handleInterfaceUpdate(String tunnelType, String tunnelKey, Node srcNode, Interface intf) {
-        Status status = getTunnelReadinessStatus(srcNode, tunnelKey);
-        if (!status.isSuccess()) return status;
-
         IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
         List<Node> nodes = connectionService.getNodes();
         nodes.remove(srcNode);
+        this.programLocalRules(tunnelType, tunnelKey, srcNode, intf);
         for (Node dstNode : nodes) {
-            status = getTunnelReadinessStatus(dstNode, tunnelKey);
+            Status status = getTunnelReadinessStatus(dstNode, tunnelKey);
             if (!status.isSuccess()) continue;
             InetAddress src = AdminConfigManager.getManager().getTunnelEndPoint(srcNode);
             InetAddress dst = AdminConfigManager.getManager().getTunnelEndPoint(dstNode);
@@ -514,12 +555,13 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
 
-        flowBuilder.setId(new FlowId("10"));
-        FlowKey key = new FlowKey(new FlowId(String.valueOf((long) 110)));
+        String flowId = "LLDP";
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setBarrier(true);
         flowBuilder.setTableId((short) 0);
         flowBuilder.setKey(key);
-        flowBuilder.setFlowName("LLDP_" + nodeName);
+        flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
         writeFlow(flowBuilder, nodeBuilder);
@@ -562,13 +604,14 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
 
+        String flowId = "TunnelIn_"+segmentationId+"_"+ofPort;
         // Add Flow Attributes
-        flowBuilder.setId(new FlowId("20"));
-        FlowKey key = new FlowKey(new FlowId(String.valueOf((long) 120)));
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setBarrier(false);
         flowBuilder.setTableId(writeTable);
         flowBuilder.setKey(key);
-        flowBuilder.setFlowName("TUNIN_" + nodeName);
+        flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
         writeFlow(flowBuilder, nodeBuilder);
@@ -615,13 +658,14 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
 
+        String flowId = "LocalMac_"+segmentationId+"_"+inPort+"_"+attachedMac;
         // Add Flow Attributes
-        flowBuilder.setId(new FlowId("30"));
-        FlowKey key = new FlowKey(new FlowId(String.valueOf((long) 130)));
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setBarrier(false);
         flowBuilder.setTableId(writeTable);
         flowBuilder.setKey(key);
-        flowBuilder.setFlowName("LOCALSMAC_" + nodeName);
+        flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
         writeFlow(flowBuilder, nodeBuilder);
@@ -663,13 +707,14 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
 
+        String flowId = "DropFilter_"+inPort;
         // Add Flow Attributes
-        flowBuilder.setId(new FlowId("40"));
-        FlowKey key = new FlowKey(new FlowId(String.valueOf((long) 140)));
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setBarrier(false);
         flowBuilder.setTableId((short) 0);
         flowBuilder.setKey(key);
-        flowBuilder.setFlowName("LOCALDROP_" + nodeName);
+        flowBuilder.setFlowName(flowId);
         flowBuilder.setPriority(8192);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
@@ -716,13 +761,14 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
 
+        String flowId = "TunnelOut_"+segmentationId+"_"+OFPortOut+"_"+attachedMac;
         // Add Flow Attributes
-        flowBuilder.setId(new FlowId("50"));
-        FlowKey key = new FlowKey(new FlowId(String.valueOf((long) 150)));
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setBarrier(false);
         flowBuilder.setTableId(writeTable);
         flowBuilder.setKey(key);
-        flowBuilder.setFlowName("TUNOUT_" + nodeName);
+        flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
         writeFlow(flowBuilder, nodeBuilder);
@@ -771,14 +817,15 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
 
+        String flowId = "TunnelFloodOut_"+segmentationId;
         // Add Flow Attributes
-        flowBuilder.setId(new FlowId("60"));
-        FlowKey key = new FlowKey(new FlowId(String.valueOf((long) 160)));
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setBarrier(true);
         flowBuilder.setTableId(writeTable);
         flowBuilder.setKey(key);
         flowBuilder.setPriority(16384);
-        flowBuilder.setFlowName("TUNFLOODOUT_" + nodeName);
+        flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
         writeFlow(flowBuilder, nodeBuilder);
@@ -819,14 +866,15 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
 
+        String flowId = "TunnelMiss_"+segmentationId;
         // Add Flow Attributes
-        flowBuilder.setId(new FlowId("70"));
-        FlowKey key = new FlowKey(new FlowId(String.valueOf((long) 170)));
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setBarrier(false);
         flowBuilder.setTableId(writeTable);
         flowBuilder.setKey(key);
         flowBuilder.setPriority(8192);
-        flowBuilder.setFlowName("TUNMISS_" + nodeName);
+        flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
         writeFlow(flowBuilder, nodeBuilder);
@@ -868,13 +916,14 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
 
+        String flowId = "UcastOut_"+segmentationId+"_"+localPort+"_"+attachedMac;
         // Add Flow Attributes
-        flowBuilder.setId(new FlowId("80"));
-        FlowKey key = new FlowKey(new FlowId(String.valueOf((long) 180)));
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setBarrier(false);
         flowBuilder.setTableId(writeTable);
         flowBuilder.setKey(key);
-        flowBuilder.setFlowName("LOCALHOSTUCAST_" + nodeName);
+        flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
         writeFlow(flowBuilder, nodeBuilder);
@@ -917,14 +966,15 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
 
+        String flowId = "BcastOut_"+segmentationId;
         // Add Flow Attributes
-        flowBuilder.setId(new FlowId("90"));
-        FlowKey key = new FlowKey(new FlowId(String.valueOf((long) 190)));
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setBarrier(false);
         flowBuilder.setTableId(writeTable);
         flowBuilder.setKey(key);
         flowBuilder.setPriority(16384);
-        flowBuilder.setFlowName("LOCALHOSTBCAST_" + nodeName);
+        flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
         writeFlow(flowBuilder, nodeBuilder);
@@ -965,14 +1015,15 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
 
+        String flowId = "LocalTableMiss_"+segmentationId;
         // Add Flow Attributes
-        flowBuilder.setId(new FlowId("100"));
-        FlowKey key = new FlowKey(new FlowId(String.valueOf((long) 200)));
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setBarrier(false);
         flowBuilder.setTableId(writeTable);
         flowBuilder.setKey(key);
         flowBuilder.setPriority(8192);
-        flowBuilder.setFlowName("TUNMISS_" + nodeName);
+        flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
         writeFlow(flowBuilder, nodeBuilder);
@@ -1003,6 +1054,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
         try {
             RpcResult<TransactionStatus> result = commitFuture.get();
             TransactionStatus status = result.getResult();
+            logger.debug("Transaction Status "+status.toString()+" for Flow "+flowBuilder.getFlowName());
         } catch (InterruptedException e) {
             logger.error(e.getMessage(), e);
         } catch (ExecutionException e) {

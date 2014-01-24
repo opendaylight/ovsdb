@@ -794,8 +794,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // Match TunnelID
         flowBuilder.setMatch(createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
         // Match DMAC
-        byte[] mask = new byte[] { (byte) 1, 0, 0, 0, 0, 0 };
-        flowBuilder.setMatch(createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"), mask).build());
+        flowBuilder.setMatch(createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"), new MacAddress("01:00:00:00:00:00")).build());
 
         // Instantiate the Builders for the OF Actions and Instructions
         InstructionBuilder ib = new InstructionBuilder();
@@ -946,8 +945,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         // Create the OF Match using MatchBuilder
         flowBuilder.setMatch(createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
-        byte[] mask = new byte[] { (byte) 1, 0, 0, 0, 0, 0 };
-        flowBuilder.setMatch(createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"), mask).build());
+        flowBuilder.setMatch(createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"), new MacAddress("01:00:00:00:00:00")).build());
 
         // Instantiate the Builders for the OF Actions and Instructions
         InstructionBuilder ib = new InstructionBuilder();
@@ -1143,7 +1141,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
      * @return matchBuilder Map MatchBuilder Object with a match
      */
 
-    protected static MatchBuilder createDestEthMatch(MatchBuilder matchBuilder, MacAddress dMacAddr, byte[] mask) {
+    protected static MatchBuilder createDestEthMatch(MatchBuilder matchBuilder, MacAddress dMacAddr, MacAddress mask) {
 
         EthernetMatchBuilder ethernetMatch = new EthernetMatchBuilder();
         EthernetDestinationBuilder ethDestinationBuilder = new EthernetDestinationBuilder();

@@ -45,13 +45,6 @@
     </pluginManagement>
   </build>
 
-  <!-- modules should go once the jenkins job is updated to use the root pom -->
-  <modules>
-    <module>../../ovsdb/</module>
-    <module>../../northbound/ovsdb</module>
-    <module>../../neutron</module>
-    <module>../../distribution/opendaylight</module>
-  </modules>
   <repositories>
     <!-- jsonrpc4j mirror -->
     <repository>

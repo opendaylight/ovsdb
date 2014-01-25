@@ -158,9 +158,11 @@ public class InternalNetworkManager {
             bridgeUUID = statusWithUuid.getUuid().toString();
             Port port = new Port();
             port.setName(bridgeName);
-            ovsdbTable.insertRow(node, Port.NAME.getName(), bridgeUUID, port);
+            Status status = ovsdbTable.insertRow(node, Port.NAME.getName(), bridgeUUID, port);
+            logger.debug("addInternalBridge : Inserting Bridge {} with protocols {} and status {}", bridgeUUID, protocols, status);
         } else {
-            ovsdbTable.updateRow(node, Bridge.NAME.getName(), null, bridgeUUID, bridge);
+            Status status = ovsdbTable.updateRow(node, Bridge.NAME.getName(), null, bridgeUUID, bridge);
+            logger.debug("addInternalBridge : Updating Bridge {} with protocols {} and status {}", bridgeUUID, protocols, status);
         }
 
         IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);

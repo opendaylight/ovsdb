@@ -56,6 +56,7 @@ import org.opendaylight.ovsdb.lib.message.MonitorRequestBuilder;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.message.UpdateNotification;
+import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.table.Bridge;
 import org.opendaylight.ovsdb.lib.table.Controller;
 import org.opendaylight.ovsdb.lib.table.Open_vSwitch;
@@ -478,17 +479,26 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
             return false;
         }
 
-        if (connection != null) {
-            List<InetAddress> ofControllerAddrs = this.getControllerIPAddresses(connection);
-            short ofControllerPort = getControllerOFPort();
-            for (InetAddress ofControllerAddress : ofControllerAddrs) {
-                String newController = "tcp:"+ofControllerAddress.getHostAddress()+":"+ofControllerPort;
-                Controller controllerRow = new Controller();
-                controllerRow.setTarget(newController);
-                OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-                if (ovsdbTable != null) {
-                    ovsdbTable.insertRow(node, Controller.NAME.getName(), bridgeUUID, controllerRow);
-                }
+        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+        OvsDBSet<String> protocols = new OvsDBSet<String>();
+        if (Boolean.getBoolean("OF1.3_Provider")) {
+            protocols.add("OpenFlow13");
+        } else {
+            protocols.add("OpenFlow10");
+        }
+        Bridge bridge = new Bridge();
+        bridge.setProtocols(protocols);
+        Status status = ovsdbTable.updateRow(node, Bridge.NAME.getName(), null, bridgeUUID, bridge);
+        logger.info("Bridge {} updated to {} with Status {}", bridgeUUID, protocols.toArray()[0], status);
+
+        List<InetAddress> ofControllerAddrs = this.getControllerIPAddresses(connection);
+        short ofControllerPort = getControllerOFPort();
+        for (InetAddress ofControllerAddress : ofControllerAddrs) {
+            String newController = "tcp:"+ofControllerAddress.getHostAddress()+":"+ofControllerPort;
+            Controller controllerRow = new Controller();
+            controllerRow.setTarget(newController);
+            if (ovsdbTable != null) {
+                ovsdbTable.insertRow(node, Controller.NAME.getName(), bridgeUUID, controllerRow);
             }
         }
         return true;

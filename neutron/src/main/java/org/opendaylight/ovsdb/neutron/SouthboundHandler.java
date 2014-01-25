@@ -9,6 +9,7 @@
  */
 package org.opendaylight.ovsdb.neutron;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,10 +40,12 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
     //private Thread eventThread;
     private ExecutorService eventHandler;
     private BlockingQueue<SouthboundEvent> events;
+    List<Node> nodeCache;
 
     void init() {
         eventHandler = Executors.newSingleThreadExecutor();
         this.events = new LinkedBlockingQueue<SouthboundEvent>();
+        nodeCache = new ArrayList<>();
     }
 
     void start() {
@@ -243,9 +246,14 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
 
     @Override
     public void notifyNode(Node node, UpdateType type, Map<String, Property> propMap) {
-        if (node.getType().equals(Node.NodeIDType.OPENFLOW) && type.equals(UpdateType.ADDED)) {
-            logger.debug("OpenFlow node {} added. Initialize Basic flows", node);
+        logger.debug("Node {} update {} from Controller's inventory Service", node, type);
+
+        // Add the Node Type check back once the Consistency issue is resolved between MD-SAL and AD-SAL
+        if (!type.equals(UpdateType.REMOVED) && !nodeCache.contains(node)) {
+            nodeCache.add(node);
             ProviderNetworkManager.getManager().initializeOFFlowRules(node);
+        } else if (type.equals(UpdateType.REMOVED)){
+            nodeCache.remove(node);
         }
     }
 

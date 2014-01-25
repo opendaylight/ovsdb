@@ -19,6 +19,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -161,9 +162,30 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
 
     private void processRowUpdate(Node node, String tableName, String uuid, Table<?> row,
                                   SouthboundEvent.Action action) {
-        if (action == SouthboundEvent.Action.DELETE) return;
-
-        if (Interface.NAME.getName().equalsIgnoreCase(tableName)) {
+        if (action == SouthboundEvent.Action.DELETE) {
+            if (Interface.NAME.getName().equalsIgnoreCase(tableName)) {
+                Interface intf = (Interface)row;
+                NeutronNetwork network = TenantNetworkManager.getManager().getTenantNetworkForInterface(intf);
+                if (network != null && !network.getRouterExternal()) {
+                    List<NeutronPort> ports = network.getPortsOnNetwork();
+                    if (ports != null) {
+                        int novaCounter = 0;
+                        for (NeutronPort port : ports) {
+                            String portOwner = port.getDeviceOwner();
+                            if (portOwner.equalsIgnoreCase("compute:nova")) novaCounter++;
+                        }
+                        /*
+                         * Make sure we don't delete the tunnel unless there are no more
+                         * compute nodes using it
+                         */
+                        if (novaCounter<=1) {
+                            this.deleteTunnels(node, uuid, intf);
+                        }
+                    }
+                }
+            }
+        }
+        else if (Interface.NAME.getName().equalsIgnoreCase(tableName)) {
             logger.debug("{} Added / Updated {} , {}, {}", tableName, node, uuid, row);
             Interface intf = (Interface)row;
             NeutronNetwork network = TenantNetworkManager.getManager().getTenantNetworkForInterface(intf);

@@ -20,12 +20,14 @@ import java.util.concurrent.Future;
 
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
+import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
+import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
 import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -251,7 +253,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
          * Action: Drop w/ a low priority
          */
 
-         writeDropSrcIface(dpid, localPort);
+         // TODO : Drop flows causing problems with other existing flows. Commenting them out for now till it is fixed.
+
+         // writeDropSrcIface(dpid, localPort);
 
          /*
           * Table(2) Rule #1
@@ -295,7 +299,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
            * table=2,priority=8192,tun_id=0x5 actions=drop
            */
 
-           writeLocalTableMiss(dpid, TABLE_2_LOCAL_FORWARD, segmentationId);
+           // TODO : Drop flows causing problems with other existing flows. Commenting them out for now till it is fixed.
+           // writeLocalTableMiss(dpid, TABLE_2_LOCAL_FORWARD, segmentationId);
     }
 
     private void programLocalIngressTunnelBridgeRules(Node node, Long dpid, String segmentationId, String attachedMac, long tunnelOFPort, long localPort) {
@@ -335,21 +340,32 @@ class OF13ProviderManager extends ProviderNetworkManager {
         writeTunnelFloodOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, tunnelOFPort);
     }
 
-    private void programLocalRules (String tunnelType, String segmentationId, Node node, Interface intf) {
+    private Long getIntegrationBridgeOFDPID (Node node) {
         try {
-
             String bridgeName = AdminConfigManager.getManager().getIntegrationBridgeName();
             String brIntId = this.getInternalBridgeUUID(node, bridgeName);
             if (brIntId == null) {
                 logger.error("Unable to spot Bridge Identifier for {} in {}", bridgeName, node);
-                return;
+                return 0L;
             }
 
             OVSDBConfigService ovsdbTable = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
             Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brIntId);
             Set<String> dpids = bridge.getDatapath_id();
-            if (dpids == null || dpids.size() == 0) return;
-            Long dpid = Long.valueOf(HexEncode.stringToLong((String) dpids.toArray()[0]));
+            if (dpids == null || dpids.size() == 0) return 0L;
+            return Long.valueOf(HexEncode.stringToLong((String) dpids.toArray()[0]));
+        } catch (Exception e) {
+            logger.error("Error finding Integration Bridge's OF DPID", e);
+            return 0L;
+        }
+    }
+    private void programLocalRules (String tunnelType, String segmentationId, Node node, Interface intf) {
+        try {
+            Long dpid = this.getIntegrationBridgeOFDPID(node);
+            if (dpid == 0L) {
+                logger.debug("Openflow Datapath-ID not set for the integration bridge in {}", node);
+                return;
+            }
 
             Set<BigInteger> of_ports = intf.getOfport();
             if (of_ports == null || of_ports.size() <= 0) {
@@ -380,18 +396,12 @@ class OF13ProviderManager extends ProviderNetworkManager {
             Interface intf, boolean local) {
         try {
 
-            String bridgeName = AdminConfigManager.getManager().getIntegrationBridgeName();
-            String brIntId = this.getInternalBridgeUUID(node, bridgeName);
-            if (brIntId == null) {
-                logger.error("Unable to spot Bridge Identifier for {} in {}", bridgeName, node);
+            Long dpid = this.getIntegrationBridgeOFDPID(node);
+            if (dpid == 0L) {
+                logger.debug("Openflow Datapath-ID not set for the integration bridge in {}", node);
                 return;
             }
-
             OVSDBConfigService ovsdbTable = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brIntId);
-            Set<String> dpids = bridge.getDatapath_id();
-            if (dpids == null || dpids.size() == 0) return;
-            Long dpid = Long.valueOf(HexEncode.stringToLong((String) dpids.toArray()[0]));
 
             Set<BigInteger> of_ports = intf.getOfport();
             if (of_ports == null || of_ports.size() <= 0) {
@@ -445,10 +455,39 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
     @Override
     public Status handleInterfaceUpdate(String tunnelType, String tunnelKey, Node srcNode, Interface intf) {
+        ISwitchManager switchManager = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, "default", this);
+        if (switchManager == null) {
+            logger.error("Unable to identify SwitchManager");
+        } else {
+            Long dpid = this.getIntegrationBridgeOFDPID(srcNode);
+            if (dpid == 0L) {
+                logger.debug("Openflow Datapath-ID not set for the integration bridge in {}", srcNode);
+                return new Status(StatusCode.NOTFOUND);
+            }
+            Set<Node> ofNodes = switchManager.getNodes();
+            boolean ofNodeFound = false;
+            if (ofNodes != null) {
+                for (Node ofNode : ofNodes) {
+                    if (ofNode.toString().contains(dpid+"")) {
+                        logger.info("Identified the Openflow node via toString {}", ofNode);
+                        ofNodeFound = true;
+                        break;
+                    }
+                }
+            } else {
+                logger.error("Unable to find any Node from SwitchManager");
+            }
+            if (!ofNodeFound) {
+                logger.error("Unable to find OF Node for {} with update {} on node {}", dpid, intf, srcNode);
+                return new Status(StatusCode.NOTFOUND);
+            }
+        }
+
         IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
         List<Node> nodes = connectionService.getNodes();
         nodes.remove(srcNode);
         this.programLocalRules(tunnelType, tunnelKey, srcNode, intf);
+
         for (Node dstNode : nodes) {
             Status status = getTunnelReadinessStatus(dstNode, tunnelKey);
             if (!status.isSuccess()) continue;
@@ -463,9 +502,30 @@ class OF13ProviderManager extends ProviderNetworkManager {
                 this.programTunnelRules(tunnelType, tunnelKey, src, dstNode, intf, false);
             }
         }
+
         return new Status(StatusCode.SUCCESS);
     }
 
+    private Status triggerInterfaceUpdates(Node node) {
+        try {
+            OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+            Map<String, org.opendaylight.ovsdb.lib.table.internal.Table<?>> intfs = ovsdbTable.getRows(node, Interface.NAME.getName());
+            if (intfs != null) {
+                for (org.opendaylight.ovsdb.lib.table.internal.Table<?> row : intfs.values()) {
+                    Interface intf = (Interface)row;
+                    NeutronNetwork network = TenantNetworkManager.getManager().getTenantNetworkForInterface(intf);
+                    logger.debug("Trigger Interface update for {}", intf);
+                    if (network != null) {
+                        this.handleInterfaceUpdate(network.getProviderNetworkType(), network.getProviderSegmentationID(), node, intf);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error Triggering the lost interface updates for "+ node, e);
+            return new Status(StatusCode.INTERNALERROR, e.getLocalizedMessage());
+        }
+        return new Status(StatusCode.SUCCESS);
+    }
     @Override
     public Status handleInterfaceUpdate(String tunnelType, String tunnelKey) {
         // TODO Auto-generated method stub
@@ -475,6 +535,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
     @Override
     public void initializeFlowRules(Node node) {
         this.initializeFlowRules(node, AdminConfigManager.getManager().getIntegrationBridgeName());
+        this.triggerInterfaceUpdates(node);
     }
 
     /**
@@ -482,40 +543,20 @@ class OF13ProviderManager extends ProviderNetworkManager {
      * @param bridgeName
      */
     private void initializeFlowRules(Node node, String bridgeName) {
-
-        // TODO : 3 second sleep hack is to make sure the OF connection is established.
-        // Correct fix is to check the MD-SAL inventory before proceeding and listen
-        // to Inventory update for processing.
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e1) {
-            logger.error("Sleep Thread interrupted ",e1);
-        }
-
-        String brIntId = this.getInternalBridgeUUID(node, bridgeName);
-        if (brIntId == null) {
-            logger.error("Failed to initialize Flow Rules for {}", node);
+        Long dpid = this.getIntegrationBridgeOFDPID(node);
+        if (dpid == 0L) {
+            logger.debug("Openflow Datapath-ID not set for the integration bridge in {}", node);
             return;
         }
 
-        try {
-            OVSDBConfigService ovsdbTable = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brIntId);
-            Set<String> dpids = bridge.getDatapath_id();
-            if (dpids == null || dpids.size() == 0) return;
-            Long dpid = Long.valueOf(HexEncode.stringToLong((String) dpids.toArray()[0]));
+        /*
+         * Table(0) Rule #1
+         * ----------------
+         * Match: LLDP (0x88CCL)
+         * Action: Packet_In to Controller Reserved Port
+         */
 
-            /*
-             * Table(0) Rule #1
-             * ----------------
-             * Match: LLDP (0x88CCL)
-             * Action: Packet_In to Controller Reserved Port
-             */
-
-             writeLLDPRule(dpid);
-        } catch (Exception e) {
-            logger.error("Failed to initialize Flow Rules for " + node.toString()+ " Bridge "+bridgeName, e);
-        }
+         writeLLDPRule(dpid);
     }
 
     /*
@@ -1865,6 +1906,18 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
     @Override
     public void initializeOFFlowRules(Node openflowNode) {
+        IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+        List<Node> ovsNodes = connectionService.getNodes();
+        if (ovsNodes == null) return;
+        for (Node ovsNode : ovsNodes) {
+            Long dpid = this.getIntegrationBridgeOFDPID(ovsNode);
+            logger.debug("Compare openflowNode to OVS br-int node {} vs {}", openflowNode.getID(), dpid);
+            String openflowID = (String)openflowNode.getID();
+            if (openflowID.contains(""+dpid)) {
+                this.initializeFlowRules(ovsNode, AdminConfigManager.getManager().getIntegrationBridgeName());
+                this.triggerInterfaceUpdates(ovsNode);
+            }
+        }
     }
 
     private NodeBuilder createNodeBuilder(String nodeId) {

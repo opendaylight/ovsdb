@@ -91,16 +91,6 @@ public class TenantNetworkManager {
         return nodeConfigurationCache.get(nodeUuid);
     }
 
-    public void networkCreated (String networkId) {
-        IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
-        List<Node> nodes = connectionService.getNodes();
-
-        for (Node node : nodes) {
-            this.networkCreated(node, networkId);
-        }
-
-    }
-
     private String getNodeUUID(Node node) {
         String nodeUuid = new String();
         OVSDBConfigService ovsdbConfigService = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);

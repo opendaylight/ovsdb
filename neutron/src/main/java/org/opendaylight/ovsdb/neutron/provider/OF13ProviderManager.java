@@ -533,7 +533,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
     }
 
     @Override
-    public Status deleteTunnels(String tunnelType, String tunnelKey, Node source, Interface intf) {
+    public Status handleInterfaceDelete(String tunnelType, String tunnelKey, Node source, Interface intf,
+            boolean isLastInstanceOnNode) {
         // TODO Auto-generated method stub
         return null;
     }

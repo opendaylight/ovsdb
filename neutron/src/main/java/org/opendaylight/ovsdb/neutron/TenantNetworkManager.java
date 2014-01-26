@@ -37,6 +37,7 @@ import org.opendaylight.ovsdb.lib.table.Open_vSwitch;
 import org.opendaylight.ovsdb.lib.table.Port;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 import org.opendaylight.ovsdb.neutron.provider.ProviderNetworkManager;
+import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,6 +89,40 @@ public class TenantNetworkManager {
         }
         this.nodeConfigurationCache.put(nodeUuid, nodeConfiguration);
         return nodeConfigurationCache.get(nodeUuid);
+    }
+
+    public void reclaimTennantNetworkInternalVlan(Node node, String portUUID, NeutronNetwork network) {
+        String nodeUuid = getNodeUUID(node);
+        if (nodeUuid == null) {
+            logger.error("Unable to get UUID for Node {}", node);
+            return;
+        }
+
+        NodeConfiguration nodeConfiguration = nodeConfigurationCache.get(nodeUuid);
+
+        // Cache miss
+        if (nodeConfiguration == null)
+        {
+            logger.error("Configuration data unavailable for Node {} ", node);
+            return;
+        }
+
+        int vlan = nodeConfiguration.reclaimInternalVlan(network.getID());
+        if (vlan <= 0) {
+            logger.error("Unable to get an internalVlan for Network {}", network);
+            return;
+        }
+        logger.debug("Removed Vlan {} on {}", vlan, portUUID);
+    }
+
+    public void networkCreated (String networkId) {
+        IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+        List<Node> nodes = connectionService.getNodes();
+
+        for (Node node : nodes) {
+            this.networkCreated(node, networkId);
+        }
+
     }
 
     private String getNodeUUID(Node node) {

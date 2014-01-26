@@ -239,6 +239,11 @@ class OF13ProviderManager extends ProviderNetworkManager {
         }
     }
 
+    private Status deleteTunnelPort (Node node, String tunnelType, InetAddress src, InetAddress dst) {
+        // Stub for now, until we decide when and how to remove
+        return new Status(StatusCode.SUCCESS);
+    }
+
     private void programLocalBridgeRules(Node node, Long dpid, String segmentationId, String attachedMac, long localPort) {
          /*
          * Table(0) Rule #3
@@ -303,6 +308,70 @@ class OF13ProviderManager extends ProviderNetworkManager {
            writeLocalTableMiss(dpid, TABLE_2_LOCAL_FORWARD, segmentationId);
     }
 
+    private void removeLocalBridgeRules(Node node, Long dpid, String segmentationId, String attachedMac, long localPort) {
+        /*
+        * Table(0) Rule #3
+        * ----------------
+        * Match: VM sMac and Local Ingress Port
+        * Action:Action: Set Tunnel ID and GOTO Local Table (5)
+        */
+
+        eraseLocalInPort(dpid, TABLE_0_DEFAULT_INGRESS, TABLE_1_ISOLATE_TENANT, segmentationId, localPort, attachedMac);
+
+       /*
+        * Table(0) Rule #4
+        * ----------------
+        * Match: Drop any remaining Ingress Local VM Packets
+        * Action: Drop w/ a low priority
+        */
+
+        eraseDropSrcIface(dpid, localPort);
+
+        /*
+         * Table(2) Rule #1
+         * ----------------
+         * Match: Match TunID and Destination DL/dMAC Addr
+         * Action: Output Port
+         * table=2,tun_id=0x5,dl_dst=00:00:00:00:00:01 actions=output:2
+         */
+
+         eraseLocalUcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId, localPort, attachedMac);
+
+        /*
+         * Table(2) Rule #2
+         * ----------------
+         * Match: Tunnel ID and dMAC (::::FF:FF)
+         * table=2,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
+         * actions=output:2,3,4,5
+         */
+
+         eraseLocalBcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId, localPort);
+
+         /*
+          * TODO : Optimize the following 2 writes to be restricted only for the very first port known in a segment.
+          */
+         /*
+          * Table(1) Rule #3
+          * ----------------
+          * Match:  Any remaining Ingress Local VM Packets
+          * Action: Drop w/ a low priority
+          * -------------------------------------------
+          * table=1,priority=8192,tun_id=0x5 actions=goto_table:2
+          */
+
+          eraseTunnelMiss(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId);
+
+         /*
+          * Table(2) Rule #3
+          * ----------------
+          * Match: Any Remaining Flows w/a TunID
+          * Action: Drop w/ a low priority
+          * table=2,priority=8192,tun_id=0x5 actions=drop
+          */
+
+          eraseLocalTableMiss(dpid, TABLE_2_LOCAL_FORWARD, segmentationId);
+    }
+
     private void programLocalIngressTunnelBridgeRules(Node node, Long dpid, String segmentationId, String attachedMac, long tunnelOFPort, long localPort) {
         /*
          * Table(0) Rule #2
@@ -312,6 +381,17 @@ class OF13ProviderManager extends ProviderNetworkManager {
          */
 
          writeTunnelIn(dpid, TABLE_0_DEFAULT_INGRESS, TABLE_2_LOCAL_FORWARD, segmentationId, tunnelOFPort);
+    }
+
+    private void removeLocalIngressTunnelBridgeRules(Node node, Long dpid, String segmentationId, String attachedMac, long tunnelOFPort, long localPort) {
+        /*
+         * Table(0) Rule #2
+         * ----------------
+         * Match: Ingress Port, Tunnel ID
+         * Action: GOTO Local Table (10)
+         */
+
+         eraseTunnelIn(dpid, TABLE_0_DEFAULT_INGRESS, TABLE_2_LOCAL_FORWARD, segmentationId, tunnelOFPort);
     }
 
     private void programRemoteEgressTunnelBridgeRules(Node node, Long dpid, String segmentationId, String attachedMac, long tunnelOFPort, long localPort) {
@@ -338,6 +418,32 @@ class OF13ProviderManager extends ProviderNetworkManager {
          */
 
         writeTunnelFloodOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, tunnelOFPort);
+    }
+
+    private void removeRemoteEgressTunnelBridgeRules(Node node, Long dpid, String segmentationId, String attachedMac, long tunnelOFPort, long localPort) {
+        /*
+         * Table(1) Rule #1
+         * ----------------
+         * Match: Drop any remaining Ingress Local VM Packets
+         * Action: Drop w/ a low priority
+         * -------------------------------------------
+         * table=1,tun_id=0x5,dl_dst=00:00:00:00:00:08 \
+         * actions=output:11,goto_table:2
+         */
+
+        eraseTunnelOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, tunnelOFPort, attachedMac);
+
+        /*
+         * Table(1) Rule #2
+         * ----------------
+         * Match: Match Tunnel ID and L2 ::::FF:FF Flooding
+         * Action: Flood to selected destination TEPs
+         * -------------------------------------------
+         * table=1,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
+         * actions=output:10,output:11,goto_table:2
+         */
+
+        eraseTunnelFloodOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, tunnelOFPort);
     }
 
     private Long getIntegrationBridgeOFDPID (Node node) {
@@ -389,6 +495,39 @@ class OF13ProviderManager extends ProviderNetworkManager {
             programLocalBridgeRules(node, dpid, segmentationId, attachedMac, localPort);
         } catch (Exception e) {
             logger.error("Exception in programming Local Rules for "+intf+" on "+node, e);
+        }
+    }
+
+    private void removeLocalRules (String tunnelType, String segmentationId, Node node, Interface intf) {
+        try {
+            Long dpid = this.getIntegrationBridgeOFDPID(node);
+            if (dpid == 0L) {
+                logger.debug("Openflow Datapath-ID not set for the integration bridge in {}", node);
+                return;
+            }
+
+            Set<BigInteger> of_ports = intf.getOfport();
+            if (of_ports == null || of_ports.size() <= 0) {
+                logger.error("Could NOT Identify OF value for port {} on {}", intf.getName(), node);
+                return;
+            }
+            long localPort = ((BigInteger)of_ports.toArray()[0]).longValue();
+
+            Map<String, String> externalIds = intf.getExternal_ids();
+            if (externalIds == null) {
+                logger.error("No external_ids seen in {}", intf);
+                return;
+            }
+
+            String attachedMac = externalIds.get(TenantNetworkManager.EXTERNAL_ID_VM_MAC);
+            if (attachedMac == null) {
+                logger.error("No AttachedMac seen in {}", intf);
+                return;
+            }
+
+            removeLocalBridgeRules(node, dpid, segmentationId, attachedMac, localPort);
+        } catch (Exception e) {
+            logger.error("Exception in removing Local Rules for "+intf+" on "+node, e);
         }
     }
 
@@ -444,6 +583,67 @@ class OF13ProviderManager extends ProviderNetworkManager {
                             programRemoteEgressTunnelBridgeRules(node, dpid, segmentationId, attachedMac, tunnelOFPort, localPort);
                         }
                         programLocalIngressTunnelBridgeRules(node, dpid, segmentationId, attachedMac, tunnelOFPort, localPort);
+                        return;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error("", e);
+        }
+    }
+
+    private void removeTunnelRules (String tunnelType, String segmentationId, InetAddress dst, Node node,
+            Interface intf, boolean local) {
+        try {
+
+            Long dpid = this.getIntegrationBridgeOFDPID(node);
+            if (dpid == 0L) {
+                logger.debug("Openflow Datapath-ID not set for the integration bridge in {}", node);
+                return;
+            }
+            OVSDBConfigService ovsdbTable = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+
+            Set<BigInteger> of_ports = intf.getOfport();
+            if (of_ports == null || of_ports.size() <= 0) {
+                logger.error("Could NOT Identify OF value for port {} on {}", intf.getName(), node);
+                return;
+            }
+            long localPort = ((BigInteger)of_ports.toArray()[0]).longValue();
+
+            Map<String, String> externalIds = intf.getExternal_ids();
+            if (externalIds == null) {
+                logger.error("No external_ids seen in {}", intf);
+                return;
+            }
+
+            String attachedMac = externalIds.get(TenantNetworkManager.EXTERNAL_ID_VM_MAC);
+            if (attachedMac == null) {
+                logger.error("No AttachedMac seen in {}", intf);
+                return;
+            }
+
+            Map<String, org.opendaylight.ovsdb.lib.table.internal.Table<?>> intfs = ovsdbTable.getRows(node, Interface.NAME.getName());
+            if (intfs != null) {
+                for (org.opendaylight.ovsdb.lib.table.internal.Table<?> row : intfs.values()) {
+                    Interface tunIntf = (Interface)row;
+                    if (tunIntf.getName().equals(this.getTunnelName(tunnelType, dst))) {
+                        of_ports = tunIntf.getOfport();
+                        if (of_ports == null || of_ports.size() <= 0) {
+                            logger.error("Could NOT Identify Tunnel port {} on {}", tunIntf.getName(), node);
+                            continue;
+                        }
+                        long tunnelOFPort = ((BigInteger)of_ports.toArray()[0]).longValue();
+
+                        if (tunnelOFPort == -1) {
+                            logger.error("Could NOT Identify Tunnel port {} -> OF ({}) on {}", tunIntf.getName(), tunnelOFPort, node);
+                            return;
+                        }
+                        logger.debug("Identified Tunnel port {} -> OF ({}) on {}", tunIntf.getName(), tunnelOFPort, node);
+
+                        if (!local) {
+                            removeRemoteEgressTunnelBridgeRules(node, dpid, segmentationId, attachedMac, tunnelOFPort, localPort);
+                        }
+                        removeLocalIngressTunnelBridgeRules(node, dpid, segmentationId, attachedMac, tunnelOFPort, localPort);
                         return;
                     }
                 }
@@ -533,9 +733,53 @@ class OF13ProviderManager extends ProviderNetworkManager {
     }
 
     @Override
-    public Status deleteTunnels(String tunnelType, String tunnelKey, Node source, Interface intf) {
-        // TODO Auto-generated method stub
-        return null;
+    public Status deleteTunnels(String tunnelType, String tunnelKey, Node srcNode, Interface intf) {
+        ISwitchManager switchManager = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, "default", this);
+        if (switchManager == null) {
+            logger.error("Unable to identify SwitchManager");
+        } else {
+            Long dpid = this.getIntegrationBridgeOFDPID(srcNode);
+            if (dpid == 0L) {
+                logger.debug("Openflow Datapath-ID not set for the integration bridge in {}", srcNode);
+                return new Status(StatusCode.NOTFOUND);
+            }
+            Set<Node> ofNodes = switchManager.getNodes();
+            boolean ofNodeFound = false;
+            if (ofNodes != null) {
+                for (Node ofNode : ofNodes) {
+                    if (ofNode.toString().contains(dpid+"")) {
+                        logger.info("Identified the Openflow node via toString {}", ofNode);
+                        ofNodeFound = true;
+                        break;
+                    }
+                }
+            } else {
+                logger.error("Unable to find any Node from SwitchManager");
+            }
+            if (!ofNodeFound) {
+                logger.error("Unable to find OF Node for {} with update {} on node {}", dpid, intf, srcNode);
+                return new Status(StatusCode.NOTFOUND);
+            }
+        }
+
+        IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+        List<Node> nodes = connectionService.getNodes();
+        nodes.remove(srcNode);
+        this.removeLocalRules(tunnelType, tunnelKey, srcNode, intf);
+
+        for (Node dstNode : nodes) {
+            Status status;
+            InetAddress src = AdminConfigManager.getManager().getTunnelEndPoint(srcNode);
+            InetAddress dst = AdminConfigManager.getManager().getTunnelEndPoint(dstNode);
+            this.removeTunnelRules(tunnelType, tunnelKey, dst, srcNode, intf, true);
+            status = deleteTunnelPort(srcNode, tunnelType, src, dst);
+            this.removeTunnelRules(tunnelType, tunnelKey, src, dstNode, intf, false);
+            if (status.isSuccess()) {
+                deleteTunnelPort(dstNode, tunnelType, dst, src);
+            }
+        }
+
+        return new Status(StatusCode.SUCCESS);
     }
 
     @Override
@@ -664,7 +908,37 @@ class OF13ProviderManager extends ProviderNetworkManager {
         writeFlow(flowBuilder, nodeBuilder);
     }
 
-   /*
+    /*
+     * (Table:0) Ingress Tunnel Traffic
+     * Match: OpenFlow InPort and Tunnel ID
+     * Action: GOTO Local Table (10)
+     * table=0,tun_id=0x5,in_port=10, actions=goto_table:2
+     */
+
+    private void eraseTunnelIn(Long dpidLong, Short writeTable, Short goToTableId, String segmentationId,  Long ofPort) {
+
+        String nodeName = "openflow:" + dpidLong;
+
+        BigInteger tunnelId = new BigInteger(segmentationId);
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        String flowId = "TunnelIn_"+segmentationId+"_"+ofPort;
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setBarrier(false);
+        flowBuilder.setStrict(true);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+        deleteFlow(flowBuilder, nodeBuilder);
+    }
+
+    /*
     * (Table:0) Egress VM Traffic Towards TEP
     * Match: Destination Ethernet Addr and OpenFlow InPort
     * Instruction: Set TunnelID and GOTO Table Tunnel Table (n)
@@ -719,6 +993,35 @@ class OF13ProviderManager extends ProviderNetworkManager {
     }
 
     /*
+    * (Table:0) Egress VM Traffic Towards TEP
+    * Match: Destination Ethernet Addr and OpenFlow InPort
+    * Instruction: Set TunnelID and GOTO Table Tunnel Table (n)
+    * table=0,in_port=2,dl_src=00:00:00:00:00:01 \
+    * actions=set_field:5->tun_id,goto_table=1"
+    */
+    private void eraseLocalInPort(Long dpidLong, Short writeTable, Short goToTableId, String segmentationId, Long inPort, String attachedMac) {
+
+        String nodeName = "openflow:" + dpidLong;
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        String flowId = "LocalMac_"+segmentationId+"_"+inPort+"_"+attachedMac;
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setBarrier(false);
+        flowBuilder.setStrict(true);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+        deleteFlow(flowBuilder, nodeBuilder);
+    }
+
+    /*
      * (Table:0) Drop frames sourced from a VM that do not
      * match the associated MAC address of the local VM.
      * Match: Low priority anything not matching the VM SMAC
@@ -769,7 +1072,38 @@ class OF13ProviderManager extends ProviderNetworkManager {
         writeFlow(flowBuilder, nodeBuilder);
     }
 
-   /*
+    /*
+     * (Table:0) Drop frames sourced from a VM that do not
+     * match the associated MAC address of the local VM.
+     * Match: Low priority anything not matching the VM SMAC
+     * Instruction: Drop
+     * table=0,priority=16384,in_port=1 actions=drop"
+     */
+    private void eraseDropSrcIface(Long dpidLong, Long inPort) {
+
+        String nodeName = "openflow:" + dpidLong;
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+
+        String flowId = "DropFilter_"+inPort;
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setBarrier(false);
+        flowBuilder.setStrict(true);
+        flowBuilder.setTableId((short) 0);
+        flowBuilder.setKey(key);
+        flowBuilder.setPriority(8192);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+        deleteFlow(flowBuilder, nodeBuilder);
+    }
+
+    /*
     * (Table:1) Egress Tunnel Traffic
     * Match: Destination Ethernet Addr and Local InPort
     * Instruction: Set TunnelID and GOTO Table Tunnel Table (n)
@@ -822,7 +1156,37 @@ class OF13ProviderManager extends ProviderNetworkManager {
         writeFlow(flowBuilder, nodeBuilder);
     }
 
-       /*
+    /*
+    * (Table:1) Egress Tunnel Traffic
+    * Match: Destination Ethernet Addr and Local InPort
+    * Instruction: Set TunnelID and GOTO Table Tunnel Table (n)
+    * table=1,tun_id=0x5,dl_dst=00:00:00:00:00:08 \
+    * actions=output:10,goto_table:2"
+    */
+
+    private void eraseTunnelOut(Long dpidLong, Short writeTable, Short goToTableId, String segmentationId , Long OFPortOut, String attachedMac) {
+
+        String nodeName = "openflow:" + dpidLong;
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        String flowId = "TunnelOut_"+segmentationId+"_"+OFPortOut+"_"+attachedMac;
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setBarrier(false);
+        flowBuilder.setStrict(true);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+        deleteFlow(flowBuilder, nodeBuilder);
+    }
+
+    /*
     * (Table:1) Egress Tunnel Traffic
     * Match: Destination Ethernet Addr and Local InPort
     * Instruction: Set TunnelID and GOTO Table Tunnel Table (n)
@@ -889,6 +1253,40 @@ class OF13ProviderManager extends ProviderNetworkManager {
         writeFlow(flowBuilder, nodeBuilder);
     }
 
+    /*
+    * (Table:1) Egress Tunnel Traffic
+    * Match: Destination Ethernet Addr and Local InPort
+    * Instruction: Set TunnelID and GOTO Table Tunnel Table (n)
+    * table=1,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
+    * actions=output:10,output:11,goto_table:2
+    */
+    private void eraseTunnelFloodOut(Long dpidLong, Short writeTable, Short localTable, String segmentationId,  Long OFPortOut) {
+
+        String nodeName = "openflow:" + dpidLong;
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        // TODO: incorrect behavior here: need to remove instruction from existing flow,
+        //       or delete flow if it's the only instruction
+
+        String flowId = "TunnelFloodOut_"+segmentationId;
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setBarrier(true);
+        flowBuilder.setStrict(true);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setPriority(16384);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+
+        //deleteFlow(flowBuilder, nodeBuilder);
+    }
+
    /*
     * (Table:1) Table Drain w/ Catch All
     * Match: Tunnel ID
@@ -939,6 +1337,35 @@ class OF13ProviderManager extends ProviderNetworkManager {
     }
 
     /*
+     * (Table:1) Table Drain w/ Catch All
+     * Match: Tunnel ID
+     * Action: GOTO Local Table (10)
+     * table=2,priority=8192,tun_id=0x5 actions=drop
+     */
+    private void eraseTunnelMiss(Long dpidLong, Short writeTable, Short goToTableId, String segmentationId) {
+
+        String nodeName = "openflow:" + dpidLong;
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        String flowId = "TunnelMiss_"+segmentationId;
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setBarrier(false);
+        flowBuilder.setStrict(true);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setPriority(8192);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+        deleteFlow(flowBuilder, nodeBuilder);
+    }
+
+    /*
      * (Table:1) Local Broadcast Flood
      * Match: Tunnel ID and dMAC
      * Action: Output Port
@@ -985,6 +1412,36 @@ class OF13ProviderManager extends ProviderNetworkManager {
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
         writeFlow(flowBuilder, nodeBuilder);
+    }
+
+    /*
+     * (Table:1) Local Broadcast Flood
+     * Match: Tunnel ID and dMAC
+     * Action: Output Port
+     * table=2,tun_id=0x5,dl_dst=00:00:00:00:00:01 actions=output:2
+     */
+    private void eraseLocalUcastOut(Long dpidLong, Short writeTable, String segmentationId, Long localPort, String attachedMac) {
+
+        String nodeName = "openflow:" + dpidLong;
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        String flowId = "UcastOut_"+segmentationId+"_"+localPort+"_"+attachedMac;
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setBarrier(false);
+        flowBuilder.setStrict(true);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        // TODO: setPriority needed? (not set in "write" call)
+        flowBuilder.setPriority(8192);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+        deleteFlow(flowBuilder, nodeBuilder);
     }
 
     /*
@@ -1046,6 +1503,39 @@ class OF13ProviderManager extends ProviderNetworkManager {
     }
 
     /*
+     * (Table:1) Local Broadcast Flood
+     * Match: Tunnel ID and dMAC (::::FF:FF)
+     * table=2,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
+     * actions=output:2,3,4,5
+     */
+    private void eraseLocalBcastOut(Long dpidLong, Short writeTable, String segmentationId, Long localPort) {
+
+        String nodeName = "openflow:" + dpidLong;
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        // TODO: incorrect behavior here: need to remove instruction from existing flow,
+        //       or delete flow if it's the only instruction
+
+        String flowId = "BcastOut_"+segmentationId;
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setBarrier(false);
+        flowBuilder.setStrict(true);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setPriority(16384);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+
+        //deleteFlow(flowBuilder, nodeBuilder);
+    }
+
+    /*
      * (Table:1) Local Table Miss
      * Match: Any Remaining Flows w/a TunID
      * Action: Drop w/ a low priority
@@ -1095,6 +1585,35 @@ class OF13ProviderManager extends ProviderNetworkManager {
         writeFlow(flowBuilder, nodeBuilder);
     }
 
+    /*
+     * (Table:1) Local Table Miss
+     * Match: Any Remaining Flows w/a TunID
+     * Action: Drop w/ a low priority
+     * table=2,priority=8192,tun_id=0x5 actions=drop
+     */
+    private void eraseLocalTableMiss(Long dpidLong, Short writeTable, String segmentationId) {
+
+        String nodeName = "openflow:" + dpidLong;
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        String flowId = "LocalTableMiss_"+segmentationId;
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setBarrier(false);
+        flowBuilder.setStrict(true);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setPriority(8192);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+        deleteFlow(flowBuilder, nodeBuilder);
+    }
+
     private Flow getFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
         IMDSALConsumer mdsalConsumer = (IMDSALConsumer) ServiceHelper.getInstance(IMDSALConsumer.class, "default", this);
         if (mdsalConsumer == null) {
@@ -1141,6 +1660,40 @@ class OF13ProviderManager extends ProviderNetworkManager {
             RpcResult<TransactionStatus> result = commitFuture.get();
             TransactionStatus status = result.getResult();
             logger.debug("Transaction Status "+status.toString()+" for Flow "+flowBuilder.getFlowName());
+        } catch (InterruptedException e) {
+            logger.error(e.getMessage(), e);
+        } catch (ExecutionException e) {
+            logger.error(e.getMessage(), e);
+        }
+    }
+
+    private void deleteFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
+        IMDSALConsumer mdsalConsumer = (IMDSALConsumer) ServiceHelper.getInstance(IMDSALConsumer.class, "default", this);
+        if (mdsalConsumer == null) {
+            logger.error("ERROR finding MDSAL Service. Its possible that writeFlow is called too soon ?");
+            return;
+        }
+
+        dataBrokerService = mdsalConsumer.getDataBrokerService();
+
+        if (dataBrokerService == null) {
+            logger.error("ERROR finding reference for DataBrokerService. Please check out the MD-SAL support on the Controller.");
+            return;
+        }
+
+        DataModification<InstanceIdentifier<?>, DataObject> modification = dataBrokerService.beginTransaction();
+
+        InstanceIdentifier<Flow> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
+                .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Table.class,
+                new TableKey(flowBuilder.getTableId())).child(Flow.class, flowBuilder.getKey()).build();
+        modification.removeOperationalData(nodeBuilderToInstanceId(nodeBuilder));
+        modification.removeOperationalData(path1);
+        modification.removeConfigurationData(nodeBuilderToInstanceId(nodeBuilder));
+        modification.removeConfigurationData(path1);
+        Future<RpcResult<TransactionStatus>> commitFuture = modification.commit();
+        try {
+            RpcResult<TransactionStatus> result = commitFuture.get();
+            TransactionStatus status = result.getResult();
         } catch (InterruptedException e) {
             logger.error(e.getMessage(), e);
         } catch (ExecutionException e) {

@@ -56,7 +56,7 @@ public abstract class ProviderNetworkManager {
     public abstract boolean hasPerTenantTunneling();
     public abstract Status handleInterfaceUpdate(String tunnelType, String tunnelKey);
     public abstract Status handleInterfaceUpdate(String tunnelType, String tunnelKey, Node source, Interface intf);
-    public abstract Status deleteTunnels(String tunnelType, String tunnelKey, Node source, Interface intf);
+    public abstract Status handleInterfaceDelete(String tunnelType, String tunnelKey, Node source, Interface intf, boolean isLastInstanceOnNode);
     /*
      * Initialize the Flow rules given the OVSDB node.
      * This method provides a set of common functionalities to initialize the Flow rules of an OVSDB node

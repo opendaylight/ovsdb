@@ -467,22 +467,25 @@ class OF10ProviderManager extends ProviderNetworkManager {
     }
 
     @Override
-    public Status deleteTunnels(String tunnelType, String tunnelKey, Node srcNode, Interface intf) {
+    public Status handleInterfaceDelete(String tunnelType, String tunnelKey, Node srcNode, Interface intf, boolean isLastInstanceOnNode) {
+        Status status = new Status(StatusCode.SUCCESS);
+
         IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
         List<Node> nodes = connectionService.getNodes();
         nodes.remove(srcNode);
         for (Node dstNode : nodes) {
-            Status status;
             InetAddress src = AdminConfigManager.getManager().getTunnelEndPoint(srcNode);
             InetAddress dst = AdminConfigManager.getManager().getTunnelEndPoint(dstNode);
             this.removeTunnelRules(tunnelType, tunnelKey, dst, srcNode, intf, true);
-            status = deleteTunnelPort(srcNode, tunnelType, src, dst, tunnelKey);
+            if (isLastInstanceOnNode) {
+                status = deleteTunnelPort(srcNode, tunnelType, src, dst, tunnelKey);
+            }
             this.removeTunnelRules(tunnelType, tunnelKey, src, dstNode, intf, false);
-            if (status.isSuccess()) {
+            if (status.isSuccess() && isLastInstanceOnNode) {
                 deleteTunnelPort(dstNode, tunnelType, dst, src, tunnelKey);
             }
         }
-        return new Status(StatusCode.SUCCESS);
+        return status;
     }
 
     private String getTunnelName(String tunnelType, String key, InetAddress dst) {

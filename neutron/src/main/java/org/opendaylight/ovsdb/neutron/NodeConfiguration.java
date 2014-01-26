@@ -11,6 +11,12 @@
 
 package org.opendaylight.ovsdb.neutron;
 
+import java.math.BigInteger;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -20,12 +26,6 @@ import org.opendaylight.ovsdb.lib.table.internal.Table;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.math.BigInteger;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class NodeConfiguration {
     static final Logger logger = LoggerFactory.getLogger(NodeConfiguration.class);
@@ -102,6 +102,16 @@ public class NodeConfiguration {
         mappedVlan = internalVlans.poll();
         if (mappedVlan != null) tenantVlanMap.put(networkId, mappedVlan);
         return mappedVlan;
+    }
+
+    public int reclaimInternalVlan (String networkId) {
+        Integer mappedVlan = tenantVlanMap.get(networkId);
+        if (mappedVlan != null) {
+            tenantVlanMap.remove(mappedVlan);
+            internalVlans.add(mappedVlan);
+            return mappedVlan;
+        }
+        return 0;
     }
 
     public void internalVlanInUse (int vlan) {

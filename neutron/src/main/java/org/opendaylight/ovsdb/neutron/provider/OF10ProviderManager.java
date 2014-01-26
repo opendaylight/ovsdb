@@ -661,7 +661,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
     private void initializeFlowRules(Node node, String bridgeName) {
         String brIntId = this.getInternalBridgeUUID(node, bridgeName);
         if (brIntId == null) {
-            logger.error("Failed to initialize Flow Rules for {}", node);
+            logger.info("Failed to initialize Flow Rules for bridge {} on node {}", bridgeName, node);
             return;
         }
 

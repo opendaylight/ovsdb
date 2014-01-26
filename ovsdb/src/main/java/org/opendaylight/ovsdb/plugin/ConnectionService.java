@@ -81,6 +81,8 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
     // Properties that can be set in config.ini
     private static final String OVSDB_LISTENPORT = "ovsdb.listenPort";
     private static final String OVSDB_AUTOCONFIGURECONTROLLER = "ovsdb.autoconfigurecontroller";
+    protected static final String OPENFLOW_10 = "1.0";
+    protected static final String OPENFLOW_13 = "1.3";
 
     private static final Integer defaultOvsdbPort = 6640;
     private static final boolean defaultAutoConfigureController = true;
@@ -482,11 +484,18 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
 
         OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
         OvsDBSet<String> protocols = new OvsDBSet<String>();
-        if (Boolean.getBoolean("OF1.3_Provider")) {
-            protocols.add("OpenFlow13");
-        } else {
-            protocols.add("OpenFlow10");
+
+        String ofVersion = System.getProperty("ovsdb.of.version", OPENFLOW_10);
+        switch (ofVersion) {
+            case OPENFLOW_13:
+                protocols.add("OpenFlow13");
+                break;
+            case OPENFLOW_10:
+            default:
+                protocols.add("OpenFlow10");
+                break;
         }
+
         Bridge bridge = new Bridge();
         bridge.setProtocols(protocols);
         Status status = ovsdbTable.updateRow(node, Bridge.NAME.getName(), null, bridgeUUID, bridge);

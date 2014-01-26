@@ -687,7 +687,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
 
     @Override
     public StatusWithUuid insertRow(Node node, String tableName, String parent_uuid, Table<?> row) {
-        logger.info("tableName : {}, parent_uuid : {} Row : {}", tableName, parent_uuid, row.toString());
+        logger.debug("tableName : {}, parent_uuid : {} Row : {}", tableName, parent_uuid, row.toString());
         StatusWithUuid statusWithUUID = null;
 
         // Schema based Table handling will help fix this static Table handling.

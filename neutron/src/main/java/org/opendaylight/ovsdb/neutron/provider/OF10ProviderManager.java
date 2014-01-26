@@ -63,7 +63,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
         }
 
         if (!InternalNetworkManager.getManager().isInternalNetworkOverlayReady(node)) {
-            logger.error(node+" is not Overlay ready");
+            logger.warn("{} is not Overlay ready. It might be an OpenStack Controller Node", node);
             return new Status(StatusCode.NOTACCEPTABLE, node+" is not Overlay ready");
         }
 
@@ -340,13 +340,13 @@ class OF10ProviderManager extends ProviderNetworkManager {
                     if (tunIntf.getName().equals(this.getTunnelName(tunnelType, segmentationId, dst))) {
                         Set<BigInteger> of_ports = tunIntf.getOfport();
                         if (of_ports == null || of_ports.size() <= 0) {
-                            logger.error("Could NOT Identify Tunnel port {} on {}", tunIntf.getName(), node);
+                            logger.warn("Could not Identify Tunnel port {} on {}. Don't panic. It might get converged soon...", tunIntf.getName(), node);
                             continue;
                         }
                         int tunnelOFPort = Long.valueOf(((BigInteger)of_ports.toArray()[0]).longValue()).intValue();
 
                         if (tunnelOFPort == -1) {
-                            logger.error("Could NOT Identify Tunnel port {} -> OF ({}) on {}", tunIntf.getName(), tunnelOFPort, node);
+                            logger.warn("Tunnel Port {} on node {}: OFPort = -1 . Don't panic. It might get converged soon...", tunIntf.getName(), node);
                             return;
                         }
                         logger.debug("Identified Tunnel port {} -> OF ({}) on {}", tunIntf.getName(), tunnelOFPort, node);
@@ -661,7 +661,12 @@ class OF10ProviderManager extends ProviderNetworkManager {
     private void initializeFlowRules(Node node, String bridgeName) {
         String brIntId = this.getInternalBridgeUUID(node, bridgeName);
         if (brIntId == null) {
-            logger.error("Failed to initialize Flow Rules for {}", node);
+            if (bridgeName == AdminConfigManager.getManager().getExternalBridgeName()){
+                logger.debug("Failed to initialize Flow Rules for bridge {} on node {}. Is the Neutron L3 agent running on this node?");
+            }
+            else {
+                logger.debug("Failed to initialize Flow Rules for bridge {} on node {}", bridgeName, node);
+            }
             return;
         }
 

@@ -317,7 +317,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
             if (databaseSchema.getTables().keySet().contains(table.getTableName().getName())) {
                 monitorReq.monitor(table);
             } else {
-                logger.warn("We know about table {} but it is not in the schema of {}", table.getTableName().getName(), connection.getNode().getNodeIDString());
+                logger.debug("We know about table {} but it is not in the schema of {}", table.getTableName().getName(), connection.getNode().getNodeIDString());
             }
         }
 
@@ -490,7 +490,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         Bridge bridge = new Bridge();
         bridge.setProtocols(protocols);
         Status status = ovsdbTable.updateRow(node, Bridge.NAME.getName(), null, bridgeUUID, bridge);
-        logger.info("Bridge {} updated to {} with Status {}", bridgeUUID, protocols.toArray()[0], status);
+        logger.debug("Bridge {} updated to {} with Status {}", bridgeUUID, protocols.toArray()[0], status);
 
         List<InetAddress> ofControllerAddrs = this.getControllerIPAddresses(connection);
         short ofControllerPort = getControllerOFPort();

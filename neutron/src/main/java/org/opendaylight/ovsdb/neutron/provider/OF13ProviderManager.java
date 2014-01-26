@@ -75,8 +75,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.ta
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Instructions;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.GoToTableCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.apply.actions._case.ApplyActionsBuilder;
@@ -838,26 +840,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         flowBuilder.setMatch(createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"), new MacAddress("01:00:00:00:00:00")).build());
 
-        // Instantiate the Builders for the OF Actions and Instructions
-        InstructionBuilder ib = new InstructionBuilder();
-        InstructionsBuilder isb = new InstructionsBuilder();
-
-        // Instructions List Stores Individual Instructions
-        List<Instruction> instructions = new ArrayList<Instruction>();
-
-        // GOTO Instuction
-        createGotoTableInstructions(ib, localTable);
-        instructions.add(ib.build());
-        // Set the Output Port/Iface
-        createOutputPortInstructions(ib, dpidLong, OFPortOut);
-        instructions.add(ib.build());
-
-        // Add InstructionBuilder to the Instruction(s)Builder List
-        isb.setInstruction(instructions);
-
-        // Add InstructionsBuilder to FlowBuilder
-        flowBuilder.setInstructions(isb.build());
-
         String flowId = "TunnelFloodOut_"+segmentationId;
         // Add Flow Attributes
         flowBuilder.setId(new FlowId(flowId));
@@ -869,6 +851,32 @@ class OF13ProviderManager extends ProviderNetworkManager {
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
+        Flow flow = this.getFlow(flowBuilder, nodeBuilder);
+        // Instantiate the Builders for the OF Actions and Instructions
+        InstructionBuilder ib = new InstructionBuilder();
+        InstructionsBuilder isb = new InstructionsBuilder();
+        List<Instruction> instructions = null;
+
+        if (flow == null) {
+            logger.info("Create New Flow Instructions for {} {}", dpidLong, flowId);
+            instructions = new ArrayList<Instruction>();
+            // GOTO Instuction
+            createGotoTableInstructions(ib, localTable);
+            instructions.add(ib.build());
+        } else {
+            Instructions ins = flow.getInstructions();
+            instructions = ins.getInstruction();
+            logger.info("Updating Existing Flow {} {} - {} + {}", dpidLong, flowId, instructions, OFPortOut);
+        }
+
+        // Set the Output Port/Iface
+        createOutputPortInstructions(ib, dpidLong, OFPortOut);
+        instructions.add(ib.build());
+
+        // Add InstructionBuilder to the Instruction(s)Builder List
+        isb.setInstruction(instructions);
+        // Add InstructionsBuilder to FlowBuilder
+        flowBuilder.setInstructions(isb.build());
         writeFlow(flowBuilder, nodeBuilder);
     }
 
@@ -989,23 +997,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
         flowBuilder.setMatch(createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
         flowBuilder.setMatch(createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"), new MacAddress("01:00:00:00:00:00")).build());
 
-        // Instantiate the Builders for the OF Actions and Instructions
-        InstructionBuilder ib = new InstructionBuilder();
-        InstructionsBuilder isb = new InstructionsBuilder();
-
-        // Instructions List Stores Individual Instructions
-        List<Instruction> instructions = new ArrayList<Instruction>();
-
-        // Broken OutPort TODO: localPort needs to be a list of Ports)
-        createOutputPortInstructions(ib, dpidLong, localPort);
-        instructions.add(ib.build());
-
-        // Add InstructionBuilder to the Instruction(s)Builder List
-        isb.setInstruction(instructions);
-
-        // Add InstructionsBuilder to FlowBuilder
-        flowBuilder.setInstructions(isb.build());
-
         String flowId = "BcastOut_"+segmentationId;
         // Add Flow Attributes
         flowBuilder.setId(new FlowId(flowId));
@@ -1017,6 +1008,35 @@ class OF13ProviderManager extends ProviderNetworkManager {
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
+        Flow flow = this.getFlow(flowBuilder, nodeBuilder);
+        // Instantiate the Builders for the OF Actions and Instructions
+        InstructionBuilder ib = new InstructionBuilder();
+        InstructionsBuilder isb = new InstructionsBuilder();
+        List<Instruction> instructions = new ArrayList<Instruction>();
+        List<Instruction> existingInstructions = null;
+        if (flow != null) {
+            Instructions ins = flow.getInstructions();
+            if (ins != null) {
+                existingInstructions = ins.getInstruction();
+                if (existingInstructions != null) {
+                    for (Instruction in : existingInstructions) {
+                        instructions.add(in);
+                    }
+                }
+            }
+            logger.info("Updating Existing Flow {} {} - {} + {}", dpidLong, flowId, existingInstructions, localPort);
+        }
+
+        // Broken OutPort TODO: localPort needs to be a list of Ports)
+        createOutputPortInstructions(ib, dpidLong, localPort, existingInstructions);
+        instructions.add(ib.build());
+
+        // Add InstructionBuilder to the Instruction(s)Builder List
+        isb.setInstruction(instructions);
+
+        // Add InstructionsBuilder to FlowBuilder
+        flowBuilder.setInstructions(isb.build());
+
         writeFlow(flowBuilder, nodeBuilder);
     }
 
@@ -1067,6 +1087,26 @@ class OF13ProviderManager extends ProviderNetworkManager {
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
         writeFlow(flowBuilder, nodeBuilder);
+    }
+
+    private Flow getFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
+        IMDSALConsumer mdsalConsumer = (IMDSALConsumer) ServiceHelper.getInstance(IMDSALConsumer.class, "default", this);
+        if (mdsalConsumer == null) {
+            logger.error("ERROR finding MDSAL Service. Its possible that writeFlow is called too soon ?");
+            return null;
+        }
+
+        dataBrokerService = mdsalConsumer.getDataBrokerService();
+
+        if (dataBrokerService == null) {
+            logger.error("ERROR finding reference for DataBrokerService. Please check out the MD-SAL support on the Controller.");
+            return null;
+        }
+
+        InstanceIdentifier<Flow> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
+                .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Table.class,
+                new TableKey(flowBuilder.getTableId())).child(Flow.class, flowBuilder.getKey()).build();
+        return (Flow)dataBrokerService.readConfigurationData(path1);
     }
 
     private void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
@@ -1397,6 +1437,59 @@ class OF13ProviderManager extends ProviderNetworkManager {
         ab.setOrder(5);
         ab.setKey(new ActionKey(5));
         actionList.add(ab.build());
+
+        // Create an Apply Action
+        ApplyActionsBuilder aab = new ApplyActionsBuilder();
+        aab.setAction(actionList);
+        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+
+        return ib;
+    }
+
+    /**
+     * Create Output Port Instruction
+     *
+     * @param ib       Map InstructionBuilder without any instructions
+     * @param dpidLong Long the datapath ID of a switch/node
+     * @param port     Long representing a port on a switch/node
+     * @return ib InstructionBuilder Map with instructions
+     */
+    protected static InstructionBuilder createOutputPortInstructions(InstructionBuilder ib, Long dpidLong, Long port , List<Instruction> instructions) {
+
+        NodeConnectorId ncid = new NodeConnectorId("openflow:" + dpidLong + ":" + port);
+        logger.debug("createOutputPortInstructions() Node Connector ID is - Type=openflow: DPID={} port={} existingInstructions={}", dpidLong, port, instructions);
+
+        List<Action> actionList = new ArrayList<Action>();
+        ActionBuilder ab = new ActionBuilder();
+
+        List<Action> existingActions = null;
+        if (instructions != null) {
+            for (Instruction in : instructions) {
+                if (in.getInstruction() instanceof ApplyActionsCase) {
+                    existingActions = (((ApplyActionsCase) in.getInstruction()).getApplyActions().getAction());
+                    if (existingActions != null) {
+                        actionList.addAll(existingActions);
+                    }
+                }
+            }
+        }
+
+        OutputActionBuilder oab = new OutputActionBuilder();
+        oab.setOutputNodeConnector(ncid);
+        ab.setAction(new OutputActionCaseBuilder().setOutputAction(oab.build()).build());
+        ab.setOrder(actionList.size());
+        ab.setKey(new ActionKey(actionList.size()));
+        Action newAction = ab.build();
+
+        boolean addNew = true;
+        for (Action action : actionList) {
+            if (action.equals(newAction)) {
+                addNew = false;
+                break;
+            }
+        }
+
+        if (addNew) actionList.add(newAction);
 
         // Create an Apply Action
         ApplyActionsBuilder aab = new ApplyActionsBuilder();

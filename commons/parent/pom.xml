@@ -45,37 +45,69 @@
     </pluginManagement>
   </build>
 
-  <repositories>
-    <!-- jsonrpc4j mirror -->
-    <repository>
-      <id>jsonrpc4j-webdav-maven-repo</id>
-      <name>jsonrpc4j maven repository</name>
-      <url>http://nexus.opendaylight.org/content/repositories/jsonrpc4j-webdav-maven-repo/</url>
-    </repository>
-    <!-- OpenDayLight Released artifact -->
-    <repository>
-      <id>opendaylight-release</id>
-      <name>opendaylight-release</name>
-      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.release/</url>
-    </repository>
-    <!-- OpenDayLight Snapshot artifact -->
-    <repository>
-      <id>opendaylight-snapshot</id>
-      <name>opendaylight-snapshot</name>
-      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/</url>
-    </repository>
-  </repositories>
-
   <pluginRepositories>
     <pluginRepository>
-      <id>central2</id>
-      <name>central2</name>
+      <id>opendaylight-public</id>
+      <name>opendaylight-public</name>
+      <url>${nexusproxy}/groups/public/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+    <pluginRepository>
+      <id>opendaylight-release</id>
+      <url>${nexusproxy}/repositories/opendaylight.release/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+      <!-- OpenDayLight Snapshot artifact -->
+      <pluginRepository>
+        <id>opendaylight-snapshot</id>
+        <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
+        <releases>
+          <enabled>false</enabled>
+        </releases>
+    </pluginRepository>
+    <pluginRepository>
+      <id>opendaylight-central2</id>
+      <name>opendaylight-central2</name>
       <url>http://nexus.opendaylight.org/content/repositories/central2/</url>
     </pluginRepository>
     <pluginRepository>
-      <id>opendaylight-snapshot</id>
-      <name>central2</name>
+      <id>opendaylight-central2-snapshot</id>
+      <name>opendaylight-central2-snapshot</name>
       <url>http://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/</url>
     </pluginRepository>
   </pluginRepositories>
+
+  <repositories>
+    <!-- Opendaylight public group -->
+    <repository>
+      <id>opendaylight-public</id>
+      <name>opendaylight-public</name>
+      <url>${nexusproxy}/groups/public/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+      <!-- OpenDayLight Released artifact -->
+      <repository>
+        <id>opendaylight-release</id>
+        <name>opendaylight-release</name>
+        <url>${nexusproxy}/repositories/opendaylight.release/</url>
+        <snapshots>
+          <enabled>false</enabled>
+        </snapshots>
+      </repository>
+      <!-- OpenDayLight Snapshot artifact -->
+      <repository>
+        <id>opendaylight-snapshot</id>
+        <name>opendaylight-snapshot</name>
+        <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
+        <releases>
+          <enabled>false</enabled>
+        </releases>
+      </repository>
+  </repositories>
 </project>

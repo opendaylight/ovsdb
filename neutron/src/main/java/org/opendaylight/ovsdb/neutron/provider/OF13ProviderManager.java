@@ -312,6 +312,19 @@ class OF13ProviderManager extends ProviderNetworkManager {
          */
 
          writeTunnelIn(dpid, TABLE_0_DEFAULT_INGRESS, TABLE_2_LOCAL_FORWARD, segmentationId, tunnelOFPort);
+
+         /*
+          * Table(1) Rule #2
+          * ----------------
+          * Match: Match Tunnel ID and L2 ::::FF:FF Flooding
+          * Action: Flood to selected destination TEPs
+          * -------------------------------------------
+          * table=1,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
+          * actions=output:10,output:11,goto_table:2
+          */
+
+         writeTunnelFloodOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, tunnelOFPort);
+
     }
 
     private void programRemoteEgressTunnelBridgeRules(Node node, Long dpid, String segmentationId, String attachedMac, long tunnelOFPort, long localPort) {
@@ -326,18 +339,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
          */
 
         writeTunnelOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, tunnelOFPort, attachedMac);
-
-        /*
-         * Table(1) Rule #2
-         * ----------------
-         * Match: Match Tunnel ID and L2 ::::FF:FF Flooding
-         * Action: Flood to selected destination TEPs
-         * -------------------------------------------
-         * table=1,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
-         * actions=output:10,output:11,goto_table:2
-         */
-
-        writeTunnelFloodOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, tunnelOFPort);
     }
 
     private Long getIntegrationBridgeOFDPID (Node node) {
@@ -469,7 +470,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
             if (ofNodes != null) {
                 for (Node ofNode : ofNodes) {
                     if (ofNode.toString().contains(dpid+"")) {
-                        logger.info("Identified the Openflow node via toString {}", ofNode);
+                        logger.debug("Identified the Openflow node via toString {}", ofNode);
                         ofNodeFound = true;
                         break;
                     }

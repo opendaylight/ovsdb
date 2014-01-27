@@ -189,7 +189,8 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
                         // Clear on that. From a user/manageability standpoint, it is easier
                         // to handle Bridge names compared to dpids.
                         // Updating the Openflow bridge name via the SAL Description update.
-                        updateOFBridgeName(n, (Bridge)newRow);
+
+                        // updateOFBridgeName(n, (Bridge)newRow);
                     }
                     if ((oldRow == null) && (inventoryListener != null)) {
                         inventoryListener.rowAdded(n, name.getName(), uuid, newRow);

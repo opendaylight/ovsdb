@@ -12,8 +12,8 @@ package org.opendaylight.ovsdb.neutron;
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
-import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
+import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +38,7 @@ public class MDSALConsumer implements BindingAwareConsumer, IMDSALConsumer {
 
     void init(Component c) {
         this.ctx = c.getDependencyManager().getBundleContext();
-        logger.info("****** OVSDB Neutron Registered with MD-SAL ******");
+        logger.info("OVSDB Neutron Registered with MD-SAL");
         broker.registerConsumer(this, this.ctx);
     }
 
@@ -60,7 +60,7 @@ public class MDSALConsumer implements BindingAwareConsumer, IMDSALConsumer {
     public void onSessionInitialized(ConsumerContext session) {
         this.consumerContext = session;
         dataBrokerService = session.getSALService(DataBrokerService.class);
-        logger.info("****** OVSDB Neutron Session Initilized with CONSUMER CONTEXT {} ******", session.toString());
+        logger.info("OVSDB Neutron Session Initilized with CONSUMER CONTEXT {}", session.toString());
     }
 
     @Override

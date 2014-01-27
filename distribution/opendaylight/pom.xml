@@ -7,7 +7,7 @@ see https://git.opendaylight.org/gerrit/#/c/390/
   <parent>
     <groupId>org.opendaylight.ovsdb</groupId>
     <artifactId>commons.ovsdb</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <relativePath>../../commons/parent/</relativePath>
   </parent>
 
@@ -19,7 +19,7 @@ see https://git.opendaylight.org/gerrit/#/c/390/
     <connection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</developerConnection>
     <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
-    <tag>master-tagforprepareonly-ovsdb-bulk-release-2-1</tag>
+    <tag>HEAD</tag>
   </scm>
   <dependencies>
     <dependency>
@@ -34,17 +34,17 @@ see https://git.opendaylight.org/gerrit/#/c/390/
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>ovsdb</artifactId>
-      <version>0.5.0</version>
+      <version>0.5.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>ovsdb.northbound</artifactId>
-      <version>0.5.0</version>
+      <version>0.5.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>ovsdb.neutron</artifactId>
-      <version>0.5.0</version>
+      <version>0.5.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>

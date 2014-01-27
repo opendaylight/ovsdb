@@ -11,14 +11,14 @@
   </parent>
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>commons.ovsdb</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</developerConnection>
     <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
-    <tag>master-tagforprepareonly-ovsdb-bulk-release-2-1</tag>
+    <tag>HEAD</tag>
   </scm>
   <properties>
     <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>

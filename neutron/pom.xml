@@ -5,7 +5,7 @@
         <groupId>org.opendaylight.ovsdb</groupId>
         <artifactId>commons.ovsdb</artifactId>
         <version>1.0.0-SNAPSHOT</version>
-        <relativePath>../commons/parent/</relativePath>
+        <relativePath>../commons/parent</relativePath>
     </parent>
 
     <artifactId>ovsdb.neutron</artifactId>

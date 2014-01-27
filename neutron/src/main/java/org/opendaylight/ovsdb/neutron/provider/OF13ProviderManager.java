@@ -661,6 +661,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // Add Flow Attributes
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setStrict(true);
         flowBuilder.setBarrier(false);
         flowBuilder.setTableId(writeTable);
         flowBuilder.setKey(key);
@@ -691,6 +692,18 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // TODO Broken In_Port Match
         flowBuilder.setMatch(createInPortMatch(matchBuilder, dpidLong, inPort).build());
 
+        String flowId = "LocalMac_"+segmentationId+"_"+inPort+"_"+attachedMac;
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setStrict(true);
+        flowBuilder.setBarrier(false);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+
         // Instantiate the Builders for the OF Actions and Instructions
         InstructionBuilder ib = new InstructionBuilder();
         InstructionsBuilder isb = new InstructionsBuilder();
@@ -715,16 +728,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
 
-        String flowId = "LocalMac_"+segmentationId+"_"+inPort+"_"+attachedMac;
-        // Add Flow Attributes
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setBarrier(false);
-        flowBuilder.setTableId(writeTable);
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
         writeFlow(flowBuilder, nodeBuilder);
     }
 
@@ -770,8 +773,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // Add Flow Attributes
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setBarrier(false);
         flowBuilder.setStrict(true);
+        flowBuilder.setBarrier(false);
         flowBuilder.setTableId((short) 0);
         flowBuilder.setKey(key);
         flowBuilder.setFlowName(flowId);
@@ -801,6 +804,17 @@ class OF13ProviderManager extends ProviderNetworkManager {
         flowBuilder.setMatch(createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
         flowBuilder.setMatch(createDestEthMatch(matchBuilder, new MacAddress(attachedMac), null).build());
 
+        String flowId = "TunnelOut_"+segmentationId+"_"+OFPortOut+"_"+attachedMac;
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setStrict(true);
+        flowBuilder.setBarrier(false);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
         // Instantiate the Builders for the OF Actions and Instructions
         InstructionBuilder ib = new InstructionBuilder();
         InstructionsBuilder isb = new InstructionsBuilder();
@@ -825,16 +839,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
 
-        String flowId = "TunnelOut_"+segmentationId+"_"+OFPortOut+"_"+attachedMac;
-        // Add Flow Attributes
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setBarrier(false);
-        flowBuilder.setTableId(writeTable);
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
         writeFlow(flowBuilder, nodeBuilder);
     }
 
@@ -946,6 +950,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // Add Flow Attributes
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setStrict(true);
         flowBuilder.setBarrier(false);
         flowBuilder.setTableId(writeTable);
         flowBuilder.setKey(key);
@@ -975,6 +980,18 @@ class OF13ProviderManager extends ProviderNetworkManager {
         flowBuilder.setMatch(createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
         flowBuilder.setMatch(createDestEthMatch(matchBuilder, new MacAddress(attachedMac), null).build());
 
+        String flowId = "UcastOut_"+segmentationId+"_"+localPort+"_"+attachedMac;
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setStrict(true);
+        flowBuilder.setBarrier(false);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+
         // Instantiate the Builders for the OF Actions and Instructions
         InstructionBuilder ib = new InstructionBuilder();
         InstructionsBuilder isb = new InstructionsBuilder();
@@ -993,17 +1010,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
-
-        String flowId = "UcastOut_"+segmentationId+"_"+localPort+"_"+attachedMac;
-        // Add Flow Attributes
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setBarrier(false);
-        flowBuilder.setTableId(writeTable);
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
         writeFlow(flowBuilder, nodeBuilder);
     }
 
@@ -1030,6 +1036,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // Add Flow Attributes
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setStrict(true);
         flowBuilder.setBarrier(false);
         flowBuilder.setTableId(writeTable);
         flowBuilder.setKey(key);
@@ -1106,8 +1113,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // Add Flow Attributes
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setBarrier(false);
         flowBuilder.setStrict(true);
+        flowBuilder.setBarrier(false);
         flowBuilder.setTableId(writeTable);
         flowBuilder.setKey(key);
         flowBuilder.setPriority(8192);
@@ -1460,8 +1467,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
         oab.setOutputNodeConnector(ncid);
 
         ab.setAction(new OutputActionCaseBuilder().setOutputAction(oab.build()).build());
-        ab.setOrder(5);
-        ab.setKey(new ActionKey(5));
+        ab.setOrder(0);
+        ab.setKey(new ActionKey(0));
         actionList.add(ab.build());
 
         // Create an Apply Action

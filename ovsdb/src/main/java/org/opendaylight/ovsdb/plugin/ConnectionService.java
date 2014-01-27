@@ -33,6 +33,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -81,8 +82,8 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
     // Properties that can be set in config.ini
     private static final String OVSDB_LISTENPORT = "ovsdb.listenPort";
     private static final String OVSDB_AUTOCONFIGURECONTROLLER = "ovsdb.autoconfigurecontroller";
-    protected static final String OPENFLOW_10 = "1.0";
-    protected static final String OPENFLOW_13 = "1.3";
+    protected static final int OPENFLOW_10 = 1;
+    protected static final int OPENFLOW_13 = 4;
 
     private static final Integer defaultOvsdbPort = 6640;
     private static final boolean defaultAutoConfigureController = true;
@@ -476,6 +477,11 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
     }
 
     @Override
+    public int getSupportedOpenflowVersion() {
+        return OpenFlowVersionSupportIdentifier.getSupportedOpenflowVersion();
+    }
+
+    @Override
     public Boolean setOFController(Node node, String bridgeUUID) throws InterruptedException, ExecutionException {
         Connection connection = this.getConnection(node);
         if (connection == null) {
@@ -485,8 +491,8 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
         OvsDBSet<String> protocols = new OvsDBSet<String>();
 
-        String ofVersion = System.getProperty("ovsdb.of.version", OPENFLOW_10);
-        switch (ofVersion) {
+        int version = this.getSupportedOpenflowVersion();
+        switch (version) {
             case OPENFLOW_13:
                 protocols.add("OpenFlow13");
                 break;
@@ -500,6 +506,21 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         bridge.setProtocols(protocols);
         Status status = ovsdbTable.updateRow(node, Bridge.NAME.getName(), null, bridgeUUID, bridge);
         logger.debug("Bridge {} updated to {} with Status {}", bridgeUUID, protocols.toArray()[0], status);
+
+        // Disconnect from the existing controllers and then connect again
+        // This Toggling is required to make sure the openflow plugin react to the changing version if any.
+        try {
+            ConcurrentMap<String, Table<?>> controllers = ovsdbTable.getRows(node, Controller.NAME.getName());
+            if (controllers != null) {
+                Iterator<String> controllerIterator = controllers.keySet().iterator();
+                while (controllerIterator.hasNext()) {
+                    String controllerUUID = controllerIterator.next();
+                    ovsdbTable.deleteRow(node, Controller.NAME.getName(), controllerUUID);
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Unexpected exception when deleting Controller rows on "+node, e);
+        }
 
         List<InetAddress> ofControllerAddrs = this.getControllerIPAddresses(connection);
         short ofControllerPort = getControllerOFPort();

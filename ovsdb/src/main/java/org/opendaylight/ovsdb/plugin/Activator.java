@@ -135,6 +135,5 @@ public class Activator extends ComponentActivatorAbstractBase {
             props.put("protocolName", "OVS");
             c.setInterface(INodeConnectorFactory.class.getName(), props);
         }
-
     }
 }

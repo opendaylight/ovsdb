@@ -186,7 +186,7 @@ public class TenantNetworkManager {
             logger.debug("Tenant Network not found with Segmenation-id {}",segmentationId);
             return false;
         }
-        if (ProviderNetworkManager.getManager().hasPerTenantTunneling()) {
+        if (ProviderNetworkManager.getManager(this).hasPerTenantTunneling()) {
             String nodeUuid = getNodeUUID(node);
             if (nodeUuid == null) {
                 logger.debug("Unable to get UUID for Node {}", node);

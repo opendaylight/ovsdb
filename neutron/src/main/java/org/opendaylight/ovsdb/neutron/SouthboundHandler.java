@@ -189,7 +189,7 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
             Interface intf = (Interface)row;
             NeutronNetwork network = TenantNetworkManager.getManager().getTenantNetworkForInterface(intf);
             if (network != null && !network.getRouterExternal()) {
-                if (ProviderNetworkManager.getManager().hasPerTenantTunneling()) {
+                if (ProviderNetworkManager.getManager(this).hasPerTenantTunneling()) {
                     int vlan = TenantNetworkManager.getManager().networkCreated(node, network.getID());
                     logger.trace("Neutron Network {} Created with Internal Vlan : {}", network.toString(), vlan);
 
@@ -239,7 +239,7 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
         }
         NeutronNetwork network = TenantNetworkManager.getManager().getTenantNetworkForInterface(intf);
         if (network != null) {
-            ProviderNetworkManager.getManager().handleInterfaceUpdate(network.getProviderNetworkType(),
+            ProviderNetworkManager.getManager(this).handleInterfaceUpdate(network.getProviderNetworkType(),
                     network.getProviderSegmentationID(), node, intf);
         }
     }
@@ -253,7 +253,7 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
             if (isLastInstanceOnNode) {
                 TenantNetworkManager.getManager().reclaimTennantNetworkInternalVlan(node, uuid, network);
             }
-            ProviderNetworkManager.getManager().handleInterfaceDelete(network.getProviderNetworkType(),
+            ProviderNetworkManager.getManager(this).handleInterfaceDelete(network.getProviderNetworkType(),
                     network.getProviderSegmentationID(), node, intf, isLastInstanceOnNode);
         }
     }
@@ -286,7 +286,7 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
         // Add the Node Type check back once the Consistency issue is resolved between MD-SAL and AD-SAL
         if (!type.equals(UpdateType.REMOVED) && !nodeCache.contains(node)) {
             nodeCache.add(node);
-            ProviderNetworkManager.getManager().initializeOFFlowRules(node);
+            ProviderNetworkManager.getManager(this).initializeOFFlowRules(node);
         } else if (type.equals(UpdateType.REMOVED)){
             nodeCache.remove(node);
         }

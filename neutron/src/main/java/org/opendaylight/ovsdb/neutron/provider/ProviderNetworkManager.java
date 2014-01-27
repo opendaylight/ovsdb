@@ -17,6 +17,7 @@ import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.ovsdb.lib.table.Bridge;
 import org.opendaylight.ovsdb.lib.table.Interface;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
+import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,12 +27,13 @@ public abstract class ProviderNetworkManager {
     private static ProviderNetworkManager provider;
     protected static final int LLDP_PRIORITY = 1000;
     protected static final int NORMAL_PRIORITY = 0;
-    protected static final String OPENFLOW_10 = "1.0";
-    protected static final String OPENFLOW_13 = "1.3";
+    protected static final int OPENFLOW_10 = 1;
+    protected static final int OPENFLOW_13 = 4;
 
-    public static ProviderNetworkManager getManager() {
+    public static ProviderNetworkManager getManager(Object ref) {
         if (provider != null) return provider;
-        String ofVersion = System.getProperty("ovsdb.of.version", OPENFLOW_10);
+        IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, ref);
+        int ofVersion = connectionService.getSupportedOpenflowVersion();
         switch (ofVersion) {
             case OPENFLOW_13:
                 provider = new OF13ProviderManager();

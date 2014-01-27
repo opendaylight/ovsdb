@@ -112,7 +112,7 @@ public class InternalNetworkManager {
 
         Status status = this.addInternalBridge(node, brInt, patchTun, patchInt);
         if (!status.isSuccess()) logger.debug("Integration Bridge Creation Status : "+status.toString());
-        if (ProviderNetworkManager.getManager().hasPerTenantTunneling()) {
+        if (ProviderNetworkManager.getManager(this).hasPerTenantTunneling()) {
             status = this.addInternalBridge(node, brTun, patchInt, patchTun);
             if (!status.isSuccess()) logger.debug("Tunnel Bridge Creation Status : "+status.toString());
         }
@@ -142,14 +142,6 @@ public class InternalNetworkManager {
         failMode.add("secure");
         bridge.setFail_mode(failMode);
 
-        OvsDBSet<String> protocols = new OvsDBSet<String>();
-        if (!ProviderNetworkManager.getManager().hasPerTenantTunneling()) {
-            protocols.add("OpenFlow13");
-        } else {
-            protocols.add("OpenFlow10");
-        }
-        bridge.setProtocols(protocols);
-
         if (bridgeUUID == null) {
             bridge.setName(bridgeName);
 
@@ -159,16 +151,16 @@ public class InternalNetworkManager {
             Port port = new Port();
             port.setName(bridgeName);
             Status status = ovsdbTable.insertRow(node, Port.NAME.getName(), bridgeUUID, port);
-            logger.debug("addInternalBridge : Inserting Bridge {} with protocols {} and status {}", bridgeUUID, protocols, status);
+            logger.debug("addInternalBridge : Inserting Bridge {} and status {}", bridgeUUID, status);
         } else {
             Status status = ovsdbTable.updateRow(node, Bridge.NAME.getName(), null, bridgeUUID, bridge);
-            logger.debug("addInternalBridge : Updating Bridge {} with protocols {} and status {}", bridgeUUID, protocols, status);
+            logger.debug("addInternalBridge : Updating Bridge {} and status {}", bridgeUUID, status);
         }
 
         IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
         connectionService.setOFController(node, bridgeUUID);
 
-        if (localPathName != null && remotePatchName != null && ProviderNetworkManager.getManager().hasPerTenantTunneling()) {
+        if (localPathName != null && remotePatchName != null && ProviderNetworkManager.getManager(this).hasPerTenantTunneling()) {
             return addPatchPort(node, bridgeUUID, localPathName, remotePatchName);
         }
         return new Status(StatusCode.SUCCESS);
@@ -217,6 +209,6 @@ public class InternalNetworkManager {
         } catch (Exception e) {
             logger.error("Error creating internal network "+node.toString(), e);
         }
-        ProviderNetworkManager.getManager().initializeFlowRules(node);
+        ProviderNetworkManager.getManager(this).initializeFlowRules(node);
     }
 }

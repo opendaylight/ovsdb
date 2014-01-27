@@ -490,11 +490,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
         this.programLocalRules(tunnelType, tunnelKey, srcNode, intf);
 
         for (Node dstNode : nodes) {
-            Status status = getTunnelReadinessStatus(dstNode, tunnelKey);
-            if (!status.isSuccess()) continue;
             InetAddress src = AdminConfigManager.getManager().getTunnelEndPoint(srcNode);
             InetAddress dst = AdminConfigManager.getManager().getTunnelEndPoint(dstNode);
-            status = addTunnelPort(srcNode, tunnelType, src, dst);
+            Status status = addTunnelPort(srcNode, tunnelType, src, dst);
             if (status.isSuccess()) {
                 this.programTunnelRules(tunnelType, tunnelKey, dst, srcNode, intf, true);
             }

@@ -67,23 +67,23 @@
   <dependencies>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <version>0.4.1-SNAPSHOT</version>
+      <version>0.4.1</version>
       <artifactId>networkconfig.neutron</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>switchmanager</artifactId>
-      <version>0.7.0-SNAPSHOT</version>
+      <version>0.7.0</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>forwardingrulesmanager</artifactId>
-      <version>0.5.0-SNAPSHOT</version>
+      <version>0.5.0</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal</artifactId>
-      <version>0.7.0-SNAPSHOT</version>
+      <version>0.7.0</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
@@ -93,42 +93,42 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>containermanager</artifactId>
-      <version>0.5.1-SNAPSHOT</version>
+      <version>0.5.1</version>
     </dependency>
     <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal-binding-api</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0</version>
     </dependency>
     <dependency>
         <groupId>org.opendaylight.controller.model</groupId>
         <artifactId>model-flow-service</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller.model</groupId>
       <artifactId>model-flow-base</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.0</version>
     </dependency>
    <dependency>
       <groupId>org.opendaylight.controller.model</groupId>
       <artifactId>model-flow-management</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.0</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller.model</groupId>
       <artifactId>model-inventory</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.0</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-binding</artifactId>
-      <version>0.6.1-SNAPSHOT</version>
+      <version>0.6.1</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-common-util</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.0</version>
     </dependency>
     <dependency>
         <groupId>junit</groupId>

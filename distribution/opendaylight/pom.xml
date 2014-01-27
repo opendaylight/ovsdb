@@ -2,15 +2,12 @@
 Adapted from David Erickson's Distribution pom.xml
 see https://git.opendaylight.org/gerrit/#/c/390/
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.ovsdb</groupId>
     <artifactId>commons.ovsdb</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <relativePath>../../commons/parent/</relativePath>
   </parent>
 
@@ -22,7 +19,7 @@ http://maven.apache.org/maven-v4_0_0.xsd">
     <connection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</developerConnection>
     <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
-    <tag>HEAD</tag>
+    <tag>master-tagforprepareonly-ovsdb-bulk-release-prepare-only-9</tag>
   </scm>
   <dependencies>
     <dependency>
@@ -37,17 +34,17 @@ http://maven.apache.org/maven-v4_0_0.xsd">
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>ovsdb</artifactId>
-      <version>0.5.0-SNAPSHOT</version>
+      <version>0.5.0</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>ovsdb.northbound</artifactId>
-      <version>0.5.0-SNAPSHOT</version>
+      <version>0.5.0</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>ovsdb.neutron</artifactId>
-      <version>0.5.0-SNAPSHOT</version>
+      <version>0.5.0</version>
     </dependency>
   </dependencies>
   <build>

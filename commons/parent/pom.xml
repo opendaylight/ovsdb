@@ -46,6 +46,15 @@
   </build>
 
   <repositories>
+    <!-- Opendaylight public group -->
+    <repository>
+      <id>opendaylight-public</id>
+      <name>opendaylight-public</name>
+      <url>${nexusproxy}/groups/public/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
     <!-- jsonrpc4j mirror -->
     <repository>
       <id>jsonrpc4j-webdav-maven-repo</id>
@@ -67,6 +76,14 @@
   </repositories>
 
   <pluginRepositories>
+    <pluginRepository>
+      <id>opendaylight-public</id>
+      <name>opendaylight-public</name>
+      <url>http://nexus.opendaylight.org/content/groups/public/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
     <pluginRepository>
       <id>central2</id>
       <name>central2</name>

@@ -2013,7 +2013,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
         for (Node ovsNode : ovsNodes) {
             Long dpid = this.getIntegrationBridgeOFDPID(ovsNode);
             logger.debug("Compare openflowNode to OVS br-int node {} vs {}", openflowNode.getID(), dpid);
-            String openflowID = (String)openflowNode.getID();
+            String openflowID = ""+openflowNode.getID();
             if (openflowID.contains(""+dpid)) {
                 this.initializeFlowRules(ovsNode, AdminConfigManager.getManager().getIntegrationBridgeName());
                 this.triggerInterfaceUpdates(ovsNode);

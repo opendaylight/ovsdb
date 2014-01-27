@@ -595,6 +595,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         // Call the InstructionBuilder Methods Containing Actions
         createSendToControllerInstructions(ib);
+        ib.setOrder(0);
+        ib.setKey(new InstructionKey(0));
         instructions.add(ib.build());
 
         // Add InstructionBuilder to the Instruction(s)Builder List
@@ -644,6 +646,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         // Call the InstructionBuilder Methods Containing Actions
         createGotoTableInstructions(ib, goToTableId);
+        ib.setOrder(0);
+        ib.setKey(new InstructionKey(0));
         instructions.add(ib.build());
 
         // Add InstructionBuilder to the Instruction(s)Builder List
@@ -695,9 +699,13 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         // GOTO Instuctions Need to be added first to the List
         createGotoTableInstructions(ib, goToTableId);
+        ib.setOrder(0);
+        ib.setKey(new InstructionKey(0));
         instructions.add(ib.build());
         // TODO Broken SetTunID
         createSetTunnelIdInstructions(ib, new BigInteger(segmentationId));
+        ib.setOrder(1);
+        ib.setKey(new InstructionKey(1));
         instructions.add(ib.build());
 
         // Add InstructionBuilder to the Instruction(s)Builder List
@@ -747,6 +755,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         // Call the InstructionBuilder Methods Containing Actions
         createDropInstructions(ib);
+        ib.setOrder(0);
+        ib.setKey(new InstructionKey(0));
         instructions.add(ib.build());
 
         // Add InstructionBuilder to the Instruction(s)Builder List
@@ -799,9 +809,13 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         // GOTO Instuctions
         createGotoTableInstructions(ib, goToTableId);
+        ib.setOrder(0);
+        ib.setKey(new InstructionKey(0));
         instructions.add(ib.build());
         // Set the Output Port/Iface
         createOutputPortInstructions(ib, dpidLong, OFPortOut);
+        ib.setOrder(1);
+        ib.setKey(new InstructionKey(1));
         instructions.add(ib.build());
 
         // Add InstructionBuilder to the Instruction(s)Builder List
@@ -917,6 +931,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         // Call the InstructionBuilder Methods Containing Actions
         createGotoTableInstructions(ib, goToTableId);
+        ib.setOrder(0);
+        ib.setKey(new InstructionKey(0));
         instructions.add(ib.build());
 
         // Add InstructionBuilder to the Instruction(s)Builder List
@@ -967,6 +983,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         // Set the Output Port/Iface
         createOutputPortInstructions(ib, dpidLong, localPort);
+        ib.setOrder(0);
+        ib.setKey(new InstructionKey(0));
         instructions.add(ib.build());
 
         // Add InstructionBuilder to the Instruction(s)Builder List
@@ -1073,6 +1091,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         // Call the InstructionBuilder Methods Containing Actions
         createDropInstructions(ib);
+        ib.setOrder(0);
+        ib.setKey(new InstructionKey(0));
         instructions.add(ib.build());
 
         // Add InstructionBuilder to the Instruction(s)Builder List
@@ -1416,8 +1436,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         // Wrap our Apply Action in an Instruction
         ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
-        ib.setOrder(0);
-        ib.setKey(new InstructionKey(0));
 
         return ib;
     }
@@ -1554,8 +1572,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         // Wrap our Apply Action in an Instruction
         ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
-        ib.setOrder(0);
-        ib.setKey(new InstructionKey(0));
 
         return ib;
     }
@@ -1641,8 +1657,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         // Wrap our Apply Action in an Instruction
         ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
-        ib.setOrder(0);
-        ib.setKey(new InstructionKey(0));
 
         return ib;
     }
@@ -1661,8 +1675,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         // Wrap our Apply Action in an InstructionBuilder
         ib.setInstruction(new GoToTableCaseBuilder().setGoToTable(gttb.build()).build());
-        ib.setOrder(0);
-        ib.setKey(new InstructionKey(0));
 
         return ib;
     }
@@ -1691,8 +1703,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
         aab.setAction(actionList);
 
         // Wrap the Apply Action in an InstructionBuilder and return
-        ib.setOrder(0);
-        ib.setKey(new InstructionKey(0));
         ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
 
         return ib;
@@ -1723,7 +1733,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         ApplyActionsBuilder aab = new ApplyActionsBuilder();
         aab.setAction(actionList);
-        ib.setKey(new InstructionKey(1));
         ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
 
         return ib;
@@ -1754,7 +1763,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         ApplyActionsBuilder aab = new ApplyActionsBuilder();
         aab.setAction(actionList);
-        ib.setKey(new InstructionKey(1));
         ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
 
         return ib;
@@ -1785,7 +1793,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         ApplyActionsBuilder aab = new ApplyActionsBuilder();
         aab.setAction(actionList);
-        ib.setKey(new InstructionKey(1));
         ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
 
         return ib;
@@ -1816,7 +1823,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         ApplyActionsBuilder aab = new ApplyActionsBuilder();
         aab.setAction(actionList);
-        ib.setKey(new InstructionKey(1));
         ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
 
         return ib;
@@ -1848,7 +1854,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
         aab.setAction(actionList);
 
         // Wrap our Apply Action in an Instruction
-        ib.setKey(new InstructionKey(0));
         ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
 
         return ib;
@@ -1878,7 +1883,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
         aab.setAction(actionList);
 
         // Wrap our Apply Action in an Instruction
-        ib.setKey(new InstructionKey(1));
         ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
 
         return ib;
@@ -1906,8 +1910,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         // Wrap our Apply Action in an Instruction
         ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
-        ib.setKey(new InstructionKey(0));
-        ib.setOrder(0);
 
         return ib;
     }

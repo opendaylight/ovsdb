@@ -31,7 +31,7 @@ public class PortHandler extends BaseHandler
      * Invoked when a port creation is requested
      * to indicate if the specified port can be created.
      *
-     * @param port     An instance of proposed new Port Port object.
+     * @param port     An instance of proposed new Port object.
      * @return A HTTP status code to the creation request.
      */
     @Override

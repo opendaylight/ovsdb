@@ -41,6 +41,7 @@ import org.opendaylight.ovsdb.neutron.TenantNetworkManager;
 import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
 import org.opendaylight.ovsdb.plugin.StatusWithUuid;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Dscp;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
@@ -563,6 +564,71 @@ class OF13ProviderManager extends ProviderNetworkManager {
          */
 
          writeLLDPRule(dpid);
+
+        /*
+        ##### Test Rule to Set DSCP DS Field #####
+        cookie=0x0, duration=4.617s, table=20, n_packets=0, n_bytes=0, send_flow_rem ip actions=set_field:16->ip_dscp
+         */
+
+        Long OFPortOut = (long) 29;
+        Long localPort = Long.valueOf(2);
+        String segmentationId = String.valueOf(BigInteger.valueOf(1001));
+        BigInteger tunnelId = new BigInteger(String.valueOf(100));
+        String attachedMac = new String("00:00:00:00:00:02");
+        MacAddress sMacAddr = new MacAddress("00:00:00:00:00:01");
+        MacAddress bcastAddr = new MacAddress("FF:FF:FF:FF:FF:FF");
+
+        writeDSCPRule(dpid, TABLE_2_LOCAL_FORWARD, segmentationId, localPort, attachedMac);
+
+    }
+
+    private void writeDSCPRule(Long dpidLong, Short writeTable, String segmentationId, Long localPort, String attachedMac) {
+
+        String nodeName = "openflow:" + dpidLong;
+        EtherType etherType = new EtherType(0x0800L);
+        Short ipTos = 16;
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        // Create the OF Match using MatchBuilder
+        // Create Match(es) and Set them in the FlowBuilder Object
+        flowBuilder.setMatch(createEtherTypeMatch(matchBuilder, etherType).build());
+        flowBuilder.setMatch(createEtherTypeMatch(matchBuilder, etherType).build());
+
+        String flowId = "UcastOut_"+segmentationId+"_"+localPort+"_"+attachedMac;
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setStrict(true);
+        flowBuilder.setBarrier(false);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+
+        // Instantiate the Builders for the OF Actions and Instructions
+        InstructionBuilder ib = new InstructionBuilder();
+        InstructionsBuilder isb = new InstructionsBuilder();
+
+        // Instructions List Stores Individual Instructions
+        List<Instruction> instructions = new ArrayList<Instruction>();
+
+
+        // Set DSCP Value
+        createSetDscpTosInstructions(ib, ipTos);
+        ib.setOrder(0);
+        ib.setKey(new InstructionKey(0));
+        instructions.add(ib.build());
+
+        // Add InstructionBuilder to the Instruction(s)Builder List
+        isb.setInstruction(instructions);
+
+        // Add InstructionsBuilder to FlowBuilder
+        flowBuilder.setInstructions(isb.build());
+        writeFlow(flowBuilder, nodeBuilder);
     }
 
     /*
@@ -1416,6 +1482,22 @@ class OF13ProviderManager extends ProviderNetworkManager {
     }
 
     /**
+     * @return
+     */
+    private static MatchBuilder createIPMatch(MatchBuilder matchBuilder, Short dscpval) {
+
+        EthernetMatchBuilder ethmatch = new EthernetMatchBuilder();
+        EthernetTypeBuilder ethtype = new EthernetTypeBuilder();
+        matchBuilder.setEthernetMatch(ethmatch.build());
+
+        IpMatchBuilder ipmatch = new IpMatchBuilder(); // ipv4 version
+        Dscp dscp = new Dscp(dscpval);
+        ipmatch.setIpDscp(dscp);
+        matchBuilder.setIpMatch(ipmatch.build());
+        return matchBuilder;
+    }
+
+    /**
      * Create Send to Controller Reserved Port Instruction (packet_in)
      *
      * @param ib Map InstructionBuilder without any instructions
@@ -2010,6 +2092,37 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         return ib;
     }
+
+    /**
+     * Create Set DSCP DS Field Instruction
+     *
+     * @param ib     Map InstructionBuilder without any instructions
+     * @param dscpvalue Short representing a DSCP ToS bit value
+     * @return ib Map InstructionBuilder with instructions
+     */
+    protected static InstructionBuilder createSetDscpTosInstructions(InstructionBuilder ib, Short dscpvalue) {
+
+        List<Action> actionList = new ArrayList<Action>();
+        ActionBuilder ab = new ActionBuilder();
+        SetFieldBuilder setFieldBuilder = new SetFieldBuilder();
+        IpMatchBuilder ipMatchBuilder = new IpMatchBuilder();
+
+        Dscp dscp = new Dscp((short) dscpvalue);
+        ipMatchBuilder.setIpDscp(dscp);
+        setFieldBuilder.setIpMatch(ipMatchBuilder.build());
+        ab.setAction(new SetFieldCaseBuilder().setSetField(setFieldBuilder.build()).build());
+        actionList.add(ab.build());
+
+        // Create an Apply Action
+        ApplyActionsBuilder aab = new ApplyActionsBuilder();
+        aab.setAction(actionList);
+
+        // Wrap our Apply Action in an Instruction
+        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+
+        return ib;
+    }
+
 
     @Override
     public void initializeOFFlowRules(Node openflowNode) {

@@ -11,6 +11,7 @@ package org.opendaylight.ovsdb.lib.message;
 
 import java.util.List;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import org.opendaylight.controller.sal.core.Node;
@@ -20,7 +21,8 @@ import org.opendaylight.ovsdb.lib.message.operations.OperationResult;
 public interface OvsdbRPC {
     public static final String REGISTER_CALLBACK_METHOD = "registerCallback";
 
-    public ListenableFuture<DatabaseSchema> get_schema(List<String> db_names);
+    //public ListenableFuture<DatabaseSchema> get_schema(List<String> db_names);
+    public ListenableFuture<JsonNode> get_schema(List<String> db_names);
 
     public ListenableFuture<List<String>> echo();
 

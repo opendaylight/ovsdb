@@ -310,7 +310,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         inventoryServiceInternal.addNode(connection.getNode(), props);
 
         List<String> dbNames = Arrays.asList(Open_vSwitch.NAME.getName());
-        ListenableFuture<DatabaseSchema> dbSchemaF = connection.getRpc().get_schema(dbNames);
+        ListenableFuture<DatabaseSchema> dbSchemaF = null;//todo : fix it up to new structue : connection.getRpc().get_schema(dbNames);
         DatabaseSchema databaseSchema = dbSchemaF.get();
         inventoryServiceInternal.updateDatabaseSchema(connection.getNode(), databaseSchema);
 

@@ -7,40 +7,46 @@
  *
  * Authors : Madhu Venugopal, Brent Salisbury
  */
-package org.opendaylight.ovsdb.neutron.provider;
+package org.opendaylight.ovsdb.testbundle.provider;
 
 import java.math.BigInteger;
-import java.net.InetAddress;
+//import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+//import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
+import org.apache.felix.dm.Component;
+import org.eclipse.osgi.framework.console.CommandInterpreter;
+import org.eclipse.osgi.framework.console.CommandProvider;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
-import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
+//import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
-import org.opendaylight.controller.sal.utils.StatusCode;
-import org.opendaylight.controller.switchmanager.ISwitchManager;
-import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
-import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
-import org.opendaylight.ovsdb.lib.notation.UUID;
+//import org.opendaylight.controller.sal.utils.StatusCode;
+//import org.opendaylight.controller.switchmanager.ISwitchManager;
+//import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
+//import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
+//import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.table.Bridge;
 import org.opendaylight.ovsdb.lib.table.Interface;
-import org.opendaylight.ovsdb.lib.table.Port;
-import org.opendaylight.ovsdb.neutron.AdminConfigManager;
-import org.opendaylight.ovsdb.neutron.IMDSALConsumer;
-import org.opendaylight.ovsdb.neutron.InternalNetworkManager;
-import org.opendaylight.ovsdb.neutron.TenantNetworkManager;
+//import org.opendaylight.ovsdb.lib.table.Port;
+//import org.opendaylight.ovsdb.neutron.AdminConfigManager;
+//import org.opendaylight.ovsdb.neutron.IMDSALConsumer;
+//import org.opendaylight.ovsdb.neutron.InternalNetworkManager;
+//import org.opendaylight.ovsdb.neutron.TenantNetworkManager;
 import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
-import org.opendaylight.ovsdb.plugin.StatusWithUuid;
+//import org.opendaylight.ovsdb.plugin.StatusWithUuid;
+import org.opendaylight.ovsdb.testbundle.AdminConfigManager;
+import org.opendaylight.ovsdb.testbundle.IMDSALConsumer;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Dscp;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
@@ -52,6 +58,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetFieldCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwDstActionCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwSrcActionCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwTosActionCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetQueueActionCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanIdActionCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.StripVlanActionCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.dec.nw.ttl._case.DecNwTtl;
@@ -62,6 +70,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.field._case.SetFieldBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.nw.dst.action._case.SetNwDstActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.nw.src.action._case.SetNwSrcActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.nw.tos.action._case.SetNwTosActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.queue.action._case.SetQueueActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.vlan.id.action._case.SetVlanIdActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.strip.vlan.action._case.StripVlanAction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.strip.vlan.action._case.StripVlanActionBuilder;
@@ -112,233 +122,63 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  *
  */
-class OF13ProviderManager extends ProviderNetworkManager {
+public class OF13ProviderManager extends ProviderNetworkManager implements  CommandProvider{
     private static final Logger logger = LoggerFactory.getLogger(OF13ProviderManager.class);
-    private DataBrokerService dataBrokerService;
     private static final short TABLE_0_DEFAULT_INGRESS = 0;
     private static final short TABLE_1_ISOLATE_TENANT = 10;
     private static final short TABLE_2_LOCAL_FORWARD = 20;
+    private BundleContext ctx = null;
+    private BindingAwareBroker broker = null;
+    private BindingAwareBroker.ConsumerContext consumerContext = null;
+    private DataBrokerService dataBrokerService;
 
-    @Override
-    public boolean hasPerTenantTunneling() {
-        return false;
+//    void setOF13ProviderManager (OF13ProviderManager b) {
+//
+//    }
+//
+//    void unsetOF13ProviderManager(OF13ProviderManager b) {
+//        if (this.broker == b) {
+//            this.broker = null;
+//        }
+//    }
+
+    void init(Component c) {
+        this.ctx = c.getDependencyManager().getBundleContext();
+        logger.info("OFManager13 Test Start*************!!!!!!!!!!!");
+
+        registerWithOSGIConsole();
     }
 
-    private Status getTunnelReadinessStatus (Node node, String tunnelKey) {
-        InetAddress srcTunnelEndPoint = AdminConfigManager.getManager().getTunnelEndPoint(node);
-        if (srcTunnelEndPoint == null) {
-            logger.error("Tunnel Endpoint not configured for Node {}", node);
-            return new Status(StatusCode.NOTFOUND, "Tunnel Endpoint not configured for "+ node);
-        }
-
-        if (!InternalNetworkManager.getManager().isInternalNetworkNeutronReady(node)) {
-            logger.error(node+" is not Overlay ready");
-            return new Status(StatusCode.NOTACCEPTABLE, node+" is not Overlay ready");
-        }
-
-        if (!TenantNetworkManager.getManager().isTenantNetworkPresentInNode(node, tunnelKey)) {
-            logger.debug(node+" has no VM corresponding to segment "+ tunnelKey);
-            return new Status(StatusCode.NOTACCEPTABLE, node+" has no VM corresponding to segment "+ tunnelKey);
-        }
-        return new Status(StatusCode.SUCCESS);
+    /**
+     * Function called by the dependency manager when at least one dependency
+     * become unsatisfied or when the component is shutting down because for
+     * example bundle is being stopped.
+     *
+     */
+    void destroy() {
     }
 
-    private String getTunnelName(String tunnelType, InetAddress dst) {
-        return tunnelType+"-"+dst.getHostAddress();
+    /**
+     * Function called by dependency manager after "init ()" is called and after
+     * the services provided by the class are registered in the service registry
+     *
+     */
+    void start() {
     }
 
-    private boolean isTunnelPresent(Node node, String tunnelName, String bridgeUUID) throws Exception {
-        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-        Bridge bridge = (Bridge)ovsdbTable.getRow(node, Bridge.NAME.getName(), bridgeUUID);
-        if (bridge != null) {
-            Set<UUID> ports = bridge.getPorts();
-            for (UUID portUUID : ports) {
-                Port port = (Port)ovsdbTable.getRow(node, Port.NAME.getName(), portUUID.toString());
-                if (port != null && port.getName().equalsIgnoreCase(tunnelName)) return true;
-            }
-        }
-        return false;
-    }
-
-    private Status addTunnelPort (Node node, String tunnelType, InetAddress src, InetAddress dst) {
-        try {
-            String bridgeUUID = null;
-            String tunnelBridgeName = AdminConfigManager.getManager().getIntegrationBridgeName();
-            OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Map<String, org.opendaylight.ovsdb.lib.table.internal.Table<?>> bridgeTable = ovsdbTable.getRows(node, Bridge.NAME.getName());
-            if (bridgeTable != null) {
-                for (String uuid : bridgeTable.keySet()) {
-                    Bridge bridge = (Bridge)bridgeTable.get(uuid);
-                    if (bridge.getName().equals(tunnelBridgeName)) {
-                        bridgeUUID = uuid;
-                        break;
-                    }
-                }
-            }
-            if (bridgeUUID == null) {
-                logger.error("Could not find Bridge {} in {}", tunnelBridgeName, node);
-                return new Status(StatusCode.NOTFOUND, "Could not find "+tunnelBridgeName+" in "+node);
-            }
-            String portName = getTunnelName(tunnelType, dst);
-
-            if (this.isTunnelPresent(node, portName, bridgeUUID)) {
-                logger.trace("Tunnel {} is present in {} of {}", portName, tunnelBridgeName, node);
-                return new Status(StatusCode.SUCCESS);
-            }
-
-            Port tunnelPort = new Port();
-            tunnelPort.setName(portName);
-            StatusWithUuid statusWithUuid = ovsdbTable.insertRow(node, Port.NAME.getName(), bridgeUUID, tunnelPort);
-            if (!statusWithUuid.isSuccess()) {
-                logger.error("Failed to insert Tunnel port {} in {}", portName, bridgeUUID);
-                return statusWithUuid;
-            }
-
-            String tunnelPortUUID = statusWithUuid.getUuid().toString();
-            String interfaceUUID = null;
-            int timeout = 6;
-            while ((interfaceUUID == null) && (timeout > 0)) {
-                tunnelPort = (Port)ovsdbTable.getRow(node, Port.NAME.getName(), tunnelPortUUID);
-                OvsDBSet<UUID> interfaces = tunnelPort.getInterfaces();
-                if (interfaces == null || interfaces.size() == 0) {
-                    // Wait for the OVSDB update to sync up the Local cache.
-                    Thread.sleep(500);
-                    timeout--;
-                    continue;
-                }
-                interfaceUUID = interfaces.toArray()[0].toString();
-                Interface intf = (Interface)ovsdbTable.getRow(node, Interface.NAME.getName(), interfaceUUID);
-                if (intf == null) interfaceUUID = null;
-            }
-
-            if (interfaceUUID == null) {
-                logger.error("Cannot identify Tunnel Interface for port {}/{}", portName, tunnelPortUUID);
-                return new Status(StatusCode.INTERNALERROR);
-            }
-
-            Interface tunInterface = new Interface();
-            tunInterface.setType(tunnelType);
-            OvsDBMap<String, String> options = new OvsDBMap<String, String>();
-            options.put("key", "flow");
-            options.put("local_ip", src.getHostAddress());
-            options.put("remote_ip", dst.getHostAddress());
-            tunInterface.setOptions(options);
-            Status status = ovsdbTable.updateRow(node, Interface.NAME.getName(), tunnelPortUUID, interfaceUUID, tunInterface);
-            logger.debug("Tunnel {} add status : {}", tunInterface, status);
-            return status;
-        } catch (Exception e) {
-            logger.error("Exception in addTunnelPort", e);
-            return new Status(StatusCode.INTERNALERROR);
-        }
-    }
-
-    private void programLocalBridgeRules(Node node, Long dpid, String segmentationId, String attachedMac, long localPort) {
-         /*
-         * Table(0) Rule #3
-         * ----------------
-         * Match: VM sMac and Local Ingress Port
-         * Action:Action: Set Tunnel ID and GOTO Local Table (5)
-         */
-
-         writeLocalInPort(dpid, TABLE_0_DEFAULT_INGRESS, TABLE_1_ISOLATE_TENANT, segmentationId, localPort, attachedMac);
-
-        /*
-         * Table(0) Rule #4
-         * ----------------
-         * Match: Drop any remaining Ingress Local VM Packets
-         * Action: Drop w/ a low priority
-         */
-
-         writeDropSrcIface(dpid, localPort);
-
-         /*
-          * Table(2) Rule #1
-          * ----------------
-          * Match: Match TunID and Destination DL/dMAC Addr
-          * Action: Output Port
-          * table=2,tun_id=0x5,dl_dst=00:00:00:00:00:01 actions=output:2
-          */
-
-          writeLocalUcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId, localPort, attachedMac);
-
-         /*
-          * Table(2) Rule #2
-          * ----------------
-          * Match: Tunnel ID and dMAC (::::FF:FF)
-          * table=2,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
-          * actions=output:2,3,4,5
-          */
-
-          writeLocalBcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId, localPort);
-
-          /*
-           * TODO : Optimize the following 2 writes to be restricted only for the very first port known in a segment.
-           */
-          /*
-           * Table(1) Rule #3
-           * ----------------
-           * Match:  Any remaining Ingress Local VM Packets
-           * Action: Drop w/ a low priority
-           * -------------------------------------------
-           * table=1,priority=8192,tun_id=0x5 actions=goto_table:2
-           */
-
-           writeTunnelMiss(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId);
-
-          /*
-           * Table(2) Rule #3
-           * ----------------
-           * Match: Any Remaining Flows w/a TunID
-           * Action: Drop w/ a low priority
-           * table=2,priority=8192,tun_id=0x5 actions=drop
-           */
-
-           writeLocalTableMiss(dpid, TABLE_2_LOCAL_FORWARD, segmentationId);
-    }
-
-    private void programLocalIngressTunnelBridgeRules(Node node, Long dpid, String segmentationId, String attachedMac, long tunnelOFPort, long localPort) {
-        /*
-         * Table(0) Rule #2
-         * ----------------
-         * Match: Ingress Port, Tunnel ID
-         * Action: GOTO Local Table (10)
-         */
-
-         writeTunnelIn(dpid, TABLE_0_DEFAULT_INGRESS, TABLE_2_LOCAL_FORWARD, segmentationId, tunnelOFPort);
-
-         /*
-          * Table(1) Rule #2
-          * ----------------
-          * Match: Match Tunnel ID and L2 ::::FF:FF Flooding
-          * Action: Flood to selected destination TEPs
-          * -------------------------------------------
-          * table=1,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
-          * actions=output:10,output:11,goto_table:2
-          */
-
-         writeTunnelFloodOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, tunnelOFPort);
-
-    }
-
-    private void programRemoteEgressTunnelBridgeRules(Node node, Long dpid, String segmentationId, String attachedMac, long tunnelOFPort, long localPort) {
-        /*
-         * Table(1) Rule #1
-         * ----------------
-         * Match: Drop any remaining Ingress Local VM Packets
-         * Action: Drop w/ a low priority
-         * -------------------------------------------
-         * table=1,tun_id=0x5,dl_dst=00:00:00:00:00:08 \
-         * actions=output:11,goto_table:2
-         */
-
-        writeTunnelOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, tunnelOFPort, attachedMac);
+    private void registerWithOSGIConsole() {
+        BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass())
+                .getBundleContext();
+        bundleContext.registerService(CommandProvider.class.getName(), this,
+                null);
     }
 
     private Long getIntegrationBridgeOFDPID (Node node) {
@@ -349,7 +189,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
                 logger.error("Unable to spot Bridge Identifier for {} in {}", bridgeName, node);
                 return 0L;
             }
-
             OVSDBConfigService ovsdbTable = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
             Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brIntId);
             Set<String> dpids = bridge.getDatapath_id();
@@ -360,171 +199,13 @@ class OF13ProviderManager extends ProviderNetworkManager {
             return 0L;
         }
     }
-    private void programLocalRules (String tunnelType, String segmentationId, Node node, Interface intf) {
-        try {
-            Long dpid = this.getIntegrationBridgeOFDPID(node);
-            if (dpid == 0L) {
-                logger.debug("Openflow Datapath-ID not set for the integration bridge in {}", node);
-                return;
-            }
 
-            Set<BigInteger> of_ports = intf.getOfport();
-            if (of_ports == null || of_ports.size() <= 0) {
-                logger.error("Could NOT Identify OF value for port {} on {}", intf.getName(), node);
-                return;
-            }
-            long localPort = ((BigInteger)of_ports.toArray()[0]).longValue();
-
-            Map<String, String> externalIds = intf.getExternal_ids();
-            if (externalIds == null) {
-                logger.error("No external_ids seen in {}", intf);
-                return;
-            }
-
-            String attachedMac = externalIds.get(TenantNetworkManager.EXTERNAL_ID_VM_MAC);
-            if (attachedMac == null) {
-                logger.error("No AttachedMac seen in {}", intf);
-                return;
-            }
-
-            programLocalBridgeRules(node, dpid, segmentationId, attachedMac, localPort);
-        } catch (Exception e) {
-            logger.error("Exception in programming Local Rules for "+intf+" on "+node, e);
-        }
-    }
-
-    private void programTunnelRules (String tunnelType, String segmentationId, InetAddress dst, Node node,
-            Interface intf, boolean local) {
-        try {
-
-            Long dpid = this.getIntegrationBridgeOFDPID(node);
-            if (dpid == 0L) {
-                logger.debug("Openflow Datapath-ID not set for the integration bridge in {}", node);
-                return;
-            }
-            OVSDBConfigService ovsdbTable = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-
-            Set<BigInteger> of_ports = intf.getOfport();
-            if (of_ports == null || of_ports.size() <= 0) {
-                logger.error("Could NOT Identify OF value for port {} on {}", intf.getName(), node);
-                return;
-            }
-            long localPort = ((BigInteger)of_ports.toArray()[0]).longValue();
-
-            Map<String, String> externalIds = intf.getExternal_ids();
-            if (externalIds == null) {
-                logger.error("No external_ids seen in {}", intf);
-                return;
-            }
-
-            String attachedMac = externalIds.get(TenantNetworkManager.EXTERNAL_ID_VM_MAC);
-            if (attachedMac == null) {
-                logger.error("No AttachedMac seen in {}", intf);
-                return;
-            }
-
-            Map<String, org.opendaylight.ovsdb.lib.table.internal.Table<?>> intfs = ovsdbTable.getRows(node, Interface.NAME.getName());
-            if (intfs != null) {
-                for (org.opendaylight.ovsdb.lib.table.internal.Table<?> row : intfs.values()) {
-                    Interface tunIntf = (Interface)row;
-                    if (tunIntf.getName().equals(this.getTunnelName(tunnelType, dst))) {
-                        of_ports = tunIntf.getOfport();
-                        if (of_ports == null || of_ports.size() <= 0) {
-                            logger.error("Could NOT Identify Tunnel port {} on {}", tunIntf.getName(), node);
-                            continue;
-                        }
-                        long tunnelOFPort = ((BigInteger)of_ports.toArray()[0]).longValue();
-
-                        if (tunnelOFPort == -1) {
-                            logger.error("Could NOT Identify Tunnel port {} -> OF ({}) on {}", tunIntf.getName(), tunnelOFPort, node);
-                            return;
-                        }
-                        logger.debug("Identified Tunnel port {} -> OF ({}) on {}", tunIntf.getName(), tunnelOFPort, node);
-
-                        if (!local) {
-                            programRemoteEgressTunnelBridgeRules(node, dpid, segmentationId, attachedMac, tunnelOFPort, localPort);
-                        }
-                        programLocalIngressTunnelBridgeRules(node, dpid, segmentationId, attachedMac, tunnelOFPort, localPort);
-                        return;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            logger.error("", e);
-        }
-    }
 
     @Override
-    public Status handleInterfaceUpdate(String tunnelType, String tunnelKey, Node srcNode, Interface intf) {
-        ISwitchManager switchManager = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, "default", this);
-        if (switchManager == null) {
-            logger.error("Unable to identify SwitchManager");
-        } else {
-            Long dpid = this.getIntegrationBridgeOFDPID(srcNode);
-            if (dpid == 0L) {
-                logger.debug("Openflow Datapath-ID not set for the integration bridge in {}", srcNode);
-                return new Status(StatusCode.NOTFOUND);
-            }
-            Set<Node> ofNodes = switchManager.getNodes();
-            boolean ofNodeFound = false;
-            if (ofNodes != null) {
-                for (Node ofNode : ofNodes) {
-                    if (ofNode.toString().contains(dpid+"")) {
-                        logger.debug("Identified the Openflow node via toString {}", ofNode);
-                        ofNodeFound = true;
-                        break;
-                    }
-                }
-            } else {
-                logger.error("Unable to find any Node from SwitchManager");
-            }
-            if (!ofNodeFound) {
-                logger.error("Unable to find OF Node for {} with update {} on node {}", dpid, intf, srcNode);
-                return new Status(StatusCode.NOTFOUND);
-            }
-        }
-
-        IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
-        List<Node> nodes = connectionService.getNodes();
-        nodes.remove(srcNode);
-        this.programLocalRules(tunnelType, tunnelKey, srcNode, intf);
-
-        for (Node dstNode : nodes) {
-            InetAddress src = AdminConfigManager.getManager().getTunnelEndPoint(srcNode);
-            InetAddress dst = AdminConfigManager.getManager().getTunnelEndPoint(dstNode);
-            Status status = addTunnelPort(srcNode, tunnelType, src, dst);
-            if (status.isSuccess()) {
-                this.programTunnelRules(tunnelType, tunnelKey, dst, srcNode, intf, true);
-            }
-            addTunnelPort(dstNode, tunnelType, dst, src);
-            if (status.isSuccess()) {
-                this.programTunnelRules(tunnelType, tunnelKey, src, dstNode, intf, false);
-            }
-        }
-
-        return new Status(StatusCode.SUCCESS);
+    public boolean hasPerTenantTunneling() {
+        return false;
     }
 
-    private Status triggerInterfaceUpdates(Node node) {
-        try {
-            OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Map<String, org.opendaylight.ovsdb.lib.table.internal.Table<?>> intfs = ovsdbTable.getRows(node, Interface.NAME.getName());
-            if (intfs != null) {
-                for (org.opendaylight.ovsdb.lib.table.internal.Table<?> row : intfs.values()) {
-                    Interface intf = (Interface)row;
-                    NeutronNetwork network = TenantNetworkManager.getManager().getTenantNetworkForInterface(intf);
-                    logger.debug("Trigger Interface update for {}", intf);
-                    if (network != null) {
-                        this.handleInterfaceUpdate(network.getProviderNetworkType(), network.getProviderSegmentationID(), node, intf);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            logger.error("Error Triggering the lost interface updates for "+ node, e);
-            return new Status(StatusCode.INTERNALERROR, e.getLocalizedMessage());
-        }
-        return new Status(StatusCode.SUCCESS);
-    }
     @Override
     public Status handleInterfaceUpdate(String tunnelType, String tunnelKey) {
         // TODO Auto-generated method stub
@@ -532,8 +213,13 @@ class OF13ProviderManager extends ProviderNetworkManager {
     }
 
     @Override
+    public Status handleInterfaceUpdate(String tunnelType, String tunnelKey, Node source, Interface intf) {
+        return null;
+    }
+
+    @Override
     public Status handleInterfaceDelete(String tunnelType, String tunnelKey, Node source, Interface intf,
-            boolean isLastInstanceOnNode) {
+                                        boolean isLastInstanceOnNode) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -541,7 +227,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
     @Override
     public void initializeFlowRules(Node node) {
         this.initializeFlowRules(node, AdminConfigManager.getManager().getIntegrationBridgeName());
-        this.triggerInterfaceUpdates(node);
+        logger.info("******* AdminConfig******** " + AdminConfigManager.getManager().getTunnelBridgeName());
+//        this.triggerInterfaceUpdates(node);
     }
 
     /**
@@ -556,13 +243,227 @@ class OF13ProviderManager extends ProviderNetworkManager {
         }
 
         /*
+        Hardcoded variables. Ideally these will be dynamic from OVSDB and OF
+         */
+
+        Long OFPortOut = (long) 29;
+        String segmentationId = String.valueOf(BigInteger.valueOf(1001));
+        String attachedMac = new String("00:00:00:00:00:02");
+        Long localPort = Long.valueOf(2);
+        BigInteger tunnelId = new BigInteger(String.valueOf(100));
+        MacAddress sMacAddr = new MacAddress("00:00:00:00:00:01");
+        MacAddress bcastAddr = new MacAddress("FF:FF:FF:FF:FF:FF");
+
+        /*
+        Add Flowmods below here
+         */
+
+        /*
          * Table(0) Rule #1
          * ----------------
          * Match: LLDP (0x88CCL)
          * Action: Packet_In to Controller Reserved Port
          */
 
-         writeLLDPRule(dpid);
+        writeLLDPRule(dpid);
+
+            /*
+            //Example Flow Rules
+            table=0,tun_id=0x5,in_port=10, actions=goto_table:2
+            table=0,tun_id=0x5,in_port=11 actions=goto_table:2
+            table=0,in_port=2,dl_src=00:00:00:00:00:01 actions=set_field:5->tun_id,goto_table=1
+            table=0,priority=16384,in_port=2 actions=drop
+
+            table=1,tun_id=0x5,dl_dst=00:00:00:00:00:08 actions=output:11,goto_table:2
+            table=1,tun_id=0x5,dl_dst=00:00:00:00:00:04 actions=output:10,goto_table:2
+            table=1,tun_id=0x5,dl_dst=00:00:00:00:00:05 actions=output:10,goto_table:2
+            table=1,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff actions=output:10,output:11,goto_table:2
+            table=1,priority=8192,tun_id=0x5 actions=goto_table:2
+
+            table=2,tun_id=0x5,dl_dst=00:00:00:00:00:01 actions=output:2
+            table=2,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff actions=output:2
+            table=2,priority=8192,tun_id=0x5 actions=drop
+            */
+
+           /*
+            * (NOTES ONLY, DO NOT COMMIT)
+            * Table #0 Flow Rules (Classifier Table):
+            * #1 -------------------------------------------
+            * table=0,tun_id=0x5,in_port=10, actions=goto_table:2
+            * #2 -------------------------------------------
+            * table=0,in_port=2,dl_src=00:00:00:00:00:01 actions=set_field:5->tun_id,goto_table=1
+            * #3 -------------------------------------------
+            * table=0,priority=16384,in_port=1 actions=drop"
+            *
+            * Parameter Order: DPID, flowmod TABLE, GotoTABLE, TunnelID, [TunnelPort||LocalPort], IPv4_src/dst, L4src/dst, L2 src/dst, VID
+            */
+      /*
+         * Table(0) Rule #3
+         * ----------------
+         * Match: VM sMac and Local Ingress Port
+         * Action:Action: Set Tunnel ID and GOTO Local Table (5)
+         */
+
+
+        writeLocalInPort(dpid, TABLE_0_DEFAULT_INGRESS, TABLE_1_ISOLATE_TENANT, segmentationId, localPort, attachedMac);
+
+        /*
+         * Table(0) Rule #4
+         * ----------------
+         * Match: Drop any remaining Ingress Local VM Packets
+         * Action: Drop w/ a low priority
+         */
+
+
+        writeDropSrcIface(dpid, localPort);
+
+         /*
+          * Table(2) Rule #1
+          * ----------------
+          * Match: Match TunID and Destination DL/dMAC Addr
+          * Action: Output Port
+          * table=2,tun_id=0x5,dl_dst=00:00:00:00:00:01 actions=output:2
+          */
+
+        writeLocalUcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId, localPort, attachedMac);
+
+         /*
+          * Table(2) Rule #2
+          * ----------------
+          * Match: Tunnel ID and dMAC (::::FF:FF)
+          * table=2,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
+          * actions=output:2,3,4,5
+          */
+
+        writeLocalBcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId, localPort);
+
+        writeTunnelOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, OFPortOut, attachedMac );
+
+          /*
+           * TODO : Optimize the following 2 writes to be restricted only for the very first port known in a segment.
+           */
+          /*
+           * Table(1) Rule #3
+           * ----------------
+           * Match:  Any remaining Ingress Local VM Packets
+           * Action: Drop w/ a low priority
+           * -------------------------------------------
+           * table=1,priority=8192,tun_id=0x5 actions=goto_table:2
+           */
+
+        writeTunnelMiss(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId);
+
+          /*
+           * Table(2) Rule #3
+           * ----------------
+           * Match: Any Remaining Flows w/a TunID
+           * Action: Drop w/ a low priority
+           * table=2,priority=8192,tun_id=0x5 actions=drop
+           */
+
+        writeLocalTableMiss(dpid, TABLE_2_LOCAL_FORWARD, segmentationId);
+
+        /*
+        End Flowmods  here
+         */
+    }
+
+
+
+    private void writeTunnelOut(Long dpidLong, Short writeTable, Short goToTableId, String segmentationId , Long OFPortOut, String attachedMac) {
+
+        String nodeName = "openflow:" + dpidLong;
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        flowBuilder.setMatch(createIpQosMatch(matchBuilder, new MacAddress(attachedMac), null).build());
+        flowBuilder.setMatch(createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
+
+        String flowId = "TunnelOut_"+segmentationId+"_"+OFPortOut+"_"+attachedMac;
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setStrict(true);
+        flowBuilder.setBarrier(false);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+        // Instantiate the Builders for the OF Actions and Instructions
+        InstructionBuilder ib = new InstructionBuilder();
+        InstructionsBuilder isb = new InstructionsBuilder();
+        // Instructions List Stores Individual Instructions
+        List<Instruction> instructions = new ArrayList<Instruction>();
+        createOutputQosPortInstructions(ib, dpidLong, OFPortOut);
+        ib.setOrder(0);
+        ib.setKey(new InstructionKey(0));
+        instructions.add(ib.build());
+
+        // GOTO Instuctions
+        createGotoTableInstructions(ib, goToTableId);
+        ib.setOrder(2);
+        ib.setKey(new InstructionKey(2));
+        instructions.add(ib.build());
+
+        // Add InstructionBuilder to the Instruction(s)Builder List
+        isb.setInstruction(instructions);
+
+        // Add InstructionsBuilder to FlowBuilder
+        flowBuilder.setInstructions(isb.build());
+
+        writeFlow(flowBuilder, nodeBuilder);
+    }
+
+
+    private void writeUnderlayFlowmods(Long dpidLong, Short writeTable, Short goToTableId, String segmentationId , Long OFPortOut,
+                                     String attachedMac) {
+
+        String nodeName = "openflow:" + dpidLong;
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        flowBuilder.setMatch(createIpQosMatch(matchBuilder, new MacAddress(attachedMac), null).build());
+        flowBuilder.setMatch(createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
+
+        String flowId = "TunnelOut_"+segmentationId+"_"+OFPortOut+"_"+attachedMac;
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setStrict(true);
+        flowBuilder.setBarrier(false);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+        // Instantiate the Builders for the OF Actions and Instructions
+        InstructionBuilder ib = new InstructionBuilder();
+        InstructionsBuilder isb = new InstructionsBuilder();
+        // Instructions List Stores Individual Instructions
+        List<Instruction> instructions = new ArrayList<Instruction>();
+        createOutputQosPortInstructions(ib, dpidLong, OFPortOut);
+        ib.setOrder(0);
+        ib.setKey(new InstructionKey(0));
+        instructions.add(ib.build());
+
+        // GOTO Instuctions
+        createGotoTableInstructions(ib, goToTableId);
+        ib.setOrder(2);
+        ib.setKey(new InstructionKey(2));
+        instructions.add(ib.build());
+
+        // Add InstructionBuilder to the Instruction(s)Builder List
+        isb.setInstruction(instructions);
+
+        // Add InstructionsBuilder to FlowBuilder
+        flowBuilder.setInstructions(isb.build());
+
+        writeFlow(flowBuilder, nodeBuilder);
     }
 
     /*
@@ -790,56 +691,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
     * actions=output:10,goto_table:2"
     */
 
-    private void writeTunnelOut(Long dpidLong, Short writeTable, Short goToTableId, String segmentationId , Long OFPortOut, String attachedMac) {
-
-        String nodeName = "openflow:" + dpidLong;
-
-        MatchBuilder matchBuilder = new MatchBuilder();
-        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
-        FlowBuilder flowBuilder = new FlowBuilder();
-
-        // Create the OF Match using MatchBuilder
-        flowBuilder.setMatch(createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
-        flowBuilder.setMatch(createDestEthMatch(matchBuilder, new MacAddress(attachedMac), null).build());
-
-        String flowId = "TunnelOut_"+segmentationId+"_"+OFPortOut+"_"+attachedMac;
-        // Add Flow Attributes
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setStrict(true);
-        flowBuilder.setBarrier(false);
-        flowBuilder.setTableId(writeTable);
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
-        // Instantiate the Builders for the OF Actions and Instructions
-        InstructionBuilder ib = new InstructionBuilder();
-        InstructionsBuilder isb = new InstructionsBuilder();
-
-        // Instructions List Stores Individual Instructions
-        List<Instruction> instructions = new ArrayList<Instruction>();
-
-        // GOTO Instuctions
-        createGotoTableInstructions(ib, goToTableId);
-        ib.setOrder(0);
-        ib.setKey(new InstructionKey(0));
-        instructions.add(ib.build());
-        // Set the Output Port/Iface
-        createOutputPortInstructions(ib, dpidLong, OFPortOut);
-        ib.setOrder(1);
-        ib.setKey(new InstructionKey(1));
-        instructions.add(ib.build());
-
-        // Add InstructionBuilder to the Instruction(s)Builder List
-        isb.setInstruction(instructions);
-
-        // Add InstructionsBuilder to FlowBuilder
-        flowBuilder.setInstructions(isb.build());
-
-        writeFlow(flowBuilder, nodeBuilder);
-    }
-
        /*
     * (Table:1) Egress Tunnel Traffic
     * Match: Destination Ethernet Addr and Local InPort
@@ -860,7 +711,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // Match TunnelID
         flowBuilder.setMatch(createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
         // Match DMAC
-
         flowBuilder.setMatch(createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"), new MacAddress("01:00:00:00:00:00")).build());
 
         String flowId = "TunnelFloodOut_"+segmentationId;
@@ -998,7 +848,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
         List<Instruction> instructions = new ArrayList<Instruction>();
 
         // Set the Output Port/Iface
-        createOutputPortInstructions(ib, dpidLong, localPort);
+        createOutputQosPortInstructions(ib, dpidLong, localPort);
         ib.setOrder(0);
         ib.setKey(new InstructionKey(0));
         instructions.add(ib.build());
@@ -1028,7 +878,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         // Create the OF Match using MatchBuilder
         flowBuilder.setMatch(createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
-        flowBuilder.setMatch(createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"), new MacAddress("01:00:00:00:00:00")).build());
+        flowBuilder.setMatch(createDestEthMatch(matchBuilder, new MacAddress("01:22:22:22:22:22"), new MacAddress("01:00:00:00:00:00")).build());
 
         String flowId = "BcastOut_"+segmentationId;
         // Add Flow Attributes
@@ -1189,6 +1039,32 @@ class OF13ProviderManager extends ProviderNetworkManager {
         logger.debug("createInPortMatch() Node Connector ID is - Type=openflow: DPID={} inPort={} ", dpidLong, inPort);
         matchBuilder.setInPort(NodeConnectorId.getDefaultInstance(ncid.getValue()));
         matchBuilder.setInPort(ncid);
+
+        return matchBuilder;
+    }
+
+    private static MatchBuilder createIpQosMatch(MatchBuilder matchBuilder, MacAddress dMacAddr, MacAddress mask) {
+
+        EthernetMatchBuilder ethernetMatch = new EthernetMatchBuilder();
+        EthernetTypeBuilder ethtype = new EthernetTypeBuilder();
+        EtherType type = new EtherType(0x0800L);
+        ethernetMatch.setEthernetType(ethtype.setType(type).build());
+        matchBuilder.setEthernetMatch(ethernetMatch.build());
+        IpMatchBuilder ipmatch = new IpMatchBuilder();
+
+        Dscp dscp = new Dscp((short) 3);
+        ipmatch.setIpDscp(dscp);
+
+        matchBuilder.setIpMatch(ipmatch.build());
+
+        EthernetDestinationBuilder ethDestinationBuilder = new EthernetDestinationBuilder();
+        ethDestinationBuilder.setAddress(new MacAddress(dMacAddr));
+        if (mask != null) {
+            ethDestinationBuilder.setMask(mask);
+        }
+        ethernetMatch.setEthernetDestination(ethDestinationBuilder.build());
+        matchBuilder.setEthernetMatch(ethernetMatch.build());
+
 
         return matchBuilder;
     }
@@ -1415,6 +1291,54 @@ class OF13ProviderManager extends ProviderNetworkManager {
         return matchBuilder;
     }
 
+    private static InstructionBuilder createSetQueue(InstructionBuilder ib) {
+
+        List<Action> actionList = new ArrayList<Action>();
+        ActionBuilder ab = new ActionBuilder();
+
+        SetQueueActionBuilder setQueueActionBuilder = new SetQueueActionBuilder();
+        setQueueActionBuilder.setQueueId(8L);
+        ab.setAction(new SetQueueActionCaseBuilder().setSetQueueAction(setQueueActionBuilder.build()).build());
+        actionList.add(ab.build());
+        // Create an Apply Action
+        ApplyActionsBuilder aab = new ApplyActionsBuilder();
+        aab.setAction(actionList);
+
+        // Wrap our Apply Action in an Instruction
+        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+
+        // Put our Instruction in a list of Instructions
+        InstructionsBuilder isb = new InstructionsBuilder();
+        List<Instruction> instructions = new ArrayList<Instruction>();
+        instructions.add(ib.build());
+        isb.setInstruction(instructions);
+        return ib;
+    }
+
+    protected static InstructionBuilder createSetNwTos(InstructionBuilder ib) {
+
+        List<Action> actionList = new ArrayList<Action>();
+        ActionBuilder ab = new ActionBuilder();
+
+        SetNwTosActionBuilder setNwTosActionBuilder = new SetNwTosActionBuilder();
+        setNwTosActionBuilder.setTos(8);
+        ab.setAction(new SetNwTosActionCaseBuilder().setSetNwTosAction(setNwTosActionBuilder.build()).build());
+        actionList.add(ab.build());
+        // Create an Apply Action
+        ApplyActionsBuilder aab = new ApplyActionsBuilder();
+        aab.setAction(actionList);
+
+        // Wrap our Apply Action in an Instruction
+        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+
+        // Put our Instruction in a list of Instructions
+        InstructionsBuilder isb = new InstructionsBuilder();
+        List<Instruction> instructions = new ArrayList<Instruction>();
+        instructions.add(ib.build());
+        isb.setInstruction(instructions);
+        return ib;
+    }
+
     /**
      * Create Send to Controller Reserved Port Instruction (packet_in)
      *
@@ -1454,13 +1378,14 @@ class OF13ProviderManager extends ProviderNetworkManager {
      * @param port     Long representing a port on a switch/node
      * @return ib InstructionBuilder Map with instructions
      */
-    protected static InstructionBuilder createOutputPortInstructions(InstructionBuilder ib, Long dpidLong, Long port) {
+    protected static InstructionBuilder createOutputQosPortInstructions(InstructionBuilder ib, Long dpidLong, Long port) {
 
         NodeConnectorId ncid = new NodeConnectorId("openflow:" + dpidLong + ":" + port);
-        logger.debug("createOutputPortInstructions() Node Connector ID is - Type=openflow: DPID={} inPort={} ", dpidLong, port);
+        logger.debug("createOutputQosPortInstructions() Node Connector ID is - Type=openflow: DPID={} inPort={} ", dpidLong, port);
 
         List<Action> actionList = new ArrayList<Action>();
         ActionBuilder ab = new ActionBuilder();
+        ActionBuilder ab2 = new ActionBuilder();
         OutputActionBuilder oab = new OutputActionBuilder();
         oab.setOutputNodeConnector(ncid);
 
@@ -1468,6 +1393,21 @@ class OF13ProviderManager extends ProviderNetworkManager {
         ab.setOrder(0);
         ab.setKey(new ActionKey(0));
         actionList.add(ab.build());
+
+        SetNwTosActionBuilder setNwTosActionBuilder = new SetNwTosActionBuilder();
+        setNwTosActionBuilder.setTos(8);
+        ab2.setAction(new SetNwTosActionCaseBuilder().setSetNwTosAction(setNwTosActionBuilder.build()).build());
+        actionList.add(ab2.build());
+
+        GoToTableBuilder gtb = new GoToTableBuilder();
+        gtb.setTableId((short) 2);
+
+        ib.setInstruction(new GoToTableCaseBuilder().setGoToTable(gtb.build()).build());
+
+        // Put our Instruction in a list of Instructions
+        InstructionsBuilder isb = new InstructionsBuilder();
+        List<Instruction> instructions = new ArrayList<Instruction>();
+        instructions.add(ib.build());
 
         // Create an Apply Action
         ApplyActionsBuilder aab = new ApplyActionsBuilder();
@@ -1488,7 +1428,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
     protected static InstructionBuilder createOutputPortInstructions(InstructionBuilder ib, Long dpidLong, Long port , List<Instruction> instructions) {
 
         NodeConnectorId ncid = new NodeConnectorId("openflow:" + dpidLong + ":" + port);
-        logger.debug("createOutputPortInstructions() Node Connector ID is - Type=openflow: DPID={} port={} existingInstructions={}", dpidLong, port, instructions);
+        logger.debug("createOutputQosPortInstructions() Node Connector ID is - Type=openflow: DPID={} port={} existingInstructions={}", dpidLong, port, instructions);
 
         List<Action> actionList = new ArrayList<Action>();
         ActionBuilder ab = new ActionBuilder();
@@ -1524,6 +1464,36 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // Create an Apply Action
         ApplyActionsBuilder aab = new ApplyActionsBuilder();
         aab.setAction(actionList);
+        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+
+        return ib;
+    }
+
+    /**
+     * Create Set DSCP DS Field Instruction
+     *
+     * @param ib     Map InstructionBuilder without any instructions
+     * @param dscpValue Short representing a DSCP ToS bit value
+     * @return ib Map InstructionBuilder with instructions
+     */
+    protected static InstructionBuilder createSetDscpTosInstructions(InstructionBuilder ib, Short dscpValue) {
+
+        List<Action> actionList = new ArrayList<Action>();
+        ActionBuilder ab = new ActionBuilder();
+        SetFieldBuilder setFieldBuilder = new SetFieldBuilder();
+        IpMatchBuilder ipMatchBuilder = new IpMatchBuilder();
+
+        Dscp dscp = new Dscp((short) dscpValue);
+        ipMatchBuilder.setIpDscp(dscp);
+        setFieldBuilder.setIpMatch(ipMatchBuilder.build());
+        ab.setAction(new SetFieldCaseBuilder().setSetField(setFieldBuilder.build()).build());
+        actionList.add(ab.build());
+
+        // Create an Apply Action
+        ApplyActionsBuilder aab = new ApplyActionsBuilder();
+        aab.setAction(actionList);
+
+        // Wrap our Apply Action in an Instruction
         ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
 
         return ib;
@@ -1712,6 +1682,31 @@ class OF13ProviderManager extends ProviderNetworkManager {
         ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
 
         return ib;
+    }
+
+    private static InstructionsBuilder createSetNwTos() {
+
+        List<Action> actionList = new ArrayList<Action>();
+        ActionBuilder ab = new ActionBuilder();
+
+        SetNwTosActionBuilder setNwTosActionBuilder = new SetNwTosActionBuilder();
+        setNwTosActionBuilder.setTos(8);
+        ab.setAction(new SetNwTosActionCaseBuilder().setSetNwTosAction(setNwTosActionBuilder.build()).build());
+        actionList.add(ab.build());
+        // Create an Apply Action
+        ApplyActionsBuilder aab = new ApplyActionsBuilder();
+        aab.setAction(actionList);
+
+        // Wrap our Apply Action in an Instruction
+        InstructionBuilder ib = new InstructionBuilder();
+        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+
+        // Put our Instruction in a list of Instructions
+        InstructionsBuilder isb = new InstructionsBuilder();
+        List<Instruction> instructions = new ArrayList<Instruction>();
+        instructions.add(ib.build());
+        isb.setInstruction(instructions);
+        return isb;
     }
 
     /**
@@ -2022,7 +2017,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
             String openflowID = ""+openflowNode.getID();
             if (openflowID.contains(""+dpid)) {
                 this.initializeFlowRules(ovsNode, AdminConfigManager.getManager().getIntegrationBridgeName());
-                this.triggerInterfaceUpdates(ovsNode);
+//                this.triggerInterfaceUpdates(ovsNode);
             }
         }
     }
@@ -2038,5 +2033,41 @@ class OF13ProviderManager extends ProviderNetworkManager {
                                                                                                                                              node) {
         return InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class,
                 node.getKey()).toInstance();
+    }
+
+
+    @Override
+    public String getHelp() {
+        StringBuilder help = new StringBuilder();
+        help.append("--- Stub in OF13 ovsdb ---\n");
+        help.append(" addflowzzz <ConnectionName> <ip-address>    - Connect to OVSDB");
+        return help.toString();
+    }
+
+    public void _addFlows2 (CommandInterpreter ci) {
+        Node nodeName = Node.fromString(ci.nextArgument());
+        if (nodeName == null) {
+            ci.println("Please enter Node ProoviderManagerClass Foo");
+            return;
+        }
+
+        ci.println("DPID => " + getIntegrationBridgeOFDPID(nodeName) );
+        logger.info("DPID => " + getIntegrationBridgeOFDPID(nodeName));
+
+//        String bridgeName = ci.nextArgument();
+//        if (bridgeName == null) {
+//            ci.println("Please enter Bridge Name ProoviderManagerClass");
+//            return;
+//        }
+    }
+
+    private void _addflow2 (CommandInterpreter ci) {
+        ci.println("Invalid Node");
+        return;
+    }
+
+    private void _addflowzzz (CommandInterpreter ci) {
+        ci.println("Invalid Node");
+        return;
     }
 }

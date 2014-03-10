@@ -7,7 +7,7 @@
  *
  * Authors : Madhu Venugopal, Brent Salisbury
  */
-package org.opendaylight.ovsdb.neutron.provider;
+package org.opendaylight.ovsdb.testbundle.provider;
 
 import java.util.Map;
 

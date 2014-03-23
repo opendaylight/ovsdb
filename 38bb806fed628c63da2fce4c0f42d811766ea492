@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a5c5d37_a6ee03b3",
+        "filename": "neutron/api/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-03-23T16:59:59Z",
+      "side": 1,
+      "message": "Please bump up the version to 0.5.2-SNAPSHOT.\nThis is not a major change. But is intrusive \u0026 would like to bump up a version to address any potential impact.",
+      "revId": "38bb806fed628c63da2fce4c0f42d811766ea492",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_c6f1f796",
+        "filename": "neutron/api/src/main/java/org/opendaylight/ovsdb/neutron/IInternalNetworkManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-03-23T16:59:59Z",
+      "side": 1,
+      "message": "Not Sure if this matter. But I have heard that \"All rights reserved\" dont make much sense with the open-source version of EPL, etc...\n\nWe currently use this text in other files :\n\n * This program and the accompanying materials are made available under the\n * terms of the Eclipse Public License v1.0 which accompanies this distribution,\n * and is available at http://www.eclipse.org/legal/epl-v10.html",
+      "revId": "38bb806fed628c63da2fce4c0f42d811766ea492",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_862bffea",
+        "filename": "neutron/impl/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-03-23T16:59:59Z",
+      "side": 1,
+      "message": "Same here. Pls bump up the version.",
+      "revId": "38bb806fed628c63da2fce4c0f42d811766ea492",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_66300b57",
+        "filename": "neutron/impl/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-03-23T16:59:59Z",
+      "side": 1,
+      "message": "Ofcourse update the dependency once you update the version of api bundle :)",
+      "revId": "38bb806fed628c63da2fce4c0f42d811766ea492",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

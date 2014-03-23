@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.opendaylight.ovsdb</groupId>
+        <artifactId>commons.ovsdb</artifactId>
+        <version>1.0.1-SNAPSHOT</version>
+        <relativePath>../../commons/parent</relativePath>
+    </parent>
+
+    <artifactId>ovsdb.neutron</artifactId>
+    <version>0.5.1-SNAPSHOT</version>
+    <packaging>bundle</packaging>
+
+    <scm>
+      <connection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</connection>
+      <developerConnection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</developerConnection>
+      <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
+      <tag>HEAD</tag>
+    </scm>
+
+    <properties>
+        <guava.version>14.0.1</guava.version>
+        <xtend.version>2.4.3</xtend.version>
+        <bundle.plugin.version>2.4.0</bundle.plugin.version>
+        <maven.clean.plugin.version>2.5</maven.clean.plugin.version>
+    </properties>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>2.3.6</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Import-Package>
+              org.opendaylight.controller.networkconfig.neutron,
+              org.opendaylight.controller.sal.core,
+              org.opendaylight.ovsdb.lib.table,
+              org.opendaylight.controller.sal.binding.api,
+              org.apache.felix.dm,
+              org.slf4j,
+              org.osgi.framework,
+              *
+            </Import-Package>
+            <Export-Package>
+                org.opendaylight.ovsdb.neutron
+            </Export-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <version>0.4.2-SNAPSHOT</version>
+      <artifactId>networkconfig.neutron</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal</artifactId>
+      <version>0.7.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>ovsdb</artifactId>
+      <version>0.5.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal-binding-api</artifactId>
+        <version>1.1-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+</project>

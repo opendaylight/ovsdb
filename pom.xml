@@ -24,7 +24,8 @@
   <modules>
     <module>ovsdb</module>
     <module>northbound/ovsdb</module>
-    <module>neutron</module>
+    <module>neutron/api</module>
+    <module>neutron/impl</module>
     <module>commons/parent</module>
     <module>distribution/opendaylight</module>
   </modules>

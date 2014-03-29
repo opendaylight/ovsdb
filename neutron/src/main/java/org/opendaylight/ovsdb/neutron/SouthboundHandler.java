@@ -239,6 +239,27 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
         }
         NeutronNetwork network = TenantNetworkManager.getManager().getTenantNetworkForInterface(intf);
         if (network != null) {
+            // Check if tunnel interface or ethx interface is added according to network type
+            if (network.getProviderNetworkType().equalsIgnoreCase("vlan")) {
+                if (!InternalNetworkManager.getManager().isInternalNetworkVlanReady(node)) {
+                    /* Add ethx interface */
+                    try {
+                        InternalNetworkManager.getManager().createPhysicalNetworkForNeutron(node);
+                    } catch (Exception e ){
+                        logger.error("Error creating internal physical network "+node.toString(), e);
+                    }
+                }
+            } else if (network.getProviderNetworkType().equalsIgnoreCase("vxlan") ||
+                       network.getProviderNetworkType().equalsIgnoreCase("gre")) {
+                if (!InternalNetworkManager.getManager().isInternalNetworkTunnelReady(node)) {
+                    /* Add tunnel interface */
+                    try {
+                        InternalNetworkManager.getManager().createInternalNetworkForOverlay(node);
+                    } catch (Exception e) {
+                        logger.error("Error creating internal tunnel network "+node.toString(), e);
+                    }
+                }
+            }
             ProviderNetworkManager.getManager().handleInterfaceUpdate(network.getProviderNetworkType(),
                     network.getProviderSegmentationID(), node, intf);
         }

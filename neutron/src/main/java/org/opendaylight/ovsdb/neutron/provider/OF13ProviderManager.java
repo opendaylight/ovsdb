@@ -49,16 +49,21 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.DropActionCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.OutputActionCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.OutputActionCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PopVlanActionCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PopVlanActionCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetFieldCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwDstActionCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwSrcActionCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanIdActionCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.StripVlanActionCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PushVlanActionCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.dec.nw.ttl._case.DecNwTtl;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.dec.nw.ttl._case.DecNwTtlBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.drop.action._case.DropAction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.drop.action._case.DropActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.output.action._case.OutputActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.push.vlan.action._case.PushVlanActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.pop.vlan.action._case.PopVlanActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.field._case.SetFieldBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.nw.dst.action._case.SetNwDstActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.nw.src.action._case.SetNwSrcActionBuilder;
@@ -341,6 +346,105 @@ class OF13ProviderManager extends ProviderNetworkManager {
         writeTunnelOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, tunnelOFPort, attachedMac);
     }
 
+    private void programLocalVlanRules(Node node, Long dpid, String segmentationId, String attachedMac, long localPort) {
+        /*
+        * Table(0) Rule #2
+        * ----------------
+        * Match: VM sMac and Local Ingress Port
+        * Action:Action: Set VLAN ID and GOTO Local Table 1
+        */
+
+        writeLocalInPortSetVlan(dpid, TABLE_0_DEFAULT_INGRESS, TABLE_1_ISOLATE_TENANT, segmentationId, localPort, attachedMac);
+
+       /*
+        * Table(0) Rule #3
+        * ----------------
+        * Match: Drop any remaining Ingress Local VM Packets
+        * Action: Drop w/ a low priority
+        */
+
+        writeDropSrcIface(dpid, localPort);
+
+        /*
+         * Table(2) Rule #1
+         * ----------------
+         * Match: Match VLAN ID and Destination DL/dMAC Addr
+         * Action: Output Port
+         * table=2,vlan_id=0x5,dl_dst=00:00:00:00:00:01 actions= strip vlan, output:2
+         */
+
+        writeLocalVlanUcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId, localPort, attachedMac);
+
+        /*
+         * Table(2) Rule #2
+         * ----------------
+         * Match: VLAN ID and dMAC (::::FF:FF)
+         * table=2,priority=16384,vlan_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
+         * actions= strip_vlan, output:2,3,4,5
+         */
+
+        writeLocalVlanBcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId, localPort);
+
+         /*
+          * Table(2) Rule #3
+          * ----------------
+          * Match: Any Remaining Flows w/a VLAN ID
+          * Action: Drop w/ a low priority
+          * table=2,priority=8192,vlan_id=0x5 actions=drop
+          */
+
+          writeLocalVlanTableMiss(dpid, TABLE_2_LOCAL_FORWARD, segmentationId);
+   }
+
+   private void programLocalIngressVlanRules(Node node, Long dpid, String segmentationId, String attachedMac, long ethPort) {
+       /*
+        * Table(0) Rule #2
+        * ----------------
+        * Match: Ingress Port, Vlan ID
+        * Action: GOTO Local Table (20)
+        */
+
+        writeVlanIn(dpid, TABLE_0_DEFAULT_INGRESS, TABLE_2_LOCAL_FORWARD, segmentationId, ethPort);
+
+        /*
+         * Table(1) Rule #2
+         * ----------------
+         * Match: Match VLAN ID and L2 ::::FF:FF Flooding
+         * Action: Flood to local and remote VLAN members
+         * -------------------------------------------
+         * table=1,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
+         * actions=output:10,output:11,goto_table:2
+         */
+
+        writeVlanFloodOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, ethPort);
+
+   }
+
+   private void programRemoteEgressVlanRules(Node node, Long dpid, String segmentationId, String attachedMac, long ethPort) {
+       /*
+        * Table(1) Rule #1
+        * ----------------
+        * Match: Destination MAC is local VM MAC and vlan id
+        * Action: go to table 20
+        * -------------------------------------------
+        * table=1,vlan_id=0x5,dl_dst=00:00:00:00:00:08 \
+        * actions=goto_table:2
+        */
+
+       writeVlanOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, ethPort, attachedMac);
+
+       /*
+        * Table(1) Rule #3
+        * ----------------
+        * Match:  VLAN ID
+        * Action: Go to table 2
+        * -------------------------------------------
+        * table=1,priority=8192,vlan_id=0x5 actions=output:1,goto_table:2
+        */
+
+        writeVlanMiss(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, ethPort);
+   }
+
     private Long getIntegrationBridgeOFDPID (Node node) {
         try {
             String bridgeName = AdminConfigManager.getManager().getIntegrationBridgeName();
@@ -360,7 +464,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
             return 0L;
         }
     }
-    private void programLocalRules (String tunnelType, String segmentationId, Node node, Interface intf) {
+    private void programLocalRules (String networkType, String segmentationId, Node node, Interface intf) {
         try {
             Long dpid = this.getIntegrationBridgeOFDPID(node);
             if (dpid == 0L) {
@@ -387,7 +491,14 @@ class OF13ProviderManager extends ProviderNetworkManager {
                 return;
             }
 
-            programLocalBridgeRules(node, dpid, segmentationId, attachedMac, localPort);
+            /* Program local rules based on network type */
+            if (networkType.equalsIgnoreCase("vlan")) {
+                logger.debug("Program local vlan rules for interface {}", intf.getName());
+                programLocalVlanRules(node, dpid, segmentationId, attachedMac, localPort);
+            } else {
+                logger.debug("Program local bridge rules for interface {}", intf.getName());
+                programLocalBridgeRules(node, dpid, segmentationId, attachedMac, localPort);
+            }
         } catch (Exception e) {
             logger.error("Exception in programming Local Rules for "+intf+" on "+node, e);
         }
@@ -454,8 +565,67 @@ class OF13ProviderManager extends ProviderNetworkManager {
         }
     }
 
+    private void programVlanRules (String segmentationId, Node node, Interface intf) {
+        logger.debug("Program vlan rules for interface {}", intf.getName());
+
+        try {
+
+            Long dpid = this.getIntegrationBridgeOFDPID(node);
+            if (dpid == 0L) {
+                logger.debug("Openflow Datapath-ID not set for the integration bridge in {}", node);
+                return;
+            }
+            OVSDBConfigService ovsdbTable = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+
+            Set<BigInteger> of_ports = intf.getOfport();
+            if (of_ports == null || of_ports.size() <= 0) {
+                logger.error("Could NOT Identify OF value for port {} on {}", intf.getName(), node);
+                return;
+            }
+
+            Map<String, String> externalIds = intf.getExternal_ids();
+            if (externalIds == null) {
+                logger.error("No external_ids seen in {}", intf);
+                return;
+            }
+
+            String attachedMac = externalIds.get(TenantNetworkManager.EXTERNAL_ID_VM_MAC);
+            if (attachedMac == null) {
+                logger.error("No AttachedMac seen in {}", intf);
+                return;
+            }
+
+            Map<String, org.opendaylight.ovsdb.lib.table.internal.Table<?>> intfs = ovsdbTable.getRows(node, Interface.NAME.getName());
+            if (intfs != null) {
+                for (org.opendaylight.ovsdb.lib.table.internal.Table<?> row : intfs.values()) {
+                    Interface ethIntf = (Interface)row;
+                    if (ethIntf.getName().startsWith("eth")) {
+                        of_ports = ethIntf.getOfport();
+                        if (of_ports == null || of_ports.size() <= 0) {
+                            logger.error("Could NOT Identify eth port {} on {}", ethIntf.getName(), node);
+                            continue;
+                        }
+                        long ethOFPort = ((BigInteger)of_ports.toArray()[0]).longValue();
+
+                        if (ethOFPort == -1) {
+                            logger.error("Could NOT Identify eth port {} -> OF ({}) on {}", ethIntf.getName(), ethOFPort, node);
+                            return;
+                        }
+                        logger.debug("Identified Tunnel port {} -> OF ({}) on {}", ethIntf.getName(), ethOFPort, node);
+
+                        programRemoteEgressVlanRules(node, dpid, segmentationId, attachedMac, ethOFPort);
+                        programLocalIngressVlanRules(node, dpid, segmentationId, attachedMac, ethOFPort);
+                        return;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error("", e);
+        }
+    }
+
     @Override
-    public Status handleInterfaceUpdate(String tunnelType, String tunnelKey, Node srcNode, Interface intf) {
+    public Status handleInterfaceUpdate(String networkType, String segmentationId, Node srcNode, Interface intf) {
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, "default", this);
         if (switchManager == null) {
             logger.error("Unable to identify SwitchManager");
@@ -487,18 +657,22 @@ class OF13ProviderManager extends ProviderNetworkManager {
         IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
         List<Node> nodes = connectionService.getNodes();
         nodes.remove(srcNode);
-        this.programLocalRules(tunnelType, tunnelKey, srcNode, intf);
+        this.programLocalRules(networkType, segmentationId, srcNode, intf);
 
-        for (Node dstNode : nodes) {
-            InetAddress src = AdminConfigManager.getManager().getTunnelEndPoint(srcNode);
-            InetAddress dst = AdminConfigManager.getManager().getTunnelEndPoint(dstNode);
-            Status status = addTunnelPort(srcNode, tunnelType, src, dst);
-            if (status.isSuccess()) {
-                this.programTunnelRules(tunnelType, tunnelKey, dst, srcNode, intf, true);
-            }
-            addTunnelPort(dstNode, tunnelType, dst, src);
-            if (status.isSuccess()) {
-                this.programTunnelRules(tunnelType, tunnelKey, src, dstNode, intf, false);
+        if (networkType.equalsIgnoreCase("vlan")) {
+            this.programVlanRules(segmentationId, srcNode, intf);
+        } else {
+            for (Node dstNode : nodes) {
+                InetAddress src = AdminConfigManager.getManager().getTunnelEndPoint(srcNode);
+                InetAddress dst = AdminConfigManager.getManager().getTunnelEndPoint(dstNode);
+                Status status = addTunnelPort(srcNode, networkType, src, dst);
+                if (status.isSuccess()) {
+                    this.programTunnelRules(networkType, segmentationId, dst, srcNode, intf, true);
+                }
+                addTunnelPort(dstNode, networkType, dst, src);
+                if (status.isSuccess()) {
+                    this.programTunnelRules(networkType, segmentationId, src, dstNode, intf, false);
+                }
             }
         }
 
@@ -669,6 +843,58 @@ class OF13ProviderManager extends ProviderNetworkManager {
         writeFlow(flowBuilder, nodeBuilder);
     }
 
+    /*
+     * (Table:0) Ingress VLAN Traffic
+     * Match: OpenFlow InPort and vlan ID
+     * Action: GOTO Local Table (20)
+     * table=0,vlan_id=0x5,in_port=10, actions=goto_table:2
+     */
+
+    private void writeVlanIn(Long dpidLong, Short writeTable, Short goToTableId, String segmentationId,  Long ethPort) {
+
+        String nodeName = "openflow:" + dpidLong;
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        // Create Match(es) and Set them in the FlowBuilder Object
+        flowBuilder.setMatch(createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId))).build());
+        flowBuilder.setMatch(createInPortMatch(matchBuilder, dpidLong, ethPort).build());
+
+        // Create the OF Actions and Instructions
+        InstructionBuilder ib = new InstructionBuilder();
+        InstructionsBuilder isb = new InstructionsBuilder();
+
+        // Instructions List Stores Individual Instructions
+        List<Instruction> instructions = new ArrayList<Instruction>();
+
+        // Call the InstructionBuilder Methods Containing Actions
+        createGotoTableInstructions(ib, goToTableId);
+        ib.setOrder(0);
+        ib.setKey(new InstructionKey(0));
+        instructions.add(ib.build());
+
+        // Add InstructionBuilder to the Instruction(s)Builder List
+        isb.setInstruction(instructions);
+
+        // Add InstructionsBuilder to FlowBuilder
+        flowBuilder.setInstructions(isb.build());
+
+        String flowId = "VlanIn_"+segmentationId+"_"+ethPort;
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setStrict(true);
+        flowBuilder.setBarrier(false);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+        writeFlow(flowBuilder, nodeBuilder);
+    }
+
    /*
     * (Table:0) Egress VM Traffic Towards TEP
     * Match: Destination Ethernet Addr and OpenFlow InPort
@@ -728,6 +954,66 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         writeFlow(flowBuilder, nodeBuilder);
     }
+
+    /*
+     * (Table:0) Egress VM Traffic Towards TEP
+     * Match: Source Ethernet Addr and OpenFlow InPort
+     * Instruction: Set VLANID and GOTO Table Egress (n)
+     * table=0,in_port=2,dl_src=00:00:00:00:00:01 \
+     * actions=set_field:5->vlan_id,goto_table=1"
+     */
+
+     private void writeLocalInPortSetVlan(Long dpidLong, Short writeTable, Short goToTableId, String segmentationId, Long inPort, String attachedMac) {
+
+         String nodeName = "openflow:" + dpidLong;
+
+         MatchBuilder matchBuilder = new MatchBuilder();
+         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+         FlowBuilder flowBuilder = new FlowBuilder();
+
+         // Create the OF Match using MatchBuilder
+         flowBuilder.setMatch(createEthSrcMatch(matchBuilder, new MacAddress(attachedMac)).build());
+         // TODO Broken In_Port Match
+         flowBuilder.setMatch(createInPortMatch(matchBuilder, dpidLong, inPort).build());
+
+         String flowId = "LocalMac_"+segmentationId+"_"+inPort+"_"+attachedMac;
+         // Add Flow Attributes
+         flowBuilder.setId(new FlowId(flowId));
+         FlowKey key = new FlowKey(new FlowId(flowId));
+         flowBuilder.setStrict(true);
+         flowBuilder.setBarrier(false);
+         flowBuilder.setTableId(writeTable);
+         flowBuilder.setKey(key);
+         flowBuilder.setFlowName(flowId);
+         flowBuilder.setHardTimeout(0);
+         flowBuilder.setIdleTimeout(0);
+
+         // Instantiate the Builders for the OF Actions and Instructions
+         InstructionBuilder ib = new InstructionBuilder();
+         InstructionsBuilder isb = new InstructionsBuilder();
+
+         // Instructions List Stores Individual Instructions
+         List<Instruction> instructions = new ArrayList<Instruction>();
+
+         // GOTO Instructions Need to be added first to the List
+         createGotoTableInstructions(ib, goToTableId);
+         ib.setOrder(0);
+         ib.setKey(new InstructionKey(0));
+         instructions.add(ib.build());
+         // Set VLAN ID Instruction
+         createSetVlanInstructions(ib, new VlanId(Integer.valueOf(segmentationId)));
+         ib.setOrder(1);
+         ib.setKey(new InstructionKey(1));
+         instructions.add(ib.build());
+
+         // Add InstructionBuilder to the Instruction(s)Builder List
+         isb.setInstruction(instructions);
+
+         // Add InstructionsBuilder to FlowBuilder
+         flowBuilder.setInstructions(isb.build());
+
+         writeFlow(flowBuilder, nodeBuilder);
+     }
 
     /*
      * (Table:0) Drop frames sourced from a VM that do not
@@ -840,6 +1126,64 @@ class OF13ProviderManager extends ProviderNetworkManager {
         writeFlow(flowBuilder, nodeBuilder);
     }
 
+    /*
+     * (Table:1) Egress VLAN Traffic
+     * Match: Destination Ethernet Addr and VLAN id
+     * Instruction: GOTO Table Table 2
+     * table=1,vlan_id=0x5,dl_dst=00:00:00:00:00:08 \
+     * actions= goto_table:2"
+     */
+
+     private void writeVlanOut(Long dpidLong, Short writeTable, Short goToTableId, String segmentationId , Long ethPort, String attachedMac) {
+
+         String nodeName = "openflow:" + dpidLong;
+
+         MatchBuilder matchBuilder = new MatchBuilder();
+         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+         FlowBuilder flowBuilder = new FlowBuilder();
+
+         // Create the OF Match using MatchBuilder
+         flowBuilder.setMatch(createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId))).build());
+         flowBuilder.setMatch(createDestEthMatch(matchBuilder, new MacAddress(attachedMac), null).build());
+
+         String flowId = "VlanOut_"+segmentationId+"_"+ethPort+"_"+attachedMac;
+         // Add Flow Attributes
+         flowBuilder.setId(new FlowId(flowId));
+         FlowKey key = new FlowKey(new FlowId(flowId));
+         flowBuilder.setStrict(true);
+         flowBuilder.setBarrier(false);
+         flowBuilder.setTableId(writeTable);
+         flowBuilder.setKey(key);
+         flowBuilder.setFlowName(flowId);
+         flowBuilder.setHardTimeout(0);
+         flowBuilder.setIdleTimeout(0);
+         // Instantiate the Builders for the OF Actions and Instructions
+         InstructionBuilder ib = new InstructionBuilder();
+         InstructionsBuilder isb = new InstructionsBuilder();
+
+         // Instructions List Stores Individual Instructions
+         List<Instruction> instructions = new ArrayList<Instruction>();
+
+         // GOTO Instuctions
+         createGotoTableInstructions(ib, goToTableId);
+         ib.setOrder(0);
+         ib.setKey(new InstructionKey(0));
+         instructions.add(ib.build());
+         /* Set the Output Port/Iface
+           createOutputPortInstructions(ib, dpidLong, ethPort);
+           ib.setOrder(1);
+           ib.setKey(new InstructionKey(1));
+           instructions.add(ib.build()); */
+
+         // Add InstructionBuilder to the Instruction(s)Builder List
+         isb.setInstruction(instructions);
+
+         // Add InstructionsBuilder to FlowBuilder
+         flowBuilder.setInstructions(isb.build());
+
+         writeFlow(flowBuilder, nodeBuilder);
+     }
+
        /*
     * (Table:1) Egress Tunnel Traffic
     * Match: Destination Ethernet Addr and Local InPort
@@ -907,6 +1251,73 @@ class OF13ProviderManager extends ProviderNetworkManager {
         writeFlow(flowBuilder, nodeBuilder);
     }
 
+    /*
+     * (Table:1) Egress VLAN Traffic
+     * Match: Destination Ethernet Addr and VLAN id
+     * Instruction: GOTO table and Output port
+     * table=1,priority=16384,vlan_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
+     * actions=output:10,output:11,goto_table:2
+     */
+
+     private void writeVlanFloodOut(Long dpidLong, Short writeTable, Short localTable, String segmentationId,  Long ethPort) {
+
+         String nodeName = "openflow:" + dpidLong;
+
+         MatchBuilder matchBuilder = new MatchBuilder();
+         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+         FlowBuilder flowBuilder = new FlowBuilder();
+
+         // Create the OF Match using MatchBuilder
+         // Match TunnelID
+         flowBuilder.setMatch(createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId))).build());
+         // Match DMAC
+
+         flowBuilder.setMatch(createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"), new MacAddress("01:00:00:00:00:00")).build());
+
+         String flowId = "VlanFloodOut_"+segmentationId;
+         // Add Flow Attributes
+         flowBuilder.setId(new FlowId(flowId));
+         FlowKey key = new FlowKey(new FlowId(flowId));
+         flowBuilder.setBarrier(true);
+         flowBuilder.setTableId(writeTable);
+         flowBuilder.setKey(key);
+         flowBuilder.setPriority(16384);
+         flowBuilder.setFlowName(flowId);
+         flowBuilder.setHardTimeout(0);
+         flowBuilder.setIdleTimeout(0);
+
+         Flow flow = this.getFlow(flowBuilder, nodeBuilder);
+         // Instantiate the Builders for the OF Actions and Instructions
+         InstructionBuilder ib = new InstructionBuilder();
+         InstructionsBuilder isb = new InstructionsBuilder();
+         List<Instruction> instructions = new ArrayList<Instruction>();
+         List<Instruction> existingInstructions = null;
+         if (flow != null) {
+             Instructions ins = flow.getInstructions();
+             if (ins != null) {
+                 existingInstructions = ins.getInstruction();
+             }
+         }
+         // GOTO Instuction
+         createGotoTableInstructions(ib, localTable);
+         ib.setOrder(0);
+         ib.setKey(new InstructionKey(0));
+         instructions.add(ib.build());
+         // Set the Output Port/Iface
+         createOutputPortInstructions(ib, dpidLong, ethPort, existingInstructions);
+         ib.setOrder(1);
+         ib.setKey(new InstructionKey(1));
+         instructions.add(ib.build());
+
+         // Add InstructionBuilder to the Instruction(s)Builder List
+         isb.setInstruction(instructions);
+
+         // Add InstructionsBuilder to FlowBuilder
+         flowBuilder.setInstructions(isb.build());
+
+         writeFlow(flowBuilder, nodeBuilder);
+     }
+
    /*
     * (Table:1) Table Drain w/ Catch All
     * Match: Tunnel ID
@@ -959,6 +1370,64 @@ class OF13ProviderManager extends ProviderNetworkManager {
         writeFlow(flowBuilder, nodeBuilder);
     }
 
+
+    /*
+     * (Table:1) Table Drain w/ Catch All
+     * Match: Vlan ID
+     * Action: GOTO Local Table (20)
+     * table=1,priority=8192,vlan_id=0x5 actions= goto table 2
+     */
+
+     private void writeVlanMiss(Long dpidLong, Short writeTable, Short goToTableId, String segmentationId, Long ethPort) {
+
+         String nodeName = "openflow:" + dpidLong;
+
+         MatchBuilder matchBuilder = new MatchBuilder();
+         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+         FlowBuilder flowBuilder = new FlowBuilder();
+
+         // Create Match(es) and Set them in the FlowBuilder Object
+         flowBuilder.setMatch(createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId))).build());
+
+         // Create the OF Actions and Instructions
+         InstructionBuilder ib = new InstructionBuilder();
+         InstructionsBuilder isb = new InstructionsBuilder();
+
+         // Instructions List Stores Individual Instructions
+         List<Instruction> instructions = new ArrayList<Instruction>();
+
+         // Call the InstructionBuilder Methods Containing Actions
+         createGotoTableInstructions(ib, goToTableId);
+         ib.setOrder(0);
+         ib.setKey(new InstructionKey(0));
+         instructions.add(ib.build());
+         // Set the Output Port/Iface
+         createOutputPortInstructions(ib, dpidLong, ethPort);
+         ib.setOrder(1);
+         ib.setKey(new InstructionKey(1));
+         instructions.add(ib.build());
+
+         // Add InstructionBuilder to the Instruction(s)Builder List
+         isb.setInstruction(instructions);
+
+         // Add InstructionsBuilder to FlowBuilder
+         flowBuilder.setInstructions(isb.build());
+
+         String flowId = "VlanMiss_"+segmentationId;
+         // Add Flow Attributes
+         flowBuilder.setId(new FlowId(flowId));
+         FlowKey key = new FlowKey(new FlowId(flowId));
+         flowBuilder.setStrict(true);
+         flowBuilder.setBarrier(false);
+         flowBuilder.setTableId(writeTable);
+         flowBuilder.setKey(key);
+         flowBuilder.setPriority(8192);
+         flowBuilder.setFlowName(flowId);
+         flowBuilder.setHardTimeout(0);
+         flowBuilder.setIdleTimeout(0);
+         writeFlow(flowBuilder, nodeBuilder);
+     }
+
     /*
      * (Table:1) Local Broadcast Flood
      * Match: Tunnel ID and dMAC
@@ -999,6 +1468,69 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         // Set the Output Port/Iface
         createOutputPortInstructions(ib, dpidLong, localPort);
+        ib.setOrder(0);
+        ib.setKey(new InstructionKey(0));
+        instructions.add(ib.build());
+
+        // Add InstructionBuilder to the Instruction(s)Builder List
+        isb.setInstruction(instructions);
+
+        // Add InstructionsBuilder to FlowBuilder
+        flowBuilder.setInstructions(isb.build());
+        writeFlow(flowBuilder, nodeBuilder);
+    }
+
+    /*
+     * (Table:2) Local VLAN unicast
+     * Match: VLAN ID and dMAC
+     * Action: Output Port
+     * table=2,vlan_id=0x5,dl_dst=00:00:00:00:00:01 actions=output:2
+     */
+
+    private void writeLocalVlanUcastOut(Long dpidLong, Short writeTable, String segmentationId, Long localPort, String attachedMac) {
+
+        String nodeName = "openflow:" + dpidLong;
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        //DEBUG:hshen
+        logger.info("segmentation id string {} Integer" + Integer.valueOf(segmentationId), segmentationId);
+
+        // Create the OF Match using MatchBuilder
+        flowBuilder.setMatch(createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId))).build());
+        flowBuilder.setMatch(createDestEthMatch(matchBuilder, new MacAddress(attachedMac), null).build());
+
+        String flowId = "VlanUcastOut_"+segmentationId+"_"+localPort+"_"+attachedMac;
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setStrict(true);
+        flowBuilder.setBarrier(false);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+
+        // Instantiate the Builders for the OF Actions and Instructions
+        InstructionBuilder ib = new InstructionBuilder();
+        InstructionsBuilder isb = new InstructionsBuilder();
+
+        // Instructions List Stores Individual Instructions
+        List<Instruction> instructions = new ArrayList<Instruction>();
+        List<Instruction> instructions_tmp = new ArrayList<Instruction>();
+
+        /* Strip vlan and store to tmp instruction space*/
+        createPopVlanInstructions(ib);
+        ib.setOrder(0);
+        ib.setKey(new InstructionKey(0));
+        instructions_tmp.add(ib.build());
+
+        // Set the Output Port/Iface
+        ib = new InstructionBuilder();
+        createOutputPortInstructions(ib, dpidLong, localPort, instructions_tmp);
         ib.setOrder(0);
         ib.setKey(new InstructionKey(0));
         instructions.add(ib.build());
@@ -1071,6 +1603,90 @@ class OF13ProviderManager extends ProviderNetworkManager {
     }
 
     /*
+     * (Table:2) Local VLAN Broadcast Flood
+     * Match: vlan ID and dMAC (::::FF:FF)
+     * table=2,priority=16384,vlan_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
+     * actions=strip_vlan, output:2,3,4,5
+     */
+
+    private void writeLocalVlanBcastOut(Long dpidLong, Short writeTable, String segmentationId, Long localPort) {
+
+        String nodeName = "openflow:" + dpidLong;
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        // Create the OF Match using MatchBuilder
+        flowBuilder.setMatch(createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId))).build());
+        flowBuilder.setMatch(createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"), new MacAddress("01:00:00:00:00:00")).build());
+
+        String flowId = "VlanBcastOut_"+segmentationId;
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setStrict(true);
+        flowBuilder.setBarrier(false);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setPriority(16384);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+        Flow flow = this.getFlow(flowBuilder, nodeBuilder);
+        // Instantiate the Builders for the OF Actions and Instructions
+        InstructionBuilder ib = new InstructionBuilder();
+        InstructionsBuilder isb = new InstructionsBuilder();
+        List<Instruction> instructions = new ArrayList<Instruction>();
+        List<Instruction> existingInstructions = null;
+        boolean add_pop_vlan = true;
+        if (flow != null) {
+            Instructions ins = flow.getInstructions();
+            if (ins != null) {
+                existingInstructions = ins.getInstruction();
+            }
+        }
+        if (existingInstructions != null) {
+            /* Check if pop vlan is already the first action in action list */
+            List<Action> existingActions = null;
+            for (Instruction in : existingInstructions) {
+                if (in.getInstruction() instanceof ApplyActionsCase) {
+                    existingActions = (((ApplyActionsCase) in.getInstruction()).getApplyActions().getAction());
+                    if (existingActions.get(0).getAction() instanceof PopVlanActionCase) {
+                        add_pop_vlan = false;
+                        break;
+                    }
+                }
+            }
+        } else {
+            existingInstructions = new ArrayList<Instruction>();
+        }
+
+        if (add_pop_vlan) {
+            /* pop vlan */
+            createPopVlanInstructions(ib);
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            existingInstructions.add(ib.build());
+            ib = new InstructionBuilder();
+        }
+
+        // Broken OutPort TODO: localPort needs to be a list of Ports)
+        createOutputPortInstructions(ib, dpidLong, localPort, existingInstructions);
+        ib.setOrder(0);
+        ib.setKey(new InstructionKey(0));
+        instructions.add(ib.build());
+
+        // Add InstructionBuilder to the Instruction(s)Builder List
+        isb.setInstruction(instructions);
+
+        // Add InstructionsBuilder to FlowBuilder
+        flowBuilder.setInstructions(isb.build());
+
+        writeFlow(flowBuilder, nodeBuilder);
+    }
+
+    /*
      * (Table:1) Local Table Miss
      * Match: Any Remaining Flows w/a TunID
      * Action: Drop w/ a low priority
@@ -1087,6 +1703,58 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         // Create Match(es) and Set them in the FlowBuilder Object
         flowBuilder.setMatch(createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
+
+        // Create the OF Actions and Instructions
+        InstructionBuilder ib = new InstructionBuilder();
+        InstructionsBuilder isb = new InstructionsBuilder();
+
+        // Instructions List Stores Individual Instructions
+        List<Instruction> instructions = new ArrayList<Instruction>();
+
+        // Call the InstructionBuilder Methods Containing Actions
+        createDropInstructions(ib);
+        ib.setOrder(0);
+        ib.setKey(new InstructionKey(0));
+        instructions.add(ib.build());
+
+        // Add InstructionBuilder to the Instruction(s)Builder List
+        isb.setInstruction(instructions);
+
+        // Add InstructionsBuilder to FlowBuilder
+        flowBuilder.setInstructions(isb.build());
+
+        String flowId = "LocalTableMiss_"+segmentationId;
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setStrict(true);
+        flowBuilder.setBarrier(false);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setPriority(8192);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+        writeFlow(flowBuilder, nodeBuilder);
+    }
+
+    /*
+     * (Table:1) Local Table Miss
+     * Match: Any Remaining Flows w/a VLAN ID
+     * Action: Drop w/ a low priority
+     * table=2,priority=8192,vlan_id=0x5 actions=drop
+     */
+
+    private void writeLocalVlanTableMiss(Long dpidLong, Short writeTable, String segmentationId) {
+
+        String nodeName = "openflow:" + dpidLong;
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        // Create Match(es) and Set them in the FlowBuilder Object
+        flowBuilder.setMatch(createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId))).build());
 
         // Create the OF Actions and Instructions
         InstructionBuilder ib = new InstructionBuilder();
@@ -1238,10 +1906,10 @@ class OF13ProviderManager extends ProviderNetworkManager {
      */
 
     protected static MatchBuilder createVlanIdMatch(MatchBuilder matchBuilder, VlanId vlanId) {
-
         VlanMatchBuilder vlanMatchBuilder = new VlanMatchBuilder();
         VlanIdBuilder vlanIdBuilder = new VlanIdBuilder();
         vlanIdBuilder.setVlanId(new VlanId(vlanId));
+        vlanIdBuilder.setVlanIdPresent(true);
         vlanMatchBuilder.setVlanId(vlanIdBuilder.build());
         matchBuilder.setVlanMatch(vlanMatchBuilder.build());
 
@@ -1530,7 +2198,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
     }
 
     /**
-     * Create Set Vlan ID Instruction
+     * Create Set Vlan ID Instruction - This includes push vlan action, and set field -> vlan vid action
      *
      * @param ib     Map InstructionBuilder without any instructions
      * @param vlanId Integer representing a VLAN ID Integer representing a VLAN ID
@@ -1541,8 +2209,16 @@ class OF13ProviderManager extends ProviderNetworkManager {
         List<Action> actionList = new ArrayList<Action>();
         ActionBuilder ab = new ActionBuilder();
 
+        /* First we push vlan header */
+        PushVlanActionBuilder vlan = new PushVlanActionBuilder();
+        vlan.setEthernetType(new Integer(0x8100));
+        ab.setAction(new PushVlanActionCaseBuilder().setPushVlanAction(vlan.build()).build());
+        actionList.add(ab.build());
+
+        /* Then we set vlan id value as vlanId */
         SetVlanIdActionBuilder vl = new SetVlanIdActionBuilder();
         vl.setVlanId(vlanId);
+        ab = new ActionBuilder();
         ab.setAction(new SetVlanIdActionCaseBuilder().setSetVlanIdAction(vl.build()).build());
         actionList.add(ab.build());
         // Create an Apply Action
@@ -1556,7 +2232,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
     }
 
     /**
-     * Create Set IPv4 Destination Instruction
+     * Create Strip Vlan Instruction - this set vlan_vid as 0
      *
      * @param ib Map InstructionBuilder without any instructions
      * @return ib Map InstructionBuilder with instructions
@@ -1570,6 +2246,32 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
         // Add our drop action to a list
         List<Action> actionList = new ArrayList<Action>();
+        actionList.add(ab.build());
+
+        // Create an Apply Action
+        ApplyActionsBuilder aab = new ApplyActionsBuilder();
+        aab.setAction(actionList);
+
+        // Wrap our Apply Action in an Instruction
+        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+
+        return ib;
+
+    }
+
+    /**
+     * Create Pop Vlan Instruction - this remove vlan header
+     *
+     * @param ib Map InstructionBuilder without any instructions
+     * @return ib Map InstructionBuilder with instructions
+     */
+    protected static InstructionBuilder createPopVlanInstructions(InstructionBuilder ib) {
+
+        List<Action> actionList = new ArrayList<Action>();
+        ActionBuilder ab = new ActionBuilder();
+
+        PopVlanActionBuilder popVlanActionBuilder = new PopVlanActionBuilder();
+        ab.setAction(new PopVlanActionCaseBuilder().setPopVlanAction(popVlanActionBuilder.build()).build());
         actionList.add(ab.build());
 
         // Create an Apply Action

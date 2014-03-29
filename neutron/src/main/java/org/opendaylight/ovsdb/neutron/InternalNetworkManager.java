@@ -65,6 +65,21 @@ public class InternalNetworkManager {
         return null;
     }
 
+    public Bridge getInternalBridge (Node node, String bridgeName) {
+        try {
+            OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+            Map<String, Table<?>> bridgeTable = ovsdbTable.getRows(node, Bridge.NAME.getName());
+            if (bridgeTable == null) return null;
+            for (String key : bridgeTable.keySet()) {
+                Bridge bridge = (Bridge)bridgeTable.get(key);
+                if (bridge.getName().equals(bridgeName)) return bridge;
+            }
+        } catch (Exception e) {
+            logger.error("Error getting Bridge Identifier for {} / {}", node, bridgeName, e);
+        }
+        return null;
+    }
+
     public boolean isInternalNetworkNeutronReady(Node node) {
         if (this.getInternalBridgeUUID(node, AdminConfigManager.getManager().getIntegrationBridgeName()) != null) {
             return true;
@@ -82,6 +97,108 @@ public class InternalNetworkManager {
         } else {
             return false;
         }
+    }
+
+    /* Determine if internal network is ready for vlan network type
+     * This includes bridge domain creation and physical interface ethx added to bridge domain */
+    public boolean isInternalNetworkVlanReady(Node node) {
+        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+
+        /* is br-int created */
+        Bridge intBridge = this.getInternalBridge(node, AdminConfigManager.getManager().getIntegrationBridgeName());
+        if (intBridge == null) {
+            return false;
+        }
+
+        if (ProviderNetworkManager.getManager().hasPerTenantTunneling()) {
+            /* is br-eth1 created?*/
+            /* TODO: change getPhysicalBridgeName to getOverlayBridgeName once we use br-overlay for both br-tun and br-eth1 */
+            Bridge physicalBridge = this.getInternalBridge(node, AdminConfigManager.getManager().getPhysicalBridgeName());
+            if (physicalBridge == null) {
+                return false;
+            }
+
+            /* Check if ethx is added to br-overlay */
+            for (UUID portsUUID:physicalBridge.getPorts()) {
+                try {
+                    Port port = (Port)ovsdbTable.getRow(node, Port.NAME.getName(), portsUUID.toString());
+                    if (port.getName().startsWith("eth")) {
+                        return true;
+                    }
+                } catch (Exception e) {
+                    logger.error("Error getting port {} for bridge domain {}/{}", portsUUID.toString(), node,
+                    physicalBridge.getName(), e);
+                }
+            }
+        } else {
+            /* Check if ethx is added to br-int */
+            for (UUID portsUUID:intBridge.getPorts()) {
+                try {
+                    Port port = (Port)ovsdbTable.getRow(node, Port.NAME.getName(), portsUUID.toString());
+                    if (port.getName().startsWith("eth")) {
+                        return true;
+                    }
+                } catch (Exception e) {
+                    logger.error("Error getting port {} for bridge domain {}/{}", portsUUID.toString(), node,
+                    intBridge.getName(), e);
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /* Determine if internal network is ready for tunnel network type
+     * This includes bridge domain creation and interface creation for patch-int and patch-tun */
+    public boolean isInternalNetworkTunnelReady(Node node) {
+        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+
+        /* is br-int created */
+        Bridge intBridge = this.getInternalBridge(node, AdminConfigManager.getManager().getIntegrationBridgeName());
+        if (intBridge == null) {
+            return false;
+        }
+
+        if (ProviderNetworkManager.getManager().hasPerTenantTunneling()) {
+            /* is br-tun created?*/
+            /* TODO: change getPhysicalBridgeName to getOverlayBridgeName once we use br-overlay for both br-tun and br-eth1 */
+            Bridge tunnelBridge = this.getInternalBridge(node, AdminConfigManager.getManager().getTunnelBridgeName());
+            if (tunnelBridge == null) {
+                return false;
+            }
+
+            boolean isPatchTunAdd = false;
+            /* Check if patch-tun is added to br-int */
+            for (UUID portsUUID:intBridge.getPorts()) {
+                try {
+                    Port port = (Port)ovsdbTable.getRow(node, Port.NAME.getName(), portsUUID.toString());
+                    if (port.getName().equalsIgnoreCase(AdminConfigManager.getManager().getPatchToTunnel())) {
+                        isPatchTunAdd = true;
+                        break;
+                    }
+                } catch (Exception e) {
+                    logger.error("Error getting port {} for bridge domain {}/{}", portsUUID.toString(), node,
+                    intBridge.getName(), e);
+                }
+            }
+            if (!isPatchTunAdd) {
+                return false;
+            }
+            /* check if patch-int is added to br-tun */
+            for (UUID portsUUID:tunnelBridge.getPorts()) {
+                try {
+                    Port port = (Port)ovsdbTable.getRow(node, Port.NAME.getName(), portsUUID.toString());
+                    if (port.getName().equalsIgnoreCase(AdminConfigManager.getManager().getPatchToIntegration())) {
+                        return true;
+                    }
+                } catch (Exception e) {
+                    logger.error("Error getting port {} for bridge domain {}/{}", portsUUID.toString(), node,
+                    intBridge.getName(), e);
+                }
+            }
+        }
+
+        return false;
     }
 
     /*
@@ -131,6 +248,50 @@ public class InternalNetworkManager {
 
         Status status = this.addInternalBridge(node, brInt, null, null);
         if (!status.isSuccess()) logger.debug("Integration Bridge Creation Status : "+status.toString());
+    }
+
+    /*
+     * Create physical network for Neutron VLAN network type for OF 1.0. For OF1.3, eth1 is add to br-int directly
+     *
+       Bridge br-int
+            Port "int-br-eth1"
+                Interface "int-br-eth1"
+            Port br-int
+                Interface br-int
+                    type: internal
+       Bridge "br-eth1"
+            Port "eth1"
+                Interface "eth1"
+            Port "phy-br-eth1"
+                Interface "phy-br-eth1"
+            Port "br-eth1"
+                Interface "br-eth1"
+                    type: internal
+
+     */
+    public void createPhysicalNetworkForNeutron(Node node) throws Exception {
+        String ethInf;
+        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+        String bridgeUUID;
+        Port   ethPort = new Port();
+        Status  status;
+        String bridgeName;
+
+        ethPort.setName(AdminConfigManager.getManager().getEthIntfName(node));
+        if (ProviderNetworkManager.getManager().hasPerTenantTunneling()) {
+            bridgeName = AdminConfigManager.getManager().getPhysicalBridgeName();
+            bridgeUUID = this.getInternalBridgeUUID(node, bridgeName);
+        } else {
+            /* For OF 1.3, eth1 is added to br-int */
+            bridgeName = AdminConfigManager.getManager().getIntegrationBridgeName();
+            bridgeUUID = this.getInternalBridgeUUID(node, bridgeName);
+        }
+
+        status = ovsdbTable.insertRow(node, Port.NAME.getName(), bridgeUUID, ethPort);
+        if (!status.isSuccess()) {
+            logger.debug("Add port {} to bridge {} Status : {}", ethPort, bridgeName, status.toString());
+        }
+        return;
     }
 
     private Status addInternalBridge (Node node, String bridgeName, String localPathName, String remotePatchName) throws Exception {
@@ -213,7 +374,12 @@ public class InternalNetworkManager {
 
     public void prepareInternalNetwork(Node node) {
         try {
-            this.createInternalNetworkForOverlay(node);
+            this.createInternalNetworkForNeutron(node);
+            /* FIXME hshen: remove following line after complete testing for bridge domain creation
+               this.createInternalNetworkForOverlay(node);
+               this.createPhysicalNetworkForNeutron(node);
+               DEBUG: hshen */
+            logger.info("Finish create physical network");
         } catch (Exception e) {
             logger.error("Error creating internal network "+node.toString(), e);
         }

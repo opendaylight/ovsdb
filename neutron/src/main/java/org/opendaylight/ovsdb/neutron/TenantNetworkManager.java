@@ -280,10 +280,10 @@ public class TenantNetworkManager {
         Map<String, String> externalIds = intf.getExternal_ids();
         logger.trace("externalIds {}", externalIds);
         if (externalIds == null) return null;
-        String neutronPortId = externalIds.get(EXTERNAL_ID_INTERFACE_ID);
+        String neutronPortId = externalIds.get(EXTERNAL_ID_INTERFACE_ID);s
         if (neutronPortId == null) return null;
         INeutronPortCRUD neutronPortService = (INeutronPortCRUD)ServiceHelper.getGlobalInstance(INeutronPortCRUD.class, this);
-        NeutronPort neutronPort = neutronPortService.getPort(neutronPortId);
+        NeutronPort neutronPort = neutronPortService.getPort(neutronPortId);s
         logger.trace("neutronPort {}", neutronPort);
         if (neutronPort == null) return null;
         INeutronNetworkCRUD neutronNetworkService = (INeutronNetworkCRUD)ServiceHelper.getGlobalInstance(INeutronNetworkCRUD.class, this);

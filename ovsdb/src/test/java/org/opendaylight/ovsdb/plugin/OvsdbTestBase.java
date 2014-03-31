@@ -51,9 +51,13 @@ public abstract class OvsdbTestBase {
         Node.NodeIDType.registerIDType("OVS", String.class);
         NodeConnector.NodeConnectorIDType.registerIDType("OVS", String.class,
                 "OVS");
+        InventoryService inventoryService = new InventoryService();
+        inventoryService.init();
 
         ConnectionService connectionService = new ConnectionService();
         connectionService.init();
+
+        connectionService.setInventoryServiceInternal(inventoryService);
         Map<ConnectionConstants, String> params = new HashMap<ConnectionConstants, String>();
         Properties props = loadProperties();
         params.put(ConnectionConstants.ADDRESS,

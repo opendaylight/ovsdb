@@ -14,17 +14,25 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class TableSchema {
+
     @JsonProperty("columns")
     private Map<String, ColumnSchema> columns;
+
     @JsonProperty("maxRows")
     private Integer maxRows;
+
     @JsonProperty("isRoot")
     private Boolean isRoot;
+
     @JsonProperty("indexes")
     private Object indexes;
 
-    public Map<String, ColumnSchema> getColumns(){
+    public Map<String, ColumnSchema> getColumns() {
         return this.columns;
+    }
+
+    public ColumnSchema getColumn(String columnName) {
+        return this.columns.get(columnName);
     }
 
     public Integer getMaxRows() {

@@ -96,7 +96,7 @@ public class OVSDBNettyFactoryIT {
 
         //GET DB-SCHEMA
         List<String> dbNames = Arrays.asList(Open_vSwitch.NAME.getName());
-        ListenableFuture<DatabaseSchema> dbSchemaF = ovsdb.get_schema(dbNames);
+        ListenableFuture<DatabaseSchema> dbSchemaF = null; //ovsdb.get_schema(dbNames);
         DatabaseSchema databaseSchema = dbSchemaF.get();
         MapUtils.debugPrint(System.out, null, databaseSchema.getTables());
 

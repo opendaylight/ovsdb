@@ -34,6 +34,7 @@ public class Bridge extends Table<Bridge> {
     private Boolean stp_enable;
     private OvsDBMap<String, String> other_config;
     private OvsDBMap<String, String> external_ids;
+    UUID ipfix;
 
     public Bridge() {
     }

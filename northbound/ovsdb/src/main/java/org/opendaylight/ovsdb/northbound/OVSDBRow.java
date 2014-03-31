@@ -12,6 +12,7 @@ package org.opendaylight.ovsdb.northbound;
 import org.opendaylight.ovsdb.lib.table.Bridge;
 import org.opendaylight.ovsdb.lib.table.Capability;
 import org.opendaylight.ovsdb.lib.table.Controller;
+import org.opendaylight.ovsdb.lib.table.IPFIX;
 import org.opendaylight.ovsdb.lib.table.Interface;
 import org.opendaylight.ovsdb.lib.table.Manager;
 import org.opendaylight.ovsdb.lib.table.Mirror;
@@ -59,7 +60,8 @@ public class OVSDBRow {
         @JsonSubTypes.Type(value=Qos.class, name="QoS"),
         @JsonSubTypes.Type(value=Queue.class, name="Queue"),
         @JsonSubTypes.Type(value=SFlow.class, name="sFlow"),
-        @JsonSubTypes.Type(value=SSL.class, name="SSL")
+        @JsonSubTypes.Type(value=SSL.class, name="SSL"),
+        @JsonSubTypes.Type(value=IPFIX.class, name="IPFIX")
         })
     Table row;
 

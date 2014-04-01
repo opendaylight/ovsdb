@@ -37,17 +37,14 @@ import org.slf4j.LoggerFactory;
  * Hence this class attempts to bring all the nodes to be elibible for OpenStack operations.
  *
  */
-public class InternalNetworkManager {
+public class InternalNetworkManager implements IInternalNetworkManager {
     static final Logger logger = LoggerFactory.getLogger(InternalNetworkManager.class);
     private static final int LLDP_PRIORITY = 1000;
     private static final int NORMAL_PRIORITY = 0;
 
-    private static InternalNetworkManager internalNetwork = new InternalNetworkManager();
-    private InternalNetworkManager() {
-    }
+    private volatile IAdminConfigManager adminConfigManager;
 
-    public static InternalNetworkManager getManager() {
-        return internalNetwork;
+    public InternalNetworkManager() {
     }
 
     public String getInternalBridgeUUID (Node node, String bridgeName) {
@@ -66,7 +63,7 @@ public class InternalNetworkManager {
     }
 
     public boolean isInternalNetworkNeutronReady(Node node) {
-        if (this.getInternalBridgeUUID(node, AdminConfigManager.getManager().getIntegrationBridgeName()) != null) {
+        if (this.getInternalBridgeUUID(node, adminConfigManager.getIntegrationBridgeName()) != null) {
             return true;
         } else {
             return false;
@@ -77,7 +74,7 @@ public class InternalNetworkManager {
         if (!this.isInternalNetworkNeutronReady(node)) {
             return false;
         }
-        if (this.getInternalBridgeUUID(node, AdminConfigManager.getManager().getTunnelBridgeName()) != null) {
+        if (this.getInternalBridgeUUID(node, adminConfigManager.getTunnelBridgeName()) != null) {
             return true;
         } else {
             return false;
@@ -105,10 +102,10 @@ public class InternalNetworkManager {
                     type: internal
      */
     public void createInternalNetworkForOverlay(Node node) throws Exception {
-        String brTun = AdminConfigManager.getManager().getTunnelBridgeName();
-        String brInt = AdminConfigManager.getManager().getIntegrationBridgeName();
-        String patchInt = AdminConfigManager.getManager().getPatchToIntegration();
-        String patchTun = AdminConfigManager.getManager().getPatchToTunnel();
+        String brTun = adminConfigManager.getTunnelBridgeName();
+        String brInt = adminConfigManager.getIntegrationBridgeName();
+        String patchInt = adminConfigManager.getPatchToIntegration();
+        String patchTun = adminConfigManager.getPatchToTunnel();
 
         Status status = this.addInternalBridge(node, brInt, patchTun, patchInt);
         if (!status.isSuccess()) logger.debug("Integration Bridge Creation Status : "+status.toString());
@@ -127,7 +124,7 @@ public class InternalNetworkManager {
                     type: internal
      */
     public void createInternalNetworkForNeutron(Node node) throws Exception {
-        String brInt = AdminConfigManager.getManager().getIntegrationBridgeName();
+        String brInt = adminConfigManager.getIntegrationBridgeName();
 
         Status status = this.addInternalBridge(node, brInt, null, null);
         if (!status.isSuccess()) logger.debug("Integration Bridge Creation Status : "+status.toString());

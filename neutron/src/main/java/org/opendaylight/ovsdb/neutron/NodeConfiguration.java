@@ -32,6 +32,7 @@ public class NodeConfiguration {
     private static final int MAX_VLAN = 4096;
     private java.util.Queue<Integer> internalVlans = new LinkedList<>();
     private ConcurrentMap<String, Integer> tenantVlanMap = new ConcurrentHashMap<>();
+    private volatile ITenantNetworkManager tenantNetworkManager;
 
     public NodeConfiguration(Node node) {
         for (int i = 1; i < MAX_VLAN ; i++) {
@@ -78,7 +79,7 @@ public class NodeConfiguration {
                         continue;
                     }
 
-                    networkId = TenantNetworkManager.getManager().getTenantNetworkForInterface(iface).getNetworkUUID();
+                    networkId = tenantNetworkManager.getTenantNetworkForInterface(iface).getNetworkUUID();
 
                     if (networkId != null) break;
                 }

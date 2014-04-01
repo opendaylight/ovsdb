@@ -23,7 +23,7 @@ import org.opendaylight.ovsdb.lib.table.Bridge;
 import org.opendaylight.ovsdb.lib.table.Interface;
 import org.opendaylight.ovsdb.lib.table.Port;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
-import org.opendaylight.ovsdb.neutron.provider.ProviderNetworkManager;
+import org.opendaylight.ovsdb.neutron.provider.IProviderNetworkManager;
 import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
 import org.opendaylight.ovsdb.plugin.StatusWithUuid;
@@ -38,17 +38,15 @@ import org.slf4j.LoggerFactory;
  * Hence this class attempts to bring all the nodes to be eligible for OpenStack operations.
  *
  */
-public class InternalNetworkManager {
+public class InternalNetworkManager implements IInternalNetworkManager {
     static final Logger logger = LoggerFactory.getLogger(InternalNetworkManager.class);
     private static final int LLDP_PRIORITY = 1000;
     private static final int NORMAL_PRIORITY = 0;
 
-    private static InternalNetworkManager internalNetwork = new InternalNetworkManager();
-    private InternalNetworkManager() {
-    }
+    private volatile IAdminConfigManager adminConfigManager;
+    private volatile IProviderNetworkManager providerNetworkManager;
 
-    public static InternalNetworkManager getManager() {
-        return internalNetwork;
+    public InternalNetworkManager() {
     }
 
     public String getInternalBridgeUUID (Node node, String bridgeName) {
@@ -85,7 +83,7 @@ public class InternalNetworkManager {
     }
 
     public boolean isInternalNetworkNeutronReady(Node node) {
-        if (this.getInternalBridgeUUID(node, AdminConfigManager.getManager().getIntegrationBridgeName()) != null) {
+        if (this.getInternalBridgeUUID(node, adminConfigManager.getIntegrationBridgeName()) != null) {
             return true;
         } else {
             return false;
@@ -96,7 +94,7 @@ public class InternalNetworkManager {
         if (!this.isInternalNetworkNeutronReady(node)) {
             return false;
         }
-        if (this.getInternalBridgeUUID(node, AdminConfigManager.getManager().getNetworkBridgeName()) != null) {
+        if (this.getInternalBridgeUUID(node, adminConfigManager.getNetworkBridgeName()) != null) {
             return true;
         } else {
             return false;
@@ -123,9 +121,9 @@ public class InternalNetworkManager {
     public boolean isNetworkPatchCreated (Node node, Bridge intBridge, Bridge netBridge) {
         boolean isPatchCreated = false;
 
-        String portName = AdminConfigManager.getManager().getPatchToNetwork();
+        String portName = adminConfigManager.getPatchToNetwork();
         if (isPortOnBridge(node, intBridge, portName)) {
-            portName = AdminConfigManager.getManager().getPatchToIntegration();
+            portName = adminConfigManager.getPatchToIntegration();
             if (isPortOnBridge(node, netBridge, portName)) {
                 isPatchCreated = true;
             }
@@ -140,14 +138,18 @@ public class InternalNetworkManager {
      */
     public boolean isInternalNetworkTunnelReady (Node node) {
         /* Is br-int created? */
-        Bridge intBridge = this.getInternalBridge(node, AdminConfigManager.getManager().getIntegrationBridgeName());
+        Bridge intBridge = this.getInternalBridge(node, adminConfigManager.getIntegrationBridgeName());
         if (intBridge == null) {
             return false;
         }
 
-        if (ProviderNetworkManager.getManager().hasPerTenantTunneling()) {
+        if (providerNetworkManager == null) {
+            logger.error("Provider Network Manager is not available");
+            return false;
+        }
+        if (providerNetworkManager.getProvider().hasPerTenantTunneling()) {
             /* Is br-net created? */
-            Bridge netBridge = this.getInternalBridge(node, AdminConfigManager.getManager().getNetworkBridgeName());
+            Bridge netBridge = this.getInternalBridge(node, adminConfigManager.getNetworkBridgeName());
             if (netBridge == null) {
                 return false;
             }
@@ -166,15 +168,19 @@ public class InternalNetworkManager {
      */
     public boolean isInternalNetworkVlanReady (Node node, NeutronNetwork network) {
         /* is br-int created */
-        Bridge intBridge = this.getInternalBridge(node, AdminConfigManager.getManager().getIntegrationBridgeName());
+        Bridge intBridge = this.getInternalBridge(node, adminConfigManager.getIntegrationBridgeName());
         if (intBridge == null) {
             logger.trace("shague isInternalNetworkVlanReady: node: {}, br-int missing", node);
             return false;
         }
 
-        if (ProviderNetworkManager.getManager().hasPerTenantTunneling()) {
+        if (providerNetworkManager == null) {
+            logger.error("Provider Network Manager is not available");
+            return false;
+        }
+        if (providerNetworkManager.getProvider().hasPerTenantTunneling()) {
             /* is br-net created? */
-            Bridge netBridge = this.getInternalBridge(node, AdminConfigManager.getManager().getNetworkBridgeName());
+            Bridge netBridge = this.getInternalBridge(node, adminConfigManager.getNetworkBridgeName());
 
             if (netBridge == null) {
                 logger.trace("shague isInternalNetworkVlanReady: node: {}, br-net missing", node);
@@ -187,13 +193,13 @@ public class InternalNetworkManager {
             }
 
             /* Check if physical device is added to br-net. */
-            String phyNetName = AdminConfigManager.getManager().getPhysicalInterfaceName(node, network.getProviderPhysicalNetwork());
+            String phyNetName = adminConfigManager.getPhysicalInterfaceName(node, network.getProviderPhysicalNetwork());
             if (isPortOnBridge(node, netBridge, phyNetName)) {
                 return true;
             }
         } else {
             /* Check if physical device is added to br-int. */
-            String phyNetName = AdminConfigManager.getManager().getPhysicalInterfaceName(node, network.getProviderPhysicalNetwork());
+            String phyNetName = adminConfigManager.getPhysicalInterfaceName(node, network.getProviderPhysicalNetwork());
             if (isPortOnBridge(node, intBridge, phyNetName)) {
                 return true;
             }
@@ -212,7 +218,7 @@ public class InternalNetworkManager {
                     type: internal
      */
     public void createIntegrationBridge (Node node) throws Exception {
-        String brInt = AdminConfigManager.getManager().getIntegrationBridgeName();
+        String brInt = adminConfigManager.getIntegrationBridgeName();
 
         Status status = this.addInternalBridge(node, brInt, null, null);
         if (!status.isSuccess()) {
@@ -280,11 +286,15 @@ public class InternalNetworkManager {
 
         logger.debug("createNetNetwork: node: {}, network type: {}", node, network.getProviderNetworkType());
 
-        if (ProviderNetworkManager.getManager().hasPerTenantTunneling()) { /* indicates OF 1.0 */
-            String brInt = AdminConfigManager.getManager().getIntegrationBridgeName();
-            String brNet = AdminConfigManager.getManager().getNetworkBridgeName();
-            String patchNet = AdminConfigManager.getManager().getPatchToNetwork();
-            String patchInt = AdminConfigManager.getManager().getPatchToIntegration();
+        if (providerNetworkManager == null) {
+            logger.error("Provider Network Manager is not available");
+            return false;
+        }
+        if (providerNetworkManager.getProvider().hasPerTenantTunneling()) { /* indicates OF 1.0 */
+            String brInt = adminConfigManager.getIntegrationBridgeName();
+            String brNet = adminConfigManager.getNetworkBridgeName();
+            String patchNet = adminConfigManager.getPatchToNetwork();
+            String patchInt = adminConfigManager.getPatchToIntegration();
 
             status = this.addInternalBridge(node, brInt, patchNet, patchInt);
             if (!status.isSuccess()) {
@@ -299,7 +309,7 @@ public class InternalNetworkManager {
 
             /* For vlan network types add physical port to br-net. */
             if (network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
-                String phyNetName = AdminConfigManager.getManager().getPhysicalInterfaceName(node, network.getProviderPhysicalNetwork());
+                String phyNetName = adminConfigManager.getPhysicalInterfaceName(node, network.getProviderPhysicalNetwork());
                 status = addPortToBridge(node, brNet, phyNetName);
                 if (!status.isSuccess()) {
                     logger.debug("Add Port {} to Bridge {} Status: {}", phyNetName, brNet, status);
@@ -307,7 +317,7 @@ public class InternalNetworkManager {
                 }
             }
         } else {
-            String brInt = AdminConfigManager.getManager().getIntegrationBridgeName();
+            String brInt = adminConfigManager.getIntegrationBridgeName();
             status = this.addInternalBridge(node, brInt, null, null);
             if (!status.isSuccess()) {
                 logger.debug("{} Bridge Creation Status: {}", brInt, status);
@@ -316,7 +326,7 @@ public class InternalNetworkManager {
 
             /* For vlan network types add physical port to br-int. */
             if (network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
-                String phyNetName = AdminConfigManager.getManager().getPhysicalInterfaceName(node, network.getProviderPhysicalNetwork());
+                String phyNetName = adminConfigManager.getPhysicalInterfaceName(node, network.getProviderPhysicalNetwork());
                 status = addPortToBridge(node, brInt, phyNetName);
                 if (!status.isSuccess()) {
                     logger.debug("Add Port {} to Bridge {} Status: {}", phyNetName, brInt, status);
@@ -448,7 +458,11 @@ public class InternalNetworkManager {
         bridge.setFail_mode(failMode);
 
         OvsDBSet<String> protocols = new OvsDBSet<String>();
-        if (!ProviderNetworkManager.getManager().hasPerTenantTunneling()) {
+        if (providerNetworkManager == null) {
+            logger.error("Provider Network Manager is not available");
+            return new Status(StatusCode.INTERNALERROR);
+        }
+        if (!providerNetworkManager.getProvider().hasPerTenantTunneling()) {
             protocols.add("OpenFlow13");
         } else {
             protocols.add("OpenFlow10");
@@ -475,7 +489,7 @@ public class InternalNetworkManager {
         IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
         connectionService.setOFController(node, bridgeUUID);
 
-        if (localPatchName != null && remotePatchName != null && ProviderNetworkManager.getManager().hasPerTenantTunneling()) {
+        if (localPatchName != null && remotePatchName != null && providerNetworkManager.getProvider().hasPerTenantTunneling()) {
             return addPatchPort(node, bridgeUUID, localPatchName, remotePatchName);
         }
         return new Status(StatusCode.SUCCESS);
@@ -487,7 +501,10 @@ public class InternalNetworkManager {
         } catch (Exception e) {
             logger.error("Error creating internal network "+node.toString(), e);
         }
-        ProviderNetworkManager.getManager().initializeFlowRules(node);
+        if (providerNetworkManager == null) {
+            logger.error("Error creating internal network. Provider Network Manager unavailable");
+        }
+        providerNetworkManager.getProvider().initializeFlowRules(node);
     }
 
     /*
@@ -496,9 +513,9 @@ public class InternalNetworkManager {
     public boolean checkAndCreateNetwork (Node node, NeutronNetwork network) {
         boolean isCreated = false;
         if (network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
-            if (!InternalNetworkManager.getManager().isInternalNetworkVlanReady(node, network)) {
+            if (!this.isInternalNetworkVlanReady(node, network)) {
                 try {
-                    isCreated = InternalNetworkManager.getManager().createNetNetwork(node, network);
+                    isCreated = this.createNetNetwork(node, network);
                 } catch (Exception e) {
                     logger.error("Error creating internal net network ", node, e);
                 }
@@ -507,9 +524,9 @@ public class InternalNetworkManager {
             }
         } else if (network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) ||
                 network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)) {
-            if (!InternalNetworkManager.getManager().isInternalNetworkTunnelReady(node)) {
+            if (!this.isInternalNetworkTunnelReady(node)) {
                 try {
-                    isCreated = InternalNetworkManager.getManager().createNetNetwork(node, network);
+                    isCreated = this.createNetNetwork(node, network);
                 } catch (Exception e) {
                     logger.error("Error creating internal net network ", node, e);
                 }
@@ -519,5 +536,13 @@ public class InternalNetworkManager {
         }
 
         return isCreated;
+    }
+
+    public void setProviderNetworkManager(IProviderNetworkManager providerNetworkManager) {
+        this.providerNetworkManager = providerNetworkManager;
+    }
+
+    public void unsetProviderNetworkManager(IProviderNetworkManager providerNetworkManager) {
+        this.providerNetworkManager = null;
     }
 }

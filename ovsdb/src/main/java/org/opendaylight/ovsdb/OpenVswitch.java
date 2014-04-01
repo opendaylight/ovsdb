@@ -266,5 +266,4 @@ public class OpenVswitch {
         this.exceptions = exceptions;
     }
 
-
 }

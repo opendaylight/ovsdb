@@ -32,12 +32,13 @@ public class NodeConfiguration {
     private static final int MAX_VLAN = 4096;
     private java.util.Queue<Integer> internalVlans = new LinkedList<>();
     private ConcurrentMap<String, Integer> tenantVlanMap = new ConcurrentHashMap<>();
+    private ITenantNetworkManager tenantNetworkManager;
 
-    public NodeConfiguration(Node node) {
+    public NodeConfiguration(Node node, ITenantNetworkManager tenantNetworkManager) {
         for (int i = 1; i < MAX_VLAN ; i++) {
             internalVlans.add(i);
         }
-
+        setTenantNetworkManager(tenantNetworkManager);
         initializeNodeConfiguration(node);
     }
 
@@ -77,7 +78,7 @@ public class NodeConfiguration {
                         continue;
                     }
 
-                    networkId = TenantNetworkManager.getManager().getTenantNetworkForInterface(iface).getNetworkUUID();
+                    networkId = tenantNetworkManager.getTenantNetworkForInterface(iface).getNetworkUUID();
 
                     if (networkId != null) break;
                 }
@@ -138,4 +139,7 @@ public class NodeConfiguration {
         return vlan.intValue();
     }
 
+    public void setTenantNetworkManager(ITenantNetworkManager tenantNetworkManager) {
+        this.tenantNetworkManager = tenantNetworkManager;
+    }
 }

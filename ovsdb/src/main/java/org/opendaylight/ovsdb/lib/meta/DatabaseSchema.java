@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author araveendrann
@@ -23,6 +24,11 @@ public class DatabaseSchema {
         this.tables = tables;
     }
 
+    public Set<String> getTables() { return this.tables.keySet(); }
+
+    public boolean hasTable(String table) { return this.getTables().contains(table); }
+
+    public TableSchema getTable(String table) { return this.tables.get(table); }
 
     public static DatabaseSchema fromJson(JsonNode json) {
         if (!json.isObject() || !json.has("tables")) {

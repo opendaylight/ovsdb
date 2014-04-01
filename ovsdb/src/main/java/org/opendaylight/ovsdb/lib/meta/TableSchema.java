@@ -9,6 +9,7 @@ import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author araveendrann
@@ -25,6 +26,14 @@ public class TableSchema<E extends TableSchema<E>> {
         this.name = name;
         this.columns = columns;
     }
+
+    public Set<String> getColumns() { return this.columns.keySet(); }
+
+    public boolean hasColumn(String column) { return this.getColumns().contains(column); }
+
+    public ColumnSchema getColumn(String column) { return this.columns.get(column); }
+
+    public ColumnType getColumnType(String column) { return this.columns.get(column).getType(); }
 
     public static TableSchema fromJson(String tableName, JsonNode json) {
 

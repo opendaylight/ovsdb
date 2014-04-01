@@ -1,0 +1,378 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a5c5d37_dce1bf9b",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-01T22:36:53Z",
+      "side": 1,
+      "message": "eth1 as default?  is that a good choice?",
+      "revId": "d42f659e22126941228def7eda8099276317ec44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_bcee0b8a",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-01T22:36:53Z",
+      "side": 1,
+      "message": "not seeing this in my openstack repo",
+      "revId": "d42f659e22126941228def7eda8099276317ec44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_9cf34773",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-01T22:36:53Z",
+      "side": 1,
+      "message": "This could be unique per compute node",
+      "revId": "d42f659e22126941228def7eda8099276317ec44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_dcee5fb4",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-01T22:36:53Z",
+      "side": 1,
+      "message": "Checking for \"eth\" is insufficient.  Physical device can have many names.\nPerhaps check for configured name (getinterfacename).",
+      "revId": "d42f659e22126941228def7eda8099276317ec44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_bc2babea",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-01T22:36:53Z",
+      "side": 1,
+      "message": "for loop could be moved to a simple helper that takes a bridge (does same as above one for physicalBridge one for intBridge",
+      "revId": "d42f659e22126941228def7eda8099276317ec44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_3c3fbb27",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-01T22:36:53Z",
+      "side": 1,
+      "message": "Comment says \"bridge domain creation\" but nothing is created here, so a little confused by comment.",
+      "revId": "d42f659e22126941228def7eda8099276317ec44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_7c353345",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-01T22:36:53Z",
+      "side": 1,
+      "message": "Same idea here, the for loop can be a helper function",
+      "revId": "d42f659e22126941228def7eda8099276317ec44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_fc4803ce",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-01T22:36:53Z",
+      "side": 1,
+      "message": "probably good to remove debugging before commit",
+      "revId": "d42f659e22126941228def7eda8099276317ec44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_dc453fb4",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13ProviderManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-01T22:36:53Z",
+      "side": 1,
+      "message": "no import of PushVlanActionCase? only PushVlanActionCaseBuilder (sorry, I don\u0027t actually know what the difference is)",
+      "revId": "d42f659e22126941228def7eda8099276317ec44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_7c0c1395",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13ProviderManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-01T22:36:53Z",
+      "side": 1,
+      "message": "Action:Action: \u003c-- minor typo\n\nminor format (\u0027*\u0027 indent one more space)",
+      "revId": "d42f659e22126941228def7eda8099276317ec44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_fc1fe3b5",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13ProviderManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-01T22:36:53Z",
+      "side": 1,
+      "message": "Any multicast support planned?\n\nCan groups be used for this?",
+      "revId": "d42f659e22126941228def7eda8099276317ec44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_9c658747",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13ProviderManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 404,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-01T22:36:53Z",
+      "side": 1,
+      "message": "inconsistent use of 2 and 20 (because TABLE_2_LOCAL_FORWARD \u003d\u003d 20)",
+      "revId": "d42f659e22126941228def7eda8099276317ec44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_3c545b53",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13ProviderManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 432,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-01T22:36:53Z",
+      "side": 1,
+      "message": "similar table 2 vs. 20 confusion",
+      "revId": "d42f659e22126941228def7eda8099276317ec44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_1c519762",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13ProviderManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 444,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-01T22:36:53Z",
+      "side": 1,
+      "message": "can this just be dropped here, rather than fwd\u0027d to table 2 to be dropped by default drop rule?",
+      "revId": "d42f659e22126941228def7eda8099276317ec44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_fc4da3c5",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13ProviderManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 501,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-01T22:36:53Z",
+      "side": 1,
+      "message": "vlan, gre/vxlan, what about flat?",
+      "revId": "d42f659e22126941228def7eda8099276317ec44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_dc4adfab",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13ProviderManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 602,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-01T22:36:53Z",
+      "side": 1,
+      "message": "similar issue with matching on \"eth\"",
+      "revId": "d42f659e22126941228def7eda8099276317ec44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_bcc72b12",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13ProviderManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 613,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-01T22:36:53Z",
+      "side": 1,
+      "message": "not sure, is this more of an exception?",
+      "revId": "d42f659e22126941228def7eda8099276317ec44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_9ccc6737",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13ProviderManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 664,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-01T22:36:53Z",
+      "side": 1,
+      "message": "vlan, gre/vxlan, or flat check",
+      "revId": "d42f659e22126941228def7eda8099276317ec44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_7cd1b3cc",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13ProviderManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1757,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-01T22:36:53Z",
+      "side": 1,
+      "message": "perhaps collapse to common helper from setMatch down for both TableMiss functions?",
+      "revId": "d42f659e22126941228def7eda8099276317ec44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_5cd6efc6",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13ProviderManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1912,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-01T22:36:53Z",
+      "side": 1,
+      "message": "What is this doing?",
+      "revId": "d42f659e22126941228def7eda8099276317ec44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_3cdb3bef",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13ProviderManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 2216,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-01T22:36:53Z",
+      "side": 1,
+      "message": "Is this a bugfix that should be separated from main patch?",
+      "revId": "d42f659e22126941228def7eda8099276317ec44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_1cd877ee",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13ProviderManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 2235,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-01T22:36:53Z",
+      "side": 1,
+      "message": "This function actually looks unused",
+      "revId": "d42f659e22126941228def7eda8099276317ec44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

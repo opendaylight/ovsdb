@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Authors : Madhu Venugopal, Brent Salisbury, Sam Hague
+ * Authors : Madhu Venugopal, Brent Salisbury, Sam Hague, Dave Tucker
  */
 package org.opendaylight.ovsdb.neutron.provider;
 
@@ -35,10 +35,10 @@ import org.opendaylight.ovsdb.lib.table.Bridge;
 import org.opendaylight.ovsdb.lib.table.Interface;
 import org.opendaylight.ovsdb.lib.table.Port;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
-import org.opendaylight.ovsdb.neutron.AdminConfigManager;
-import org.opendaylight.ovsdb.neutron.InternalNetworkManager;
 import org.opendaylight.ovsdb.neutron.NetworkHandler;
-import org.opendaylight.ovsdb.neutron.TenantNetworkManager;
+import org.opendaylight.ovsdb.neutron.IAdminConfigManager;
+import org.opendaylight.ovsdb.neutron.IInternalNetworkManager;
+import org.opendaylight.ovsdb.neutron.ITenantNetworkManager;
 import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
 import org.opendaylight.ovsdb.plugin.StatusWithUuid;
@@ -46,12 +46,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-class OF10ProviderManager extends ProviderNetworkManager {
-    private static final Logger logger = LoggerFactory.getLogger(OF10ProviderManager.class);
+public class OF10Provider implements NetworkProvider {
+    private static final Logger logger = LoggerFactory.getLogger(OF10Provider.class);
     private static final int INGRESS_TUNNEL_FLOW_PRIORITY = 100;
     private static final int EGRESS_TUNNEL_FLOW_PRIORITY = 100;
     private static final int DROP_FLOW_PRIORITY = 10;
     private static final int FLOOD_TUNNEL_FLOW_PRIORITY = 50;
+
+    private IAdminConfigManager adminConfigManager;
+    private IInternalNetworkManager internalNetworkManager;
+    private ITenantNetworkManager tenantNetworkManager;
+
+    public OF10Provider(IAdminConfigManager adminConfigManager,
+                        IInternalNetworkManager internalNetworkManager,
+                        ITenantNetworkManager tenantNetworkManager) {
+        this.adminConfigManager = adminConfigManager;
+        this.internalNetworkManager = internalNetworkManager;
+        this.tenantNetworkManager = tenantNetworkManager;
+    }
 
     @Override
     public boolean hasPerTenantTunneling() {
@@ -59,18 +71,18 @@ class OF10ProviderManager extends ProviderNetworkManager {
     }
 
     private Status getTunnelReadinessStatus (Node node, String tunnelKey) {
-        InetAddress srcTunnelEndPoint = AdminConfigManager.getManager().getTunnelEndPoint(node);
+        InetAddress srcTunnelEndPoint = adminConfigManager.getTunnelEndPoint(node);
         if (srcTunnelEndPoint == null) {
             logger.error("Tunnel Endpoint not configured for Node {}", node);
             return new Status(StatusCode.NOTFOUND, "Tunnel Endpoint not configured for "+ node);
         }
 
-        if (!InternalNetworkManager.getManager().isInternalNetworkOverlayReady(node)) {
+        if (!internalNetworkManager.isInternalNetworkOverlayReady(node)) {
             logger.warn("{} is not Overlay ready. It might be an OpenStack Controller Node", node);
             return new Status(StatusCode.NOTACCEPTABLE, node+" is not Overlay ready");
         }
 
-        if (!TenantNetworkManager.getManager().isTenantNetworkPresentInNode(node, tunnelKey)) {
+        if (!tenantNetworkManager.isTenantNetworkPresentInNode(node, tunnelKey)) {
             logger.debug(node+" has no network corresponding to segment "+ tunnelKey);
             return new Status(StatusCode.NOTACCEPTABLE, node+" has no network corresponding to segment "+ tunnelKey);
         }
@@ -78,12 +90,12 @@ class OF10ProviderManager extends ProviderNetworkManager {
     }
 
     private Status getVlanReadinessStatus (Node node, String segmentationId) {
-        if (!InternalNetworkManager.getManager().isInternalNetworkOverlayReady(node)) {
+        if (!internalNetworkManager.isInternalNetworkOverlayReady(node)) {
             logger.warn("{} is not Overlay ready. It might be an OpenStack Controller Node", node);
             return new Status(StatusCode.NOTACCEPTABLE, node+" is not Overlay ready");
         }
 
-        if (!TenantNetworkManager.getManager().isTenantNetworkPresentInNode(node, segmentationId)) {
+        if (!tenantNetworkManager.isTenantNetworkPresentInNode(node, segmentationId)) {
             logger.debug(node+" has no network corresponding to segment "+ segmentationId);
             return new Status(StatusCode.NOTACCEPTABLE, node+" has no network corresponding to segment "+ segmentationId);
         }
@@ -96,7 +108,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
      * and rewrite the Corresponding internal Vlan and pass it on to br-int via the patch port.
      */
     private void programLocalIngressTunnelBridgeRules(Node node, int tunnelOFPort, int internalVlan, int patchPort) {
-        String brNetId = InternalNetworkManager.getManager().getInternalBridgeUUID(node, AdminConfigManager.getManager().getNetworkBridgeName());
+        String brNetId = internalNetworkManager.getInternalBridgeUUID(node, adminConfigManager.getNetworkBridgeName());
         if (brNetId == null) {
             logger.error("Failed to initialize Flow Rules for {}", node);
             return;
@@ -127,7 +139,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
     }
 
     private void removeLocalIngressTunnelBridgeRules(Node node, int tunnelOFPort, int internalVlan, int patchPort) {
-        String brNetId = InternalNetworkManager.getManager().getInternalBridgeUUID(node, AdminConfigManager.getManager().getNetworkBridgeName());
+        String brNetId = internalNetworkManager.getInternalBridgeUUID(node, adminConfigManager.getNetworkBridgeName());
         if (brNetId == null) {
             logger.error("Failed to remove Flow Rules for {}", node);
             return;
@@ -157,7 +169,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
      */
     private void programRemoteEgressTunnelBridgeRules(Node node, int patchPort, String attachedMac,
             int internalVlan, int tunnelOFPort) {
-        String brNetId = InternalNetworkManager.getManager().getInternalBridgeUUID(node, AdminConfigManager.getManager().getNetworkBridgeName());
+        String brNetId = internalNetworkManager.getInternalBridgeUUID(node, adminConfigManager.getNetworkBridgeName());
         if (brNetId == null) {
             logger.error("Failed to initialize Flow Rules for {}", node);
             return;
@@ -191,7 +203,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
 
     private void removeRemoteEgressTunnelBridgeRules(Node node, int patchPort, String attachedMac,
             int internalVlan, int tunnelOFPort) {
-        String brNetId = InternalNetworkManager.getManager().getInternalBridgeUUID(node, AdminConfigManager.getManager().getNetworkBridgeName());
+        String brNetId = internalNetworkManager.getInternalBridgeUUID(node, adminConfigManager.getNetworkBridgeName());
         if (brNetId == null) {
             logger.error("Failed to initialize Flow Rules for {}", node);
             return;
@@ -219,7 +231,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
      * Also perform the Strip-Vlan action.
      */
     private void programFloodEgressTunnelBridgeRules(Node node, int patchPort, int internalVlan, int tunnelOFPort) {
-        String brNetId = InternalNetworkManager.getManager().getInternalBridgeUUID(node, AdminConfigManager.getManager().getNetworkBridgeName());
+        String brNetId = internalNetworkManager.getInternalBridgeUUID(node, adminConfigManager.getNetworkBridgeName());
         if (brNetId == null) {
             logger.error("Failed to initialize Flow Rules for {}", node);
             return;
@@ -273,7 +285,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
     }
 
     private void removeFloodEgressTunnelBridgeRules(Node node, int patchPort, int internalVlan, int tunnelOFPort) {
-        String brNetId = InternalNetworkManager.getManager().getInternalBridgeUUID(node, AdminConfigManager.getManager().getNetworkBridgeName());
+        String brNetId = internalNetworkManager.getInternalBridgeUUID(node, adminConfigManager.getNetworkBridgeName());
         if (brNetId == null) {
             logger.error("Failed to remove Flow Rules for {}", node);
             return;
@@ -307,12 +319,12 @@ class OF10ProviderManager extends ProviderNetworkManager {
 
     private void programTunnelRules (String tunnelType, String segmentationId, InetAddress dst, Node node,
                                      Interface intf, boolean local) {
-        String networkId = TenantNetworkManager.getManager().getNetworkIdForSegmentationId(segmentationId);
+        String networkId = tenantNetworkManager.getNetworkIdForSegmentationId(segmentationId);
         if (networkId == null) {
             logger.debug("Tenant Network not found with Segmentation-id {}", segmentationId);
             return;
         }
-        int internalVlan = TenantNetworkManager.getManager().getInternalVlan(node, networkId);
+        int internalVlan = tenantNetworkManager.getInternalVlan(node, networkId);
         if (internalVlan == 0) {
             logger.debug("No InternalVlan provisioned for Tenant Network {}",networkId);
             return;
@@ -323,12 +335,12 @@ class OF10ProviderManager extends ProviderNetworkManager {
             return;
         }
 
-        String attachedMac = externalIds.get(TenantNetworkManager.EXTERNAL_ID_VM_MAC);
+        String attachedMac = externalIds.get(ITenantNetworkManager.EXTERNAL_ID_VM_MAC);
         if (attachedMac == null) {
             logger.error("No AttachedMac seen in {}", intf);
             return;
         }
-        String patchInt = AdminConfigManager.getManager().getPatchToIntegration();
+        String patchInt = adminConfigManager.getPatchToIntegration();
 
         int patchOFPort = -1;
         try {
@@ -383,12 +395,12 @@ class OF10ProviderManager extends ProviderNetworkManager {
 
     private void removeTunnelRules (String tunnelType, String segmentationId, InetAddress dst, Node node,
             Interface intf, boolean local) {
-        String networkId = TenantNetworkManager.getManager().getNetworkIdForSegmentationId(segmentationId);
+        String networkId = tenantNetworkManager.getNetworkIdForSegmentationId(segmentationId);
         if (networkId == null) {
             logger.debug("Tenant Network not found with Segmentation-id {}",segmentationId);
             return;
         }
-        int internalVlan = TenantNetworkManager.getManager().getInternalVlan(node,networkId);
+        int internalVlan = tenantNetworkManager.getInternalVlan(node,networkId);
         if (internalVlan == 0) {
             logger.debug("No InternalVlan provisioned for Tenant Network {}",networkId);
             return;
@@ -399,12 +411,12 @@ class OF10ProviderManager extends ProviderNetworkManager {
             return;
         }
 
-        String attachedMac = externalIds.get(TenantNetworkManager.EXTERNAL_ID_VM_MAC);
+        String attachedMac = externalIds.get(ITenantNetworkManager.EXTERNAL_ID_VM_MAC);
         if (attachedMac == null) {
             logger.error("No AttachedMac seen in {}", intf);
             return;
         }
-        String patchInt = AdminConfigManager.getManager().getPatchToIntegration();
+        String patchInt = adminConfigManager.getPatchToIntegration();
 
         int patchOFPort = -1;
         try {
@@ -634,16 +646,16 @@ class OF10ProviderManager extends ProviderNetworkManager {
         }
 
         public void initializeVlanNet (NeutronNetwork network, Node node, Interface intf) {
-            internalVlan = TenantNetworkManager.getManager().getInternalVlan(node, network.getNetworkUUID());
+            internalVlan = tenantNetworkManager.getInternalVlan(node, network.getNetworkUUID());
             if (internalVlan == 0) {
                 logger.debug("No InternalVlan provisioned for Tenant Network {}", network.getNetworkUUID());
                 return;
             }
 
             /* Get ofports for patch ports and physical interface. */
-            String patchToNetworkName = AdminConfigManager.getManager().getPatchToNetwork();
-            String patchToIntegrationName = AdminConfigManager.getManager().getPatchToIntegration();
-            String physNetName = AdminConfigManager.getManager().getPhysicalInterfaceName(node, network.getProviderPhysicalNetwork());
+            String patchToNetworkName = adminConfigManager.getPatchToNetwork();
+            String patchToIntegrationName = adminConfigManager.getPatchToIntegration();
+            String physNetName = adminConfigManager.getPhysicalInterfaceName(node, network.getProviderPhysicalNetwork());
 
             patchIntOfPort = getOFPort(node, patchToNetworkName);
             if (patchIntOfPort == -1) {
@@ -666,7 +678,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
     }
 
     private Node getOFNode (Node node, String bridgeName) {
-        String brUUID = InternalNetworkManager.getManager().getInternalBridgeUUID(node, bridgeName);
+        String brUUID = internalNetworkManager.getInternalBridgeUUID(node, bridgeName);
         if (brUUID == null) {
             logger.error("getOFNode: Unable to find {} UUID on node {}", bridgeName, node);
             return null;
@@ -708,7 +720,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
     private void programVlanRules (NeutronNetwork network, Node node, Interface intf) {
         vlanNet vlanNet = new vlanNet(network, node, intf);
         if (vlanNet.isValid()) {
-            String netBrName = AdminConfigManager.getManager().getNetworkBridgeName();
+            String netBrName = adminConfigManager.getNetworkBridgeName();
             String intModVlanFlowName = getIntModVlanFlowName(vlanNet.getPatchNetOfPort(), network.getProviderSegmentationID(), vlanNet.getInternalVlan()+"");
             String netModVlanFlowName = getNetModVlanFlowName(vlanNet.getPatchNetOfPort(), vlanNet.getInternalVlan()+"", network.getProviderSegmentationID());
 
@@ -730,7 +742,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
     private void removeVlanRules (NeutronNetwork network, Node node, Interface intf) {
         vlanNet vlanNet = new vlanNet(network, node, intf);
         if (vlanNet.isValid()) {
-            String netBrName = AdminConfigManager.getManager().getNetworkBridgeName();
+            String netBrName = adminConfigManager.getNetworkBridgeName();
             String intModVlanFlowName = getIntModVlanFlowName(vlanNet.getPatchNetOfPort(), network.getProviderSegmentationID(), vlanNet.getInternalVlan()+"");
             String netModVlanFlowName = getNetModVlanFlowName(vlanNet.getPatchNetOfPort(), vlanNet.getInternalVlan()+"", network.getProviderSegmentationID());
 
@@ -769,8 +781,8 @@ class OF10ProviderManager extends ProviderNetworkManager {
             for (Node dstNode : nodes) {
                 status = getTunnelReadinessStatus(dstNode, network.getProviderSegmentationID());
                 if (!status.isSuccess()) continue;
-                InetAddress src = AdminConfigManager.getManager().getTunnelEndPoint(srcNode);
-                InetAddress dst = AdminConfigManager.getManager().getTunnelEndPoint(dstNode);
+                InetAddress src = adminConfigManager.getTunnelEndPoint(srcNode);
+                InetAddress dst = adminConfigManager.getTunnelEndPoint(dstNode);
                 status = addTunnelPort(srcNode, network.getProviderNetworkType(), src, dst, network.getProviderSegmentationID());
                 if (status.isSuccess()) {
                     this.programTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), dst, srcNode, intf, true);
@@ -814,8 +826,8 @@ class OF10ProviderManager extends ProviderNetworkManager {
             List<Node> nodes = connectionService.getNodes();
             nodes.remove(srcNode);
             for (Node dstNode : nodes) {
-                InetAddress src = AdminConfigManager.getManager().getTunnelEndPoint(srcNode);
-                InetAddress dst = AdminConfigManager.getManager().getTunnelEndPoint(dstNode);
+                InetAddress src = adminConfigManager.getTunnelEndPoint(srcNode);
+                InetAddress dst = adminConfigManager.getTunnelEndPoint(dstNode);
                 this.removeTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), dst, srcNode, intf, true);
                 if (isLastInstanceOnNode) {
                     status = deleteTunnelPort(srcNode, network.getProviderNetworkType(), src, dst, network.getProviderSegmentationID());
@@ -882,7 +894,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
     private Status addTunnelPort (Node node, String tunnelType, InetAddress src, InetAddress dst, String key) {
         try {
             String bridgeUUID = null;
-            String tunnelBridgeName = AdminConfigManager.getManager().getNetworkBridgeName();
+            String tunnelBridgeName = adminConfigManager.getNetworkBridgeName();
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
             Map<String, Table<?>> bridgeTable = ovsdbTable.getRows(node, Bridge.NAME.getName());
             if (bridgeTable != null) {
@@ -954,7 +966,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
     private Status deleteTunnelPort (Node node, String tunnelType, InetAddress src, InetAddress dst, String key) {
         try {
             String bridgeUUID = null;
-            String tunnelBridgeName = AdminConfigManager.getManager().getNetworkBridgeName();
+            String tunnelBridgeName = adminConfigManager.getNetworkBridgeName();
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
             Map<String, Table<?>> bridgeTable = ovsdbTable.getRows(node, Bridge.NAME.getName());
             if (bridgeTable != null) {
@@ -998,14 +1010,14 @@ class OF10ProviderManager extends ProviderNetworkManager {
 
     @Override
     public void initializeFlowRules(Node node) {
-        this.initializeFlowRules(node, AdminConfigManager.getManager().getIntegrationBridgeName());
-        this.initializeFlowRules(node, AdminConfigManager.getManager().getExternalBridgeName());
+        this.initializeFlowRules(node, adminConfigManager.getIntegrationBridgeName());
+        this.initializeFlowRules(node, adminConfigManager.getExternalBridgeName());
     }
 
     private void initializeFlowRules(Node node, String bridgeName) {
         String brIntId = this.getInternalBridgeUUID(node, bridgeName);
         if (brIntId == null) {
-            if (bridgeName == AdminConfigManager.getManager().getExternalBridgeName()){
+            if (bridgeName == adminConfigManager.getExternalBridgeName()){
                 logger.debug("Failed to initialize Flow Rules for bridge {} on node {}. Is the Neutron L3 agent running on this node?");
             }
             else {
@@ -1095,4 +1107,21 @@ class OF10ProviderManager extends ProviderNetworkManager {
             return new Status(StatusCode.SUCCESS);
         }
         return frm.removeStaticFlow(flowName,ofNode);
-    }}
+    }
+
+    private String getInternalBridgeUUID (Node node, String bridgeName) {
+        try {
+            OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+            Map<String, Table<?>> bridgeTable = ovsdbTable.getRows(node, Bridge.NAME.getName());
+            if (bridgeTable == null) return null;
+            for (String key : bridgeTable.keySet()) {
+                Bridge bridge = (Bridge)bridgeTable.get(key);
+                if (bridge.getName().equals(bridgeName)) return key;
+            }
+        } catch (Exception e) {
+            logger.error("Error getting Bridge Identifier for {} / {}", node, bridgeName, e);
+        }
+        return null;
+    }
+
+}

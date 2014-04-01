@@ -41,6 +41,8 @@ public class NetworkHandler extends BaseHandler
      */
     static final Logger logger = LoggerFactory.getLogger(NetworkHandler.class);
 
+    private volatile ITenantNetworkManager tenantNetworkManager;
+
     /**
      * Invoked when a network creation is requested
      * to indicate if the specified network can be created.
@@ -163,6 +165,6 @@ public class NetworkHandler extends BaseHandler
                 }
             }
         }
-        TenantNetworkManager.getManager().networkDeleted(network.getID());
+        tenantNetworkManager.networkDeleted(network.getID());
     }
 }

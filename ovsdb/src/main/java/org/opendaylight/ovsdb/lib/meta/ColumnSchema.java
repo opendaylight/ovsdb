@@ -38,6 +38,8 @@ public class ColumnSchema<E extends TableSchema<E>, D> {
         return name;
     }
 
+    public ColumnType getType() { return type; }
+
     public Condition opEqual(D data) {
         return new Condition(this.getName(), Function.EQUALS, data);
     }

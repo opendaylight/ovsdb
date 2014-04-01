@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a5c5d37_bcddeb16",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/meta/DatabaseSchema.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 952
+      },
+      "writtenOn": "2014-04-01T18:12:35Z",
+      "side": 1,
+      "message": "should this be returning a Set to be more specific? since we would not have duplicates that fits better.",
+      "revId": "81efe618da2af38effd4e94540a2965c7d412d00",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

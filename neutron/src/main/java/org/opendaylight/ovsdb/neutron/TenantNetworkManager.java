@@ -42,25 +42,16 @@ import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TenantNetworkManager {
+public class TenantNetworkManager implements ITenantNetworkManager {
     static final Logger logger = LoggerFactory.getLogger(TenantNetworkManager.class);
-
-    public static final String EXTERNAL_ID_VM_ID = "vm-id";
-    public static final String EXTERNAL_ID_INTERFACE_ID = "iface-id";
-    public static final String EXTERNAL_ID_VM_MAC = "attached-mac";
-    private static TenantNetworkManager tenantHelper = new TenantNetworkManager();
     private ConcurrentMap<String, NodeConfiguration> nodeConfigurationCache = new ConcurrentHashMap<>();
 
     private boolean enableContainer = false;
-    private TenantNetworkManager() {
+    public TenantNetworkManager() {
         String isTenantContainer = System.getProperty("TenantIsContainer");
         if (isTenantContainer != null && isTenantContainer.equalsIgnoreCase("true")) {
             enableContainer =  true;
         }
-    }
-
-    public static TenantNetworkManager getManager() {
-        return tenantHelper;
     }
 
     public int getInternalVlan(Node node, String networkId) {
@@ -91,7 +82,7 @@ public class TenantNetworkManager {
         return nodeConfigurationCache.get(nodeUuid);
     }
 
-    public void reclaimTennantNetworkInternalVlan(Node node, String portUUID, NeutronNetwork network) {
+    public void reclaimTenantNetworkInternalVlan(Node node, String portUUID, NeutronNetwork network) {
         String nodeUuid = getNodeUUID(node);
         if (nodeUuid == null) {
             logger.error("Unable to get UUID for Node {}", node);

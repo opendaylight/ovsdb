@@ -58,7 +58,10 @@ public class Activator extends ComponentActivatorAbstractBase {
      */
     @Override
     public Object[] getImplementations() {
-        Object[] res = {NetworkHandler.class,
+        Object[] res = {AdminConfigManager.class,
+                        InternalNetworkManager.class,
+                        TenantNetworkManager.class,
+                        NetworkHandler.class,
                         SubnetHandler.class,
                         PortHandler.class,
                         SouthboundHandler.class,
@@ -82,6 +85,18 @@ public class Activator extends ComponentActivatorAbstractBase {
     @Override
     public void configureInstance(Component c, Object imp,
                                   String containerName) {
+        if (imp.equals(AdminConfigManager.class)) {
+            c.setInterface(IAdminConfigManager.class.getName(), null);
+        }
+
+        if (imp.equals(InternalNetworkManager.class)) {
+            c.setInterface(IInternalNetworkManager.class.getName(), null);
+        }
+
+        if (imp.equals(TenantNetworkManager.class)) {
+            c.setInterface(ITenantNetworkManager.class.getName(), null);
+        }
+
         if (imp.equals(NetworkHandler.class)) {
             c.setInterface(INeutronNetworkAware.class.getName(), null);
         }
@@ -101,6 +116,7 @@ public class Activator extends ComponentActivatorAbstractBase {
         if (imp.equals(MDSALConsumer.class)) {
             c.setInterface(IMDSALConsumer.class.getName(), null);
         }
+
         c.add(createServiceDependency().
                 setService(OVSDBConfigService.class).
                 setCallbacks("setOVSDBConfigService", "unsetOVSDBConfigService").

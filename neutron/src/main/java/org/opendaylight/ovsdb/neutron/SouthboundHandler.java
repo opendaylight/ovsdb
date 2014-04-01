@@ -42,6 +42,10 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
     private BlockingQueue<SouthboundEvent> events;
     List<Node> nodeCache;
 
+    private volatile IAdminConfigManager adminConfigManager;
+    private volatile IInternalNetworkManager internalNetworkManager;
+    private volatile ITenantNetworkManager tenantNetworkManager;
+
     void init() {
         eventHandler = Executors.newSingleThreadExecutor();
         this.events = new LinkedBlockingQueue<SouthboundEvent>();
@@ -156,7 +160,7 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
     public void processNodeUpdate(Node node, SouthboundEvent.Action action) {
         if (action == SouthboundEvent.Action.DELETE) return;
         logger.trace("Process Node added {}", node);
-        InternalNetworkManager.getManager().prepareInternalNetwork(node);
+        internalNetworkManager.prepareInternalNetwork(node);
     }
 
     private void processRowUpdate(Node node, String tableName, String uuid, Table<?> row,
@@ -164,7 +168,7 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
         if (action == SouthboundEvent.Action.DELETE) {
             if (Interface.NAME.getName().equalsIgnoreCase(tableName)) {
                 Interface deletedIntf = (Interface)row;
-                NeutronNetwork network = TenantNetworkManager.getManager().getTenantNetworkForInterface(deletedIntf);
+                NeutronNetwork network = tenantNetworkManager.getTenantNetworkForInterface(deletedIntf);
                 if (network != null && !network.getRouterExternal()) {
                     try {
                         ConcurrentMap<String, Table<?>> interfaces = this.ovsdbConfigService.getRows(node, Interface.NAME.getName());
@@ -173,7 +177,7 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
                             for (String intfUUID : interfaces.keySet()) {
                                 if (intfUUID.equals(uuid)) continue;
                                 Interface intf = (Interface) interfaces.get(intfUUID);
-                                NeutronNetwork neutronNetwork = TenantNetworkManager.getManager().getTenantNetworkForInterface(intf);
+                                NeutronNetwork neutronNetwork = tenantNetworkManager.getTenantNetworkForInterface(intf);
                                 if (neutronNetwork != null && neutronNetwork.equals(network)) isLastInstanceOnNode = false;
                             }
                             this.handleInterfaceDelete(node, uuid, deletedIntf, isLastInstanceOnNode);
@@ -187,15 +191,15 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
         else if (Interface.NAME.getName().equalsIgnoreCase(tableName)) {
             logger.debug("{} Added / Updated {} , {}, {}", tableName, node, uuid, row);
             Interface intf = (Interface)row;
-            NeutronNetwork network = TenantNetworkManager.getManager().getTenantNetworkForInterface(intf);
+            NeutronNetwork network = tenantNetworkManager.getTenantNetworkForInterface(intf);
             if (network != null && !network.getRouterExternal()) {
                 if (ProviderNetworkManager.getManager().hasPerTenantTunneling()) {
-                    int vlan = TenantNetworkManager.getManager().networkCreated(node, network.getID());
+                    int vlan = tenantNetworkManager.networkCreated(node, network.getID());
                     logger.trace("Neutron Network {} Created with Internal Vlan : {}", network.toString(), vlan);
 
                     String portUUID = this.getPortIdForInterface(node, uuid, intf);
                     if (portUUID != null) {
-                        TenantNetworkManager.getManager().programTenantNetworkInternalVlan(node, portUUID, network);
+                        tenantNetworkManager.programTenantNetworkInternalVlan(node, portUUID, network);
                     }
                 }
                 this.handleInterfaceUpdate(node, uuid, intf);
@@ -208,9 +212,9 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
                 logger.trace("Scanning interface "+intfUUID);
                 try {
                     Interface intf = (Interface)this.ovsdbConfigService.getRow(node, Interface.NAME.getName(), intfUUID.toString());
-                    NeutronNetwork network = TenantNetworkManager.getManager().getTenantNetworkForInterface(intf);
+                    NeutronNetwork network = tenantNetworkManager.getTenantNetworkForInterface(intf);
                     if (network != null && !network.getRouterExternal()) {
-                        TenantNetworkManager.getManager().programTenantNetworkInternalVlan(node, uuid, network);
+                        tenantNetworkManager.programTenantNetworkInternalVlan(node, uuid, network);
                     }
                 } catch (Exception e) {
                     logger.error("Failed to process row update", e);
@@ -233,25 +237,25 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
     }
 
     private void handleInterfaceUpdate (Node node, String uuid, Interface intf) {
-        if (AdminConfigManager.getManager().getTunnelEndPoint(node) == null) {
+        if (adminConfigManager.getTunnelEndPoint(node) == null) {
             logger.error("Tunnel end-point configuration missing. Please configure it in Open_vSwitch Table");
             return;
         }
-        NeutronNetwork network = TenantNetworkManager.getManager().getTenantNetworkForInterface(intf);
+        NeutronNetwork network = tenantNetworkManager.getTenantNetworkForInterface(intf);
         if (network != null) {
             ProviderNetworkManager.getManager().handleInterfaceUpdate(network.getProviderNetworkType(),
                     network.getProviderSegmentationID(), node, intf);
         }
     }
     private void handleInterfaceDelete (Node node, String uuid, Interface intf, boolean isLastInstanceOnNode) {
-        if (AdminConfigManager.getManager().getTunnelEndPoint(node) == null) {
+        if (adminConfigManager.getTunnelEndPoint(node) == null) {
             logger.error("Tunnel end-point configuration missing. Please configure it in Open_vSwitch Table");
             return;
         }
-        NeutronNetwork network = TenantNetworkManager.getManager().getTenantNetworkForInterface(intf);
+        NeutronNetwork network = tenantNetworkManager.getTenantNetworkForInterface(intf);
         if (network != null) {
             if (isLastInstanceOnNode) {
-                TenantNetworkManager.getManager().reclaimTennantNetworkInternalVlan(node, uuid, network);
+                tenantNetworkManager.reclaimTenantNetworkInternalVlan(node, uuid, network);
             }
             ProviderNetworkManager.getManager().handleInterfaceDelete(network.getProviderNetworkType(),
                     network.getProviderSegmentationID(), node, intf, isLastInstanceOnNode);

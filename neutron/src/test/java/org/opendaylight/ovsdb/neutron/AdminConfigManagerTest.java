@@ -23,6 +23,7 @@ import java.net.InetAddress;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.sal.core.Node;
@@ -39,6 +40,13 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(ServiceHelper.class)
 public class AdminConfigManagerTest {
+
+    AdminConfigManager adminConfigManager;
+
+    @Before
+    public void setUp(){
+        adminConfigManager = new AdminConfigManager();
+    }
 
     @Test
     public void testGetTunnelEndpoint() throws Exception {
@@ -62,10 +70,10 @@ public class AdminConfigManagerTest {
         when(ServiceHelper.getGlobalInstance(eq(OVSDBConfigService.class), anyObject())).thenReturn(ovsdbConfig);
 
         // OVSDBConfigService is null
-        assertEquals(null, AdminConfigManager.getManager().getTunnelEndPoint(mockNode));
+        assertEquals(null, adminConfigManager.getTunnelEndPoint(mockNode));
 
         // Success...
-        assertEquals(testAddress, AdminConfigManager.getManager().getTunnelEndPoint(mockNode));
+        assertEquals(testAddress, adminConfigManager.getTunnelEndPoint(mockNode));
     }
 
     @Test
@@ -98,6 +106,6 @@ public class AdminConfigManagerTest {
         when(ServiceHelper.getGlobalInstance(eq(OVSDBConfigService.class), anyObject())).thenReturn(ovsdbConfig);
 
         // Success...
-        assertEquals(testAddress, AdminConfigManager.getManager().getTunnelEndPoint(mockNode));
+        assertEquals(testAddress, adminConfigManager.getTunnelEndPoint(mockNode));
     }
 }

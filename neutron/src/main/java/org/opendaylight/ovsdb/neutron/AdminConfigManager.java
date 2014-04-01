@@ -20,7 +20,7 @@ import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AdminConfigManager {
+public class AdminConfigManager implements IAdminConfigManager{
     static final Logger logger = LoggerFactory.getLogger(AdminConfigManager.class);
 
     private String integrationBridgeName;
@@ -44,9 +44,7 @@ public class AdminConfigManager {
     private static String CONFIG_PATCH_TO_INTEGRATION = "patch-int";
     private static String CONFIG_PATCH_TO_TUNNEL = "patch-tun";
 
-    private static AdminConfigManager adminConfiguration = new AdminConfigManager();
-
-    private AdminConfigManager() {
+    public AdminConfigManager() {
         tunnelEndpointConfigName = System.getProperty(CONFIG_TUNNEL_ENDPOINT_CONFIG);
         integrationBridgeName = System.getProperty(CONFIG_INTEGRATION_BRIDGENAME);
         tunnelBridgeName = System.getProperty(CONFIG_TUNNEL_BRIDGENAME);
@@ -60,10 +58,6 @@ public class AdminConfigManager {
         if (externalBridgeName == null) externalBridgeName = DEFAULT_EXTERNAL_BRIDGENAME;
         if (patchToIntegration == null) patchToIntegration = DEFAULT_PATCH_TO_INTEGRATION;
         if (patchToTunnel == null) patchToTunnel = DEFAULT_PATCH_TO_TUNNEL;
-    }
-
-    public static AdminConfigManager getManager() {
-        return adminConfiguration;
     }
 
     public String getIntegrationBridgeName() {

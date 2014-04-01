@@ -1,3 +1,12 @@
+/*
+ * Copyright (C) 2014 EBay Software Foundation
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Authors : Ashwin Raveendran
+ */
 package org.opendaylight.ovsdb.lib.meta.temp;
 
 import org.opendaylight.ovsdb.OpenVswitch;
@@ -5,9 +14,7 @@ import org.opendaylight.ovsdb.lib.meta.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.meta.ColumnSchema;
 import org.opendaylight.ovsdb.lib.meta.TableSchema;
 
-/**
- * @author araveendrann
- */
+
 public class SchemaObjs {
 
     public static class Bridge extends TableSchema<Bridge> {

@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Authors : Madhu Venugopal, Brent Salisbury
+ * Authors : Madhu Venugopal, Brent Salisbury, Dave Tucker
  */
 package org.opendaylight.ovsdb.neutron.provider;
 
@@ -34,11 +34,11 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.table.Bridge;
 import org.opendaylight.ovsdb.lib.table.Interface;
 import org.opendaylight.ovsdb.lib.table.Port;
-import org.opendaylight.ovsdb.neutron.AdminConfigManager;
+import org.opendaylight.ovsdb.neutron.IAdminConfigManager;
+import org.opendaylight.ovsdb.neutron.IInternalNetworkManager;
 import org.opendaylight.ovsdb.neutron.IMDSALConsumer;
-import org.opendaylight.ovsdb.neutron.InternalNetworkManager;
 import org.opendaylight.ovsdb.neutron.NetworkHandler;
-import org.opendaylight.ovsdb.neutron.TenantNetworkManager;
+import org.opendaylight.ovsdb.neutron.ITenantNetworkManager;
 import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
 import org.opendaylight.ovsdb.plugin.StatusWithUuid;
@@ -120,12 +120,24 @@ import org.slf4j.LoggerFactory;
 /**
  *
  */
-class OF13ProviderManager extends ProviderNetworkManager {
-    private static final Logger logger = LoggerFactory.getLogger(OF13ProviderManager.class);
+public class OF13Provider implements NetworkProvider {
+    private static final Logger logger = LoggerFactory.getLogger(OF13Provider.class);
     private DataBrokerService dataBrokerService;
     private static final short TABLE_0_DEFAULT_INGRESS = 0;
     private static final short TABLE_1_ISOLATE_TENANT = 10;
     private static final short TABLE_2_LOCAL_FORWARD = 20;
+
+    private IAdminConfigManager adminConfigManager;
+    private IInternalNetworkManager internalNetworkManager;
+    private ITenantNetworkManager tenantNetworkManager;
+
+    public OF13Provider(IAdminConfigManager adminConfigManager,
+                        IInternalNetworkManager internalNetworkManager,
+                        ITenantNetworkManager tenantNetworkManager) {
+        this.adminConfigManager = adminConfigManager;
+        this.internalNetworkManager = internalNetworkManager;
+        this.tenantNetworkManager = tenantNetworkManager;
+    }
 
     @Override
     public boolean hasPerTenantTunneling() {
@@ -133,18 +145,18 @@ class OF13ProviderManager extends ProviderNetworkManager {
     }
 
     private Status getTunnelReadinessStatus (Node node, String tunnelKey) {
-        InetAddress srcTunnelEndPoint = AdminConfigManager.getManager().getTunnelEndPoint(node);
+        InetAddress srcTunnelEndPoint = adminConfigManager.getTunnelEndPoint(node);
         if (srcTunnelEndPoint == null) {
             logger.error("Tunnel Endpoint not configured for Node {}", node);
             return new Status(StatusCode.NOTFOUND, "Tunnel Endpoint not configured for "+ node);
         }
 
-        if (!InternalNetworkManager.getManager().isInternalNetworkNeutronReady(node)) {
+        if (!internalNetworkManager.isInternalNetworkNeutronReady(node)) {
             logger.error(node+" is not Overlay ready");
             return new Status(StatusCode.NOTACCEPTABLE, node+" is not Overlay ready");
         }
 
-        if (!TenantNetworkManager.getManager().isTenantNetworkPresentInNode(node, tunnelKey)) {
+        if (!tenantNetworkManager.isTenantNetworkPresentInNode(node, tunnelKey)) {
             logger.debug(node+" has no VM corresponding to segment "+ tunnelKey);
             return new Status(StatusCode.NOTACCEPTABLE, node+" has no VM corresponding to segment "+ tunnelKey);
         }
@@ -184,7 +196,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
     private Status addTunnelPort (Node node, String tunnelType, InetAddress src, InetAddress dst) {
         try {
             String bridgeUUID = null;
-            String tunnelBridgeName = AdminConfigManager.getManager().getIntegrationBridgeName();
+            String tunnelBridgeName = adminConfigManager.getIntegrationBridgeName();
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
             Map<String, org.opendaylight.ovsdb.lib.table.internal.Table<?>> bridgeTable = ovsdbTable.getRows(node, Bridge.NAME.getName());
             if (bridgeTable != null) {
@@ -292,7 +304,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
     }
 
     private Status deleteTunnelPort(Node node, String tunnelType, InetAddress src, InetAddress dst) {
-        String tunnelBridgeName = AdminConfigManager.getManager().getIntegrationBridgeName();
+        String tunnelBridgeName = adminConfigManager.getIntegrationBridgeName();
         String portName = getTunnelName(tunnelType, dst);
         Status status = deletePort(node, tunnelBridgeName, portName);
         return status;
@@ -504,7 +516,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
     private Long getIntegrationBridgeOFDPID (Node node) {
         try {
-            String bridgeName = AdminConfigManager.getManager().getIntegrationBridgeName();
+            String bridgeName = adminConfigManager.getIntegrationBridgeName();
             String brIntId = this.getInternalBridgeUUID(node, bridgeName);
             if (brIntId == null) {
                 logger.error("Unable to spot Bridge Identifier for {} in {}", bridgeName, node);
@@ -542,7 +554,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
                 return;
             }
 
-            String attachedMac = externalIds.get(TenantNetworkManager.EXTERNAL_ID_VM_MAC);
+            String attachedMac = externalIds.get(ITenantNetworkManager.EXTERNAL_ID_VM_MAC);
             if (attachedMac == null) {
                 logger.error("No AttachedMac seen in {}", intf);
                 return;
@@ -575,7 +587,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
                 return;
             }
 
-            String attachedMac = externalIds.get(TenantNetworkManager.EXTERNAL_ID_VM_MAC);
+            String attachedMac = externalIds.get(ITenantNetworkManager.EXTERNAL_ID_VM_MAC);
             if (attachedMac == null) {
                 logger.error("No AttachedMac seen in {}", intf);
                 return;
@@ -617,7 +629,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
                 return;
             }
 
-            String attachedMac = externalIds.get(TenantNetworkManager.EXTERNAL_ID_VM_MAC);
+            String attachedMac = externalIds.get(ITenantNetworkManager.EXTERNAL_ID_VM_MAC);
             if (attachedMac == null) {
                 logger.error("No AttachedMac seen in {}", intf);
                 return;
@@ -681,7 +693,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
                 return;
             }
 
-            String attachedMac = externalIds.get(TenantNetworkManager.EXTERNAL_ID_VM_MAC);
+            String attachedMac = externalIds.get(ITenantNetworkManager.EXTERNAL_ID_VM_MAC);
             if (attachedMac == null) {
                 logger.error("No AttachedMac seen in {}", intf);
                 return;
@@ -756,8 +768,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
         this.programLocalRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), srcNode, intf);
 
         for (Node dstNode : nodes) {
-            InetAddress src = AdminConfigManager.getManager().getTunnelEndPoint(srcNode);
-            InetAddress dst = AdminConfigManager.getManager().getTunnelEndPoint(dstNode);
+            InetAddress src = adminConfigManager.getTunnelEndPoint(srcNode);
+            InetAddress dst = adminConfigManager.getTunnelEndPoint(dstNode);
             Status status = addTunnelPort(srcNode, network.getProviderNetworkType(), src, dst);
             if (status.isSuccess()) {
                 this.programTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), dst, srcNode, intf, true);
@@ -778,7 +790,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
             if (intfs != null) {
                 for (org.opendaylight.ovsdb.lib.table.internal.Table<?> row : intfs.values()) {
                     Interface intf = (Interface)row;
-                    NeutronNetwork network = TenantNetworkManager.getManager().getTenantNetworkForInterface(intf);
+                    NeutronNetwork network = tenantNetworkManager.getTenantNetworkForInterface(intf);
                     logger.debug("Trigger Interface update for {}", intf);
                     if (network != null) {
                         this.handleInterfaceUpdate(network, node, intf);
@@ -824,8 +836,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
             if (tunnelType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)
                  || tunnelType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN)) {
                 for (Node dstNode : nodes) {
-                    InetAddress src = AdminConfigManager.getManager().getTunnelEndPoint(srcNode);
-                    InetAddress dst = AdminConfigManager.getManager().getTunnelEndPoint(dstNode);
+                    InetAddress src = adminConfigManager.getTunnelEndPoint(srcNode);
+                    InetAddress dst = adminConfigManager.getTunnelEndPoint(dstNode);
                     logger.info("Remove tunnel rules for interface " + intf.getName() + " on srcNode" + srcNode.getNodeIDString());
                     this.removeTunnelRules(tunnelType, network.getProviderSegmentationID(),
                                            dst, srcNode, intf, true, isLastInstanceOnNode);
@@ -840,7 +852,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
     @Override
     public void initializeFlowRules(Node node) {
-        this.initializeFlowRules(node, AdminConfigManager.getManager().getIntegrationBridgeName());
+        this.initializeFlowRules(node, adminConfigManager.getIntegrationBridgeName());
         this.triggerInterfaceUpdates(node);
     }
 
@@ -2498,7 +2510,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
             logger.debug("Compare openflowNode to OVS br-int node {} vs {}", openflowNode.getID(), dpid);
             String openflowID = ""+openflowNode.getID();
             if (openflowID.contains(""+dpid)) {
-                this.initializeFlowRules(ovsNode, AdminConfigManager.getManager().getIntegrationBridgeName());
+                this.initializeFlowRules(ovsNode, adminConfigManager.getIntegrationBridgeName());
                 this.triggerInterfaceUpdates(ovsNode);
             }
         }
@@ -2515,5 +2527,20 @@ class OF13ProviderManager extends ProviderNetworkManager {
                                                                                                                                              node) {
         return InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class,
                 node.getKey()).toInstance();
+    }
+
+    private String getInternalBridgeUUID (Node node, String bridgeName) {
+        try {
+            OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+            Map<String, org.opendaylight.ovsdb.lib.table.internal.Table<?>> bridgeTable = ovsdbTable.getRows(node, Bridge.NAME.getName());
+            if (bridgeTable == null) return null;
+            for (String key : bridgeTable.keySet()) {
+                Bridge bridge = (Bridge)bridgeTable.get(key);
+                if (bridge.getName().equals(bridgeName)) return key;
+            }
+        } catch (Exception e) {
+            logger.error("Error getting Bridge Identifier for {} / {}", node, bridgeName, e);
+        }
+        return null;
     }
 }

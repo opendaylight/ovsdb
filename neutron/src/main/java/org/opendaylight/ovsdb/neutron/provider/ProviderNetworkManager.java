@@ -5,75 +5,40 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Authors : Madhu Venugopal, Brent Salisbury
+ * Authors : Madhu Venugopal, Brent Salisbury, Dave Tucker
  */
 package org.opendaylight.ovsdb.neutron.provider;
 
-import java.util.Map;
-
-import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
-import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
-import org.opendaylight.controller.sal.utils.Status;
-import org.opendaylight.ovsdb.lib.table.Bridge;
-import org.opendaylight.ovsdb.lib.table.Interface;
-import org.opendaylight.ovsdb.lib.table.internal.Table;
-import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
+import org.opendaylight.ovsdb.neutron.IAdminConfigManager;
+import org.opendaylight.ovsdb.neutron.IInternalNetworkManager;
+import org.opendaylight.ovsdb.neutron.ITenantNetworkManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class ProviderNetworkManager {
+public class ProviderNetworkManager implements IProviderNetworkManager {
     static final Logger logger = LoggerFactory.getLogger(ProviderNetworkManager.class);
-    private static ProviderNetworkManager provider;
-    protected static final int LLDP_PRIORITY = 1000;
-    protected static final int NORMAL_PRIORITY = 0;
+    private NetworkProvider provider;
     protected static final String OPENFLOW_10 = "1.0";
     protected static final String OPENFLOW_13 = "1.3";
 
-    public static ProviderNetworkManager getManager() {
+    // The implementation for each of these services is resolved by the OSGi Service Manager
+    private volatile IAdminConfigManager adminConfigManager;
+    private volatile IInternalNetworkManager internalNetworkManager;
+    private volatile ITenantNetworkManager tenantNetworkManager;
+
+    public NetworkProvider getProvider() {
         if (provider != null) return provider;
         String ofVersion = System.getProperty("ovsdb.of.version", OPENFLOW_10);
         switch (ofVersion) {
             case OPENFLOW_13:
-                provider = new OF13ProviderManager();
+                provider = new OF13Provider(adminConfigManager, internalNetworkManager, tenantNetworkManager);
                 break;
             case OPENFLOW_10:
             default:
-                provider = new OF10ProviderManager();
+                provider = new OF10Provider(adminConfigManager, internalNetworkManager, tenantNetworkManager);
                 break;
         }
         return provider;
     }
 
-    protected String getInternalBridgeUUID (Node node, String bridgeName) {
-        try {
-            OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Map<String, Table<?>> bridgeTable = ovsdbTable.getRows(node, Bridge.NAME.getName());
-            if (bridgeTable == null) return null;
-            for (String key : bridgeTable.keySet()) {
-                Bridge bridge = (Bridge)bridgeTable.get(key);
-                if (bridge.getName().equals(bridgeName)) return key;
-            }
-        } catch (Exception e) {
-            logger.error("Error getting Bridge Identifier for {} / {}", node, bridgeName, e);
-        }
-        return null;
-    }
-
-    public abstract boolean hasPerTenantTunneling();
-    public abstract Status handleInterfaceUpdate(String tunnelType, String tunnelKey);
-    public abstract Status handleInterfaceUpdate(NeutronNetwork network, Node source, Interface intf);
-    public abstract Status handleInterfaceDelete(String tunnelType, NeutronNetwork network, Node source, Interface intf, boolean isLastInstanceOnNode);
-    /*
-     * Initialize the Flow rules given the OVSDB node.
-     * This method provides a set of common functionalities to initialize the Flow rules of an OVSDB node
-     * that are Openflow Version specific. Hence we have this method in addition to the following
-     * Openflow Node specific initialization method.
-     */
-    public abstract void initializeFlowRules(Node node);
-
-    /*
-     * Initialize the Flow rules given the Openflow node
-     */
-    public abstract void initializeOFFlowRules(Node openflowNode);
 }

@@ -36,31 +36,25 @@ import org.opendaylight.ovsdb.lib.table.Interface;
 import org.opendaylight.ovsdb.lib.table.Open_vSwitch;
 import org.opendaylight.ovsdb.lib.table.Port;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
-import org.opendaylight.ovsdb.neutron.provider.ProviderNetworkManager;
+import org.opendaylight.ovsdb.neutron.provider.IProviderNetworkManager;
 import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TenantNetworkManager {
+public class TenantNetworkManager implements ITenantNetworkManager {
     static final Logger logger = LoggerFactory.getLogger(TenantNetworkManager.class);
-
-    public static final String EXTERNAL_ID_VM_ID = "vm-id";
-    public static final String EXTERNAL_ID_INTERFACE_ID = "iface-id";
-    public static final String EXTERNAL_ID_VM_MAC = "attached-mac";
-    private static TenantNetworkManager tenantHelper = new TenantNetworkManager();
     private ConcurrentMap<String, NodeConfiguration> nodeConfigurationCache = new ConcurrentHashMap<>();
 
+    // The implementation for each of these services is resolved by the OSGi Service Manager
+    private volatile IProviderNetworkManager providerNetworkManager;
+
     private boolean enableContainer = false;
-    private TenantNetworkManager() {
+    public TenantNetworkManager() {
         String isTenantContainer = System.getProperty("TenantIsContainer");
         if (isTenantContainer != null && isTenantContainer.equalsIgnoreCase("true")) {
             enableContainer =  true;
         }
-    }
-
-    public static TenantNetworkManager getManager() {
-        return tenantHelper;
     }
 
     public int getInternalVlan(Node node, String networkId) {
@@ -81,7 +75,7 @@ public class TenantNetworkManager {
     }
 
     private NodeConfiguration addNodeConfigurationToCache(Node node) {
-        NodeConfiguration nodeConfiguration = new NodeConfiguration(node);
+        NodeConfiguration nodeConfiguration = new NodeConfiguration(node, this);
         String nodeUuid = getNodeUUID(node);
         if (nodeUuid == null) {
             logger.error("Cannot get Node UUID for Node {}", node);
@@ -91,7 +85,7 @@ public class TenantNetworkManager {
         return nodeConfigurationCache.get(nodeUuid);
     }
 
-    public void reclaimTennantNetworkInternalVlan(Node node, String portUUID, NeutronNetwork network) {
+    public void reclaimTenantNetworkInternalVlan(Node node, String portUUID, NeutronNetwork network) {
         String nodeUuid = getNodeUUID(node);
         if (nodeUuid == null) {
             logger.error("Unable to get UUID for Node {}", node);
@@ -186,7 +180,7 @@ public class TenantNetworkManager {
             logger.debug("Tenant Network not found with Segmenation-id {}",segmentationId);
             return false;
         }
-        if (ProviderNetworkManager.getManager().hasPerTenantTunneling()) {
+        if (providerNetworkManager.getProvider().hasPerTenantTunneling()) {
             String nodeUuid = getNodeUUID(node);
             if (nodeUuid == null) {
                 logger.debug("Unable to get UUID for Node {}", node);
@@ -420,5 +414,4 @@ public class TenantNetworkManager {
         config.setContainer(networkID);
         containerManager.removeContainer(config);
     }
-
 }

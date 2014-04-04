@@ -12,11 +12,13 @@ package org.opendaylight.ovsdb;
 import com.google.common.util.concurrent.ListenableFuture;
 import junit.framework.Assert;
 import org.junit.Test;
+import org.opendaylight.ovsdb.lib.OvsDBClient;
+import org.opendaylight.ovsdb.lib.OvsDBClientImpl;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
-import org.opendaylight.ovsdb.lib.message.operations.OperationResult;
-import org.opendaylight.ovsdb.lib.meta.ColumnSchema;
-import org.opendaylight.ovsdb.lib.meta.TableSchema;
-import org.opendaylight.ovsdb.lib.meta.temp.Reference;
+import org.opendaylight.ovsdb.lib.notation.operations.OperationResult;
+import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
+import org.opendaylight.ovsdb.lib.schema.TableSchema;
+import org.opendaylight.ovsdb.lib.schema.temp.Reference;
 import org.opendaylight.ovsdb.plugin.OvsdbTestBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +30,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static org.opendaylight.ovsdb.OpenVswitch.Operations.op;
+import static org.opendaylight.ovsdb.lib.notation.operations.Operations.op;
 
 public class OpenVswitchTestITTyped extends OvsdbTestBase {
 
@@ -42,30 +44,30 @@ public class OpenVswitchTestITTyped extends OvsdbTestBase {
         }
 
         public ColumnSchema<Bridge, String> name() {
-            return column("name");
+            return column("name", String.class);
         }
 
         public ColumnSchema<Bridge, Integer> floodVlans() {
-            return column("flood_vlans");
+            return column("flood_vlans", Integer.class);
         }
 
         public ColumnSchema<Bridge, String> status() {
-            return column("status");
+            return column("status", String.class);
         }
 
         public ColumnSchema<Bridge, Reference> netflow() {
-            return column("netflow");
+            return column("netflow", Reference.class);
         }
     }
 
 
     @Test
     public void test() throws IOException, InterruptedException, ExecutionException {
-        OpenVswitch ovs = getVswitch();
+        OvsDBClientImpl ovs = getVswitch();
 
-        Bridge bridge = ovs.schema().table("Bridge", Bridge.class);
+        Bridge bridge = ovs.getSchema(OvsDBClient.OPEN_VSWITCH_SCHEMA, true).get().table("Bridge", Bridge.class);
 
-        ListenableFuture<List<OperationResult>> results = ovs.transact()
+        ListenableFuture<List<OperationResult>> results = ovs.transactBuilder()
                 .add(op.insert(bridge).value(bridge.name(), "br-int"))
                 .add(op.update(bridge)
                         .set(bridge.status(), "br-blah")
@@ -82,13 +84,12 @@ public class OpenVswitchTestITTyped extends OvsdbTestBase {
 
 
 
-    private OpenVswitch getVswitch() throws IOException, InterruptedException {
+    private OvsDBClientImpl getVswitch() throws IOException, InterruptedException {
         TestObjects testConnection = getTestConnection();
         OvsdbRPC rpc = testConnection.connectionService.getConnection(testConnection.node).getRpc();
 
         ExecutorService executorService = Executors.newFixedThreadPool(3);
-        OpenVswitch ovs = new OpenVswitch(rpc, executorService);
-        ovs.populateSchemaFromDevice();
+        OvsDBClientImpl ovs = new OvsDBClientImpl(rpc, executorService);
 
         for (int i = 0; i < 100; i++) {
            if (ovs.isReady(0)) {

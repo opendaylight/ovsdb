@@ -7,7 +7,7 @@
  *
  * Authors : Ashwin Raveendran
  */
-package org.opendaylight.ovsdb.lib.meta;
+package org.opendaylight.ovsdb.lib.schema;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
@@ -135,6 +135,11 @@ public abstract class BaseType<E extends BaseType<E>> {
         public void setEnums(Set<Integer> enums) {
             this.enums = enums;
         }
+
+        @Override
+        public String toString() {
+            return "IntegerBaseType";
+        }
     }
 
     public static class RealBaseType extends BaseType<RealBaseType> {
@@ -196,7 +201,10 @@ public abstract class BaseType<E extends BaseType<E>> {
             this.enums = enums;
         }
 
-
+        @Override
+        public String toString() {
+            return "RealBaseType";
+        }
     }
 
 
@@ -209,6 +217,11 @@ public abstract class BaseType<E extends BaseType<E>> {
         @Override
         protected void getConstraints(BaseType baseType, JsonNode node) {
             //no op
+        }
+
+        @Override
+        public String toString() {
+            return "BooleanBaseType";
         }
     }
 
@@ -271,6 +284,11 @@ public abstract class BaseType<E extends BaseType<E>> {
         public void setEnums(Set<String> enums) {
             this.enums = enums;
         }
+
+        public String toString() {
+            return "StringBaseType";
+        }
+
     }
 
 
@@ -310,6 +328,10 @@ public abstract class BaseType<E extends BaseType<E>> {
 
         public void setRefType(RefType refType) {
             this.refType = refType;
+        }
+
+        public String toString() {
+            return "UuidBaseType";
         }
     }
 }

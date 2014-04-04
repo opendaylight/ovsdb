@@ -7,12 +7,15 @@
  *
  * Authors : Ashwin Raveendran
  */
-package org.opendaylight.ovsdb.lib.meta.temp;
+package org.opendaylight.ovsdb.lib.schema.temp;
 
-import org.opendaylight.ovsdb.OpenVswitch;
-import org.opendaylight.ovsdb.lib.meta.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.meta.ColumnSchema;
-import org.opendaylight.ovsdb.lib.meta.TableSchema;
+import org.opendaylight.ovsdb.lib.OvsDBClient;
+import org.opendaylight.ovsdb.lib.OvsDBClientImpl;
+import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
+import org.opendaylight.ovsdb.lib.schema.TableSchema;
+
+import java.util.concurrent.ExecutionException;
 
 
 public class SchemaObjs {
@@ -27,8 +30,8 @@ public class SchemaObjs {
 
         public Bridge(TableSchema<Bridge> target) {
             this.target = target;
-            name = target.column("name");
-            flood_vlans = target.column("statistics");
+            name = target.column("name", String.class);
+            flood_vlans = target.column("statistics", Boolean.class);
         }
 
     }
@@ -42,16 +45,16 @@ public class SchemaObjs {
 
         public Port(TableSchema<Port> target) {
             this.target = target;
-            name = target.column("name");
-            statistics = target.column("statistics");
+            name = target.column("name", String.class);
+            statistics = target.column("statistics", String.class);
         }
 
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
 
-        OpenVswitch ovs = new OpenVswitch(null, null);
-        DatabaseSchema db = ovs.getSchema();
+        OvsDBClientImpl ovs = new OvsDBClientImpl(null, null);
+        DatabaseSchema db = ovs.getSchema(OvsDBClient.OPEN_VSWITCH_SCHEMA, true).get();
         Bridge bridge = db.table(Bridge.NAME, Bridge.class);
         Port port = db.table(Port.NAME, Port.class);
 

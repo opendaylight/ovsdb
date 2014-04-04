@@ -7,7 +7,7 @@
  *
  * Authors : Madhu Venugopal
  */
-package org.opendaylight.ovsdb.lib.message.operations;
+package org.opendaylight.ovsdb.lib.notation.operations;
 
 import java.util.ArrayList;
 import java.util.List;

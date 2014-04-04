@@ -12,7 +12,7 @@ package org.opendaylight.ovsdb.lib.message;
 import com.google.common.collect.Lists;
 
 import org.opendaylight.ovsdb.lib.jsonrpc.Params;
-import org.opendaylight.ovsdb.lib.message.operations.Operation;
+import org.opendaylight.ovsdb.lib.notation.operations.Operation;
 import java.util.List;
 
 public class TransactBuilder implements Params {

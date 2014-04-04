@@ -7,9 +7,14 @@
  *
  * Authors : Ashwin Raveendran
  */
-package org.opendaylight.ovsdb.lib.meta.temp;
+package org.opendaylight.ovsdb.lib.notation.operations;
 
+import org.opendaylight.ovsdb.lib.notation.Condition;
 
-public class Reference {
+/**
+ * Represents an Operation type that accepts a condition, for e.g Update, Select etc
+ */
+public interface ConditionalOperation {
 
+    public void addCondition(Condition condition);
 }

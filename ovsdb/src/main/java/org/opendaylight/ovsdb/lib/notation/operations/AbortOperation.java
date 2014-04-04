@@ -7,8 +7,8 @@
  *
  * Authors : Madhu Venugopal
  */
-package org.opendaylight.ovsdb.lib.message.operations;
+package org.opendaylight.ovsdb.lib.notation.operations;
 
-public class AssertOperation extends Operation {
+public class AbortOperation extends Operation {
 
 }

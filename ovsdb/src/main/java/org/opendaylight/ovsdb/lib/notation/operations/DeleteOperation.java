@@ -7,23 +7,21 @@
  *
  * Authors : Madhu Venugopal
  */
-package org.opendaylight.ovsdb.lib.message.operations;
+package org.opendaylight.ovsdb.lib.notation.operations;
 
 import java.util.List;
 
 import org.opendaylight.ovsdb.lib.notation.Condition;
-
-public class SelectOperation extends Operation {
+//TODO Madhu : This is not complete. Getting it in to enable other committers to make progress
+public class DeleteOperation extends Operation {
     String table;
     List<Condition> where;
-    List<String> columns;
 
-    public SelectOperation(String table, List<Condition> where, List<String> columns) {
+    public DeleteOperation(String table, List<Condition> where) {
         super();
-        super.setOp("select");
+        super.setOp("delete");
         this.table = table;
         this.where = where;
-        this.columns = columns;
     }
     public String getTable() {
         return table;
@@ -37,15 +35,9 @@ public class SelectOperation extends Operation {
     public void setWhere(List<Condition> where) {
         this.where = where;
     }
-    public List<String> getColumns() {
-        return columns;
-    }
-    public void setColumns(List<String> columns) {
-        this.columns = columns;
-    }
     @Override
     public String toString() {
-        return "SelectOperation [table=" + table + ", where=" + where
-                + ", columns=" + columns + "]";
+        return "DeleteOperation [table=" + table + ", where=" + where
+                + ", toString()=" + super.toString() + "]";
     }
 }

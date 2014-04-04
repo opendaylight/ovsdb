@@ -7,37 +7,55 @@
  *
  * Authors : Madhu Venugopal
  */
-package org.opendaylight.ovsdb.lib.message.operations;
+package org.opendaylight.ovsdb.lib.notation.operations;
 
 import java.util.List;
 
 import org.opendaylight.ovsdb.lib.notation.Condition;
-//TODO Madhu : This is not complete. Getting it in to enable other committers to make progress
-public class DeleteOperation extends Operation {
+import org.opendaylight.ovsdb.lib.notation.Mutation;
+
+public class MutateOperation extends Operation {
     String table;
     List<Condition> where;
+    List<Mutation> mutations;
 
-    public DeleteOperation(String table, List<Condition> where) {
+    public MutateOperation(String table, List<Condition> where,
+                           List<Mutation> mutations) {
         super();
-        super.setOp("delete");
+        super.setOp("mutate");
         this.table = table;
         this.where = where;
+        this.mutations = mutations;
     }
+
     public String getTable() {
         return table;
     }
+
     public void setTable(String table) {
         this.table = table;
     }
+
     public List<Condition> getWhere() {
         return where;
     }
+
     public void setWhere(List<Condition> where) {
         this.where = where;
     }
+
+    public List<Mutation> getMutations() {
+        return mutations;
+    }
+
+    public void setMutations(List<Mutation> mutations) {
+        this.mutations = mutations;
+    }
+
     @Override
     public String toString() {
-        return "DeleteOperation [table=" + table + ", where=" + where
-                + ", toString()=" + super.toString() + "]";
+        return "MutateOperation [table=" + table + ", where=" + where
+                + ", mutations=" + mutations + ", toString()="
+                + super.toString() + "]";
     }
 }

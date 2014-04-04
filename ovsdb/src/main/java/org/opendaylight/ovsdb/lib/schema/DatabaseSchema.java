@@ -7,10 +7,10 @@
  *
  * Authors : Ashwin Raveendran
  */
-package org.opendaylight.ovsdb.lib.meta;
+package org.opendaylight.ovsdb.lib.schema;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.opendaylight.ovsdb.OpenVswitch;
+import org.opendaylight.ovsdb.lib.notation.operations.TransactionBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,9 +21,8 @@ import java.util.Set;
 
 
 public class DatabaseSchema {
-    public static Logger logger = LoggerFactory.getLogger(DatabaseSchema.class);
 
-    public static String OPEN_VSWITCH_SCHEMA_NAME = "Open_vSwitch";
+    public static Logger logger = LoggerFactory.getLogger(DatabaseSchema.class);
 
     public Map<String, TableSchema> tables;
 
@@ -31,11 +30,17 @@ public class DatabaseSchema {
         this.tables = tables;
     }
 
-    public Set<String> getTables() { return this.tables.keySet(); }
+    public Set<String> getTables() {
+        return this.tables.keySet();
+    }
 
-    public boolean hasTable(String table) { return this.getTables().contains(table); }
+    public boolean hasTable(String table) {
+        return this.getTables().contains(table);
+    }
 
-    public TableSchema getTable(String table) { return this.tables.get(table); }
+    public TableSchema getTable(String table) {
+        return this.tables.get(table);
+    }
 
     public static DatabaseSchema fromJson(JsonNode json) {
         if (!json.isObject() || !json.has("tables")) {
@@ -45,9 +50,9 @@ public class DatabaseSchema {
 
         Map<String, TableSchema> tables = new HashMap<>();
         //Iterator<Map.Entry<String,JsonNode>> fields = json.fields();
-        for(Iterator<Map.Entry<String,JsonNode>> iter = json.get("tables").fields(); iter.hasNext();) {
+        for (Iterator<Map.Entry<String, JsonNode>> iter = json.get("tables").fields(); iter.hasNext(); ) {
             Map.Entry<String, JsonNode> table = iter.next();
-            logger.debug("Read schema for table[{}]:{}" , table.getKey(), table.getValue());
+            logger.debug("Read schema for table[{}]:{}", table.getKey(), table.getValue());
 
             tables.put(table.getKey(), TableSchema.fromJson(table.getKey(), table.getValue()));
         }
@@ -55,8 +60,8 @@ public class DatabaseSchema {
         return new DatabaseSchema(tables);
     }
 
-    public OpenVswitch.Transaction beginTransaction() {
-        return new OpenVswitch.Transaction(this);
+    public TransactionBuilder beginTransaction() {
+        return new TransactionBuilder(this);
     }
 
     public <E extends TableSchema<E>> TableSchema<E> table(String tableName) {

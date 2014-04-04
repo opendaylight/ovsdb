@@ -7,8 +7,8 @@
  *
  * Authors : Madhu Venugopal
  */
-package org.opendaylight.ovsdb.lib.message.operations;
+package org.opendaylight.ovsdb.lib.notation.operations;
 
-public class WaitOperation extends Operation {
+public class AssertOperation extends Operation {
 
 }

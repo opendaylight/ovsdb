@@ -7,13 +7,12 @@
  *
  * Authors : Ashwin Raveendran
  */
-package org.opendaylight.ovsdb;
+package org.opendaylight.ovsdb.lib.notation.operations;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Maps;
-import org.opendaylight.ovsdb.lib.message.operations.Operation;
-import org.opendaylight.ovsdb.lib.meta.ColumnSchema;
-import org.opendaylight.ovsdb.lib.meta.TableSchema;
+import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
+import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
 import java.util.Map;
 
@@ -73,7 +72,5 @@ public class Insert<E extends TableSchema<E>> extends Operation<E> {
     public void setRow(Map<String, Object> row) {
         this.row = row;
     }
-
-
 
 }

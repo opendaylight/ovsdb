@@ -7,10 +7,10 @@
  *
  * Authors : Ashwin Raveendran
  */
-package org.opendaylight.ovsdb.lib.meta;
+package org.opendaylight.ovsdb.lib.schema;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.opendaylight.ovsdb.Insert;
+import org.opendaylight.ovsdb.lib.notation.operations.Insert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +22,7 @@ import java.util.Set;
 
 
 public class TableSchema<E extends TableSchema<E>> {
+
     protected static final Logger logger = LoggerFactory.getLogger(TableSchema.class);
     private String name;
     private Map<String, ColumnSchema> columns;
@@ -34,13 +35,25 @@ public class TableSchema<E extends TableSchema<E>> {
         this.columns = columns;
     }
 
-    public Set<String> getColumns() { return this.columns.keySet(); }
+    public Set<String> getColumns() {
+        return this.columns.keySet();
+    }
 
-    public boolean hasColumn(String column) { return this.getColumns().contains(column); }
+    public Map<String, ColumnSchema> getColumnSchemas() {
+        return columns;
+    }
 
-    public ColumnSchema getColumn(String column) { return this.columns.get(column); }
+    public boolean hasColumn(String column) {
+        return this.getColumns().contains(column);
+    }
 
-    public ColumnType getColumnType(String column) { return this.columns.get(column).getType(); }
+    public ColumnSchema getColumn(String column) {
+        return this.columns.get(column);
+    }
+
+    public ColumnType getColumnType(String column) {
+        return this.columns.get(column).getType();
+    }
 
     public static TableSchema fromJson(String tableName, JsonNode json) {
 
@@ -56,8 +69,8 @@ public class TableSchema<E extends TableSchema<E>> {
             columns.put(column.getKey(), ColumnSchema.fromJson(column.getKey(), column.getValue()));
         }
 
-       TableSchema tableSchema = new TableSchema(tableName, columns);
-       return tableSchema;
+        TableSchema tableSchema = new TableSchema(tableName, columns);
+        return tableSchema;
     }
 
     public <E extends TableSchema<E>> E as(Class<E> clazz) {
@@ -73,9 +86,7 @@ public class TableSchema<E extends TableSchema<E>> {
         return new Insert<>(this);
     }
 
-
-
-    public <D> ColumnSchema<E, D> column(String column) {
+    public <D> ColumnSchema<E, D> column(String column, Class<D> type) {
         //todo exception handling
         return columns.get(column);
     }
@@ -88,5 +99,4 @@ public class TableSchema<E extends TableSchema<E>> {
         this.name = name;
     }
 
-    public static class AnyTableSchema extends TableSchema<AnyTableSchema>{}
 }

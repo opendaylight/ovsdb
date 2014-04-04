@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.ovsdb.lib.message.operations.OperationResult;
+import org.opendaylight.ovsdb.lib.notation.operations.OperationResult;
 
 public interface OvsdbRPC {
     public static final String REGISTER_CALLBACK_METHOD = "registerCallback";
@@ -42,6 +42,7 @@ public interface OvsdbRPC {
     public ListenableFuture<Object> unlock(List<String> id);
 
     public boolean registerCallback(Callback callback);
+
 
     public static interface Callback {
         public void update(Node node, UpdateNotification upadateNotification);

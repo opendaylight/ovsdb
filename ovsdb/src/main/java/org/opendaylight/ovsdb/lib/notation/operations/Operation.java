@@ -7,11 +7,11 @@
  *
  * Authors : Madhu Venugopal, Ashwin Raveendran
  */
-package org.opendaylight.ovsdb.lib.message.operations;
+package org.opendaylight.ovsdb.lib.notation.operations;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.opendaylight.ovsdb.lib.meta.TableSchema;
+import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
 public abstract class Operation<E extends TableSchema<E>> {
 

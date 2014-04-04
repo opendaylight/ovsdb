@@ -11,7 +11,7 @@ package org.opendaylight.ovsdb.lib.message;
 
 import java.util.ArrayList;
 
-import org.opendaylight.ovsdb.lib.message.operations.OperationResult;
+import org.opendaylight.ovsdb.lib.notation.operations.OperationResult;
 
 public class TransactResponse extends Response {
     ArrayList<OperationResult> result;

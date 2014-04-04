@@ -7,55 +7,45 @@
  *
  * Authors : Madhu Venugopal
  */
-package org.opendaylight.ovsdb.lib.message.operations;
+package org.opendaylight.ovsdb.lib.notation.operations;
 
 import java.util.List;
 
 import org.opendaylight.ovsdb.lib.notation.Condition;
-import org.opendaylight.ovsdb.lib.notation.Mutation;
 
-public class MutateOperation extends Operation {
+public class SelectOperation extends Operation {
     String table;
     List<Condition> where;
-    List<Mutation> mutations;
+    List<String> columns;
 
-    public MutateOperation(String table, List<Condition> where,
-                           List<Mutation> mutations) {
+    public SelectOperation(String table, List<Condition> where, List<String> columns) {
         super();
-        super.setOp("mutate");
+        super.setOp("select");
         this.table = table;
         this.where = where;
-        this.mutations = mutations;
+        this.columns = columns;
     }
-
     public String getTable() {
         return table;
     }
-
     public void setTable(String table) {
         this.table = table;
     }
-
     public List<Condition> getWhere() {
         return where;
     }
-
     public void setWhere(List<Condition> where) {
         this.where = where;
     }
-
-    public List<Mutation> getMutations() {
-        return mutations;
+    public List<String> getColumns() {
+        return columns;
     }
-
-    public void setMutations(List<Mutation> mutations) {
-        this.mutations = mutations;
+    public void setColumns(List<String> columns) {
+        this.columns = columns;
     }
-
     @Override
     public String toString() {
-        return "MutateOperation [table=" + table + ", where=" + where
-                + ", mutations=" + mutations + ", toString()="
-                + super.toString() + "]";
+        return "SelectOperation [table=" + table + ", where=" + where
+                + ", columns=" + columns + "]";
     }
 }

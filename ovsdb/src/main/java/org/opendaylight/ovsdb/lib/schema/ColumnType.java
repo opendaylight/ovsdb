@@ -7,7 +7,7 @@
  *
  * Authors : Ashwin Raveendran
  */
-package org.opendaylight.ovsdb.lib.meta;
+package org.opendaylight.ovsdb.lib.schema;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonUtils;
@@ -30,6 +30,10 @@ public abstract class ColumnType {
 
     public ColumnType(BaseType baseType) {
         this.baseType = baseType;
+    }
+
+    public BaseType getBaseType() {
+        return baseType;
     }
 
     /**

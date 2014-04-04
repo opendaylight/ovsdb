@@ -7,14 +7,9 @@
  *
  * Authors : Ashwin Raveendran
  */
-package org.opendaylight.ovsdb.lib.message.operations;
+package org.opendaylight.ovsdb.lib.schema.temp;
 
-import org.opendaylight.ovsdb.lib.notation.Condition;
 
-/**
- * Represents an Operation type that accepts acondition, for e.g Update, Select etc
- */
-public interface ConditionalOperation {
+public class Reference {
 
-    public void addCondition(Condition condition);
 }

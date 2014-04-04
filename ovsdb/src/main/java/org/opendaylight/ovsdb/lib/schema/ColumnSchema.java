@@ -7,7 +7,7 @@
  *
  * Authors : Ashwin Raveendran
  */
-package org.opendaylight.ovsdb.lib.meta;
+package org.opendaylight.ovsdb.lib.schema;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.opendaylight.ovsdb.lib.notation.Condition;
@@ -40,6 +40,8 @@ public class ColumnSchema<E extends TableSchema<E>, D> {
 
     public ColumnType getType() { return type; }
 
+    // --- Operations on the column ----------//
+
     public Condition opEqual(D data) {
         return new Condition(this.getName(), Function.EQUALS, data);
     }
@@ -55,6 +57,8 @@ public class ColumnSchema<E extends TableSchema<E>, D> {
     public Condition opLesserThanOrEquals(D data) {
         return new Condition(this.getName(), Function.LESS_THAN_OR_EQUALS, data);
     }
+
+    // --- Operations on the column ----------//:w
 
     @Override
     public String toString() {

@@ -1,0 +1,87 @@
+/*
+ *
+ *  * Copyright (C) 2014 EBay Software Foundation
+ *  *
+ *  * This program and the accompanying materials are made available under the
+ *  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ *  * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *  *
+ *  * Authors : Ashwin Raveendran
+ *
+ */
+
+package org.opendaylight.ovsdb.lib.operations;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import org.opendaylight.ovsdb.lib.notation.Condition;
+import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
+import org.opendaylight.ovsdb.lib.schema.TableSchema;
+
+import java.util.List;
+import java.util.Map;
+
+public class Update<E extends TableSchema<E>> extends Operation<E> implements ConditionalOperation {
+
+    Map<String, Object> row = Maps.newHashMap();
+    String uuid;
+    //Where where;
+    List<Condition> where = Lists.newArrayList();
+
+    private String uuidName;
+
+    public Update(TableSchema<E> schema) {
+        super(schema, "update");
+    }
+
+    public Update<E> on(TableSchema schema){
+        return this;
+    }
+
+    public <T extends TableSchema<T>, D> Update<E> set(ColumnSchema<T, D> columnSchema, D value) {
+        columnSchema.validate(value);
+        this.row.put(columnSchema.getName(), value);
+        return this;
+    }
+
+    public Where where(Condition condition) {
+        return new Where(this);
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public String getUuidName() {
+        return uuidName;
+    }
+
+    public void setUuidName(String uuidName) {
+        this.uuidName = uuidName;
+    }
+
+    public Map<String, Object> getRow() {
+        return row;
+    }
+
+    public void setRow(Map<String, Object> row) {
+        this.row = row;
+    }
+
+    @Override
+    public void addCondition(Condition condition) {
+        this.where.add(condition);
+    }
+
+    public List<Condition> getWhere() {
+        return where;
+    }
+
+    public void setWhere(List<Condition> where) {
+        this.where = where;
+    }
+}

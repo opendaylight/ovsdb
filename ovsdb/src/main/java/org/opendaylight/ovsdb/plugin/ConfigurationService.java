@@ -32,12 +32,12 @@ import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.lib.database.OVSInstance;
 import org.opendaylight.ovsdb.lib.database.OvsdbType;
 import org.opendaylight.ovsdb.lib.message.TransactBuilder;
-import org.opendaylight.ovsdb.lib.message.operations.DeleteOperation;
-import org.opendaylight.ovsdb.lib.message.operations.InsertOperation;
-import org.opendaylight.ovsdb.lib.message.operations.MutateOperation;
-import org.opendaylight.ovsdb.lib.message.operations.Operation;
-import org.opendaylight.ovsdb.lib.message.operations.OperationResult;
-import org.opendaylight.ovsdb.lib.message.operations.UpdateOperation;
+import org.opendaylight.ovsdb.lib.operations.DeleteOperation;
+import org.opendaylight.ovsdb.lib.operations.InsertOperation;
+import org.opendaylight.ovsdb.lib.operations.MutateOperation;
+import org.opendaylight.ovsdb.lib.operations.Operation;
+import org.opendaylight.ovsdb.lib.operations.OperationResult;
+import org.opendaylight.ovsdb.lib.operations.UpdateOperation;
 import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.notation.Function;
 import org.opendaylight.ovsdb.lib.notation.Mutation;
@@ -145,7 +145,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     /**
      * Add a new bridge
      * @param node Node serving this configuration service
-     * @param bridgeConnectorIdentifier String representation of a Bridge Connector
+     * @param bridgeIdentifier String representation of a Bridge Connector
      * @return Bridge Connector configurations
      */
     @Override
@@ -390,7 +390,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
      * Implements the OVS Connection for Managers
      *
      * @param node Node serving this configuration service
-     * @param String with IP and connection types
+     * @param managerip with IP and connection types
      */
     @SuppressWarnings("unchecked")
     public boolean setManager(Node node, String managerip) {

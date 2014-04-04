@@ -10,8 +10,6 @@
 package org.opendaylight.ovsdb.lib.database;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.opendaylight.ovsdb.lib.notation.Condition;
-import org.opendaylight.ovsdb.lib.notation.Function;
 
 public class ColumnSchema {
 
@@ -46,21 +44,6 @@ public class ColumnSchema {
         this.name = name;
     }
 
-    public Condition opEqual(String some) {
-        return new Condition(this.getName(), Function.EQUALS, some);
-    }
-
-    public Condition opGreaterThan(Object val) {
-        return new Condition(this.getName(), Function.GREATER_THAN, val);
-    }
-
-    public Condition opLesserThan(int val) {
-        return new Condition(this.getName(), Function.GREATER_THAN, val);
-    }
-
-    public Condition opLesserThanOrEquals(Object val) {
-        return new Condition(this.getName(), Function.LESS_THAN_OR_EQUALS, val);
-    }
 
     @Override
     public String toString() {

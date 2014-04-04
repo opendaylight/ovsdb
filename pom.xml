@@ -8,12 +8,12 @@
   <parent>
     <groupId>org.opendaylight.ovsdb</groupId>
     <artifactId>commons.ovsdb</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.0-1-SNAPSHOT</version>
     <relativePath>commons/parent</relativePath>
   </parent>
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>ovsdb.project</artifactId>
-  <version>0.5.0</version>
+  <version>0.5.0-1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</connection>

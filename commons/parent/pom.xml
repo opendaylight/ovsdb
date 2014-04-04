@@ -11,7 +11,7 @@
   </parent>
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>commons.ovsdb</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.0-1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
   <scm>

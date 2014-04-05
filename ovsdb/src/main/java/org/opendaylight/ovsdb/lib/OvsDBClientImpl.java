@@ -16,6 +16,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import org.opendaylight.ovsdb.lib.message.MonitorRequest;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
 import org.opendaylight.ovsdb.lib.message.TransactBuilder;
 import org.opendaylight.ovsdb.lib.notation.operations.Operation;
@@ -56,6 +57,41 @@ public class OvsDBClientImpl implements OvsDBClient {
 
         ListenableFuture<List<OperationResult>> transact = rpc.transact(builder);
         return transact;
+    }
+
+    @Override
+    public void monitor(MonitorRequest monitorRequest, MonitorCallBack callback) {
+        throw new UnsupportedOperationException("not yet implemented");
+    }
+
+    @Override
+    public void cancelMonitor(MonitorHandle handler) {
+        throw new UnsupportedOperationException("not yet implemented");
+    }
+
+    @Override
+    public void lock(String lockId, LockAquisitionCallback lockedCallBack, LockStolenCallback stolenCallback) {
+        throw new UnsupportedOperationException("not yet implemented");
+    }
+
+    @Override
+    public ListenableFuture<Boolean> steal(String lockId) {
+        throw new UnsupportedOperationException("not yet implemented");
+    }
+
+    @Override
+    public ListenableFuture<Boolean> unLock(String lockId) {
+        throw new UnsupportedOperationException("not yet implemented");
+    }
+
+    @Override
+    public void startEchoService(EchoServiceCallbackFilters callbackFilters) {
+        throw new UnsupportedOperationException("not yet implemented");
+    }
+
+    @Override
+    public void stopEchoService() {
+        throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override

@@ -2,6 +2,74 @@
   "comments": [
     {
       "key": {
+        "uuid": "1a486d77_2357aa04",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/OvsDBClient.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-06T15:50:28Z",
+      "side": 1,
+      "message": "Since we are at the library layer, we should avoid hard-coding the Schema name. It should rather be a parameter from the plugin/application (along with the connection parameters).",
+      "revId": "5944edb9bc9b9dac1664e8cf5e4c6569f79dec51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a486d77_035cae24",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/OvsDBClientImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-06T15:50:28Z",
+      "side": 1,
+      "message": "Since we are in an OSGi environment, we have the luxury to determine which Package to export and which ones to hide it from the external applications, So in order to protect the implementation class from directly accessible, either we can give it package access rights or wrap them in its own impl/ package and keep it private to this bundle.\n\nBut also, this library can be used in an non-osgi environment, So, I would leave it to your best judgement on the access limit for this class.",
+      "revId": "5944edb9bc9b9dac1664e8cf5e4c6569f79dec51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a486d77_e3407237",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/message/InsertSerializer.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-06T15:50:28Z",
+      "side": 1,
+      "message": "Why are operations moved under notation ?\nThe Spec keeps the Notations (Data Types) separate from the Operations (Section 5.2). I think we can remove the message hierarchy from the package name and leave operations under lib directly ?",
+      "revId": "5944edb9bc9b9dac1664e8cf5e4c6569f79dec51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a486d77_c33d76bd",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/message/OvsdbRPC.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-06T15:50:28Z",
+      "side": 1,
+      "message": "Same here. and please consider this comment a generic one for all the operations classes/interfaces that are moved under notation package.",
+      "revId": "5944edb9bc9b9dac1664e8cf5e4c6569f79dec51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a486d77_c33696e7",
         "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/notation/operations/TransactionBuilder.java",
         "patchSetId": 2
@@ -30,6 +98,23 @@
       "writtenOn": "2014-04-06T13:57:11Z",
       "side": 1,
       "message": "Can we remove this?",
+      "revId": "5944edb9bc9b9dac1664e8cf5e4c6569f79dec51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a486d77_a34a7a53",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/schema/ATableSchema.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-06T15:50:28Z",
+      "side": 1,
+      "message": "What is the need for this ?",
       "revId": "5944edb9bc9b9dac1664e8cf5e4c6569f79dec51",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a486d77_0325ceaa",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/EchoServiceCallbackFilters.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-04-06T13:50:10Z",
+      "side": 1,
+      "message": "I don\u0027t think this is necessary as authors are already in the copyright block",
+      "revId": "04bcd17960994a102826a4db2e08e798037ff67e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a486d77_2320ca9a",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/OvsDBClient.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-04-06T13:50:10Z",
+      "side": 1,
+      "message": "Any reason for lower case OVSDB in the docstring?",
+      "revId": "04bcd17960994a102826a4db2e08e798037ff67e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a486d77_c33696e7",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/notation/operations/TransactionBuilder.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-04-06T13:57:11Z",
+      "side": 1,
+      "message": "Can we remove this author block?",
+      "revId": "5944edb9bc9b9dac1664e8cf5e4c6569f79dec51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a486d77_a3339af5",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/notation/operations/Update.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-04-06T13:57:11Z",
+      "side": 1,
+      "message": "Can we remove this?",
+      "revId": "5944edb9bc9b9dac1664e8cf5e4c6569f79dec51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

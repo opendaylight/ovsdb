@@ -15,3 +15,5 @@ target
 .project
 .settings
 MANIFEST.MF
+.vagrant
+.DS_Store

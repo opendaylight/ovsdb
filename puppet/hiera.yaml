@@ -1,0 +1,10 @@
+---
+:backends:
+  - yaml
+  - json
+:yaml:
+  :datadir: /vagrant/puppet/hieradata
+:json:
+  :datadir: /vagrant/puppet/hieradata
+:hierarchy:
+  - hosts

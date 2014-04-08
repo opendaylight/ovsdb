@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_82367a02",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/OvsDBClient.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 952
+      },
+      "writtenOn": "2014-04-08T03:37:51Z",
+      "side": 1,
+      "message": "We can, but some commonly used schema\u0027s can be constants not to have it repeated everywhere? Otherwise this will need to be maintained in the client libraries.",
+      "parentUuid": "1a486d77_2357aa04",
+      "revId": "5944edb9bc9b9dac1664e8cf5e4c6569f79dec51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a486d77_035cae24",
         "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/OvsDBClientImpl.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-04-06T15:50:28Z",
       "side": 1,
       "message": "Since we are in an OSGi environment, we have the luxury to determine which Package to export and which ones to hide it from the external applications, So in order to protect the implementation class from directly accessible, either we can give it package access rights or wrap them in its own impl/ package and keep it private to this bundle.\n\nBut also, this library can be used in an non-osgi environment, So, I would leave it to your best judgement on the access limit for this class.",
+      "revId": "5944edb9bc9b9dac1664e8cf5e4c6569f79dec51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c2548223",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/OvsDBClientImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 952
+      },
+      "writtenOn": "2014-04-08T03:37:51Z",
+      "side": 1,
+      "message": "To allow for actual OSGI level module isolation, the interface (and dependent types including parameters and return types) and implementation should be in separate modules. We can do it if its the pattern we are following everywhere else, otherwise those kind of refactoring can be done when we hit a situation. Also your second point is valid too.",
+      "parentUuid": "1a486d77_035cae24",
       "revId": "5944edb9bc9b9dac1664e8cf5e4c6569f79dec51",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_6231f60a",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/message/InsertSerializer.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 952
+      },
+      "writtenOn": "2014-04-08T03:37:51Z",
+      "side": 1,
+      "message": "good catch, will revert.",
+      "parentUuid": "1a486d77_e3407237",
+      "revId": "5944edb9bc9b9dac1664e8cf5e4c6569f79dec51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a486d77_c33d76bd",
         "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/message/OvsdbRPC.java",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2014-04-06T15:50:28Z",
       "side": 1,
       "message": "Same here. and please consider this comment a generic one for all the operations classes/interfaces that are moved under notation package.",
+      "revId": "5944edb9bc9b9dac1664e8cf5e4c6569f79dec51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_223beeec",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/message/OvsdbRPC.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 952
+      },
+      "writtenOn": "2014-04-08T03:37:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a486d77_c33d76bd",
       "revId": "5944edb9bc9b9dac1664e8cf5e4c6569f79dec51",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_42407256",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/notation/operations/TransactionBuilder.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 952
+      },
+      "writtenOn": "2014-04-08T03:37:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a486d77_c33696e7",
+      "revId": "5944edb9bc9b9dac1664e8cf5e4c6569f79dec51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a486d77_a3339af5",
         "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/notation/operations/Update.java",
         "patchSetId": 2
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_e22426c8",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/notation/operations/Update.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 952
+      },
+      "writtenOn": "2014-04-08T03:37:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a486d77_a3339af5",
+      "revId": "5944edb9bc9b9dac1664e8cf5e4c6569f79dec51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a486d77_a34a7a53",
         "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/schema/ATableSchema.java",
         "patchSetId": 2
@@ -115,6 +223,24 @@
       "writtenOn": "2014-04-06T15:50:28Z",
       "side": 1,
       "message": "What is the need for this ?",
+      "revId": "5944edb9bc9b9dac1664e8cf5e4c6569f79dec51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_02226ab9",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/lib/schema/ATableSchema.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 952
+      },
+      "writtenOn": "2014-04-08T03:37:51Z",
+      "side": 1,
+      "message": "The typing needs to be reworked, I will submit another patch with those changes. Until then we need this for things to type check.",
+      "parentUuid": "1a486d77_a34a7a53",
       "revId": "5944edb9bc9b9dac1664e8cf5e4c6569f79dec51",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

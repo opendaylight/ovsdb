@@ -1,0 +1,67 @@
+ODL OVSDB Vagrant
+=================
+
+# Installation
+
+You can download an install for your system from [here](http://www.vagrantup.com/downloads.html)
+Vagrant can also be installed using RubyGems
+
+    gem install vagrant
+
+# Usage
+
+Vagrant is a tool for creating development/test environments.
+The environment created for this project is as follows:
+
+1 x ODL Controller VM
+1 x DevStack Control/Compute VM
+1 x DevStack Compute VM
+1 x Mininet VM
+
+## Controller VM
+
+This VM is where the ODL controller is installed.
+The following steps are performed when the VM is created or when `vagrant provision` is run.
+
+- Check dependencies are installed
+- Your `ovsdb` directory is copied to `~/src` on the VM
+- `mvn clean install` is run on the VM
+- The output of the distribution maven goal is symlinked to `~/dist/`
+
+To start the controller:
+
+    vagrant ssh odl
+    cd ~/dist
+    ./run.sh
+
+## DevStack VMs
+
+There are two DevStack VMs. One combined control/compute node and one dedicated compute node.
+The following steps are performed when the VM is created or when `vagrant provision` is run.
+
+- Check dependencies are installed
+- Clone the devstack repository to `devstack`
+- Generate a `local.conf` file
+
+To start DevStack
+
+    vagrant ssh devstack-control
+    # or vagrant ssh devstack-compute
+    cd devstack
+    ./stack.sh
+
+## Mininet
+
+There is a single VM provided for running mininet.
+This is for testing that does not require OpenStack Neutron.
+
+The following steps are performed when the VM is created or when `vagrant provision` is run.
+- Check dependencies are installed
+- Clone the mininet repository
+- Install mininet and Open vSwitch
+
+To start Mininet
+
+    vagrant ssh mininet
+    sudo mn
+

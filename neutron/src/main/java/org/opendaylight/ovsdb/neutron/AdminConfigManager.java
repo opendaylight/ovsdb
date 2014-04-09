@@ -241,13 +241,6 @@ public class AdminConfigManager {
                 logger.debug("Eth interface for Node {} {}", node, ethIntf);
                 break;
             }
-
-            //FIXME hshen: remove this after debug
-            // if (ethIntf == null) {
-                 /* If can't find interface name from config or ovs table, just give default as eth1 */
-            //  ethIntf = DEFAULT_ETH_INTERFACE_NAME;
-            //  }
-
         } catch (Exception e) {
             logger.error("Error get eth interface for Node {} ", node, e);
         }

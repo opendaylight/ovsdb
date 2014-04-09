@@ -123,8 +123,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
     private static final Logger logger = LoggerFactory.getLogger(OF13ProviderManager.class);
     private DataBrokerService dataBrokerService;
     private static final short TABLE_0_DEFAULT_INGRESS = 0;
-    private static final short TABLE_1_ISOLATE_TENANT = 10;
-    private static final short TABLE_2_LOCAL_FORWARD = 20;
+    private static final short TABLE_10_ISOLATE_TENANT = 10;
+    private static final short TABLE_20_LOCAL_FORWARD = 20;
 
     @Override
     public boolean hasPerTenantTunneling() {
@@ -247,7 +247,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
          * Action:Action: Set Tunnel ID and GOTO Local Table (5)
          */
 
-         writeLocalInPort(dpid, TABLE_0_DEFAULT_INGRESS, TABLE_1_ISOLATE_TENANT, segmentationId, localPort, attachedMac);
+         writeLocalInPort(dpid, TABLE_0_DEFAULT_INGRESS, TABLE_10_ISOLATE_TENANT, segmentationId, localPort, attachedMac);
 
         /*
          * Table(0) Rule #4
@@ -266,7 +266,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
           * table=2,tun_id=0x5,dl_dst=00:00:00:00:00:01 actions=output:2
           */
 
-          writeLocalUcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId, localPort, attachedMac);
+          writeLocalUcastOut(dpid, TABLE_20_LOCAL_FORWARD, segmentationId, localPort, attachedMac);
 
          /*
           * Table(2) Rule #2
@@ -276,7 +276,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
           * actions=output:2,3,4,5
           */
 
-          writeLocalBcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId, localPort);
+          writeLocalBcastOut(dpid, TABLE_20_LOCAL_FORWARD, segmentationId, localPort);
 
           /*
            * TODO : Optimize the following 2 writes to be restricted only for the very first port known in a segment.
@@ -290,7 +290,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
            * table=1,priority=8192,tun_id=0x5 actions=goto_table:2
            */
 
-           writeTunnelMiss(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId);
+           writeTunnelMiss(dpid, TABLE_10_ISOLATE_TENANT, TABLE_20_LOCAL_FORWARD, segmentationId);
 
           /*
            * Table(2) Rule #3
@@ -300,7 +300,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
            * table=2,priority=8192,tun_id=0x5 actions=drop
            */
 
-           writeLocalTableMiss(dpid, TABLE_2_LOCAL_FORWARD, segmentationId);
+           writeLocalTableMiss(dpid, TABLE_20_LOCAL_FORWARD, segmentationId);
     }
 
     private void programLocalIngressTunnelBridgeRules(Node node, Long dpid, String segmentationId, String attachedMac, long tunnelOFPort, long localPort) {
@@ -311,7 +311,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
          * Action: GOTO Local Table (10)
          */
 
-         writeTunnelIn(dpid, TABLE_0_DEFAULT_INGRESS, TABLE_2_LOCAL_FORWARD, segmentationId, tunnelOFPort);
+         writeTunnelIn(dpid, TABLE_0_DEFAULT_INGRESS, TABLE_20_LOCAL_FORWARD, segmentationId, tunnelOFPort);
 
          /*
           * Table(1) Rule #2
@@ -323,7 +323,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
           * actions=output:10,output:11,goto_table:2
           */
 
-         writeTunnelFloodOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, tunnelOFPort);
+         writeTunnelFloodOut(dpid, TABLE_10_ISOLATE_TENANT, TABLE_20_LOCAL_FORWARD, segmentationId, tunnelOFPort);
 
     }
 
@@ -338,7 +338,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
          * actions=output:11,goto_table:2
          */
 
-        writeTunnelOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, tunnelOFPort, attachedMac);
+        writeTunnelOut(dpid, TABLE_10_ISOLATE_TENANT, TABLE_20_LOCAL_FORWARD, segmentationId, tunnelOFPort, attachedMac);
     }
 
     private Long getIntegrationBridgeOFDPID (Node node) {
@@ -614,6 +614,19 @@ class OF13ProviderManager extends ProviderNetworkManager {
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
         writeFlow(flowBuilder, nodeBuilder);
+
+        // Enable Debugging to troubleshoot OF Flowmods
+        logger.debug("FlowBuilder obj from writeLLDP() as follows: " +
+            "FlowBuilder Priority={}, FlowBuilder Table ID={}, " +
+            "FlowBuilder Flow Matches={}, FlowBuilder Key={}, " +
+            "FlowBuilder Flowmod ID={}, FlowBuilder isStrict={}, " +
+            "FlowBuilder OutPort={} FlowBuilder Instructions={}" +
+            "FlowBuilder isBarrier={} FlowBuilder Flowmod Name={}",
+            flowBuilder.getPriority(), flowBuilder.getTableId(),
+            flowBuilder.getMatch(), flowBuilder.getKey(),
+            flowBuilder.getId(), flowBuilder.isStrict(),
+            flowBuilder.getOutPort(), flowBuilder.getInstructions(),
+            flowBuilder.isBarrier(), flowBuilder.getFlowName());
     }
 
     /*
@@ -667,6 +680,19 @@ class OF13ProviderManager extends ProviderNetworkManager {
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
         writeFlow(flowBuilder, nodeBuilder);
+
+        // Enable Debugging to troubleshoot OF Flowmods
+        logger.debug("FlowBuilder obj from writeLLDP() as follows: " +
+            "FlowBuilder Priority={}, FlowBuilder Table ID={}, " +
+            "FlowBuilder Flow Matches={}, FlowBuilder Key={}, " +
+            "FlowBuilder Flowmod ID={}, FlowBuilder isStrict={}, " +
+            "FlowBuilder OutPort={} FlowBuilder Instructions={}" +
+            "FlowBuilder isBarrier={} FlowBuilder Flowmod Name={}",
+            flowBuilder.getPriority(), flowBuilder.getTableId(),
+            flowBuilder.getMatch(), flowBuilder.getKey(),
+            flowBuilder.getId(), flowBuilder.isStrict(),
+            flowBuilder.getOutPort(), flowBuilder.getInstructions(),
+            flowBuilder.isBarrier(), flowBuilder.getFlowName());
     }
 
    /*
@@ -719,14 +745,24 @@ class OF13ProviderManager extends ProviderNetworkManager {
         ib.setOrder(1);
         ib.setKey(new InstructionKey(1));
         instructions.add(ib.build());
-
         // Add InstructionBuilder to the Instruction(s)Builder List
         isb.setInstruction(instructions);
-
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
-
         writeFlow(flowBuilder, nodeBuilder);
+
+        // Enable Debugging to troubleshoot OF Flowmods
+        logger.debug("FlowBuilder obj from writeLLDP() as follows: " +
+            "FlowBuilder Priority={}, FlowBuilder Table ID={}, " +
+            "FlowBuilder Flow Matches={}, FlowBuilder Key={}, " +
+            "FlowBuilder Flowmod ID={}, FlowBuilder isStrict={}, " +
+            "FlowBuilder OutPort={} FlowBuilder Instructions={}" +
+            "FlowBuilder isBarrier={} FlowBuilder Flowmod Name={}",
+            flowBuilder.getPriority(), flowBuilder.getTableId(),
+            flowBuilder.getMatch(), flowBuilder.getKey(),
+            flowBuilder.getId(), flowBuilder.isStrict(),
+            flowBuilder.getOutPort(), flowBuilder.getInstructions(),
+            flowBuilder.isBarrier(), flowBuilder.getFlowName());
     }
 
     /*
@@ -780,6 +816,19 @@ class OF13ProviderManager extends ProviderNetworkManager {
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
         writeFlow(flowBuilder, nodeBuilder);
+
+        // Enable Debugging to troubleshoot OF Flowmods
+        logger.debug("FlowBuilder obj from writeLLDP() as follows: " +
+            "FlowBuilder Priority={}, FlowBuilder Table ID={}, " +
+            "FlowBuilder Flow Matches={}, FlowBuilder Key={}, " +
+            "FlowBuilder Flowmod ID={}, FlowBuilder isStrict={}, " +
+            "FlowBuilder OutPort={} FlowBuilder Instructions={}" +
+            "FlowBuilder isBarrier={} FlowBuilder Flowmod Name={}",
+            flowBuilder.getPriority(), flowBuilder.getTableId(),
+            flowBuilder.getMatch(), flowBuilder.getKey(),
+            flowBuilder.getId(), flowBuilder.isStrict(),
+            flowBuilder.getOutPort(), flowBuilder.getInstructions(),
+            flowBuilder.isBarrier(), flowBuilder.getFlowName());
     }
 
    /*
@@ -838,6 +887,19 @@ class OF13ProviderManager extends ProviderNetworkManager {
         flowBuilder.setInstructions(isb.build());
 
         writeFlow(flowBuilder, nodeBuilder);
+
+        // Enable Debugging to troubleshoot OF Flowmods
+        logger.debug("FlowBuilder obj from writeLLDP() as follows: " +
+            "FlowBuilder Priority={}, FlowBuilder Table ID={}, " +
+            "FlowBuilder Flow Matches={}, FlowBuilder Key={}, " +
+            "FlowBuilder Flowmod ID={}, FlowBuilder isStrict={}, " +
+            "FlowBuilder OutPort={} FlowBuilder Instructions={}" +
+            "FlowBuilder isBarrier={} FlowBuilder Flowmod Name={}",
+            flowBuilder.getPriority(), flowBuilder.getTableId(),
+            flowBuilder.getMatch(), flowBuilder.getKey(),
+            flowBuilder.getId(), flowBuilder.isStrict(),
+            flowBuilder.getOutPort(), flowBuilder.getInstructions(),
+            flowBuilder.isBarrier(), flowBuilder.getFlowName());
     }
 
        /*
@@ -897,14 +959,24 @@ class OF13ProviderManager extends ProviderNetworkManager {
         ib.setOrder(1);
         ib.setKey(new InstructionKey(1));
         instructions.add(ib.build());
-
         // Add InstructionBuilder to the Instruction(s)Builder List
         isb.setInstruction(instructions);
-
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
-
         writeFlow(flowBuilder, nodeBuilder);
+
+        // Enable Debugging to troubleshoot OF Flowmods
+        logger.debug("FlowBuilder obj from writeLLDP() as follows: " +
+            "FlowBuilder Priority={}, FlowBuilder Table ID={}, " +
+            "FlowBuilder Flow Matches={}, FlowBuilder Key={}, " +
+            "FlowBuilder Flowmod ID={}, FlowBuilder isStrict={}, " +
+            "FlowBuilder OutPort={} FlowBuilder Instructions={}" +
+            "FlowBuilder isBarrier={} FlowBuilder Flowmod Name={}",
+            flowBuilder.getPriority(), flowBuilder.getTableId(),
+            flowBuilder.getMatch(), flowBuilder.getKey(),
+            flowBuilder.getId(), flowBuilder.isStrict(),
+            flowBuilder.getOutPort(), flowBuilder.getInstructions(),
+            flowBuilder.isBarrier(), flowBuilder.getFlowName());
     }
 
    /*
@@ -957,6 +1029,19 @@ class OF13ProviderManager extends ProviderNetworkManager {
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
         writeFlow(flowBuilder, nodeBuilder);
+
+        // Enable Debugging to troubleshoot OF Flowmods
+        logger.debug("FlowBuilder obj from writeLLDP() as follows: " +
+            "FlowBuilder Priority={}, FlowBuilder Table ID={}, " +
+            "FlowBuilder Flow Matches={}, FlowBuilder Key={}, " +
+            "FlowBuilder Flowmod ID={}, FlowBuilder isStrict={}, " +
+            "FlowBuilder OutPort={} FlowBuilder Instructions={}" +
+            "FlowBuilder isBarrier={} FlowBuilder Flowmod Name={}",
+            flowBuilder.getPriority(), flowBuilder.getTableId(),
+            flowBuilder.getMatch(), flowBuilder.getKey(),
+            flowBuilder.getId(), flowBuilder.isStrict(),
+            flowBuilder.getOutPort(), flowBuilder.getInstructions(),
+            flowBuilder.isBarrier(), flowBuilder.getFlowName());
     }
 
     /*
@@ -1002,13 +1087,24 @@ class OF13ProviderManager extends ProviderNetworkManager {
         ib.setOrder(0);
         ib.setKey(new InstructionKey(0));
         instructions.add(ib.build());
-
         // Add InstructionBuilder to the Instruction(s)Builder List
         isb.setInstruction(instructions);
-
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
         writeFlow(flowBuilder, nodeBuilder);
+
+        // Enable Debugging to troubleshoot OF Flowmods
+        logger.debug("FlowBuilder obj from writeLLDP() as follows: " +
+            "FlowBuilder Priority={}, FlowBuilder Table ID={}, " +
+            "FlowBuilder Flow Matches={}, FlowBuilder Key={}, " +
+            "FlowBuilder Flowmod ID={}, FlowBuilder isStrict={}, " +
+            "FlowBuilder OutPort={} FlowBuilder Instructions={}" +
+            "FlowBuilder isBarrier={} FlowBuilder Flowmod Name={}",
+            flowBuilder.getPriority(), flowBuilder.getTableId(),
+            flowBuilder.getMatch(), flowBuilder.getKey(),
+            flowBuilder.getId(), flowBuilder.isStrict(),
+            flowBuilder.getOutPort(), flowBuilder.getInstructions(),
+            flowBuilder.isBarrier(), flowBuilder.getFlowName());
     }
 
     /*
@@ -1060,14 +1156,24 @@ class OF13ProviderManager extends ProviderNetworkManager {
         ib.setOrder(0);
         ib.setKey(new InstructionKey(0));
         instructions.add(ib.build());
-
         // Add InstructionBuilder to the Instruction(s)Builder List
         isb.setInstruction(instructions);
-
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
-
         writeFlow(flowBuilder, nodeBuilder);
+
+        // Enable Debugging to troubleshoot OF Flowmods
+        logger.debug("FlowBuilder obj from writeLLDP() as follows: " +
+            "FlowBuilder Priority={}, FlowBuilder Table ID={}, " +
+            "FlowBuilder Flow Matches={}, FlowBuilder Key={}, " +
+            "FlowBuilder Flowmod ID={}, FlowBuilder isStrict={}, " +
+            "FlowBuilder OutPort={} FlowBuilder Instructions={}" +
+            "FlowBuilder isBarrier={} FlowBuilder Flowmod Name={}",
+            flowBuilder.getPriority(), flowBuilder.getTableId(),
+            flowBuilder.getMatch(), flowBuilder.getKey(),
+            flowBuilder.getId(), flowBuilder.isStrict(),
+            flowBuilder.getOutPort(), flowBuilder.getInstructions(),
+            flowBuilder.isBarrier(), flowBuilder.getFlowName());
     }
 
     /*
@@ -1120,6 +1226,19 @@ class OF13ProviderManager extends ProviderNetworkManager {
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
         writeFlow(flowBuilder, nodeBuilder);
+
+        // Enable Debugging to troubleshoot OF Flowmods
+        logger.debug("FlowBuilder obj from writeLLDP() as follows: " +
+            "FlowBuilder Priority={}, FlowBuilder Table ID={}, " +
+            "FlowBuilder Flow Matches={}, FlowBuilder Key={}, " +
+            "FlowBuilder Flowmod ID={}, FlowBuilder isStrict={}, " +
+            "FlowBuilder OutPort={} FlowBuilder Instructions={}" +
+            "FlowBuilder isBarrier={} FlowBuilder Flowmod Name={}",
+            flowBuilder.getPriority(), flowBuilder.getTableId(),
+            flowBuilder.getMatch(), flowBuilder.getKey(),
+            flowBuilder.getId(), flowBuilder.isStrict(),
+            flowBuilder.getOutPort(), flowBuilder.getInstructions(),
+            flowBuilder.isBarrier(), flowBuilder.getFlowName());
     }
 
     private Flow getFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
@@ -1351,7 +1470,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
         eth.setEthernetType(ethTypeBuilder.build());
         matchBuilder.setEthernetMatch(eth.build());
 
-        Ipv4MatchBuilder ipv4Match = new Ipv4MatchBuilder();
         Ipv4MatchBuilder ipv4match = new Ipv4MatchBuilder();
         ipv4match.setIpv4Source(srcip);
         matchBuilder.setLayer3Match(ipv4match.build());
@@ -1406,7 +1524,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
         ipmatch.setIpProtocol((short) 6);
         matchBuilder.setIpMatch(ipmatch.build());
 
-        PortNumber dstport = new PortNumber(tcpport);
         TcpMatchBuilder tcpmatch = new TcpMatchBuilder();
 
         tcpmatch.setTcpDestinationPort(tcpport);

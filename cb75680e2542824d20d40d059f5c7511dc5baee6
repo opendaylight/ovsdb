@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_08adab31",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13ProviderManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 685,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-09T08:18:06Z",
+      "side": 1,
+      "message": "3 Generic comments that is applicable for all the logger changes :\n1. Please change the writeLLDP string above to reflect the correct method name. \n2. FlowBuilder does seem to have toString(), didnt the flowBuilder.toString() call help ? Also, what is the purpose of repeating \"FlowBuilder\" for every member ?\n3. I now see why logger.trace is a better choice for this. consider changing to trace ?",
+      "revId": "cb75680e2542824d20d40d059f5c7511dc5baee6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

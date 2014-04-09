@@ -51,7 +51,7 @@ public class NetworkHandler extends BaseHandler
     @Override
     public void neutronNetworkCreated(NeutronNetwork network) {
         int result = HttpURLConnection.HTTP_BAD_REQUEST;
-
+        logger.trace("shague neutronNetworkCreated: network: {}", network);
         result = canCreateNetwork(network);
         if (result != HttpURLConnection.HTTP_CREATED) {
             logger.debug("Network creation failed {} ", result);
@@ -73,6 +73,7 @@ public class NetworkHandler extends BaseHandler
     @Override
     public int canUpdateNetwork(NeutronNetwork delta,
                                 NeutronNetwork original) {
+        logger.trace("shague canUpdateNetwork: network delta {} --- original {}", delta, original);
         return HttpURLConnection.HTTP_OK;
     }
 
@@ -83,6 +84,7 @@ public class NetworkHandler extends BaseHandler
      */
     @Override
     public void neutronNetworkUpdated(NeutronNetwork network) {
+        logger.trace("shague neutronNetworkUpdated: network: {}", network);
         return;
     }
 
@@ -95,6 +97,7 @@ public class NetworkHandler extends BaseHandler
      */
     @Override
     public int canDeleteNetwork(NeutronNetwork network) {
+        logger.trace("shague canDeleteNetwork: network: {}", network);
         return HttpURLConnection.HTTP_OK;
     }
 
@@ -107,6 +110,7 @@ public class NetworkHandler extends BaseHandler
     public void neutronNetworkDeleted(NeutronNetwork network) {
 
         int result = canDeleteNetwork(network);
+        logger.trace("shague canDeleteNetwork: network: {}", network);
         if  (result != HttpURLConnection.HTTP_OK) {
             logger.error(" deleteNetwork validation failed for result - {} ",
                     result);

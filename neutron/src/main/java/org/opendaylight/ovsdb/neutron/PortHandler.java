@@ -56,6 +56,7 @@ public class PortHandler extends BaseHandler
                      " network-id - {}, port-id - {}, result - {} ",
                      port.getTenantID(), port.getNetworkUUID(),
                      port.getID(), result);
+        //logger.trace("shague: neutronPortCreated {}", port);
     }
 
     /**
@@ -80,6 +81,7 @@ public class PortHandler extends BaseHandler
             logger.error("port object not specified");
             return HttpURLConnection.HTTP_BAD_REQUEST;
         }
+        logger.trace("shague: canUpdatePort delta: {}, original: {}", delta, original);
         return result;
     }
 
@@ -90,6 +92,7 @@ public class PortHandler extends BaseHandler
      */
     @Override
     public void neutronPortUpdated(NeutronPort port) {
+        logger.trace("shague: neutronPortUpdated {}", port);
     }
 
     /**

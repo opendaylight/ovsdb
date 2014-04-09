@@ -1,0 +1,378 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_4b72cde6",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-09T21:17:39Z",
+      "side": 1,
+      "message": "Looks unused?",
+      "revId": "369165f4f92665242e033454b49a5ee6a4ea0381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0b74c5cd",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-09T21:17:39Z",
+      "side": 1,
+      "message": "still using Physical?",
+      "revId": "369165f4f92665242e033454b49a5ee6a4ea0381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0b092531",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-09T21:17:39Z",
+      "side": 1,
+      "message": "hasPerTenantTunneling \u003d\u003d 1.3, but it\u0027s not clear between this and above comment",
+      "revId": "369165f4f92665242e033454b49a5ee6a4ea0381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ab059915",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-09T21:17:39Z",
+      "side": 1,
+      "message": "need to be sure interface name is per ovsdb instance",
+      "revId": "369165f4f92665242e033454b49a5ee6a4ea0381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_cb025d0b",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-09T21:17:39Z",
+      "side": 1,
+      "message": "small here, but if getPhysInterfaceName is expanded...this is same as netBridge...could be done once (perhaps a helper function)",
+      "revId": "369165f4f92665242e033454b49a5ee6a4ea0381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_76ff7802",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-09T21:17:39Z",
+      "side": 1,
+      "message": "minor nitpick...inconsistent use of \"s (Bridge br-int and Bridge \"br-net\", for example)",
+      "revId": "369165f4f92665242e033454b49a5ee6a4ea0381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_96047c16",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 320,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-09T21:17:39Z",
+      "side": 1,
+      "message": "spurious whitespace?",
+      "revId": "369165f4f92665242e033454b49a5ee6a4ea0381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3609f02c",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 377,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-09T21:17:39Z",
+      "side": 1,
+      "message": "Magic sleep times and timeouts...this looks broken",
+      "revId": "369165f4f92665242e033454b49a5ee6a4ea0381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_16106c4d",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 496,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-09T21:17:39Z",
+      "side": 1,
+      "message": "why commented out?",
+      "revId": "369165f4f92665242e033454b49a5ee6a4ea0381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_762698bc",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 526,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-09T21:17:39Z",
+      "side": 1,
+      "message": "other types (\"flat\") for example",
+      "revId": "369165f4f92665242e033454b49a5ee6a4ea0381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_962b1c82",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/NodeConfiguration.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-09T21:17:39Z",
+      "side": 1,
+      "message": "These comments could go in a separate patch",
+      "revId": "369165f4f92665242e033454b49a5ee6a4ea0381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0b5b6555",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/SouthboundHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-09T21:17:39Z",
+      "side": 1,
+      "message": "Is that an exception?",
+      "revId": "369165f4f92665242e033454b49a5ee6a4ea0381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3620109b",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/TenantNetworkManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-09T21:17:39Z",
+      "side": 1,
+      "message": "all these trace could go as separate changes (w/out \"shague\" of course ;)",
+      "revId": "369165f4f92665242e033454b49a5ee6a4ea0381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f63948d9",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF10ProviderManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-09T21:17:39Z",
+      "side": 1,
+      "message": "Valid (but unrelated...separate change)",
+      "revId": "369165f4f92665242e033454b49a5ee6a4ea0381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_764d3872",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF10ProviderManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 503,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-09T21:17:39Z",
+      "side": 1,
+      "message": "just actions.add(ActionType.HW_PATH.toString()) ?",
+      "revId": "369165f4f92665242e033454b49a5ee6a4ea0381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_96523c12",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF10ProviderManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 562,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-09T21:17:39Z",
+      "side": 1,
+      "message": "will this break mixing tunnels and vlans?",
+      "revId": "369165f4f92665242e033454b49a5ee6a4ea0381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3657b004",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF10ProviderManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 580,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-09T21:17:39Z",
+      "side": 1,
+      "message": "nitpick flow2...better name?",
+      "revId": "369165f4f92665242e033454b49a5ee6a4ea0381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f6406837",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF10ProviderManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 642,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-09T21:17:39Z",
+      "side": 1,
+      "message": "could this be part of constructor, and have isValid() or something like that?",
+      "revId": "369165f4f92665242e033454b49a5ee6a4ea0381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_565cb425",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF10ProviderManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 661,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-09T21:17:39Z",
+      "side": 1,
+      "message": "certainly not right long term, currently getPhysicalInterfaceName()",
+      "revId": "369165f4f92665242e033454b49a5ee6a4ea0381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_163e2cb9",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF10ProviderManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 772,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-09T21:17:39Z",
+      "side": 1,
+      "message": "could be \"flat\"",
+      "revId": "369165f4f92665242e033454b49a5ee6a4ea0381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b64ae053",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF10ProviderManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 806,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-09T21:17:39Z",
+      "side": 1,
+      "message": "same here",
+      "revId": "369165f4f92665242e033454b49a5ee6a4ea0381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d647644a",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF10ProviderManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1087,
+      "author": {
+        "id": 37
+      },
+      "writtenOn": "2014-04-09T21:17:39Z",
+      "side": 1,
+      "message": "spelling comment...valid to separate it",
+      "revId": "369165f4f92665242e033454b49a5ee6a4ea0381",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

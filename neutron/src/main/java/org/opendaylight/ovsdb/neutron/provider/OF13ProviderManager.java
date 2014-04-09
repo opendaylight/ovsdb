@@ -455,7 +455,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
     }
 
     @Override
-    public Status handleInterfaceUpdate(String tunnelType, String tunnelKey, Node srcNode, Interface intf) {
+    public Status handleInterfaceUpdate(NeutronNetwork network, Node srcNode, Interface intf) {
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, "default", this);
         if (switchManager == null) {
             logger.error("Unable to identify SwitchManager");
@@ -487,18 +487,18 @@ class OF13ProviderManager extends ProviderNetworkManager {
         IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
         List<Node> nodes = connectionService.getNodes();
         nodes.remove(srcNode);
-        this.programLocalRules(tunnelType, tunnelKey, srcNode, intf);
+        this.programLocalRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), srcNode, intf);
 
         for (Node dstNode : nodes) {
             InetAddress src = AdminConfigManager.getManager().getTunnelEndPoint(srcNode);
             InetAddress dst = AdminConfigManager.getManager().getTunnelEndPoint(dstNode);
-            Status status = addTunnelPort(srcNode, tunnelType, src, dst);
+            Status status = addTunnelPort(srcNode, network.getProviderNetworkType(), src, dst);
             if (status.isSuccess()) {
-                this.programTunnelRules(tunnelType, tunnelKey, dst, srcNode, intf, true);
+                this.programTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), dst, srcNode, intf, true);
             }
-            addTunnelPort(dstNode, tunnelType, dst, src);
+            addTunnelPort(dstNode, network.getProviderNetworkType(), dst, src);
             if (status.isSuccess()) {
-                this.programTunnelRules(tunnelType, tunnelKey, src, dstNode, intf, false);
+                this.programTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), src, dstNode, intf, false);
             }
         }
 
@@ -515,7 +515,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
                     NeutronNetwork network = TenantNetworkManager.getManager().getTenantNetworkForInterface(intf);
                     logger.debug("Trigger Interface update for {}", intf);
                     if (network != null) {
-                        this.handleInterfaceUpdate(network.getProviderNetworkType(), network.getProviderSegmentationID(), node, intf);
+                        this.handleInterfaceUpdate(network, node, intf);
                     }
                 }
             }
@@ -532,8 +532,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
     }
 
     @Override
-    public Status handleInterfaceDelete(String tunnelType, String tunnelKey, Node source, Interface intf,
-            boolean isLastInstanceOnNode) {
+    public Status handleInterfaceDelete(NeutronNetwork network, Node source, Interface intf, boolean isLastInstanceOnNode) {
         // TODO Auto-generated method stub
         return null;
     }

@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Authors : Madhu Venugopal, Brent Salisbury, Dave Tucker
+ * Authors : Madhu Venugopal, Brent Salisbury, Dave Tucker, Sam Hague
  */
 package org.opendaylight.ovsdb.neutron;
 
@@ -119,6 +119,7 @@ public class TenantNetworkManager {
         IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
         List<Node> nodes = connectionService.getNodes();
 
+        logger.trace("shague ********** networkCreated networkId: {}", networkId);
         for (Node node : nodes) {
             this.networkCreated(node, networkId);
         }
@@ -155,6 +156,7 @@ public class TenantNetworkManager {
         }
 
         int internalVlan = nodeConfiguration.assignInternalVlan(networkId);
+        logger.trace("shague: internalVlan returned: {}", internalVlan);
         if (enableContainer && internalVlan != 0) {
             IContainerManager containerManager = (IContainerManager)ServiceHelper.getGlobalInstance(IContainerManager.class, this);
             if (containerManager == null) {
@@ -183,7 +185,7 @@ public class TenantNetworkManager {
     public boolean isTenantNetworkPresentInNode(Node node, String segmentationId) {
         String networkId = this.getNetworkIdForSegmentationId(segmentationId);
         if (networkId == null) {
-            logger.debug("Tenant Network not found with Segmenation-id {}",segmentationId);
+            logger.debug("Tenant Network not found with Segmentation-id {}",segmentationId);
             return false;
         }
         if (ProviderNetworkManager.getManager().hasPerTenantTunneling()) {
@@ -222,7 +224,7 @@ public class TenantNetworkManager {
                 Port port = (Port)row;
                 Set<BigInteger> tags = port.getTag();
                 if (tags.contains(internalVlan)) {
-                    logger.debug("Tenant Network {} with Segmenation-id {} is present in Node {} / Port {}",
+                    logger.debug("Tenant Network {} with Segmentation-id {} is present in Node {} / Port {}",
                                   networkId, segmentationId, node, port);
                     return true;
                 }
@@ -275,16 +277,16 @@ public class TenantNetworkManager {
     }
 
     public NeutronNetwork getTenantNetworkForInterface (Interface intf) {
-        logger.trace("getTenantNetworkForInterface for {}", intf);
+        //logger.trace("getTenantNetworkForInterface for {}", intf.getName());
         if (intf == null) return null;
         Map<String, String> externalIds = intf.getExternal_ids();
-        logger.trace("externalIds {}", externalIds);
+        //logger.trace("externalIds {}", externalIds);
         if (externalIds == null) return null;
         String neutronPortId = externalIds.get(EXTERNAL_ID_INTERFACE_ID);
         if (neutronPortId == null) return null;
         INeutronPortCRUD neutronPortService = (INeutronPortCRUD)ServiceHelper.getGlobalInstance(INeutronPortCRUD.class, this);
         NeutronPort neutronPort = neutronPortService.getPort(neutronPortId);
-        logger.trace("neutronPort {}", neutronPort);
+        //logger.trace("neutronPort {}", neutronPort);
         if (neutronPort == null) return null;
         INeutronNetworkCRUD neutronNetworkService = (INeutronNetworkCRUD)ServiceHelper.getGlobalInstance(INeutronNetworkCRUD.class, this);
         NeutronNetwork neutronNetwork = neutronNetworkService.getNetwork(neutronPort.getNetworkUUID());

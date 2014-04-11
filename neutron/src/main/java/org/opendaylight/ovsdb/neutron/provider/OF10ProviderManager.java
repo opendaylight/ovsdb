@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Authors : Madhu Venugopal, Brent Salisbury
+ * Authors : Madhu Venugopal, Brent Salisbury, Sam Hague
  */
 package org.opendaylight.ovsdb.neutron.provider;
 
@@ -18,6 +18,7 @@ import java.util.Set;
 
 import org.opendaylight.controller.forwardingrulesmanager.FlowConfig;
 import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManager;
+import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.EtherTypes;
@@ -68,8 +69,21 @@ class OF10ProviderManager extends ProviderNetworkManager {
         }
 
         if (!TenantNetworkManager.getManager().isTenantNetworkPresentInNode(node, tunnelKey)) {
-            logger.debug(node+" has no VM corresponding to segment "+ tunnelKey);
-            return new Status(StatusCode.NOTACCEPTABLE, node+" has no VM corresponding to segment "+ tunnelKey);
+            logger.debug(node+" has no network corresponding to segment "+ tunnelKey);
+            return new Status(StatusCode.NOTACCEPTABLE, node+" has no network corresponding to segment "+ tunnelKey);
+        }
+        return new Status(StatusCode.SUCCESS);
+    }
+
+    private Status getVlanReadinessStatus (Node node, String segmentationId) {
+        if (!InternalNetworkManager.getManager().isInternalNetworkOverlayReady(node)) {
+            logger.warn("{} is not Overlay ready. It might be an OpenStack Controller Node", node);
+            return new Status(StatusCode.NOTACCEPTABLE, node+" is not Overlay ready");
+        }
+
+        if (!TenantNetworkManager.getManager().isTenantNetworkPresentInNode(node, segmentationId)) {
+            logger.debug(node+" has no network corresponding to segment "+ segmentationId);
+            return new Status(StatusCode.NOTACCEPTABLE, node+" has no network corresponding to segment "+ segmentationId);
         }
         return new Status(StatusCode.SUCCESS);
     }
@@ -80,14 +94,14 @@ class OF10ProviderManager extends ProviderNetworkManager {
      * and rewrite the Corresponding internal Vlan and pass it on to br-int via the patch port.
      */
     private void programLocalIngressTunnelBridgeRules(Node node, int tunnelOFPort, int internalVlan, int patchPort) {
-        String brIntId = InternalNetworkManager.getManager().getInternalBridgeUUID(node, AdminConfigManager.getManager().getTunnelBridgeName());
-        if (brIntId == null) {
+        String brNetId = InternalNetworkManager.getManager().getInternalBridgeUUID(node, AdminConfigManager.getManager().getNetworkBridgeName());
+        if (brNetId == null) {
             logger.error("Failed to initialize Flow Rules for {}", node);
             return;
         }
         try {
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brIntId);
+            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brNetId);
             Set<String> dpids = bridge.getDatapath_id();
             if (dpids == null || dpids.size() ==  0) return;
             Long dpidLong = Long.valueOf(HexEncode.stringToLong((String)dpids.toArray()[0]));
@@ -111,14 +125,14 @@ class OF10ProviderManager extends ProviderNetworkManager {
     }
 
     private void removeLocalIngressTunnelBridgeRules(Node node, int tunnelOFPort, int internalVlan, int patchPort) {
-        String brIntId = InternalNetworkManager.getManager().getInternalBridgeUUID(node, AdminConfigManager.getManager().getTunnelBridgeName());
-        if (brIntId == null) {
+        String brNetId = InternalNetworkManager.getManager().getInternalBridgeUUID(node, AdminConfigManager.getManager().getNetworkBridgeName());
+        if (brNetId == null) {
             logger.error("Failed to remove Flow Rules for {}", node);
             return;
         }
         try {
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brIntId);
+            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brNetId);
             Set<String> dpids = bridge.getDatapath_id();
             if (dpids == null || dpids.size() ==  0) return;
             Long dpidLong = Long.valueOf(HexEncode.stringToLong((String)dpids.toArray()[0]));
@@ -141,14 +155,14 @@ class OF10ProviderManager extends ProviderNetworkManager {
      */
     private void programRemoteEgressTunnelBridgeRules(Node node, int patchPort, String attachedMac,
             int internalVlan, int tunnelOFPort) {
-        String brIntId = InternalNetworkManager.getManager().getInternalBridgeUUID(node, AdminConfigManager.getManager().getTunnelBridgeName());
-        if (brIntId == null) {
+        String brNetId = InternalNetworkManager.getManager().getInternalBridgeUUID(node, AdminConfigManager.getManager().getNetworkBridgeName());
+        if (brNetId == null) {
             logger.error("Failed to initialize Flow Rules for {}", node);
             return;
         }
         try {
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brIntId);
+            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brNetId);
             Set<String> dpids = bridge.getDatapath_id();
             if (dpids == null || dpids.size() ==  0) return;
             Long dpidLong = Long.valueOf(HexEncode.stringToLong((String)dpids.toArray()[0]));
@@ -175,14 +189,14 @@ class OF10ProviderManager extends ProviderNetworkManager {
 
     private void removeRemoteEgressTunnelBridgeRules(Node node, int patchPort, String attachedMac,
             int internalVlan, int tunnelOFPort) {
-        String brIntId = InternalNetworkManager.getManager().getInternalBridgeUUID(node, AdminConfigManager.getManager().getTunnelBridgeName());
-        if (brIntId == null) {
+        String brNetId = InternalNetworkManager.getManager().getInternalBridgeUUID(node, AdminConfigManager.getManager().getNetworkBridgeName());
+        if (brNetId == null) {
             logger.error("Failed to initialize Flow Rules for {}", node);
             return;
         }
         try {
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brIntId);
+            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brNetId);
             Set<String> dpids = bridge.getDatapath_id();
             if (dpids == null || dpids.size() ==  0) return;
             Long dpidLong = Long.valueOf(HexEncode.stringToLong((String)dpids.toArray()[0]));
@@ -203,14 +217,14 @@ class OF10ProviderManager extends ProviderNetworkManager {
      * Also perform the Strip-Vlan action.
      */
     private void programFloodEgressTunnelBridgeRules(Node node, int patchPort, int internalVlan, int tunnelOFPort) {
-        String brIntId = InternalNetworkManager.getManager().getInternalBridgeUUID(node, AdminConfigManager.getManager().getTunnelBridgeName());
-        if (brIntId == null) {
+        String brNetId = InternalNetworkManager.getManager().getInternalBridgeUUID(node, AdminConfigManager.getManager().getNetworkBridgeName());
+        if (brNetId == null) {
             logger.error("Failed to initialize Flow Rules for {}", node);
             return;
         }
         try {
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brIntId);
+            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brNetId);
             Set<String> dpids = bridge.getDatapath_id();
             if (dpids == null || dpids.size() ==  0) return;
             Long dpidLong = Long.valueOf(HexEncode.stringToLong((String)dpids.toArray()[0]));
@@ -257,14 +271,14 @@ class OF10ProviderManager extends ProviderNetworkManager {
     }
 
     private void removeFloodEgressTunnelBridgeRules(Node node, int patchPort, int internalVlan, int tunnelOFPort) {
-        String brIntId = InternalNetworkManager.getManager().getInternalBridgeUUID(node, AdminConfigManager.getManager().getTunnelBridgeName());
-        if (brIntId == null) {
+        String brNetId = InternalNetworkManager.getManager().getInternalBridgeUUID(node, AdminConfigManager.getManager().getNetworkBridgeName());
+        if (brNetId == null) {
             logger.error("Failed to remove Flow Rules for {}", node);
             return;
         }
         try {
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brIntId);
+            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brNetId);
             Set<String> dpids = bridge.getDatapath_id();
             if (dpids == null || dpids.size() ==  0) return;
             Long dpidLong = Long.valueOf(HexEncode.stringToLong((String)dpids.toArray()[0]));
@@ -293,7 +307,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
                                      Interface intf, boolean local) {
         String networkId = TenantNetworkManager.getManager().getNetworkIdForSegmentationId(segmentationId);
         if (networkId == null) {
-            logger.debug("Tenant Network not found with Segmenation-id {}",segmentationId);
+            logger.debug("Tenant Network not found with Segmentation-id {}", segmentationId);
             return;
         }
         int internalVlan = TenantNetworkManager.getManager().getInternalVlan(node, networkId);
@@ -369,7 +383,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
             Interface intf, boolean local) {
         String networkId = TenantNetworkManager.getManager().getNetworkIdForSegmentationId(segmentationId);
         if (networkId == null) {
-            logger.debug("Tenant Network not found with Segmenation-id {}",segmentationId);
+            logger.debug("Tenant Network not found with Segmentation-id {}",segmentationId);
             return;
         }
         int internalVlan = TenantNetworkManager.getManager().getInternalVlan(node,networkId);
@@ -441,50 +455,397 @@ class OF10ProviderManager extends ProviderNetworkManager {
         }
     }
 
-    @Override
-    public Status handleInterfaceUpdate(String tunnelType, String tunnelKey, Node srcNode, Interface intf) {
-        Status status = getTunnelReadinessStatus(srcNode, tunnelKey);
-        if (!status.isSuccess()) return status;
+    private String getVlanIngressFlowName (int patchOFPort, int internalVlan, String segmentationId) {
+        return "int_"+patchOFPort+"_"+segmentationId+"_"+internalVlan;
+    }
 
-        IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
-        List<Node> nodes = connectionService.getNodes();
-        nodes.remove(srcNode);
-        for (Node dstNode : nodes) {
-            status = getTunnelReadinessStatus(dstNode, tunnelKey);
-            if (!status.isSuccess()) continue;
-            InetAddress src = AdminConfigManager.getManager().getTunnelEndPoint(srcNode);
-            InetAddress dst = AdminConfigManager.getManager().getTunnelEndPoint(dstNode);
-            status = addTunnelPort(srcNode, tunnelType, src, dst, tunnelKey);
-            if (status.isSuccess()) {
-                this.programTunnelRules(tunnelType, tunnelKey, dst, srcNode, intf, true);
-            }
-            addTunnelPort(dstNode, tunnelType, dst, src, tunnelKey);
-            if (status.isSuccess()) {
-                this.programTunnelRules(tunnelType, tunnelKey, src, dstNode, intf, false);
+    private String getVlanEgressFlowName (int patchOFPort, int internalVlan, String segmentationId) {
+        return "net_"+patchOFPort+"_"+internalVlan+"_"+segmentationId;
+    }
+
+    private String getVlanEgressPhyFlowName (int phyOFPort, int internalVlan, String segmentationId) {
+        return "net_"+phyOFPort+"_"+segmentationId+"_"+internalVlan;
+    }
+
+    /**
+     * Program OF1.0 Flow rules on br-int in the ingress direction from the network towards the br-int.
+     * Vlan isolation uses a patch port between br-int and br-net. Anything received on one end of
+     * the patch is piped to the other end of the patch so the incoming packets from the network would
+     * arrive untouched at the patch port on br-int.
+     * The logic is to simply match on the incoming patch OF-Port and external vlan
+     * and rewrite the external vlan to the internal vlan.
+     */
+    private void programLocalIngressVlanBridgeRules (Node node, int inOFPort, int internalVlan, String segmentationId) {
+        String brIntId = InternalNetworkManager.getManager().getInternalBridgeUUID(node, AdminConfigManager.getManager().getIntegrationBridgeName());
+        if (brIntId == null) {
+            logger.error("Unable to find brIntId, Failed to initialize Flow Rules for {}", node);
+            return;
+        }
+        logger.debug("shague: ingress: node: {}, inOfPort: {}, internalVlan: {}, segmentationId: {}, brIntId: {}",
+                node, inOFPort, internalVlan, segmentationId, brIntId);
+        try {
+            OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brIntId);
+            Set<String> dpids = bridge.getDatapath_id();
+            if (dpids == null || dpids.size() ==  0) return;
+            Long dpidLong = Long.valueOf(HexEncode.stringToLong((String)dpids.toArray()[0]));
+            Node ofNode = new Node(Node.NodeIDType.OPENFLOW, dpidLong);
+            String flowName = getVlanIngressFlowName(inOFPort, internalVlan, segmentationId);
+            FlowConfig flow = new FlowConfig();
+            flow.setName(flowName);
+            flow.setNode(ofNode);
+            flow.setInstallInHw(true);
+            flow.setPriority(INGRESS_TUNNEL_FLOW_PRIORITY+"");
+            flow.setIngressPort(inOFPort+"");
+            flow.setVlanId(segmentationId);
+            List<String> actions = new ArrayList<String>();
+            actions.add(ActionType.SET_VLAN_ID+"="+internalVlan);
+            //String flowName2 = ActionType.HW_PATH.toString();
+            actions.add(ActionType.HW_PATH.toString());
+            flow.setActions(actions);
+            Status status = this.addStaticFlow(ofNode, flow);
+            logger.debug("shague Local Ingress Flow Programming Status {} for Flow {} on {} / {}", status, flow, ofNode, node);
+        } catch (Exception e) {
+            logger.error("Failed to initialize Flow Rules for {}", node, e);
+        }
+    }
+
+    private void removeLocalIngressVlanBridgeRules (Node node, int inOFPort, int internalVlan, String segmentationId) {
+        String brIntId = InternalNetworkManager.getManager().getInternalBridgeUUID(node, AdminConfigManager.getManager().getIntegrationBridgeName());
+        if (brIntId == null) {
+            logger.error("Unable to find brIntId, Failed to remove Flow Rules for {}", node);
+            return;
+        }
+        logger.debug("shague: ingress: node: {}, inOfPort: {}, internalVlan: {}, segmentationId: {}, brIntId: {}",
+                node, inOFPort, internalVlan, segmentationId, brIntId);
+        try {
+            OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brIntId);
+            Set<String> dpids = bridge.getDatapath_id();
+            if (dpids == null || dpids.size() ==  0) return;
+            Long dpidLong = Long.valueOf(HexEncode.stringToLong((String)dpids.toArray()[0]));
+            Node ofNode = new Node(Node.NodeIDType.OPENFLOW, dpidLong);
+            String flowName = getVlanIngressFlowName(inOFPort, internalVlan, segmentationId);
+
+            Status status = this.deleteStaticFlow(ofNode, flowName);
+            logger.debug("Local Ingress Vlan Flow Removal Status {} for Flow {} on {} / {}", status, flowName, ofNode, node);
+        } catch (Exception e) {
+            logger.error("Failed to Remove Vlan Flow Rules for {}", node, e);
+        }
+    }
+
+    /**
+     * Program OF1.0 Flow rules on br-net in the egress direction towards the network.
+     * Vlan isolation uses a patch port between br-int and br-eth1. Anything received on one end of
+     * the patch is piped to the other end of the patch so the outgoing packets from br-int would
+     * arrive untouched at the patch port on br-eth1.
+     * The logic is to simply match on the incoming patch OF-Port and internal vlan,
+     * rewrite the internal vlan to the external vlan and forward out the physical port.
+     * There is also a flow to match the externally tagged packets from the physical port
+     * and forward to the patch port.
+     */
+    private void programLocalEgressVlanBridgeRules (Node node, int inOFPort, int phyOFPort, int internalVlan, String segmentationId) {
+        String brPhyId = InternalNetworkManager.getManager().getInternalBridgeUUID(node, AdminConfigManager.getManager().getNetworkBridgeName());
+        if (brPhyId == null) {
+            logger.error("Unable to find phyBrId, Failed to initialize Flow Rules for {}", node);
+            return;
+        }
+        logger.debug("shague: egress: node: {}, inOFPort: {}, phyOFPort {}, internalVlan: {}, segmentationId: {}, brNetId: {}",
+                node, inOFPort, phyOFPort, internalVlan, segmentationId, brPhyId);
+        try {
+            OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brPhyId);
+            Set<String> dpids = bridge.getDatapath_id();
+            if (dpids == null || dpids.size() ==  0) return;
+            Long dpidLong = Long.valueOf(HexEncode.stringToLong((String)dpids.toArray()[0]));
+            Node ofNode = new Node(Node.NodeIDType.OPENFLOW, dpidLong);
+
+            this.deleteStaticFlow(ofNode, "NORMAL");
+
+            FlowConfig flow = new FlowConfig();
+            String flowName = getVlanEgressFlowName(inOFPort, internalVlan, segmentationId);
+            flow.setName(flowName);
+            flow.setNode(ofNode);
+            flow.setInstallInHw(true);
+            flow.setPriority(EGRESS_TUNNEL_FLOW_PRIORITY+"");
+            flow.setIngressPort(inOFPort+"");
+            flow.setVlanId(internalVlan+"");
+            List<String> actions = new ArrayList<String>();
+            actions.add(ActionType.SET_VLAN_ID+"="+segmentationId);
+            actions.add(ActionType.OUTPUT.toString()+"="+phyOFPort);
+            flow.setActions(actions);
+            Status status = this.addStaticFlow(ofNode, flow);
+            logger.debug("shague Local Egress Flow Programming Status {} for Flow {} on {} / {}",
+                    status, flow, ofNode, node);
+
+            FlowConfig flowExtNet = new FlowConfig();
+            String flowName2 = getVlanEgressPhyFlowName(phyOFPort, internalVlan, segmentationId);
+            flowExtNet.setName(flowName2);
+            flowExtNet.setNode(ofNode);
+            flowExtNet.setInstallInHw(true);
+            flowExtNet.setPriority(EGRESS_TUNNEL_FLOW_PRIORITY + "");
+            flowExtNet.setIngressPort(phyOFPort + "");
+            flowExtNet.setVlanId(segmentationId);
+            List<String> actions2 = new ArrayList<String>();
+            actions2.add(ActionType.OUTPUT.toString()+"="+inOFPort);
+            flowExtNet.setActions(actions2);
+            status = this.addStaticFlow(ofNode, flowExtNet);
+            logger.debug("shague Local Egress Flow Programming Status {} for Flow {} on {} / {}",
+                    status, flowExtNet, ofNode, node);
+        } catch (Exception e) {
+            logger.error("Failed to initialize Flow Rules for {}", node, e);
+        }
+    }
+
+    private void removeLocalEgressVlanBridgeRules (Node node, int inOFPort, int phyOFPort, int internalVlan, String segmentationId) {
+        String brNetId = InternalNetworkManager.getManager().getInternalBridgeUUID(node, AdminConfigManager.getManager().getNetworkBridgeName());
+        if (brNetId == null) {
+            logger.error("Unable to find brPhyId, Failed to remove Flow Rules for {}", node);
+            return;
+        }
+        logger.debug("shague: ingress: node: {}, inOfPort: {}, internalVlan: {}, segmentationId: {}, brNetId: {}",
+                node, inOFPort, internalVlan, segmentationId, brNetId);
+        try {
+            OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brNetId);
+            Set<String> dpids = bridge.getDatapath_id();
+            if (dpids == null || dpids.size() ==  0) return;
+            Long dpidLong = Long.valueOf(HexEncode.stringToLong((String)dpids.toArray()[0]));
+            Node ofNode = new Node(Node.NodeIDType.OPENFLOW, dpidLong);
+            String flowName = getVlanEgressFlowName(inOFPort, internalVlan, segmentationId);
+            Status status = this.deleteStaticFlow(ofNode, flowName);
+            logger.debug("Local Egress Vlan Flow Removal Status {} for Flow {} on {} / {}", status, flowName, ofNode, node);
+
+            flowName = getVlanEgressPhyFlowName(phyOFPort, internalVlan, segmentationId);
+            status = this.deleteStaticFlow(ofNode, flowName);
+            logger.debug("Local Egress Vlan Flow Removal Status {} for Flow {} on {} / {}", status, flowName, ofNode, node);
+        } catch (Exception e) {
+            logger.error("Failed to Remove Vlan Flow Rules for {}", node, e);
+        }
+    }
+
+    /*
+     * Transient class to return all the vlan network data needed for flow programming.
+     */
+    public class vlanNet {
+        public int patchIntOfPort;
+        public int patchNetOfPort;
+        public int phyOfPort;
+        public int internalVlan;
+
+        public vlanNet (NeutronNetwork network, Node node, Interface intf) {
+            patchIntOfPort = -1;
+            patchNetOfPort = -1;
+            phyOfPort = -1;
+            internalVlan = 0;
+
+            initializeVlanNet(network, node, intf);
+        }
+
+        public boolean isValid () {
+            if ((patchIntOfPort != -1) && (patchNetOfPort != -1) && (phyOfPort != -1) && (internalVlan != -1)) {
+                return true;
+            } else {
+                return false;
             }
         }
-        return new Status(StatusCode.SUCCESS);
+
+        public int getPatchIntOfPort () {
+            return patchIntOfPort;
+        }
+
+        public int getPatchNetOfPort () {
+            return patchNetOfPort;
+        }
+
+        public int getPhyOfPort () {
+            return phyOfPort;
+        }
+
+        public int getInternalVlan () {
+            return internalVlan;
+        }
+
+        public void initializeVlanNet (NeutronNetwork network, Node node, Interface intf) {
+            logger.debug("shague getVlanNet: node: {}, intf: {}, networkUUID: {}", node, intf, network.getNetworkUUID());
+            internalVlan = TenantNetworkManager.getManager().getInternalVlan(node, network.getNetworkUUID());
+            if (internalVlan == 0) {
+                logger.debug("No InternalVlan provisioned for Tenant Network {}", network.getNetworkUUID());
+                return;
+            }
+
+            /* Get ofports for patch ports and physical interface. */
+            String patchToNetworkName = AdminConfigManager.getManager().getPatchToNetwork();
+            String patchToIntegrationName = AdminConfigManager.getManager().getPatchToIntegration();
+            String physNetName = AdminConfigManager.getManager().getPhyIfName(node, network.getProviderPhysicalNetwork());
+
+            try {
+                OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+                Map<String, Table<?>> intfs = ovsdbTable.getRows(node, Interface.NAME.getName());
+                if (intfs != null) {
+                    for (Table<?> row : intfs.values()) {
+                        Interface patchIntIntf = (Interface)row;
+                        if (patchIntIntf.getName().equalsIgnoreCase(patchToNetworkName)) {
+                            Set<BigInteger> of_ports = patchIntIntf.getOfport();
+                            if (of_ports == null || of_ports.size() <= 0) {
+                                logger.error("Could not identify patch port {} on {}", patchToNetworkName, node);
+                                continue;
+                            }
+                            patchIntOfPort = Long.valueOf(((BigInteger)of_ports.toArray()[0]).longValue()).intValue();
+                            logger.debug("Identified patch port {} -> OF ({}) on {}", patchToNetworkName, patchIntOfPort, node);
+                            break;
+                        }
+                    }
+                    if (patchIntOfPort == -1) {
+                        logger.error("Cannot identify {} interface on {}", patchToNetworkName, node);
+                        return;
+                    }
+
+                    for (Table<?> row : intfs.values()) {
+                        Interface patchPhyIntf = (Interface)row;
+                        if (patchPhyIntf.getName().equalsIgnoreCase(patchToIntegrationName)) {
+                            Set<BigInteger> of_ports = patchPhyIntf.getOfport();
+                            if (of_ports == null || of_ports.size() <= 0) {
+                                logger.error("Could not identify patch port {} on {}", patchToIntegrationName, node);
+                                continue;
+                            }
+                            patchNetOfPort = Long.valueOf(((BigInteger)of_ports.toArray()[0]).longValue()).intValue();
+                            logger.debug("Identified patch port {} -> OF ({}) on {}", patchToIntegrationName, patchNetOfPort, node);
+                            break;
+                        }
+                    }
+                    if (patchNetOfPort == -1) {
+                        logger.error("Cannot identify {} interface on {}", patchToNetworkName, node);
+                        return;
+                    }
+
+                    for (Table<?> row : intfs.values()) {
+                        Interface phyIntf = (Interface)row;
+                        if (phyIntf.getName().equalsIgnoreCase(physNetName)) {
+                            Set<BigInteger> of_ports = phyIntf.getOfport();
+                            if (of_ports == null || of_ports.size() <= 0) {
+                                logger.error("Could not identify port {} on {}", physNetName, node);
+                                continue;
+                            }
+                            phyOfPort = Long.valueOf(((BigInteger)of_ports.toArray()[0]).longValue()).intValue();
+                            logger.debug("Identified port {} -> OF ({}) on {}", physNetName, phyOfPort, node);
+                            break;
+                        }
+                    }
+                    if (phyOfPort == -1) {
+                        logger.error("Cannot identify {} interface on {}", physNetName, node);
+                        return;
+                    }
+                }
+            } catch (Exception e) {
+                logger.error("", e);
+            }
+
+            return;
+        }
+    }
+
+    /*
+     * Program the vlan rules for the patch port connecting br-int and br-net:
+     * 1. Get the OF port for the patch port on br-int by looping through all the interfaces.
+     * 2. Get the OF port for the patch port on br-net by looping through all the interfaces.
+     * 3. Get the OF port for the physical interface by looping through all the interfaces.
+     * 4. Program the ingress and egress rules on the perspective bridges.
+     */
+    private void programVlanRules (NeutronNetwork network, Node node, Interface intf) {
+        vlanNet vlanNet = new vlanNet(network, node, intf);
+        if (vlanNet.isValid()) {
+            programLocalIngressVlanBridgeRules(node, vlanNet.patchIntOfPort, vlanNet.internalVlan, network.getProviderSegmentationID());
+            programLocalEgressVlanBridgeRules(node, vlanNet.patchNetOfPort, vlanNet.phyOfPort, vlanNet.internalVlan, network.getProviderSegmentationID());
+        }
+    }
+
+    /*
+     * Remove the vlan rules for the patch port connecting br-int and br-net:
+     * 1. Get the OF port for the patch port on br-int by looping through all the interfaces.
+     * 2. Get the OF port for the patch port on br-net by looping through all the interfaces.
+     * 3. Get the OF port for the physical interface by looping through all the interfaces.
+     * 4. Remove the ingress and egress rules on the perspective bridges.
+     */
+    private void removeVlanRules (NeutronNetwork network, Node node, Interface intf) {
+        vlanNet vlanNet = new vlanNet(network, node, intf);
+        if (vlanNet.isValid()) {
+            removeLocalIngressVlanBridgeRules(node, vlanNet.patchIntOfPort, vlanNet.internalVlan, network.getProviderSegmentationID());
+            removeLocalEgressVlanBridgeRules(node, vlanNet.patchNetOfPort, vlanNet.phyOfPort, vlanNet.internalVlan, network.getProviderSegmentationID());
+        }
     }
 
     @Override
-    public Status handleInterfaceDelete(String tunnelType, String tunnelKey, Node srcNode, Interface intf, boolean isLastInstanceOnNode) {
+    public Status handleInterfaceUpdate(NeutronNetwork network, Node srcNode, Interface intf) {
+        logger.debug("shague handleInterfaceUpdate: networkType: {}, segmentationId: {}, srcNode: {}, intf: {}",
+                     network.getProviderNetworkType(), network.getProviderSegmentationID(), srcNode, intf.getName());
+
+        if (network.getProviderNetworkType().equalsIgnoreCase("vlan")) {
+            Status status = getVlanReadinessStatus(srcNode, network.getProviderSegmentationID());
+            if (!status.isSuccess()) {
+                return status;
+            } else {
+                this.programVlanRules(network, srcNode, intf);
+                return new Status(StatusCode.SUCCESS);
+            }
+        } else if (network.getProviderNetworkType().equalsIgnoreCase("vxlan") ||
+                   network.getProviderNetworkType().equalsIgnoreCase("gre")) {
+            Status status = getTunnelReadinessStatus(srcNode, network.getProviderSegmentationID());
+            if (!status.isSuccess()) return status;
+
+            IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+            List<Node> nodes = connectionService.getNodes();
+            nodes.remove(srcNode);
+            for (Node dstNode : nodes) {
+                status = getTunnelReadinessStatus(dstNode, network.getProviderSegmentationID());
+                if (!status.isSuccess()) continue;
+                InetAddress src = AdminConfigManager.getManager().getTunnelEndPoint(srcNode);
+                InetAddress dst = AdminConfigManager.getManager().getTunnelEndPoint(dstNode);
+                status = addTunnelPort(srcNode, network.getProviderNetworkType(), src, dst, network.getProviderSegmentationID());
+                if (status.isSuccess()) {
+                    this.programTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), dst, srcNode, intf, true);
+                }
+                addTunnelPort(dstNode, network.getProviderNetworkType(), dst, src, network.getProviderSegmentationID());
+                if (status.isSuccess()) {
+                    this.programTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), src, dstNode, intf, false);
+                }
+            }
+            return new Status(StatusCode.SUCCESS);
+        } else {
+            return new Status(StatusCode.BADREQUEST);
+        }
+    }
+
+    @Override
+    public Status handleInterfaceDelete(NeutronNetwork network, Node srcNode, Interface intf, boolean isLastInstanceOnNode) {
         Status status = new Status(StatusCode.SUCCESS);
 
-        IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
-        List<Node> nodes = connectionService.getNodes();
-        nodes.remove(srcNode);
-        for (Node dstNode : nodes) {
-            InetAddress src = AdminConfigManager.getManager().getTunnelEndPoint(srcNode);
-            InetAddress dst = AdminConfigManager.getManager().getTunnelEndPoint(dstNode);
-            this.removeTunnelRules(tunnelType, tunnelKey, dst, srcNode, intf, true);
-            if (isLastInstanceOnNode) {
-                status = deleteTunnelPort(srcNode, tunnelType, src, dst, tunnelKey);
+        logger.debug("shague handleInterfaceDelete: networkType: {}, segmentationId: {}, srcNode: {}, intf: {}",
+                network.getProviderNetworkType(), network.getProviderSegmentationID(), srcNode, intf.getName(), isLastInstanceOnNode);
+
+        if (network.getProviderNetworkType().equalsIgnoreCase("vlan")) {
+            this.removeVlanRules(network, srcNode, intf);
+        } else if (network.getProviderNetworkType().equalsIgnoreCase("vxlan") ||
+                   network.getProviderNetworkType().equalsIgnoreCase("gre")) {
+            IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+            List<Node> nodes = connectionService.getNodes();
+            nodes.remove(srcNode);
+            for (Node dstNode : nodes) {
+                InetAddress src = AdminConfigManager.getManager().getTunnelEndPoint(srcNode);
+                InetAddress dst = AdminConfigManager.getManager().getTunnelEndPoint(dstNode);
+                this.removeTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), dst, srcNode, intf, true);
+                if (isLastInstanceOnNode) {
+                    status = deleteTunnelPort(srcNode, network.getProviderNetworkType(), src, dst, network.getProviderSegmentationID());
+                }
+                this.removeTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), src, dstNode, intf, false);
+                if (status.isSuccess() && isLastInstanceOnNode) {
+                    deleteTunnelPort(dstNode, network.getProviderNetworkType(), dst, src, network.getProviderSegmentationID());
+                }
             }
-            this.removeTunnelRules(tunnelType, tunnelKey, src, dstNode, intf, false);
-            if (status.isSuccess() && isLastInstanceOnNode) {
-                deleteTunnelPort(dstNode, tunnelType, dst, src, tunnelKey);
-            }
+        } else {
+            return new Status(StatusCode.BADREQUEST);
         }
+
         return status;
     }
 
@@ -540,7 +901,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
     private Status addTunnelPort (Node node, String tunnelType, InetAddress src, InetAddress dst, String key) {
         try {
             String bridgeUUID = null;
-            String tunnelBridgeName = AdminConfigManager.getManager().getTunnelBridgeName();
+            String tunnelBridgeName = AdminConfigManager.getManager().getNetworkBridgeName();
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
             Map<String, Table<?>> bridgeTable = ovsdbTable.getRows(node, Bridge.NAME.getName());
             if (bridgeTable != null) {
@@ -612,7 +973,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
     private Status deleteTunnelPort (Node node, String tunnelType, InetAddress src, InetAddress dst, String key) {
         try {
             String bridgeUUID = null;
-            String tunnelBridgeName = AdminConfigManager.getManager().getTunnelBridgeName();
+            String tunnelBridgeName = AdminConfigManager.getManager().getNetworkBridgeName();
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
             Map<String, Table<?>> bridgeTable = ovsdbTable.getRows(node, Bridge.NAME.getName());
             if (bridgeTable != null) {
@@ -649,7 +1010,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
         IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
         List<Node> nodes = connectionService.getNodes();
         for (Node srcNode : nodes) {
-            this.handleInterfaceUpdate(tunnelType, tunnelKey, srcNode, null);
+            this.handleInterfaceUpdate(null, srcNode, null);
         }
         return new Status(StatusCode.SUCCESS);
     }
@@ -657,7 +1018,6 @@ class OF10ProviderManager extends ProviderNetworkManager {
     @Override
     public void initializeFlowRules(Node node) {
         this.initializeFlowRules(node, AdminConfigManager.getManager().getIntegrationBridgeName());
-        this.initializeFlowRules(node, AdminConfigManager.getManager().getTunnelBridgeName());
         this.initializeFlowRules(node, AdminConfigManager.getManager().getExternalBridgeName());
     }
 
@@ -750,7 +1110,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
         IForwardingRulesManager frm = (IForwardingRulesManager) ServiceHelper.getInstance(
                 IForwardingRulesManager.class, "default", this);
         if (frm.getStaticFlow(flowName, ofNode) == null) {
-            logger.debug("Flow doese not exist {} on {}. Skipping deletion.", flowName, ofNode);
+            logger.debug("Flow does not exist {} on {}. Skipping deletion.", flowName, ofNode);
             return new Status(StatusCode.SUCCESS);
         }
         return frm.removeStaticFlow(flowName,ofNode);

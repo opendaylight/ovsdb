@@ -316,7 +316,7 @@ public class InternalNetworkManager {
                 logger.debug("{} Bridge Creation Status: {}", brInt, status);
                 return false;
             }
-            
+
             /* For vlan network types add physical port to br-int. */
             if (network.getProviderNetworkType().equalsIgnoreCase("vlan")) {
                 String phyNetName = AdminConfigManager.getManager().getPhyIfName(node, network.getProviderPhysicalNetwork());

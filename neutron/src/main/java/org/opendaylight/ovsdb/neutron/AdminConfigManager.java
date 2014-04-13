@@ -12,7 +12,6 @@ package org.opendaylight.ovsdb.neutron;
 import java.net.InetAddress;
 import java.util.Map;
 
-import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.ovsdb.lib.table.Open_vSwitch;

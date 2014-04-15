@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_7fe98819",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13ProviderManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 587,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-04-15T15:48:15Z",
+      "side": 1,
+      "message": "Would it be better to create a function in TenantNetworkManager that returns the attached mac? Pass in the intf and get back the mac?",
+      "revId": "e134b4e71550ae9e0c2b8652b97326e298c6e08e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -43,6 +43,7 @@ public class NetworkHandler extends BaseHandler
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile ITenantNetworkManager tenantNetworkManager;
+    private volatile IAdminConfigManager adminConfigManager;
 
     /**
      * Invoked when a network creation is requested
@@ -146,6 +147,7 @@ public class NetworkHandler extends BaseHandler
                 List<Node> nodes = connectionService.getNodes();
 
                 for (Node node : nodes) {
+                    List<String> phyIfName = adminConfigManager.getAllPhysicalInterfaceNames(node);
                     try {
                         ConcurrentMap<String, Table<?>> interfaces = this.ovsdbConfigService.getRows(node, Interface.NAME.getName());
                         if (interfaces != null) {
@@ -156,7 +158,11 @@ public class NetworkHandler extends BaseHandler
                                     /* delete tunnel ports on this node */
                                     logger.trace("Delete tunnel intf {}", intf);
                                     inventoryListener.rowRemoved(node, Interface.NAME.getName(), intfUUID,
-                                                                 intf, null);
+                                            intf, null);
+                                } else if (!phyIfName.isEmpty() && phyIfName.contains(intf.getName())) {
+                                    logger.trace("Delete physical intf {}", intf);
+                                    inventoryListener.rowRemoved(node, Interface.NAME.getName(), intfUUID,
+                                            intf, null);
                                 }
                             }
                         }

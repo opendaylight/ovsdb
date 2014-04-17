@@ -10,6 +10,8 @@
 package org.opendaylight.ovsdb.neutron;
 
 import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.opendaylight.controller.sal.core.Node;
@@ -200,6 +202,57 @@ public class AdminConfigManager implements IAdminConfigManager{
         }
 
         return phyIf;
+    }
+
+    /* Return all physical interfaces configure in bridge mapping
+     * Bridge mappings will be of the following format:
+     * bridge_mappings=physnet1:eth1,physnet2:eth2
+     * Method will return list = {eth1, eth2}
+     */
+    public List<String> getAllPhysicalInterfaceNames(Node node) {
+        List<String> phyIfName = new ArrayList<String>();
+
+        try {
+            OVSDBConfigService ovsdbConfig = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+            Map<String, Table<?>> ovsTable = ovsdbConfig.getRows(node, Open_vSwitch.NAME.getName());
+
+            if (ovsTable == null) {
+                logger.error("Open_vSwitch table is null for Node {} ", node);
+                return null;
+            }
+
+            // While there is only one entry in the HashMap, we can't access it by index...
+            for (Table<?> row : ovsTable.values()) {
+                String bridgeMaps;
+                Open_vSwitch ovsRow = (Open_vSwitch) row;
+                Map<String, String> configs = ovsRow.getOther_config();
+
+                if (configs == null) {
+                    logger.debug("Open_vSwitch table is null for Node {} ", node);
+                    continue;
+                }
+
+                bridgeMaps = configs.get(providerMappingsConfigName);
+                if (bridgeMaps == null) {
+                    bridgeMaps = providerMappings;
+                }
+
+                if (bridgeMaps != null) {
+                    for (String map : bridgeMaps.split(",")) {
+                        String[] pair = map.split(":");
+                        phyIfName.add(pair[1]);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Unable to find physical interface for Node: {}",
+                    node, e);
+        }
+
+        logger.debug("Physical interface for Node: {}, If: {}",
+                node, phyIfName);
+
+        return phyIfName;
     }
 
     public boolean isInterested (String tableName) {

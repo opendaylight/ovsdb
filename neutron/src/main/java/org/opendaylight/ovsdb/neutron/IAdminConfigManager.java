@@ -11,7 +11,9 @@
 package org.opendaylight.ovsdb.neutron;
 
 import org.opendaylight.controller.sal.core.Node;
+
 import java.net.InetAddress;
+import java.util.List;
 
 public interface IAdminConfigManager {
     public String getIntegrationBridgeName();
@@ -25,6 +27,7 @@ public interface IAdminConfigManager {
     public String getPatchToIntegration();
     public void setPatchToIntegration(String patchToIntegration);
     public String getPhysicalInterfaceName (Node node, String physicalNetwork);
+    public List<String> getAllPhysicalInterfaceNames(Node node);
     public InetAddress getTunnelEndPoint(Node node);
     public boolean isInterested (String tableName);
 }

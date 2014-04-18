@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 Adapted from David Erickson's Distribution pom.xml
 see https://git.opendaylight.org/gerrit/#/c/390/
@@ -6,7 +7,7 @@ see https://git.opendaylight.org/gerrit/#/c/390/
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.ovsdb</groupId>
-    <artifactId>commons.ovsdb</artifactId>
+    <artifactId>ovsdb_commons</artifactId>
     <version>1.1.0-SNAPSHOT</version>
     <relativePath>../../commons/parent/</relativePath>
   </parent>
@@ -14,37 +15,35 @@ see https://git.opendaylight.org/gerrit/#/c/390/
   <artifactId>distribution.ovsdb</artifactId>
   <packaging>pom</packaging>
   <name>ovsdb Distribution</name>
-
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</developerConnection>
-    <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
-    <tag>HEAD</tag>
-  </scm>
   <dependencies>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>distribution.opendaylight</artifactId>
-      <version>0.1.2-SNAPSHOT</version>
-      <type>zip</type>
-      <classifier>osgipackage</classifier>
-      <!-- Make sure this isn't included on any classpath-->
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>ovsdb</artifactId>
+      <artifactId>ovsdb_library</artifactId>
       <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>ovsdb.northbound</artifactId>
+      <artifactId>ovsdb_neutron</artifactId>
       <version>0.6.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>ovsdb.neutron</artifactId>
+      <artifactId>ovsdb_northbound</artifactId>
       <version>0.6.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>ovsdb_plugin</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>distribution.opendaylight</artifactId>
+      <version>0.1.2-SNAPSHOT</version>
+      <classifier>osgipackage</classifier>
+      <type>zip</type>
+      <!-- Make sure this isn't included on any classpath-->
+      <scope>provided</scope>
     </dependency>
   </dependencies>
   <build>
@@ -53,11 +52,28 @@ see https://git.opendaylight.org/gerrit/#/c/390/
         <directory>${basedir}/src/main/resources</directory>
       </resource>
       <resource>
-        <directory>${project.build.directory}/generated-resources</directory>
         <filtering>true</filtering>
+        <directory>${project.build.directory}/generated-resources</directory>
       </resource>
     </resources>
     <plugins>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>distro-assembly</id>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <descriptors>
+                <descriptor>src/assemble/bin.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
@@ -70,32 +86,22 @@ see https://git.opendaylight.org/gerrit/#/c/390/
             </goals>
             <phase>generate-resources</phase>
             <configuration>
-             <outputDirectory>${project.build.directory}/generated-resources</outputDirectory>
-             <includeArtifactIds>distribution.opendaylight</includeArtifactIds>
-             <includeGroupIds>org.opendaylight.controller</includeGroupIds>
-             <excludeTransitive>true</excludeTransitive>
-             <ignorePermissions>false</ignorePermissions>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>distro-assembly</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <descriptors>
-                <descriptor>src/assemble/bin.xml</descriptor>
-              </descriptors>
+              <outputDirectory>${project.build.directory}/generated-resources</outputDirectory>
+              <includeArtifactIds>distribution.opendaylight</includeArtifactIds>
+              <includeGroupIds>org.opendaylight.controller</includeGroupIds>
+              <excludeTransitive>true</excludeTransitive>
+              <ignorePermissions>false</ignorePermissions>
             </configuration>
           </execution>
         </executions>
       </plugin>
     </plugins>
   </build>
+
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
+  </scm>
 </project>

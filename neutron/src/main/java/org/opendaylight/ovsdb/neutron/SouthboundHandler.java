@@ -29,7 +29,7 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.table.Interface;
 import org.opendaylight.ovsdb.lib.table.Open_vSwitch;
 import org.opendaylight.ovsdb.lib.table.Port;
-import org.opendaylight.ovsdb.lib.table.internal.Table;
+import org.opendaylight.ovsdb.lib.table.Table;
 import org.opendaylight.ovsdb.neutron.provider.ProviderNetworkManager;
 import org.opendaylight.ovsdb.plugin.OVSDBInventoryListener;
 import org.slf4j.Logger;

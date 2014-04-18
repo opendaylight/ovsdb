@@ -15,7 +15,7 @@ import java.util.Map;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.ovsdb.lib.table.Open_vSwitch;
-import org.opendaylight.ovsdb.lib.table.internal.Table;
+import org.opendaylight.ovsdb.lib.table.Table;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

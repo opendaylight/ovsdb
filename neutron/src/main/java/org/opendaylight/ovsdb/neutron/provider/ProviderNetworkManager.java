@@ -16,7 +16,7 @@ import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.ovsdb.lib.table.Bridge;
 import org.opendaylight.ovsdb.lib.table.Interface;
-import org.opendaylight.ovsdb.lib.table.internal.Table;
+import org.opendaylight.ovsdb.lib.table.Table;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

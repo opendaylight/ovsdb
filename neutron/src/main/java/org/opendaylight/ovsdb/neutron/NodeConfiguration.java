@@ -22,7 +22,7 @@ import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.table.Interface;
 import org.opendaylight.ovsdb.lib.table.Port;
-import org.opendaylight.ovsdb.lib.table.internal.Table;
+import org.opendaylight.ovsdb.lib.table.Table;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

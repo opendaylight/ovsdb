@@ -172,7 +172,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
             String bridgeUUID = null;
             String tunnelBridgeName = AdminConfigManager.getManager().getIntegrationBridgeName();
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Map<String, org.opendaylight.ovsdb.lib.table.internal.Table<?>> bridgeTable = ovsdbTable.getRows(node, Bridge.NAME.getName());
+            Map<String, org.opendaylight.ovsdb.lib.table.Table<?>> bridgeTable = ovsdbTable.getRows(node, Bridge.NAME.getName());
             if (bridgeTable != null) {
                 for (String uuid : bridgeTable.keySet()) {
                     Bridge bridge = (Bridge)bridgeTable.get(uuid);
@@ -423,9 +423,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
                 return;
             }
 
-            Map<String, org.opendaylight.ovsdb.lib.table.internal.Table<?>> intfs = ovsdbTable.getRows(node, Interface.NAME.getName());
+            Map<String, org.opendaylight.ovsdb.lib.table.Table<?>> intfs = ovsdbTable.getRows(node, Interface.NAME.getName());
             if (intfs != null) {
-                for (org.opendaylight.ovsdb.lib.table.internal.Table<?> row : intfs.values()) {
+                for (org.opendaylight.ovsdb.lib.table.Table<?> row : intfs.values()) {
                     Interface tunIntf = (Interface)row;
                     if (tunIntf.getName().equals(this.getTunnelName(tunnelType, dst))) {
                         of_ports = tunIntf.getOfport();
@@ -508,9 +508,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
     private Status triggerInterfaceUpdates(Node node) {
         try {
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Map<String, org.opendaylight.ovsdb.lib.table.internal.Table<?>> intfs = ovsdbTable.getRows(node, Interface.NAME.getName());
+            Map<String, org.opendaylight.ovsdb.lib.table.Table<?>> intfs = ovsdbTable.getRows(node, Interface.NAME.getName());
             if (intfs != null) {
-                for (org.opendaylight.ovsdb.lib.table.internal.Table<?> row : intfs.values()) {
+                for (org.opendaylight.ovsdb.lib.table.Table<?> row : intfs.values()) {
                     Interface intf = (Interface)row;
                     NeutronNetwork network = TenantNetworkManager.getManager().getTenantNetworkForInterface(intf);
                     logger.debug("Trigger Interface update for {}", intf);

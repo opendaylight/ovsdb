@@ -29,7 +29,7 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
 import org.opendaylight.ovsdb.lib.table.Open_vSwitch;
-import org.opendaylight.ovsdb.lib.table.internal.Table;
+import org.opendaylight.ovsdb.lib.table.Table;
 import org.opendaylight.ovsdb.plugin.ConfigurationService;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
 import org.powermock.api.mockito.PowerMockito;

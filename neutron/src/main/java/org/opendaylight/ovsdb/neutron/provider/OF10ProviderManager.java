@@ -33,7 +33,7 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.table.Bridge;
 import org.opendaylight.ovsdb.lib.table.Interface;
 import org.opendaylight.ovsdb.lib.table.Port;
-import org.opendaylight.ovsdb.lib.table.internal.Table;
+import org.opendaylight.ovsdb.lib.table.Table;
 import org.opendaylight.ovsdb.neutron.AdminConfigManager;
 import org.opendaylight.ovsdb.neutron.InternalNetworkManager;
 import org.opendaylight.ovsdb.neutron.TenantNetworkManager;

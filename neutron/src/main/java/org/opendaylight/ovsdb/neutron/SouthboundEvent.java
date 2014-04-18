@@ -10,7 +10,7 @@
 package org.opendaylight.ovsdb.neutron;
 
 import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.ovsdb.lib.table.internal.Table;
+import org.opendaylight.ovsdb.lib.table.Table;
 
 public class SouthboundEvent {
     public enum Type { NODE, ROW };

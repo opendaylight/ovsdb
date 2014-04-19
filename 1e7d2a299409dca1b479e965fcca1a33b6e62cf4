@@ -1,0 +1,650 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_385b1656",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "General comment - the patch lacks any unitests (why?) \n\nhow is this code tested now, and how it will be tested against regressions over time automatically ? whenever someone will change some code - how without unitests will we know that the code functions correctly?",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f87daeb2",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "unused import?",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_188972ca",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "What do the 2 above represent? What is the difference between \nbridgeMappingsConfigName and bridgeMappings?\nWhat is in particular \"bridgeMappings\" represent? It\u0027s a string, not a map, and it\u0027s in plural - what kind of mapping and in which format is it?",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3886b6ba",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "What does this comment mean? (looks like before your patch, but worth to check)",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f88feeca",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "Regarding all the constants below (I know this patch just adds some and not all)...\n\n1. It will be best to read those from a conf file, not hardcoded in code.\n\n2. A lot of words repeat themselves, harder to maintain and change when needed, increases risk for typos. It will be better to define separate constants for those words and then construct the other constants with them. For example - \"patch\", \"bridge\", \"eth1\".",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_98bca26e",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "Please consider renaming CONFIG_BRIDGE_MAPPINGS_CONFIG - the constant itself contains \"config\" twice in its name, it\u0027s hard to understand it.",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d8922af6",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "the value is the same as for DEFAULT_BRIDGE_MAPPINGS_CONFIG_STRING?\n(\"bridge_mappings\")\nAlso, it\u0027s not clear (at least to me) what are all the \"bridge_mappings\" strings representing - see my additional comment above regarding it (first comment in this file). When reading a constant it\u0027s important to understand whether it represents a path to some file, a name (term) , etc.\n\"bridge_mappings_config_string\" is not clear what it is.",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_58b61a8c",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "Is this thread safe? When is this class initialized and by how many threads?",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b8c166e6",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "Please use brackets (curlys {}) after if statements - it\u0027s easier to read.\nAnd please put the code that comes after \"if\" in a newline.",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d880ea8d",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "please put the return statement in a newline - more Java standard.",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_984a6282",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "I didn\u0027t see in the method anything that has to do with neutron - can you please explain where/how/why it relates to neutron, perhaps I missed it?\nthanks",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_18b0928a",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "Please give the method a more clear name - I would turn \"phy\" into \"physical\" for example.\nBecause if you take the javadoc out, it\u0027s not clear that it relates to neutron at all.\n\nAnd also the parameter \"node\" should have a more clear name too.\nIt\u0027s type is Node, but the name should be more clear what this node represents.",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_38ad5632",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "perhaps rename phyIf --\u003e physicalInterfaceName?",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f8a60e53",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "worth to document in javadoc this behavior - in which case null is returned.",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_387476ce",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "I know that \"getOther_config\" is not added in this patch.\nBut I have to say it - this is really not a proper Java naming convention. \nBoth the underscore and the lowercase \"config\" instead of camel case...",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9863421a",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "Why continue is needed here? (you wrote that there\u0027s only one value in this map)\nor perhaps it should have been \"break\" ?",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_187732d6",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "How often is this method called?\nAll the \"splits\" can have some cost if done too often.",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_586dba03",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "is equals needed or equalsIgnoreCase? (in other words - is this case sensitive ?)",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7872fee6",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "phyIf is initialized in the beginning of the method, and here it is overriden - is this OK?",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b86886f6",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "Why break is needed here? (you wrote that there\u0027s only one value in this map)",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b84f2692",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/NetworkHandler.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "this file is just logging statements, I understand it\u0027s just temporary for debugging, but you can simply leave it out of the patch by not adding it to the commit. save your reviewers time :)",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_78499e8a",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/NodeConfiguration.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "Why is this relevant to this patch?\nIf logging improvements are needed, it will be more easy and correct to review them in a separate patch.\n(I saw Chris commented on it as well, so +1 to his comment)",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5844da73",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/NodeConfiguration.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "The method name is not clear. \nIf it removes something, it should be mentioned in its name.\nJavadoc is not the right way to bypass unclear method naming.\n\nAnd how is this Javadoc addition relevant to the patch? (I saw Chris commented on it as well, so +1 to his comment)",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_185e5246",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/PortHandler.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "you can just leave this out of the commit, and have it locally for your checks.",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9831020e",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/SouthboundHandler.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "the method \"checkAndCreateNetwork\" does a lot of logic and changes the state of objects. (imagine it could potentially throw an exception inside an if statement  - runtime ex for example ) it\u0027s not a plain true/false condition evaluation.\nIt will be better to execute it first, and then evaluate its value (extract it to a local variable) in an \"if\" statement.",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d31c4b6d",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF10ProviderManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "is it ok to have those values hardcoded? don\u0027t they never need to be changed?\nbecause if yes, they should be read from a config file that can be easily changed, rather than having source code changed + compile + redeploy it.",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f3194f7a",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF10ProviderManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "In this method and below in several more methods, first 3-5 lines of code look like a copy paste.\nHow about extracting them to a separate method and reuse it?",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9326c3b9",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF10ProviderManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 459,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "What I would do in the 4 methods below is reuse code.\nFor example, have one method constructing \"prefix\"+patchOFPort+fromVlan+toVlan, and passing (possibly from another method or directly from the calling code) every time the parameters and the prefix which is either \"int_mod\" or \"net_mod\".",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b32bc781",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF10ProviderManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 484,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "What\u0027s the implication of failing to delete a rule? And how the calling code/user is notified that it\u0027s failed if it\u0027s written only to the log?",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3337b7e5",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF10ProviderManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 519,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "There are several methods in this class that do exactly the same - construct and populate FlowConfig.\nPlease consider extracting it to a separate method, populating the defaults there and passing as parameters the things that are different in each case.\nIt will make the methods more readable as well as code reuse \u003d better maintainable code.",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_53203b9b",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF10ProviderManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 569,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "1. Java classes should start with capital letter.\n\n2. What do you mean by transient class?\n\n3. Why does it have to be an inner class for OF10...?",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_133ab3cd",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF10ProviderManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 600,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "The names are hard to understand because of all the half words.\nPlease use full words, it will be much easier to read the code.",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_73253faa",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF10ProviderManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 608,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "This is a very long method. Very hard to read, understand and maintain.\nPlease break it to shorter methods.",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_934d6375",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF10ProviderManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 771,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "Because the Java class is incorrectly named, this line looks very strange \nat least for Java people: \n\nvlanNet vlanNet.",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b352e711",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF10ProviderManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 793,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "I suggest creating a method named \"deleteRules\" and pass all the info there and do the logic there. Much cleaner code.",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3310174e",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13ProviderManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 535,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "if this method has no implementation, why it exists and why it needs a signature update?",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1313935d",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/ProviderNetworkManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "I know this code was here prior to the patch, but if you are touching\nthis area, please consider this refactoring in a separate patch:\n\nThis abstract class has only one method - getManager.\nWhich returns its inheriting children.\nSo the abstract class, along with its inheriting classes which all inherit this method, are all well aware of each other. \nIt\u0027s not a correct approach.\nA more correct approach would be to do a factory design pattern (having a factory class) which will\nbe the one to create the instances of the correct class based on\nopen flow version.\n\nAlso, given the fact that getManager is the only method that is implemented\nin this abstract class, what is the gain of its existence versus having\nan interface and having the OF10/Of13 classes implementing directly\nthe interface?\nThis way, the factory will be able to declare as return type the interface itself - much more clean and standard approach.",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f854ce22",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/ProviderNetworkManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2014-04-19T17:07:23Z",
+      "side": 1,
+      "message": "consider having an enum instead of 2 string representing a version of open flow.",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

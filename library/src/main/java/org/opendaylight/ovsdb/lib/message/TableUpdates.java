@@ -12,6 +12,7 @@ package org.opendaylight.ovsdb.lib.message;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Maps;
 
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.table.Bridge;
 import org.opendaylight.ovsdb.lib.table.Capability;
 import org.opendaylight.ovsdb.lib.table.Interface;
@@ -193,5 +194,15 @@ public class TableUpdates extends Response {
 
     public void setIPFIXUpdate(TableUpdate<IPFIX> IPFIXUpdate) {
         put(IPFIX.NAME, IPFIXUpdate);
+    }
+
+    public TableUpdate getUpdate(GenericTableSchema table) {
+        //todo Horrible just for time being, before this whole thing is refactored.
+        for (Map.Entry<Table.Name, TableUpdate> s : this.map.entrySet()) {
+            if (table.getName().equals(s.getKey().getName())) {
+                return s.getValue();
+            }
+        }
+        return null;
     }
 }

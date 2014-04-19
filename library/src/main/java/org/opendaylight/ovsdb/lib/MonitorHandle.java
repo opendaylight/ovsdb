@@ -12,5 +12,16 @@
 
 package org.opendaylight.ovsdb.lib;
 
-public interface MonitorHandle {
+import java.io.Serializable;
+
+public class MonitorHandle implements Serializable{
+   String id;
+
+    public MonitorHandle(String id) {
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
 }

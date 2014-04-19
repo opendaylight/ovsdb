@@ -74,4 +74,12 @@ public class ColumnSchema<E extends TableSchema<E>, D> {
     public void validate(Object value)throws RuntimeException {
         //todo(type check and validate based on constraints set)
     }
+
+    /**
+     * Verifies if this Column if of the specified type
+     * @param type the type to check for
+     */
+    public void validateType(Class<?> type) {
+
+    }
 }

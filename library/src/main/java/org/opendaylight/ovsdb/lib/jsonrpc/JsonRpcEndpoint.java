@@ -9,6 +9,7 @@
  */
 package org.opendaylight.ovsdb.lib.jsonrpc;
 
+import com.google.common.reflect.Invokable;
 import io.netty.channel.Channel;
 
 import java.lang.reflect.InvocationHandler;
@@ -157,7 +158,9 @@ public class JsonRpcEndpoint {
                     JsonNode params = requestJson.get("params");
                     Object param = objectMapper.convertValue(params, parameters[1]);
                     try {
-                        m.invoke(callback, context, param);
+                        Invokable from = Invokable.from(m);
+                        from.setAccessible(true);
+                        from.invoke(callback, context, param);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         logger.error("Unable to invoke callback " + m.getName(), e);
                     }

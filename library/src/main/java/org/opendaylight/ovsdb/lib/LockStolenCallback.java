@@ -18,7 +18,7 @@ package org.opendaylight.ovsdb.lib;
  *  @see <a href="http://tools.ietf.org/html/draft-pfaff-ovsdb-proto-04#section-4.1.10">ovsdb spec</a>
  *  <p/>
  *
- *  @see org.opendaylight.ovsdb.lib.OvsDBClient#lock(String, LockStolenCallback)
+ *  @see org.opendaylight.ovsdb.lib.OvsDBClient#lock(String, LockAquisitionCallback, LockStolenCallback)
  */
 public interface LockStolenCallback {
 

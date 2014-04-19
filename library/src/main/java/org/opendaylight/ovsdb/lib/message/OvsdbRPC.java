@@ -16,6 +16,8 @@ import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.util.concurrent.ListenableFuture;
 
+import org.opendaylight.ovsdb.lib.jsonrpc.Params;
+
 public interface OvsdbRPC {
     public static final String REGISTER_CALLBACK_METHOD = "registerCallback";
 
@@ -24,7 +26,7 @@ public interface OvsdbRPC {
 
     public ListenableFuture<List<String>> echo();
 
-    public ListenableFuture<TableUpdates> monitor(MonitorRequestBuilder request);
+    public ListenableFuture<TableUpdates> monitor(Params equest);
 
     public ListenableFuture<List<String>> list_dbs();
 

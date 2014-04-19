@@ -9,29 +9,38 @@
  */
 package org.opendaylight.ovsdb.lib.message;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
-import java.util.List;
-
-import org.opendaylight.ovsdb.lib.table.Column;
+import java.util.Set;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class MonitorRequest<E> {
-
-    //@JsonSerialize(contentAs = ToStringSerializer.class)
-    List<Column<E>> columns;
-
+public class MonitorRequest<E extends TableSchema<E>> {
+    @JsonIgnore String tableName;
+    Set<String> columns = Sets.newHashSet();
     MonitorSelect select;
 
-    public List<? extends Column> getColumns() {
-        return columns;
+    public MonitorRequest() {
     }
 
-    public void setColumns(List<Column<E>> columns) {
+    public MonitorRequest(String tableName, Set<String> columns) {
+        this.tableName = tableName;
         this.columns = columns;
     }
 
+    public MonitorRequest(String tableName) {
+        this.tableName = tableName;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
 
     public MonitorSelect getSelect() {
         return select;
@@ -41,11 +50,12 @@ public class MonitorRequest<E> {
         this.select = select;
     }
 
-    public MonitorRequest<E> column(Column<E> column) {
-        if (null == columns) {
-            columns = Lists.newArrayList();
-        }
-        columns.add(column);
-        return this;
+    public Set<String> getColumns() {
+        return columns;
     }
+
+    public void setColumns(Set<String> columns) {
+        this.columns = columns;
+    }
+
 }

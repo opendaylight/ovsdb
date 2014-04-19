@@ -10,40 +10,82 @@
 package org.opendaylight.ovsdb.lib;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import org.opendaylight.ovsdb.lib.jsonrpc.Params;
 import org.opendaylight.ovsdb.lib.message.MonitorRequest;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
+import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.message.TransactBuilder;
+import org.opendaylight.ovsdb.lib.message.UpdateNotification;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.TableSchema;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
 
 public class OvsDBClientImpl implements OvsDBClient {
 
-    ExecutorService executorService;
-    String schemaName;
-    OvsdbRPC rpc;
-    Map<String, DatabaseSchema> schema = Maps.newHashMap();
-    Queue<Throwable> exceptions;
+    protected static final Logger logger = LoggerFactory.getLogger(OvsDBClientImpl.class);
+    private ExecutorService executorService;
+    private OvsdbRPC rpc;
+    private Map<String, DatabaseSchema> schema = Maps.newHashMap();
+    private HashMap<String, MonitorCallBack> monitorCallbacks = Maps.newHashMap();
+    private Queue<Throwable> exceptions;
+    private OvsdbRPC.Callback rpcCallback;
 
     public OvsDBClientImpl(OvsdbRPC rpc, ExecutorService executorService) {
         this.rpc = rpc;
         this.executorService = executorService;
     }
 
-    public OvsDBClientImpl() {
+    OvsDBClientImpl() {
+    }
+
+    void setupUpdateListner() {
+        if (rpcCallback == null) {
+            OvsdbRPC.Callback temp = new OvsdbRPC.Callback() {
+                @Override
+                public void update(Object node, UpdateNotification upadateNotification) {
+                    Object key = upadateNotification.getContext();
+                    MonitorCallBack monitorCallBack = monitorCallbacks.get(key);
+                    if (monitorCallBack == null) {
+                        //ignore ?
+                        logger.info("callback received with context {}, but no known handler. Ignoring!", key);
+                        return;
+                    }
+                    monitorCallBack.update(upadateNotification.getUpdate());
+                }
+
+                @Override
+                public void locked(Object node, List<String> ids) {
+
+                }
+
+                @Override
+                public void stolen(Object node, List<String> ids) {
+
+                }
+            };
+            this.rpcCallback = temp;
+            rpc.registerCallback(temp);
+        }
     }
 
     @Override
@@ -55,13 +97,49 @@ public class OvsDBClientImpl implements OvsDBClient {
             builder.addOperation(o);
         }
 
-        ListenableFuture<List<OperationResult>> transact = rpc.transact(builder);
-        return transact;
+        return rpc.transact(builder);
     }
 
     @Override
-    public void monitor(MonitorRequest monitorRequest, MonitorCallBack callback) {
-        throw new UnsupportedOperationException("not yet implemented");
+    public <E extends TableSchema<E>> MonitorHandle monitor(final DatabaseSchema dbSchema,
+                                                            List<MonitorRequest<E>> monitorRequest,
+                                                            final MonitorCallBack callback) {
+
+        final ImmutableMap<String, MonitorRequest<E>> reqMap = Maps.uniqueIndex(monitorRequest,
+                new Function<MonitorRequest<E>, String>() {
+                    @Override
+                    public String apply(MonitorRequest<E> input) {
+                        return input.getTableName();
+                    }
+                });
+
+        final MonitorHandle monitorHandle = new MonitorHandle(UUID.randomUUID().toString());
+        registerCallback(monitorHandle, callback);
+
+        ListenableFuture<TableUpdates> monitor = rpc.monitor(new Params() {
+            @Override
+            public List<Object> params() {
+                return Lists.<Object>newArrayList(dbSchema.getName(), monitorHandle.getId(), reqMap);
+            }
+        });
+        Futures.addCallback(monitor, new FutureCallback<TableUpdates>() {
+            @Override
+            public void onSuccess(TableUpdates result) {
+                callback.update(result);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                callback.exception(t);
+            }
+        });
+
+        return monitorHandle;
+    }
+
+    private void registerCallback(MonitorHandle monitorHandle, MonitorCallBack callback) {
+        this.monitorCallbacks.put(monitorHandle.getId(), callback);
+        setupUpdateListner();
     }
 
     @Override
@@ -115,31 +193,24 @@ public class OvsDBClientImpl implements OvsDBClient {
 
         DatabaseSchema databaseSchema = schema.get(database);
 
-        if (databaseSchema == null) {
-            ListenableFuture<Map<String, DatabaseSchema>> schemaFromDevice = getSchemaFromDevice(Lists.newArrayList(database));
+        if (databaseSchema == null || cacheResult) {
+            return Futures.transform(
+                    getSchemaFromDevice(Lists.newArrayList(database)),
+                    new Function<Map<String, DatabaseSchema>, DatabaseSchema>() {
+                        @Override
+                        public DatabaseSchema apply(Map<String, DatabaseSchema> result) {
+                            if (result.containsKey(database)) {
+                                DatabaseSchema s = result.get(database);
+                                if (cacheResult) {
+                                    OvsDBClientImpl.this.schema.put(database, s);
+                                }
+                                return s;
+                            } else {
+                                return null;
+                            }
+                        }
+                    }, executorService);
 
-            final SettableFuture<DatabaseSchema> future = SettableFuture.create();
-            Futures.addCallback(schemaFromDevice, new FutureCallback<Map<String, DatabaseSchema>>() {
-                @Override
-                public void onSuccess(Map<String, DatabaseSchema> result) {
-                    if (result.containsKey(database)) {
-                       DatabaseSchema s = result.get(database);
-                       if (cacheResult) {
-                         OvsDBClientImpl.this.schema.put(database, s);
-                       }
-                       future.set(s);
-                    } else {
-                        future.set(null);
-                    }
-                }
-
-                @Override
-                public void onFailure(Throwable t) {
-                    //todo: should wrap
-                    future.setException(t);
-                }
-            });
-          return future;
 
         } else {
             return Futures.immediateFuture(databaseSchema);
@@ -154,8 +225,8 @@ public class OvsDBClientImpl implements OvsDBClient {
     }
 
     private void _populateSchema(final List<String> dbNames,
-                                                       final Map<String, DatabaseSchema> schema,
-                                                       final SettableFuture<Map<String, DatabaseSchema>> sfuture) {
+                                 final Map<String, DatabaseSchema> schema,
+                                 final SettableFuture<Map<String, DatabaseSchema>> sfuture) {
 
         if (dbNames == null || dbNames.isEmpty()) {
             return;
@@ -163,20 +234,21 @@ public class OvsDBClientImpl implements OvsDBClient {
 
         Futures.transform(rpc.get_schema(Lists.newArrayList(dbNames.get(0))),
                 new com.google.common.base.Function<JsonNode, Void>() {
-            @Override
-            public Void apply(JsonNode jsonNode) {
-                try{
-                schema.put(dbNames.get(0), DatabaseSchema.fromJson(jsonNode));
-                if (schema.size() > 1 && !sfuture.isCancelled()) {
-                    _populateSchema(dbNames.subList(1, dbNames.size()), schema, sfuture);
-                } else if (schema.size() == 1) {
-                    sfuture.set(schema);
-                }
-            } catch (Throwable e) {
-               sfuture.setException(e);
-            }
-            return null;
-        }});
+                    @Override
+                    public Void apply(JsonNode jsonNode) {
+                        try {
+                            schema.put(dbNames.get(0), DatabaseSchema.fromJson(dbNames.get(0), jsonNode));
+                            if (schema.size() > 1 && !sfuture.isCancelled()) {
+                                _populateSchema(dbNames.subList(1, dbNames.size()), schema, sfuture);
+                            } else if (schema.size() == 1) {
+                                sfuture.set(schema);
+                            }
+                        } catch (Throwable e) {
+                            sfuture.setException(e);
+                        }
+                        return null;
+                    }
+                });
     }
 
     public void setRpc(OvsdbRPC rpc) {

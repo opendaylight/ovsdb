@@ -60,15 +60,14 @@ public abstract class ColumnType {
                 return columnType;
             }
         }
-        //todo mode to speicfic typed exception
+        //todo move to speicfic typed exception
         throw new RuntimeException(String.format("could not find the right column type %s",
                 JsonUtils.prettyString(json)));
     }
 
 
     /**
-     * Creates a ColumnType from the JsonNode if the type knows how to,
-     * returns null otherwise
+     * Creates a ColumnType from the JsonNode if the implementation  knows how to, returns null otherwise
      *
      * @param json the JSONNode object that needs to converted
      * @return a valid SubType or Null (if the JsonNode does not represent

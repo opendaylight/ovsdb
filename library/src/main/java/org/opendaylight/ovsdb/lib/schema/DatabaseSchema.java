@@ -10,23 +10,34 @@
 package org.opendaylight.ovsdb.lib.schema;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.reflect.Invokable;
+import org.opendaylight.ovsdb.lib.ParsingException;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-
+/**
+ * Represents an ovsdb database schema, which is comprised of a set of tables.
+ */
 public class DatabaseSchema {
 
     public static Logger logger = LoggerFactory.getLogger(DatabaseSchema.class);
 
-    public Map<String, TableSchema> tables;
+    private String name;
+    private Map<String, TableSchema> tables;
 
     public DatabaseSchema(Map<String, TableSchema> tables) {
+        this.tables = tables;
+    }
+
+    public DatabaseSchema(String name, Map<String, TableSchema> tables) {
+        this.name = name;
         this.tables = tables;
     }
 
@@ -38,39 +49,62 @@ public class DatabaseSchema {
         return this.getTables().contains(table);
     }
 
-    public TableSchema getTable(String table) {
-        return this.tables.get(table);
-    }
-
-    public static DatabaseSchema fromJson(JsonNode json) {
-        if (!json.isObject() || !json.has("tables")) {
-            //todo specific types of exception
-            throw new RuntimeException("bad databaseschema root, expected \"tables\" as child");
-        }
-
-        Map<String, TableSchema> tables = new HashMap<>();
-        //Iterator<Map.Entry<String,JsonNode>> fields = json.fields();
-        for (Iterator<Map.Entry<String, JsonNode>> iter = json.get("tables").fields(); iter.hasNext(); ) {
-            Map.Entry<String, JsonNode> table = iter.next();
-            logger.debug("Read schema for table[{}]:{}", table.getKey(), table.getValue());
-
-            tables.put(table.getKey(), TableSchema.fromJson(table.getKey(), table.getValue()));
-        }
-
-        return new DatabaseSchema(tables);
-    }
-
     public TransactionBuilder beginTransaction() {
         return new TransactionBuilder(this);
     }
 
-    public <E extends TableSchema<E>> TableSchema<E> table(String tableName) {
-        //todo : error handling
-        return tables.get(tableName);
+    public <E extends TableSchema<E>> E table(String tableName, Class<E> clazz) {
+        TableSchema<E> table = tables.get(tableName);
+
+        if (clazz.isInstance(table)) {
+            return clazz.cast(table);
+        }
+
+        return createTableSchema(clazz, table);
     }
 
-    public <E extends TableSchema<E>> E table(String tableName, Class<E> clazz) {
-        TableSchema<E> table = table(tableName);
-        return table.as(clazz);
+    protected <E extends TableSchema<E>> E createTableSchema(Class<E> clazz, TableSchema<E> table) {
+        Constructor<E> declaredConstructor = null;
+        try {
+            declaredConstructor = clazz.getDeclaredConstructor(TableSchema.class);
+        } catch (NoSuchMethodException e) {
+            String message = String.format("Class %s does not have public constructor that accepts TableSchema object",
+                    clazz);
+            throw new IllegalArgumentException(message, e);
+        }
+        Invokable<E, E> invokable = Invokable.from(declaredConstructor);
+        try {
+            return invokable.invoke(null, table);
+        } catch (Exception e) {
+            String message = String.format("Not able to create instance of class %s using public constructor " +
+                    "that accepts TableSchema object", clazz);
+            throw new IllegalArgumentException(message, e);
+        }
+    }
+
+    //todo : this needs to move to a custom factory
+    public static DatabaseSchema fromJson(String dbName, JsonNode json) {
+        if (!json.isObject() || !json.has("tables")) {
+            throw new ParsingException("bad DatabaseSchema root, expected \"tables\" as child but was not found");
+        }
+
+        Map<String, TableSchema> tables = new HashMap<>();
+        for (Iterator<Map.Entry<String, JsonNode>> iter = json.get("tables").fields(); iter.hasNext(); ) {
+            Map.Entry<String, JsonNode> table = iter.next();
+            logger.debug("Read schema for table[{}]:{}", table.getKey(), table.getValue());
+
+            //todo : this needs to done by a factory
+            tables.put(table.getKey(), new GenericTableSchema().fromJson(table.getKey(), table.getValue()));
+        }
+
+        return new DatabaseSchema(dbName, tables);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

@@ -314,16 +314,16 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         DatabaseSchema databaseSchema = dbSchemaF.get();
         inventoryServiceInternal.updateDatabaseSchema(connection.getNode(), databaseSchema);
 
-        MonitorRequestBuilder monitorReq = new MonitorRequestBuilder();
+        MonitorRequestBuilder monitorReq = null; //ashwin(not sure if we need) : new MonitorRequestBuilder();
         for (Table<?> table : Tables.getTables()) {
             if (databaseSchema.getTables().keySet().contains(table.getTableName().getName())) {
-                monitorReq.monitor(table);
+                //ashwin(not sure if we need) monitorReq.monitor(table);
             } else {
                 logger.debug("We know about table {} but it is not in the schema of {}", table.getTableName().getName(), connection.getNode().getNodeIDString());
             }
         }
 
-        ListenableFuture<TableUpdates> monResponse = connection.getRpc().monitor(monitorReq);
+        ListenableFuture<TableUpdates> monResponse = null; //ashwin(not sure if we need)connection.getRpc().monitor(monitorReq);
         TableUpdates updates = monResponse.get();
         if (updates.getError() != null) {
             logger.error("Error configuring monitor, error : {}, details : {}",

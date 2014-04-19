@@ -12,5 +12,11 @@
 
 package org.opendaylight.ovsdb.lib;
 
+import org.opendaylight.ovsdb.lib.message.TableUpdates;
+
 public interface MonitorCallBack {
+
+    void update(TableUpdates result);
+
+    void exception(Throwable t);
 }

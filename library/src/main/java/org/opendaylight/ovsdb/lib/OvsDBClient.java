@@ -18,6 +18,7 @@ import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
 import java.util.List;
 
@@ -64,11 +65,12 @@ public interface OvsDBClient {
 
     /**
      * ovsdb <a href="http://tools.ietf.org/html/draft-pfaff-ovsdb-proto-04#section-4.1.5">monitor</a> operation.
-     * @param monitorRequest represents what needs to be monitored including a client specified monitor handle. This
+     * @param monitorRequests represents what needs to be monitored including a client specified monitor handle. This
      *                       handle is used to later cancel ({@link #cancelMonitor(MonitorHandle)}) the monitor.
      * @param callback receives the monitor response
      */
-    public void monitor(MonitorRequest monitorRequest, MonitorCallBack callback);
+    public <E extends TableSchema<E>> MonitorHandle monitor(DatabaseSchema schema, List<MonitorRequest<E>> monitorRequests,
+                                 MonitorCallBack callback);
 
     /**
      * Cancels an existing monitor method.

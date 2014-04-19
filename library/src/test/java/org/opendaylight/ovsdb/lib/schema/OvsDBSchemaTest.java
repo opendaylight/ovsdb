@@ -26,7 +26,7 @@ public class OvsDBSchemaTest {
         JsonNode jsonNode = mapper.readTree(resourceAsStream);
         System.out.println("jsonNode = " + jsonNode.get("id"));
 
-        DatabaseSchema schema = DatabaseSchema.fromJson(jsonNode.get("result"));
+        DatabaseSchema schema = DatabaseSchema.fromJson("some", jsonNode.get("result"));
         assertNotNull(schema);
 
     }

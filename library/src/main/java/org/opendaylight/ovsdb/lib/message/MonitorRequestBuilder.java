@@ -9,27 +9,61 @@
  */
 package org.opendaylight.ovsdb.lib.message;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
-import org.opendaylight.ovsdb.lib.jsonrpc.Params;
-import org.opendaylight.ovsdb.lib.table.Table;
+import com.google.common.collect.Sets;
+import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
+import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
 import java.util.List;
-import java.util.Map;
 
-public class MonitorRequestBuilder implements Params {
+public class MonitorRequestBuilder<E extends TableSchema<E>> {
 
-    Map<String, MonitorRequest> requests = Maps.newLinkedHashMap();
+    E tableSchema;
+    MonitorRequest<E> monitorRequest;
 
-    @Override
-    public List<Object> params() {
-        return Lists.newArrayList("Open_vSwitch", null, requests);
+    MonitorRequestBuilder(E tableSchema) {
+        this.tableSchema = tableSchema;
     }
 
-    public <T extends Table> MonitorRequest<T> monitor(T table) {
-        MonitorRequest<T> req = new MonitorRequest<T>();
-        requests.put(table.getTableName().getName(), req);
-        return req;
+    public static <T extends TableSchema<T>> MonitorRequestBuilder<T> builder(T tableSchema) {
+        return new MonitorRequestBuilder<>(tableSchema);
+    }
+
+    MonitorRequest<E> getMonitorRequest() {
+        if (monitorRequest == null) {
+            monitorRequest = new MonitorRequest<>();
+            monitorRequest.setColumns(Sets.<String>newHashSet());
+        }
+        return monitorRequest;
+    }
+
+    public MonitorRequestBuilder<E> addColumn(String column) {
+        getMonitorRequest().getColumns().add(column);
+        return this;
+    }
+
+    public MonitorRequestBuilder<E> addColumn(ColumnSchema<?, ?> column) {
+        this.addColumn(column.getName());
+        return this;
+    }
+
+    public MonitorRequestBuilder<E> addColumns(List<ColumnSchema<E, ?>> columns) {
+        for(ColumnSchema<E, ?> schema : columns) {
+            this.addColumn(schema);
+        }
+        return this;
+    }
+
+    public MonitorRequestBuilder<E> with(MonitorSelect select) {
+        getMonitorRequest().setSelect(select);
+        return this;
+    }
+
+    public MonitorRequest<E> build() {
+        MonitorRequest<E> monitorRequest = getMonitorRequest();
+        if (monitorRequest.getSelect() == null) {
+            monitorRequest.setSelect(new MonitorSelect());
+        }
+        monitorRequest.setTableName(tableSchema.getName());
+        return monitorRequest;
     }
 }

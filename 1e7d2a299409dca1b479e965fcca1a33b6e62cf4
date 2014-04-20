@@ -87,6 +87,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_3809d631",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-20T21:04:54Z",
+      "side": 1,
+      "message": "am not too comfortable to have such default values / assumptions at this layer. The only \"DEFAULTS\" that is declared here are the generic entities which will have no impact one way or the other on the deployment. But having \"eth1\" declared in the default section kinda get into the specifics of deployment and hence cannot be considered as default. I see this is something similar to the \"local_ip\" configuration for which we have no default (because having an local_ip ip-address as default doesnt make much sense due to the deployment considerations).\n\nSo, Can you please consider removing the above 2 deafults that are specific to a deployment ?",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_98bca26e",
         "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
         "patchSetId": 3
@@ -138,6 +155,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_d8054a15",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-20T21:04:54Z",
+      "side": 1,
+      "message": "Same as the above comment.",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_b8c166e6",
         "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
         "patchSetId": 3
@@ -155,6 +189,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_f8028e0a",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-20T21:04:54Z",
+      "side": 1,
+      "message": "Same comment as above.",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_d880ea8d",
         "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
         "patchSetId": 3
@@ -166,6 +217,23 @@
       "writtenOn": "2014-04-19T17:07:23Z",
       "side": 1,
       "message": "please put the return statement in a newline - more Java standard.",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_93ffa301",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-20T21:04:54Z",
+      "side": 1,
+      "message": "Based on the above comments, should we remove this member variable ?",
       "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -217,6 +285,23 @@
       "writtenOn": "2014-04-19T17:07:23Z",
       "side": 1,
       "message": "perhaps rename phyIf --\u003e physicalInterfaceName?",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_53091b2b",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-20T21:04:54Z",
+      "side": 1,
+      "message": "Better to be initialized to null \u0026 not even use a default value for deployment specific physical interface.",
       "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -308,6 +393,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_b3042716",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-20T21:04:54Z",
+      "side": 1,
+      "message": "is this case-sensitive, if not, can u consider using equalsIgnoreCase ?",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_7872fee6",
         "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
         "patchSetId": 3
@@ -336,6 +438,108 @@
       "writtenOn": "2014-04-19T17:07:23Z",
       "side": 1,
       "message": "Why break is needed here? (you wrote that there\u0027s only one value in this map)",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_730e9f36",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-20T21:04:54Z",
+      "side": 1,
+      "message": "Minor comment. pls change ifName to portName.",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_13f953c8",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-20T21:04:54Z",
+      "side": 1,
+      "message": "I understand that you added this temporarily for your debugging purposes. But since most of the design review is complete, i think you can remove this for this iteration so that we can get to a cleaner review/merge",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d3020bb4",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-20T21:04:54Z",
+      "side": 1,
+      "message": "Shouldnt this be named createIntegrationBridge ?",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_33f6d7d8",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-20T21:04:54Z",
+      "side": 1,
+      "message": "Shouldnt this be named addIntegrationBridge()",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f3ff0fa9",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-20T21:04:54Z",
+      "side": 1,
+      "message": "Shouldnt this be named createNetBridge ?",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_932c834c",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 321,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-20T21:04:54Z",
+      "side": 1,
+      "message": "This Vlan network operation is generic for OF1.0 and OF1.3, is it okay to move this outside the if/else condition and make it common for both the cases ?",
       "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

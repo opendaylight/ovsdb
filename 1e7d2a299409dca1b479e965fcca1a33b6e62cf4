@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_d3752b33",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-04-21T18:57:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_f87daeb2",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_188972ca",
         "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
         "patchSetId": 3
@@ -140,6 +158,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_f372af48",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-04-21T18:57:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_f3162ff1",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_98bca26e",
         "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
         "patchSetId": 3
@@ -208,6 +244,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_938fa323",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-04-21T18:57:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_d8054a15",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_b8c166e6",
         "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
         "patchSetId": 3
@@ -254,6 +308,24 @@
       "writtenOn": "2014-04-20T21:04:54Z",
       "side": 1,
       "message": "Same comment as above.",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b3942738",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-04-21T18:57:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_f8028e0a",
       "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -312,6 +384,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_53991b6d",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-04-21T18:57:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_93d32338",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_984a6282",
         "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
         "patchSetId": 3
@@ -340,6 +430,24 @@
       "writtenOn": "2014-04-19T17:07:23Z",
       "side": 1,
       "message": "Please give the method a more clear name - I would turn \"phy\" into \"physical\" for example.\nBecause if you take the javadoc out, it\u0027s not clear that it relates to neutron at all.\n\nAnd also the parameter \"node\" should have a more clear name too.\nIt\u0027s type is Node, but the name should be more clear what this node represents.",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_739e9f58",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-04-21T18:57:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_18b0928a",
       "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -623,6 +731,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_13a3939f",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-04-21T18:57:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_f3edcff0",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_13f953c8",
         "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
         "patchSetId": 3
@@ -652,6 +778,24 @@
       "side": 1,
       "message": "OK",
       "parentUuid": "fa82b9bf_13f953c8",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_33a01790",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-04-21T18:57:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_93ba43e0",
       "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -1128,6 +1272,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_f3a94f7c",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF10ProviderManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 600,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-04-21T18:57:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_133ab3cd",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_73253faa",
         "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF10ProviderManager.java",
         "patchSetId": 3
@@ -1139,6 +1301,24 @@
       "writtenOn": "2014-04-19T17:07:23Z",
       "side": 1,
       "message": "This is a very long method. Very hard to read, understand and maintain.\nPlease break it to shorter methods.",
+      "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d3ac4b8f",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF10ProviderManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 608,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-04-21T18:57:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_73253faa",
       "revId": "1e7d2a299409dca1b479e965fcca1a33b6e62cf4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

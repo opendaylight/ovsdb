@@ -151,7 +151,7 @@
 	"requests": [
 		{
 			"id": "0753fa84-8a0e-7727-1d45-5b5eb8c74de0",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/interface/rows/45bf1633-1411-4c92-87f8-b1492eed2ff6",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/interface/rows/45bf1633-1411-4c92-87f8-b1492eed2ff6",
 			"data": "",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
 			"dataMode": "raw",
@@ -166,7 +166,7 @@
 		},
 		{
 			"id": "085fa6c6-1d5b-8afb-4e4a-56cafe5e8bd0",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/bridge/rows",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/bridge/rows",
 			"data": [],
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
 			"dataMode": "params",
@@ -181,7 +181,7 @@
 		},
 		{
 			"id": "190627e6-ef20-863f-998b-e019034874c4",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/open_vswitch/rows",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/open_vswitch/rows",
 			"data": [],
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
 			"dataMode": "params",
@@ -196,7 +196,7 @@
 		},
 		{
 			"id": "1aaa544a-7d79-3159-84b5-89574ff7f3e2",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/manager/rows",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/manager/rows",
 			"data": "{\n  \"parent_uuid\":\"8d3fb89b-5fac-4631-a990-f5a4e7f5383a\",\n    \"row\":{\n      \"Manager\":{\n        \"target\":\"a_string\",\n        \"is_connected\": true,\n        \"state\":\"active\"\n      }\n    }\n}",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
 			"dataMode": "raw",
@@ -211,7 +211,7 @@
 		},
 		{
 			"id": "2990bcf5-976b-413a-f732-9a21d26d2146",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/port/rows",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/port/rows",
 			"data": [],
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
 			"dataMode": "params",
@@ -227,7 +227,7 @@
 		{
 			"id": "2ced04cd-b934-9a0a-576d-8640b6a0b80e",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/bridge/rows/66ad493c-23cf-45e7-b5a5-1901fb3165f4",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/bridge/rows/66ad493c-23cf-45e7-b5a5-1901fb3165f4",
 			"pathVariables": {},
 			"method": "PUT",
 			"data": "{\n    \"row\":{\n      \"Bridge\":{\n        \"netflow\": [\"55f5d382-17fd-4c42-850d-02c282a67c20\",\"60db8cde-26e6-4bf9-bb08-cd1da68d1fcc\"]\n                \n      }\n    }\n}",
@@ -243,7 +243,7 @@
 		{
 			"id": "2d670425-e1ae-c615-1fe1-b27c0ddf4c43",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/queue/rows/cd1d39f2-0e8d-4164-a5ab-926329cd1c61",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/queue/rows/cd1d39f2-0e8d-4164-a5ab-926329cd1c61",
 			"pathVariables": {},
 			"method": "DELETE",
 			"data": "",
@@ -258,7 +258,7 @@
 		},
 		{
 			"id": "39cdc358-7c75-d1cc-34ff-081e74254748",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/port/rows/2f93780e-ce56-4cce-9f7c-579be7996651",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/port/rows/2f93780e-ce56-4cce-9f7c-579be7996651",
 			"data": "",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
 			"dataMode": "raw",
@@ -274,7 +274,7 @@
 		{
 			"id": "3c4a6bb9-30e8-fdf1-1cf3-a3e187537924",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/SSL/rows",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/SSL/rows",
 			"pathVariables": {},
 			"method": "GET",
 			"data": [],
@@ -289,7 +289,7 @@
 		},
 		{
 			"id": "3d34de25-8015-98e5-957b-eb3cef69175f",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/manager/rows",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/manager/rows",
 			"data": [],
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
 			"dataMode": "params",
@@ -305,7 +305,7 @@
 		{
 			"id": "40323a39-f07f-695a-2428-e888dd9c7cf1",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/qos/rows/739f3929-3a3e-45b1-88ea-afc09df0ca5c",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/qos/rows/739f3929-3a3e-45b1-88ea-afc09df0ca5c",
 			"pathVariables": {},
 			"method": "DELETE",
 			"data": "",
@@ -321,7 +321,7 @@
 		{
 			"id": "485249a8-94d2-b61b-a6b9-addfe8fb1495",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/ipfix/rows",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/ipfix/rows",
 			"pathVariables": {},
 			"method": "POST",
 			"data": "{\n  \"parent_uuid\":\"2e5c0418-e70c-406b-9ad9-58585ac10c19\",\n    \"row\":{\n      \"IPFIX\":{\n        \"targets\":[\n          \"set\", [\"192.168.56.1:5555\"]]\n      }\n    }\n}",
@@ -339,7 +339,7 @@
 		{
 			"id": "4945fedc-a9c9-5b38-478f-df9ea0d1248a",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/port/rows/97a82ec9-e85e-4a48-9b77-ca4a41128b90",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/port/rows/97a82ec9-e85e-4a48-9b77-ca4a41128b90",
 			"pathVariables": {},
 			"method": "PUT",
 			"data": "{\n    \"row\":{\n      \"Port\":{\n        \"qos\": [\n          \"ab2b6f2d-5cb4-4dcf-ac1b-c989ae3d76ce\"\n                ]\n      }\n    }\n}",
@@ -355,7 +355,7 @@
 		{
 			"id": "4b21a8b1-1703-bc2c-8716-7dcdab57300a",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/interface/rows",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/interface/rows",
 			"pathVariables": {},
 			"method": "POST",
 			"data": "{\n  \"parent_uuid\":\"ea70e5b1-8b21-4caf-a102-0b85b6c63119\",\n    \"row\":{\n      \"Interface\":{\n        \"name\":\"s1-1125-1\",\n        \"mac\":[\"00:00:bb:bb:00:01\"],\n        \"admin_state\":\"up\"\n      }\n    }\n}",
@@ -372,7 +372,7 @@
 		{
 			"id": "5e1f52b7-3295-9485-377f-6988c401a8cd",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/qos/rows",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/qos/rows",
 			"pathVariables": {},
 			"method": "GET",
 			"data": [],
@@ -388,7 +388,7 @@
 		{
 			"id": "5eab776e-dd13-2a7f-90c3-fabc4d98d481",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/sflow/rows/",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/sflow/rows/",
 			"pathVariables": {},
 			"method": "DELETE",
 			"data": "",
@@ -404,7 +404,7 @@
 		{
 			"id": "618382e3-a833-04d1-f917-c40e70c176cb",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/port/rows",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/port/rows",
 			"pathVariables": {},
 			"method": "POST",
 			"data": "{\n  \"parent_uuid\":\"6b3072ba-a120-4db9-82f8-a8ce4eae6942\",\n    \"row\":{\n      \"Port\":{\n        \"name\":\"krb1\",\n        \"mac\":[\"00:00:00:00:00:01\"],\n        \"tag\":[200]\n      }\n    }\n}",
@@ -420,7 +420,7 @@
 		},
 		{
 			"id": "646be7a5-a484-329a-1039-02b53e1b05fc",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/controller/rows/68e97a9a-9f2c-497a-b39b-7f1e37c30c6f",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/controller/rows/68e97a9a-9f2c-497a-b39b-7f1e37c30c6f",
 			"data": "",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
 			"dataMode": "raw",
@@ -436,7 +436,7 @@
 		{
 			"id": "6c1b9611-b195-c64c-684f-a639e7ae3946",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/SSL/rows",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/SSL/rows",
 			"pathVariables": {},
 			"method": "POST",
 			"data": "{\n    \"row\":{\n      \"SSL\":{\n        \"name\":\"mySSL\",\n        \"ca_cert\" : \"ca_cert\",\n        \"bootstrap_ca_cert\" : true,\n        \"certificate\":\"pieceofpaper\",\n        \"private_key\" : \"private\"\n      }\n    }\n}\n",
@@ -452,7 +452,7 @@
 		{
 			"id": "6f5b8f9a-3e66-16b0-7a16-62a96313eab5",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/bridge/rows",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/bridge/rows",
 			"pathVariables": {},
 			"method": "POST",
 			"data": "{\n    \"row\":{\n      \"Bridge\":{\n        \"name\":\"br25\",\n        \"datapath_type\":\"OPENFLOW\"\n      }\n    }\n}",
@@ -469,7 +469,7 @@
 		{
 			"id": "76c04544-3be0-e330-75e1-509919d781f0",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/netflow/rows",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/netflow/rows",
 			"pathVariables": {},
 			"method": "POST",
 			"data": "{\n  \"parent_uuid\":\"817d2e33-448d-4f2e-b183-7f835e93922f\",\n  \"row\" : {\n    \"NetFlow\":{\n      \"targets\" : [\n        \"set\", [\"192.168.1.102:9998\"]],\n      \"active_timeout\" : \"0\"\n      }\n  } \n}",
@@ -488,7 +488,7 @@
 			"id": "7e41f2e4-6797-64f0-ebd2-b4b634b6a559",
 			"name": "DELETE a Bridge row given UUID",
 			"description": "Please note that the UUID used here must be one of the existing UUID of a Row in Bridge Table",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/bridge/rows/45677cc9-bed2-4def-9986-b05a9b59f1f4",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/bridge/rows/45677cc9-bed2-4def-9986-b05a9b59f1f4",
 			"method": "DELETE",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
 			"data": "",
@@ -500,7 +500,7 @@
 		},
 		{
 			"id": "7fc7d8cd-244d-58a0-febf-9814729b9422",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/controller/rows",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/controller/rows",
 			"data": [],
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
 			"dataMode": "params",
@@ -516,7 +516,7 @@
 		{
 			"id": "88f1ec23-5471-97a8-2633-c89c51c20071",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/sflow/rows",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/sflow/rows",
 			"pathVariables": {},
 			"method": "GET",
 			"data": [],
@@ -532,7 +532,7 @@
 		{
 			"id": "8f74bdb1-1f10-69f4-da1d-cd878df784e5",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/ipfix/rows/715fb52c-63bb-495a-8dca-f3f824fbf8fb",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/ipfix/rows/715fb52c-63bb-495a-8dca-f3f824fbf8fb",
 			"pathVariables": {},
 			"method": "DELETE",
 			"data": "",
@@ -549,7 +549,7 @@
 		{
 			"id": "989d5e9c-47a9-206a-c225-dc0e796f096a",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/SSL/rows/6c2a532c-96df-49ce-8f3f-f83c39e47122",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/SSL/rows/6c2a532c-96df-49ce-8f3f-f83c39e47122",
 			"pathVariables": {},
 			"method": "DELETE",
 			"data": "",
@@ -565,7 +565,7 @@
 		{
 			"id": "9b2eaefc-5cc0-958a-0926-2b18fea54b88",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/sflow/rows",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/sflow/rows",
 			"pathVariables": {},
 			"method": "POST",
 			"data": "{\n  \"parent_uuid\": \"a8c88ae9-fc08-498b-8ec8-2fd86627055d\",\n  \"row\": {\n    \"sFlow\": {\n      \"targets\": [\n        \"set\",\n        [\n          \"targets_string\"\n        ]\n      ]\n    }\n  }\n}",
@@ -582,7 +582,7 @@
 		{
 			"id": "9d887d97-a323-a847-a163-ca6e62ad96fe",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/qos/rows/ab2b6f2d-5cb4-4dcf-ac1b-c989ae3d76ce",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/qos/rows/ab2b6f2d-5cb4-4dcf-ac1b-c989ae3d76ce",
 			"pathVariables": {},
 			"method": "PUT",
 			"data": "{\n    \"row\":{\n      \"QoS\":{\n        \"queues\": {\n          \"1\" : { \"val\": \"0fbe6ced-16cf-4a39-8a79-e7c8c31f63a9\"}\n        }\n      }\n    }\n}",
@@ -598,7 +598,7 @@
 		{
 			"id": "a01a045e-e642-8e39-f2cc-baf37ec5dfc5",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/ipfix/rows",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/ipfix/rows",
 			"pathVariables": {},
 			"method": "GET",
 			"data": [],
@@ -615,7 +615,7 @@
 		},
 		{
 			"id": "a37af20f-0e43-3fe1-9f3b-c42a264fa3a1",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/interface/rows",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/interface/rows",
 			"data": [],
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
 			"dataMode": "params",
@@ -633,7 +633,7 @@
 			"id": "aed6c263-4d42-ca35-669f-33a00c3d9c82",
 			"name": "GET a bridge row given a UUID",
 			"description": "Please note that the UUID used here must be one of the existing UUID of a Row in Bridge Table",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/bridge/rows/45677cc9-bed2-4def-9986-b05a9b59f1f4",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/bridge/rows/45677cc9-bed2-4def-9986-b05a9b59f1f4",
 			"method": "GET",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
 			"data": "",
@@ -646,7 +646,7 @@
 		{
 			"id": "b1af09ee-f6b9-cddd-9087-6d8dc5b958a4",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/queue/rows",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/queue/rows",
 			"pathVariables": {},
 			"method": "GET",
 			"data": [],
@@ -662,7 +662,7 @@
 		{
 			"id": "baab428a-b056-bd23-906d-290933aee25f",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/manager/rows/",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/manager/rows/",
 			"pathVariables": {},
 			"method": "DELETE",
 			"data": "",
@@ -678,7 +678,7 @@
 		{
 			"id": "c3c1dd3a-1f8e-947d-f729-2eef56795fef",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/qos/rows/ab2b6f2d-5cb4-4dcf-ac1b-c989ae3d76ce",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/qos/rows/ab2b6f2d-5cb4-4dcf-ac1b-c989ae3d76ce",
 			"pathVariables": {},
 			"method": "PUT",
 			"data": "{\n    \"row\":{\n      \"QoS\":{\n        \"Queues\": {\n          \"queue_value\" : \"5afa70b6-7c74-4972-9d98-874e6307807d\"\n        }\n      }\n    }\n}",
@@ -694,7 +694,7 @@
 		{
 			"id": "c7ab23bd-2d49-71a0-7a40-31ee0f44b2b0",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/netflow/rows",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/netflow/rows",
 			"pathVariables": {},
 			"method": "GET",
 			"data": [],
@@ -710,7 +710,7 @@
 		{
 			"id": "d239a9ea-8247-3d47-0d3a-2a1063c0177a",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/controller/rows",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/controller/rows",
 			"pathVariables": {},
 			"method": "POST",
 			"data": "{\n  \"parent_uuid\" : \"a8c88ae9-fc08-498b-8ec8-2fd86627055d\",\n  \"row\" : {\n  \t\"Controller\": {\n      \"target\": \"1.1.1.1\"\n    \t}\n\t}\t\n}",
@@ -727,7 +727,7 @@
 		{
 			"id": "d32420de-40fd-d407-59c5-e1c3b8ea359c",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/queue/rows",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/queue/rows",
 			"pathVariables": {},
 			"method": "POST",
 			"data": "{\n  \"parent_uuid\": \"c5f7ce39-847c-4a69-bf8a-2a0181898581\",\n  \"row\": {\n    \"Queue\": {\n      \"dscp\" : [\n      \"set\",\n      [\n          25\n        ]\n      ]\n    }\n  }\n}",
@@ -744,7 +744,7 @@
 		{
 			"id": "d565f3fb-4a9a-3e61-9e8e-87324427c979",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/qos/rows",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/qos/rows",
 			"pathVariables": {},
 			"method": "POST",
 			"data": "{\n  \"parent_uuid\" : \"b109dbcf-47bb-4121-b244-e623b3421d6e\",\n  \"row\" : {\n  \t\"QoS\": {\n      \"type\": \"linux-htb\"\n    \t}\n\t}\t\n}",
@@ -759,7 +759,7 @@
 		},
 		{
 			"id": "d70a4755-d62a-dfcd-e363-dbe931af99a0",
-			"url": "http://localhost:8080/controller/nb/v2/connectionmanager/node/HOST1/address/192.168.1.102/port/6640/",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/controller/nb/v2/connectionmanager/node/HOST1/address/192.168.1.102/port/6640/",
 			"data": [],
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\n",
 			"dataMode": "params",
@@ -775,7 +775,7 @@
 		{
 			"id": "f8d9b165-7fa7-e0bd-b634-b45d550a3114",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
-			"url": "http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/netflow/rows/60db8cde-26e6-4bf9-bb08-cd1da68d1fcc",
+			"url": "http://{{controllerHost}}:{{controllerPort}}/ovsdb/nb/v2/node/OVS/HOST1/tables/netflow/rows/60db8cde-26e6-4bf9-bb08-cd1da68d1fcc",
 			"pathVariables": {},
 			"method": "DELETE",
 			"data": "",

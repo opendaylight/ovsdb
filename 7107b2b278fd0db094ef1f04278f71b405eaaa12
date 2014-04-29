@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_78f9854c",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-29T17:15:21Z",
+      "side": 1,
+      "message": "This might be confusing for the users. If there are no physical ethernet configs, this Port wont be present I believe. Is that correct ?",
+      "revId": "7107b2b278fd0db094ef1f04278f71b405eaaa12",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d89f7102",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 493,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-29T17:15:21Z",
+      "side": 1,
+      "message": "If I have to drill deeper with the original intent, this was added because of the fact that we are in OSGi environment and the OVSDB bundles are mostly state-less. Hence, if we have to restart any of the ovsdb bundles, we should be able to program the entries in cases where the node events wont be seen.\n\nCan you please check ovsdb.neutron bundle restart case to make sure things work with this commented out ?",
+      "revId": "7107b2b278fd0db094ef1f04278f71b405eaaa12",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d86d3106",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 501,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-29T17:15:21Z",
+      "side": 1,
+      "message": "Just a request, if you can address it.\nCan you please replace all the \"vlan\", \"vxlan\", \"gre\" raw strings to constant values in appropriate places ?\nFor example, the network provider constants must go under NetworkHandler.java, etc. (If not already defined in the NeutronNetwork)",
+      "revId": "7107b2b278fd0db094ef1f04278f71b405eaaa12",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3850dd31",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/NodeConfiguration.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-29T17:15:21Z",
+      "side": 1,
+      "message": "Why is this an info ? maybe a deubg",
+      "revId": "7107b2b278fd0db094ef1f04278f71b405eaaa12",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d8445176",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/SouthboundHandler.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-29T17:15:21Z",
+      "side": 1,
+      "message": "Its a trace to make sure we know we are ignoring some genuine updates. (just that we dont care for stats much). Can we keep it in place ?",
+      "revId": "7107b2b278fd0db094ef1f04278f71b405eaaa12",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f849158c",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/SouthboundHandler.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-29T17:15:21Z",
+      "side": 1,
+      "message": "Same here",
+      "revId": "7107b2b278fd0db094ef1f04278f71b405eaaa12",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_985ec944",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/TenantNetworkManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-29T17:15:21Z",
+      "side": 1,
+      "message": "This file has no important change done. and the traces can go as well. Can you remove this file from the changeset ?",
+      "revId": "7107b2b278fd0db094ef1f04278f71b405eaaa12",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

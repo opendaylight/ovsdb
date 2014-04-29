@@ -70,7 +70,8 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
                         break;
                     case ROW:
                         try {
-                            processRowUpdate(ev.getNode(), ev.getTableName(), ev.getUuid(), ev.getRow(), ev.getAction());
+                            processRowUpdate(ev.getNode(), ev.getTableName(), ev.getUuid(), ev.getRow(),
+                                             ev.getContext(),ev.getAction());
                         } catch (Exception e) {
                             logger.error("Exception caught in ProcessRowUpdate for node " + ev.getNode(), e);
                         }
@@ -134,14 +135,22 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
                 //logger.trace("IGNORING Port Update : "+newRow.toString());
                 return false;
             }
+        } else if (newRow.getTableName().equals(Open_vSwitch.NAME)) {
+            /* print the row for now */
+            Open_vSwitch oldOpenvSwitch = (Open_vSwitch) oldRow;
+            if (oldOpenvSwitch.getOther_config()== null) {
+                /* we are only interested in other_config field change */
+                return false;
+            }
+            logger.trace("isUpdateOfInterest: Open_vSwitch table old row {}", oldRow);
+            logger.trace("isUpdateOfInterest: Open_vSwitch table new row {}", newRow);
         }
-
         return true;
     }
 
     @Override
-    public void rowRemoved(Node node, String tableName, String uuid, Table<?> row) {
-        this.enqueueEvent(new SouthboundEvent(node, tableName, uuid, row, SouthboundEvent.Action.DELETE));
+    public void rowRemoved(Node node, String tableName, String uuid, Table<?> row, Object context) {
+        this.enqueueEvent(new SouthboundEvent(node, tableName, uuid, row, context, SouthboundEvent.Action.DELETE));
     }
 
     private void enqueueEvent (SouthboundEvent event) {
@@ -159,13 +168,26 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
     }
 
     private void processRowUpdate(Node node, String tableName, String uuid, Table<?> row,
-                                  SouthboundEvent.Action action) {
+                                  Object context, SouthboundEvent.Action action) {
         if (action == SouthboundEvent.Action.DELETE) {
             if (Interface.NAME.getName().equalsIgnoreCase(tableName)) {
                 logger.debug("processRowUpdate: {} Deleted node: {}, uuid: {}, row: {}", tableName, node, uuid, row);
                 Interface deletedIntf = (Interface)row;
-                NeutronNetwork network = TenantNetworkManager.getManager().getTenantNetworkForInterface(deletedIntf);
-                if (network != null && !network.getRouterExternal()) {
+                NeutronNetwork network = null;
+                if (context == null) {
+                    network = TenantNetworkManager.getManager().getTenantNetworkForInterface(deletedIntf);
+                } else {
+                    network = (NeutronNetwork)context;
+                }
+                List<String> phyIfName = AdminConfigManager.getManager().getAllPhyIfName(node);
+                logger.info("Delete interface " + deletedIntf.getName());
+                if (deletedIntf.getType().equalsIgnoreCase("vxlan") ||
+                    deletedIntf.getType().equalsIgnoreCase("gre") ||
+                    phyIfName.contains(deletedIntf.getName())) {
+                    /* delete tunnel or physical interfaces */
+                    this.handleInterfaceDelete(node, uuid, deletedIntf, false, null);
+                } else if (network != null && !network.getRouterExternal()) {
+                    logger.info("Neutron network" + network + "isRouterExternal" + network.getRouterExternal());
                     try {
                         ConcurrentMap<String, Table<?>> interfaces = this.ovsdbConfigService.getRows(node, Interface.NAME.getName());
                         if (interfaces != null) {
@@ -176,7 +198,7 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
                                 NeutronNetwork neutronNetwork = TenantNetworkManager.getManager().getTenantNetworkForInterface(intf);
                                 if (neutronNetwork != null && neutronNetwork.equals(network)) isLastInstanceOnNode = false;
                             }
-                            this.handleInterfaceDelete(node, uuid, deletedIntf, isLastInstanceOnNode);
+                            this.handleInterfaceDelete(node, uuid, deletedIntf, isLastInstanceOnNode, network);
                         }
                     } catch (Exception e) {
                         logger.error("Error fetching Interface Rows for node " + node, e);
@@ -244,18 +266,26 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
         }
     }
 
-    private void handleInterfaceDelete (Node node, String uuid, Interface intf, boolean isLastInstanceOnNode) {
+    private void handleInterfaceDelete (Node node, String uuid, Interface intf,
+                                        boolean isLastInstanceOnNode, NeutronNetwork network) {
         logger.debug("handleInterfaceDelete: node: {}, uuid: {}, isLastInstanceOnNode: {}",
                 node, uuid, isLastInstanceOnNode);
-        NeutronNetwork network = TenantNetworkManager.getManager().getTenantNetworkForInterface(intf);
-        if (network != null) {
+        List<String> phyIfName = AdminConfigManager.getManager().getAllPhyIfName(node);
+        if (intf.getType().equalsIgnoreCase("vxlan") || intf.getType().equalsIgnoreCase("gre") ||
+            phyIfName.contains(intf.getName())) {
+            /* delete tunnel or physical interfaces */
+            logger.debug("handlerInterfaceDelete: intf {}", intf);
+            ProviderNetworkManager.getManager().handleInterfaceDelete(network, node, intf, isLastInstanceOnNode);
+        } else if (network != null) {
+            logger.debug("handlerInterfaceDelete: network {}", network);
             if (!network.getProviderNetworkType().equalsIgnoreCase("vlan")) { /* vlan doesn't need a tunnel endpoint */
                 if (AdminConfigManager.getManager().getTunnelEndPoint(node) == null) {
                     logger.error("Tunnel end-point configuration missing. Please configure it in Open_vSwitch Table");
                     return;
                 }
             }
-            if (isLastInstanceOnNode) {
+            if (isLastInstanceOnNode && ProviderNetworkManager.getManager().hasPerTenantTunneling()) {
+                /* if using OF 1.0, reclaim internal vlan */
                 TenantNetworkManager.getManager().reclaimTennantNetworkInternalVlan(node, uuid, network);
             }
             ProviderNetworkManager.getManager().handleInterfaceDelete(network, node, intf, isLastInstanceOnNode);

@@ -846,29 +846,46 @@ class OF10ProviderManager extends ProviderNetworkManager {
         logger.debug("handleInterfaceDelete: networkType: {}, segmentationId: {}, srcNode: {}, intf: {}",
                 network.getProviderNetworkType(), network.getProviderSegmentationID(), srcNode, intf.getName(), isLastInstanceOnNode);
 
-        if (network.getProviderNetworkType().equalsIgnoreCase("vlan")) {
-            this.removeVlanRules(network, srcNode, intf);
-        } else if (network.getProviderNetworkType().equalsIgnoreCase("vxlan") ||
-                   network.getProviderNetworkType().equalsIgnoreCase("gre")) {
-            IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
-            List<Node> nodes = connectionService.getNodes();
-            nodes.remove(srcNode);
-            for (Node dstNode : nodes) {
-                InetAddress src = AdminConfigManager.getManager().getTunnelEndPoint(srcNode);
-                InetAddress dst = AdminConfigManager.getManager().getTunnelEndPoint(dstNode);
-                this.removeTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), dst, srcNode, intf, true);
-                if (isLastInstanceOnNode) {
-                    status = deleteTunnelPort(srcNode, network.getProviderNetworkType(), src, dst, network.getProviderSegmentationID());
-                }
-                this.removeTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), src, dstNode, intf, false);
-                if (status.isSuccess() && isLastInstanceOnNode) {
-                    deleteTunnelPort(dstNode, network.getProviderNetworkType(), dst, src, network.getProviderSegmentationID());
-                }
+        List<String> phyIfName = AdminConfigManager.getManager().getAllPhyIfName(srcNode);
+        if (intf.getType().equalsIgnoreCase("vxlan") || intf.getType().equalsIgnoreCase("gre")) {
+            /* Delete tunnel port */
+            try {
+                OvsDBMap<String, String> options = intf.getOptions();
+                InetAddress src = InetAddress.getByName(options.get("local_ip"));
+                InetAddress dst = InetAddress.getByName(options.get("remote_ip"));
+                String key = options.get("key");
+                status = deleteTunnelPort(srcNode, intf.getType(), src, dst, key);
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
             }
+        } else if (phyIfName.contains(intf.getName())) {
+            /* delete physical port */
+            deletePhysicalPort(srcNode, intf.getName());
         } else {
-            return new Status(StatusCode.BADREQUEST);
+            /* delete all other interfaces */
+            if (network.getProviderNetworkType().equalsIgnoreCase("vlan")) {
+                this.removeVlanRules(network, srcNode, intf);
+            } else if (network.getProviderNetworkType().equalsIgnoreCase("vxlan") ||
+                       network.getProviderNetworkType().equalsIgnoreCase("gre")) {
+                IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+                List<Node> nodes = connectionService.getNodes();
+                nodes.remove(srcNode);
+                for (Node dstNode : nodes) {
+                    InetAddress src = AdminConfigManager.getManager().getTunnelEndPoint(srcNode);
+                    InetAddress dst = AdminConfigManager.getManager().getTunnelEndPoint(dstNode);
+                    this.removeTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), dst, srcNode, intf, true);
+                    if (isLastInstanceOnNode) {
+                        status = deleteTunnelPort(srcNode, network.getProviderNetworkType(), src, dst, network.getProviderSegmentationID());
+                    }
+                    this.removeTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), src, dstNode, intf, false);
+                    if (status.isSuccess() && isLastInstanceOnNode) {
+                        deleteTunnelPort(dstNode, network.getProviderNetworkType(), dst, src, network.getProviderSegmentationID());
+                    }
+                }
+            } else {
+                return new Status(StatusCode.BADREQUEST);
+            }
         }
-
         return status;
     }
 
@@ -908,14 +925,14 @@ class OF10ProviderManager extends ProviderNetworkManager {
         return false;
     }
 
-    private String getTunnelPortUuid(Node node, String tunnelName, String bridgeUUID) throws Exception {
+    private String getPortUuid(Node node, String portName, String bridgeUUID) throws Exception {
         OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
         Bridge bridge = (Bridge)ovsdbTable.getRow(node, Bridge.NAME.getName(), bridgeUUID);
         if (bridge != null) {
             Set<UUID> ports = bridge.getPorts();
             for (UUID portUUID : ports) {
                 Port port = (Port)ovsdbTable.getRow(node, Port.NAME.getName(), portUUID.toString());
-                if (port != null && port.getName().equalsIgnoreCase(tunnelName)) return portUUID.toString();
+                if (port != null && port.getName().equalsIgnoreCase(portName)) return portUUID.toString();
             }
         }
         return null;
@@ -993,39 +1010,52 @@ class OF10ProviderManager extends ProviderNetworkManager {
         }
     }
 
-    private Status deleteTunnelPort (Node node, String tunnelType, InetAddress src, InetAddress dst, String key) {
+    private Status deletePort(Node node, String bridgeName, String portName) {
         try {
-            String bridgeUUID = null;
-            String tunnelBridgeName = AdminConfigManager.getManager().getNetworkBridgeName();
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
             Map<String, Table<?>> bridgeTable = ovsdbTable.getRows(node, Bridge.NAME.getName());
+            String bridgeUUID = null;
             if (bridgeTable != null) {
                 for (String uuid : bridgeTable.keySet()) {
                     Bridge bridge = (Bridge)bridgeTable.get(uuid);
-                    if (bridge.getName().equals(tunnelBridgeName)) {
+                    if (bridge.getName().equals(bridgeName)) {
                         bridgeUUID = uuid;
                         break;
                     }
                 }
             }
             if (bridgeUUID == null) {
-                logger.debug("Could not find Bridge {} in {}", tunnelBridgeName, node);
+                logger.debug("Could not find Bridge {} in {}", bridgeName, node);
                 return new Status(StatusCode.SUCCESS);
             }
-            String portName = getTunnelName(tunnelType, key, dst);
-            String tunnelPortUUID = this.getTunnelPortUuid(node, portName, bridgeUUID);
-            Status status = ovsdbTable.deleteRow(node, Port.NAME.getName(), tunnelPortUUID);
-            if (!status.isSuccess()) {
-                logger.error("Failed to delete Tunnel port {} in {} status : {}", portName, bridgeUUID, status);
-                return status;
+            String portUUID = this.getPortUuid(node, portName, bridgeUUID);
+            Status status = new Status(StatusCode.SUCCESS);
+            if (portUUID != null) {
+                status = ovsdbTable.deleteRow(node, Port.NAME.getName(), portUUID);
+                if (!status.isSuccess()) {
+                    logger.error("Failed to delete port {} in {} status : {}", portName, bridgeUUID, status);
+                    return status;
+                }
+                logger.debug("Port {} delete status : {}", portName, status);
             }
-
-            logger.debug("Tunnel {} delete status : {}", portName, status);
             return status;
         } catch (Exception e) {
             logger.error("Exception in deleteTunnelPort", e);
             return new Status(StatusCode.INTERNALERROR);
         }
+    }
+
+    private Status deleteTunnelPort (Node node, String tunnelType, InetAddress src, InetAddress dst, String key) {
+        String tunnelBridgeName = AdminConfigManager.getManager().getNetworkBridgeName();
+        String portName = getTunnelName(tunnelType, key, dst);
+        Status status = deletePort(node, tunnelBridgeName, portName);
+        return status;
+    }
+
+    private Status deletePhysicalPort(Node node, String phyIntfName) {
+        String netBridgeName = AdminConfigManager.getManager().getNetworkBridgeName();
+        Status status = deletePort(node, netBridgeName, phyIntfName);
+        return status;
     }
 
     @Override

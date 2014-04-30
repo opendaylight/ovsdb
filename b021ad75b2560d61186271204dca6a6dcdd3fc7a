@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_532022f7",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-30T10:18:23Z",
+      "side": 1,
+      "message": "Please remove this commented import.",
+      "revId": "b021ad75b2560d61186271204dca6a6dcdd3fc7a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b323ae04",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 490,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-04-30T10:18:23Z",
+      "side": 1,
+      "message": "Please remove this comment :)",
+      "revId": "b021ad75b2560d61186271204dca6a6dcdd3fc7a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

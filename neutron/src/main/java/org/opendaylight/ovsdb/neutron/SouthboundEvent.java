@@ -21,6 +21,7 @@ public class SouthboundEvent {
     private String tableName;
     private String uuid;
     private Table<?> row;
+    private Object context;
     public SouthboundEvent(Node node, Action action) {
         super();
         this.type = Type.NODE;
@@ -35,6 +36,16 @@ public class SouthboundEvent {
         this.tableName = tableName;
         this.uuid = uuid;
         this.row = row;
+    }
+    public SouthboundEvent(Node node, String tableName, String uuid, Table<?> row, Object context, Action action) {
+        super();
+        this.type = Type.ROW;
+        this.action = action;
+        this.node = node;
+        this.tableName = tableName;
+        this.uuid = uuid;
+        this.row = row;
+        this.context = context;
     }
     public Type getType() {
         return type;
@@ -54,10 +65,13 @@ public class SouthboundEvent {
     public Table<?> getRow() {
         return row;
     }
+    public Object getContext() {
+        return context;
+    }
     @Override
     public String toString() {
         return "SouthboundEvent [type=" + type + ", action=" + action + ", node=" + node + ", tableName=" + tableName
-                + ", uuid=" + uuid + ", row=" + row + "]";
+                + ", uuid=" + uuid + ", row=" + row + ", context=" + context.toString() + "]";
     }
     @Override
     public int hashCode() {

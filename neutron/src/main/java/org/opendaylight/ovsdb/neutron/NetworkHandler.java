@@ -5,14 +5,24 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Authors : Madhu Venugopal, Brent Salisbury
+ * Authors : Madhu Venugopal, Brent Salisbury, Hsin-Yi Shen
  */
 package org.opendaylight.ovsdb.neutron;
 
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentMap;
 
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.utils.ServiceHelper;
+import org.opendaylight.ovsdb.lib.table.Interface;
+import org.opendaylight.ovsdb.lib.table.internal.Table;
+import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
+import org.opendaylight.ovsdb.plugin.OVSDBInventoryListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,10 +117,44 @@ public class NetworkHandler extends BaseHandler
     public void neutronNetworkDeleted(NeutronNetwork network) {
 
         int result = canDeleteNetwork(network);
+        logger.trace("neutronNetworkDeleted: network: {}", network);
         if  (result != HttpURLConnection.HTTP_OK) {
             logger.error(" deleteNetwork validation failed for result - {} ",
                     result);
             return;
+        }
+        /* Is this the last Neutron tenant network */
+        INeutronNetworkCRUD neutronNetworkService = (INeutronNetworkCRUD)ServiceHelper.getGlobalInstance(INeutronNetworkCRUD.class, this);
+        List <NeutronNetwork> networks = new ArrayList<NeutronNetwork>();
+        if (neutronNetworkService != null) {
+            networks = neutronNetworkService.getAllNetworks();
+            OVSDBInventoryListener inventoryListener = (OVSDBInventoryListener)ServiceHelper.getGlobalInstance(OVSDBInventoryListener.class, this);
+            if (networks.isEmpty()) {
+                logger.trace("neutronNetworkDeleted: last tenant network, delete tunnel ports...");
+                IConnectionServiceInternal connectionService = (IConnectionServiceInternal)
+                                        ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+                List<Node> nodes = connectionService.getNodes();
+
+                for (Node node : nodes) {
+                    try {
+                        ConcurrentMap<String, Table<?>> interfaces = this.ovsdbConfigService.getRows(node, Interface.NAME.getName());
+                        if (interfaces != null) {
+                            for (String intfUUID : interfaces.keySet()) {
+                                Interface intf = (Interface) interfaces.get(intfUUID);
+                                String intfType = intf.getType();
+                                if (intfType.equalsIgnoreCase("vxlan") || intfType.equalsIgnoreCase("gre")) {
+                                    /* delete tunnel ports on this node */
+                                    logger.trace("Delete tunnel intf {}", intf);
+                                    inventoryListener.rowRemoved(node, Interface.NAME.getName(), intfUUID,
+                                                                 intf, null);
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        logger.error("Exception during handlingNeutron network delete");
+                    }
+                }
+            }
         }
         TenantNetworkManager.getManager().networkDeleted(network.getID());
     }

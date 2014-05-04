@@ -846,27 +846,41 @@ class OF10ProviderManager extends ProviderNetworkManager {
         logger.debug("handleInterfaceDelete: networkType: {}, segmentationId: {}, srcNode: {}, intf: {}",
                 network.getProviderNetworkType(), network.getProviderSegmentationID(), srcNode, intf.getName(), isLastInstanceOnNode);
 
-        if (network.getProviderNetworkType().equalsIgnoreCase("vlan")) {
-            this.removeVlanRules(network, srcNode, intf);
-        } else if (network.getProviderNetworkType().equalsIgnoreCase("vxlan") ||
-                   network.getProviderNetworkType().equalsIgnoreCase("gre")) {
-            IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
-            List<Node> nodes = connectionService.getNodes();
-            nodes.remove(srcNode);
-            for (Node dstNode : nodes) {
-                InetAddress src = AdminConfigManager.getManager().getTunnelEndPoint(srcNode);
-                InetAddress dst = AdminConfigManager.getManager().getTunnelEndPoint(dstNode);
-                this.removeTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), dst, srcNode, intf, true);
-                if (isLastInstanceOnNode) {
-                    status = deleteTunnelPort(srcNode, network.getProviderNetworkType(), src, dst, network.getProviderSegmentationID());
-                }
-                this.removeTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), src, dstNode, intf, false);
-                if (status.isSuccess() && isLastInstanceOnNode) {
-                    deleteTunnelPort(dstNode, network.getProviderNetworkType(), dst, src, network.getProviderSegmentationID());
-                }
+        if (intf.getType().equalsIgnoreCase("vxlan") || intf.getType().equalsIgnoreCase("gre")) {
+            /* Delete tunnel port */
+            try {
+                OvsDBMap<String, String> options = intf.getOptions();
+                InetAddress src = InetAddress.getByName(options.get("local_ip"));
+                InetAddress dst = InetAddress.getByName(options.get("remote_ip"));
+                String key = options.get("key");
+                status = deleteTunnelPort(srcNode, intf.getType(), src, dst, key);
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
             }
         } else {
-            return new Status(StatusCode.BADREQUEST);
+            /* delete all other interfaces */
+            if (network.getProviderNetworkType().equalsIgnoreCase("vlan")) {
+                this.removeVlanRules(network, srcNode, intf);
+            } else if (network.getProviderNetworkType().equalsIgnoreCase("vxlan") ||
+                   network.getProviderNetworkType().equalsIgnoreCase("gre")) {
+                IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+                List<Node> nodes = connectionService.getNodes();
+                nodes.remove(srcNode);
+                for (Node dstNode : nodes) {
+                    InetAddress src = AdminConfigManager.getManager().getTunnelEndPoint(srcNode);
+                    InetAddress dst = AdminConfigManager.getManager().getTunnelEndPoint(dstNode);
+                    this.removeTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), dst, srcNode, intf, true);
+                    if (isLastInstanceOnNode) {
+                        status = deleteTunnelPort(srcNode, network.getProviderNetworkType(), src, dst, network.getProviderSegmentationID());
+                    }
+                    this.removeTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), src, dstNode, intf, false);
+                    if (status.isSuccess() && isLastInstanceOnNode) {
+                        deleteTunnelPort(dstNode, network.getProviderNetworkType(), dst, src, network.getProviderSegmentationID());
+                    }
+                }
+            } else {
+                return new Status(StatusCode.BADREQUEST);
+            }
         }
 
         return status;

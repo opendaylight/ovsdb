@@ -299,6 +299,12 @@ class OF13ProviderManager extends ProviderNetworkManager {
         return status;
     }
 
+    private Status deletePhysicalPort(Node node, String phyIntfName) {
+        String intBridgeName = AdminConfigManager.getManager().getIntegrationBridgeName();
+        Status status = deletePort(node, intBridgeName, phyIntfName);
+        return status;
+    }
+
     private void programLocalBridgeRules(Node node, Long dpid, String segmentationId, String attachedMac, long localPort) {
          /*
          * Table(0) Rule #3
@@ -365,42 +371,42 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
     private void removeLocalBridgeRules(Node node, Long dpid, String segmentationId, String attachedMac, long localPort) {
         /*
-         ** Table(0) Rule #3
-         ** ----------------
-         ** Match: VM sMac and Local Ingress Port
-         ** Action:Action: Set Tunnel ID and GOTO Local Table (5)
-         **/
+         * Table(0) Rule #3
+         * ----------------
+         * Match: VM sMac and Local Ingress Port
+         * Action:Action: Set Tunnel ID and GOTO Local Table (5)
+         */
 
-        handleLocalInPort(dpid, TABLE_0_DEFAULT_INGRESS, TABLE_1_ISOLATE_TENANT, segmentationId, localPort, attachedMac, false);
-
-        /*
-         ** Table(0) Rule #4
-         ** ----------------
-         ** Match: Drop any remaining Ingress Local VM Packets
-         ** Action: Drop w/ a low priority
-         **/
-
-        handleDropSrcIface(dpid, localPort, false);
+         handleLocalInPort(dpid, TABLE_0_DEFAULT_INGRESS, TABLE_1_ISOLATE_TENANT, segmentationId, localPort, attachedMac, false);
 
         /*
-         ** Table(2) Rule #1
-         ** ----------------
-         ** Match: Match TunID and Destination DL/dMAC Addr
-         ** Action: Output Port
-         ** table=2,tun_id=0x5,dl_dst=00:00:00:00:00:01 actions=output:2
-         **/
+         * Table(0) Rule #4
+         * ----------------
+         * Match: Drop any remaining Ingress Local VM Packets
+         * Action: Drop w/ a low priority
+         */
 
-        handleLocalUcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId, localPort, attachedMac, false);
+         handleDropSrcIface(dpid, localPort, false);
 
-        /*
-         ** Table(2) Rule #2
-         ** ----------------
-         ** Match: Tunnel ID and dMAC (::::FF:FF)
-         ** table=2,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
-         ** actions=output:2,3,4,5
-         **/
+         /*
+          * Table(2) Rule #1
+          * ----------------
+          * Match: Match TunID and Destination DL/dMAC Addr
+          * Action: Output Port
+          * table=2,tun_id=0x5,dl_dst=00:00:00:00:00:01 actions=output:2
+          */
 
-        handleLocalBcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId, localPort, false);
+         handleLocalUcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId, localPort, attachedMac, false);
+
+         /*
+          * Table(2) Rule #2
+          * ----------------
+          * Match: Tunnel ID and dMAC (::::FF:FF)
+          * table=2,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
+          * actions=output:2,3,4,5
+          */
+
+          handleLocalBcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId, localPort, false);
     }
 
     private void programLocalIngressTunnelBridgeRules(Node node, Long dpid, String segmentationId, String attachedMac, long tunnelOFPort, long localPort) {
@@ -443,64 +449,64 @@ class OF13ProviderManager extends ProviderNetworkManager {
 
     private void removeRemoteEgressTunnelBridgeRules(Node node, Long dpid, String segmentationId, String attachedMac, long tunnelOFPort, long localPort) {
         /*
-         ** Table(1) Rule #1
-         ** ----------------
-         ** Match: Drop any remaining Ingress Local VM Packets
-         ** Action: Drop w/ a low priority
-         ** -------------------------------------------
-         ** table=1,tun_id=0x5,dl_dst=00:00:00:00:00:08 \
-         ** actions=output:11,goto_table:2
-         **/
+         * Table(1) Rule #1
+         * ----------------
+         * Match: Drop any remaining Ingress Local VM Packets
+         * Action: Drop w/ a low priority
+         * -------------------------------------------
+         * table=1,tun_id=0x5,dl_dst=00:00:00:00:00:08 \
+         * actions=output:11,goto_table:2
+         */
 
-       handleTunnelOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, tunnelOFPort, attachedMac, false);
+        handleTunnelOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, tunnelOFPort, attachedMac, false);
     }
 
     /* Remove tunnel rules if last node in this tenant network */
     private void removePerTunnelRules(Node node, Long dpid, String segmentationId, long tunnelOFPort) {
         /*
-         ** TODO : Optimize the following 2 writes to be restricted only for the very first port known in a segment.
-         **/
+         * TODO : Optimize the following 2 writes to be restricted only for the very first port known in a segment.
+         */
         /*
-         ** Table(1) Rule #3
-         ** ----------------
-         ** Match: Any remaining Ingress Local VM Packets
-         ** Action: Drop w/ a low priority
-         ** -------------------------------------------
-         ** table=1,priority=8192,tun_id=0x5 actions=goto_table:2
-         **/
+         * Table(1) Rule #3
+         * ----------------
+         * Match:  Any remaining Ingress Local VM Packets
+         * Action: Drop w/ a low priority
+         * -------------------------------------------
+         * table=1,priority=8192,tun_id=0x5 actions=goto_table:2
+         */
 
         handleTunnelMiss(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, false);
 
         /*
-         ** Table(2) Rule #3
-         ** ----------------
-         ** Match: Any Remaining Flows w/a TunID
-         ** Action: Drop w/ a low priority
-         ** table=2,priority=8192,tun_id=0x5 actions=drop
-         **/
+         * Table(2) Rule #3
+         * ----------------
+         * Match: Any Remaining Flows w/a TunID
+         * Action: Drop w/ a low priority
+         * table=2,priority=8192,tun_id=0x5 actions=drop
+         */
 
         handleLocalTableMiss(dpid, TABLE_2_LOCAL_FORWARD, segmentationId, false);
 
-       /*
-        ** Table(0) Rule #2
-        ** ----------------
-        ** Match: Ingress Port, Tunnel ID
-        ** Action: GOTO Local Table (10)
-        **/
+        /*
+         * Table(0) Rule #2
+         * ----------------
+         * Match: Ingress Port, Tunnel ID
+         * Action: GOTO Local Table (10)
+         */
 
-       handleTunnelIn(dpid, TABLE_0_DEFAULT_INGRESS, TABLE_2_LOCAL_FORWARD, segmentationId, tunnelOFPort, false);
+        handleTunnelIn(dpid, TABLE_0_DEFAULT_INGRESS, TABLE_2_LOCAL_FORWARD, segmentationId, tunnelOFPort, false);
 
-       /*
-        ** Table(1) Rule #2
-        ** ----------------
-        ** Match: Match Tunnel ID and L2 ::::FF:FF Flooding
-        ** Action: Flood to selected destination TEPs
-        ** -------------------------------------------
-        ** table=1,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
-        ** actions=output:10,output:11,goto_table:2
-        **/
+         /*
+          * Table(1) Rule #2
+          * ----------------
+          * Match: Match Tunnel ID and L2 ::::FF:FF Flooding
+          * Action: Flood to selected destination TEPs
+          * -------------------------------------------
+          * table=1,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
+          * actions=output:10,output:11,goto_table:2
+          */
 
-       handleTunnelFloodOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, tunnelOFPort, false);
+        handleTunnelFloodOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, tunnelOFPort, false);
     }
 
     private void programLocalVlanRules(Node node, Long dpid, String segmentationId, String attachedMac, long localPort) {
@@ -511,7 +517,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
          * Action: Set VLAN ID and GOTO Local Table 1
          */
 
-        writeLocalInPortSetVlan(dpid, TABLE_0_DEFAULT_INGRESS, TABLE_1_ISOLATE_TENANT, segmentationId, localPort, attachedMac);
+        handleLocalInPortSetVlan(dpid, TABLE_0_DEFAULT_INGRESS,
+                TABLE_1_ISOLATE_TENANT, segmentationId, localPort,
+                attachedMac, true);
 
         /*
          * Table(0) Rule #3
@@ -530,7 +538,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
          * Example: table=2,vlan_id=0x5,dl_dst=00:00:00:00:00:01 actions= strip vlan, output:2
          */
 
-        writeLocalVlanUcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId, localPort, attachedMac);
+        handleLocalVlanUcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId,
+                localPort, attachedMac, true);
 
         /*
          * Table(2) Rule #2
@@ -541,7 +550,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
          * actions= strip_vlan, output:2,3,4,5
          */
 
-        writeLocalVlanBcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId, localPort);
+        handleLocalVlanBcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId,
+                localPort, true);
 
          /*
           * Table(2) Rule #3
@@ -551,7 +561,55 @@ class OF13ProviderManager extends ProviderNetworkManager {
           * Example: table=2,priority=8192,vlan_id=0x5 actions=drop
           */
 
-          writeLocalVlanTableMiss(dpid, TABLE_2_LOCAL_FORWARD, segmentationId);
+          handleLocalVlanTableMiss(dpid, TABLE_2_LOCAL_FORWARD, segmentationId,
+                                   true);
+   }
+
+    private void removeLocalVlanRules(Node node, Long dpid,
+                                      String segmentationId, String attachedMac,
+                                      long localPort) {
+        /*
+         * Table(0) Rule #1
+         * ----------------
+         * Match: VM sMac and Local Ingress Port
+         * Action: Set VLAN ID and GOTO Local Table 1
+         */
+
+        handleLocalInPortSetVlan(dpid, TABLE_0_DEFAULT_INGRESS,
+                TABLE_1_ISOLATE_TENANT, segmentationId, localPort,
+                attachedMac, false);
+
+        /*
+         * Table(0) Rule #3
+         * ----------------
+         * Match: Drop any remaining Ingress Local VM Packets
+         * Action: Drop w/ a low priority
+         */
+
+        handleDropSrcIface(dpid, localPort, false);
+
+        /*
+         * Table(2) Rule #1
+         * ----------------
+         * Match: Match VLAN ID and Destination DL/dMAC Addr
+         * Action: strip vlan, output to local port
+         * Example: table=2,vlan_id=0x5,dl_dst=00:00:00:00:00:01 actions= strip vlan, output:2
+         */
+
+        handleLocalVlanUcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId,
+                localPort, attachedMac, false);
+
+        /*
+         * Table(2) Rule #2
+         * ----------------
+         * Match: VLAN ID and dMAC (::::FF:FF)
+         * Action: strip vlan, output to all local ports in this vlan
+         * Example: table=2,priority=16384,vlan_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
+         * actions= strip_vlan, output:2,3,4,5
+         */
+
+        handleLocalVlanBcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId,
+                localPort, false);
    }
 
    private void programLocalIngressVlanRules(Node node, Long dpid, String segmentationId, String attachedMac, long ethPort) {
@@ -562,7 +620,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
         * Action: GOTO Local Table 2
         */
 
-        writeVlanIn(dpid, TABLE_0_DEFAULT_INGRESS, TABLE_2_LOCAL_FORWARD, segmentationId, ethPort);
+       handleVlanIn(dpid, TABLE_0_DEFAULT_INGRESS, TABLE_2_LOCAL_FORWARD,
+                    segmentationId, ethPort, true);
 
         /*
          * Table(1) Rule #2
@@ -570,12 +629,12 @@ class OF13ProviderManager extends ProviderNetworkManager {
          * Match: Match VLAN ID and L2 ::::FF:FF Flooding
          * Action: Flood to local and remote VLAN members
          * -------------------------------------------
-         * Example: table=1,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
+         * Example: table=1,priority=16384,vlan_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
          * actions=output:10 (eth port),goto_table:2
          */
 
-        writeVlanFloodOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, ethPort);
-
+        handleVlanFloodOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD,
+                           segmentationId, ethPort, true);
    }
 
    private void programRemoteEgressVlanRules(Node node, Long dpid, String segmentationId, String attachedMac, long ethPort) {
@@ -589,7 +648,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
         * actions=goto_table:2
         */
 
-       writeVlanOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, ethPort, attachedMac);
+       handleVlanOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD,
+                     segmentationId, ethPort, attachedMac, true);
 
        /*
         * Table(1) Rule #3
@@ -600,9 +660,72 @@ class OF13ProviderManager extends ProviderNetworkManager {
         * Example: table=1,priority=8192,vlan_id=0x5 actions=output:1,goto_table:2
         */
 
-        writeVlanMiss(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, ethPort);
+       handleVlanMiss(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD,
+                      segmentationId, ethPort, true);
    }
 
+   private void removeRemoteEgressVlanRules(Node node, Long dpid, String segmentationId, String attachedMac, long ethPort) {
+       /*
+        * Table(1) Rule #1
+        * ----------------
+        * Match: Destination MAC is local VM MAC and vlan id
+        * Action: go to table 2
+        * -------------------------------------------
+        * Example: table=1,vlan_id=0x5,dl_dst=00:00:00:00:00:08 \
+        * actions=goto_table:2
+        */
+
+       handleVlanOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD,
+                     segmentationId, ethPort, attachedMac, false);
+   }
+
+   private void removePerVlanRules(Node node, Long dpid, String segmentationId, long ethPort) {
+       /*
+        * Table(2) Rule #3
+        * ----------------
+        * Match: Any Remaining Flows w/a VLAN ID
+        * Action: Drop w/ a low priority
+        * Example: table=2,priority=8192,vlan_id=0x5 actions=drop
+        */
+
+        handleLocalVlanTableMiss(dpid, TABLE_2_LOCAL_FORWARD, segmentationId,
+                                 false);
+
+        /*
+         * Table(0) Rule #2
+         * ----------------
+         * Match: Ingress port = physical interface, Vlan ID
+         * Action: GOTO Local Table 2
+         */
+
+        handleVlanIn(dpid, TABLE_0_DEFAULT_INGRESS, TABLE_2_LOCAL_FORWARD,
+                     segmentationId, ethPort, false);
+
+         /*
+          * Table(1) Rule #2
+          * ----------------
+          * Match: Match VLAN ID and L2 ::::FF:FF Flooding
+          * Action: Flood to local and remote VLAN members
+          * -------------------------------------------
+          * Example: table=1,priority=16384,vlan_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
+          * actions=output:10 (eth port),goto_table:2
+          */
+
+         handleVlanFloodOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD,
+                            segmentationId, ethPort, false);
+
+         /*
+          * Table(1) Rule #3
+          * ----------------
+          * Match:  VLAN ID
+          * Action: Go to table 2
+          * -------------------------------------------
+          * Example: table=1,priority=8192,vlan_id=0x5 actions=output:1,goto_table:2
+          */
+
+         handleVlanMiss(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD,
+                        segmentationId, ethPort, false);
+   }
     private Long getIntegrationBridgeOFDPID (Node node) {
         try {
             String bridgeName = AdminConfigManager.getManager().getIntegrationBridgeName();
@@ -691,8 +814,11 @@ class OF13ProviderManager extends ProviderNetworkManager {
             }
 
             /* Program local rules based on network type */
-            if (networkType.equalsIgnoreCase("gre") ||
-              networkType.equalsIgnoreCase("vxlan")) {
+            if (networkType.equalsIgnoreCase("vlan")) {
+                logger.debug("Remove local vlan rules for interface {}", intf.getName());
+                removeLocalVlanRules(node, dpid, segmentationId, attachedMac, localPort);
+            } else if (networkType.equalsIgnoreCase("gre") ||
+                       networkType.equalsIgnoreCase("vxlan")) {
                 logger.debug("Remove local bridge rules for interface {}", intf.getName());
                 removeLocalBridgeRules(node, dpid, segmentationId, attachedMac, localPort);
             }
@@ -700,7 +826,6 @@ class OF13ProviderManager extends ProviderNetworkManager {
             logger.error("Exception in removing Local Rules for "+intf+" on "+node, e);
         }
     }
-
 
     private void programTunnelRules (String tunnelType, String segmentationId, InetAddress dst, Node node,
             Interface intf, boolean local) {
@@ -888,6 +1013,69 @@ class OF13ProviderManager extends ProviderNetworkManager {
         }
     }
 
+    private void removeVlanRules (NeutronNetwork network, Node node,
+                      Interface intf, boolean isLastInstanceOnNode) {
+        logger.debug("Remove vlan rules for interface {}", intf.getName());
+
+        try {
+
+            Long dpid = this.getIntegrationBridgeOFDPID(node);
+            if (dpid == 0L) {
+                logger.debug("Openflow Datapath-ID not set for the integration bridge in {}", node);
+                return;
+            }
+            OVSDBConfigService ovsdbTable = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+
+            Set<BigInteger> of_ports = intf.getOfport();
+            if (of_ports == null || of_ports.size() <= 0) {
+                logger.error("Could NOT Identify OF value for port {} on {}", intf.getName(), node);
+                return;
+            }
+
+            Map<String, String> externalIds = intf.getExternal_ids();
+            if (externalIds == null) {
+                logger.error("No external_ids seen in {}", intf);
+                return;
+            }
+
+            String attachedMac = externalIds.get(TenantNetworkManager.EXTERNAL_ID_VM_MAC);
+            if (attachedMac == null) {
+                logger.error("No AttachedMac seen in {}", intf);
+                return;
+            }
+
+            Map<String, org.opendaylight.ovsdb.lib.table.internal.Table<?>> intfs = ovsdbTable.getRows(node, Interface.NAME.getName());
+            if (intfs != null) {
+                for (org.opendaylight.ovsdb.lib.table.internal.Table<?> row : intfs.values()) {
+                    Interface ethIntf = (Interface)row;
+                    if (ethIntf.getName().equalsIgnoreCase(AdminConfigManager.getManager().getPhyIfName(node,
+                                                                   network.getProviderPhysicalNetwork()))) {
+                        of_ports = ethIntf.getOfport();
+                        if (of_ports == null || of_ports.size() <= 0) {
+                            logger.error("Could NOT Identify eth port {} on {}", ethIntf.getName(), node);
+                            continue;
+                        }
+                        long ethOFPort = ((BigInteger)of_ports.toArray()[0]).longValue();
+
+                        if (ethOFPort == -1) {
+                            logger.error("Could NOT Identify eth port {} -> OF ({}) on {}", ethIntf.getName(), ethOFPort, node);
+                            throw new Exception("port number < 0");
+                        }
+                        logger.debug("Identified eth port {} -> OF ({}) on {}", ethIntf.getName(), ethOFPort, node);
+
+                        removeRemoteEgressVlanRules(node, dpid, network.getProviderSegmentationID(), attachedMac, ethOFPort);
+                        if (isLastInstanceOnNode) {
+                            removePerVlanRules(node, dpid, network.getProviderSegmentationID(), ethOFPort);
+                        }
+                        return;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error("", e);
+        }
+    }
+
     @Override
     public Status handleInterfaceUpdate(NeutronNetwork network, Node srcNode, Interface intf) {
         ISwitchManager switchManager = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, "default", this);
@@ -979,8 +1167,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
         nodes.remove(srcNode);
 
         logger.info("Delete intf " + intf.getName() + " isLastInstanceOnNode " + isLastInstanceOnNode);
+        List<String> phyIfName = AdminConfigManager.getManager().getAllPhyIfName(srcNode);
         if (intf.getType().equalsIgnoreCase("vxlan") || intf.getType().equalsIgnoreCase("gre")) {
-        /* Delete tunnel port */
+            /* Delete tunnel port */
             try {
                 OvsDBMap<String, String> options = intf.getOptions();
                 InetAddress src = InetAddress.getByName(options.get("local_ip"));
@@ -988,25 +1177,32 @@ class OF13ProviderManager extends ProviderNetworkManager {
                 status = deleteTunnelPort(srcNode, intf.getType(), src, dst);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
-             }
+            }
+        } else if (phyIfName.contains(intf.getName())) {
+            /* delete physical port */
+            deletePhysicalPort(srcNode, intf.getName());
         } else {
             /* delete all other interfaces */
             this.removeLocalRules(network.getProviderNetworkType(), network.getProviderSegmentationID(),
-                                  srcNode, intf);
+                    srcNode, intf);
 
-            if (network.getProviderNetworkType().equalsIgnoreCase("gre")
-                 || network.getProviderNetworkType().equalsIgnoreCase("vxlan")) {
+            if (network.getProviderNetworkType().equalsIgnoreCase("vlan")) {
+                this.removeVlanRules(network, srcNode,
+                                 intf, isLastInstanceOnNode);
+            } else if (network.getProviderNetworkType().equalsIgnoreCase("gre")
+                   || network.getProviderNetworkType().equalsIgnoreCase("vxlan")) {
+
                 for (Node dstNode : nodes) {
                     InetAddress src = AdminConfigManager.getManager().getTunnelEndPoint(srcNode);
                     InetAddress dst = AdminConfigManager.getManager().getTunnelEndPoint(dstNode);
-                    logger.info("Remove tunnel rules for interface " + intf.getName() + " on srcNode" + srcNode.getNodeIDString());
+                    logger.info("Remove tunnel rules for interface " + intf.getName() + " on  srcNode" + srcNode.getNodeIDString());
                     this.removeTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(),
-                                           dst, srcNode, intf, true, isLastInstanceOnNode);
-                    logger.info("Remove tunnel rules for interface " + intf.getName() + " on dstNode" + dstNode.getNodeIDString());
+                                       dst, srcNode, intf, true, isLastInstanceOnNode);
+                    logger.info("Remove tunnel rules for interface " + intf.getName() + " on  dstNode" + dstNode.getNodeIDString());
                     this.removeTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(),
-                                           src, dstNode, intf, false, isLastInstanceOnNode);
-                }
-            }
+                                        src, dstNode, intf, false, isLastInstanceOnNode);
+               }
+           }
         }
         return status;
     }
@@ -1096,8 +1292,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
      * table=0,tun_id=0x5,in_port=10, actions=goto_table:2
      */
 
-    private void handleTunnelIn(Long dpidLong, Short writeTable, Short goToTableId,
-                                String segmentationId,  Long ofPort, boolean write) {
+    private void handleTunnelIn(Long dpidLong, Short writeTable,
+                                Short goToTableId, String segmentationId,
+                                Long ofPort, boolean write) {
 
         String nodeName = "openflow:" + dpidLong;
 
@@ -1157,7 +1354,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
      * table=0,vlan_id=0x5,in_port=10, actions=goto_table:2
      */
 
-    private void writeVlanIn(Long dpidLong, Short writeTable, Short goToTableId, String segmentationId,  Long ethPort) {
+    private void handleVlanIn(Long dpidLong, Short writeTable, Short goToTableId,
+                      String segmentationId,  Long ethPort, boolean write) {
 
         String nodeName = "openflow:" + dpidLong;
 
@@ -1169,24 +1367,26 @@ class OF13ProviderManager extends ProviderNetworkManager {
         flowBuilder.setMatch(createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId))).build());
         flowBuilder.setMatch(createInPortMatch(matchBuilder, dpidLong, ethPort).build());
 
-        // Create the OF Actions and Instructions
-        InstructionBuilder ib = new InstructionBuilder();
-        InstructionsBuilder isb = new InstructionsBuilder();
+        if (write) {
+            // Create the OF Actions and Instructions
+            InstructionBuilder ib = new InstructionBuilder();
+            InstructionsBuilder isb = new InstructionsBuilder();
 
-        // Instructions List Stores Individual Instructions
-        List<Instruction> instructions = new ArrayList<Instruction>();
+            // Instructions List Stores Individual Instructions
+            List<Instruction> instructions = new ArrayList<Instruction>();
 
-        // Call the InstructionBuilder Methods Containing Actions
-        createGotoTableInstructions(ib, goToTableId);
-        ib.setOrder(0);
-        ib.setKey(new InstructionKey(0));
-        instructions.add(ib.build());
+            // Call the InstructionBuilder Methods Containing Actions
+            createGotoTableInstructions(ib, goToTableId);
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            instructions.add(ib.build());
 
-        // Add InstructionBuilder to the Instruction(s)Builder List
-        isb.setInstruction(instructions);
+            // Add InstructionBuilder to the Instruction(s)Builder List
+            isb.setInstruction(instructions);
 
-        // Add InstructionsBuilder to FlowBuilder
-        flowBuilder.setInstructions(isb.build());
+            // Add InstructionsBuilder to FlowBuilder
+            flowBuilder.setInstructions(isb.build());
+        }
 
         String flowId = "VlanIn_"+segmentationId+"_"+ethPort;
         // Add Flow Attributes
@@ -1199,7 +1399,11 @@ class OF13ProviderManager extends ProviderNetworkManager {
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
-        writeFlow(flowBuilder, nodeBuilder);
+        if (write) {
+            writeFlow(flowBuilder, nodeBuilder);
+        } else {
+            removeFlow(flowBuilder, nodeBuilder);
+        }
     }
 
    /*
@@ -1211,7 +1415,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
     */
 
     private void handleLocalInPort(Long dpidLong, Short writeTable, Short goToTableId,
-                                   String segmentationId, Long inPort, String attachedMac, boolean write) {
+                           String segmentationId, Long inPort, String attachedMac,
+                           boolean write) {
 
         String nodeName = "openflow:" + dpidLong;
 
@@ -1275,7 +1480,10 @@ class OF13ProviderManager extends ProviderNetworkManager {
      * actions=set_field:5->vlan_id,goto_table=1"
      */
 
-     private void writeLocalInPortSetVlan(Long dpidLong, Short writeTable, Short goToTableId, String segmentationId, Long inPort, String attachedMac) {
+     private void handleLocalInPortSetVlan(Long dpidLong, Short writeTable,
+                                  Short goToTableId, String segmentationId,
+                                  Long inPort, String attachedMac,
+                                  boolean write) {
 
          String nodeName = "openflow:" + dpidLong;
 
@@ -1300,35 +1508,39 @@ class OF13ProviderManager extends ProviderNetworkManager {
          flowBuilder.setHardTimeout(0);
          flowBuilder.setIdleTimeout(0);
 
-         // Instantiate the Builders for the OF Actions and Instructions
-         InstructionBuilder ib = new InstructionBuilder();
-         InstructionsBuilder isb = new InstructionsBuilder();
+         if (write) {
+             // Instantiate the Builders for the OF Actions and Instructions
+             InstructionBuilder ib = new InstructionBuilder();
+             InstructionsBuilder isb = new InstructionsBuilder();
 
-         // Instructions List Stores Individual Instructions
-         List<Instruction> instructions = new ArrayList<Instruction>();
+             // Instructions List Stores Individual Instructions
+             List<Instruction> instructions = new ArrayList<Instruction>();
 
-         // GOTO Instructions Need to be added first to the List
-         createGotoTableInstructions(ib, goToTableId);
-         ib.setOrder(0);
-         ib.setKey(new InstructionKey(0));
-         instructions.add(ib.build());
-         // Set VLAN ID Instruction
-         createSetVlanInstructions(ib, new VlanId(Integer.valueOf(segmentationId)));
-         ib.setOrder(1);
-         ib.setKey(new InstructionKey(1));
-         instructions.add(ib.build());
+             // GOTO Instructions Need to be added first to the List
+             createGotoTableInstructions(ib, goToTableId);
+             ib.setOrder(0);
+             ib.setKey(new InstructionKey(0));
+             instructions.add(ib.build());
+             // Set VLAN ID Instruction
+             createSetVlanInstructions(ib, new VlanId(Integer.valueOf(segmentationId)));
+             ib.setOrder(1);
+             ib.setKey(new InstructionKey(1));
+             instructions.add(ib.build());
 
-         // Add InstructionBuilder to the Instruction(s)Builder List
-         isb.setInstruction(instructions);
+             // Add InstructionBuilder to the Instruction(s)Builder List
+             isb.setInstruction(instructions);
 
-         // Add InstructionsBuilder to FlowBuilder
-         flowBuilder.setInstructions(isb.build());
+             // Add InstructionsBuilder to FlowBuilder
+             flowBuilder.setInstructions(isb.build());
 
-         writeFlow(flowBuilder, nodeBuilder);
+             writeFlow(flowBuilder, nodeBuilder);
+         } else {
+             removeFlow(flowBuilder, nodeBuilder);
+         }
      }
 
     /*
-     * (Table:0) Drop frames sourced from a VM that do not
+     * (Table:0) Drop frames source from a VM that do not
      * match the associated MAC address of the local VM.
      * Match: Low priority anything not matching the VM SMAC
      * Instruction: Drop
@@ -1393,9 +1605,10 @@ class OF13ProviderManager extends ProviderNetworkManager {
     * table=1,tun_id=0x5,dl_dst=00:00:00:00:00:08 \
     * actions=output:10,goto_table:2"
     */
-
-    private void handleTunnelOut(Long dpidLong, Short writeTable, Short goToTableId, String segmentationId,
-                                 Long OFPortOut, String attachedMac, boolean write) {
+    private void handleTunnelOut(Long dpidLong, Short writeTable,
+                         Short goToTableId, String segmentationId,
+                         Long OFPortOut, String attachedMac,
+                         boolean write) {
 
         String nodeName = "openflow:" + dpidLong;
 
@@ -1458,7 +1671,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
      * actions= goto_table:2"
      */
 
-     private void writeVlanOut(Long dpidLong, Short writeTable, Short goToTableId, String segmentationId , Long ethPort, String attachedMac) {
+     private void handleVlanOut(Long dpidLong, Short writeTable,
+                        Short goToTableId, String segmentationId,
+                        Long ethPort, String attachedMac, boolean write) {
 
          String nodeName = "openflow:" + dpidLong;
 
@@ -1481,31 +1696,31 @@ class OF13ProviderManager extends ProviderNetworkManager {
          flowBuilder.setFlowName(flowId);
          flowBuilder.setHardTimeout(0);
          flowBuilder.setIdleTimeout(0);
-         // Instantiate the Builders for the OF Actions and Instructions
-         InstructionBuilder ib = new InstructionBuilder();
-         InstructionsBuilder isb = new InstructionsBuilder();
 
-         // Instructions List Stores Individual Instructions
-         List<Instruction> instructions = new ArrayList<Instruction>();
+         if (write) {
+             // Instantiate the Builders for the OF Actions and Instructions
+             InstructionBuilder ib = new InstructionBuilder();
+             InstructionsBuilder isb = new InstructionsBuilder();
 
-         // GOTO Instuctions
-         createGotoTableInstructions(ib, goToTableId);
-         ib.setOrder(0);
-         ib.setKey(new InstructionKey(0));
-         instructions.add(ib.build());
-         /* Set the Output Port/Iface
-           createOutputPortInstructions(ib, dpidLong, ethPort);
-           ib.setOrder(1);
-           ib.setKey(new InstructionKey(1));
-           instructions.add(ib.build()); */
+             // Instructions List Stores Individual Instructions
+             List<Instruction> instructions = new ArrayList<Instruction>();
 
-         // Add InstructionBuilder to the Instruction(s)Builder List
-         isb.setInstruction(instructions);
+             // GOTO Instuctions
+             createGotoTableInstructions(ib, goToTableId);
+             ib.setOrder(0);
+             ib.setKey(new InstructionKey(0));
+             instructions.add(ib.build());
 
-         // Add InstructionsBuilder to FlowBuilder
-         flowBuilder.setInstructions(isb.build());
+             // Add InstructionBuilder to the Instruction(s)Builder List
+             isb.setInstruction(instructions);
 
-         writeFlow(flowBuilder, nodeBuilder);
+             // Add InstructionsBuilder to FlowBuilder
+             flowBuilder.setInstructions(isb.build());
+
+             writeFlow(flowBuilder, nodeBuilder);
+         } else {
+             removeFlow(flowBuilder, nodeBuilder);
+         }
      }
 
        /*
@@ -1516,8 +1731,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
     * actions=output:10,output:11,goto_table:2
     */
 
-    private void handleTunnelFloodOut(Long dpidLong, Short writeTable, Short localTable,
-                                      String segmentationId,  Long OFPortOut, boolean write) {
+    private void handleTunnelFloodOut(Long dpidLong, Short writeTable,
+                             Short localTable, String segmentationId,
+                             Long OFPortOut, boolean write) {
 
         String nodeName = "openflow:" + dpidLong;
 
@@ -1558,7 +1774,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
         }
 
         if (write) {
-            // GOTO Instuction
+            // GOTO Instruction
             createGotoTableInstructions(ib, localTable);
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
@@ -1578,7 +1794,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
             writeFlow(flowBuilder, nodeBuilder);
         } else {
             /* remove port from action list */
-            boolean flowRemove = removeOutputPortFromInstructions(ib, dpidLong,OFPortOut, existingInstructions);
+            boolean flowRemove = removeOutputPortFromInstructions(ib, dpidLong,
+                                   OFPortOut, existingInstructions);
             if (flowRemove) {
                 /* if all port are removed, remove the flow too. */
                 removeFlow(flowBuilder, nodeBuilder);
@@ -1605,7 +1822,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
      * actions=output:eth1,goto_table:2
      */
 
-     private void writeVlanFloodOut(Long dpidLong, Short writeTable, Short localTable, String segmentationId,  Long ethPort) {
+     private void handleVlanFloodOut(Long dpidLong, Short writeTable,
+                           Short localTable, String segmentationId,
+                           Long ethPort, boolean write) {
 
          String nodeName = "openflow:" + dpidLong;
 
@@ -1643,24 +1862,29 @@ class OF13ProviderManager extends ProviderNetworkManager {
                  existingInstructions = ins.getInstruction();
              }
          }
-         // GOTO Instuction
-         createGotoTableInstructions(ib, localTable);
-         ib.setOrder(0);
-         ib.setKey(new InstructionKey(0));
-         instructions.add(ib.build());
-         // Set the Output Port/Iface
-         createOutputPortInstructions(ib, dpidLong, ethPort, existingInstructions);
-         ib.setOrder(1);
-         ib.setKey(new InstructionKey(1));
-         instructions.add(ib.build());
 
-         // Add InstructionBuilder to the Instruction(s)Builder List
-         isb.setInstruction(instructions);
+         if (write) {
+             // GOTO Instuction
+             createGotoTableInstructions(ib, localTable);
+             ib.setOrder(0);
+             ib.setKey(new InstructionKey(0));
+             instructions.add(ib.build());
+             // Set the Output Port/Iface
+             createOutputPortInstructions(ib, dpidLong, ethPort, existingInstructions);
+             ib.setOrder(1);
+             ib.setKey(new InstructionKey(1));
+             instructions.add(ib.build());
 
-         // Add InstructionsBuilder to FlowBuilder
-         flowBuilder.setInstructions(isb.build());
+             // Add InstructionBuilder to the Instruction(s)Builder List
+             isb.setInstruction(instructions);
 
-         writeFlow(flowBuilder, nodeBuilder);
+             // Add InstructionsBuilder to FlowBuilder
+             flowBuilder.setInstructions(isb.build());
+
+             writeFlow(flowBuilder, nodeBuilder);
+         } else {
+             removeFlow(flowBuilder, nodeBuilder);
+         }
      }
 
    /*
@@ -1670,7 +1894,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
     * table=2,priority=8192,tun_id=0x5 actions=drop
     */
 
-    private void handleTunnelMiss(Long dpidLong, Short writeTable, Short goToTableId, String segmentationId, boolean write) {
+    private void handleTunnelMiss(Long dpidLong, Short writeTable,
+                          Short goToTableId, String segmentationId,
+                          boolean write) {
 
         String nodeName = "openflow:" + dpidLong;
 
@@ -1729,7 +1955,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
      * table=1,priority=8192,vlan_id=0x5 actions= output port:eth1
      */
 
-     private void writeVlanMiss(Long dpidLong, Short writeTable, Short goToTableId, String segmentationId, Long ethPort) {
+     private void handleVlanMiss(Long dpidLong, Short writeTable,
+                         Short goToTableId, String segmentationId,
+                         Long ethPort, boolean write) {
 
          String nodeName = "openflow:" + dpidLong;
 
@@ -1740,25 +1968,31 @@ class OF13ProviderManager extends ProviderNetworkManager {
          // Create Match(es) and Set them in the FlowBuilder Object
          flowBuilder.setMatch(createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId))).build());
 
-         // Create the OF Actions and Instructions
-         InstructionBuilder ib = new InstructionBuilder();
-         InstructionsBuilder isb = new InstructionsBuilder();
+         if (write) {
+             // Create the OF Actions and Instructions
+             InstructionBuilder ib = new InstructionBuilder();
+             InstructionsBuilder isb = new InstructionsBuilder();
 
-         // Instructions List Stores Individual Instructions
-         List<Instruction> instructions = new ArrayList<Instruction>();
+             // Instructions List Stores Individual Instructions
+             List<Instruction> instructions = new ArrayList<Instruction>();
 
-         // Call the InstructionBuilder Methods Containing Actions
-         // Set the Output Port/Iface
-         createOutputPortInstructions(ib, dpidLong, ethPort);
-         ib.setOrder(1);
-         ib.setKey(new InstructionKey(1));
-         instructions.add(ib.build());
+             // Call the InstructionBuilder Methods Containing Actions
+             //createGotoTableInstructions(ib, goToTableId);
+             //ib.setOrder(0);
+             //ib.setKey(new InstructionKey(0));
+             //instructions.add(ib.build());
+             // Set the Output Port/Iface
+             createOutputPortInstructions(ib, dpidLong, ethPort);
+             ib.setOrder(1);
+             ib.setKey(new InstructionKey(1));
+             instructions.add(ib.build());
 
-         // Add InstructionBuilder to the Instruction(s)Builder List
-         isb.setInstruction(instructions);
+             // Add InstructionBuilder to the Instruction(s)Builder List
+             isb.setInstruction(instructions);
 
-         // Add InstructionsBuilder to FlowBuilder
-         flowBuilder.setInstructions(isb.build());
+             // Add InstructionsBuilder to FlowBuilder
+             flowBuilder.setInstructions(isb.build());
+         }
 
          String flowId = "VlanMiss_"+segmentationId;
          // Add Flow Attributes
@@ -1772,7 +2006,11 @@ class OF13ProviderManager extends ProviderNetworkManager {
          flowBuilder.setFlowName(flowId);
          flowBuilder.setHardTimeout(0);
          flowBuilder.setIdleTimeout(0);
-         writeFlow(flowBuilder, nodeBuilder);
+         if (write) {
+             writeFlow(flowBuilder, nodeBuilder);
+         } else {
+             removeFlow(flowBuilder, nodeBuilder);
+         }
      }
 
     /*
@@ -1782,8 +2020,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
      * table=2,tun_id=0x5,dl_dst=00:00:00:00:00:01 actions=output:2
      */
 
-    private void handleLocalUcastOut(Long dpidLong, Short writeTable, String segmentationId, Long localPort,
-                                     String attachedMac, boolean write) {
+    private void handleLocalUcastOut(Long dpidLong, Short writeTable,
+                             String segmentationId, Long localPort,
+                             String attachedMac, boolean write) {
 
         String nodeName = "openflow:" + dpidLong;
 
@@ -1839,7 +2078,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
      * table=2,vlan_id=0x5,dl_dst=00:00:00:00:00:01 actions=output:2
      */
 
-    private void writeLocalVlanUcastOut(Long dpidLong, Short writeTable, String segmentationId, Long localPort, String attachedMac) {
+    private void handleLocalVlanUcastOut(Long dpidLong, Short writeTable,
+                                 String segmentationId, Long localPort,
+                                 String attachedMac, boolean write) {
 
         String nodeName = "openflow:" + dpidLong;
 
@@ -1866,44 +2107,49 @@ class OF13ProviderManager extends ProviderNetworkManager {
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
 
-        // Instantiate the Builders for the OF Actions and Instructions
-        InstructionBuilder ib = new InstructionBuilder();
-        InstructionsBuilder isb = new InstructionsBuilder();
+        if (write) {
+            // Instantiate the Builders for the OF Actions and Instructions
+            InstructionBuilder ib = new InstructionBuilder();
+            InstructionsBuilder isb = new InstructionsBuilder();
 
-        // Instructions List Stores Individual Instructions
-        List<Instruction> instructions = new ArrayList<Instruction>();
-        List<Instruction> instructions_tmp = new ArrayList<Instruction>();
+            // Instructions List Stores Individual Instructions
+            List<Instruction> instructions = new ArrayList<Instruction>();
+            List<Instruction> instructions_tmp = new ArrayList<Instruction>();
 
-        /* Strip vlan and store to tmp instruction space*/
-        createPopVlanInstructions(ib);
-        ib.setOrder(0);
-        ib.setKey(new InstructionKey(0));
-        instructions_tmp.add(ib.build());
+            /* Strip vlan and store to tmp instruction space*/
+            createPopVlanInstructions(ib);
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            instructions_tmp.add(ib.build());
 
-        // Set the Output Port/Iface
-        ib = new InstructionBuilder();
-        createOutputPortInstructions(ib, dpidLong, localPort, instructions_tmp);
-        ib.setOrder(0);
-        ib.setKey(new InstructionKey(0));
-        instructions.add(ib.build());
+            // Set the Output Port/Iface
+            ib = new InstructionBuilder();
+            createOutputPortInstructions(ib, dpidLong, localPort, instructions_tmp);
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            instructions.add(ib.build());
 
-        // Add InstructionBuilder to the Instruction(s)Builder List
-        isb.setInstruction(instructions);
+            // Add InstructionBuilder to the Instruction(s)Builder List
+            isb.setInstruction(instructions);
 
-        // Add InstructionsBuilder to FlowBuilder
-        flowBuilder.setInstructions(isb.build());
-        writeFlow(flowBuilder, nodeBuilder);
+            // Add InstructionsBuilder to FlowBuilder
+            flowBuilder.setInstructions(isb.build());
+            writeFlow(flowBuilder, nodeBuilder);
+        } else {
+            removeFlow(flowBuilder, nodeBuilder);
+        }
     }
 
     /*
-     * (Table:1) Local Broadcast Flood
+     * (Table:2) Local Broadcast Flood
      * Match: Tunnel ID and dMAC (::::FF:FF)
      * table=2,priority=16384,tun_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
      * actions=output:2,3,4,5
      */
 
-    private void handleLocalBcastOut(Long dpidLong, Short writeTable, String segmentationId,
-                                     Long localPort, boolean write) {
+    private void handleLocalBcastOut(Long dpidLong, Short writeTable,
+                             String segmentationId, Long localPort,
+                             boolean write) {
 
         String nodeName = "openflow:" + dpidLong;
 
@@ -1956,23 +2202,23 @@ class OF13ProviderManager extends ProviderNetworkManager {
             writeFlow(flowBuilder, nodeBuilder);
         } else {
             boolean flowRemove = removeOutputPortFromInstructions(ib, dpidLong,
-                                       localPort, existingInstructions);
+                                      localPort, existingInstructions);
             if (flowRemove) {
-                   /* if all ports are removed, remove flow */
-                 removeFlow(flowBuilder, nodeBuilder);
-               } else {
+                /* if all ports are removed, remove flow */
+                removeFlow(flowBuilder, nodeBuilder);
+            } else {
                 /* Install instruction with new output port list*/
-                   ib.setOrder(0);
-                   ib.setKey(new InstructionKey(0));
-                 instructions.add(ib.build());
+                ib.setOrder(0);
+                ib.setKey(new InstructionKey(0));
+                instructions.add(ib.build());
 
                 // Add InstructionBuilder to the Instruction(s)Builder List
                 isb.setInstruction(instructions);
 
                 // Add InstructionsBuilder to FlowBuilder
-                   flowBuilder.setInstructions(isb.build());
+                flowBuilder.setInstructions(isb.build());
 
-                   writeFlow(flowBuilder, nodeBuilder);
+                writeFlow(flowBuilder, nodeBuilder);
             }
         }
     }
@@ -1984,7 +2230,9 @@ class OF13ProviderManager extends ProviderNetworkManager {
      * actions=strip_vlan, output:2,3,4,5
      */
 
-    private void writeLocalVlanBcastOut(Long dpidLong, Short writeTable, String segmentationId, Long localPort) {
+    private void handleLocalVlanBcastOut(Long dpidLong, Short writeTable,
+                                 String segmentationId, Long localPort,
+                                 boolean write) {
 
         String nodeName = "openflow:" + dpidLong;
 
@@ -2021,44 +2269,67 @@ class OF13ProviderManager extends ProviderNetworkManager {
                 existingInstructions = ins.getInstruction();
             }
         }
-        if (existingInstructions != null) {
-            /* Check if pop vlan is already the first action in action list */
-            List<Action> existingActions = null;
-            for (Instruction in : existingInstructions) {
-                if (in.getInstruction() instanceof ApplyActionsCase) {
-                    existingActions = (((ApplyActionsCase) in.getInstruction()).getApplyActions().getAction());
-                    if (existingActions.get(0).getAction() instanceof PopVlanActionCase) {
-                        add_pop_vlan = false;
-                        break;
+
+        if (write) {
+            if (existingInstructions != null) {
+                /* Check if pop vlan is already the first action in action list */
+                List<Action> existingActions = null;
+                for (Instruction in : existingInstructions) {
+                    if (in.getInstruction() instanceof ApplyActionsCase) {
+                        existingActions = (((ApplyActionsCase)
+                                in.getInstruction()).getApplyActions().getAction());
+                        if (existingActions.get(0).getAction() instanceof PopVlanActionCase) {
+                            add_pop_vlan = false;
+                            break;
+                        }
                     }
                 }
+            } else {
+                existingInstructions = new ArrayList<Instruction>();
             }
-        } else {
-            existingInstructions = new ArrayList<Instruction>();
-        }
 
-        if (add_pop_vlan) {
-            /* pop vlan */
-            createPopVlanInstructions(ib);
+            if (add_pop_vlan) {
+                /* pop vlan */
+                createPopVlanInstructions(ib);
+                ib.setOrder(0);
+                ib.setKey(new InstructionKey(0));
+                existingInstructions.add(ib.build());
+                ib = new InstructionBuilder();
+            }
+
+            // Create port list
+            createOutputPortInstructions(ib, dpidLong, localPort, existingInstructions);
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
-            existingInstructions.add(ib.build());
-            ib = new InstructionBuilder();
+            instructions.add(ib.build());
+
+            // Add InstructionBuilder to the Instruction(s)Builder List
+            isb.setInstruction(instructions);
+
+            // Add InstructionsBuilder to FlowBuilder
+            flowBuilder.setInstructions(isb.build());
+
+            writeFlow(flowBuilder, nodeBuilder);
+        } else {
+            boolean flowRemove = removeOutputPortFromInstructions(ib, dpidLong,
+                                 localPort, existingInstructions);
+            if (flowRemove) {
+                /* if all ports are removed, remove flow */
+                removeFlow(flowBuilder, nodeBuilder);
+            } else {
+                /* Install instruction with new output port list*/
+                ib.setOrder(0);
+                ib.setKey(new InstructionKey(0));
+                instructions.add(ib.build());
+
+                // Add InstructionBuilder to the Instruction(s)Builder List
+                isb.setInstruction(instructions);
+
+                // Add InstructionsBuilder to FlowBuilder
+                flowBuilder.setInstructions(isb.build());
+                writeFlow(flowBuilder, nodeBuilder);
+            }
         }
-
-        // Broken OutPort TODO: localPort needs to be a list of Ports)
-        createOutputPortInstructions(ib, dpidLong, localPort, existingInstructions);
-        ib.setOrder(0);
-        ib.setKey(new InstructionKey(0));
-        instructions.add(ib.build());
-
-        // Add InstructionBuilder to the Instruction(s)Builder List
-        isb.setInstruction(instructions);
-
-        // Add InstructionsBuilder to FlowBuilder
-        flowBuilder.setInstructions(isb.build());
-
-        writeFlow(flowBuilder, nodeBuilder);
     }
 
     /*
@@ -2068,8 +2339,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
      * table=2,priority=8192,tun_id=0x5 actions=drop
      */
 
-    private void handleLocalTableMiss(Long dpidLong, Short writeTable, String segmentationId,
-                                      boolean write) {
+    private void handleLocalTableMiss(Long dpidLong, Short writeTable,
+                             String segmentationId, boolean write) {
 
         String nodeName = "openflow:" + dpidLong;
 
@@ -2127,7 +2398,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
      * table=2,priority=8192,vlan_id=0x5 actions=drop
      */
 
-    private void writeLocalVlanTableMiss(Long dpidLong, Short writeTable, String segmentationId) {
+    private void handleLocalVlanTableMiss(Long dpidLong, Short writeTable,
+                                  String segmentationId, boolean write) {
 
         String nodeName = "openflow:" + dpidLong;
 
@@ -2138,24 +2410,26 @@ class OF13ProviderManager extends ProviderNetworkManager {
         // Create Match(es) and Set them in the FlowBuilder Object
         flowBuilder.setMatch(createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId))).build());
 
-        // Create the OF Actions and Instructions
-        InstructionBuilder ib = new InstructionBuilder();
-        InstructionsBuilder isb = new InstructionsBuilder();
+        if (write) {
+            // Create the OF Actions and Instructions
+            InstructionBuilder ib = new InstructionBuilder();
+            InstructionsBuilder isb = new InstructionsBuilder();
 
-        // Instructions List Stores Individual Instructions
-        List<Instruction> instructions = new ArrayList<Instruction>();
+            // Instructions List Stores Individual Instructions
+            List<Instruction> instructions = new ArrayList<Instruction>();
 
-        // Call the InstructionBuilder Methods Containing Actions
-        createDropInstructions(ib);
-        ib.setOrder(0);
-        ib.setKey(new InstructionKey(0));
-        instructions.add(ib.build());
+            // Call the InstructionBuilder Methods Containing Actions
+            createDropInstructions(ib);
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            instructions.add(ib.build());
 
-        // Add InstructionBuilder to the Instruction(s)Builder List
-        isb.setInstruction(instructions);
+            // Add InstructionBuilder to the Instruction(s)Builder List
+            isb.setInstruction(instructions);
 
-        // Add InstructionsBuilder to FlowBuilder
-        flowBuilder.setInstructions(isb.build());
+            // Add InstructionsBuilder to FlowBuilder
+            flowBuilder.setInstructions(isb.build());
+        }
 
         String flowId = "LocalTableMiss_"+segmentationId;
         // Add Flow Attributes
@@ -2169,7 +2443,11 @@ class OF13ProviderManager extends ProviderNetworkManager {
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
-        writeFlow(flowBuilder, nodeBuilder);
+        if (write) {
+            writeFlow(flowBuilder, nodeBuilder);
+        } else {
+            removeFlow(flowBuilder, nodeBuilder);
+        }
     }
 
     private Flow getFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
@@ -2235,7 +2513,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
         dataBrokerService = mdsalConsumer.getDataBrokerService();
 
         if (dataBrokerService == null) {
-            logger.error("ERROR finding reference for DataBrokerService. Please check out the MD-SALsupport on the Controller.");
+            logger.error("ERROR finding reference for DataBrokerService. Please check out the MD-SAL support on the Controller.");
             return;
         }
         DataModification<InstanceIdentifier<?>, DataObject> modification = dataBrokerService.beginTransaction();
@@ -2615,15 +2893,15 @@ class OF13ProviderManager extends ProviderNetworkManager {
     }
 
     /**
-    * Remove Output Port from Instruction
-    *
-    * @param ib Map InstructionBuilder without any instructions
-    * @param dpidLong Long the datapath ID of a switch/node
-    * @param port Long representing a port on a switch/node
-    * @return ib InstructionBuilder Map with instructions
-    */
+     * Remove Output Port from Instruction
+     *
+     * @param ib       Map InstructionBuilder without any instructions
+     * @param dpidLong Long the datapath ID of a switch/node
+     * @param port     Long representing a port on a switch/node
+     * @return ib InstructionBuilder Map with instructions
+     */
     protected static boolean removeOutputPortFromInstructions(InstructionBuilder ib,
-                                   Long dpidLong, Long port , List<Instruction> instructions) {
+                                Long dpidLong, Long port , List<Instruction> instructions) {
 
         NodeConnectorId ncid = new NodeConnectorId("openflow:" + dpidLong + ":" + port);
         logger.debug("createOutputPortInstructions() Node Connector ID is - Type=openflow: DPID={} port={} existingInstructions={}", dpidLong, port, instructions);

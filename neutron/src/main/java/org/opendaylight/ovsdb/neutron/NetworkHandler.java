@@ -141,6 +141,8 @@ public class NetworkHandler extends BaseHandler
 
                 for (Node node : nodes) {
                     logger.trace("hshen: : neutronNetworkDeleted check node {}", node);
+                    /* Get list of physical interfaces */
+                    List<String> phyIfName = AdminConfigManager.getManager().getAllPhyIfName(node);
                     try {
                         ConcurrentMap<String, Table<?>> interfaces = this.ovsdbConfigService.getRows(node, Interface.NAME.getName());
                         if (interfaces != null) {
@@ -151,7 +153,12 @@ public class NetworkHandler extends BaseHandler
                                     /* delete tunnel ports on this node */
                                     logger.trace("Delete tunnel intf {}", intf);
                                     inventoryListener.rowRemoved(node, Interface.NAME.getName(), intfUUID,
-                                                                 intf, null);
+                                            intf, null);
+                                } else if (!phyIfName.isEmpty() && phyIfName.contains(intf.getName())) {
+                                    /* delete physical interface */
+                                    logger.trace("Delete physical intf {}", intf);
+                                    inventoryListener.rowRemoved(node, Interface.NAME.getName(), intfUUID,
+                                            intf, null);
                                 }
                             }
                         }

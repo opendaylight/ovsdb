@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_59a7e04f",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/NetworkHandler.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-05T23:02:32Z",
+      "side": 1,
+      "message": "Please remove the name hshen and also consider reducing the usage of traces if possible. A whole lot of traces which doesnt help in debugging much is not useful and can cause distractions. Please consider this comment for all the places you have used trace() messages.",
+      "revId": "b4ba097b7d4df3f213f29e080847ae03e03cad85",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_997488d0",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/SouthboundEvent.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-05T23:02:32Z",
+      "side": 1,
+      "message": "Will be useful to also add the context.toString() to the toString() method.",
+      "revId": "b4ba097b7d4df3f213f29e080847ae03e03cad85",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_992248b8",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/SouthboundHandler.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-05T23:02:32Z",
+      "side": 1,
+      "message": "Please change it to debug.",
+      "revId": "b4ba097b7d4df3f213f29e080847ae03e03cad85",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

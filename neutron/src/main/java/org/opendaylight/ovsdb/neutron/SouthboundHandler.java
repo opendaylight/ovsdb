@@ -177,8 +177,8 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
                     network = (NeutronNetwork)context;
                 }
                 logger.info("Delete interface " + deletedIntf.getName());
-                if (deletedIntf.getType().equalsIgnoreCase("vxlan") ||
-                    deletedIntf.getType().equalsIgnoreCase("gre")) {
+                if (deletedIntf.getType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) ||
+                    deletedIntf.getType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)) {
                     /* delete tunnel interfaces */
                     this.handleInterfaceDelete(node, uuid, deletedIntf, false, null);
                 } else if (network != null && !network.getRouterExternal()) {
@@ -265,11 +265,11 @@ public class SouthboundHandler extends BaseHandler implements OVSDBInventoryList
         logger.debug("handleInterfaceDelete: node: {}, uuid: {}, isLastInstanceOnNode: {}, interface: {}",
                 node, uuid, isLastInstanceOnNode, intf);
 
-        if (intf.getType().equalsIgnoreCase("vxlan") || intf.getType().equalsIgnoreCase("gre")) {
+        if (intf.getType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) || intf.getType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)) {
             /* delete tunnel interfaces */
             ProviderNetworkManager.getManager().handleInterfaceDelete(intf.getType(), null, node, intf, isLastInstanceOnNode);
         } else if (network != null) {
-            if (!network.getProviderNetworkType().equalsIgnoreCase("vlan")) { /* vlan doesn't need a tunnel endpoint */
+            if (!network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) { /* vlan doesn't need a tunnel endpoint */
                 if (AdminConfigManager.getManager().getTunnelEndPoint(node) == null) {
                     logger.error("Tunnel end-point configuration missing. Please configure it in Open_vSwitch Table");
                     return;

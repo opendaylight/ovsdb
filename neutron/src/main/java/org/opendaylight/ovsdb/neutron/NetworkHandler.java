@@ -31,6 +31,11 @@ import org.slf4j.LoggerFactory;
  */
 public class NetworkHandler extends BaseHandler
                             implements INeutronNetworkAware {
+
+    public static final String NETWORK_TYPE_VXLAN = "vxlan";
+    public static final String NETWORK_TYPE_GRE = "gre";
+    public static final String NETWORK_TYPE_VLAN = "vlan";
+
     /**
      * Logger instance.
      */
@@ -144,7 +149,7 @@ public class NetworkHandler extends BaseHandler
                             for (String intfUUID : interfaces.keySet()) {
                                 Interface intf = (Interface) interfaces.get(intfUUID);
                                 String intfType = intf.getType();
-                                if (intfType.equalsIgnoreCase("vxlan") || intfType.equalsIgnoreCase("gre")) {
+                                if (intfType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) || intfType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)) {
                                     /* delete tunnel ports on this node */
                                     logger.trace("Delete tunnel intf {}", intf);
                                     inventoryListener.rowRemoved(node, Interface.NAME.getName(), intfUUID,

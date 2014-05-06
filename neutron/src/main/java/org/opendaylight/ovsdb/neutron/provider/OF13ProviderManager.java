@@ -37,6 +37,7 @@ import org.opendaylight.ovsdb.lib.table.Port;
 import org.opendaylight.ovsdb.neutron.AdminConfigManager;
 import org.opendaylight.ovsdb.neutron.IMDSALConsumer;
 import org.opendaylight.ovsdb.neutron.InternalNetworkManager;
+import org.opendaylight.ovsdb.neutron.NetworkHandler;
 import org.opendaylight.ovsdb.neutron.TenantNetworkManager;
 import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
@@ -581,8 +582,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
             }
 
             /* Program local rules based on network type */
-            if (networkType.equalsIgnoreCase("gre") ||
-              networkType.equalsIgnoreCase("vxlan")) {
+            if (networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE) ||
+              networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN)) {
                 logger.debug("Remove local bridge rules for interface {}", intf.getName());
                 removeLocalBridgeRules(node, dpid, segmentationId, attachedMac, localPort);
             }
@@ -805,7 +806,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
         nodes.remove(srcNode);
 
         logger.info("Delete intf " + intf.getName() + " isLastInstanceOnNode " + isLastInstanceOnNode);
-        if (intf.getType().equalsIgnoreCase("vxlan") || intf.getType().equalsIgnoreCase("gre")) {
+        if (intf.getType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) || intf.getType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)) {
         /* Delete tunnel port */
             try {
                 OvsDBMap<String, String> options = intf.getOptions();
@@ -820,8 +821,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
             this.removeLocalRules(tunnelType, network.getProviderSegmentationID(),
                                   srcNode, intf);
 
-            if (tunnelType.equalsIgnoreCase("gre")
-                 || tunnelType.equalsIgnoreCase("vxlan")) {
+            if (tunnelType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)
+                 || tunnelType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN)) {
                 for (Node dstNode : nodes) {
                     InetAddress src = AdminConfigManager.getManager().getTunnelEndPoint(srcNode);
                     InetAddress dst = AdminConfigManager.getManager().getTunnelEndPoint(dstNode);

@@ -37,6 +37,7 @@ import org.opendaylight.ovsdb.lib.table.Port;
 import org.opendaylight.ovsdb.lib.table.internal.Table;
 import org.opendaylight.ovsdb.neutron.AdminConfigManager;
 import org.opendaylight.ovsdb.neutron.InternalNetworkManager;
+import org.opendaylight.ovsdb.neutron.NetworkHandler;
 import org.opendaylight.ovsdb.neutron.TenantNetworkManager;
 import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
@@ -749,7 +750,7 @@ class OF10ProviderManager extends ProviderNetworkManager {
         logger.debug("handleInterfaceUpdate: networkType: {}, segmentationId: {}, srcNode: {}, intf: {}",
                      network.getProviderNetworkType(), network.getProviderSegmentationID(), srcNode, intf.getName());
 
-        if (network.getProviderNetworkType().equalsIgnoreCase("vlan")) {
+        if (network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
             Status status = getVlanReadinessStatus(srcNode, network.getProviderSegmentationID());
             if (!status.isSuccess()) {
                 return status;
@@ -757,8 +758,8 @@ class OF10ProviderManager extends ProviderNetworkManager {
                 this.programVlanRules(network, srcNode, intf);
                 return new Status(StatusCode.SUCCESS);
             }
-        } else if (network.getProviderNetworkType().equalsIgnoreCase("vxlan") ||
-                   network.getProviderNetworkType().equalsIgnoreCase("gre")) {
+        } else if (network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) ||
+                   network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)) {
             Status status = getTunnelReadinessStatus(srcNode, network.getProviderSegmentationID());
             if (!status.isSuccess()) return status;
 
@@ -792,11 +793,11 @@ class OF10ProviderManager extends ProviderNetworkManager {
                 srcNode, (network != null) ? network.getProviderNetworkType() : "",
                 intf.getName(), intf.getType(), isLastInstanceOnNode);
 
-        if ((network != null) && network.getProviderNetworkType().equalsIgnoreCase("vlan")) {
+        if ((network != null) && network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
             if (isLastInstanceOnNode) {
                 this.removeVlanRules(network, srcNode, intf);
             }
-        } else if (intf.getType().equalsIgnoreCase("vxlan") || intf.getType().equalsIgnoreCase("gre")) {
+        } else if (intf.getType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) || intf.getType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)) {
             /* Delete tunnel port */
             try {
                 OvsDBMap<String, String> options = intf.getOptions();

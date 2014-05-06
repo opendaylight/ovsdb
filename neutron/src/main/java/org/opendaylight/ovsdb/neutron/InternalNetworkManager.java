@@ -298,7 +298,7 @@ public class InternalNetworkManager {
             }
 
             /* For vlan network types add physical port to br-net. */
-            if (network.getProviderNetworkType().equalsIgnoreCase("vlan")) {
+            if (network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
                 String phyNetName = AdminConfigManager.getManager().getPhysicalInterfaceName(node, network.getProviderPhysicalNetwork());
                 status = addPortToBridge(node, brNet, phyNetName);
                 if (!status.isSuccess()) {
@@ -315,7 +315,7 @@ public class InternalNetworkManager {
             }
 
             /* For vlan network types add physical port to br-int. */
-            if (network.getProviderNetworkType().equalsIgnoreCase("vlan")) {
+            if (network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
                 String phyNetName = AdminConfigManager.getManager().getPhysicalInterfaceName(node, network.getProviderPhysicalNetwork());
                 status = addPortToBridge(node, brInt, phyNetName);
                 if (!status.isSuccess()) {
@@ -495,7 +495,7 @@ public class InternalNetworkManager {
      */
     public boolean checkAndCreateNetwork (Node node, NeutronNetwork network) {
         boolean isCreated = false;
-        if (network.getProviderNetworkType().equalsIgnoreCase("vlan")) {
+        if (network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
             if (!InternalNetworkManager.getManager().isInternalNetworkVlanReady(node, network)) {
                 try {
                     isCreated = InternalNetworkManager.getManager().createNetNetwork(node, network);
@@ -505,8 +505,8 @@ public class InternalNetworkManager {
             } else {
                 isCreated = true;
             }
-        } else if (network.getProviderNetworkType().equalsIgnoreCase("vxlan") ||
-                network.getProviderNetworkType().equalsIgnoreCase("gre")) {
+        } else if (network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) ||
+                network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)) {
             if (!InternalNetworkManager.getManager().isInternalNetworkTunnelReady(node)) {
                 try {
                     isCreated = InternalNetworkManager.getManager().createNetNetwork(node, network);

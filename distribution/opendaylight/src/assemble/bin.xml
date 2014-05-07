@@ -12,6 +12,9 @@
     <fileSet>
       <directory>${project.build.directory}/generated-resources</directory>
       <outputDirectory>/</outputDirectory>
+      <excludes>
+          <exclude>opendaylight/plugins/*ovsdb*</exclude>
+      </excludes>
     </fileSet>
   </fileSets>
   <dependencySets>

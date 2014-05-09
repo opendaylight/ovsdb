@@ -9,8 +9,11 @@
  */
 package org.opendaylight.ovsdb.plugin;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
 import org.slf4j.Logger;
@@ -20,11 +23,19 @@ public class OvsdbTestGetBridgeDomainsIT extends OvsdbTestBase {
     private static final Logger logger = LoggerFactory
             .getLogger(OvsdbTestGetBridgeDomainsIT.class);
 
+    private Properties props;
+
+    @Before
+    public void loadProps() throws IOException {
+        props = loadProperties();
+    }
+
     @Test
     public void getBridgeDomains() throws Throwable{
 
         TestObjects testObjects = getTestConnection();
         ConnectionService connectionService = testObjects.connectionService;
+        InventoryService inventoryService = testObjects.inventoryService;
         Node node = testObjects.node;
 
         /**
@@ -35,7 +46,7 @@ public class OvsdbTestGetBridgeDomainsIT extends OvsdbTestBase {
          */
         ConfigurationService configurationService = new ConfigurationService();
         configurationService.setConnectionServiceInternal(connectionService);
+        configurationService.setInventoryServiceInternal(inventoryService);
         List<String> ls = configurationService.getBridgeDomains(node);
-        System.out.println(ls);
     }
 }

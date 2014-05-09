@@ -24,6 +24,13 @@ public class OvsdbTestSetManagerIT extends OvsdbTestBase {
         ConnectionService connectionService = testObjects.connectionService;
         Node node = testObjects.node;
 
+
+        String port = "6634";
+        String host = FAKE_IP;
+        String connectionType = "ptcp";
+
+        String manager = connectionType + ":" + host + ":" + port;
+
         /**
          * Implements the OVS Connection for Managers
          *
@@ -33,7 +40,7 @@ public class OvsdbTestSetManagerIT extends OvsdbTestBase {
          */
         ConfigurationService configurationService = new ConfigurationService();
         configurationService.setConnectionServiceInternal(connectionService);
-        configurationService.setManager(node, "ptcp:6634:172.16.58.128");
+        configurationService.setManager(node, manager);
     }
 
 }

@@ -33,7 +33,7 @@ public class OvsdbTestSetOFControllerIT extends OvsdbTestBase {
         configs.put(ConfigConstants.CUSTOM, "6633");
         ConfigurationService configurationService = new ConfigurationService();
         configurationService.setConnectionServiceInternal(connectionService);
-        configurationService.setBridgeOFController(node, "br0");
+        configurationService.setBridgeOFController(node, BRIDGE_NAME);
 
     }
 }

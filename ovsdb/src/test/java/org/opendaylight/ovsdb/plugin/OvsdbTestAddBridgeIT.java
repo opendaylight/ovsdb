@@ -33,7 +33,7 @@ public class OvsdbTestAddBridgeIT extends OvsdbTestBase {
          */
         ConfigurationService configurationService = new ConfigurationService();
         configurationService.setConnectionServiceInternal(connectionService);
-        configurationService.createBridgeDomain(node, "JUNIT_BRIDGE_TEST", null);
+        configurationService.createBridgeDomain(node, BRIDGE_NAME, null);
     }
 
 }

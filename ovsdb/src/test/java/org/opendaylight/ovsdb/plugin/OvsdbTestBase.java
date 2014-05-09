@@ -21,6 +21,11 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 
 public abstract class OvsdbTestBase {
     private final static String identifier = "TEST";
+    protected final static String BRIDGE_NAME = "JUNIT_TEST_BRIDGE";
+    protected final static String PORT_NAME = "eth0";
+    protected final static String TAGGED_PORT_NAME = "eth1";
+    protected final static String TUNNEL_PORT_NAME = "vxlan0";
+    protected final static String FAKE_IP = "192.168.254.254";
 
     public Properties loadProperties() throws IOException {
         InputStream is = this

@@ -43,6 +43,6 @@ public class OvsdbTestAddPortIT extends OvsdbTestBase {
          */
         ConfigurationService configurationService = new ConfigurationService();
         configurationService.setConnectionServiceInternal(connectionService);
-        configurationService.addPort(node, "JUNIT_BRIDGE_TEST", "Jvif0", null);
+        configurationService.addPort(node, BRIDGE_NAME, PORT_NAME, null);
     }
 }

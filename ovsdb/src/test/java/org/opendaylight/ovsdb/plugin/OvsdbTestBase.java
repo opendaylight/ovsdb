@@ -39,10 +39,12 @@ public abstract class OvsdbTestBase {
 
     public class TestObjects {
         public final ConnectionService connectionService;
+        public final InventoryService inventoryService;
         public final Node node;
 
-        public TestObjects(ConnectionService connectionService, Node node) {
+        public TestObjects(ConnectionService connectionService, Node node, InventoryService inventoryService) {
             this.connectionService = connectionService;
+            this.inventoryService = inventoryService;
             this.node = node;
         }
     }
@@ -66,9 +68,9 @@ public abstract class OvsdbTestBase {
 
         Node node = connectionService.connect(identifier, params);
         if (node == null) {
-            throw new IOException("Failed to connecto to ovsdb server");
+            throw new IOException("Failed to connect to the ovsdb server");
         }
-        return new TestObjects(connectionService, node);
+        return new TestObjects(connectionService, node, inventory);
     }
 
 }

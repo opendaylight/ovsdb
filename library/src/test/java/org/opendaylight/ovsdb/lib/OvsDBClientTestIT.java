@@ -63,6 +63,9 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
                         .where(name.opEqual("br-int"))
                         //.and(name.opEqual("br-int"))
                         .operation())
+                .add(op.delete(bridge)
+                        .where(name.opEqual("br-int"))
+                        .operation())
                 .execute();
 
         List<OperationResult> operationResults = results.get();

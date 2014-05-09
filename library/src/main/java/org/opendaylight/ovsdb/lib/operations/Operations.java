@@ -25,5 +25,8 @@ public class Operations {
         return new Update<>(schema);
     }
 
+    public  <E extends TableSchema<E>> Delete<E> delete(TableSchema<E> schema) {
+        return new Delete<>(schema);
+    }
 
 }

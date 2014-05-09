@@ -54,6 +54,9 @@ public abstract class OvsdbTestBase {
 
         ConnectionService connectionService = new ConnectionService();
         connectionService.init();
+        InventoryService inventory = new InventoryService();
+        inventory.init();
+        connectionService.setInventoryServiceInternal(inventory);
         Map<ConnectionConstants, String> params = new HashMap<ConnectionConstants, String>();
         Properties props = loadProperties();
         params.put(ConnectionConstants.ADDRESS,

@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_db10bd50",
+        "filename": "resources/openstack/bootvm.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-10T13:49:30Z",
+      "side": 1,
+      "message": "Can you pls also make the image name as an user-input",
+      "revId": "b589f8833d20581c460a77568d18f4e265a78ba2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.collections.MapUtils;
 import org.junit.Before;
@@ -66,7 +68,7 @@ public class OVSDBNettyFactoryIT {
     }
 
     @Test
-    public void testSome() throws InterruptedException, ExecutionException,
+    public void testSome() throws InterruptedException, ExecutionException, TimeoutException,
             IOException {
         ConnectionService connectionService = new ConnectionService();
         connectionService.init();
@@ -79,6 +81,7 @@ public class OVSDBNettyFactoryIT {
                 props.getProperty("ovsdbserver.ipaddress"));
         params.put(ConnectionConstants.PORT,
                 props.getProperty("ovsdbserver.port", "6640"));
+
         Node node = connectionService.connect("TEST", params);
         if (node == null) {
             throw new IOException("Unable to connect to the host");
@@ -97,7 +100,24 @@ public class OVSDBNettyFactoryIT {
         //GET DB-SCHEMA
         List<String> dbNames = Arrays.asList(Open_vSwitch.NAME.getName());
         ListenableFuture<DatabaseSchema> dbSchemaF = ovsdb.get_schema(dbNames);
-        DatabaseSchema databaseSchema = dbSchemaF.get();
+
+        int retries = 3;
+        Boolean connected = false;
+        DatabaseSchema databaseSchema = null;
+        while (!connected && retries > 0) {
+            retries--;
+            try {
+                databaseSchema = dbSchemaF.get(3000, TimeUnit.MILLISECONDS);
+            } catch (TimeoutException e) {
+                if (retries == 0){
+                throw e;
+                }
+                else {
+                    System.out.println("Connection Failed. Retrying...");
+                }
+            }
+        }
+
         MapUtils.debugPrint(System.out, null, databaseSchema.getTables());
 
         // TEST MONITOR
@@ -111,6 +131,16 @@ public class OVSDBNettyFactoryIT {
         System.out.println("Monitor Request sent :");
         TableUpdates updates = monResponse.get();
         inventoryService.processTableUpdates(node, updates);
+
+        /*
+        Sometimes we get an ERROR here to due. NodeDB.schema == null;
+
+        java.lang.NullPointerException
+	    at org.opendaylight.ovsdb.plugin.NodeDB.printTableCache(NodeDB.java:70)
+	    at org.opendaylight.ovsdb.plugin.InventoryService.printCache(InventoryService.java:249)
+	    at org.opendaylight.ovsdb.lib.message.OVSDBNettyFactoryIT.testSome(OVSDBNettyFactoryIT.java:134)
+
+         */
         inventoryService.printCache(node);
 
         // TRANSACT INSERT TEST

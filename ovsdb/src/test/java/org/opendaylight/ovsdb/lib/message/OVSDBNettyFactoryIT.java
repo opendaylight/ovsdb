@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.collections.MapUtils;
 import org.junit.Before;
@@ -50,6 +52,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 public class OVSDBNettyFactoryIT {
     InventoryService inventoryService;
     private static String bridgeIdentifier = "br1";
+    private static final Integer CONNECTION_TIMEOUT_MSEC = 3000;
     private Properties props;
 
     @Before
@@ -66,7 +69,7 @@ public class OVSDBNettyFactoryIT {
     }
 
     @Test
-    public void testSome() throws InterruptedException, ExecutionException,
+    public void testSome() throws InterruptedException, ExecutionException, TimeoutException,
             IOException {
         ConnectionService connectionService = new ConnectionService();
         connectionService.init();
@@ -79,6 +82,7 @@ public class OVSDBNettyFactoryIT {
                 props.getProperty("ovsdbserver.ipaddress"));
         params.put(ConnectionConstants.PORT,
                 props.getProperty("ovsdbserver.port", "6640"));
+
         Node node = connectionService.connect("TEST", params);
         if (node == null) {
             throw new IOException("Unable to connect to the host");
@@ -97,7 +101,9 @@ public class OVSDBNettyFactoryIT {
         //GET DB-SCHEMA
         List<String> dbNames = Arrays.asList(Open_vSwitch.NAME.getName());
         ListenableFuture<DatabaseSchema> dbSchemaF = ovsdb.get_schema(dbNames);
-        DatabaseSchema databaseSchema = dbSchemaF.get();
+        DatabaseSchema databaseSchema = null;
+        databaseSchema = dbSchemaF.get(CONNECTION_TIMEOUT_MSEC, TimeUnit.MILLISECONDS);
+
         MapUtils.debugPrint(System.out, null, databaseSchema.getTables());
 
         // TEST MONITOR

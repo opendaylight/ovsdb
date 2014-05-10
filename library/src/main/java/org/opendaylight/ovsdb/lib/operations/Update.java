@@ -23,6 +23,8 @@ import java.util.Map;
 
 public class Update<E extends TableSchema<E>> extends Operation<E> implements ConditionalOperation {
 
+    public static final String UPDATE = "update";
+
     Map<String, Object> row = Maps.newHashMap();
     String uuid;
     //Where where;
@@ -31,7 +33,7 @@ public class Update<E extends TableSchema<E>> extends Operation<E> implements Co
     private String uuidName;
 
     public Update(TableSchema<E> schema) {
-        super(schema, "update");
+        super(schema, UPDATE);
     }
 
     public Update<E> on(TableSchema schema){

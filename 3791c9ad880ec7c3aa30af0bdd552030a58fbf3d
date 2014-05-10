@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_bba3799d",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13ProviderManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 492,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-10T18:37:33Z",
+      "side": 1,
+      "message": "See - https://git.opendaylight.org/gerrit/#/c/6758/\n\nPlease rebase this change and use the constants introduced in the above patch",
+      "revId": "3791c9ad880ec7c3aa30af0bdd552030a58fbf3d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9baa356f",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13ProviderManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 621,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-10T18:37:33Z",
+      "side": 1,
+      "message": "Is there a more specific Exception that can be caught here?",
+      "revId": "3791c9ad880ec7c3aa30af0bdd552030a58fbf3d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3bb769da",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13ProviderManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 661,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-10T18:37:33Z",
+      "side": 1,
+      "message": "As per previous comment, replace literals with constants",
+      "revId": "3791c9ad880ec7c3aa30af0bdd552030a58fbf3d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_fbb021df",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13ProviderManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1271,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-10T18:37:33Z",
+      "side": 1,
+      "message": "What\u0027s the purpose of the MAC \"01:00:00:00:00:00\"?\nMaybe a comment here or replace with a constant",
+      "revId": "3791c9ad880ec7c3aa30af0bdd552030a58fbf3d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

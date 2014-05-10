@@ -21,12 +21,16 @@ public class Operations {
         return new Insert<>(schema);
     }
 
-    public  <E extends TableSchema<E>> Update<E> update(TableSchema<E> schema) {
+    public <E extends TableSchema<E>> Update<E> update(TableSchema<E> schema) {
         return new Update<>(schema);
     }
 
-    public  <E extends TableSchema<E>> Delete<E> delete(TableSchema<E> schema) {
+    public <E extends TableSchema<E>> Delete<E> delete(TableSchema<E> schema) {
         return new Delete<>(schema);
+    }
+
+    public <E extends TableSchema<E>> Select<E> select(TableSchema<E> schema) {
+        return new Select<>(schema);
     }
 
 }

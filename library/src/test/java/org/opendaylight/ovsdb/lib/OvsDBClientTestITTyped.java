@@ -65,7 +65,7 @@ public class OvsDBClientTestITTyped extends OvsdbTestBase {
     public void test() throws IOException, InterruptedException, ExecutionException {
         OvsDBClientImpl ovs = getVswitch();
 
-        Bridge bridge = ovs.getSchema(OvsDBClient.OPEN_VSWITCH_SCHEMA, true).get().table("Bridge", Bridge.class);
+        Bridge bridge = ovs.getSchema(OvsDBClient.OPEN_VSWITCH_SCHEMA, true).get().table(ovs.BRIDGE_TABLE, Bridge.class);
 
         ListenableFuture<List<OperationResult>> results = ovs.transactBuilder()
                 .add(op.insert(bridge).value(bridge.name(), "br-int"))

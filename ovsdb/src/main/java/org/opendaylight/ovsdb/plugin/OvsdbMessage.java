@@ -18,7 +18,7 @@ public class OvsdbMessage {
 
     public OvsdbMessage(String method, Object[] arg){
         this.methodName = method;
-        this.argument = arg;
+        this.argument = arg.clone();
         Random x = new Random();
         this.id = Integer.toString(x.nextInt(10000));
     }

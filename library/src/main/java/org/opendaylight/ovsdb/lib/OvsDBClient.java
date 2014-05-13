@@ -1,12 +1,12 @@
 /*
  *
- *  * Copyright (C) 2014 EBay Software Foundation
- *  *
- *  * This program and the accompanying materials are made available under the
- *  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
- *  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *  *
- *  * Authors : Ashwin Raveendran
+ * Copyright (C) 2014 EBay Software Foundation and others...
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Authors : Ashwin Raveendran, Dave Tucker
  *
  */
 
@@ -32,6 +32,24 @@ public interface OvsDBClient {
      * Represents the Open Vswitch Schema
      */
     String OPEN_VSWITCH_SCHEMA = "Open_vSwitch";
+
+    /**
+     * Represents the tables of the Open Vswitch Schema
+     */
+    String OPEN_VSWITCH_TABLE = "Open_vSwitch";
+    String BRIDGE_TABLE = "Bridge";
+    String PORT_TABLE = "Port";
+    String INTERFACE_TABLE = "Interface";
+    String FLOW_TABLE = "Flow_Table";
+    String QOS_TABLE = "QoS";
+    String QUEUE_TABLE = "Queue";
+    String MIRROR_TABLE = "Mirror";
+    String CONTROLLER_TABLE = "Controller";
+    String MANAGER_TABLE = "Manager";
+    String NETFLOW_TABLE = "NetFlow";
+    String SSL_TABLE = "SSL";
+    String SFLOW_TABLE = "sFlow";
+    String IPFIX_TABLE = "IPFIX";
 
     /**
      * Gets the list of database names exposed by this ovsdb capable device

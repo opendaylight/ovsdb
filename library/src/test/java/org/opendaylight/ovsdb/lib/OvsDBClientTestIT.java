@@ -48,7 +48,7 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
     public void testTransact() throws IOException, InterruptedException, ExecutionException {
 
         ListenableFuture<DatabaseSchema> schema = ovs.getSchema(OvsDBClient.OPEN_VSWITCH_SCHEMA, true);
-        TableSchema<GenericTableSchema> bridge = schema.get().table("Bridge", GenericTableSchema.class);
+        TableSchema<GenericTableSchema> bridge = schema.get().table(ovs.BRIDGE_TABLE, GenericTableSchema.class);
 
         for (Map.Entry<String, ColumnSchema> names : bridge.getColumnSchemas().entrySet()) {
             System.out.println("names = " + names.getKey());
@@ -79,7 +79,7 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
     public void testMonitorRequest() throws ExecutionException, InterruptedException {
 
         DatabaseSchema dbSchema = ovs.getSchema(OvsDBClient.OPEN_VSWITCH_SCHEMA, true).get();
-        GenericTableSchema bridge = dbSchema.table("Bridge", GenericTableSchema.class);
+        GenericTableSchema bridge = dbSchema.table(ovs.BRIDGE_TABLE, GenericTableSchema.class);
 
         List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
         monitorRequests.add(

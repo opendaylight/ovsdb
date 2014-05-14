@@ -21,11 +21,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.google.inject</groupId>
-      <artifactId>guice</artifactId>
-      <version>3.0</version>
-    </dependency>
-    <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>containermanager</artifactId>
       <version>0.5.2-SNAPSHOT</version>
@@ -142,7 +137,6 @@
               org.apache.felix.dm,
               org.slf4j,
               org.osgi.framework,
-              com.google.inject,
               *</Import-Package>
             <Bundle-Activator>org.opendaylight.ovsdb.neutron.Activator</Bundle-Activator>
           </instructions>

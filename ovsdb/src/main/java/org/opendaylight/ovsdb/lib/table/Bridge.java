@@ -34,7 +34,7 @@ public class Bridge extends Table<Bridge> {
     private Boolean stp_enable;
     private OvsDBMap<String, String> other_config;
     private OvsDBMap<String, String> external_ids;
-    UUID ipfix;
+    private OvsDBSet<UUID> ipfix;
 
     public Bridge() {
     }
@@ -158,13 +158,27 @@ public class Bridge extends Table<Bridge> {
         this.external_ids = external_ids;
     }
 
+    public void setSflow(OvsDBSet<UUID> sflow) {
+        this.sflow = sflow;
+    }
+
+    public OvsDBSet<UUID> getIpfix() {
+        return ipfix;
+    }
+
+    public void setIpfix(OvsDBSet<UUID> ipfix) {
+        this.ipfix = ipfix;
+    }
+
     @Override
     public String toString() {
-        return "Bridge [name=" + name + ", ports=" + ports + ", controller="
-                + controller + ", datapath_id=" + datapath_id
-                + ", datapath_type=" + datapath_type + ", fail_mode="
-                + fail_mode + ", status=" + status + ", stp_enable="
-                + stp_enable + ", other_config=" + other_config
-                + ", external_ids=" + external_ids + "]";
+        return "Bridge [name=" + name + ", ports=" + ports + ", mirrors="
+                + mirrors + ", controller=" + controller + ", datapath_id="
+                + datapath_id + ", datapath_type=" + datapath_type
+                + ", fail_mode=" + fail_mode + ", sflow=" + sflow
+                + ", netflow=" + netflow + ", protocols=" + protocols
+                + ", status=" + status + ", stp_enable=" + stp_enable
+                + ", other_config=" + other_config + ", external_ids="
+                + external_ids + ", ipfix=" + ipfix + "]";
     }
 }

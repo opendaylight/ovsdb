@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_4e9ffb50",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-16T22:29:22Z",
+      "side": 1,
+      "message": "Minor nit, but should this be \"getAllPhysicalInterfaceNames\"?",
+      "revId": "9c0bed18cfbb05bb2eb6ecd076e69b4490352651",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a9b7a1d7",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/NetworkHandler.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-16T22:29:22Z",
+      "side": 1,
+      "message": "I think these were part of Madhu\u0027s patches! Looks like you might have had issues rebasing.",
+      "revId": "9c0bed18cfbb05bb2eb6ecd076e69b4490352651",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e9ada989",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/NetworkHandler.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-16T22:29:22Z",
+      "side": 1,
+      "message": "I appreciate you taking the initiative to fix this (should not have made it through code review)... but as this is unrelated to your change could you please resubmit as a separate patch?",
+      "revId": "9c0bed18cfbb05bb2eb6ecd076e69b4490352651",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_09a9ed7a",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/NetworkHandler.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-16T22:29:22Z",
+      "side": 1,
+      "message": "This delete code looks generic. Didn\u0027t this merge in another patch set recently? I\u0027d prefer this was separated from the VLAN support if it is not just for VLAN support.",
+      "revId": "9c0bed18cfbb05bb2eb6ecd076e69b4490352651",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

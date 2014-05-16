@@ -178,9 +178,16 @@ public class OvsDBClientImpl implements OvsDBClient {
     }
 
 
-    public boolean isReady(long timeout) {
-        //todo implement timeout
-        return null != schema;
+    public boolean isReady(int timeout) throws InterruptedException {
+        boolean ready = false;
+        while (!ready && timeout > 0) {
+            if (!schema.isEmpty()) {
+                ready = true;
+            }
+            Thread.sleep(1000);
+            timeout--;
+        }
+        return ready;
     }
 
     @Override

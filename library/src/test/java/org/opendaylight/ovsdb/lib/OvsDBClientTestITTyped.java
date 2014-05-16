@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
-public class OvsDBClientTestITTyped extends OvsdbTestBase {
+public class OvsDBClientTestITTyped extends OvsdbIntegrationTestBase {
 
     Logger logger = LoggerFactory.getLogger(OvsDBClientTestITTyped.class);
 

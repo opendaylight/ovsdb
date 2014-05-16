@@ -12,7 +12,6 @@
 
 package org.opendaylight.ovsdb.lib;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.ovsdb.lib.message.MonitorRequest;
 import org.opendaylight.ovsdb.lib.operations.Operation;

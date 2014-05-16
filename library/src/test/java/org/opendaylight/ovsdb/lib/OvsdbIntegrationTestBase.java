@@ -36,7 +36,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public abstract class OvsdbTestBase implements OvsdbRPC.Callback{
+public abstract class OvsdbIntegrationTestBase implements OvsdbRPC.Callback{
     private final static String identifier = "TEST";
 
     public Properties loadProperties() throws IOException {

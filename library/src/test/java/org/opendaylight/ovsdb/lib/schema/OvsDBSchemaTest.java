@@ -15,8 +15,10 @@ import org.junit.Test;
 import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import java.io.InputStream;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
-
+@RunWith(JUnit4.class)
 public class OvsDBSchemaTest {
 
     @Test

@@ -39,7 +39,7 @@ import java.util.concurrent.Executors;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 
-public class OvsDBClientTestIT extends OvsdbTestBase {
+public class OvsDBClientTestIT extends OvsdbIntegrationTestBase {
     Logger logger = LoggerFactory.getLogger(OvsDBClientTestIT.class);
 
     OvsDBClientImpl ovs;

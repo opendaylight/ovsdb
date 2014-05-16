@@ -41,7 +41,7 @@ import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
 
 
-public class OvsDBClientTestIT extends OvsdbTestBase {
+public class OvsDBClientTestIT extends OvsdbIntegrationTestBase {
     Logger logger = LoggerFactory.getLogger(OvsDBClientTestIT.class);
 
     OvsDBClientImpl ovs;

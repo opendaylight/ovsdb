@@ -180,7 +180,7 @@ public class OvsDBClientImpl implements OvsDBClient {
 
     public boolean isReady(long timeout) {
         //todo implement timeout
-        return null != schema;
+        return schema.size() > 0;
     }
 
     @Override

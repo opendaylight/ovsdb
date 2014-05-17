@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_49fe153a",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/IAdminConfigManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-17T19:36:02Z",
+      "side": 1,
+      "message": "Seriously ? :-)",
+      "revId": "4e9c84598750e099e52d35ba703c8860de54b251",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e9fcc940",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 505,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-17T19:36:02Z",
+      "side": 1,
+      "message": "missing a return ?",
+      "revId": "4e9c84598750e099e52d35ba703c8860de54b251",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_09f80d48",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/NetworkHandler.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-17T19:36:02Z",
+      "side": 1,
+      "message": "I remember this technique :-) But am not too happy with such black magic. Would be more readable if we have proper setters. Or atleast add a comment pointing to this trick.",
+      "revId": "4e9c84598750e099e52d35ba703c8860de54b251",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a996c1ee",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/TenantNetworkManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-17T19:36:02Z",
+      "side": 1,
+      "message": "Is this even possible ?\nWith the setRequired(true), we have a strict dependency and hence this cannot be null isnt it ?",
+      "revId": "4e9c84598750e099e52d35ba703c8860de54b251",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

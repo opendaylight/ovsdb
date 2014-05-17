@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_69a0b943",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/IAdminConfigManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-17T19:52:16Z",
+      "side": 1,
+      "message": "That\u0027s where I was when I wrote it :p",
+      "parentUuid": "fa82b9bf_49fe153a",
+      "revId": "4e9c84598750e099e52d35ba703c8860de54b251",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_e9fcc940",
         "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2014-05-17T19:36:02Z",
       "side": 1,
       "message": "missing a return ?",
+      "revId": "4e9c84598750e099e52d35ba703c8860de54b251",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_89a3bd4e",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 505,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-17T19:52:16Z",
+      "side": 1,
+      "message": "It\u0027s a void so there is nothing to return",
+      "parentUuid": "fa82b9bf_e9fcc940",
       "revId": "4e9c84598750e099e52d35ba703c8860de54b251",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_298ab1bf",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/NetworkHandler.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-17T19:52:16Z",
+      "side": 1,
+      "message": "Even with callbacks those attributes should still be volatile IMO. See http://jeremymanson.blogspot.co.uk/2008/11/what-volatile-means-in-java.html",
+      "parentUuid": "fa82b9bf_09f80d48",
+      "revId": "4e9c84598750e099e52d35ba703c8860de54b251",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_a996c1ee",
         "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/TenantNetworkManager.java",
         "patchSetId": 5
@@ -64,6 +118,24 @@
       "writtenOn": "2014-05-17T19:36:02Z",
       "side": 1,
       "message": "Is this even possible ?\nWith the setRequired(true), we have a strict dependency and hence this cannot be null isnt it ?",
+      "revId": "4e9c84598750e099e52d35ba703c8860de54b251",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4985b5ab",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/TenantNetworkManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-17T19:52:16Z",
+      "side": 1,
+      "message": "Yes. If something bad happens providerNetworkManager could be \"unset\" and therefore null. Also IIRC I couldn\u0027t make providerNetworkManager setRequired(true) as it depends on TenantNetworkManager and we have cyclic dependency.",
+      "parentUuid": "fa82b9bf_a996c1ee",
       "revId": "4e9c84598750e099e52d35ba703c8860de54b251",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

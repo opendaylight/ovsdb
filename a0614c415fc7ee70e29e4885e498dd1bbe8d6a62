@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_54ab0cd6",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13ProviderManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1854,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-18T13:55:09Z",
+      "side": 0,
+      "message": "Since we dont have proper IT to confirm if this fix works. Can you please confirm if the Topology is formed over the Tunnels with this fix ?\nIf you are blocked by other issues, May I suggest you to install the LLDP punt rules manually on the OVS and confirm that the topology is infact formed ? Since we will be generating periodic LLDP packets from the plugin, just installing the LLDP punt rule should take care of topology discovery.",
+      "revId": "a0614c415fc7ee70e29e4885e498dd1bbe8d6a62",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -486,6 +486,7 @@ public class InternalNetworkManager {
             this.createIntegrationBridge(node);
         } catch (Exception e) {
             logger.error("Error creating internal network "+node.toString(), e);
+            return;
         }
         ProviderNetworkManager.getManager().initializeFlowRules(node);
     }

@@ -37,6 +37,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_693c39e3",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/IAdminConfigManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-18T02:52:00Z",
+      "side": 1,
+      "message": "Since the code has not merged yet and is in the process of review, I think another company whom you dont represent now may not appreciate it :) I believe it should be your current employer.",
+      "revId": "4e9c84598750e099e52d35ba703c8860de54b251",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_e9fcc940",
         "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
         "patchSetId": 5
@@ -66,6 +83,24 @@
       "side": 1,
       "message": "It\u0027s a void so there is nothing to return",
       "parentUuid": "fa82b9bf_e9fcc940",
+      "revId": "4e9c84598750e099e52d35ba703c8860de54b251",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_893f3dd6",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 505,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-18T02:52:00Z",
+      "side": 1,
+      "message": "Okay. But if it is null, we will get an error and also a null pointer exception due to the following line of code. So please add a return for this if check.",
+      "parentUuid": "fa82b9bf_89a3bd4e",
       "revId": "4e9c84598750e099e52d35ba703c8860de54b251",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -107,6 +142,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_292631cf",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/NetworkHandler.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-18T02:52:00Z",
+      "side": 1,
+      "message": "okay fair enough. But my concern about the callback mechanism by defining it as a private volatile without the actual setxxx method is that am not sure if it is dependent on the framework being used (i.e) Equinox vs Felix vs other DI provider.",
+      "parentUuid": "fa82b9bf_298ab1bf",
+      "revId": "4e9c84598750e099e52d35ba703c8860de54b251",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_a996c1ee",
         "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/TenantNetworkManager.java",
         "patchSetId": 5
@@ -136,6 +189,24 @@
       "side": 1,
       "message": "Yes. If something bad happens providerNetworkManager could be \"unset\" and therefore null. Also IIRC I couldn\u0027t make providerNetworkManager setRequired(true) as it depends on TenantNetworkManager and we have cyclic dependency.",
       "parentUuid": "fa82b9bf_a996c1ee",
+      "revId": "4e9c84598750e099e52d35ba703c8860de54b251",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_492135b3",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/TenantNetworkManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-18T02:52:00Z",
+      "side": 1,
+      "message": "okay.",
+      "parentUuid": "fa82b9bf_4985b5ab",
       "revId": "4e9c84598750e099e52d35ba703c8860de54b251",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

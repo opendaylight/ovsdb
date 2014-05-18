@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_6913d966",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13ProviderManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1854,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-18T02:57:00Z",
+      "side": 1,
+      "message": "These magic numbers scares me :-)\nWhy does maxLength\u003d5 work ?\n\nIs it better not to even set the maxlength and let the default 128 bytes to succeed ? \nCan you please confirm if removing this line works as well ?",
+      "revId": "078baac8d1d835f6145f3c1f160541c1cff6d955",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

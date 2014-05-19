@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_7a5956fd",
+        "filename": "library/src/test/resources/org/opendaylight/ovsdb/lib/message/integration-test.properties",
+        "patchSetId": 3
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-05-19T18:05:15Z",
+      "side": 1,
+      "message": "Is any validation needed on these values - valid IP, port within range, etc? Or do we just let the later calls fail if the values are bad?",
+      "revId": "3a9dda5292cf084f7b85c27d0519f80e797f0bce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

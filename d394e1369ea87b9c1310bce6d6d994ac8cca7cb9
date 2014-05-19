@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_413b49d1",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/AdminConfigManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-19T09:14:17Z",
+      "side": 1,
+      "message": "Would it be better to call this method \"getAllPhysicalInterfaceNames\"?",
+      "revId": "d394e1369ea87b9c1310bce6d6d994ac8cca7cb9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_61368de9",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/NetworkHandler.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-19T09:14:17Z",
+      "side": 1,
+      "message": "I\u0027m wondering whether this comment is necessary....",
+      "revId": "d394e1369ea87b9c1310bce6d6d994ac8cca7cb9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_213085e7",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/NetworkHandler.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-19T09:14:17Z",
+      "side": 1,
+      "message": "Same here with the comment",
+      "revId": "d394e1369ea87b9c1310bce6d6d994ac8cca7cb9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2147254d",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/SouthboundHandler.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-19T09:14:17Z",
+      "side": 1,
+      "message": "I\u0027m confused by this comment. Where do we print the row?",
+      "revId": "d394e1369ea87b9c1310bce6d6d994ac8cca7cb9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c1751999",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF10Provider.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 825,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-19T09:14:17Z",
+      "side": 1,
+      "message": "Again I think this comment is unnecessary... the method call says it all!",
+      "revId": "d394e1369ea87b9c1310bce6d6d994ac8cca7cb9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c1b759d7",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13Provider.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 1060,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-19T09:14:17Z",
+      "side": 1,
+      "message": "Can we catch and handle a more specific exception? It\u0027s ok if the answer is no as I\u0027ve noticed this pattern a lot in the code base. Fixing this is on my radar...",
+      "revId": "d394e1369ea87b9c1310bce6d6d994ac8cca7cb9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a1b495d1",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13Provider.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 1232,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-19T09:14:17Z",
+      "side": 1,
+      "message": "Same as comment on OF10Provider about this comment being redundant.",
+      "revId": "d394e1369ea87b9c1310bce6d6d994ac8cca7cb9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_81ff1167",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13Provider.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 2232,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-19T09:14:17Z",
+      "side": 1,
+      "message": "If this code is no longer needed can we delete it rather than commenting it out?",
+      "revId": "d394e1369ea87b9c1310bce6d6d994ac8cca7cb9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a102556d",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13Provider.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 2246,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-19T09:14:17Z",
+      "side": 1,
+      "message": "As above...",
+      "revId": "d394e1369ea87b9c1310bce6d6d994ac8cca7cb9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

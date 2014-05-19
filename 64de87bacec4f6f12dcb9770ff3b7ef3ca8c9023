@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_3a4c2e42",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/operations/Select.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-05-19T18:05:32Z",
+      "side": 1,
+      "message": "Many of these functions look generic. Could they be in a base class?",
+      "revId": "64de87bacec4f6f12dcb9770ff3b7ef3ca8c9023",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

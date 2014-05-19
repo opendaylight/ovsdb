@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_7a271665",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 489,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-05-19T18:29:05Z",
+      "side": 1,
+      "message": "What is the normal way to handle a failure like this? Is the log and exception enough?  Wondering if some error handling needs to be added? The processNodeUpdate has failed but no error is propogated.",
+      "revId": "d138b30f38ec116dd06fe0ad23d8c55199021ba7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

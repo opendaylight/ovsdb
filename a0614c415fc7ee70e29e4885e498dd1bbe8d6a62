@@ -16,6 +16,23 @@
       "revId": "a0614c415fc7ee70e29e4885e498dd1bbe8d6a62",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_da0982de",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13ProviderManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1854,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-05-19T18:11:40Z",
+      "side": 0,
+      "message": "when you say \"since we don\u0027t have proper it tests\" what do you mean? The infra is not there in ovsdb, there just isn\u0027t a test case in ovsdb for this or this should actually be covered by the openflow module?\n\nIf this is something supported by ovsdb then shouldn\u0027t a test be added as part of the commit?",
+      "revId": "a0614c415fc7ee70e29e4885e498dd1bbe8d6a62",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

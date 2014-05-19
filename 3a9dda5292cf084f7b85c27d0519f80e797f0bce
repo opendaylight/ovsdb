@@ -16,6 +16,24 @@
       "revId": "3a9dda5292cf084f7b85c27d0519f80e797f0bce",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9a13fa0c",
+        "filename": "library/src/test/resources/org/opendaylight/ovsdb/lib/message/integration-test.properties",
+        "patchSetId": 3
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-19T18:12:29Z",
+      "side": 1,
+      "message": "As this is for IT only (not user facing) I\u0027m good with skipping validation. Also I wouldn\u0027t know where to start to implement it!",
+      "parentUuid": "fa82b9bf_7a5956fd",
+      "revId": "3a9dda5292cf084f7b85c27d0519f80e797f0bce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

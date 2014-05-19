@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_fabec6fe",
+        "filename": "library/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-05-19T17:53:32Z",
+      "side": 1,
+      "message": "do we want this by default?",
+      "revId": "706252a415b46e203cab35e823d38b10eadefde5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

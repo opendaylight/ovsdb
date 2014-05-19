@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_5a47b21d",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/operations/Update.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-05-19T18:01:16Z",
+      "side": 1,
+      "message": "I don\u0027t know this code, but just curious if these constants are defined in a base class? I can understand the definition here if not already defined.",
+      "revId": "1fe0b4302e2ecfb39135f605dcc627633dbfe0ed",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_3a218e4d",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/OvsDBClient.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-05-19T18:33:31Z",
+      "side": 1,
+      "message": "Why are these not final? Is it because this is an interface and not a class?",
+      "revId": "61000d26f6a96d7a16243bc1fd14e0e8684e2a18",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_fa1a4616",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/OvsDBClient.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-05-19T18:33:31Z",
+      "side": 1,
+      "message": "These seem like constants that could be in another file shared across many different classes.",
+      "revId": "61000d26f6a96d7a16243bc1fd14e0e8684e2a18",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

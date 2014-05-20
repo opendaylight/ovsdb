@@ -16,6 +16,24 @@
       "revId": "1fe0b4302e2ecfb39135f605dcc627633dbfe0ed",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3a266ecf",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/operations/Update.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-20T01:57:19Z",
+      "side": 1,
+      "message": "I think it is fine. Because the string \"update\" is completely localized to the class.",
+      "parentUuid": "fa82b9bf_5a47b21d",
+      "revId": "1fe0b4302e2ecfb39135f605dcc627633dbfe0ed",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -16,6 +16,24 @@
       "revId": "64de87bacec4f6f12dcb9770ff3b7ef3ca8c9023",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5a8572ab",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/operations/Select.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-20T00:27:49Z",
+      "side": 1,
+      "message": "No as they are setters/getters for class variables which cannot be added in a base class i.e they are specific to this type of operation.",
+      "parentUuid": "fa82b9bf_3a4c2e42",
+      "revId": "64de87bacec4f6f12dcb9770ff3b7ef3ca8c9023",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

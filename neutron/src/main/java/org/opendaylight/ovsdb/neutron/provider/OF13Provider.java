@@ -3358,7 +3358,7 @@ public class OF13Provider implements NetworkProvider {
                                 Long dpidLong, Long port , List<Instruction> instructions) {
 
         NodeConnectorId ncid = new NodeConnectorId("openflow:" + dpidLong + ":" + port);
-        logger.debug("createOutputPortInstructions() Node Connector ID is - Type=openflow: DPID={} port={} existingInstructions={}", dpidLong, port, instructions);
+        logger.debug("removeOutputPortFromInstructions() Node Connector ID is - Type=openflow: DPID={} port={} existingInstructions={}", dpidLong, port, instructions);
 
         List<Action> actionList = new ArrayList<Action>();
         ActionBuilder ab;
@@ -3374,21 +3374,20 @@ public class OF13Provider implements NetworkProvider {
             }
         }
 
-        int numOutputPort = 0;
         int index = 0;
         boolean isPortDeleted = false;
+        boolean removeFlow = true;
         for (Action action : actionList) {
             if (action.getAction() instanceof OutputActionCase) {
-                numOutputPort++;
                 OutputActionCase opAction = (OutputActionCase)action.getAction();
                 if (opAction.getOutputAction().getOutputNodeConnector().equals(new Uri(ncid))) {
                     /* Find the output port in action list and remove */
                     index = actionList.indexOf(action);
                     actionList.remove(action);
                     isPortDeleted = true;
-                    numOutputPort--;
                     break;
                 }
+                removeFlow = false;
             }
         }
 
@@ -3405,15 +3404,18 @@ public class OF13Provider implements NetworkProvider {
                     actionList.remove(action);
                     actionList.add(i, actionNewOrder);
                 }
+                if (action.getAction() instanceof OutputActionCase) {
+                    removeFlow = false;
+                }
             }
         }
 
         /* Put new action list in Apply Action instruction */
-        if (numOutputPort > 0) {
+        if (!removeFlow) {
             ApplyActionsBuilder aab = new ApplyActionsBuilder();
             aab.setAction(actionList);
             ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
-            logger.debug("createOutputPortInstructions() : applyAction {}", aab.build());
+            logger.debug("removeOutputPortFromInstructions() : applyAction {}", aab.build());
             return false;
         } else {
             /* if all output port are removed. Return true to indicate flow remove */

@@ -106,7 +106,7 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
         });
 
         //for (int i = 0; i < 5 && results.isEmpty(); i++) { //wait 5 seconds to get a result
-        for (int i = 0; i < 500 ; i++) { //wait 5 seconds to get a result
+        for (int i = 0; i < 5 ; i++) { //wait 5 seconds to get a result
             System.out.println("waiting");
             Thread.sleep(1000);
         }

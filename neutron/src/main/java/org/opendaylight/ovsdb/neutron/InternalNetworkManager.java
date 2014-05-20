@@ -501,6 +501,7 @@ public class InternalNetworkManager implements IInternalNetworkManager {
             this.createIntegrationBridge(node);
         } catch (Exception e) {
             logger.error("Error creating internal network "+node.toString(), e);
+            return;
         }
         if (providerNetworkManager == null) {
             logger.error("Error creating internal network. Provider Network Manager unavailable");

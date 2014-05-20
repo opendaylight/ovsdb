@@ -52,6 +52,24 @@
       "revId": "d138b30f38ec116dd06fe0ad23d8c55199021ba7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_fa81e68f",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/InternalNetworkManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 489,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-20T01:42:49Z",
+      "side": 1,
+      "message": "Agreed.",
+      "parentUuid": "fa82b9bf_7aa07643",
+      "revId": "d138b30f38ec116dd06fe0ad23d8c55199021ba7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

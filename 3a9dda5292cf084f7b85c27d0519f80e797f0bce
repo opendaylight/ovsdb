@@ -34,6 +34,24 @@
       "revId": "3a9dda5292cf084f7b85c27d0519f80e797f0bce",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ba327e0e",
+        "filename": "library/src/test/resources/org/opendaylight/ovsdb/lib/message/integration-test.properties",
+        "patchSetId": 3
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-20T01:55:23Z",
+      "side": 1,
+      "message": "I propose to just remove this file and not even use the properties file at all. Rather force the user to always input the data via command-line parameter. The moment we use a variable to fill this data without a default value, that essentially means we are forcing the user to input data through a parameter and hence this file gets really useless.\n\nAlso, As we expand our IT across all the bundles, having this property file localized to a lib/message seems inappropriate.",
+      "parentUuid": "fa82b9bf_9a13fa0c",
+      "revId": "3a9dda5292cf084f7b85c27d0519f80e797f0bce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

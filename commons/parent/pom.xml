@@ -1,30 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <prerequisites>
-    <maven>3.0</maven>
-  </prerequisites>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
-    <version>1.4.1</version>
+    <version>1.4.1-1-SNAPSHOT</version>
   </parent>
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>commons.ovsdb</artifactId>
   <version>1.0.0-1-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</developerConnection>
-    <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
-    <tag>master-tagforprepareonly-ovsdb-bulk-release-prepare-only-9</tag>
-  </scm>
+  <prerequisites>
+    <maven>3.0</maven>
+  </prerequisites>
   <properties>
-    <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version.source>1.7</java.version.source>
     <java.version.target>1.7</java.version.target>
+    <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <build>
@@ -43,16 +36,23 @@
       </plugins>
     </pluginManagement>
   </build>
+  <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</developerConnection>
+    <tag>master-tagforprepareonly-ovsdb-bulk-release-prepare-only-9</tag>
+    <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
+  </scm>
 
   <repositories>
     <!-- Opendaylight public group -->
     <repository>
-      <id>opendaylight-public</id>
-      <name>opendaylight-public</name>
-      <url>${nexusproxy}/groups/public/</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
+      <id>opendaylight-public</id>
+      <name>opendaylight-public</name>
+      <url>${nexusproxy}/groups/public/</url>
     </repository>
     <!-- OpenDayLight Released artifact -->
     <repository>
@@ -70,12 +70,12 @@
 
   <pluginRepositories>
     <pluginRepository>
-      <id>opendaylight-public</id>
-      <name>opendaylight-public</name>
-      <url>http://nexus.opendaylight.org/content/groups/public/</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
+      <id>opendaylight-public</id>
+      <name>opendaylight-public</name>
+      <url>http://nexus.opendaylight.org/content/groups/public/</url>
     </pluginRepository>
     <pluginRepository>
       <id>opendaylight-release</id>

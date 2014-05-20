@@ -1,30 +1,115 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.opendaylight.ovsdb</groupId>
-        <artifactId>commons.ovsdb</artifactId>
-        <version>1.0.0-1-SNAPSHOT</version>
-        <relativePath>../commons/parent</relativePath>
-    </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.opendaylight.ovsdb</groupId>
+    <artifactId>commons.ovsdb</artifactId>
+    <version>1.0.0-1-SNAPSHOT</version>
+    <relativePath>../commons/parent</relativePath>
+  </parent>
 
-    <artifactId>ovsdb.neutron</artifactId>
-    <version>0.5.0-1-SNAPSHOT</version>
-    <packaging>bundle</packaging>
+  <artifactId>ovsdb.neutron</artifactId>
+  <version>0.5.0-1-SNAPSHOT</version>
+  <packaging>bundle</packaging>
 
-    <scm>
-      <connection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</connection>
-      <developerConnection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</developerConnection>
-      <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
-      <tag>master-tagforprepareonly-ovsdb-bulk-release-prepare-only-9</tag>
-    </scm>
+  <properties>
+    <bundle.plugin.version>2.4.0</bundle.plugin.version>
+    <guava.version>14.0.1</guava.version>
+    <maven.clean.plugin.version>2.5</maven.clean.plugin.version>
+    <xtend.version>2.4.3</xtend.version>
+  </properties>
 
-    <properties>
-        <guava.version>14.0.1</guava.version>
-        <xtend.version>2.4.3</xtend.version>
-        <bundle.plugin.version>2.4.0</bundle.plugin.version>
-        <maven.clean.plugin.version>2.5</maven.clean.plugin.version>
-    </properties>
+  <dependencies>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>containermanager</artifactId>
+      <version>0.5.1-1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>forwardingrulesmanager</artifactId>
+      <version>0.5.0-1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>networkconfig.neutron</artifactId>
+      <version>0.4.1-1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal</artifactId>
+      <version>0.7.0-1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-binding-api</artifactId>
+      <version>1.0-1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-common-util</artifactId>
+      <version>1.0-1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>switchmanager</artifactId>
+      <version>0.7.0-1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller.model</groupId>
+      <artifactId>model-flow-base</artifactId>
+      <version>1.0-1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller.model</groupId>
+      <artifactId>model-flow-management</artifactId>
+      <version>1.0-1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller.model</groupId>
+      <artifactId>model-flow-service</artifactId>
+      <version>1.0-1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller.model</groupId>
+      <artifactId>model-inventory</artifactId>
+      <version>1.0-1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>ovsdb</artifactId>
+      <version>0.5.0-1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-binding</artifactId>
+      <version>0.6.1-1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>1.9.5</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.powermock</groupId>
+      <artifactId>powermock-api-mockito</artifactId>
+      <version>1.5.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.powermock</groupId>
+      <artifactId>powermock-module-junit4</artifactId>
+      <version>1.5.2</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
   <build>
     <plugins>
       <plugin>
@@ -34,8 +119,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Import-Package>
-              org.opendaylight.controller.networkconfig.neutron,
+            <Import-Package>org.opendaylight.controller.networkconfig.neutron,
               org.opendaylight.controller.containermanager,
               org.opendaylight.controller.switchmanager,
               org.opendaylight.controller.forwardingrulesmanager,
@@ -53,106 +137,18 @@
               org.apache.felix.dm,
               org.slf4j,
               org.osgi.framework,
-              *
-            </Import-Package>
-            <Bundle-Activator>
-              org.opendaylight.ovsdb.neutron.Activator
-            </Bundle-Activator>
+              *</Import-Package>
+            <Bundle-Activator>org.opendaylight.ovsdb.neutron.Activator</Bundle-Activator>
           </instructions>
         </configuration>
       </plugin>
     </plugins>
   </build>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <version>0.4.1</version>
-      <artifactId>networkconfig.neutron</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>switchmanager</artifactId>
-      <version>0.7.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>forwardingrulesmanager</artifactId>
-      <version>0.5.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal</artifactId>
-      <version>0.7.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>ovsdb</artifactId>
-      <version>0.5.0-1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>containermanager</artifactId>
-      <version>0.5.1</version>
-    </dependency>
-    <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>sal-binding-api</artifactId>
-        <version>1.0</version>
-    </dependency>
-    <dependency>
-        <groupId>org.opendaylight.controller.model</groupId>
-        <artifactId>model-flow-service</artifactId>
-        <version>1.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller.model</groupId>
-      <artifactId>model-flow-base</artifactId>
-      <version>1.0</version>
-    </dependency>
-   <dependency>
-      <groupId>org.opendaylight.controller.model</groupId>
-      <artifactId>model-flow-management</artifactId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller.model</groupId>
-      <artifactId>model-inventory</artifactId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>yang-binding</artifactId>
-      <version>0.6.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-common-util</artifactId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>4.11</version>
-        <scope>test</scope>
-    </dependency>
-    <dependency>
-        <groupId>org.mockito</groupId>
-        <artifactId>mockito-all</artifactId>
-        <version>1.9.5</version>
-        <scope>test</scope>
-    </dependency>
-    <dependency>
-        <groupId>org.powermock</groupId>
-        <artifactId>powermock-module-junit4</artifactId>
-        <version>1.5.2</version>
-        <scope>test</scope>
-    </dependency>
-    <dependency>
-        <groupId>org.powermock</groupId>
-        <artifactId>powermock-api-mockito</artifactId>
-        <version>1.5.2</version>
-        <scope>test</scope>
-    </dependency>
-  </dependencies>
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</developerConnection>
+    <tag>master-tagforprepareonly-ovsdb-bulk-release-prepare-only-9</tag>
+    <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
+  </scm>
 </project>

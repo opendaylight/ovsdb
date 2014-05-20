@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_107829f1",
+        "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/OvsDBClientTestIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-05-20T14:41:49Z",
+      "side": 1,
+      "message": "Is this related to the timeout comment from another diff? Maybe a TODO comment could be added here to refer to that, otherwise someone might delete the save line above.",
+      "revId": "61e82a527c4b183b7a4b3bb641ada4daa28d4543",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_908439d5",
+        "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/OvsdbTestBase.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-05-20T14:41:49Z",
+      "side": 1,
+      "message": "Seems like this member could be defined somewhere else, otherwise we have to update all the different files containing 6640.",
+      "revId": "61e82a527c4b183b7a4b3bb641ada4daa28d4543",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b087fdd6",
+        "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/OvsdbTestBase.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-05-20T14:41:49Z",
+      "side": 1,
+      "message": "Since we know ip addr is null should we be more helpful and say that along with the usage?",
+      "revId": "61e82a527c4b183b7a4b3bb641ada4daa28d4543",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

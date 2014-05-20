@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_babd9e6a",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/OvsDBClient.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-20T00:31:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_3a218e4d",
+      "revId": "61000d26f6a96d7a16243bc1fd14e0e8684e2a18",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_fa1a4616",
         "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/OvsDBClient.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-05-19T18:33:31Z",
       "side": 1,
       "message": "These seem like constants that could be in another file shared across many different classes.",
+      "revId": "61000d26f6a96d7a16243bc1fd14e0e8684e2a18",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_dac0a2e2",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/OvsDBClient.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-20T00:31:44Z",
+      "side": 1,
+      "message": "I\u0027m not sure which class they should belong to. OvsdbClient makes sense to me right now as these are, to the best of my knowledge the only table names learned to date. Access to these tables from classes higher up in the hierarchy should be abstract and there is nothing restricting this if these are static final attributes.",
+      "parentUuid": "fa82b9bf_fa1a4616",
       "revId": "61000d26f6a96d7a16243bc1fd14e0e8684e2a18",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

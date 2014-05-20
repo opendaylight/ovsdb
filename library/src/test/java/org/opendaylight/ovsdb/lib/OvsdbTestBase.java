@@ -22,10 +22,11 @@ import io.netty.handler.codec.string.StringEncoder;
 import io.netty.util.CharsetUtil;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetAddress;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
+
+import junit.framework.Assert;
 
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcDecoder;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcEndpoint;
@@ -37,20 +38,12 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public abstract class OvsdbTestBase implements OvsdbRPC.Callback{
-    private final static String identifier = "TEST";
+    private final static String SERVER_IPADDRESS = "ovsdbserver.ipaddress";
+    private final static String SERVER_PORT = "ovsdbserver.port";
+    private final static String DEFAULT_SERVER_PORT = "6640";
 
-    public Properties loadProperties() throws IOException {
-        InputStream is = this
-                .getClass()
-                .getClassLoader()
-                .getResourceAsStream(
-                        "org/opendaylight/ovsdb/lib/message/integration-test.properties");
-        if (is == null) {
-            throw new IOException("Unable to load integration-test.properties");
-        }
-        Properties props = new Properties();
-        props.load(is);
-
+    public Properties loadProperties() {
+        Properties props = new Properties(System.getProperties());
         return props;
     }
 
@@ -101,12 +94,15 @@ public abstract class OvsdbTestBase implements OvsdbRPC.Callback{
 
     public OvsdbRPC getTestConnection() throws IOException {
         Properties props = loadProperties();
-        String address = props.getProperty("ovsdbserver.ipaddress");
-        String port = props.getProperty("ovsdbserver.port", "6640");
+        String address = props.getProperty(SERVER_IPADDRESS);
+        String port = props.getProperty(SERVER_PORT, DEFAULT_SERVER_PORT);
 
+        if (address == null) {
+            Assert.fail("Usage : mvn -Pintegrationtest -Dovsdbserver.ipaddress=x.x.x.x -Dovsdbserver.port=yyyy verify");
+        }
         Channel channel = this.connect(address, port);
         if (channel == null) {
-            throw new IOException("Failed to connecto to ovsdb server");
+            throw new IOException("Failed to connect to ovsdb server");
         }
         try {
             return this.handleNewConnection(channel);

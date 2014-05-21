@@ -18,45 +18,55 @@ import java.io.OutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-public class TestClient extends TestCase {
+public class TestClientIT extends TestCase {
+    private static final int MIN_PORT = 32768;
+    private static final int MAX_PORT = 61000;
+    private static final String serverUrl = "127.0.0.1";
+    private int serverPort;
 
-        String serverurl = "127.0.0.1";
-        int serverport = 8080;
+    NettyBootStrapper bootstrapper = new NettyBootStrapper();
+    JsonRpcDecoder jsonRpcDecoder = new JsonRpcDecoder(100000);
 
-        NettyBootStrapper bootstrapper = new NettyBootStrapper();
-        JsonRpcDecoder jsonRpcDecoder = new JsonRpcDecoder(100000);
-
-        public void setupServer() throws Exception {
-            bootstrapper.startServer(serverport,
-                    jsonRpcDecoder,
-                    new LoggingHandler(LogLevel.DEBUG));
-        }
-
-        public void shutDownServer() throws InterruptedException {
-            bootstrapper.stopServer();
-        }
-
-        @Test
-        public void testBasicFlow() throws Exception {
-            setupServer();
-            Socket socket = socket = new Socket(serverurl, serverport);
-
-            OutputStream outputStream = socket.getOutputStream();
-
-            int records = 20;
-
-            for (int i = 0; i < records; i++) {
-                writeJson(outputStream, 1);
-                writePartialFirst(outputStream);
-                outputStream.flush();
-                Thread.sleep(10);
-                writePartialLast(outputStream);
+    public void setupServer() throws Exception {
+        boolean started = false;
+        while (!started) {
+            try {
+                serverPort = MIN_PORT + (int) (Math.random() * (MAX_PORT - MIN_PORT));
+                bootstrapper.startServer(serverPort,
+                        jsonRpcDecoder,
+                        new LoggingHandler(LogLevel.DEBUG));
+                started = true;
+            } catch (Exception e){
+            //Ignore the exception
             }
-            socket.close();
-            shutDownServer();
-
-            assertEquals("mismatch in records processed", records * 2, jsonRpcDecoder.getRecordsRead());
         }
+    }
+
+    public void shutDownServer() throws InterruptedException {
+        bootstrapper.stopServer();
+    }
+
+    @Test
+    public void testBasicFlow() throws Exception {
+        setupServer();
+        Socket socket = new Socket(serverUrl, serverPort);
+
+        OutputStream outputStream = socket.getOutputStream();
+
+        int records = 20;
+
+        for (int i = 0; i < records; i++) {
+            writeJson(outputStream, 1);
+            writePartialFirst(outputStream);
+            outputStream.flush();
+            Thread.sleep(10);
+            writePartialLast(outputStream);
+        }
+        socket.close();
+        shutDownServer();
+
+        assertEquals("mismatch in records processed", records * 2, jsonRpcDecoder.getRecordsRead());
+    }
 
     static int counter = 0;
 

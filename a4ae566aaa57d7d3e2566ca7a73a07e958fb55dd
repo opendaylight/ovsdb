@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_666e9b98",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-21T12:35:06Z",
+      "side": 1,
+      "message": "Maybe it\u0027s me, but \"Fix the logic\" could be interpreted in many different ways. A couple of bullet points noting specifically what was changed would be really useful to help get some context for review and also to as a permanent record in the commit log.",
+      "revId": "a4ae566aaa57d7d3e2566ca7a73a07e958fb55dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_86595f00",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 3386,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-21T12:35:06Z",
+      "side": 1,
+      "message": "Do we need int index?\n\nactionList.remove(actionList.indexOf(action));",
+      "revId": "a4ae566aaa57d7d3e2566ca7a73a07e958fb55dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_46735780",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 3394,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-21T12:35:06Z",
+      "side": 1,
+      "message": "As we break from the loop after we set isPortDeleted, could this logic be moved directly to after the call to actionList.remove?",
+      "revId": "a4ae566aaa57d7d3e2566ca7a73a07e958fb55dd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

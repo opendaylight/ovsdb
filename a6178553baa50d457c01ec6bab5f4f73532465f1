@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_6673fbe7",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/OvsDBClientImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-21T17:17:28Z",
+      "side": 1,
+      "message": "Please remove !ready from the check in lieu of the following comment :)",
+      "revId": "a6178553baa50d457c01ec6bab5f4f73532465f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2821419f",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/OvsDBClientImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-21T17:17:28Z",
+      "side": 1,
+      "message": "Can you introduce a break here ? Atleast it will avoid an unnecessary 1 second wait :-)",
+      "revId": "a6178553baa50d457c01ec6bab5f4f73532465f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

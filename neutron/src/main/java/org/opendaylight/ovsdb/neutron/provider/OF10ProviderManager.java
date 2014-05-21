@@ -469,20 +469,36 @@ class OF10ProviderManager extends ProviderNetworkManager {
     @Override
     public Status handleInterfaceDelete(String tunnelType, String tunnelKey, Node srcNode, Interface intf, boolean isLastInstanceOnNode) {
         Status status = new Status(StatusCode.SUCCESS);
-
-        IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
-        List<Node> nodes = connectionService.getNodes();
-        nodes.remove(srcNode);
-        for (Node dstNode : nodes) {
-            InetAddress src = AdminConfigManager.getManager().getTunnelEndPoint(srcNode);
-            InetAddress dst = AdminConfigManager.getManager().getTunnelEndPoint(dstNode);
-            this.removeTunnelRules(tunnelType, tunnelKey, dst, srcNode, intf, true);
-            if (isLastInstanceOnNode) {
-                status = deleteTunnelPort(srcNode, tunnelType, src, dst, tunnelKey);
+        logger.debug("handleInterfaceDelete: networkType: {}, segmentationId: {}, srcNode: {}, intf:{}",
+                     tunnelType, tunnelKey, srcNode,
+                     intf.getName(), isLastInstanceOnNode);
+        if (intf.getType().equalsIgnoreCase("vxlan") || intf.getType().equalsIgnoreCase("gre")) {
+            /* Delete tunnel port */
+            try {
+                OvsDBMap<String, String> options = intf.getOptions();
+                InetAddress src = InetAddress.getByName(options.get("local_ip"));
+                InetAddress dst = InetAddress.getByName(options.get("remote_ip"));
+                String key = options.get("key");
+                status = deleteTunnelPort(srcNode, intf.getType(), src, dst, key);
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
             }
-            this.removeTunnelRules(tunnelType, tunnelKey, src, dstNode, intf, false);
-            if (status.isSuccess() && isLastInstanceOnNode) {
-                deleteTunnelPort(dstNode, tunnelType, dst, src, tunnelKey);
+        } else {
+            /* delete all other interfaces */
+            IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+            List<Node> nodes = connectionService.getNodes();
+            nodes.remove(srcNode);
+            for (Node dstNode : nodes) {
+                InetAddress src = AdminConfigManager.getManager().getTunnelEndPoint(srcNode);
+                InetAddress dst = AdminConfigManager.getManager().getTunnelEndPoint(dstNode);
+                this.removeTunnelRules(tunnelType, tunnelKey, dst, srcNode, intf, true);
+                if (isLastInstanceOnNode) {
+                    status = deleteTunnelPort(srcNode, tunnelType, src, dst, tunnelKey);
+                }
+                this.removeTunnelRules(tunnelType, tunnelKey, src, dstNode, intf, false);
+                if (status.isSuccess() && isLastInstanceOnNode) {
+                    deleteTunnelPort(dstNode, tunnelType, dst, src, tunnelKey);
+                }
             }
         }
         return status;

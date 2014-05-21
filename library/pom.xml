@@ -12,9 +12,6 @@
   <packaging>bundle</packaging>
 
   <properties>
-    <!-- used for filtering the integration test resource -->
-    <ovsdbserver.ipaddress>192.168.56.10</ovsdbserver.ipaddress>
-    <ovsdbserver.port>6640</ovsdbserver.port>
     <skip.integrationtest>true</skip.integrationtest>
   </properties>
   <dependencies>

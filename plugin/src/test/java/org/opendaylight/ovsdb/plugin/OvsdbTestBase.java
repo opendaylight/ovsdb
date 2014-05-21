@@ -10,10 +10,11 @@
 package org.opendaylight.ovsdb.plugin;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
+import junit.framework.Assert;
 
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.core.Node;
@@ -21,19 +22,12 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 
 public abstract class OvsdbTestBase {
     private final static String identifier = "TEST";
+    private final static String SERVER_IPADDRESS = "ovsdbserver.ipaddress";
+    private final static String SERVER_PORT = "ovsdbserver.port";
+    private final static String DEFAULT_SERVER_PORT = "6640";
 
     public Properties loadProperties() throws IOException {
-        InputStream is = this
-                .getClass()
-                .getClassLoader()
-                .getResourceAsStream(
-                        "org/opendaylight/ovsdb/lib/message/integration-test.properties");
-        if (is == null) {
-            throw new IOException("Unable to load integration-test.properties");
-        }
-        Properties props = new Properties();
-        props.load(is);
-
+        Properties props = new Properties(System.getProperties());
         return props;
     }
 
@@ -48,6 +42,14 @@ public abstract class OvsdbTestBase {
     }
 
     public TestObjects getTestConnection() throws IOException {
+        Properties props = loadProperties();
+        String address = props.getProperty(SERVER_IPADDRESS);
+        String port = props.getProperty(SERVER_PORT, DEFAULT_SERVER_PORT);
+
+        if (address == null) {
+            Assert.fail("Usage : mvn -Pintegrationtest -Dovsdbserver.ipaddress=x.x.x.x -Dovsdbserver.port=yyyy verify");
+        }
+
         Node.NodeIDType.registerIDType("OVS", String.class);
         NodeConnector.NodeConnectorIDType.registerIDType("OVS", String.class,
                 "OVS");
@@ -59,11 +61,9 @@ public abstract class OvsdbTestBase {
 
         connectionService.setInventoryServiceInternal(inventoryService);
         Map<ConnectionConstants, String> params = new HashMap<ConnectionConstants, String>();
-        Properties props = loadProperties();
-        params.put(ConnectionConstants.ADDRESS,
-                props.getProperty("ovsdbserver.ipaddress"));
-        params.put(ConnectionConstants.PORT,
-                props.getProperty("ovsdbserver.port", "6640"));
+
+        params.put(ConnectionConstants.ADDRESS, address);
+        params.put(ConnectionConstants.PORT, port);
 
         Node node = connectionService.connect(identifier, params);
         if (node == null) {

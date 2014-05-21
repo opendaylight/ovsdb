@@ -12,14 +12,15 @@
 
 package org.opendaylight.ovsdb.lib.operations;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.util.List;
+import java.util.Map;
+
 import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 public class Update<E extends TableSchema<E>> extends Operation<E> implements ConditionalOperation {
 
@@ -45,6 +46,7 @@ public class Update<E extends TableSchema<E>> extends Operation<E> implements Co
     }
 
     public Where where(Condition condition) {
+        where.add(condition);
         return new Where(this);
     }
 

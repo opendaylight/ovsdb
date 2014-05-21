@@ -11,11 +11,12 @@
 
 package org.opendaylight.ovsdb.lib.operations;
 
-import com.google.common.collect.Lists;
+import java.util.List;
+
 import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
-import java.util.List;
+import com.google.common.collect.Lists;
 
 public class Delete<E extends TableSchema<E>> extends Operation<E> implements ConditionalOperation {
 
@@ -32,6 +33,7 @@ public class Delete<E extends TableSchema<E>> extends Operation<E> implements Co
     }
 
     public Where where(Condition condition) {
+        where.add(condition);
         return new Where(this);
     }
 

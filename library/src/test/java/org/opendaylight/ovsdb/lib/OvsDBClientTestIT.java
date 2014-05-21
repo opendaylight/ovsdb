@@ -67,15 +67,24 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
                         .where(name.opEqual("br-int"))
                         //.and(name.opEqual("br-int"))
                         .operation())
+                .add(op.commit(true))
+                .execute();
+
+        List<OperationResult> operationResults = results.get();
+        Assert.assertFalse(operationResults.isEmpty());
+        System.out.println("Insert & Update operation results = " + operationResults);
+
+        results = ovs.transactBuilder()
                 .add(op.delete(bridge)
                         .where(name.opEqual("br-int"))
                         .operation())
                 .add(op.commit(true))
                 .execute();
 
-        List<OperationResult> operationResults = results.get();
+        operationResults = results.get();
         Assert.assertFalse(operationResults.isEmpty());
-        System.out.println("operationResults = " + operationResults);
+        System.out.println("Delete operation results = " + operationResults);
+
     }
 
     @Test

@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_e6e14bd1",
+        "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/OvsdbIntegrationTestBase.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-05-21T14:12:31Z",
+      "side": 1,
+      "message": "Is it better to do the IT string appended to the class and file name?",
+      "revId": "e68869f7a32065590d59541fe2ffeda55fdbc585",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

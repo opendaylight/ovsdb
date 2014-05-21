@@ -16,6 +16,24 @@
       "revId": "69e3458d1ad988d963df57ce4ea8c5ec35fd1a89",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_860ddf92",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/OvsDBClientImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-21T14:40:06Z",
+      "side": 1,
+      "message": "AFAIK an instance of a List can never be null.",
+      "parentUuid": "fa82b9bf_9ace9ab3",
+      "revId": "69e3458d1ad988d963df57ce4ea8c5ec35fd1a89",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

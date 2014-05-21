@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_a63fc3d5",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/operations/Mutate.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-21T16:42:23Z",
+      "side": 1,
+      "message": "As discussed over IRC, count is actually a result object of Mutate operation and hence we can remove this from here.",
+      "revId": "54037c2d02e252a9c53a7e1687feacd8b455f183",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4626f7cf",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/operations/Mutate.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-21T16:42:23Z",
+      "side": 1,
+      "message": "value doesnt apply directly to Mutation operation and hence this method wont be usable. Please remove this.",
+      "revId": "54037c2d02e252a9c53a7e1687feacd8b455f183",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6621bbb3",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/operations/Mutate.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-21T16:42:23Z",
+      "side": 1,
+      "message": "Though setMutations is a perfectly legitimate way to set the mutations for the operation, it doesn\u0027t fit very well with the existing design of isolating the json serialization/deserialization mechanism from the API. Hence if you look @ Update.java, you will see that we have a method named \"set\" which abstracts the Rows object. It also makes the class API friendly for apps to use intuitively.\n\nWe can take a similar approach instead of a set() we can call it mutate().\n\nI can send a proposal patch which you can make use of if you find it useful.",
+      "revId": "54037c2d02e252a9c53a7e1687feacd8b455f183",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

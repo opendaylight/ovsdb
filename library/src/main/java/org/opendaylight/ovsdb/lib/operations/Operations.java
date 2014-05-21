@@ -32,4 +32,8 @@ public class Operations {
     public Commit commit(Boolean durable) {
         return new Commit(durable);
     }
+
+    public Abort abort() {
+        return new Abort();
+    }
 }

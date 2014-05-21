@@ -29,4 +29,7 @@ public class Operations {
         return new Delete<>(schema);
     }
 
+    public Commit commit(Boolean durable) {
+        return new Commit(durable);
+    }
 }

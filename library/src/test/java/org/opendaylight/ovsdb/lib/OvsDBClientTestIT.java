@@ -9,9 +9,17 @@
  */
 package org.opendaylight.ovsdb.lib;
 
-import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.ListenableFuture;
+import static org.opendaylight.ovsdb.lib.operations.Operations.op;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import junit.framework.Assert;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.ovsdb.lib.message.MonitorRequest;
@@ -29,14 +37,8 @@ import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
+import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.ListenableFuture;
 
 
 public class OvsDBClientTestIT extends OvsdbTestBase {
@@ -68,6 +70,7 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
                 .add(op.delete(bridge)
                         .where(name.opEqual("br-int"))
                         .operation())
+                .add(op.commit(true))
                 .execute();
 
         List<OperationResult> operationResults = results.get();

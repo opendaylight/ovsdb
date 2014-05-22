@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_08ac7d34",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/OvsDBClientImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-22T07:18:01Z",
+      "side": 1,
+      "message": "Expanding on Patchset 4 comments : Wont it be easy to have the following patch without the ready flag:\n\n                   while (timeout \u003e 0) {\n\t\t\tif (!schema.isEmpty()) {\n\t\t\treturn true;\n\t\t\t}\n\t\t\tThread.sleep(1000);\n\t\t\ttimeout--;\t\n\t\t    }\n                    return false;",
+      "revId": "c5268787111c78d4ae23455231e7b83006d48a07",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

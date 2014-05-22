@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_eb3a73cc",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/operations/Select.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-22T12:22:12Z",
+      "side": 1,
+      "message": "Please remove row member from the class. \nIt is part of the Result object returned \u0026 hence it is not appropriate to declare it as part of the Select class.",
+      "revId": "5921822677c3c98475571c88e8613cabd8bb2008",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4b24bfae",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/operations/Select.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-22T12:22:12Z",
+      "side": 1,
+      "message": "The method name value() is not appropriate for the Select class and also there is no \"value\" per-se. The \"row\" shouldnt even be part of this class because it is the Result of a Select operation.\n\nPlease refer to the addColumn in MonitorRequest and we need exactly that functionality here.",
+      "revId": "5921822677c3c98475571c88e8613cabd8bb2008",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_cb18cf77",
+        "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/OvsDBClientTestIT.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-22T12:22:12Z",
+      "side": 1,
+      "message": "Please also include the addColumn method in the test case.\nPlease refer to the Monitor test case on its usage.",
+      "revId": "5921822677c3c98475571c88e8613cabd8bb2008",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

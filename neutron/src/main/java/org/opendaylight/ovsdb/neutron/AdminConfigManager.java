@@ -152,10 +152,10 @@ public class AdminConfigManager implements IAdminConfigManager{
      * provider_mappings=physnet1:eth1[,physnet2:eth2]
      */
       public String getPhysicalInterfaceName (Node node, String physicalNetwork) {
-        String phyIf = null;
+          String phyIf = null;
 
-        try {
-            OVSDBConfigService ovsdbConfig = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+          OVSDBConfigService ovsdbConfig = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+          try {
             Map<String, Table<?>> ovsTable = ovsdbConfig.getRows(node, Open_vSwitch.NAME.getName());
 
             if (ovsTable == null) {
@@ -189,7 +189,10 @@ public class AdminConfigManager implements IAdminConfigManager{
                         }
                     }
                 }
-                break;
+
+                if (phyIf != null) {
+                    break;
+                }
             }
         } catch (Exception e) {
             logger.error("Unable to find physical interface for Node: {}, Network {}",

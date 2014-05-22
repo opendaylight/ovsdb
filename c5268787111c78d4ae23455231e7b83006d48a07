@@ -16,6 +16,24 @@
       "revId": "c5268787111c78d4ae23455231e7b83006d48a07",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0808fd2b",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/OvsDBClientImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-22T11:41:38Z",
+      "side": 1,
+      "message": "Force of habit. I like to return a value at the end of a method as I find that return values within logic like this can get easily missed when reading code. Will change if you prefer the more concise form.",
+      "parentUuid": "fa82b9bf_08ac7d34",
+      "revId": "c5268787111c78d4ae23455231e7b83006d48a07",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -22,8 +22,12 @@ import org.opendaylight.controller.containermanager.ContainerFlowConfig;
 import org.opendaylight.controller.containermanager.IContainerManager;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityGroupCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityRuleCRUD;
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
+import org.opendaylight.controller.networkconfig.neutron.NeutronSecurityGroup;
+import org.opendaylight.controller.networkconfig.neutron.NeutronSecurityRule;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.utils.HexEncode;
@@ -264,6 +268,7 @@ public class TenantNetworkManager implements ITenantNetworkManager {
     private boolean isInterfacePresentInTenantNetwork (String portId, String networkId) {
         INeutronPortCRUD neutronPortService = (INeutronPortCRUD)ServiceHelper.getGlobalInstance(INeutronPortCRUD.class, this);
         NeutronPort neutronPort = neutronPortService.getPort(portId);
+        logger.info("isInterfacePresentInTenantNetwork Port SecGroup {}", neutronPort.getSecurityGroups());
         if (neutronPort != null && neutronPort.getNetworkUUID().equalsIgnoreCase(networkId)) return true;
         return false;
     }
@@ -278,6 +283,7 @@ public class TenantNetworkManager implements ITenantNetworkManager {
         if (neutronPortId == null) return null;
         INeutronPortCRUD neutronPortService = (INeutronPortCRUD)ServiceHelper.getGlobalInstance(INeutronPortCRUD.class, this);
         NeutronPort neutronPort = neutronPortService.getPort(neutronPortId);
+        logger.info("getTenantNetworkForInterface Port SecGroup {}", neutronPort.getSecurityGroups());
         logger.trace("neutronPort {}", neutronPort);
         if (neutronPort == null) return null;
         INeutronNetworkCRUD neutronNetworkService = (INeutronNetworkCRUD)ServiceHelper.getGlobalInstance(INeutronNetworkCRUD.class, this);
@@ -413,5 +419,68 @@ public class TenantNetworkManager implements ITenantNetworkManager {
         ContainerConfig config = new ContainerConfig();
         config.setContainer(networkID);
         containerManager.removeContainer(config);
+    }
+
+    /**
+     * Method to extract the Security Group(s) from a Neutron provisioned port
+     *
+     * @param intf interface containing external IDs
+     * @return boolean true if the device is a compute node w/ a security group associated
+     */
+    public List<NeutronSecurityGroup> getSecurityGroupInPort(Interface intf) {
+
+        logger.trace("getTenantNetworkForInterface for {}", intf);
+        if (intf == null) return null;
+        Map<String, String> externalIds = intf.getExternal_ids();
+        logger.trace("externalIds {}", externalIds);
+        if (externalIds == null) return null;
+        String neutronPortId = externalIds.get(EXTERNAL_ID_INTERFACE_ID);
+        if (neutronPortId == null) return null;
+        INeutronPortCRUD neutronPortService = (INeutronPortCRUD) ServiceHelper.getGlobalInstance(INeutronPortCRUD.class, this);
+        NeutronPort neutronPort = neutronPortService.getPort(neutronPortId);
+        List<NeutronSecurityGroup> neutronSecurityGroup = neutronPort.getSecurityGroups();
+
+        return neutronSecurityGroup;
+    }
+
+    /**
+     * Method to deterimine if the port is security group ready
+     * by checking the Neutron provisioned port for Security Group(s).
+     * @param intf interface containing external IDs
+     * @return boolean true if the device is a compute node w/ a security group associated
+     */
+    public boolean isSecurityGroupReady(Interface intf) {
+
+        logger.trace("getTenantNetworkForInterface for {}", intf);
+        if (intf == null) return false;
+        Map<String, String> externalIds = intf.getExternal_ids();
+        logger.trace("externalIds {}", externalIds);
+        if (externalIds == null) return false;
+        String neutronPortId = externalIds.get(EXTERNAL_ID_INTERFACE_ID);
+        if (neutronPortId == null) return false;
+        INeutronPortCRUD neutronPortService = (INeutronPortCRUD) ServiceHelper.getGlobalInstance(INeutronPortCRUD.class, this);
+        NeutronPort neutronPort = neutronPortService.getPort(neutronPortId);
+        String deviceOwner = neutronPort.getDeviceOwner();
+        if (deviceOwner.contains("compute")) {
+            logger.debug("The OpenStack device owner is: {}", deviceOwner);
+            return true;
+        }
+        logger.debug("The OpenStack device owner is: {}", deviceOwner);
+        return false;
+    }
+
+    /**
+     * Method to extract the tenant id for a segmentation id.
+     * @param segmentationId the Neutron segmentation id
+     * @return the network UUID id for the given segmentation id
+     */
+    public String getTenantIdForSegmentationId(String segmentationId) {
+        INeutronNetworkCRUD neutronSecurityService = (INeutronNetworkCRUD) ServiceHelper.getGlobalInstance(INeutronNetworkCRUD.class, this);
+        List<NeutronNetwork> networks = neutronSecurityService.getAllNetworks();
+        for (NeutronNetwork network : networks) {
+            if (network.getProviderSegmentationID().equalsIgnoreCase(segmentationId))
+                return network.getNetworkUUID();
+        }
+        return null;
     }
 }

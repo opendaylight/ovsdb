@@ -9,6 +9,9 @@
  */
 package org.opendaylight.ovsdb.lib;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.ListenableFuture;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.io.IOException;
@@ -37,8 +40,7 @@ import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.ListenableFuture;
+import java.util.Set;
 
 
 public class OvsDBClientTestIT extends OvsdbTestBase {
@@ -59,13 +61,17 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
 
         ColumnSchema<GenericTableSchema, String> name = bridge.column("name", String.class);
         ColumnSchema<GenericTableSchema, String> fail_mode = bridge.column("fail_mode", String.class);
+        ColumnSchema<GenericTableSchema, Set<Integer>> flood_vlans = bridge.multiValuedColumn("flood_vlans", Integer.class);
 
         ListenableFuture<List<OperationResult>> results = ovs.transactBuilder()
-                .add(op.insert(bridge).value(name, "br-int"))
+                .add(op.insert(bridge)
+                        .value(name, "br-int")
+                        .value(flood_vlans, Sets.newHashSet(100, 101, 4001))
+                )
                 .add(op.update(bridge)
                         .set(fail_mode, "secure")
                         .where(name.opEqual("br-int"))
-                        //.and(name.opEqual("br-int"))
+                                //.and(name.opEqual("br-int"))
                         .operation())
                 .add(op.select(bridge)
                         .column(name)
@@ -117,6 +123,7 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
                 MonitorRequestBuilder.builder(bridge)
                         .addColumn(bridge.column("name"))
                         .addColumn(bridge.column("fail_mode", String.class))
+                        .addColumn(bridge.multiValuedColumn("flood_vlans", Integer.class))
                         .with(new MonitorSelect(true, true, true, true))
                         .build());
 

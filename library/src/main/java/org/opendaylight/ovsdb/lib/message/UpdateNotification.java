@@ -9,6 +9,7 @@
  */
 package org.opendaylight.ovsdb.lib.message;
 
+import org.opendaylight.ovsdb.lib.message.temp.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.json.Converter.UpdateNotificationConverter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 

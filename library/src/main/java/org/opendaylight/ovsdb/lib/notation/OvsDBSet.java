@@ -23,10 +23,22 @@ import java.util.Set;
 @JsonSerialize(using = OvsDBSetSerializer.class)
 public class OvsDBSet<T> extends ForwardingSet<T> {
 
-    Set<T> target = Sets.newHashSet();
+    Set<T> target = null;
+
+    public OvsDBSet() {
+        this(Sets.<T>newHashSet());
+    }
+
+    public OvsDBSet(Set<T> backing) {
+       this.target = backing;
+    }
 
     @Override
     public Set<T> delegate() {
         return target;
+    }
+
+    public static<D> OvsDBSet<D> fromSet(Set<D> value) {
+        return new OvsDBSet<>(value);
     }
 }

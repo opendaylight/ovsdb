@@ -9,6 +9,9 @@
  */
 package org.opendaylight.ovsdb.lib;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.ListenableFuture;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.io.IOException;
@@ -29,7 +32,6 @@ import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
 import org.opendaylight.ovsdb.lib.message.TableUpdate;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.message.UpdateNotification;
-import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
@@ -38,9 +40,7 @@ import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.ListenableFuture;
+import java.util.Set;
 
 
 public class OvsDBClientTestIT extends OvsdbTestBase {
@@ -61,23 +61,16 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
 
         ColumnSchema<GenericTableSchema, String> name = bridge.column("name", String.class);
         ColumnSchema<GenericTableSchema, String> fail_mode = bridge.column("fail_mode", String.class);
+        ColumnSchema<GenericTableSchema, Set<Integer>> flood_vlans = bridge.multiValuedColumn("flood_vlans", Integer.class);
 
-        /*
-         * Adding a Test around non-atomic columns, since Set/Map columns requires special
-         * serialization/deserailzation for OVSDB Bidirection JSON.
-         * TODO : Replace this with regular Set and hide the ugliness of OvsDBSet inside the API.
-         */
-        ColumnSchema<GenericTableSchema, OvsDBSet> flood_vlans = bridge.column("flood_vlans", OvsDBSet.class);
-        OvsDBSet vlans = new OvsDBSet();
-        vlans.addAll(Sets.newHashSet(100, 200));
         ListenableFuture<List<OperationResult>> results = ovs.transactBuilder()
                 .add(op.insert(bridge)
-                     .value(name, "br-int")
-                     .value(flood_vlans, vlans))
+                        .value(name, "br-int")
+                        .value(flood_vlans, Sets.newHashSet(100, 101, 4001))
+                )
                 .add(op.update(bridge)
                         .set(fail_mode, "secure")
                         .where(name.opEqual("br-int"))
-                        //.and(name.opEqual("br-int"))
                         .operation())
                 .add(op.select(bridge)
                         .column(name)
@@ -129,7 +122,7 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
                 MonitorRequestBuilder.builder(bridge)
                         .addColumn(bridge.column("name"))
                         .addColumn(bridge.column("fail_mode", String.class))
-                        .addColumn(bridge.column("flood_vlans"))
+                        .addColumn(bridge.multiValuedColumn("flood_vlans", Integer.class))
                         .with(new MonitorSelect(true, true, true, true))
                         .build());
 
@@ -149,7 +142,6 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
             }
         });
 
-        //for (int i = 0; i < 5 && results.isEmpty(); i++) { //wait 5 seconds to get a result
         for (int i = 0; i < 5 ; i++) { //wait 5 seconds to get a result
             System.out.println("waiting");
             Thread.sleep(1000);

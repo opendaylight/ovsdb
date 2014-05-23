@@ -67,6 +67,14 @@ public abstract class TableSchema<E extends TableSchema<E>> {
         return new Insert<>(this);
     }
 
+    public <D> ColumnSchema<E, Set<D>> multiValuedColumn(String column, Class<D> type) {
+        //todo exception handling
+
+        ColumnSchema columnSchema = columns.get(column);
+        columnSchema.validateType(type);
+        return columnSchema;
+    }
+
     public <D> ColumnSchema<E, D> column(String column, Class<D> type) {
         //todo exception handling
 

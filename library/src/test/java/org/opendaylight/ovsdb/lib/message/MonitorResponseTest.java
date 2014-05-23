@@ -19,6 +19,7 @@ import com.google.common.io.Resources;
 
 import junit.framework.TestCase;
 
+import org.opendaylight.ovsdb.lib.message.temp.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
 import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.notation.UUID;

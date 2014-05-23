@@ -15,8 +15,24 @@ import org.opendaylight.ovsdb.lib.jsonrpc.JsonUtils;
 
 public abstract class ColumnType {
     BaseType baseType;
-    int min = 0;
-    int max = 0;
+    long min = 0;
+    long max = 0;
+
+    public long getMin() {
+        return min;
+    }
+
+    void setMin(long min) {
+        this.min = min;
+    }
+
+    public long getMax() {
+        return max;
+    }
+
+    void setMax(long max) {
+        this.max = max;
+    }
 
     private static ColumnType columns[] = new ColumnType[]{
             new AtomicColumnType(),
@@ -75,6 +91,11 @@ public abstract class ColumnType {
      */
     protected abstract ColumnType fromJsonNode(JsonNode json);
 
+    public boolean isMultiValued() {
+        //todo check if this is the right logic
+        return this.min != this.max && this.min != 1;
+    }
+
     public static class AtomicColumnType extends ColumnType {
 
         public AtomicColumnType() {
@@ -90,7 +111,22 @@ public abstract class ColumnType {
             }
             BaseType baseType = BaseType.fromJson(json, "key");
 
-            return baseType != null ? new AtomicColumnType(baseType) : null;
+            if (baseType != null) {
+
+                AtomicColumnType atomicColumnType = new AtomicColumnType(baseType);
+
+                JsonNode node = null;
+                if ((node = json.get("min")) != null) {
+                    atomicColumnType.setMin(node.asLong());
+                }
+                if ((node = json.get("max")) != null) {
+                    atomicColumnType.setMax(node.asLong());
+                }
+
+                return atomicColumnType;
+            }
+
+            return null;
         }
 
     }

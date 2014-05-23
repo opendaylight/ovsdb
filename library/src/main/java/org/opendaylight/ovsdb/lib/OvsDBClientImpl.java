@@ -21,6 +21,7 @@ import com.google.common.util.concurrent.SettableFuture;
 import org.opendaylight.ovsdb.lib.jsonrpc.Params;
 import org.opendaylight.ovsdb.lib.message.MonitorRequest;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
+import org.opendaylight.ovsdb.lib.message.TableUpdate;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.message.TransactBuilder;
 import org.opendaylight.ovsdb.lib.message.UpdateNotification;
@@ -29,6 +30,7 @@ import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
+import org.opendaylight.ovsdb.lib.table.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +72,7 @@ public class OvsDBClientImpl implements OvsDBClient {
                         logger.info("callback received with context {}, but no known handler. Ignoring!", key);
                         return;
                     }
-                    monitorCallBack.update(upadateNotification.getUpdate());
+                    _transformingCallback(upadateNotification.getUpdate(), monitorCallBack);
                 }
 
                 @Override
@@ -86,6 +88,16 @@ public class OvsDBClientImpl implements OvsDBClient {
             this.rpcCallback = temp;
             rpc.registerCallback(temp);
         }
+    }
+
+    protected void _transformingCallback( org.opendaylight.ovsdb.lib.message.temp.TableUpdates oldUpdate, MonitorCallBack monitorCallBack) {
+        //todo(ashwin) : temp kludge to get stuff working while deprecating old stuff
+        Map<String, TableUpdate> updateMap = Maps.newHashMap();
+        for (Map.Entry<Table.Name, TableUpdate> temp : oldUpdate.map.entrySet()) {
+            updateMap.put(temp.getKey().getName(), temp.getValue());
+        }
+
+        monitorCallBack.update(new TableUpdates(updateMap));
     }
 
     @Override
@@ -116,16 +128,16 @@ public class OvsDBClientImpl implements OvsDBClient {
         final MonitorHandle monitorHandle = new MonitorHandle(UUID.randomUUID().toString());
         registerCallback(monitorHandle, callback);
 
-        ListenableFuture<TableUpdates> monitor = rpc.monitor(new Params() {
+        ListenableFuture<org.opendaylight.ovsdb.lib.message.temp.TableUpdates> monitor = rpc.monitor(new Params() {
             @Override
             public List<Object> params() {
                 return Lists.<Object>newArrayList(dbSchema.getName(), monitorHandle.getId(), reqMap);
             }
         });
-        Futures.addCallback(monitor, new FutureCallback<TableUpdates>() {
+        Futures.addCallback(monitor, new FutureCallback<org.opendaylight.ovsdb.lib.message.temp.TableUpdates>() {
             @Override
-            public void onSuccess(TableUpdates result) {
-                callback.update(result);
+            public void onSuccess(org.opendaylight.ovsdb.lib.message.temp.TableUpdates result) {
+                _transformingCallback(result, callback);
             }
 
             @Override

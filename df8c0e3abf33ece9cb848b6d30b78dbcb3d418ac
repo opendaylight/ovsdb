@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_ae9319f9",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/OvsDBClientImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-05-23T15:26:00Z",
+      "side": 1,
+      "message": "I haven\u0027t seen this pattern before in Java but assume the underscore is to signify a private/protected method. As we haven\u0027t used this pattern elsewhere I\u0027d prefer if we did not use underscores.",
+      "revId": "df8c0e3abf33ece9cb848b6d30b78dbcb3d418ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

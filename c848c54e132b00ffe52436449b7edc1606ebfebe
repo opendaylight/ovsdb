@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_2e6e2902",
+        "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/jsonrpc/TestClientIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-05-23T16:29:51Z",
+      "side": 1,
+      "message": "This is dangerous. The startServer could fail for any number of reasons. I think it is safe to catch the Port binding exception.\n\nEven better. :-) lets not even fix it this way.\nLets just setup the jenkins job to run in sequence. That is anyways would be neccessary for integration tests (as number of docker instances will try to open same ports that are mapped to the same host port and the results will be unpredictable.",
+      "revId": "c848c54e132b00ffe52436449b7edc1606ebfebe",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

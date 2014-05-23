@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_714e5471",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/Activator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-05-23T19:14:11Z",
+      "side": 1,
+      "message": "comment is just referencing the code below so it can be removed.",
+      "revId": "dbdfcd4e0accba1f98951d052318a1aba9a337f8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_91519810",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/NeutronPortSecurityHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-05-23T19:14:11Z",
+      "side": 1,
+      "message": "should this be 2014?",
+      "revId": "dbdfcd4e0accba1f98951d052318a1aba9a337f8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3158cc31",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/NeutronPortSecurityHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-05-23T19:14:11Z",
+      "side": 1,
+      "message": "not needed",
+      "revId": "dbdfcd4e0accba1f98951d052318a1aba9a337f8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_515b102e",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/NeutronPortSecurityHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-05-23T19:14:11Z",
+      "side": 1,
+      "message": "why is this called? I always see that the canCreatexx call is called before the xxxCreated call is made so it seems redundant.",
+      "revId": "dbdfcd4e0accba1f98951d052318a1aba9a337f8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f141043a",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/NeutronPortSecurityHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-05-23T19:14:11Z",
+      "side": 1,
+      "message": "nothing todo?",
+      "revId": "dbdfcd4e0accba1f98951d052318a1aba9a337f8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_113d88bb",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/NeutronPortSecurityHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-05-23T19:14:11Z",
+      "side": 1,
+      "message": "why is canCreatexx called here during a delete?",
+      "revId": "dbdfcd4e0accba1f98951d052318a1aba9a337f8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

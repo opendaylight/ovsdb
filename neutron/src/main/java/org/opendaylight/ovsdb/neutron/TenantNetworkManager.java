@@ -235,7 +235,7 @@ public class TenantNetworkManager implements ITenantNetworkManager {
                 if (externalIds != null && externalIds.get(EXTERNAL_ID_INTERFACE_ID) != null) {
                     if (this.isInterfacePresentInTenantNetwork(externalIds.get(EXTERNAL_ID_INTERFACE_ID), networkId)) {
                         logger.debug("Tenant Network {} with Segmentation-id {} is present in Node {} / Interface {}",
-                                      networkId, segmentationId, node, intf);
+                                networkId, segmentationId, node, intf);
                         return true;
                     }
                 }
@@ -357,8 +357,8 @@ public class TenantNetworkManager implements ITenantNetworkManager {
                     List<String> ncList = new ArrayList<String>();
                     Node ofNode = new Node(Node.NodeIDType.OPENFLOW, dpidLong);
                     NodeConnector nc = NodeConnector.fromStringNoNode(Node.NodeIDType.OPENFLOW.toString(),
-                                                                      Long.valueOf(of_port.longValue()).intValue()+"",
-                                                                      ofNode);
+                            Long.valueOf(of_port.longValue()).intValue()+"",
+                            ofNode);
                     ncList.add(nc.toString());
                     config.addNodeConnectors(ncList);
 
@@ -369,7 +369,7 @@ public class TenantNetworkManager implements ITenantNetworkManager {
                                 status, nc, network.getID());
                     } else {
                         logger.error(" Successfully added port {} to container - {}",
-                                       nc, network.getID());
+                                nc, network.getID());
                     }
                 }
             }

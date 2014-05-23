@@ -17,6 +17,10 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityGroupAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityGroupCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityRuleAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityRuleCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
@@ -67,6 +71,7 @@ public class Activator extends ComponentActivatorAbstractBase {
                         SubnetHandler.class,
                         PortHandler.class,
                         SouthboundHandler.class,
+                        NeutronPortSecurityHandler.class,
                         MDSALConsumer.class,
                         ProviderNetworkManager.class};
         return res;
@@ -131,54 +136,67 @@ public class Activator extends ComponentActivatorAbstractBase {
         if (imp.equals(ProviderNetworkManager.class)) {
             c.setInterface(IProviderNetworkManager.class.getName(), null);
             c.add(createServiceDependency()
-                    .setService(IAdminConfigManager.class)
-                    .setRequired(true));
+                .setService(IAdminConfigManager.class)
+                .setRequired(true));
             c.add(createServiceDependency()
-                    .setService(IInternalNetworkManager.class)
-                    .setRequired(true));
+                .setService(IInternalNetworkManager.class)
+                .setRequired(true));
             c.add(createServiceDependency()
-                    .setService(ITenantNetworkManager.class)
-                    .setRequired(true));
+                .setService(ITenantNetworkManager.class)
+                .setRequired(true));
+        }
+        if (imp.equals(NeutronPortSecurityHandler.class)) {
+            c.setInterface(INeutronSecurityRuleAware.class.getName(), null);
+            c.setInterface(INeutronSecurityGroupAware.class.getName(), null);
         }
 
         //ToDo: DT: We don't need these dependencies for every implementation...
         //ToDo: DT: Callbacks are only required when behaviour is more complex than simple set/unset operation
         c.add(createServiceDependency().
-                setService(OVSDBConfigService.class).
-                setCallbacks("setOVSDBConfigService", "unsetOVSDBConfigService").
-                setRequired(true));
+            setService(OVSDBConfigService.class).
+            setCallbacks("setOVSDBConfigService", "unsetOVSDBConfigService").
+            setRequired(true));
 
         c.add(createServiceDependency().
-                setService(IConnectionServiceInternal.class).
-                setCallbacks("setConnectionService", "unsetConnectionService").
-                setRequired(true));
+            setService(IConnectionServiceInternal.class).
+            setCallbacks("setConnectionService", "unsetConnectionService").
+            setRequired(true));
 
         c.add(createServiceDependency().
-              setService(IContainerManager.class).
-              setCallbacks("setContainerManager", "unsetContainerManager").
-              setRequired(true));
+            setService(IContainerManager.class).
+            setCallbacks("setContainerManager", "unsetContainerManager").
+            setRequired(true));
 
         c.add(createServiceDependency().
-                setService(IForwardingRulesManager.class).
-                setCallbacks("setForwardingRulesManager", "unsetForwardingRulesManager").
-                setRequired(true));
+            setService(IForwardingRulesManager.class).
+            setCallbacks("setForwardingRulesManager", "unsetForwardingRulesManager").
+            setRequired(true));
 
         c.add(createServiceDependency()
-                .setService(BindingAwareBroker.class)
-                .setCallbacks("setBindingAwareBroker", "unsetBindingAwareBroker")
-                .setRequired(true));
+            .setService(BindingAwareBroker.class)
+            .setCallbacks("setBindingAwareBroker", "unsetBindingAwareBroker")
+            .setRequired(true));
 
         c.add(createServiceDependency().
-                setService(INeutronNetworkCRUD.class).
-                setCallbacks("setNeutronNetworkCRUD", "unsetNeutronNetworkCRUD").
-                setRequired(true));
+            setService(INeutronNetworkCRUD.class).
+            setCallbacks("setNeutronNetworkCRUD", "unsetNeutronNetworkCRUD").
+            setRequired(true));
         c.add(createServiceDependency().
-                setService(INeutronSubnetCRUD.class).
-                setCallbacks("setNeutronSubnetCRUD", "unsetNeutronSubnetCRUD").
-                setRequired(true));
+            setService(INeutronSubnetCRUD.class).
+            setCallbacks("setNeutronSubnetCRUD", "unsetNeutronSubnetCRUD").
+            setRequired(true));
         c.add(createServiceDependency().
-                setService(INeutronPortCRUD.class).
-                setCallbacks("setNeutronPortCRUD", "unsetNeutronPortCRUD").
-                setRequired(true));
+            setService(INeutronPortCRUD.class).
+            setCallbacks("setNeutronPortCRUD", "unsetNeutronPortCRUD").
+            setRequired(true));
+        // Neutron Port Security Callbacks
+        c.add(createServiceDependency().
+            setService(INeutronSecurityRuleCRUD.class).
+            setCallbacks("setNeutronSecurityRuleCRUD", "unsetNeutronSecurityRuleCRUD").
+            setRequired(true));
+        c.add(createServiceDependency().
+            setService(INeutronSecurityGroupCRUD.class).
+            setCallbacks("setNeutronSecurityGroupCRUD", "unsetNeutronSecurityGroupCRUD").
+            setRequired(true));
     }
 }

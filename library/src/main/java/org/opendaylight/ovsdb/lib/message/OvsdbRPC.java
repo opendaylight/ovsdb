@@ -27,7 +27,7 @@ public interface OvsdbRPC {
 
     public ListenableFuture<List<String>> echo();
 
-    public ListenableFuture<TableUpdates> monitor(Params equest);
+    public ListenableFuture<JsonNode> monitor(Params equest);
 
     public ListenableFuture<List<String>> list_dbs();
 

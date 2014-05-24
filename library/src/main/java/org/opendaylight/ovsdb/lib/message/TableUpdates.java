@@ -12,7 +12,7 @@
 package org.opendaylight.ovsdb.lib.message;
 
 import com.google.common.collect.Maps;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
+import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
 import java.util.Map;
 
@@ -29,7 +29,7 @@ public class TableUpdates extends Response {
         this.map = map;
     }
 
-    public TableUpdate getUpdate(GenericTableSchema table) {
+    public <E extends TableSchema<E>> TableUpdate<E> getUpdate(TableSchema<E> table) {
         //todo Horrible just for time being, before this whole thing is refactored.
         for (Map.Entry<String, TableUpdate> s : this.map.entrySet()) {
             if (table.getName().equals(s.getKey())) {

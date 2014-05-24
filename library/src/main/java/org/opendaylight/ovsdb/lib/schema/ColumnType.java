@@ -10,13 +10,16 @@
 package org.opendaylight.ovsdb.lib.schema;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.Sets;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonUtils;
+
+import java.util.Set;
 
 
 public abstract class ColumnType {
     BaseType baseType;
-    long min = 0;
-    long max = 0;
+    long min = 1;
+    long max = 1;
 
     public long getMin() {
         return min;
@@ -96,6 +99,10 @@ public abstract class ColumnType {
         return this.min != this.max && this.min != 1;
     }
 
+    public abstract Object valueFromJson(JsonNode value);
+
+    public abstract void validate(Object value);
+
     public static class AtomicColumnType extends ColumnType {
 
         public AtomicColumnType() {
@@ -119,14 +126,40 @@ public abstract class ColumnType {
                 if ((node = json.get("min")) != null) {
                     atomicColumnType.setMin(node.asLong());
                 }
-                if ((node = json.get("max")) != null) {
-                    atomicColumnType.setMax(node.asLong());
-                }
 
+                if ((node = json.get("max")) != null) {
+                    if (node.isLong()){
+                        atomicColumnType.setMax(node.asLong());
+                    } else if (node.isTextual() && "unlimited".equals(node.asText())) {
+                        max = Long.MAX_VALUE;
+                    }
+                }
                 return atomicColumnType;
             }
 
             return null;
+        }
+
+        @Override
+        public Object valueFromJson(JsonNode value) {
+            if (isMultiValued()) {
+                Set<Object> result = Sets.newHashSet();
+               if(value.isContainerNode()) {
+                  for(JsonNode node: value) {
+                     result.add(getBaseType().toValue(node));
+                  }
+               } else {
+                   result.add(getBaseType().toValue(value));
+               }
+                return result;
+            } else {
+                return getBaseType().toValue(value);
+            }
+        }
+
+        @Override
+        public void validate(Object value) {
+            this.baseType.validate(value);
         }
 
     }
@@ -150,6 +183,16 @@ public abstract class ColumnType {
             BaseType valueType = BaseType.fromJson(json, "value");
 
             return new KeyValuedColumnType(keyType, valueType);
+        }
+
+        @Override
+        public Object valueFromJson(JsonNode value) {
+            throw new UnsupportedOperationException("needs to be implemented");
+        }
+
+        @Override
+        public void validate(Object value) {
+            throw new UnsupportedOperationException("not implemented yet");
         }
     }
 }

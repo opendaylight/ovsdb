@@ -9,11 +9,19 @@
  */
 package org.opendaylight.ovsdb.lib.schema;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.Lists;
+import org.opendaylight.ovsdb.lib.message.TableUpdate;
+import org.opendaylight.ovsdb.lib.notation.Column;
+import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.operations.Insert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -87,6 +95,7 @@ public abstract class TableSchema<E extends TableSchema<E>> {
         return this.columns.get(column);
     }
 
+
     public String getName() {
         return name;
     }
@@ -97,5 +106,31 @@ public abstract class TableSchema<E extends TableSchema<E>> {
 
     protected void setColumns(Map<String, ColumnSchema> columns) {
         this.columns = columns;
+    }
+
+    public TableUpdate<E> updatesFromJson(JsonNode value) {
+        ObjectNode new_ = (ObjectNode) value.get("new");
+        ObjectNode old = (ObjectNode) value.get("new");
+
+        Row<E> newRow = createRow(new_);
+        Row<E> oldRow = createRow(old);
+
+        TableUpdate<E> tableUpdate = new TableUpdate<>();
+        tableUpdate.setNew(newRow);
+        tableUpdate.setNew(oldRow);
+
+
+        return tableUpdate;
+    }
+
+    protected Row<E> createRow(ObjectNode rowNode) {
+        List<Column<E, ?>> columns = Lists.newArrayList();
+        for (Iterator<Map.Entry<String, JsonNode>> iter = rowNode.fields(); iter.hasNext();) {
+            Map.Entry<String, JsonNode> next = iter.next();
+            ColumnSchema<E, Object> schema = column(next.getKey(), Object.class);
+            Object o = schema.valueFromJson(next.getValue());
+            columns.add(new Column<>(schema, o));
+        }
+        return new Row<>(columns);
     }
 }

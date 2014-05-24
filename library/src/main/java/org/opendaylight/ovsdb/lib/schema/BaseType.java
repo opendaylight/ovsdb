@@ -11,6 +11,7 @@ package org.opendaylight.ovsdb.lib.schema;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
+import org.opendaylight.ovsdb.lib.notation.UUID;
 
 import java.util.Set;
 
@@ -76,6 +77,10 @@ public abstract class BaseType<E extends BaseType<E>> {
         return baseType;
     }
 
+    public abstract Object toValue(JsonNode value);
+
+    public abstract void validate(Object value);
+
     public static class IntegerBaseType extends BaseType<IntegerBaseType> {
         long min = Long.MIN_VALUE;
         long max = Long.MAX_VALUE;
@@ -99,6 +104,16 @@ public abstract class BaseType<E extends BaseType<E>> {
             }
 
             populateEnum(type);
+        }
+
+        @Override
+        public Object toValue(JsonNode value) {
+            return value.asLong();
+        }
+
+        @Override
+        public void validate(Object value) {
+
         }
 
         private void populateEnum(JsonNode node) {
@@ -167,6 +182,16 @@ public abstract class BaseType<E extends BaseType<E>> {
             populateEnum(type);
         }
 
+        @Override
+        public Object toValue(JsonNode value) {
+            return value.asDouble();
+        }
+
+        @Override
+        public void validate(Object value) {
+
+        }
+
         private void populateEnum(JsonNode node) {
             if (node.has("enum")) {
                 Set<Double> s = Sets.newHashSet();
@@ -220,6 +245,16 @@ public abstract class BaseType<E extends BaseType<E>> {
         }
 
         @Override
+        public Object toValue(JsonNode value) {
+            return value.asBoolean();
+        }
+
+        @Override
+        public void validate(Object value) {
+
+        }
+
+        @Override
         public String toString() {
             return "BooleanBaseType";
         }
@@ -248,6 +283,16 @@ public abstract class BaseType<E extends BaseType<E>> {
             }
 
             populateEnum(baseType, type);
+        }
+
+        @Override
+        public Object toValue(JsonNode value) {
+            return value.asText();
+        }
+
+        @Override
+        public void validate(Object value) {
+
         }
 
         private void populateEnum(StringBaseType baseType, JsonNode node) {
@@ -311,6 +356,16 @@ public abstract class BaseType<E extends BaseType<E>> {
 
             JsonNode refTypeJson = node.get("refType");
             baseType.setRefType(refTypeJson != null ? RefType.valueOf(refTypeJson.asText()) : RefType.strong);
+
+        }
+
+        @Override
+        public Object toValue(JsonNode value) {
+            return new UUID(value.asText());
+        }
+
+        @Override
+        public void validate(Object value) {
 
         }
 

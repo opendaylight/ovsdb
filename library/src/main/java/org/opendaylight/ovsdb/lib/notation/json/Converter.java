@@ -101,6 +101,7 @@ public class Converter {
             if (node.isArray()) {
                 if (node.size() == 2) {
                     un.setContext(node.get(0).asText());
+                    un.setUpdates(node.get(1));
                     ObjectMapper objectMapper = new ObjectMapper();
                     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                     TableUpdates updates = objectMapper.convertValue(node.get(1), TableUpdates.class);

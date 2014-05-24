@@ -11,7 +11,6 @@ package org.opendaylight.ovsdb.lib.message;
 
 import java.util.List;
 
-import org.opendaylight.ovsdb.lib.message.temp.TableUpdates;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -27,7 +26,7 @@ public interface OvsdbRPC {
 
     public ListenableFuture<List<String>> echo();
 
-    public ListenableFuture<TableUpdates> monitor(Params equest);
+    public ListenableFuture<JsonNode> monitor(Params equest);
 
     public ListenableFuture<List<String>> list_dbs();
 

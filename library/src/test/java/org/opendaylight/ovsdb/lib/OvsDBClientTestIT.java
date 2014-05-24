@@ -9,12 +9,14 @@
  */
 package org.opendaylight.ovsdb.lib;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.ListenableFuture;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -30,18 +32,18 @@ import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
 import org.opendaylight.ovsdb.lib.message.TableUpdate;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.message.UpdateNotification;
-import org.opendaylight.ovsdb.lib.notation.Mutator;
+import org.opendaylight.ovsdb.lib.notation.Column;
+import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
+import org.opendaylight.ovsdb.lib.schema.ColumnType;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.ListenableFuture;
+import java.util.Set;
 
 
 public class OvsDBClientTestIT extends OvsdbTestBase {
@@ -72,18 +74,12 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
                 .add(op.update(bridge)
                         .set(fail_mode, "secure")
                         .where(name.opEqual("br-int"))
-                        .operation())
-                .add(op.comment("Updating fail_mode to secure on Bridge br-int"))
+                        .build())
                 .add(op.select(bridge)
                         .column(name)
                         .where(name.opEqual("br-int"))
-                        .operation())
-                .add(op.mutate(bridge)
-                        .addMutation(flood_vlans, Mutator.INSERT, Sets.newHashSet(100, 101, 4001))
-                        .where(name.opEqual("br-int"))
-                        .operation())
+                        .build())
                 .add(op.commit(true))
-                .add(op.comment("Commiting the operation"))
                 .execute();
 
         List<OperationResult> operationResults = results.get();
@@ -93,10 +89,8 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
         results = ovs.transactBuilder()
                 .add(op.delete(bridge)
                         .where(name.opEqual("br-int"))
-                        .operation())
-                .add(op.comment("Deleting Bridge br-int"))
+                        .build())
                 .add(op.commit(true))
-                .add(op.comment("Commiting the operation"))
                 .execute();
 
         operationResults = results.get();
@@ -110,7 +104,7 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
         results = ovs.transactBuilder()
                 .add(op.delete(bridge)
                         .where(name.opEqual("br-int"))
-                        .operation())
+                        .build())
                 .add(op.abort())
                 .execute();
 
@@ -127,7 +121,7 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
         results = ovs.transactBuilder()
                 .add(op.delete(bridge)
                         .where(name.opEqual("br-int"))
-                        .operation())
+                        .build())
                 .add(op.assertion("Assert12345")) // Failing intentionally
                 .execute();
 
@@ -146,11 +140,13 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
         GenericTableSchema bridge = dbSchema.table("Bridge", GenericTableSchema.class);
 
         List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
+        ColumnSchema<GenericTableSchema, Set<Integer>> flood_vlans = bridge.multiValuedColumn("flood_vlans", Integer.class);
+
         monitorRequests.add(
                 MonitorRequestBuilder.builder(bridge)
                         .addColumn(bridge.column("name"))
                         .addColumn(bridge.column("fail_mode", String.class))
-                        .addColumn(bridge.multiValuedColumn("flood_vlans", Integer.class))
+                        .addColumn(flood_vlans)
                         .with(new MonitorSelect(true, true, true, true))
                         .build());
 
@@ -178,8 +174,15 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
         Assert.assertTrue(!results.isEmpty());
         Object result = results.get(0);
         Assert.assertTrue(result instanceof TableUpdates);
-        TableUpdate bridgeUpdate = ((TableUpdates) result).getUpdate(bridge);
-        Assert.assertNotNull(bridgeUpdate);
+        TableUpdates updates = (TableUpdates) result;
+        org.opendaylight.ovsdb.lib.message.TableUpdate<GenericTableSchema> update = updates.getUpdate(bridge);
+        Row<GenericTableSchema> aNew = update.getNew();
+        for (Column<GenericTableSchema, ?> column: aNew.getColumns()) {
+            if (column.getSchema().equals(flood_vlans)) {
+                Set<Integer> data = column.getData(flood_vlans);
+                Assert.assertTrue(!data.isEmpty());
+            }
+        }
     }
 
     public void testGetDBs() throws ExecutionException, InterruptedException {

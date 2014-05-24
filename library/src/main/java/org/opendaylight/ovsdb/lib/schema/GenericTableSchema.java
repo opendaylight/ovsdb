@@ -45,4 +45,30 @@ public class GenericTableSchema extends TableSchema<GenericTableSchema> {
         this.setColumns(columns);
         return this;
     }
+
+//    public TableUpdate<GenericTableSchema> updatesFromJson(JsonNode value) {
+//        ObjectNode new_ = (ObjectNode) value.get("new");
+//        ObjectNode old = (ObjectNode) value.get("new");
+//
+//        Row<GenericTableSchema> newRow = createRow(new_);
+//        Row<GenericTableSchema> oldRow = createRow(old);
+//
+//        TableUpdate<GenericTableSchema> tableUpdate = new TableUpdate<GenericTableSchema>();
+//        tableUpdate.setNew(newRow);
+//        tableUpdate.setNew(oldRow);
+//
+//
+//        return null;
+//    }
+//
+//    protected Row<GenericTableSchema> createRow(ObjectNode rowNode) {
+//        List<Column<GenericTableSchema, ?>> columns = Lists.newArrayList();
+//        for (Iterator<Map.Entry<String, JsonNode>> iter = rowNode.fields(); iter.hasNext();) {
+//            Map.Entry<String, JsonNode> next = iter.next();
+//            ColumnSchema schema = column(next.getKey());
+//            Object o = schema.valueFromJson(next.getValue());
+//            columns.add(new Column(schema, o));
+//        }
+//        return new Row<>(columns);
+//    }
 }

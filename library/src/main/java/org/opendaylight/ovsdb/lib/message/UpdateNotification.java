@@ -9,6 +9,8 @@
  */
 package org.opendaylight.ovsdb.lib.message;
 
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.opendaylight.ovsdb.lib.message.temp.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.json.Converter.UpdateNotificationConverter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -17,6 +19,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 public class UpdateNotification {
     Object context;
     TableUpdates update;
+    private JsonNode updatesJson;
+
     public Object getContext() {
         return context;
     }
@@ -28,5 +32,20 @@ public class UpdateNotification {
     }
     public void setUpdate(TableUpdates update) {
         this.update = update;
+    }
+
+    @JsonAnySetter
+    public void setValue(String key, JsonNode val) {
+        System.out.println("key = " + key);
+        System.out.println("val = " + val);
+        System.out.println();
+    }
+
+    public void setUpdates(JsonNode jsonNode) {
+        this.updatesJson = jsonNode;
+    }
+
+    public JsonNode getUpdates() {
+        return updatesJson;
     }
 }

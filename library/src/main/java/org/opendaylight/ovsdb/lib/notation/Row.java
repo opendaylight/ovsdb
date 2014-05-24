@@ -12,14 +12,29 @@
 
 package org.opendaylight.ovsdb.lib.notation;
 
-import org.opendaylight.ovsdb.lib.database.ColumnSchema;
+import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
+import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
-import java.util.Map;
+import java.util.List;
 
-public class Row {
-    private Map<String, ColumnSchema> columnSchema;
-    private Map<String, Object> columns;
-
+public class Row<E extends TableSchema<E>> {
+    List<Column<E, ?>> columns;
 
 
+    public Row(List<Column<E, ?>> columns) {
+        this.columns = columns;
+    }
+
+    public <D> Column<E, D> getColumn(ColumnSchema<E, D> schema) {
+        for (Column<E, ?> column : columns) {
+           if (column.getSchema().equals(schema)) {
+               return (Column<E, D>) column;
+           }
+        }
+        return null;
+    }
+
+    public List<Column<E, ?>> getColumns() {
+        return columns;
+    }
 }

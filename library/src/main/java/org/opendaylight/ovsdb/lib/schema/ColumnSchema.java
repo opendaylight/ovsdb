@@ -60,10 +60,13 @@ public class ColumnSchema<E extends TableSchema<E>, D> {
 
     // --- Operations on the column ----------//:w
 
+
     @Override
     public String toString() {
-        return "ColumnType [type=" + type + ", ephemeral=" + ephemeral
-                + ", mutable=" + mutable + "]";
+        return "ColumnSchema{" +
+                "name='" + name + '\'' +
+                ", type=" + type +
+                '}';
     }
 
     /**
@@ -71,8 +74,10 @@ public class ColumnSchema<E extends TableSchema<E>, D> {
      * @param value
      * @throws java.lang.RuntimeException (validation exception)
      */
-    public void validate(Object value)throws RuntimeException {
+    public D validate(Object value)throws RuntimeException {
         //todo(type check and validate based on constraints set)
+        this.type.validate(value);
+        return (D) value;
     }
 
     /**
@@ -82,4 +87,9 @@ public class ColumnSchema<E extends TableSchema<E>, D> {
     public void validateType(Class<?> type) {
 
     }
+
+    public D valueFromJson(JsonNode value) {
+      return (D) this.getType().valueFromJson(value);
+    }
+
 }

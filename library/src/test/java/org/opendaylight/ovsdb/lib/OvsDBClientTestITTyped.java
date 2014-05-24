@@ -25,6 +25,7 @@ import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
 import org.opendaylight.ovsdb.lib.message.UpdateNotification;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.temp.Reference;
 import org.slf4j.Logger;
@@ -58,6 +59,7 @@ public class OvsDBClientTestITTyped extends OvsdbTestBase {
         public ColumnSchema<Bridge, Reference> netflow() {
             return column("netflow", Reference.class);
         }
+
     }
 
 
@@ -65,7 +67,10 @@ public class OvsDBClientTestITTyped extends OvsdbTestBase {
     public void test() throws IOException, InterruptedException, ExecutionException {
         OvsDBClientImpl ovs = getVswitch();
 
-        Bridge bridge = ovs.getSchema(OPEN_VSWITCH_SCHEMA, true).get().table("Bridge", Bridge.class);
+        Bridge bridge = ovs.getSchema("Open_vSwitch", true).get().table("Bridge", Bridge.class);
+        GenericTableSchema anytable = null;
+
+
 
         ListenableFuture<List<OperationResult>> results = ovs.transactBuilder()
                 .add(op.insert(bridge).value(bridge.name(), "br-int"))
@@ -73,7 +78,7 @@ public class OvsDBClientTestITTyped extends OvsdbTestBase {
                         .set(bridge.status(), "br-blah")
                         .set(bridge.floodVlans(), 34)
                         .where(bridge.name().opEqual("br-int"))
-                        .and(bridge.name().opEqual("br-int")).operation())
+                        .and(bridge.name().opEqual("br-int")).build())
                 .execute();
 
         List<OperationResult> operationResults = results.get();

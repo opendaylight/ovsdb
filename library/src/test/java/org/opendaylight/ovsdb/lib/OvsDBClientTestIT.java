@@ -111,7 +111,26 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
 
         operationResults = results.get();
         Assert.assertFalse(operationResults.isEmpty());
+        /* Testing for Abort Error */
+        Assert.assertFalse(operationResults.get(1).getError() == null);
         System.out.println("Abort operation results = " + operationResults);
+
+        /*
+         * Adding a separate Abort operation in a transaction. Lets not mix this with other
+         * valid transactions as above.
+         */
+        results = ovs.transactBuilder()
+                .add(op.delete(bridge)
+                        .where(name.opEqual("br-int"))
+                        .operation())
+                .add(op.assertion("Assert12345")) // Failing intentionally
+                .execute();
+
+        operationResults = results.get();
+        Assert.assertFalse(operationResults.isEmpty());
+        /* Testing for an Assertion Error */
+        Assert.assertFalse(operationResults.get(1).getError() == null);
+        System.out.println("Assert operation results = " + operationResults);
 
     }
 

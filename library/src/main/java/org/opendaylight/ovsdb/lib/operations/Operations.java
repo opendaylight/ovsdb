@@ -44,4 +44,12 @@ public class Operations {
     public Comment comment(String comment) {
         return new Comment(comment);
     }
+
+    /*
+     * Could not use Java keyword "assert" which clashes with the ovsdb json-rpc method.
+     * using assertion instead.
+     */
+    public Assert assertion(String lock) {
+        return new Assert(lock);
+    }
 }

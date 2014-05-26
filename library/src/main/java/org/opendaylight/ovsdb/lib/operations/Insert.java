@@ -9,15 +9,16 @@
  */
 package org.opendaylight.ovsdb.lib.operations;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
+import java.util.Map;
+import java.util.Set;
+
 import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
-import java.util.Map;
-import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 
 
 public class Insert<E extends TableSchema<E>> extends Operation<E> {
@@ -52,6 +53,8 @@ public class Insert<E extends TableSchema<E>> extends Operation<E> {
         if (columnSchema.getType().isMultiValued()) {
             Preconditions.checkArgument((value instanceof Set),"expected a set for multivalued item") ;
             tval = OvsDBSet.fromSet((Set) value);
+        } else {
+            tval = value;
         }
         row.put(columnSchema.getName(), tval);
         return this;

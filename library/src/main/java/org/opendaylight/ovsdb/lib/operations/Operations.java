@@ -41,4 +41,7 @@ public class Operations {
         return new Select<>(schema);
     }
 
+    public Comment comment(String comment) {
+        return new Comment(comment);
+    }
 }

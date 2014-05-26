@@ -9,14 +9,12 @@
  */
 package org.opendaylight.ovsdb.lib;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.ListenableFuture;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -40,7 +38,9 @@ import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Set;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.ListenableFuture;
 
 
 public class OvsDBClientTestIT extends OvsdbTestBase {
@@ -65,18 +65,20 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
 
         ListenableFuture<List<OperationResult>> results = ovs.transactBuilder()
                 .add(op.insert(bridge)
-                        .value(name, "br-int")
-                        .value(flood_vlans, Sets.newHashSet(100, 101, 4001))
-                )
+                        .value(name, "br-test")
+                        .value(flood_vlans, Sets.newHashSet(100, 101, 4001)))
+                .add(op.comment("Inserting Bridge br-int"))
                 .add(op.update(bridge)
                         .set(fail_mode, "secure")
                         .where(name.opEqual("br-int"))
                         .operation())
+                .add(op.comment("Updating fail_mode to secure on Bridge br-int"))
                 .add(op.select(bridge)
                         .column(name)
                         .where(name.opEqual("br-int"))
                         .operation())
                 .add(op.commit(true))
+                .add(op.comment("Commiting the operation"))
                 .execute();
 
         List<OperationResult> operationResults = results.get();
@@ -87,7 +89,9 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
                 .add(op.delete(bridge)
                         .where(name.opEqual("br-int"))
                         .operation())
+                .add(op.comment("Deleting Bridge br-int"))
                 .add(op.commit(true))
+                .add(op.comment("Commiting the operation"))
                 .execute();
 
         operationResults = results.get();

@@ -29,6 +29,10 @@ public class Operations {
         return new Delete<>(schema);
     }
 
+    public <E extends TableSchema<E>> Mutate<E> mutate(TableSchema<E> schema) {
+        return new Mutate<>(schema);
+    }
+
     public Commit commit(Boolean durable) {
         return new Commit(durable);
     }

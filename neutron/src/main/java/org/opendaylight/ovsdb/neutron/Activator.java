@@ -17,6 +17,10 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityGroupAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityGroupCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityRuleAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityRuleCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
@@ -67,6 +71,7 @@ public class Activator extends ComponentActivatorAbstractBase {
                         SubnetHandler.class,
                         PortHandler.class,
                         SouthboundHandler.class,
+                        PortSecurityHandler.class,
                         MDSALConsumer.class,
                         ProviderNetworkManager.class};
         return res;
@@ -140,6 +145,10 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(ITenantNetworkManager.class)
                     .setRequired(true));
         }
+        if (imp.equals(PortSecurityHandler.class)) {
+            c.setInterface(INeutronSecurityRuleAware.class.getName(), null);
+            c.setInterface(INeutronSecurityGroupAware.class.getName(), null);
+        }
 
         //ToDo: DT: We don't need these dependencies for every implementation...
         //ToDo: DT: Callbacks are only required when behaviour is more complex than simple set/unset operation
@@ -180,5 +189,13 @@ public class Activator extends ComponentActivatorAbstractBase {
                 setService(INeutronPortCRUD.class).
                 setCallbacks("setNeutronPortCRUD", "unsetNeutronPortCRUD").
                 setRequired(true));
+        c.add(createServiceDependency().
+            setService(INeutronSecurityRuleCRUD.class).
+            setCallbacks("setNeutronSecurityRuleCRUD", "unsetNeutronSecurityRuleCRUD").
+            setRequired(true));
+        c.add(createServiceDependency().
+            setService(INeutronSecurityGroupCRUD.class).
+            setCallbacks("setNeutronSecurityGroupCRUD", "unsetNeutronSecurityGroupCRUD").
+            setRequired(true));
     }
 }

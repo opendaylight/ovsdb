@@ -32,6 +32,7 @@ import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
 import org.opendaylight.ovsdb.lib.message.TableUpdate;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.message.UpdateNotification;
+import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
@@ -74,6 +75,10 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
                         .operation())
                 .add(op.select(bridge)
                         .column(name)
+                        .where(name.opEqual("br-int"))
+                        .operation())
+                .add(op.mutate(bridge)
+                        .addMutation(flood_vlans, Mutator.INSERT, Sets.newHashSet(100, 101, 4001))
                         .where(name.opEqual("br-int"))
                         .operation())
                 .add(op.commit(true))

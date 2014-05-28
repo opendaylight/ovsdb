@@ -42,6 +42,11 @@ public abstract class OvsdbTestBase implements OvsdbRPC.Callback{
     private final static String SERVER_PORT = "ovsdbserver.port";
     private final static String DEFAULT_SERVER_PORT = "6640";
 
+    /**
+     * Represents the Open Vswitch Schema
+     */
+    public final static String OPEN_VSWITCH_SCHEMA = "Open_vSwitch";
+
     public Properties loadProperties() {
         Properties props = new Properties(System.getProperties());
         return props;

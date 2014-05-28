@@ -52,7 +52,7 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
     @Test
     public void testTransact() throws IOException, InterruptedException, ExecutionException {
 
-        ListenableFuture<DatabaseSchema> schema = ovs.getSchema(OvsDBClient.OPEN_VSWITCH_SCHEMA, true);
+        ListenableFuture<DatabaseSchema> schema = ovs.getSchema(OPEN_VSWITCH_SCHEMA, true);
         TableSchema<GenericTableSchema> bridge = schema.get().table("Bridge", GenericTableSchema.class);
 
         for (Map.Entry<String, ColumnSchema> names : bridge.getColumnSchemas().entrySet()) {
@@ -142,7 +142,7 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
     @Test
     public void testMonitorRequest() throws ExecutionException, InterruptedException {
 
-        DatabaseSchema dbSchema = ovs.getSchema(OvsDBClient.OPEN_VSWITCH_SCHEMA, true).get();
+        DatabaseSchema dbSchema = ovs.getSchema(OPEN_VSWITCH_SCHEMA, true).get();
         GenericTableSchema bridge = dbSchema.table("Bridge", GenericTableSchema.class);
 
         List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
@@ -182,16 +182,22 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
         Assert.assertNotNull(bridgeUpdate);
     }
 
-    @Test
     public void testGetDBs() throws ExecutionException, InterruptedException {
         ListenableFuture<List<String>> databases = ovs.getDatabases();
         List<String> dbNames = databases.get();
         Assert.assertNotNull(dbNames);
-        Assert.assertTrue(dbNames.size() > 0);
+        boolean hasOpenVswitchSchema = false;
+        for(String dbName : dbNames) {
+           if (dbName.equals(OPEN_VSWITCH_SCHEMA)) {
+                hasOpenVswitchSchema = true;
+                break;
+           }
+        }
+        Assert.assertTrue(OPEN_VSWITCH_SCHEMA+" schema is not supported by the switch", hasOpenVswitchSchema);
     }
 
     @Before
-    public  void initalize() throws IOException {
+    public  void initalize() throws IOException, ExecutionException, InterruptedException {
         if (ovs != null) {
             return;
         }
@@ -201,6 +207,7 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
         }
         ExecutorService executorService = Executors.newFixedThreadPool(3);
         ovs = new OvsDBClientImpl(rpc, executorService);
+        testGetDBs();
     }
 
 

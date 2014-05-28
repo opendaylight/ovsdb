@@ -9,17 +9,16 @@
  */
 package org.opendaylight.ovsdb.lib.schema.temp;
 
-import org.opendaylight.ovsdb.lib.OvsDBClient;
-import org.opendaylight.ovsdb.lib.OvsDBClientImpl;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
-import org.opendaylight.ovsdb.lib.schema.TableSchema;
-
 import java.util.concurrent.ExecutionException;
+
+import org.opendaylight.ovsdb.lib.OvsDBClientImpl;
+import org.opendaylight.ovsdb.lib.OvsdbTestBase;
+import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
+import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
 
 public class SchemaObjs {
-
     public static class Bridge extends TableSchema<Bridge> {
         public static String NAME = "Bridge";
         TableSchema target;
@@ -54,7 +53,7 @@ public class SchemaObjs {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
 
         OvsDBClientImpl ovs = new OvsDBClientImpl(null, null);
-        DatabaseSchema db = ovs.getSchema(OvsDBClient.OPEN_VSWITCH_SCHEMA, true).get();
+        DatabaseSchema db = ovs.getSchema(OvsdbTestBase.OPEN_VSWITCH_SCHEMA, true).get();
         Bridge bridge = db.table(Bridge.NAME, Bridge.class);
         Port port = db.table(Port.NAME, Port.class);
 

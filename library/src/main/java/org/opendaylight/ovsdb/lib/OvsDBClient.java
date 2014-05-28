@@ -12,7 +12,8 @@
 
 package org.opendaylight.ovsdb.lib;
 
-import com.google.common.util.concurrent.ListenableFuture;
+import java.util.List;
+
 import org.opendaylight.ovsdb.lib.message.MonitorRequest;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
@@ -20,18 +21,13 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
-import java.util.List;
+import com.google.common.util.concurrent.ListenableFuture;
 
 /**
  * The main interface to interact with a device speaking ovsdb protocol in an asynchronous fashion and hence most
  * operations return a Future object representing the eventual response data from the remote.
  */
 public interface OvsDBClient {
-
-    /**
-     * Represents the Open Vswitch Schema
-     */
-    String OPEN_VSWITCH_SCHEMA = "Open_vSwitch";
 
     /**
      * Gets the list of database names exposed by this ovsdb capable device

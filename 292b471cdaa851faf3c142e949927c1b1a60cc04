@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_e82a6e8f",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13Provider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 3390,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-05-31T12:20:35Z",
+      "side": 1,
+      "message": "Add a small comment here saying something like: if codepath made it here, it means that _blablabla_. Therefore, flow should not be deleted.",
+      "revId": "292b471cdaa851faf3c142e949927c1b1a60cc04",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8819628a",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13Provider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 3408,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-05-31T12:20:35Z",
+      "side": 1,
+      "message": "Add a small comment here saying something like: if codepath made it here, it means that _blablabla_. Therefore, flow should not be deleted.",
+      "revId": "292b471cdaa851faf3c142e949927c1b1a60cc04",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

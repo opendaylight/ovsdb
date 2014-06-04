@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_3662f43e",
+        "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/jsonrpc/JsonRpcDecoderTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-04T03:39:54Z",
+      "side": 1,
+      "message": "hmm... Can you instead use an approach as in MonitorResponseTest where the JSONs are read from a resource file ?\nIt makes the code more readable I think.",
+      "revId": "bb8700f758b3870e308b9120359909c70c16e8f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

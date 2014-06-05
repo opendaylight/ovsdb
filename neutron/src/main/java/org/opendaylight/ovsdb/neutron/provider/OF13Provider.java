@@ -754,6 +754,19 @@ public class OF13Provider implements NetworkProvider {
          handleVlanMiss(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD,
                         segmentationId, ethPort, false);
    }
+    private Long getDpid (Node node, String bridgeUuid) {
+        try {
+            OVSDBConfigService ovsdbTable = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), bridgeUuid);
+            Set<String> dpids = bridge.getDatapath_id();
+            if (dpids == null || dpids.size() == 0) return 0L;
+            return Long.valueOf(HexEncode.stringToLong((String) dpids.toArray()[0]));
+        } catch (Exception e) {
+            logger.error("Error finding Bridge's OF DPID", e);
+            return 0L;
+        }
+    }
+
     private Long getIntegrationBridgeOFDPID (Node node) {
         try {
             String bridgeName = adminConfigManager.getIntegrationBridgeName();
@@ -763,16 +776,29 @@ public class OF13Provider implements NetworkProvider {
                 return 0L;
             }
 
-            OVSDBConfigService ovsdbTable = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brIntId);
-            Set<String> dpids = bridge.getDatapath_id();
-            if (dpids == null || dpids.size() == 0) return 0L;
-            return Long.valueOf(HexEncode.stringToLong((String) dpids.toArray()[0]));
+            return getDpid(node, brIntId);
         } catch (Exception e) {
             logger.error("Error finding Integration Bridge's OF DPID", e);
             return 0L;
         }
     }
+
+    private Long getExternalBridgeDpid (Node node) {
+        try {
+            String bridgeName = adminConfigManager.getExternalBridgeName();
+            String brUuid = this.getInternalBridgeUUID(node, bridgeName);
+            if (brUuid == null) {
+                logger.error("Unable to spot Bridge Identifier for {} in {}", bridgeName, node);
+                return 0L;
+            }
+
+            return getDpid(node, brUuid);
+        } catch (Exception e) {
+            logger.error("Error finding External Bridge's OF DPID", e);
+            return 0L;
+        }
+    }
+
     private void programLocalRules (String networkType, String segmentationId, Node node, Interface intf) {
         try {
             Long dpid = this.getIntegrationBridgeOFDPID(node);
@@ -1259,6 +1285,7 @@ public class OF13Provider implements NetworkProvider {
     @Override
     public void initializeFlowRules(Node node) {
         this.initializeFlowRules(node, adminConfigManager.getIntegrationBridgeName());
+        this.initializeFlowRules(node, adminConfigManager.getExternalBridgeName());
         this.triggerInterfaceUpdates(node);
     }
 
@@ -1267,7 +1294,13 @@ public class OF13Provider implements NetworkProvider {
      * @param bridgeName
      */
     private void initializeFlowRules(Node node, String bridgeName) {
-        Long dpid = this.getIntegrationBridgeOFDPID(node);
+        String bridgeUuid = this.getInternalBridgeUUID(node, bridgeName);
+        if (bridgeUuid == null) {
+            return;
+        }
+
+        Long dpid = getDpid(node, bridgeUuid);
+
         if (dpid == 0L) {
             logger.debug("Openflow Datapath-ID not set for the integration bridge in {}", node);
             return;
@@ -1281,6 +1314,9 @@ public class OF13Provider implements NetworkProvider {
          */
 
          writeLLDPRule(dpid);
+         if (bridgeName == adminConfigManager.getExternalBridgeName()) {
+             writeNormalRule(dpid);
+         }
     }
 
     /*
@@ -1325,6 +1361,53 @@ public class OF13Provider implements NetworkProvider {
         String flowId = "LLDP";
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setBarrier(true);
+        flowBuilder.setTableId((short) 0);
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+        writeFlow(flowBuilder, nodeBuilder);
+    }
+
+    /*
+    * Create a NORMAL Table Miss Flow Rule
+    * Match: any
+    * Action: forward to NORMAL pipeline
+    */
+
+    private void writeNormalRule(Long dpidLong) {
+
+        String nodeName = "openflow:" + dpidLong;
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        // Create the OF Actions and Instructions
+        InstructionBuilder ib = new InstructionBuilder();
+        InstructionsBuilder isb = new InstructionsBuilder();
+
+        // Instructions List Stores Individual Instructions
+        List<Instruction> instructions = new ArrayList<Instruction>();
+
+        // Call the InstructionBuilder Methods Containing Actions
+        createNormalInstructions(ib);
+        ib.setOrder(0);
+        ib.setKey(new InstructionKey(0));
+        instructions.add(ib.build());
+
+        // Add InstructionBuilder to the Instruction(s)Builder List
+        isb.setInstruction(instructions);
+
+        // Add InstructionsBuilder to FlowBuilder
+        flowBuilder.setInstructions(isb.build());
+
+        String flowId = "NORMAL";
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setMatch(matchBuilder.build());
+        flowBuilder.setPriority(0);
         flowBuilder.setBarrier(true);
         flowBuilder.setTableId((short) 0);
         flowBuilder.setKey(key);
@@ -2937,6 +3020,36 @@ public class OF13Provider implements NetworkProvider {
     }
 
     /**
+     * Create NORMAL Reserved Port Instruction (packet_in)
+     *
+     * @param ib Map InstructionBuilder without any instructions
+     * @return ib Map InstructionBuilder with instructions
+     */
+
+    protected static InstructionBuilder createNormalInstructions(InstructionBuilder ib) {
+
+        List<Action> actionList = new ArrayList<Action>();
+        ActionBuilder ab = new ActionBuilder();
+
+        OutputActionBuilder output = new OutputActionBuilder();
+        Uri value = new Uri("NORMAL");
+        output.setOutputNodeConnector(value);
+        ab.setAction(new OutputActionCaseBuilder().setOutputAction(output.build()).build());
+        ab.setOrder(0);
+        ab.setKey(new ActionKey(0));
+        actionList.add(ab.build());
+
+        // Create an Apply Action
+        ApplyActionsBuilder aab = new ApplyActionsBuilder();
+        aab.setAction(actionList);
+
+        // Wrap our Apply Action in an Instruction
+        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+
+        return ib;
+    }
+
+    /**
      * Create Output Port Instruction
      *
      * @param ib       Map InstructionBuilder without any instructions
@@ -3920,10 +4033,15 @@ public class OF13Provider implements NetworkProvider {
         List<Node> ovsNodes = connectionService.getNodes();
         if (ovsNodes == null) return;
         for (Node ovsNode : ovsNodes) {
-            Long dpid = this.getIntegrationBridgeOFDPID(ovsNode);
-            logger.debug("Compare openflowNode to OVS br-int node {} vs {}", openflowNode.getID(), dpid);
-            String openflowID = ""+openflowNode.getID();
-            if (openflowID.contains(""+dpid)) {
+            Long brIntDpid = this.getIntegrationBridgeOFDPID(ovsNode);
+            Long brExDpid = this.getExternalBridgeDpid(ovsNode);
+            logger.debug("Compare openflowNode to OVS node {} vs {} and {}", openflowNode.getID(), brIntDpid, brExDpid);
+            String openflowID = openflowNode.getID().toString();
+            if (openflowID.contains(brExDpid.toString())) {
+                this.initializeFlowRules(ovsNode, adminConfigManager.getExternalBridgeName());
+                this.triggerInterfaceUpdates(ovsNode);
+            }
+            if (openflowID.contains(brIntDpid.toString())) {
                 this.initializeFlowRules(ovsNode, adminConfigManager.getIntegrationBridgeName());
                 this.triggerInterfaceUpdates(ovsNode);
             }

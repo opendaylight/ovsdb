@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_454fb86b",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 757,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-05T22:29:04Z",
+      "side": 1,
+      "message": "Perhaps just getDpid would be better... the method args tell me the rest",
+      "revId": "8f6530ed5465664421c0d6cef34f2c0b8d9ec228",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6552fc14",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 773,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-05T22:29:04Z",
+      "side": 1,
+      "message": "Appreciate you changing this (I\u0027ve never like this naming) but I don\u0027t think this is related to your change so I\u0027d rather you didn\u0027t :) I would encourage a second commit to change this to integrationBridgeUuid as the abbreviations can get confusing...",
+      "revId": "8f6530ed5465664421c0d6cef34f2c0b8d9ec228",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a547a44a",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 786,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-05T22:29:04Z",
+      "side": 1,
+      "message": "getExternalBridgeDpid",
+      "revId": "8f6530ed5465664421c0d6cef34f2c0b8d9ec228",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_65799c92",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1297,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-05T22:29:04Z",
+      "side": 1,
+      "message": "bridgeUuid",
+      "revId": "8f6530ed5465664421c0d6cef34f2c0b8d9ec228",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0570d0a3",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 4042,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-05T22:29:04Z",
+      "side": 1,
+      "message": "integrationBridgeDpid and\nexternalBridgeDpid might be better names...",
+      "revId": "8f6530ed5465664421c0d6cef34f2c0b8d9ec228",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_856380db",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 4046,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-05T22:29:04Z",
+      "side": 1,
+      "message": "Can we either add spaces here:\n    \"\" + brExDpid\n\nor use brExDpid.toString()",
+      "revId": "8f6530ed5465664421c0d6cef34f2c0b8d9ec228",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

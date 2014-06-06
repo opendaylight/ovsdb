@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_8b04f1c0",
+        "filename": "features/src/main/resources/features.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-06T15:53:11Z",
+      "side": 1,
+      "message": "Why is MD-SAL based openflowjava/plugin added as a feature dependency to ovsdb, whereas the AD-SAL\u0027s protocol-plugins.openflow not added ?\n\nAlso, the point of having SAL is to make sure the southbound plugin dependencies are not declared directly and the only dependencies that the consumer must have is with the SAL. By binding a openflow plugin here, arent we defeating that purpose ? \n\nToday OVSDB uses MD-SAL for OF13, and AD-SAL for OF10.\n\nSo, am trying to understand why these are dependent features.",
+      "revId": "8f906b949091418b4042f3c0c91dda3229b7907d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

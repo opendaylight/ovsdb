@@ -17,6 +17,11 @@
     <java.version.source>1.7</java.version.source>
     <java.version.target>1.7</java.version.target>
     <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
+    <openflowjava.version>0.5-SNAPSHOT</openflowjava.version>
+    <openflowplugin.version>0.0.3-SNAPSHOT</openflowplugin.version>
+    <ovsdb.neutron.version>0.7.0-SNAPSHOT</ovsdb.neutron.version>
+    <ovsdb.northbound.version>0.5.1-SNAPSHOT</ovsdb.northbound.version>
+    <ovsdb.version>0.5.1-SNAPSHOT</ovsdb.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 

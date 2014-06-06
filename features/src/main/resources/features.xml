@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features name="ovsdb-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+   <feature name="odl-ovsdb" description="OpenDaylight OVSDB" version="${project.version}">
+      <feature version="${openflowplugin.version}">odl-openflowplugin</feature>
+      <feature version="${openflowjava.version}">odl-openflowjava</feature>
+      <bundle>mvn:org.opendaylight.ovsdb/ovsdb/${ovsdb.version}</bundle>
+      <bundle>mvn:org.opendaylight.ovsdb/ovsdb.neutron/${ovsdb.neutron.version}</bundle>
+      <bundle>mvn:org.opendaylight.ovsdb/ovsdb.northbound/${ovsdb.northbound.version}</bundle>
+   </feature>
+</features>

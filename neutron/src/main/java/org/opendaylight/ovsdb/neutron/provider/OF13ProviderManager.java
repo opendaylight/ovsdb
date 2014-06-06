@@ -1546,8 +1546,8 @@ class OF13ProviderManager extends ProviderNetworkManager {
         InstanceIdentifier<Flow> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
                 .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Table.class,
                 new TableKey(flowBuilder.getTableId())).child(Flow.class, flowBuilder.getKey()).build();
-        modification.putOperationalData(nodeBuilderToInstanceId(nodeBuilder), nodeBuilder.build());
-        modification.putOperationalData(path1, flowBuilder.build());
+        //modification.putOperationalData(nodeBuilderToInstanceId(nodeBuilder), nodeBuilder.build());
+        //modification.putOperationalData(path1, flowBuilder.build());
         modification.putConfigurationData(nodeBuilderToInstanceId(nodeBuilder), nodeBuilder.build());
         modification.putConfigurationData(path1, flowBuilder.build());
         Future<RpcResult<TransactionStatus>> commitFuture = modification.commit();
@@ -1582,7 +1582,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
                 .augmentation(FlowCapableNode.class).child(Table.class,
                 new TableKey(flowBuilder.getTableId())).child(Flow.class, flowBuilder.getKey()).build();
         //modification.removeOperationalData(nodeBuilderToInstanceId(nodeBuilder));
-        modification.removeOperationalData(path1);
+        //modification.removeOperationalData(path1);
         //modification.removeConfigurationData(nodeBuilderToInstanceId(nodeBuilder));
         modification.removeConfigurationData(path1);
         Future<RpcResult<TransactionStatus>> commitFuture = modification.commit();
@@ -1664,6 +1664,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
         VlanMatchBuilder vlanMatchBuilder = new VlanMatchBuilder();
         VlanIdBuilder vlanIdBuilder = new VlanIdBuilder();
         vlanIdBuilder.setVlanId(new VlanId(vlanId));
+        vlanIdBuilder.setVlanIdPresent(true);
         vlanMatchBuilder.setVlanId(vlanIdBuilder.build());
         matchBuilder.setVlanMatch(vlanMatchBuilder.build());
 
@@ -1925,29 +1926,34 @@ class OF13ProviderManager extends ProviderNetworkManager {
             }
         }
 
+        /* Create output action for this port*/
         OutputActionBuilder oab = new OutputActionBuilder();
         oab.setOutputNodeConnector(ncid);
         ab.setAction(new OutputActionCaseBuilder().setOutputAction(oab.build()).build());
-        ab.setOrder(0);
-        ab.setKey(new ActionKey(0));
-        Action newAction = ab.build();
         boolean addNew = true;
+
+        /* Find the group action and get the group */
         for (Action action : actionList) {
             if (action.getAction() instanceof OutputActionCase) {
                 OutputActionCase opAction = (OutputActionCase)action.getAction();
+                /* If output port action already in the action list of one of the buckets, skip */
                 if (opAction.getOutputAction().getOutputNodeConnector().equals(new Uri(ncid))) {
                     addNew = false;
                     break;
                 }
             }
         }
-        if (addNew) actionList.add(newAction);
+        if (addNew) {
+            ab.setOrder(actionList.size());
+            ab.setKey(new ActionKey(actionList.size()));
+            actionList.add(ab.build());
+        }
 
         // Create an Apply Action
         ApplyActionsBuilder aab = new ApplyActionsBuilder();
         aab.setAction(actionList);
         ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
-
+        logger.debug("createOutputPortInstructions() : applyAction {}", aab.build());
         return ib;
     }
 
@@ -2128,7 +2134,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
         DropAction dropAction = dab.build();
         ActionBuilder ab = new ActionBuilder();
         ab.setAction(new DropActionCaseBuilder().setDropAction(dropAction).build());
-
+        ab.setOrder(0);
         // Add our drop action to a list
         List<Action> actionList = new ArrayList<Action>();
         actionList.add(ab.build());
@@ -2179,6 +2185,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
         tunnel.setTunnelId(tunnelId);
         setFieldBuilder.setTunnel(tunnel.build());
         ab.setAction(new SetFieldCaseBuilder().setSetField(setFieldBuilder.build()).build());
+        ab.setOrder(0);
         actionList.add(ab.build());
 
         ApplyActionsBuilder aab = new ApplyActionsBuilder();

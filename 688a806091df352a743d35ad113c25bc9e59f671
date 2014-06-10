@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_5163f7b0",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/OvsDBClientImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-10T18:42:23Z",
+      "side": 1,
+      "message": "Why do we need this ? \nCant we trust dbSchema and use that directly rather than having to get it from this.schema ?",
+      "revId": "688a806091df352a743d35ad113c25bc9e59f671",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_310753cc",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/message/UpdateNotification.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-10T18:42:23Z",
+      "side": 1,
+      "message": "Do we still maintain this for backward compatibility ?\nIf yes, shall we handle it by maintaining a \"temp\" UpdateNotification with the old format and the new format free of  older values.",
+      "revId": "688a806091df352a743d35ad113c25bc9e59f671",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_115d6fe9",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/message/UpdateNotification.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-10T18:42:23Z",
+      "side": 1,
+      "message": "Is this needed ?",
+      "revId": "688a806091df352a743d35ad113c25bc9e59f671",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8c8f24cc",
+        "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/OvsDBClientTestITTyped.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-10T18:42:23Z",
+      "side": 1,
+      "message": "OPEN_VSWITCH_SCHEMA is not hard-coded. It is infact coming from the OvsdbTestBase. So, i guess it is okay to leave the constant.",
+      "revId": "688a806091df352a743d35ad113c25bc9e59f671",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

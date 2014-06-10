@@ -49,7 +49,7 @@ public class Where {
         return this;
     }
 
-    public Operation operation() {
+    public Operation build() {
         return (Operation) this.operation;
     }
 

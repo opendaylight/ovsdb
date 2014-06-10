@@ -19,6 +19,7 @@ import com.google.common.io.Resources;
 
 import junit.framework.TestCase;
 
+import org.opendaylight.ovsdb.lib.message.temp.TableUpdate;
 import org.opendaylight.ovsdb.lib.message.temp.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
 import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
@@ -97,7 +98,7 @@ public class MonitorResponseTest extends TestCase {
         assertEquals(2, rows.size());
         List<TableUpdate.Row<Port>> sorted = Ordering.natural().onResultOf(new Function<TableUpdate.Row<Port>, String>() {
             @Override
-            public String apply(org.opendaylight.ovsdb.lib.message.TableUpdate.Row<Port> input) {
+            public String apply(TableUpdate.Row<Port> input) {
                 return input.getId();
             }
         }).sortedCopy(rows);

@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_a4d79cbe",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/operations/Mutate.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-11T22:33:32Z",
+      "side": 1,
+      "message": "tval? \n\nI\u0027m guessing temporary value...\n\nvalidatedValue?\ncheckedValue?",
+      "revId": "16047c4a81b60e967a1f1a700c22d8ac2f84f434",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_44e6d0b5",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/operations/Mutate.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-11T22:33:32Z",
+      "side": 1,
+      "message": "is assigning something (which is a subclass of Object) to an Object ok?\nI know the compiler is happy, but now tval will act just like an ordinary object until it\u0027s cast back... but there is no reference to it\u0027s original type anywhere. This doesn\u0027t seem very Type Safe to me.",
+      "revId": "16047c4a81b60e967a1f1a700c22d8ac2f84f434",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_84dcd8e5",
+        "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/OvsDBClientTestIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-11T22:33:32Z",
+      "side": 1,
+      "message": "Can we use a \"real\" UUID here?\nUUID.randomUUID() or a literal would be perferable.",
+      "revId": "16047c4a81b60e967a1f1a700c22d8ac2f84f434",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e4d5a4b9",
+        "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/OvsDBClientTestIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-11T22:33:32Z",
+      "side": 1,
+      "message": "I know 0 \u003d\u003d the result of the first operation, but can we put a comment here or perhaps use a constant? If ordering of operations changes the this will break the test.",
+      "revId": "16047c4a81b60e967a1f1a700c22d8ac2f84f434",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c4d2e0d1",
+        "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/OvsDBClientTestIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-11T22:33:32Z",
+      "side": 1,
+      "message": "It\u0027s probably better to move the transactions from testTransact in to a method of their own which is shared by both testMonitorRequest and testTransact. This way it\u0027s clear which test cases are dependent on that logic, and to avoid changes in testTransact affecting outcomes in testMonitorRequest.\n\nI\u0027d suggest prepareTestBridge()",
+      "revId": "16047c4a81b60e967a1f1a700c22d8ac2f84f434",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8455b851",
+        "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/OvsDBClientTestIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-11T22:33:32Z",
+      "side": 1,
+      "message": "Can we call this method setUp\nWhile not necessary as we have annotations I like to keep the conventions forced in Junit3",
+      "revId": "16047c4a81b60e967a1f1a700c22d8ac2f84f434",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e45e0476",
+        "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/OvsDBClientTestIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-11T22:33:32Z",
+      "side": 1,
+      "message": "Can we call this method tearDown.\nWhile not necessary as we have annotations I like to keep the conventions forced in Junit3",
+      "revId": "16047c4a81b60e967a1f1a700c22d8ac2f84f434",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_24ccec34",
+        "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/OvsDBClientTestIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-11T22:33:32Z",
+      "side": 1,
+      "message": "I\u0027m not sure it\u0027s safe to have assertions in cleanup code. These methods are designed to tear down the test fixture... I would rather this code was moved to the end of the testCase or to a helper method that is called at the end of the test case,",
+      "revId": "16047c4a81b60e967a1f1a700c22d8ac2f84f434",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

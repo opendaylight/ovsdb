@@ -9,20 +9,19 @@
  */
 package org.opendaylight.ovsdb.lib;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.ListenableFuture;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import junit.framework.Assert;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.ovsdb.lib.message.MonitorRequest;
@@ -32,7 +31,9 @@ import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.message.UpdateNotification;
 import org.opendaylight.ovsdb.lib.notation.Column;
+import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.Row;
+import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
@@ -41,19 +42,24 @@ import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Set;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.ListenableFuture;
 
 
 public class OvsDBClientTestIT extends OvsdbTestBase {
     Logger logger = LoggerFactory.getLogger(OvsDBClientTestIT.class);
 
     OvsDBClientImpl ovs;
-
+    DatabaseSchema dbSchema = null;
+    static String testBridgeName = "br-test";
+    static UUID testBridgeUuid = null;
     @Test
     public void testTransact() throws IOException, InterruptedException, ExecutionException {
-
-        ListenableFuture<DatabaseSchema> schema = ovs.getSchema(OPEN_VSWITCH_SCHEMA, true);
-        TableSchema<GenericTableSchema> bridge = schema.get().table("Bridge", GenericTableSchema.class);
+        Assert.assertNotNull(dbSchema);
+        TableSchema<GenericTableSchema> bridge = dbSchema.table("Bridge", GenericTableSchema.class);
+        GenericTableSchema ovsTable = dbSchema.table("Open_vSwitch", GenericTableSchema.class);
+        ColumnSchema<GenericTableSchema, Set<UUID>> bridges = ovsTable.multiValuedColumn("bridges", UUID.class);
 
         for (Map.Entry<String, ColumnSchema> names : bridge.getColumnSchemas().entrySet()) {
             System.out.println("names = " + names.getKey());
@@ -64,36 +70,37 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
         ColumnSchema<GenericTableSchema, String> fail_mode = bridge.column("fail_mode", String.class);
         ColumnSchema<GenericTableSchema, Set<Integer>> flood_vlans = bridge.multiValuedColumn("flood_vlans", Integer.class);
 
+        String namedUuid = "br_test";
+        int nOperations = 7;
         ListenableFuture<List<OperationResult>> results = ovs.transactBuilder()
                 .add(op.insert(bridge)
-                        .value(name, "br-test")
+                        .withId(namedUuid)
+                        .value(name, testBridgeName)
                         .value(flood_vlans, Sets.newHashSet(100, 101, 4001)))
                 .add(op.comment("Inserting Bridge br-int"))
                 .add(op.update(bridge)
                         .set(fail_mode, "secure")
-                        .where(name.opEqual("br-int"))
+                        .where(name.opEqual(testBridgeName))
                         .build())
                 .add(op.select(bridge)
                         .column(name)
-                        .where(name.opEqual("br-int"))
+                        .where(name.opEqual(testBridgeName))
                         .build())
+                .add(op.mutate(bridge)
+                        .addMutation(flood_vlans, Mutator.INSERT, Sets.newHashSet(200,400))
+                        .where(name.opEqual(testBridgeName))
+                        .build())
+                .add(op.mutate(ovsTable)
+                        .addMutation(bridges, Mutator.INSERT, Sets.newHashSet(new UUID(namedUuid))))
                 .add(op.commit(true))
                 .execute();
 
         List<OperationResult> operationResults = results.get();
         Assert.assertFalse(operationResults.isEmpty());
+        // Check if Results matches the number of operations in transaction
+        Assert.assertEquals(nOperations, operationResults.size());
         System.out.println("Insert & Update operation results = " + operationResults);
-
-        results = ovs.transactBuilder()
-                .add(op.delete(bridge)
-                        .where(name.opEqual("br-int"))
-                        .build())
-                .add(op.commit(true))
-                .execute();
-
-        operationResults = results.get();
-        Assert.assertFalse(operationResults.isEmpty());
-        System.out.println("Delete operation results = " + operationResults);
+        testBridgeUuid = operationResults.get(0).getUuid();
 
         /*
          * Adding a separate Abort operation in a transaction. Lets not mix this with other
@@ -101,7 +108,7 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
          */
         results = ovs.transactBuilder()
                 .add(op.delete(bridge)
-                        .where(name.opEqual("br-int"))
+                        .where(name.opEqual(testBridgeName))
                         .build())
                 .add(op.abort())
                 .execute();
@@ -113,12 +120,12 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
         System.out.println("Abort operation results = " + operationResults);
 
         /*
-         * Adding a separate Abort operation in a transaction. Lets not mix this with other
+         * Adding a separate Assert operation in a transaction. Lets not mix this with other
          * valid transactions as above.
          */
         results = ovs.transactBuilder()
                 .add(op.delete(bridge)
-                        .where(name.opEqual("br-int"))
+                        .where(name.opEqual(testBridgeName))
                         .build())
                 .add(op.assertion("Assert12345")) // Failing intentionally
                 .execute();
@@ -128,13 +135,12 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
         /* Testing for an Assertion Error */
         Assert.assertFalse(operationResults.get(1).getError() == null);
         System.out.println("Assert operation results = " + operationResults);
-
     }
 
     @Test
-    public void testMonitorRequest() throws ExecutionException, InterruptedException {
-
-        DatabaseSchema dbSchema = ovs.getSchema(OPEN_VSWITCH_SCHEMA, true).get();
+    public void testMonitorRequest() throws ExecutionException, InterruptedException, IOException {
+        Assert.assertNotNull(dbSchema);
+        testTransact(); // Reuse the br-test create transactions
         GenericTableSchema bridge = dbSchema.table("Bridge", GenericTableSchema.class);
 
         List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
@@ -209,6 +215,31 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
         ExecutorService executorService = Executors.newFixedThreadPool(3);
         ovs = new OvsDBClientImpl(rpc, executorService);
         testGetDBs();
+        dbSchema = ovs.getSchema(OPEN_VSWITCH_SCHEMA, true).get();
+        Assert.assertNotNull(dbSchema);
+    }
+
+    @After
+    public void cleanup() throws InterruptedException, ExecutionException {
+        Assert.assertNotNull(dbSchema);
+        Assert.assertNotNull(testBridgeUuid);
+        TableSchema<GenericTableSchema> bridge = dbSchema.table("Bridge", GenericTableSchema.class);
+        ColumnSchema<GenericTableSchema, String> name = bridge.column("name", String.class);
+        GenericTableSchema ovsTable = dbSchema.table("Open_vSwitch", GenericTableSchema.class);
+        ColumnSchema<GenericTableSchema, Set<UUID>> bridges = ovsTable.multiValuedColumn("bridges", UUID.class);
+
+        ListenableFuture<List<OperationResult>> results = ovs.transactBuilder()
+                .add(op.delete(bridge)
+                        .where(name.opEqual(testBridgeName))
+                        .build())
+                .add(op.mutate(ovsTable)
+                        .addMutation(bridges, Mutator.DELETE, Sets.newHashSet(testBridgeUuid)))
+                .add(op.commit(true))
+                .execute();
+
+        List<OperationResult> operationResults = results.get();
+        Assert.assertFalse(operationResults.isEmpty());
+        System.out.println("Delete operation results = " + operationResults);
     }
 
 

@@ -32,12 +32,12 @@ public class Insert<E extends TableSchema<E>> extends Operation<E> {
 
     private Map<String, Object> row = Maps.newHashMap();
 
-    public Insert on(TableSchema schema){
+    public Insert<E> on(TableSchema schema){
         this.setTableSchema(schema);
         return this;
     }
 
-    public Insert withId(String name) {
+    public Insert<E> withId(String name) {
         this.uuidName = name;
         this.setOp(INSERT);
         return this;

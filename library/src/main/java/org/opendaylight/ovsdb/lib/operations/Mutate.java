@@ -10,14 +10,18 @@
  */
 package org.opendaylight.ovsdb.lib.operations;
 
-import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.Set;
+
 import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.notation.Mutation;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
+import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
-import java.util.List;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 public class Mutate<E extends TableSchema<E>> extends Operation<E> implements ConditionalOperation {
 
@@ -36,7 +40,14 @@ public class Mutate<E extends TableSchema<E>> extends Operation<E> implements Co
 
     public <T extends TableSchema<T>, D> Mutate<E> addMutation(ColumnSchema<T, D> columnSchema, Mutator mutator, D value) {
         columnSchema.validate(value);
-        mutations.add(new Mutation(columnSchema.getName(), mutator, value));
+        Object tval = null;
+        if (columnSchema.getType().isMultiValued()) {
+            Preconditions.checkArgument((value instanceof Set),"expected a set for multivalued item") ;
+            tval = OvsDBSet.fromSet((Set) value);
+        } else {
+            tval = value;
+        }
+        mutations.add(new Mutation(columnSchema.getName(), mutator, tval));
         return this;
     }
 

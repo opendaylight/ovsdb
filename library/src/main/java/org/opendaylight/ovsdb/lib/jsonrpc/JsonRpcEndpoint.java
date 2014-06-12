@@ -9,7 +9,6 @@
  */
 package org.opendaylight.ovsdb.lib.jsonrpc;
 
-import com.google.common.reflect.Invokable;
 import io.netty.channel.Channel;
 
 import java.lang.reflect.InvocationHandler;
@@ -29,6 +28,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.common.collect.Maps;
+import com.google.common.reflect.Invokable;
 import com.google.common.reflect.Reflection;
 import com.google.common.reflect.TypeToken;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -130,8 +130,6 @@ public class JsonRpcEndpoint {
             JavaType javaType =  TypeFactory.defaultInstance().constructType (retType.getType());
 
             JsonNode result = response.get("result");
-            logger.trace("Result : {}", result.toString());
-
             Object result1 = objectMapper.convertValue(result, javaType);
             JsonNode error = response.get("error");
             if (error != null && !error.isNull()) {

@@ -13,12 +13,23 @@
 package org.opendaylight.ovsdb.lib.message;
 
 import org.opendaylight.ovsdb.lib.notation.Row;
+import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
 public class TableUpdate<E extends TableSchema<E>> {
 
+    private UUID uuid;
     private Row<E> old;
     private Row<E> new_;
+
+    public TableUpdate(UUID uuid) {
+        super();
+        this.uuid = uuid;
+    }
+
+    public UUID getUuid() {
+        return this.uuid;
+    }
 
     public Row<E> getOld() {
         return old;

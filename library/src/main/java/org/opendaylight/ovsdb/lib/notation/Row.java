@@ -12,14 +12,15 @@
 
 package org.opendaylight.ovsdb.lib.notation;
 
+import java.util.List;
+
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
-
-import java.util.List;
 
 public class Row<E extends TableSchema<E>> {
     List<Column<E, ?>> columns;
 
+    private Row() { }
 
     public Row(List<Column<E, ?>> columns) {
         this.columns = columns;

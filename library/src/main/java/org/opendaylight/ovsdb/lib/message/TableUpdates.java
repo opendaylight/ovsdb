@@ -11,10 +11,11 @@
  */
 package org.opendaylight.ovsdb.lib.message;
 
-import com.google.common.collect.Maps;
+import java.util.Map;
+
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
-import java.util.Map;
+import com.google.common.collect.Maps;
 
 
 public class TableUpdates extends Response {
@@ -31,5 +32,13 @@ public class TableUpdates extends Response {
 
     public <E extends TableSchema<E>> TableUpdate<E> getUpdate(TableSchema<E> table) {
         return this.map.get(table.getName());
+    }
+
+    @Override
+    public String toString() {
+        return "TableUpdates [map=" + map + ", error=" + error + ", details="
+                + details + ", getError()=" + getError() + ", getDetails()="
+                + getDetails() + ", getClass()=" + getClass() + ", hashCode()="
+                + hashCode() + ", toString()=" + super.toString() + "]";
     }
 }

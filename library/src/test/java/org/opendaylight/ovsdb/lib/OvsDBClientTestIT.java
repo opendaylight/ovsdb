@@ -27,6 +27,7 @@ import org.opendaylight.ovsdb.lib.message.MonitorRequest;
 import org.opendaylight.ovsdb.lib.message.MonitorRequestBuilder;
 import org.opendaylight.ovsdb.lib.message.MonitorSelect;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
+import org.opendaylight.ovsdb.lib.message.TableUpdate;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.message.UpdateNotification;
 import org.opendaylight.ovsdb.lib.notation.Column;
@@ -99,8 +100,9 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
             }
         });
 
-        for (int i = 0; i < 5 ; i++) { //wait 5 seconds to get a result
-            System.out.println("waiting");
+        for (int i = 0; i < 3 ; i++) { //wait 3 seconds to get a result
+            System.out.println("waiting on monitor response for Bridge Table...");
+            if (!results.isEmpty()) break;
             Thread.sleep(1000);
         }
 
@@ -108,7 +110,7 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
         Object result = results.get(0);
         Assert.assertTrue(result instanceof TableUpdates);
         TableUpdates updates = (TableUpdates) result;
-        org.opendaylight.ovsdb.lib.message.TableUpdate<GenericTableSchema> update = updates.getUpdate(bridge);
+        TableUpdate<GenericTableSchema> update = updates.getUpdate(bridge);
         Row<GenericTableSchema> aNew = update.getNew();
         for (Column<GenericTableSchema, ?> column: aNew.getColumns()) {
             if (column.getSchema().equals(flood_vlans)) {
@@ -116,6 +118,78 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
                 Assert.assertTrue(!data.isEmpty());
             }
         }
+    }
+
+    /*
+     * Ideally we should be using selectOpenVSwitchTableUuid() instead of this method.
+     * But Row.java needs some Jackson Jitsu to obtain the appropriate Row Json mapped to Java object
+     * for Select operation.
+     * Hence using the Monitor approach to obtain the uuid of the open_vSwitch table entry.
+     * Replace this method with selectOpenVSwitchTableUuid() once it is functional,
+     */
+    private UUID getOpenVSwitchTableUuid() throws ExecutionException, InterruptedException {
+        Assert.assertNotNull(dbSchema);
+        GenericTableSchema ovsTable = dbSchema.table("Open_vSwitch", GenericTableSchema.class);
+        List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
+        ColumnSchema<GenericTableSchema, UUID> _uuid = ovsTable.column("_uuid", UUID.class);
+
+        monitorRequests.add(
+                MonitorRequestBuilder.builder(ovsTable)
+                        .addColumn(_uuid)
+                        .with(new MonitorSelect(true, true, true, true))
+                        .build());
+
+        final List<Object> results = Lists.newArrayList();
+
+        MonitorHandle monitor = ovs.monitor(dbSchema, monitorRequests, new MonitorCallBack() {
+            @Override
+            public void update(TableUpdates result) {
+                results.add(result);
+            }
+
+            @Override
+            public void exception(Throwable t) {
+                results.add(t);
+                System.out.println("t = " + t);
+            }
+        });
+
+        for (int i = 0; i < 3 ; i++) { //wait 5 seconds to get a result
+            System.out.println("waiting on monitor response for open_vSwtich Table...");
+            if (!results.isEmpty()) break;
+            Thread.sleep(1000);
+        }
+
+        Assert.assertTrue(!results.isEmpty());
+        Object result = results.get(0); // open_vSwitch table has just 1 row.
+        Assert.assertTrue(result instanceof TableUpdates);
+        TableUpdates updates = (TableUpdates) result;
+        TableUpdate<GenericTableSchema> update = updates.getUpdate(ovsTable);
+        return update.getUuid();
+    }
+
+    /*
+     * TODO : selectOpenVSwitchTableUuid method isn't working as expected due to the Jackson
+     * parsing challenges on the Row object returned by the Select operation.
+     */
+    private UUID selectOpenVSwitchTableUuid() throws ExecutionException, InterruptedException {
+        Assert.assertNotNull(dbSchema);
+        GenericTableSchema ovsTable = dbSchema.table("Open_vSwitch", GenericTableSchema.class);
+
+        List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
+        ColumnSchema<GenericTableSchema, UUID> _uuid = ovsTable.column("_uuid", UUID.class);
+
+        List<OperationResult> results = ovs.transactBuilder()
+               .add(op.select(ovsTable)
+                      .column(_uuid))
+                      .execute()
+                      .get();
+
+        Assert.assertTrue(!results.isEmpty());
+        OperationResult result = results.get(0);
+        List<Row<GenericTableSchema>> rows = result.getRows();
+        Row<GenericTableSchema> ovsTableRow = rows.get(0);
+        return (UUID)ovsTableRow.getColumn(_uuid).getData();
     }
 
     private void createBridgeTransaction() throws IOException, InterruptedException, ExecutionException {
@@ -127,10 +201,12 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
         ColumnSchema<GenericTableSchema, String> fail_mode = bridge.column("fail_mode", String.class);
         ColumnSchema<GenericTableSchema, Set<Integer>> flood_vlans = bridge.multiValuedColumn("flood_vlans", Integer.class);
         ColumnSchema<GenericTableSchema, Set<UUID>> bridges = ovsTable.multiValuedColumn("bridges", UUID.class);
+        ColumnSchema<GenericTableSchema, UUID> _uuid = ovsTable.column("_uuid", UUID.class);
 
         String namedUuid = "br_test";
         int nOperations = 7;
         int insertOperationIndex = 0;
+        UUID parentTable = getOpenVSwitchTableUuid();
         ListenableFuture<List<OperationResult>> results = ovs.transactBuilder()
                  /*
                   * Make sure that the position of insert operation matches the insertOperationIndex.
@@ -147,6 +223,7 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
                         .build())
                 .add(op.select(bridge)
                         .column(name)
+                        .column(_uuid)
                         .where(name.opEqual(testBridgeName))
                         .build())
                 .add(op.mutate(bridge)
@@ -154,7 +231,9 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
                         .where(name.opEqual(testBridgeName))
                         .build())
                 .add(op.mutate(ovsTable)
-                        .addMutation(bridges, Mutator.INSERT, Sets.newHashSet(new UUID(namedUuid))))
+                        .addMutation(bridges, Mutator.INSERT, Sets.newHashSet(new UUID(namedUuid)))
+                        .where(_uuid.opEqual(parentTable))
+                        .build())
                 .add(op.commit(true))
                 .execute();
 
@@ -247,13 +326,17 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
         ColumnSchema<GenericTableSchema, String> name = bridge.column("name", String.class);
         GenericTableSchema ovsTable = dbSchema.table("Open_vSwitch", GenericTableSchema.class);
         ColumnSchema<GenericTableSchema, Set<UUID>> bridges = ovsTable.multiValuedColumn("bridges", UUID.class);
+        ColumnSchema<GenericTableSchema, UUID> _uuid = ovsTable.column("_uuid", UUID.class);
+        UUID parentTable = getOpenVSwitchTableUuid();
 
         ListenableFuture<List<OperationResult>> results = ovs.transactBuilder()
                 .add(op.delete(bridge)
                         .where(name.opEqual(testBridgeName))
                         .build())
                 .add(op.mutate(ovsTable)
-                        .addMutation(bridges, Mutator.DELETE, Sets.newHashSet(testBridgeUuid)))
+                        .addMutation(bridges, Mutator.DELETE, Sets.newHashSet(testBridgeUuid))
+                        .where(_uuid.opEqual(parentTable))
+                        .build())
                 .add(op.commit(true))
                 .execute();
 

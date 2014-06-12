@@ -40,14 +40,14 @@ public class Mutate<E extends TableSchema<E>> extends Operation<E> implements Co
 
     public <T extends TableSchema<T>, D> Mutate<E> addMutation(ColumnSchema<T, D> columnSchema, Mutator mutator, D value) {
         columnSchema.validate(value);
-        Object tval = null;
+        Object untypedValue = null;
         if (columnSchema.getType().isMultiValued()) {
             Preconditions.checkArgument((value instanceof Set),"expected a set for multivalued item") ;
-            tval = OvsDBSet.fromSet((Set) value);
+            untypedValue = OvsDBSet.fromSet((Set) value);
         } else {
-            tval = value;
+            untypedValue = value;
         }
-        mutations.add(new Mutation(columnSchema.getName(), mutator, tval));
+        mutations.add(new Mutation(columnSchema.getName(), mutator, untypedValue));
         return this;
     }
 

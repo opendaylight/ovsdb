@@ -49,14 +49,14 @@ public class Insert<E extends TableSchema<E>> extends Operation<E> {
     }
 
     public <D, C extends TableSchema<C>> Insert<E> value(ColumnSchema<C, D> columnSchema, D value) {
-        Object tval = null;
+        Object untypedValue = null;
         if (columnSchema.getType().isMultiValued()) {
             Preconditions.checkArgument((value instanceof Set),"expected a set for multivalued item") ;
-            tval = OvsDBSet.fromSet((Set) value);
+            untypedValue = OvsDBSet.fromSet((Set) value);
         } else {
-            tval = value;
+            untypedValue = value;
         }
-        row.put(columnSchema.getName(), tval);
+        row.put(columnSchema.getName(), untypedValue);
         return this;
     }
 

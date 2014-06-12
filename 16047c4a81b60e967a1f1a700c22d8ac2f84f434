@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_848a98bd",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/operations/Mutate.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-12T05:11:38Z",
+      "side": 1,
+      "message": "Good point :-) It is just a copy paste from Insert ;) and we have to ask Ashwin for these naming. I will fix it in the subsequent commit",
+      "parentUuid": "fa82b9bf_a4d79cbe",
+      "revId": "16047c4a81b60e967a1f1a700c22d8ac2f84f434",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_44e6d0b5",
         "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/operations/Mutate.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-11T22:33:32Z",
       "side": 1,
       "message": "is assigning something (which is a subclass of Object) to an Object ok?\nI know the compiler is happy, but now tval will act just like an ordinary object until it\u0027s cast back... but there is no reference to it\u0027s original type anywhere. This doesn\u0027t seem very Type Safe to me.",
+      "revId": "16047c4a81b60e967a1f1a700c22d8ac2f84f434",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a4855cae",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/operations/Mutate.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-12T05:11:38Z",
+      "side": 1,
+      "message": "Again a copy+paste issue. But, as you know, the generics is introduced for better type-safety over the \"generic\" Object. But, there are places where we cannot use Generics and Object is the way to go. am not saying that this is one such place. But as you can see the tval is used to handle a scenario where the value can either be a Set or a raw atomic value.",
+      "parentUuid": "fa82b9bf_44e6d0b5",
       "revId": "16047c4a81b60e967a1f1a700c22d8ac2f84f434",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_449490e1",
+        "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/OvsDBClientTestIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-12T05:11:38Z",
+      "side": 1,
+      "message": "Named UUID is deliberately a String :-) and not \"necessarily\" an UUID. that is because, this namedUuid is transaction scoped and has no meaning outside. Infact the existing code uses named uuid heavily. Also, it is good to test this feature provided by RFC 7047. (for example, named-uuid will NOT support strings with a \"-\" on it ;) ).",
+      "parentUuid": "fa82b9bf_84dcd8e5",
+      "revId": "16047c4a81b60e967a1f1a700c22d8ac2f84f434",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_e4d5a4b9",
         "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/OvsDBClientTestIT.java",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2014-06-11T22:33:32Z",
       "side": 1,
       "message": "I know 0 \u003d\u003d the result of the first operation, but can we put a comment here or perhaps use a constant? If ordering of operations changes the this will break the test.",
+      "revId": "16047c4a81b60e967a1f1a700c22d8ac2f84f434",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_648f54cd",
+        "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/OvsDBClientTestIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-12T05:11:38Z",
+      "side": 1,
+      "message": "Good point and I will do that.",
+      "parentUuid": "fa82b9bf_e4d5a4b9",
       "revId": "16047c4a81b60e967a1f1a700c22d8ac2f84f434",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +193,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_c413c064",
+        "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/OvsDBClientTestIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-12T05:11:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_e45e0476",
+      "revId": "16047c4a81b60e967a1f1a700c22d8ac2f84f434",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_24ccec34",
         "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/OvsDBClientTestIT.java",
         "patchSetId": 1
@@ -132,6 +222,24 @@
       "writtenOn": "2014-06-11T22:33:32Z",
       "side": 1,
       "message": "I\u0027m not sure it\u0027s safe to have assertions in cleanup code. These methods are designed to tear down the test fixture... I would rather this code was moved to the end of the testCase or to a helper method that is called at the end of the test case,",
+      "revId": "16047c4a81b60e967a1f1a700c22d8ac2f84f434",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e4160455",
+        "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/OvsDBClientTestIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-12T05:11:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_24ccec34",
       "revId": "16047c4a81b60e967a1f1a700c22d8ac2f84f434",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

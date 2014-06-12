@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_07076acb",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/operations/Mutate.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-12T09:07:51Z",
+      "side": 1,
+      "message": "Perhaps it might be safer here to do the following....\n\nif (columnSchema.getType().isMultiValued()) {\n    Preconditions.checkArgument((value instanceof Set),\"expected a set for multivalued item\") ;\n    value \u003d OvsDBSet.fromSet((Set) value);\n}\n\nThen the original type of value (as passed in to the method) should be preserved unless it\u0027s a Set",
+      "parentUuid": "fa82b9bf_a4855cae",
+      "revId": "16047c4a81b60e967a1f1a700c22d8ac2f84f434",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_84dcd8e5",
         "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/OvsDBClientTestIT.java",
         "patchSetId": 1
@@ -101,6 +119,24 @@
       "side": 1,
       "message": "Named UUID is deliberately a String :-) and not \"necessarily\" an UUID. that is because, this namedUuid is transaction scoped and has no meaning outside. Infact the existing code uses named uuid heavily. Also, it is good to test this feature provided by RFC 7047. (for example, named-uuid will NOT support strings with a \"-\" on it ;) ).",
       "parentUuid": "fa82b9bf_84dcd8e5",
+      "revId": "16047c4a81b60e967a1f1a700c22d8ac2f84f434",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_270aaed2",
+        "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/OvsDBClientTestIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-12T09:07:51Z",
+      "side": 1,
+      "message": "Got it :) Thanks for clarifying",
+      "parentUuid": "fa82b9bf_449490e1",
       "revId": "16047c4a81b60e967a1f1a700c22d8ac2f84f434",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

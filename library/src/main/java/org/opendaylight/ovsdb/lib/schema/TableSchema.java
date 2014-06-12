@@ -9,21 +9,25 @@
  */
 package org.opendaylight.ovsdb.lib.schema;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.collect.Lists;
-import org.opendaylight.ovsdb.lib.message.TableUpdate;
-import org.opendaylight.ovsdb.lib.notation.Column;
-import org.opendaylight.ovsdb.lib.notation.Row;
-import org.opendaylight.ovsdb.lib.operations.Insert;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.lang.reflect.Constructor;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.opendaylight.ovsdb.lib.message.TableUpdate;
+import org.opendaylight.ovsdb.lib.notation.Column;
+import org.opendaylight.ovsdb.lib.notation.Row;
+import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.operations.Insert;
+import org.opendaylight.ovsdb.lib.schema.BaseType.UuidBaseType;
+import org.opendaylight.ovsdb.lib.schema.ColumnType.AtomicColumnType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.Lists;
 
 
 public abstract class TableSchema<E extends TableSchema<E>> {
@@ -111,6 +115,7 @@ public abstract class TableSchema<E extends TableSchema<E>> {
     public TableUpdate<E> updatesFromJson(JsonNode value) {
 
         Map.Entry<String, JsonNode> idOldNew = value.fields().next();
+        String uuid = idOldNew.getKey();
 
         ObjectNode new_ = (ObjectNode) idOldNew.getValue().get("new");
         ObjectNode old = (ObjectNode) idOldNew.getValue().get("old");
@@ -118,10 +123,9 @@ public abstract class TableSchema<E extends TableSchema<E>> {
         Row<E> newRow = new_ != null ? createRow(new_) : null;
         Row<E> oldRow = old != null ? createRow(old) : null;
 
-        TableUpdate<E> tableUpdate = new TableUpdate<>();
+        TableUpdate<E> tableUpdate = new TableUpdate<>(new UUID(uuid));
         tableUpdate.setNew(newRow);
         tableUpdate.setOld(oldRow);
-
 
         return tableUpdate;
     }
@@ -135,5 +139,20 @@ public abstract class TableSchema<E extends TableSchema<E>> {
             columns.add(new Column<>(schema, o));
         }
         return new Row<>(columns);
+    }
+
+    /*
+     * RFC 7047 Section 3.2 specifies 2 internally generated columns in each table
+     * namely _uuid and version which are not exposed in get_schema call.
+     * Since these 2 columns are extremely useful for Mutate, update and select operations,
+     * the ColumnSchema for these 2 columns are manually populated.
+     *
+     * It is to be noted that these 2 columns are specified as part of the RFC7047 and not
+     * a specific Schema implementation detail & hence adding it by default in the Library
+     * for better application experience using the library.
+     */
+    public void populateInternallyGeneratedColumns() {
+        columns.put("_uuid", new ColumnSchema("_uuid", new AtomicColumnType(new UuidBaseType())));
+        columns.put("version", new ColumnSchema("version", new AtomicColumnType(new UuidBaseType())));
     }
 }

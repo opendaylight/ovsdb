@@ -9,18 +9,19 @@
  */
 package org.opendaylight.ovsdb.lib.schema;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.reflect.Invokable;
-import org.opendaylight.ovsdb.lib.ParsingException;
-import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import org.opendaylight.ovsdb.lib.ParsingException;
+import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.reflect.Invokable;
 
 /**
  * Represents an ovsdb database schema, which is comprised of a set of tables.
@@ -106,5 +107,11 @@ public class DatabaseSchema {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void populateInternallyGeneratedColumns() {
+        for (TableSchema tableSchema : tables.values()) {
+            tableSchema.populateInternallyGeneratedColumns();
+        }
     }
 }

@@ -12,7 +12,9 @@ package org.opendaylight.ovsdb.lib.operations;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -30,7 +32,7 @@ public class OperationResult {
     private int count;
     @JsonIgnore
     private UUID uuid;
-    private ArrayList<Object> rows;
+    private ArrayList<Row<GenericTableSchema>> rows;
     private String error;
     private String details;
 
@@ -47,10 +49,10 @@ public class OperationResult {
     public void setUuid(List<String> uuidList) {
         this.uuid = new UUID(uuidList.get(1));
     }
-    public ArrayList<Object> getRows() {
+    public ArrayList<Row<GenericTableSchema>> getRows() {
         return rows;
     }
-    public void setRows(ArrayList<Object> rows) {
+    public void setRows(ArrayList<Row<GenericTableSchema>> rows) {
         this.rows = rows;
     }
     public String getError() {

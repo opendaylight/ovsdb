@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_674af6ad",
+        "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/OvsDBClientTestIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-12T16:05:44Z",
+      "side": 1,
+      "message": "Let\u0027s not call these mehods *Test as they are helpers and dn\u0027t have an @Test annotation",
+      "revId": "fd83519e649bf6e3436b1ebe3e5756b92b1755d0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a750fe5e",
+        "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/OvsDBClientTestIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-12T16:05:44Z",
+      "side": 1,
+      "message": "As per previous review comments. There should not be assertions in setup/teardown methods as they should not fail (for setting up or tearing down fixtures only).",
+      "revId": "fd83519e649bf6e3436b1ebe3e5756b92b1755d0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_474fb2bd",
+        "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/OvsDBClientTestIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-12T16:05:44Z",
+      "side": 1,
+      "message": "As above",
+      "revId": "fd83519e649bf6e3436b1ebe3e5756b92b1755d0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

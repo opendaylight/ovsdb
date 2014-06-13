@@ -16,6 +16,24 @@
       "revId": "8f906b949091418b4042f3c0c91dda3229b7907d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0d146b9e",
+        "filename": "features/src/main/resources/features.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-06-13T13:12:33Z",
+      "side": 1,
+      "message": "It should be AD-SAL protocol-plugins OF , which is my mistake as for the SAL + Southbound.. the answer is not really SAL abstracts compile dependency not runtime dependency here you specific runtime / component dependency as such it is what components are required in your \"distribution\" if I could phrase it this way.. SAL is an API abstraction for the bundles.",
+      "parentUuid": "fa82b9bf_8b04f1c0",
+      "revId": "8f906b949091418b4042f3c0c91dda3229b7907d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

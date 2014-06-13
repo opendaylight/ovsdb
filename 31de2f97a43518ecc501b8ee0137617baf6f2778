@@ -1,0 +1,8 @@
+Verified+1: jenkins-ovsdb <jenkins-ovsdb@opendaylight.org>
+Code-Review+2: Ashwin Raveendran <ashw7n@gmail.com>
+Verified+1: Ashwin Raveendran <ashw7n@gmail.com>
+Submitted-by: Ashwin Raveendran <ashw7n@gmail.com>
+Submitted-at: Fri, 13 Jun 2014 14:24:43 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/7970
+Project: ovsdb
+Branch: refs/heads/topic/schema

@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_add77fbe",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/operations/Mutate.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 952
+      },
+      "writtenOn": "2014-06-13T14:31:26Z",
+      "side": 1,
+      "message": "there needs to be an easy method for figuring this out, otherwise we will repeat the logic everywhere. someting like columnSchema.isSetType()",
+      "revId": "4547a66ee45fc7c945eb5a7633e2deacf7eed971",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

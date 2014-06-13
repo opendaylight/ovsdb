@@ -16,6 +16,24 @@
       "revId": "0ae9fed3ecc2e3f612c9d97d1aedbbf43baa7a7a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0d622b3e",
+        "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/OvsDBClientTestIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-13T14:00:41Z",
+      "side": 1,
+      "message": "It is mentioned in the comment :-) : \"all columns in the table, ex\ncept for \"_uuid\", are monitored.\" Hence the -1.",
+      "parentUuid": "fa82b9bf_4d7833f2",
+      "revId": "0ae9fed3ecc2e3f612c9d97d1aedbbf43baa7a7a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

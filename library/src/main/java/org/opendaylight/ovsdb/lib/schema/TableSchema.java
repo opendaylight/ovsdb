@@ -99,7 +99,9 @@ public abstract class TableSchema<E extends TableSchema<E>> {
         //todo exception handling
 
         ColumnSchema columnSchema = columns.get(column);
-        columnSchema.validateType(type);
+        if (columnSchema != null) {
+            columnSchema.validateType(type);
+        }
         return columnSchema;
     }
 
@@ -143,8 +145,16 @@ public abstract class TableSchema<E extends TableSchema<E>> {
         for (Iterator<Map.Entry<String, JsonNode>> iter = rowNode.fields(); iter.hasNext();) {
             Map.Entry<String, JsonNode> next = iter.next();
             ColumnSchema<E, Object> schema = column(next.getKey(), Object.class);
-            Object o = schema.valueFromJson(next.getValue());
-            columns.add(new Column<>(schema, o));
+            /*
+             * Ideally the ColumnSchema shouldn't be null at this stage. But there can be cases in which
+             * the OVSDB manager Schema implementation might decide to include some "hidden" columns that
+             * are NOT reported in getSchema, but decide to report it in unfiltered monitor.
+             * Hence adding some safety checks around that.
+             */
+            if (schema != null) {
+                Object o = schema.valueFromJson(next.getValue());
+                columns.add(new Column<>(schema, o));
+            }
         }
         return new Row<>(columns);
     }

@@ -36,6 +36,7 @@ import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
+import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
@@ -127,6 +128,9 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
                 Map<String, String> data = column.getData(externalIds);
                 Assert.assertNotNull(data.get("key"));
                 Assert.assertEquals("value", data.get("key"));
+                // Test for {"key2", "value2"} external_ids mutation-inserted in Bridge br-test in createBridgeTransaction
+                Assert.assertNotNull(data.get("key2"));
+                Assert.assertEquals("value2", data.get("key2"));
             }
         }
     }
@@ -216,10 +220,9 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
         ColumnSchema<GenericTableSchema, UUID> _uuid = ovsTable.column("_uuid", UUID.class);
 
         String namedUuid = "br_test";
-        int nOperations = 7;
         int insertOperationIndex = 0;
         UUID parentTable = getOpenVSwitchTableUuid();
-        ListenableFuture<List<OperationResult>> results = ovs.transactBuilder()
+        TransactionBuilder transactionBuilder = ovs.transactBuilder()
                  /*
                   * Make sure that the position of insert operation matches the insertOperationIndex.
                   * This will be used later when the Results are processed.
@@ -243,17 +246,21 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
                         .addMutation(flood_vlans, Mutator.INSERT, Sets.newHashSet(200,400))
                         .where(name.opEqual(testBridgeName))
                         .build())
+                .add(op.mutate(bridge)
+                        .addMutation(externalIds, Mutator.INSERT, Maps.newHashMap(ImmutableMap.of("key2","value2")))
+                        .where(name.opEqual(testBridgeName))
+                        .build())
                 .add(op.mutate(ovsTable)
                         .addMutation(bridges, Mutator.INSERT, Sets.newHashSet(new UUID(namedUuid)))
                         .where(_uuid.opEqual(parentTable))
                         .build())
-                .add(op.commit(true))
-                .execute();
+                .add(op.commit(true));
 
+        ListenableFuture<List<OperationResult>> results = transactionBuilder.execute();
         List<OperationResult> operationResults = results.get();
         Assert.assertFalse(operationResults.isEmpty());
         // Check if Results matches the number of operations in transaction
-        Assert.assertEquals(nOperations, operationResults.size());
+        Assert.assertEquals(transactionBuilder.getOperations().size(), operationResults.size());
         System.out.println("Insert & Update operation results = " + operationResults);
         testBridgeUuid = operationResults.get(insertOperationIndex).getUuid();
     }

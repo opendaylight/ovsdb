@@ -12,13 +12,14 @@
 
 package org.opendaylight.ovsdb.lib.operations;
 
-import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.ListenableFuture;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.opendaylight.ovsdb.lib.OvsDBClientImpl;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.ListenableFuture;
 
 public class TransactionBuilder {
 
@@ -32,6 +33,10 @@ public class TransactionBuilder {
 
     public TransactionBuilder(DatabaseSchema eDatabaseSchema) {
         this.eDatabaseSchema = eDatabaseSchema;
+    }
+
+    public ArrayList<Operation> getOperations() {
+        return operations;
     }
 
     public TransactionBuilder add(Operation operation) {

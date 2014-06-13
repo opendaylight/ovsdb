@@ -9,11 +9,13 @@
  */
 package org.opendaylight.ovsdb.lib.schema;
 
+import java.util.Set;
+
+import org.opendaylight.ovsdb.lib.jsonrpc.JsonUtils;
+import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
-import org.opendaylight.ovsdb.lib.jsonrpc.JsonUtils;
-
-import java.util.Set;
 
 
 public abstract class ColumnType {
@@ -121,6 +123,7 @@ public abstract class ColumnType {
             super(baseType1);
         }
 
+        @Override
         public AtomicColumnType fromJsonNode(JsonNode json) {
             if (json.isObject() && json.has("value")) {
                 return null;
@@ -153,10 +156,14 @@ public abstract class ColumnType {
         public Object valueFromJson(JsonNode value) {
             if (isMultiValued()) {
                 Set<Object> result = Sets.newHashSet();
-               if(value.isContainerNode()) {
-                  for(JsonNode node: value) {
-                     result.add(getBaseType().toValue(node));
-                  }
+               if(value.isArray()) {
+                     if (value.size() == 2) {
+                         if (value.get(0).isTextual() && "set".equals(value.get(0).asText())) {
+                              for(JsonNode node: value.get(1)) {
+                                 result.add(getBaseType().toValue(node));
+                              }
+                         }
+                     }
                } else {
                    result.add(getBaseType().toValue(value));
                }
@@ -174,16 +181,21 @@ public abstract class ColumnType {
     }
 
     public static class KeyValuedColumnType extends ColumnType {
+        BaseType keyType;
 
-        BaseType valueType;
+        public BaseType getKeyType() {
+            return keyType;
+        }
 
         public KeyValuedColumnType() {
         }
 
-        public KeyValuedColumnType(BaseType baseType, BaseType valueType) {
-            super(baseType);
+        public KeyValuedColumnType(BaseType keyType, BaseType valueType) {
+            super(valueType);
+            this.keyType = keyType;
         }
 
+        @Override
         public KeyValuedColumnType fromJsonNode(JsonNode json) {
             if (json.isValueNode() || !json.has("value")) {
                 return null;
@@ -191,17 +203,48 @@ public abstract class ColumnType {
             BaseType keyType = BaseType.fromJson(json, "key");
             BaseType valueType = BaseType.fromJson(json, "value");
 
-            return new KeyValuedColumnType(keyType, valueType);
+            KeyValuedColumnType keyValueColumnType = new KeyValuedColumnType(keyType, valueType);
+            JsonNode node = null;
+            if ((node = json.get("min")) != null) {
+                keyValueColumnType.setMin(node.asLong());
+            }
+
+            if ((node = json.get("max")) != null) {
+                if (node.isLong()){
+                    keyValueColumnType.setMax(node.asLong());
+                } else if (node.isTextual() && "unlimited".equals(node.asText())) {
+                    max = Long.MAX_VALUE;
+                }
+            }
+
+            return keyValueColumnType;
         }
 
         @Override
-        public Object valueFromJson(JsonNode value) {
-            throw new UnsupportedOperationException("needs to be implemented");
+        public Object valueFromJson(JsonNode node) {
+            if (node.isArray()) {
+                if (node.size() == 2) {
+                    if (node.get(0).isTextual() && "map".equals(node.get(0).asText())) {
+                        OvsDBMap<Object, Object> map = new OvsDBMap<Object, Object>();
+                        for (JsonNode pairNode : node.get(1)) {
+                            if (pairNode.isArray() && node.size() == 2) {
+                                Object key = getKeyType().toValue(pairNode.get(0));
+                                Object value = getBaseType().toValue(pairNode.get(1));
+                                map.put(key, value);
+                            }
+                        }
+                        return map;
+                    } else if (node.size() == 0) {
+                        return null;
+                    }
+                }
+            }
+            return null;
         }
 
         @Override
         public void validate(Object value) {
-            throw new UnsupportedOperationException("not implemented yet");
+            this.baseType.validate(value);
         }
     }
 }

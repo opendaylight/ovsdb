@@ -31,7 +31,7 @@ public class Column<E extends TableSchema<E>, D> {
         return schema.validate(data);
     }
 
-    public Object getData() {
+    public D getData() {
         return data;
     }
 

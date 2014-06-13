@@ -13,6 +13,7 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -42,7 +43,9 @@ import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -75,12 +78,13 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
 
         List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
         ColumnSchema<GenericTableSchema, Set<Integer>> flood_vlans = bridge.multiValuedColumn("flood_vlans", Integer.class);
-
+        ColumnSchema<GenericTableSchema, Map<String, String>> externalIds = bridge.multiValuedColumn("external_ids", String.class, String.class);
         monitorRequests.add(
                 MonitorRequestBuilder.builder(bridge)
                         .addColumn(bridge.column("name"))
                         .addColumn(bridge.column("fail_mode", String.class))
                         .addColumn(flood_vlans)
+                        .addColumn(externalIds)
                         .with(new MonitorSelect(true, true, true, true))
                         .build());
 
@@ -114,8 +118,15 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
         Row<GenericTableSchema> aNew = update.getNew();
         for (Column<GenericTableSchema, ?> column: aNew.getColumns()) {
             if (column.getSchema().equals(flood_vlans)) {
+                // Test for the 5 flood_vlans inserted in Bridge br-test in createBridgeTransaction
                 Set<Integer> data = column.getData(flood_vlans);
                 Assert.assertTrue(!data.isEmpty());
+                Assert.assertEquals(5, data.size());
+            } else if (column.getSchema().equals(externalIds)) {
+                // Test for the {"key", "value"} external_ids inserted in Bridge br-test in createBridgeTransaction
+                Map<String, String> data = column.getData(externalIds);
+                Assert.assertNotNull(data.get("key"));
+                Assert.assertEquals("value", data.get("key"));
             }
         }
     }
@@ -189,7 +200,7 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
         OperationResult result = results.get(0);
         List<Row<GenericTableSchema>> rows = result.getRows();
         Row<GenericTableSchema> ovsTableRow = rows.get(0);
-        return (UUID)ovsTableRow.getColumn(_uuid).getData();
+        return ovsTableRow.getColumn(_uuid).getData();
     }
 
     private void createBridgeTransaction() throws IOException, InterruptedException, ExecutionException {
@@ -200,6 +211,7 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
         ColumnSchema<GenericTableSchema, String> name = bridge.column("name", String.class);
         ColumnSchema<GenericTableSchema, String> fail_mode = bridge.column("fail_mode", String.class);
         ColumnSchema<GenericTableSchema, Set<Integer>> flood_vlans = bridge.multiValuedColumn("flood_vlans", Integer.class);
+        ColumnSchema<GenericTableSchema, Map<String, String>> externalIds = bridge.multiValuedColumn("external_ids", String.class, String.class);
         ColumnSchema<GenericTableSchema, Set<UUID>> bridges = ovsTable.multiValuedColumn("bridges", UUID.class);
         ColumnSchema<GenericTableSchema, UUID> _uuid = ovsTable.column("_uuid", UUID.class);
 
@@ -215,7 +227,8 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
                 .add(op.insert(bridge)
                         .withId(namedUuid)
                         .value(name, testBridgeName)
-                        .value(flood_vlans, Sets.newHashSet(100, 101, 4001)))
+                        .value(flood_vlans, Sets.newHashSet(100, 101, 4001))
+                        .value(externalIds, Maps.newHashMap(ImmutableMap.of("key","value"))))
                 .add(op.comment("Inserting Bridge br-int"))
                 .add(op.update(bridge)
                         .set(fail_mode, "secure")

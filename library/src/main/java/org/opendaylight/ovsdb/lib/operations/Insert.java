@@ -12,12 +12,12 @@ package org.opendaylight.ovsdb.lib.operations;
 import java.util.Map;
 import java.util.Set;
 
+import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
 import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 
 
@@ -51,8 +51,11 @@ public class Insert<E extends TableSchema<E>> extends Operation<E> {
     public <D, C extends TableSchema<C>> Insert<E> value(ColumnSchema<C, D> columnSchema, D value) {
         Object untypedValue = null;
         if (columnSchema.getType().isMultiValued()) {
-            Preconditions.checkArgument((value instanceof Set),"expected a set for multivalued item") ;
-            untypedValue = OvsDBSet.fromSet((Set) value);
+            if (value instanceof Set) {
+                untypedValue = OvsDBSet.fromSet((Set) value);
+            } else if (value instanceof Map) {
+                untypedValue = OvsDBMap.fromMap((Map)value);
+            }
         } else {
             untypedValue = value;
         }

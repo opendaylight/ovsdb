@@ -151,7 +151,7 @@ public abstract class TableSchema<E extends TableSchema<E>> {
 
     /*
      * RFC 7047 Section 3.2 specifies 2 internally generated columns in each table
-     * namely _uuid and version which are not exposed in get_schema call.
+     * namely _uuid and _version which are not exposed in get_schema call.
      * Since these 2 columns are extremely useful for Mutate, update and select operations,
      * the ColumnSchema for these 2 columns are manually populated.
      *
@@ -161,6 +161,6 @@ public abstract class TableSchema<E extends TableSchema<E>> {
      */
     public void populateInternallyGeneratedColumns() {
         columns.put("_uuid", new ColumnSchema("_uuid", new AtomicColumnType(new UuidBaseType())));
-        columns.put("version", new ColumnSchema("version", new AtomicColumnType(new UuidBaseType())));
+        columns.put("_version", new ColumnSchema("_version", new AtomicColumnType(new UuidBaseType())));
     }
 }

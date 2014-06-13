@@ -74,20 +74,26 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
         Assert.assertNotNull(dbSchema);
         // Create Test Bridge before testing the Monitor operation
         createBridgeTransaction();
+        sendBridgeMonitorRequest(true); // Test monitor request with Column filters
+        sendBridgeMonitorRequest(false); // Test monitor request without filters
+    }
 
+    public void sendBridgeMonitorRequest(boolean filter) throws ExecutionException, InterruptedException, IOException {
+        Assert.assertNotNull(dbSchema);
         GenericTableSchema bridge = dbSchema.table("Bridge", GenericTableSchema.class);
 
         List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
         ColumnSchema<GenericTableSchema, Set<Integer>> flood_vlans = bridge.multiValuedColumn("flood_vlans", Integer.class);
         ColumnSchema<GenericTableSchema, Map<String, String>> externalIds = bridge.multiValuedColumn("external_ids", String.class, String.class);
-        monitorRequests.add(
-                MonitorRequestBuilder.builder(bridge)
-                        .addColumn(bridge.column("name"))
-                        .addColumn(bridge.column("fail_mode", String.class))
-                        .addColumn(flood_vlans)
-                        .addColumn(externalIds)
-                        .with(new MonitorSelect(true, true, true, true))
-                        .build());
+        MonitorRequestBuilder<GenericTableSchema> builder = MonitorRequestBuilder.builder(bridge);
+        if (filter) {
+            builder.addColumn(bridge.column("name"))
+                   .addColumn(bridge.column("fail_mode", String.class))
+                   .addColumn(flood_vlans)
+                   .addColumn(externalIds);
+        }
+        monitorRequests.add(builder.with(new MonitorSelect(true, true, true, true))
+                                   .build());
 
         final List<Object> results = Lists.newArrayList();
 
@@ -117,6 +123,12 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
         TableUpdates updates = (TableUpdates) result;
         TableUpdate<GenericTableSchema> update = updates.getUpdate(bridge);
         Row<GenericTableSchema> aNew = update.getNew();
+        if (filter) {
+            Assert.assertEquals(builder.getColumns().size(), aNew.getColumns().size());
+        } else {
+            // As per RFC7047, Section 4.1.5 : If "columns" is omitted, all columns in the table, except for "_uuid", are monitored.
+            Assert.assertEquals(bridge.getColumns().size() - 1, aNew.getColumns().size());
+        }
         for (Column<GenericTableSchema, ?> column: aNew.getColumns()) {
             if (column.getSchema().equals(flood_vlans)) {
                 // Test for the 5 flood_vlans inserted in Bridge br-test in createBridgeTransaction
@@ -180,6 +192,7 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
         Assert.assertTrue(result instanceof TableUpdates);
         TableUpdates updates = (TableUpdates) result;
         TableUpdate<GenericTableSchema> update = updates.getUpdate(ovsTable);
+        Assert.assertNotNull(update.getUuid());
         return update.getUuid();
     }
 

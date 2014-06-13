@@ -9,11 +9,11 @@
  */
 package org.opendaylight.ovsdb.lib.message;
 
-import com.google.common.collect.Sets;
+import java.util.List;
+import java.util.Set;
+
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
-
-import java.util.List;
 
 public class MonitorRequestBuilder<E extends TableSchema<E>> {
 
@@ -31,13 +31,12 @@ public class MonitorRequestBuilder<E extends TableSchema<E>> {
     MonitorRequest<E> getMonitorRequest() {
         if (monitorRequest == null) {
             monitorRequest = new MonitorRequest<>();
-            monitorRequest.setColumns(Sets.<String>newHashSet());
         }
         return monitorRequest;
     }
 
     public MonitorRequestBuilder<E> addColumn(String column) {
-        getMonitorRequest().getColumns().add(column);
+        getMonitorRequest().addColumn(column);
         return this;
     }
 
@@ -51,6 +50,10 @@ public class MonitorRequestBuilder<E extends TableSchema<E>> {
             this.addColumn(schema);
         }
         return this;
+    }
+
+    public Set<String> getColumns() {
+        return getMonitorRequest().getColumns();
     }
 
     public MonitorRequestBuilder<E> with(MonitorSelect select) {

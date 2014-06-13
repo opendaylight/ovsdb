@@ -9,17 +9,18 @@
  */
 package org.opendaylight.ovsdb.lib.message;
 
+import java.util.Set;
+
+import org.opendaylight.ovsdb.lib.schema.TableSchema;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.common.collect.Sets;
-import org.opendaylight.ovsdb.lib.schema.TableSchema;
-
-import java.util.Set;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MonitorRequest<E extends TableSchema<E>> {
     @JsonIgnore String tableName;
-    Set<String> columns = Sets.newHashSet();
+    Set<String> columns;
     MonitorSelect select;
 
     public MonitorRequest() {
@@ -58,4 +59,10 @@ public class MonitorRequest<E extends TableSchema<E>> {
         this.columns = columns;
     }
 
+    public void addColumn(String column) {
+        if (columns == null) {
+            columns = Sets.<String>newHashSet();
+        }
+        columns.add(column);
+    }
 }

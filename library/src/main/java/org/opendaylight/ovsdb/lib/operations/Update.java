@@ -43,7 +43,8 @@ public class Update<E extends TableSchema<E>> extends Operation<E> implements Co
 
     public <T extends TableSchema<T>, D> Update<E> set(ColumnSchema<T, D> columnSchema, D value) {
         columnSchema.validate(value);
-        this.row.put(columnSchema.getName(), value);
+        Object untypedValue = columnSchema.getNormalizeData(value);
+        this.row.put(columnSchema.getName(), untypedValue);
         return this;
     }
 

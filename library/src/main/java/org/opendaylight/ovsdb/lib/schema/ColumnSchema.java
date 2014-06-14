@@ -9,9 +9,15 @@
  */
 package org.opendaylight.ovsdb.lib.schema;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import java.util.Map;
+import java.util.Set;
+
 import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.notation.Function;
+import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
+import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 
 public class ColumnSchema<E extends TableSchema<E>, D> {
@@ -92,4 +98,15 @@ public class ColumnSchema<E extends TableSchema<E>, D> {
       return (D) this.getType().valueFromJson(value);
     }
 
+    public Object getNormalizeData(D value) {
+        Object untypedValue = null;
+        if (value instanceof Set) {
+            untypedValue = OvsDBSet.fromSet((Set) value);
+        } else if (value instanceof Map) {
+            untypedValue = OvsDBMap.fromMap((Map)value);
+        } else {
+            untypedValue = value;
+        }
+        return untypedValue;
+    }
 }

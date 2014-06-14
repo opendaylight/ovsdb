@@ -11,14 +11,10 @@
 package org.opendaylight.ovsdb.lib.operations;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.notation.Mutation;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
-import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
-import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
@@ -41,16 +37,7 @@ public class Mutate<E extends TableSchema<E>> extends Operation<E> implements Co
 
     public <T extends TableSchema<T>, D> Mutate<E> addMutation(ColumnSchema<T, D> columnSchema, Mutator mutator, D value) {
         columnSchema.validate(value);
-        Object untypedValue = null;
-        if (columnSchema.getType().isMultiValued()) {
-            if (value instanceof Set) {
-                untypedValue = OvsDBSet.fromSet((Set) value);
-            } else if (value instanceof Map) {
-                untypedValue = OvsDBMap.fromMap((Map)value);
-            }
-        } else {
-            untypedValue = value;
-        }
+        Object untypedValue = columnSchema.getNormalizeData(value);
         mutations.add(new Mutation(columnSchema.getName(), mutator, untypedValue));
         return this;
     }

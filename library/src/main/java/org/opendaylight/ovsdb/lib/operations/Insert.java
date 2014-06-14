@@ -10,10 +10,7 @@
 package org.opendaylight.ovsdb.lib.operations;
 
 import java.util.Map;
-import java.util.Set;
 
-import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
-import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
@@ -49,16 +46,7 @@ public class Insert<E extends TableSchema<E>> extends Operation<E> {
     }
 
     public <D, C extends TableSchema<C>> Insert<E> value(ColumnSchema<C, D> columnSchema, D value) {
-        Object untypedValue = null;
-        if (columnSchema.getType().isMultiValued()) {
-            if (value instanceof Set) {
-                untypedValue = OvsDBSet.fromSet((Set) value);
-            } else if (value instanceof Map) {
-                untypedValue = OvsDBMap.fromMap((Map)value);
-            }
-        } else {
-            untypedValue = value;
-        }
+        Object untypedValue = columnSchema.getNormalizeData(value);
         row.put(columnSchema.getName(), untypedValue);
         return this;
     }

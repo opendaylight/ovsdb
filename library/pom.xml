@@ -136,6 +136,9 @@
         <artifactId>maven-failsafe-plugin</artifactId>
         <configuration>
           <skipITs>${skip.integrationtest}</skipITs>
+          <includes>
+            <include>**/*IT*</include>
+          </includes>
         </configuration>
       </plugin>
       <plugin>
@@ -145,7 +148,7 @@
         <configuration>
           <excludes>
             <!--  Exclude integration tests -->
-            <exclude>**/*IT</exclude>
+            <exclude>**/*IT*</exclude>
           </excludes>
         </configuration>
       </plugin>

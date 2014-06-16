@@ -31,13 +31,13 @@ public class OvsdbTestBridgeConfigIT extends OvsdbTestBase {
         Map<ConfigConstants, Object> configs = new HashMap<ConfigConstants, Object>();
 
         Map<String, String> exterIDPairs = new HashMap<String, String>();
-        exterIDPairs.put("bridge-foo", "bri-bar");
+        exterIDPairs.put("br-foo", "br-bar");
         //Will accept multiple array pairs. Pairs must be arrays not maps.
         configs.put(ConfigConstants.CUSTOM, exterIDPairs);
 
         ConfigurationService configurationService = new ConfigurationService();
         configurationService.setConnectionServiceInternal(connectionService);
-        configurationService.addBridgeDomainConfig(node, "br0", configs);
+        configurationService.addBridgeDomainConfig(node, BRIDGE_NAME, configs);
     }
 
 }

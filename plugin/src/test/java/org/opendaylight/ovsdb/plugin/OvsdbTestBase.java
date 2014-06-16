@@ -22,6 +22,11 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 
 public abstract class OvsdbTestBase {
     private final static String identifier = "TEST";
+    protected final static String BRIDGE_NAME = "JUNIT_TEST_BRIDGE";
+    protected final static String PORT_NAME = "eth0";
+    protected final static String TAGGED_PORT_NAME = "eth1";
+    protected final static String TUNNEL_PORT_NAME = "vxlan0";
+    protected final static String FAKE_IP = "192.168.254.254";
     private final static String SERVER_IPADDRESS = "ovsdbserver.ipaddress";
     private final static String SERVER_PORT = "ovsdbserver.port";
     private final static String DEFAULT_SERVER_PORT = "6640";
@@ -33,10 +38,12 @@ public abstract class OvsdbTestBase {
 
     public class TestObjects {
         public final ConnectionService connectionService;
+        public final InventoryService inventoryService;
         public final Node node;
 
-        public TestObjects(ConnectionService connectionService, Node node) {
+        public TestObjects(ConnectionService connectionService, Node node, InventoryService inventoryService) {
             this.connectionService = connectionService;
+            this.inventoryService = inventoryService;
             this.node = node;
         }
     }
@@ -58,8 +65,9 @@ public abstract class OvsdbTestBase {
 
         ConnectionService connectionService = new ConnectionService();
         connectionService.init();
-
-        connectionService.setInventoryServiceInternal(inventoryService);
+        InventoryService inventory = new InventoryService();
+        inventory.init();
+        connectionService.setInventoryServiceInternal(inventory);
         Map<ConnectionConstants, String> params = new HashMap<ConnectionConstants, String>();
 
         params.put(ConnectionConstants.ADDRESS, address);
@@ -67,9 +75,9 @@ public abstract class OvsdbTestBase {
 
         Node node = connectionService.connect(identifier, params);
         if (node == null) {
-            throw new IOException("Failed to connecto to ovsdb server");
+            throw new IOException("Failed to connect to the ovsdb server");
         }
-        return new TestObjects(connectionService, node);
+        return new TestObjects(connectionService, node, inventory);
     }
 
 }

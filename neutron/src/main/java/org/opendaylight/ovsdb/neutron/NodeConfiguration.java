@@ -32,18 +32,18 @@ public class NodeConfiguration {
     private static final int MAX_VLAN = 4096;
     private java.util.Queue<Integer> internalVlans = new LinkedList<>();
     private ConcurrentMap<String, Integer> tenantVlanMap = new ConcurrentHashMap<>();
+    private ITenantNetworkManager tenantNetworkManager;
 
-    public NodeConfiguration(Node node) {
+    public NodeConfiguration(Node node, ITenantNetworkManager tenantNetworkManager) {
         for (int i = 1; i < MAX_VLAN ; i++) {
             internalVlans.add(i);
         }
-
+        setTenantNetworkManager(tenantNetworkManager);
         initializeNodeConfiguration(node);
     }
 
 
     private void initializeNodeConfiguration(Node node) {
-
         int vlan = 0;
         String networkId = new String();
         OVSDBConfigService ovsdbTable = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
@@ -66,7 +66,7 @@ public class NodeConfiguration {
                     vlan = tags[0].intValue();
                 }
                 else {
-                   logger.debug("This port has more {} interfaces", tags.length);
+                   logger.debug("This port ({}) has {} tags", port.getName(), tags.length);
                    continue;
                 }
 
@@ -78,7 +78,7 @@ public class NodeConfiguration {
                         continue;
                     }
 
-                    networkId = TenantNetworkManager.getManager().getTenantNetworkForInterface(iface).getNetworkUUID();
+                    networkId = tenantNetworkManager.getTenantNetworkForInterface(iface).getNetworkUUID();
 
                     if (networkId != null) break;
                 }
@@ -88,6 +88,8 @@ public class NodeConfiguration {
                     this.internalVlanInUse(vlan);
                     this.tenantVlanMap.put(networkId, vlan);
 
+                } else {
+                    logger.debug("Node: {} initialized without a vlan", node);
                 }
             }
         }
@@ -96,6 +98,10 @@ public class NodeConfiguration {
         }
     }
 
+    /*
+     * Return the currently mapped internal vlan or get the next
+     * free internal vlan from the available pool and map it to the networkId.
+     */
     public int assignInternalVlan (String networkId) {
         Integer mappedVlan = tenantVlanMap.get(networkId);
         if (mappedVlan != null) return mappedVlan;
@@ -104,6 +110,9 @@ public class NodeConfiguration {
         return mappedVlan;
     }
 
+    /*
+     * Return the mapped internal vlan to the available pool.
+     */
     public int reclaimInternalVlan (String networkId) {
         Integer mappedVlan = tenantVlanMap.get(networkId);
         if (mappedVlan != null) {
@@ -114,14 +123,23 @@ public class NodeConfiguration {
         return 0;
     }
 
+    /*
+     * Remove the internal vlan from the available pool.
+     */
     public void internalVlanInUse (int vlan) {
         internalVlans.remove(vlan);
     }
 
+    /*
+     * Return a vlan from the mapped pool keyed by the networkId.
+     */
     public int getInternalVlan (String networkId) {
         Integer vlan = tenantVlanMap.get(networkId);
         if (vlan == null) return 0;
         return vlan.intValue();
     }
 
+    public void setTenantNetworkManager(ITenantNetworkManager tenantNetworkManager) {
+        this.tenantNetworkManager = tenantNetworkManager;
+    }
 }

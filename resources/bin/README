@@ -1,0 +1,49 @@
+# README
+#
+# ovsdb-build
+# Author: Dave Tucker <dave.j.tucker@hp.com>
+#
+#
+
+The script in this commit simplifies the build process of the OVSDB
+project.
+usage: ovsdb-build [-h] [-r] [-b] [-of13] [-v] [-g CHANGE_ID] [-start]
+[-stop]
+                   [-d DIRECTORY] [-t]
+optional arguments:
+  -h, --help            show this help message and exit
+  -r, --reclone         Reclone the Controller/OVSDB repos
+  -b, --rebuild         Build the Controller Project
+  -of13, --openflow13   Enable OpenFlow 1.3 Support
+  -v, --verbose         Verbose output
+  -g CHANGE_ID, --gerrit CHANGE_ID
+                        Gerrit Change ID
+  -start, --start       Start the controller
+  -stop, --stop         Stop the controller
+  -d DIRECTORY, --directory DIRECTORY
+                        directory
+  -t, --tmux            Create tmux session
+
+On first run it is recommended to run the following:
+
+./ovsdb-build -r -b -start
+
+You can add the `-d` option to specify the directory you want to build
+in:
+
+./ovsdb-build -r -b -d /home/dave/dev/opendaylight -start
+
+This will clone the controller and ovsdb projects, build them, move the
+ovsdb artifacts in to the controller directory and start the controller.
+
+Gerrit Changes can be built and loaded to the controller with a single
+command:
+
+./ovsbd-build -g 5716 -start
+
+The controller is started in the background. To access the OSGi ole
+you can manually `telnet 127.0.0.1 2400` or you can add `-t` to let
+the build script create a tmux session for you.
+
+
+

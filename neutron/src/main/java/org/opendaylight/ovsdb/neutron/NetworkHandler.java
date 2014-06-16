@@ -5,14 +5,24 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Authors : Madhu Venugopal, Brent Salisbury
+ * Authors : Madhu Venugopal, Brent Salisbury, Hsin-Yi Shen
  */
 package org.opendaylight.ovsdb.neutron;
 
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentMap;
 
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.utils.ServiceHelper;
+import org.opendaylight.ovsdb.lib.table.Interface;
+import org.opendaylight.ovsdb.lib.table.Table;
+import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
+import org.opendaylight.ovsdb.plugin.OVSDBInventoryListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,10 +31,19 @@ import org.slf4j.LoggerFactory;
  */
 public class NetworkHandler extends BaseHandler
                             implements INeutronNetworkAware {
+
+    public static final String NETWORK_TYPE_VXLAN = "vxlan";
+    public static final String NETWORK_TYPE_GRE = "gre";
+    public static final String NETWORK_TYPE_VLAN = "vlan";
+
     /**
      * Logger instance.
      */
     static final Logger logger = LoggerFactory.getLogger(NetworkHandler.class);
+
+    // The implementation for each of these services is resolved by the OSGi Service Manager
+    private volatile ITenantNetworkManager tenantNetworkManager;
+    private volatile IAdminConfigManager adminConfigManager;
 
     /**
      * Invoked when a network creation is requested
@@ -51,7 +70,7 @@ public class NetworkHandler extends BaseHandler
     @Override
     public void neutronNetworkCreated(NeutronNetwork network) {
         int result = HttpURLConnection.HTTP_BAD_REQUEST;
-
+        logger.trace("neutronNetworkCreated: network: {}", network);
         result = canCreateNetwork(network);
         if (result != HttpURLConnection.HTTP_CREATED) {
             logger.debug("Network creation failed {} ", result);
@@ -73,6 +92,7 @@ public class NetworkHandler extends BaseHandler
     @Override
     public int canUpdateNetwork(NeutronNetwork delta,
                                 NeutronNetwork original) {
+        logger.trace("canUpdateNetwork: network delta {} --- original {}", delta, original);
         return HttpURLConnection.HTTP_OK;
     }
 
@@ -83,6 +103,7 @@ public class NetworkHandler extends BaseHandler
      */
     @Override
     public void neutronNetworkUpdated(NeutronNetwork network) {
+        logger.trace("neutronNetworkUpdated: network: {}", network);
         return;
     }
 
@@ -107,11 +128,50 @@ public class NetworkHandler extends BaseHandler
     public void neutronNetworkDeleted(NeutronNetwork network) {
 
         int result = canDeleteNetwork(network);
+        logger.trace("canDeleteNetwork: network: {}", network);
         if  (result != HttpURLConnection.HTTP_OK) {
             logger.error(" deleteNetwork validation failed for result - {} ",
                     result);
             return;
         }
-        TenantNetworkManager.getManager().networkDeleted(network.getID());
+        /* Is this the last Neutron tenant network */
+        INeutronNetworkCRUD neutronNetworkService = (INeutronNetworkCRUD)ServiceHelper.getGlobalInstance(INeutronNetworkCRUD.class, this);
+        List <NeutronNetwork> networks = new ArrayList<NeutronNetwork>();
+        if (neutronNetworkService != null) {
+            networks = neutronNetworkService.getAllNetworks();
+            OVSDBInventoryListener inventoryListener = (OVSDBInventoryListener)ServiceHelper.getGlobalInstance(OVSDBInventoryListener.class, this);
+            if (networks.isEmpty()) {
+                logger.trace("neutronNetworkDeleted: last tenant network, delete tunnel ports...");
+                IConnectionServiceInternal connectionService = (IConnectionServiceInternal)
+                                        ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+                List<Node> nodes = connectionService.getNodes();
+
+                for (Node node : nodes) {
+                    List<String> phyIfName = adminConfigManager.getAllPhysicalInterfaceNames(node);
+                    try {
+                        ConcurrentMap<String, Table<?>> interfaces = this.ovsdbConfigService.getRows(node, Interface.NAME.getName());
+                        if (interfaces != null) {
+                            for (String intfUUID : interfaces.keySet()) {
+                                Interface intf = (Interface) interfaces.get(intfUUID);
+                                String intfType = intf.getType();
+                                if (intfType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) || intfType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)) {
+                                    /* delete tunnel ports on this node */
+                                    logger.trace("Delete tunnel intf {}", intf);
+                                    inventoryListener.rowRemoved(node, Interface.NAME.getName(), intfUUID,
+                                            intf, null);
+                                } else if (!phyIfName.isEmpty() && phyIfName.contains(intf.getName())) {
+                                    logger.trace("Delete physical intf {}", intf);
+                                    inventoryListener.rowRemoved(node, Interface.NAME.getName(), intfUUID,
+                                            intf, null);
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        logger.error("Exception during handlingNeutron network delete");
+                    }
+                }
+            }
+        }
+        tenantNetworkManager.networkDeleted(network.getID());
     }
 }

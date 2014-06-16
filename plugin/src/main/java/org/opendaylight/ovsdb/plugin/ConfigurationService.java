@@ -32,6 +32,12 @@ import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.lib.database.OVSInstance;
 import org.opendaylight.ovsdb.lib.database.OvsdbType;
 import org.opendaylight.ovsdb.lib.message.TransactBuilder;
+import org.opendaylight.ovsdb.lib.operations.DeleteOperation;
+import org.opendaylight.ovsdb.lib.operations.InsertOperation;
+import org.opendaylight.ovsdb.lib.operations.MutateOperation;
+import org.opendaylight.ovsdb.lib.operations.Operation;
+import org.opendaylight.ovsdb.lib.operations.OperationResult;
+import org.opendaylight.ovsdb.lib.operations.UpdateOperation;
 import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.notation.Function;
 import org.opendaylight.ovsdb.lib.notation.Mutation;
@@ -39,14 +45,9 @@ import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
 import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.lib.operations.DeleteOperation;
-import org.opendaylight.ovsdb.lib.operations.InsertOperation;
-import org.opendaylight.ovsdb.lib.operations.MutateOperation;
-import org.opendaylight.ovsdb.lib.operations.Operation;
-import org.opendaylight.ovsdb.lib.operations.OperationResult;
-import org.opendaylight.ovsdb.lib.operations.UpdateOperation;
 import org.opendaylight.ovsdb.lib.table.Bridge;
 import org.opendaylight.ovsdb.lib.table.Controller;
+import org.opendaylight.ovsdb.lib.table.IPFIX;
 import org.opendaylight.ovsdb.lib.table.Interface;
 import org.opendaylight.ovsdb.lib.table.Manager;
 import org.opendaylight.ovsdb.lib.table.Mirror;
@@ -266,7 +267,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
      * Create a Port Attached to a Bridge
      * Ex. ovs-vsctl add-port br0 vif0
      * @param node Node serving this configuration service
-     * @param bridgeDomainIdentifier String representation of a Bridge Domain
+     * @param bridgeIdentifier String representation of a Bridge Domain
      * @param portIdentifier String representation of a user defined Port Name
      */
     @Override
@@ -390,7 +391,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
      * Implements the OVS Connection for Managers
      *
      * @param node Node serving this configuration service
-     * @param managerip with IP and connection types
+     * @param managerip String Representing IP and connection types
      */
     @SuppressWarnings("unchecked")
     public boolean setManager(Node node, String managerip) {
@@ -728,6 +729,9 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         else if (row.getTableName().getName().equalsIgnoreCase("sFlow")) {
             statusWithUUID = insertSflowRow(node, parent_uuid, (SFlow)row);
         }
+        else if (row.getTableName().getName().equalsIgnoreCase("IPFIX")) {
+            statusWithUUID = insertIpFixRow(node, parent_uuid, (IPFIX) row);
+        }
         else if (row.getTableName().getName().equalsIgnoreCase("SSL")) {
             statusWithUUID = insertSSLRow(node, parent_uuid, (SSL)row);
         }
@@ -830,6 +834,9 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         }
         else if (tableName.equalsIgnoreCase("sFlow")) {
             return deleteSflowRow(node, uuid);
+        }
+        else if (tableName.equalsIgnoreCase("IPFIX")) {
+            return deleteIpFixRow(node, uuid);
         }
         else if (tableName.equalsIgnoreCase("SSL")) {
             return deleteSSLRow(node, uuid);
@@ -1143,6 +1150,48 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
 
         } catch(Exception e){
             logger.error("Error in insertSSLRow(): ",e);
+        }
+        return new StatusWithUuid(StatusCode.INTERNALERROR);
+    }
+
+        private StatusWithUuid insertIpFixRow(Node node, String parent_uuid, IPFIX row) {
+
+        String insertErrorMsg = "ipfix";
+        String rowName=row.NAME.getName();
+
+        try{
+            Map<String, Table<?>> brTable = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
+            if (brTable == null ||  brTable.get(parent_uuid) == null) {
+                return new StatusWithUuid(StatusCode.NOTFOUND, "Bridge with UUID "+parent_uuid+" Not found");
+            }
+
+            if (parent_uuid == null) {
+                return new StatusWithUuid(StatusCode.BADREQUEST, "Require parent Bridge UUID.");
+            }
+
+            UUID uuid = new UUID(parent_uuid);
+            String newIpFix = "new_ipfix";
+            Operation addBridgeRequest = null;
+            UUID ipfixUuid = new UUID(newIpFix);
+            Mutation ipfixMutation = new Mutation("ipfix", Mutator.INSERT, ipfixUuid);
+            List<Mutation> mutations = new ArrayList<Mutation>();
+            mutations.add(ipfixMutation);
+
+            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
+            List<Condition> where = new ArrayList<Condition>();
+            where.add(condition);
+            addBridgeRequest = new MutateOperation(Bridge.NAME.getName(), where, mutations);
+            InsertOperation addIpFixRequest = new InsertOperation(IPFIX.NAME.getName(), newIpFix, row);
+
+            TransactBuilder transaction = new TransactBuilder();
+            transaction.addOperations(
+                    new ArrayList<Operation>(Arrays.asList(addIpFixRequest,addBridgeRequest)));
+            int ipfixInsertIndex = transaction.getRequests().indexOf(addIpFixRequest);
+
+            return _insertTableRow(node,transaction,ipfixInsertIndex,insertErrorMsg,rowName);
+
+        } catch (Exception e) {
+            logger.error("Error in insertInterfaceRow(): ",e);
         }
         return new StatusWithUuid(StatusCode.INTERNALERROR);
     }
@@ -1537,6 +1586,15 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         String parentTableName=Bridge.NAME.getName();
         String childTableName=SFlow.NAME.getName();
         String parentColumn = "sflow";
+
+        return _deleteTableRow(node,uuid,parentTableName,childTableName,parentColumn);
+    }
+
+    private Status deleteIpFixRow(Node node, String uuid) {
+        // Set up variables for generic _deleteTableRow()
+        String parentTableName=Bridge.NAME.getName();
+        String childTableName=IPFIX.NAME.getName();
+        String parentColumn = "ipfix";
 
         return _deleteTableRow(node,uuid,parentTableName,childTableName,parentColumn);
     }

@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Authors : Madhu Venugopal, Brent Salisbury
+ * Authors : Madhu Venugopal, Brent Salisbury, Dave Tucker
  */
 
 package org.opendaylight.ovsdb.neutron;
@@ -17,11 +17,17 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityGroupAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityGroupCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityRuleAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityRuleCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.switchmanager.IInventoryListener;
+import org.opendaylight.ovsdb.neutron.provider.IProviderNetworkManager;
+import org.opendaylight.ovsdb.neutron.provider.ProviderNetworkManager;
 import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
 import org.opendaylight.ovsdb.plugin.OVSDBInventoryListener;
@@ -58,11 +64,16 @@ public class Activator extends ComponentActivatorAbstractBase {
      */
     @Override
     public Object[] getImplementations() {
-        Object[] res = {NetworkHandler.class,
+        Object[] res = {AdminConfigManager.class,
+                        InternalNetworkManager.class,
+                        TenantNetworkManager.class,
+                        NetworkHandler.class,
                         SubnetHandler.class,
                         PortHandler.class,
                         SouthboundHandler.class,
-                        MDSALConsumer.class};
+                        PortSecurityHandler.class,
+                        MDSALConsumer.class,
+                        ProviderNetworkManager.class};
         return res;
     }
 
@@ -82,8 +93,24 @@ public class Activator extends ComponentActivatorAbstractBase {
     @Override
     public void configureInstance(Component c, Object imp,
                                   String containerName) {
+        if (imp.equals(AdminConfigManager.class)) {
+            c.setInterface(IAdminConfigManager.class.getName(), null);
+        }
+
+        if (imp.equals(InternalNetworkManager.class)) {
+            c.setInterface(IInternalNetworkManager.class.getName(), null);
+            c.add(createServiceDependency().setService(IAdminConfigManager.class).setRequired(true));
+            c.add(createServiceDependency().setService(IProviderNetworkManager.class));
+        }
+
+        if (imp.equals(TenantNetworkManager.class)) {
+            c.setInterface(ITenantNetworkManager.class.getName(), null);
+            c.add(createServiceDependency().setService(IProviderNetworkManager.class));
+        }
+
         if (imp.equals(NetworkHandler.class)) {
             c.setInterface(INeutronNetworkAware.class.getName(), null);
+            c.add(createServiceDependency().setService(ITenantNetworkManager.class).setRequired(true));
         }
 
         if (imp.equals(SubnetHandler.class)) {
@@ -96,11 +123,35 @@ public class Activator extends ComponentActivatorAbstractBase {
 
         if (imp.equals(SouthboundHandler.class)) {
             c.setInterface(new String[] {OVSDBInventoryListener.class.getName(), IInventoryListener.class.getName()}, null);
+            c.add(createServiceDependency().setService(IAdminConfigManager.class).setRequired(true));
+            c.add(createServiceDependency().setService(IInternalNetworkManager.class).setRequired(true));
+            c.add(createServiceDependency().setService(ITenantNetworkManager.class).setRequired(true));
+            c.add(createServiceDependency().setService(IProviderNetworkManager.class).setRequired(true));
         }
 
         if (imp.equals(MDSALConsumer.class)) {
             c.setInterface(IMDSALConsumer.class.getName(), null);
         }
+
+        if (imp.equals(ProviderNetworkManager.class)) {
+            c.setInterface(IProviderNetworkManager.class.getName(), null);
+            c.add(createServiceDependency()
+                    .setService(IAdminConfigManager.class)
+                    .setRequired(true));
+            c.add(createServiceDependency()
+                    .setService(IInternalNetworkManager.class)
+                    .setRequired(true));
+            c.add(createServiceDependency()
+                    .setService(ITenantNetworkManager.class)
+                    .setRequired(true));
+        }
+        if (imp.equals(PortSecurityHandler.class)) {
+            c.setInterface(INeutronSecurityRuleAware.class.getName(), null);
+            c.setInterface(INeutronSecurityGroupAware.class.getName(), null);
+        }
+
+        //ToDo: DT: We don't need these dependencies for every implementation...
+        //ToDo: DT: Callbacks are only required when behaviour is more complex than simple set/unset operation
         c.add(createServiceDependency().
                 setService(OVSDBConfigService.class).
                 setCallbacks("setOVSDBConfigService", "unsetOVSDBConfigService").
@@ -111,7 +162,6 @@ public class Activator extends ComponentActivatorAbstractBase {
                 setCallbacks("setConnectionService", "unsetConnectionService").
                 setRequired(true));
 
-        // Create service dependencies.
         c.add(createServiceDependency().
               setService(IContainerManager.class).
               setCallbacks("setContainerManager", "unsetContainerManager").
@@ -139,5 +189,13 @@ public class Activator extends ComponentActivatorAbstractBase {
                 setService(INeutronPortCRUD.class).
                 setCallbacks("setNeutronPortCRUD", "unsetNeutronPortCRUD").
                 setRequired(true));
+        c.add(createServiceDependency().
+            setService(INeutronSecurityRuleCRUD.class).
+            setCallbacks("setNeutronSecurityRuleCRUD", "unsetNeutronSecurityRuleCRUD").
+            setRequired(true));
+        c.add(createServiceDependency().
+            setService(INeutronSecurityGroupCRUD.class).
+            setCallbacks("setNeutronSecurityGroupCRUD", "unsetNeutronSecurityGroupCRUD").
+            setRequired(true));
     }
 }

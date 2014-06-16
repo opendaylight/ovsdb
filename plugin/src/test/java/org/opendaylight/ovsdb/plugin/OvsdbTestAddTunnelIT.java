@@ -41,7 +41,7 @@ public class OvsdbTestAddTunnelIT extends OvsdbTestBase {
 
         Encapsulation encap = Encapsulation.VXLAN;
         String tunencap = encap.toString();
-        String tunnelendpoint = "192.168.100.100";
+        String tunnelendpoint = FAKE_IP;
 
         /**
          * Create an Encapsulated Tunnel Interface and destination Tunnel Endpoint
@@ -62,7 +62,7 @@ public class OvsdbTestAddTunnelIT extends OvsdbTestBase {
         configs.put(ConfigConstants.TUNNEL_TYPE, tunencap);
         configs.put(ConfigConstants.DEST_IP, tunnelendpoint);
 
-        configurationService.addPort(node, "JUNIT_BRIDGE_TEST", "Jtunnel0", configs);
+        configurationService.addPort(node, BRIDGE_NAME, TUNNEL_PORT_NAME, configs);
 
     }
 }

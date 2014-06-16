@@ -12,28 +12,40 @@
     <fileSet>
       <directory>${project.build.directory}/generated-resources</directory>
       <outputDirectory>/</outputDirectory>
+      <excludes>
+          <exclude>opendaylight/plugins/*ovsdb*</exclude>
+          <exclude>opendaylight/run.sh</exclude>
+      </excludes>
+    </fileSet>
+    <fileSet>
+      <directory>${project.build.directory}/provided-configs/initial</directory>
+      <outputDirectory>/opendaylight/configuration/initial.available</outputDirectory>
+      <excludes>
+        <exclude>**/META-INF/**</exclude>
+      </excludes>
     </fileSet>
   </fileSets>
+  <files>
+    <file>
+      <source>${project.build.directory}/generated-resources/opendaylight/run.sh</source>
+      <outputDirectory>/opendaylight/</outputDirectory>
+      <destName>run.internal.sh</destName>
+      <fileMode>0755</fileMode>
+    </file>
+    <file>
+      <source>${basedir}/src/assemble/resources/run.sh</source>
+      <outputDirectory>/opendaylight/</outputDirectory>
+      <fileMode>0755</fileMode>
+    </file>
+    <file>
+      <source>${basedir}/src/assemble/resources/run.base.sh</source>
+      <outputDirectory>/opendaylight/</outputDirectory>
+      <fileMode>0755</fileMode>
+    </file>
+  </files>
   <dependencySets>
     <dependencySet>
       <outputDirectory>opendaylight/plugins</outputDirectory>
-      <excludes>
-        <exclude>equinoxSDK381:org.eclipse.osgi</exclude>
-        <exclude>equinoxSDK381:org.eclipse.equinox.console</exclude>
-        <exclude>equinoxSDK381:org.eclipse.equinox.launcher</exclude>
-        <exclude>equinoxSDK381:org.eclipse.equinox.ds</exclude>
-        <exclude>equinoxSDK381:org.eclipse.equinox.util</exclude>
-        <exclude>equinoxSDK381:org.eclipse.osgi.services</exclude>
-        <exclude>virgomirror:org.eclipse.jdt.core.compiler.batch</exclude>
-        <exclude>org.apache.felix:org.apache.felix.fileinstall</exclude>
-        <exclude>geminiweb:org.eclipse.virgo.kernel.equinox.extensions</exclude>
-        <exclude>org.slf4j:slf4j-api</exclude>
-        <exclude>ch.qos.logback:logback-core</exclude>
-        <exclude>ch.qos.logback:logback-classic</exclude>
-        <exclude>com.sun.jersey:jersey-core</exclude>
-        <exclude>com.sun.jersey:jersey-json</exclude>
-        <exclude>com.sun.jersey:jersey-server</exclude>
-      </excludes>
       <outputFileNameMapping>
         ${artifact.groupId}.${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}
       </outputFileNameMapping>

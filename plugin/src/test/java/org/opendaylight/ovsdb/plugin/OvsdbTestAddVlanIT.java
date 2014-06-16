@@ -44,6 +44,6 @@ public class OvsdbTestAddVlanIT extends OvsdbTestBase {
         Map<ConfigConstants, Object> configs = new HashMap<ConfigConstants, Object>();
         configs.put(ConfigConstants.TYPE, "VLAN");
         configs.put(ConfigConstants.VLAN, vlanid+"");
-        configurationService.addPort(node, "JUNIT_BRIDGE_TEST", "Jtagvif0", configs);
+        configurationService.addPort(node, BRIDGE_NAME, TAGGED_PORT_NAME, configs);
     }
 }

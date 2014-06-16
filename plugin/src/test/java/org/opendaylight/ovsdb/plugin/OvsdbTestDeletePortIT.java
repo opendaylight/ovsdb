@@ -33,6 +33,6 @@ public class OvsdbTestDeletePortIT extends OvsdbTestBase {
          */
         ConfigurationService configurationService = new ConfigurationService();
         configurationService.setConnectionServiceInternal(connectionService);
-        configurationService.deletePort(node, "ovsbr0", "tap2");
+        configurationService.deletePort(node, BRIDGE_NAME, PORT_NAME);
     }
 }

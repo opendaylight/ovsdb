@@ -23,8 +23,8 @@ public class IPFIX extends Table<IPFIX> {
 
     private OvsDBSet<String> targets;
     private OvsDBSet<Integer> sampling;
-    private Integer obs_domain_id;
-    private Integer obs_point_id;
+    private OvsDBSet<Integer> obs_domain_id;
+    private OvsDBSet<Integer> obs_point_id;
     private OvsDBSet<Integer> cache_active_timeout;
     private OvsDBSet<Integer> cache_max_ﬂows;
     private OvsDBMap<String, String> external_ids;
@@ -48,19 +48,19 @@ public class IPFIX extends Table<IPFIX> {
         this.sampling = sampling;
     }
 
-    public Integer getObs_domain_id() {
+    public OvsDBSet<Integer> getObs_domain_id() {
         return obs_domain_id;
     }
 
-    public void setObs_domain_id(Integer obs_domain_id) {
+    public void setObs_domain_id(OvsDBSet<Integer> obs_domain_id) {
         this.obs_domain_id = obs_domain_id;
     }
 
-    public Integer getObs_point_id() {
+    public OvsDBSet<Integer> getObs_point_id() {
         return obs_point_id;
     }
 
-    public void setObs_point_id(Integer obs_point_id) {
+    public void setObs_point_id(OvsDBSet<Integer> obs_point_id) {
         this.obs_point_id = obs_point_id;
     }
 

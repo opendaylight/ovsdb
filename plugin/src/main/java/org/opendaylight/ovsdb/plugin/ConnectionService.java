@@ -310,7 +310,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         inventoryServiceInternal.addNode(connection.getNode(), props);
 
         List<String> dbNames = Arrays.asList(Open_vSwitch.NAME.getName());
-        ListenableFuture<DatabaseSchema> dbSchemaF = null;//todo : fix it up to new structue : connection.getRpc().get_schema(dbNames);
+        ListenableFuture<DatabaseSchema> dbSchemaF = null;//TODO : fix it up to new structue : connection.getRpc().get_schema(dbNames);
         DatabaseSchema databaseSchema = dbSchemaF.get();
         inventoryServiceInternal.updateDatabaseSchema(connection.getNode(), databaseSchema);
 
@@ -323,7 +323,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
             }
         }
 
-        ListenableFuture<TableUpdates> monResponse = null; //ashwin(not sure if we need)connection.getRpc().monitor(monitorReq);
+        ListenableFuture<TableUpdates> monResponse = null; //TODO : ashwin(not sure if we need)connection.getRpc().monitor(monitorReq);
         TableUpdates updates = monResponse.get();
         if (updates.getError() != null) {
             logger.error("Error configuring monitor, error : {}, details : {}",
@@ -541,5 +541,4 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
     public void stolen(Object context, List<String> ids) {
         // TODO Auto-generated method stub
     }
-
 }

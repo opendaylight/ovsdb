@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>ovsdb_neutron</artifactId>
-  <version>0.6.0-SNAPSHOT</version>
+  <version>0.7.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <properties>
@@ -146,6 +146,7 @@
           </instructions>
         </configuration>
       </plugin>
+
     </plugins>
   </build>
 

@@ -16,6 +16,8 @@ import org.opendaylight.controller.containermanager.IContainerManager;
 import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManager;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityGroupCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityRuleCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
@@ -372,5 +374,15 @@ public class BaseHandler {
 
     public void setNeutronNetworkCRUD(INeutronNetworkCRUD s) {
         this.neutronNetworkCache = s;
+    }
+
+    protected INeutronSecurityRuleCRUD neutronSecurityRuleCache;
+    public void setNeutronSecurityRuleCache(INeutronSecurityRuleCRUD s) {
+        this.neutronSecurityRuleCache = s;
+    }
+
+    protected INeutronSecurityGroupCRUD neutronSecurityGroupCache;
+    public void setNeutronSecurityGroupCache(INeutronSecurityGroupCRUD s) {
+        this.neutronSecurityGroupCache = s;
     }
 }

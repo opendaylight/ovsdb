@@ -12,30 +12,38 @@
 
 package org.opendaylight.ovsdb.lib.notation;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
-public class Row<E extends TableSchema<E>> {
-    List<Column<E, ?>> columns;
+import com.google.common.collect.Maps;
 
-    private Row() { }
+public class Row<E extends TableSchema<E>> {
+    protected Map<String, Column<E, ?>> columns;
+
+    public Row() {
+        this.columns = Maps.newHashMap();
+    }
 
     public Row(List<Column<E, ?>> columns) {
-        this.columns = columns;
+        this.columns = Maps.newHashMap();
+        for (Column<E, ?> column : columns) {
+            this.columns.put(column.getSchema().getName(), column);
+        }
     }
 
     public <D> Column<E, D> getColumn(ColumnSchema<E, D> schema) {
-        for (Column<E, ?> column : columns) {
-           if (column.getSchema().equals(schema)) {
-               return (Column<E, D>) column;
-           }
-        }
-        return null;
+        return (Column<E, D>) columns.get(schema.getName());
     }
 
-    public List<Column<E, ?>> getColumns() {
-        return columns;
+    public Collection<Column<E, ?>> getColumns() {
+        return columns.values();
+    }
+
+    public void addColumn(String columnName, Column<E, ?> data) {
+        this.columns.put(columnName, data);
     }
 }

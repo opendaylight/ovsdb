@@ -15,6 +15,7 @@ package org.opendaylight.ovsdb.lib.operations;
 import java.util.List;
 import java.util.Map;
 
+import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
@@ -46,6 +47,12 @@ public class Update<E extends TableSchema<E>> extends Operation<E> implements Co
         Object untypedValue = columnSchema.getNormalizeData(value);
         this.row.put(columnSchema.getName(), untypedValue);
         return this;
+    }
+
+    public <T extends TableSchema<T>, D> Update<E> set(Column<T, D> column) {
+        ColumnSchema<T, D> columnSchema = column.getSchema();
+        D value = column.getData();
+        return this.set(columnSchema, value);
     }
 
     public Where where(Condition condition) {

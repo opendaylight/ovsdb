@@ -7,13 +7,14 @@
  *
  * Authors : Ashwin Raveendran, Madhu Venugopal
  */
+
 package org.opendaylight.ovsdb.lib;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -27,6 +28,7 @@ import org.junit.Test;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
 import org.opendaylight.ovsdb.lib.message.UpdateNotification;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
+import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
@@ -34,7 +36,7 @@ import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
-import org.opendaylight.ovsdb.lib.schema.temp.Reference;
+import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,53 +53,29 @@ public class OvsDBClientTestITTyped extends OvsdbTestBase {
     static String testBridgeName = "br-test";
     static UUID testBridgeUuid = null;
 
-    public static class Bridge extends TableSchema<Bridge> {
-
-        public Bridge (TableSchema<Bridge> tableSchema) {
-            super("Bridge", tableSchema.getColumnSchemas());
-        }
-
-        public Bridge(String name, Map<String, ColumnSchema> columns) {
-            super(name, columns);
-        }
-
-        public ColumnSchema<Bridge, String> name() {
-            return column("name", String.class);
-        }
-
-        public ColumnSchema<Bridge, Integer> floodVlans() {
-            return column("flood_vlans", Integer.class);
-        }
-
-        public ColumnSchema<Bridge, Map> status() {
-            return column("status", Map.class);
-        }
-
-        public ColumnSchema<Bridge, Reference> netflow() {
-            return column("netflow", Reference.class);
-        }
-    }
-
-
     @Test
-    public void testTypedBridgeCreate() throws IOException, InterruptedException, ExecutionException {
-        Bridge bridge = dbSchema.table("Bridge", Bridge.class);
+    public void testTypedBridgeCreate() throws IOException, InterruptedException, ExecutionException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        GenericTableSchema rBridgeSchema = TyperUtils.getTableSchema(dbSchema, TestBridge.class);
+        TestBridge rBridge = TyperUtils.getTypedRowWrapper(dbSchema, TestBridge.class, new Row<GenericTableSchema>());
+        rBridge.setName(testBridgeName);
+        rBridge.setStatus(Maps.newHashMap(ImmutableMap.of("key","value")));
+        rBridge.setFloodVlans(Sets.newHashSet(34));
+
         GenericTableSchema ovsTable = dbSchema.table("Open_vSwitch", GenericTableSchema.class);
         ColumnSchema<GenericTableSchema, Set<UUID>> bridges = ovsTable.multiValuedColumn("bridges", UUID.class);
 
-        GenericTableSchema anytable = null;
         String namedUuid = "br_test";
         int insertOperationIndex = 0;
 
         TransactionBuilder transactionBuilder = ovs.transactBuilder()
-                .add(op.insert(bridge)
+                .add(op.insert(rBridgeSchema)
                         .withId(namedUuid)
-                        .value(bridge.name(), testBridgeName))
-                .add(op.update(bridge)
-                        .set(bridge.status(), Maps.newHashMap(ImmutableMap.of("key","value")))
-                        .set(bridge.floodVlans(), 34)
-                        .where(bridge.name().opEqual(testBridgeName))
-                        .and(bridge.name().opEqual(testBridgeName)).build())
+                        .value(rBridge.getNameColumn()))
+                .add(op.update(rBridgeSchema)
+                        .set(rBridge.getStatusColumn())
+                        .set(rBridge.getFloodVlansColumn())
+                        .where(rBridge.getNameColumn().getSchema().opEqual(rBridge.getName()))
+                        .and(rBridge.getNameColumn().getSchema().opEqual(rBridge.getName())).build())
                 .add(op.mutate(ovsTable)
                         .addMutation(bridges, Mutator.INSERT, Sets.newHashSet(new UUID(namedUuid))));
 
@@ -174,5 +152,4 @@ public class OvsDBClientTestITTyped extends OvsdbTestBase {
         // TODO Auto-generated method stub
 
     }
-
 }

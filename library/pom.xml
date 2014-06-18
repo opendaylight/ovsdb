@@ -126,7 +126,8 @@
                 org.opendaylight.ovsdb.lib.database,
                 org.opendaylight.ovsdb.lib.operations,
                 org.opendaylight.ovsdb.lib.message,
-                org.opendaylight.ovsdb.lib.schema</Export-Package>
+                org.opendaylight.ovsdb.lib.schema,
+                org.opendaylight.ovsdb.lib.schema.typed</Export-Package>
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>

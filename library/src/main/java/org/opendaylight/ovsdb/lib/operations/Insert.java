@@ -11,6 +11,7 @@ package org.opendaylight.ovsdb.lib.operations;
 
 import java.util.Map;
 
+import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
@@ -49,6 +50,12 @@ public class Insert<E extends TableSchema<E>> extends Operation<E> {
         Object untypedValue = columnSchema.getNormalizeData(value);
         row.put(columnSchema.getName(), untypedValue);
         return this;
+    }
+
+    public <D, C extends TableSchema<C>> Insert<E> value(Column<C, D> column) {
+        ColumnSchema<C, D> columnSchema = column.getSchema();
+        D value = column.getData();
+        return this.value(columnSchema, value);
     }
 
     public String getUuid() {

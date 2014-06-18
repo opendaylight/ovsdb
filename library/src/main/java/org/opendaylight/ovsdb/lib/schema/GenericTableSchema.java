@@ -27,6 +27,10 @@ public class GenericTableSchema extends TableSchema<GenericTableSchema> {
         super(tableName);
     }
 
+    public GenericTableSchema (TableSchema tableSchema) {
+        super(tableSchema.getName(), tableSchema.getColumnSchemas());
+    }
+
     public GenericTableSchema fromJson(String tableName, JsonNode json) {
 
         if (!json.isObject() || !json.has("columns")) {

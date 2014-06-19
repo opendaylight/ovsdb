@@ -16,6 +16,74 @@
       "revId": "b8e0affec6c13e2859bae090b6b6bcbb1556a848",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_44ba450b",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/notation/Version.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-06-19T10:49:26Z",
+      "side": 1,
+      "message": "I\u0027ve heard of non-numeric patch... is that applicable here? things like \u0027-SNAPSHOT\u0027 comes to mind. :)",
+      "revId": "b8e0affec6c13e2859bae090b6b6bcbb1556a848",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e43839a2",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/notation/Version.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-06-19T10:49:26Z",
+      "side": 1,
+      "message": "Did you mean result +\u003d   ? \nIf not, the only line that matters is the last one.",
+      "revId": "b8e0affec6c13e2859bae090b6b6bcbb1556a848",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_043c3d92",
+        "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/notation/VersionTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-06-19T10:49:26Z",
+      "side": 1,
+      "message": "Should add some test to exercise hash",
+      "revId": "b8e0affec6c13e2859bae090b6b6bcbb1556a848",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a442310e",
+        "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/schema/OvsDBSchemaTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-06-19T10:49:26Z",
+      "side": 1,
+      "message": "Should \"6.12.0\" be in a xml file somewhere?!? I am little scared of hard coded things like this...",
+      "revId": "b8e0affec6c13e2859bae090b6b6bcbb1556a848",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.Maps;
 import com.google.common.reflect.Invokable;
 
 /**
@@ -35,6 +36,11 @@ public class DatabaseSchema {
 
     private Version version;
     private Map<String, TableSchema> tables;
+    /**
+     * Repository of all the learnt Schemas cataloged by Schema-Name to a Map of Version based DatabaseSchema.
+     * The library supports multiple versions of same database schema all active at the same time.
+     */
+    private static Map<String, Map<Version, DatabaseSchema>> schemaRepo = Maps.newHashMap();
 
     public DatabaseSchema(Map<String, TableSchema> tables) {
         this.tables = tables;
@@ -98,16 +104,83 @@ public class DatabaseSchema {
 
         Version dbVersion = Version.fromString(json.get("version").asText());
 
-        Map<String, TableSchema> tables = new HashMap<>();
-        for (Iterator<Map.Entry<String, JsonNode>> iter = json.get("tables").fields(); iter.hasNext(); ) {
-            Map.Entry<String, JsonNode> table = iter.next();
-            logger.debug("Read schema for table[{}]:{}", table.getKey(), table.getValue());
+        DatabaseSchema schema = DatabaseSchema.getDatabaseSchema(dbName, dbVersion);
+        if (schema == null) {
+            Map<String, TableSchema> tables = new HashMap<>();
+            for (Iterator<Map.Entry<String, JsonNode>> iter = json.get("tables").fields(); iter.hasNext(); ) {
+                Map.Entry<String, JsonNode> table = iter.next();
+                logger.debug("Read schema for table[{}]:{}", table.getKey(), table.getValue());
 
-            //todo : this needs to done by a factory
-            tables.put(table.getKey(), new GenericTableSchema().fromJson(table.getKey(), table.getValue()));
+                //todo : this needs to done by a factory
+                tables.put(table.getKey(), new GenericTableSchema().fromJson(table.getKey(), table.getValue()));
+            }
+            schema = new DatabaseSchema(dbName, dbVersion, tables);
+            DatabaseSchema.addDatabaseSchemaToRepository(schema);
         }
 
-        return new DatabaseSchema(dbName, dbVersion, tables);
+        return schema;
+    }
+
+    /**
+     * getDatabaseSchema returns DatabaseSchema given the Database Name and exact Database version
+     *
+     * @param dbName Database Name
+     * @param version Database Version
+     * @return
+     */
+    public static DatabaseSchema getDatabaseSchema (String dbName, Version version) {
+        Map<Version, DatabaseSchema> schemas = schemaRepo.get(dbName);
+        if (schemas != null) {
+            return schemas.get(version);
+        }
+        return null;
+    }
+
+    /**
+     * This method finds the Best DatabaseSchema for a Database Name and between the fromVersion and untilVersion.
+     * With the introduction of TypedTable and TypedColumn annotations along with the fromVersion and untilVersion attributes,
+     * it is possible to the best possible supported Database Schema for a version range.
+     * The Highest supported Database Version that falls between the fromVersion and untilVersion would be picked up as the
+     * Best Match DatabaseSchema.
+     *
+     * @param dbName Database Name
+     * @param fromVersion Lower limit of the Version comparison
+     * @param untilVersion Upper limit of the Version comparison
+     */
+    public static DatabaseSchema getBestMatchDatabaseSchema (String dbName, Version fromVersion, Version untilVersion) {
+        Map<Version, DatabaseSchema> schemas = schemaRepo.get(dbName);
+        if (schemas != null) {
+            Version bestMatch = Version.NULL;
+            for (Version version : schemas.keySet()) {
+                if (!Version.NULL.equals(fromVersion) && version.compareTo(fromVersion) < 0) {
+                    continue;
+                }
+                if (!Version.NULL.equals(untilVersion) && version.compareTo(untilVersion) > 0) {
+                    continue;
+                }
+                if (version.compareTo(bestMatch) >= 0) {
+                    bestMatch = version;
+                }
+            }
+            if (bestMatch.equals(Version.NULL)) {
+                return null;
+            }
+            return schemas.get(bestMatch);
+        }
+        return null;
+    }
+
+    /**
+     * Add a learnt Database Schema to the Repository
+     * @param schema Learnt Database schema
+     */
+    private static void addDatabaseSchemaToRepository (DatabaseSchema schema) {
+        Map<Version, DatabaseSchema> schemas = schemaRepo.get(schema.getName());
+        if (schemas == null) {
+            schemas = Maps.newHashMap();
+            schemaRepo.put(schema.getName(), schemas);
+        }
+        schemas.put(schema.getVersion(), schema);
     }
 
     public String getName() {

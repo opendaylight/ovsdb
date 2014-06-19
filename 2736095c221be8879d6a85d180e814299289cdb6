@@ -1,0 +1,7 @@
+Code-Review+2: Brent Salisbury <brent.salisbury@gmail.com>
+Verified+1: jenkins-ovsdb <jenkins-ovsdb@opendaylight.org>
+Submitted-by: Brent Salisbury <brent.salisbury@gmail.com>
+Submitted-at: Thu, 19 Jun 2014 18:58:34 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/8156
+Project: ovsdb
+Branch: refs/heads/topic/schema

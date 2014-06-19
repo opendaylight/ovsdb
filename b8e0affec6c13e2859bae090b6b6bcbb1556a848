@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_a4131165",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/notation/Version.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-19T16:51:57Z",
+      "side": 1,
+      "message": "Okay. Shall we just comment it in the code on this ambiguity and proceed with this \"well-informed\" assumption ?",
+      "parentUuid": "fa82b9bf_244f01bf",
+      "revId": "b8e0affec6c13e2859bae090b6b6bcbb1556a848",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_44ba450b",
         "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/notation/Version.java",
         "patchSetId": 4

@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_dfeaa20e",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/schema/typed/TyperUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-19T20:39:01Z",
+      "side": 1,
+      "message": "Can you move NULL_VERSION to Version class and make it public ?\nAlso, having the 0.0.0 sprayed across all the classes isnt pretty :).\nCan you add a public constant NULL_VERSION_STRING \u003d \"0.0.0\" in Version class and reuse it everywhere ?",
+      "revId": "ac258d6a1a64d293ee7c2b62527b0498133572da",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

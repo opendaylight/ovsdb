@@ -35,6 +35,28 @@ public class TyperUtils {
         return klazz.getSimpleName();
     }
 
+    /**
+     * This method finds the Best DatabaseSchema that matches a given Typed Table Class.
+     * With the introduction of TypedTable and TypedColumn annotations along with the fromVersion and untilVersion attributes,
+     * it is possible to express the Database Name, Table Name & the Database Versions within with the Table is defined and
+     * maintained. Hence the Highest supported Database Version would be picked up as the Best Match DatabaseSchema for a given
+     * Typed Table class.
+     *
+     * @param klazz Typed Class that represents a Table
+     * @return DatabaseSchema with the Highest known & compatible version for this Table.
+     */
+    private static <T> DatabaseSchema getBestMatchDatabaseSchema (Class <T> klazz) {
+        TypedTable typedTable = klazz.getAnnotation(TypedTable.class);
+        if (typedTable != null) {
+            Version fromVersion = Version.fromString(typedTable.untilVersion());
+            Version untilVersion = Version.fromString(typedTable.untilVersion());
+            DatabaseSchema dbSchema = DatabaseSchema.getBestMatchDatabaseSchema(typedTable.database(), fromVersion, untilVersion);
+            if (dbSchema == null) return null;
+            return dbSchema;
+        }
+        return null;
+    }
+
     public static <T> GenericTableSchema getTableSchema(DatabaseSchema dbSchema, Class<T> klazz) {
         String tableName = getTableName(klazz);
         return dbSchema.table(tableName, GenericTableSchema.class);
@@ -65,6 +87,14 @@ public class TyperUtils {
         }
 
         return null;
+    }
+
+    private static boolean isGetTableSchema (Method method) {
+        TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
+        if (typedColumn != null) {
+            return typedColumn.method().equals(MethodType.GETTABLESCHEMA) ? true : false;
+        }
+        return false;
     }
 
     private static boolean isGetColumn (Method method) {
@@ -137,6 +167,10 @@ public class TyperUtils {
      * @return true if valid, false otherwise
      */
     private static <T> boolean isValid (DatabaseSchema dbSchema, final Class<T> klazz) {
+        if (dbSchema == null) {
+            return false;
+        }
+
         TypedTable typedTable = klazz.getAnnotation(TypedTable.class);
         if (typedTable != null) {
             if (!dbSchema.getName().equalsIgnoreCase(typedTable.database())) {
@@ -165,6 +199,37 @@ public class TyperUtils {
                         + untilVersion + "of the Schema");
             }
         }
+    }
+
+    /**
+     * User friendly convenient methods that make use of getTypedRowWrapper to create a Typed Row Proxy given a Interface Type.
+     * @param klazz Typed Interface
+     * @return Proxy wrapper for the actual raw Row class.
+     */
+    public static <T> T createTypedRowWrapper(Class<T> klazz) {
+        DatabaseSchema dbSchema = getBestMatchDatabaseSchema(klazz);
+        return createTypedRowWrapper(dbSchema, klazz);
+    }
+
+    /**
+     * User friendly convenient methods that make use of getTypedRowWrapper to create a Typed Row Proxy given DatabaseSchema and Interface Type.
+     * @param dbSchema Database Schema of interest
+     * @param klazz Typed Interface
+     * @return Proxy wrapper for the actual raw Row class.
+     */
+    public static <T> T createTypedRowWrapper(DatabaseSchema dbSchema, Class<T> klazz) {
+        return getTypedRowWrapper(dbSchema, klazz, new Row<GenericTableSchema>());
+    }
+
+    /**
+     * User friendly convenient method to get a Typed Row Proxy given an Interface type and the Row to be wrapped.
+     * @param klazz Typed Interface
+     * @param row The actual Row that the wrapper is operating on. It can be null if the caller is just interested in getting ColumnSchema.
+     * @return Proxy wrapper for the actual raw Row class.
+     */
+    public static <T> T getTypedRowWrapper(final Class<T> klazz, final Row<GenericTableSchema> row) {
+        DatabaseSchema dbSchema = getBestMatchDatabaseSchema(klazz);
+        return getTypedRowWrapper(dbSchema, klazz, row);
     }
 
     /**
@@ -245,9 +310,17 @@ public class TyperUtils {
                 return proxy;
             }
 
+            private Object processGetTableSchema() throws Throwable {
+                DatabaseSchema dbSchema = TyperUtils.getBestMatchDatabaseSchema(klazz);
+                if (dbSchema == null) return null;
+                return getTableSchema(dbSchema, klazz);
+            }
+
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                if (isSetData(method)) {
+                if (isGetTableSchema(method)) {
+                    return processGetTableSchema();
+                } else if (isSetData(method)) {
                     return processSetData(proxy, method, args);
                 } else if(isGetData(method)) {
                     return processGetData(method);

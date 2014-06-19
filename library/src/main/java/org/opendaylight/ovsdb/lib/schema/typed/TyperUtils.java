@@ -67,6 +67,14 @@ public class TyperUtils {
         return null;
     }
 
+    private static boolean isGetTableSchema (Method method) {
+        TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
+        if (typedColumn != null) {
+            return typedColumn.method().equals(MethodType.GETTABLESCHEMA) ? true : false;
+        }
+        return false;
+    }
+
     private static boolean isGetColumn (Method method) {
         TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
         if (typedColumn != null) {
@@ -137,6 +145,10 @@ public class TyperUtils {
      * @return true if valid, false otherwise
      */
     private static <T> boolean isValid (DatabaseSchema dbSchema, final Class<T> klazz) {
+        if (dbSchema == null) {
+            return false;
+        }
+
         TypedTable typedTable = klazz.getAnnotation(TypedTable.class);
         if (typedTable != null) {
             if (!dbSchema.getName().equalsIgnoreCase(typedTable.database())) {
@@ -245,16 +257,23 @@ public class TyperUtils {
                 return proxy;
             }
 
+            private Object processGetTableSchema() throws Throwable {
+                if (dbSchema == null) return null;
+                return getTableSchema(dbSchema, klazz);
+            }
+
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                if (isSetData(method)) {
+                if (isGetTableSchema(method)) {
+                    return processGetTableSchema();
+                } else if (isSetData(method)) {
                     return processSetData(proxy, method, args);
                 } else if(isGetData(method)) {
                     return processGetData(method);
                 } else if(isGetColumn(method)) {
                     return processGetColumn(method);
                 } else {
-                    throw new RuntimeException("Unsupported method : "+method.getName());
+                    return null;
                 }
             }
         }

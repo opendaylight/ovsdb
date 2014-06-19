@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.opendaylight.ovsdb.lib.ParsingException;
+import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,14 +32,17 @@ public class DatabaseSchema {
     public static Logger logger = LoggerFactory.getLogger(DatabaseSchema.class);
 
     private String name;
+
+    private Version version;
     private Map<String, TableSchema> tables;
 
     public DatabaseSchema(Map<String, TableSchema> tables) {
         this.tables = tables;
     }
 
-    public DatabaseSchema(String name, Map<String, TableSchema> tables) {
+    public DatabaseSchema(String name, Version version, Map<String, TableSchema> tables) {
         this.name = name;
+        this.version = version;
         this.tables = tables;
     }
 
@@ -88,6 +92,11 @@ public class DatabaseSchema {
         if (!json.isObject() || !json.has("tables")) {
             throw new ParsingException("bad DatabaseSchema root, expected \"tables\" as child but was not found");
         }
+        if (!json.isObject() || !json.has("version")) {
+            throw new ParsingException("bad DatabaseSchema root, expected \"version\" as child but was not found");
+        }
+
+        Version dbVersion = Version.fromString(json.get("version").asText());
 
         Map<String, TableSchema> tables = new HashMap<>();
         for (Iterator<Map.Entry<String, JsonNode>> iter = json.get("tables").fields(); iter.hasNext(); ) {
@@ -98,7 +107,7 @@ public class DatabaseSchema {
             tables.put(table.getKey(), new GenericTableSchema().fromJson(table.getKey(), table.getValue()));
         }
 
-        return new DatabaseSchema(dbName, tables);
+        return new DatabaseSchema(dbName, dbVersion, tables);
     }
 
     public String getName() {
@@ -108,6 +117,10 @@ public class DatabaseSchema {
     public void setName(String name) {
         this.name = name;
     }
+
+    public Version getVersion() { return version; }
+
+    public void setVersion(Version version) { this.version = version; }
 
     public void populateInternallyGeneratedColumns() {
         for (TableSchema tableSchema : tables.values()) {

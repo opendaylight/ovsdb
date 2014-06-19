@@ -33,6 +33,9 @@ public class Version implements Comparable<Version> {
         this.patch = patch;
     }
 
+    public static final Version NULL = new Version(0,0,0);
+    public static final String NULL_VERSION_STRING = "0.0.0";
+
     public static Version fromString(String version){
         final Matcher matcher = Version.PATTERN.matcher(version);
         if (!matcher.matches()) {

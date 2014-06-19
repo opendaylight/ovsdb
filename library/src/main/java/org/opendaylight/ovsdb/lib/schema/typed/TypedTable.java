@@ -20,4 +20,6 @@ import java.lang.annotation.ElementType;;
 public @interface TypedTable {
     public String name();
     public String database();
+    public String fromVersion() default "0.0.0";
+    public String untilVersion() default "0.0.0";
 }

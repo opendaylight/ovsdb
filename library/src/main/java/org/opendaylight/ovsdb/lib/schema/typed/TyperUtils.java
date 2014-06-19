@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Row;
+import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
@@ -25,6 +26,7 @@ public class TyperUtils {
     private static final String GET_STARTS_WITH="get";
     private static final String SET_STARTS_WITH="set";
     private static final String GETCOLUMN_ENDS_WITH="Column";
+    private static final Version NULL_VERSION = Version.fromString("0.0.0");
 
     private static <T> String getTableName (Class<T> klazz) {
         TypedTable typedTable = klazz.getAnnotation(TypedTable.class);
@@ -102,6 +104,30 @@ public class TyperUtils {
         return false;
     }
 
+    public static Version getFromVersion (Method method) {
+        TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
+        if (typedColumn != null) {
+            return Version.fromString(typedColumn.fromVersion());
+        }
+        TypedTable typedTable = method.getAnnotation(TypedTable.class);
+        if (typedTable != null) {
+            return Version.fromString(typedTable.fromVersion());
+        }
+        return NULL_VERSION;
+    }
+
+    public static Version getuntilVersion (Method method) {
+        TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
+        if (typedColumn != null) {
+            return Version.fromString(typedColumn.untilVersion());
+        }
+        TypedTable typedTable = method.getAnnotation(TypedTable.class);
+        if (typedTable != null) {
+            return Version.fromString(typedTable.untilVersion());
+        }
+        return NULL_VERSION;
+    }
+
     /**
      * Method that checks validity of the parameter passed to getTypedRowWrapper.
      * This method checks for a valid Database Schema matching the expected Database for a given table
@@ -147,6 +173,20 @@ public class TyperUtils {
         return Reflection.newProxy(klazz, new InvocationHandler() {
             private Object processGetData(Method method) throws Throwable {
                 String columnName = getColumnName(method);
+                Version fromVersion = getFromVersion(method);
+                Version untilVersion = getuntilVersion(method);
+                if (!fromVersion.equals(NULL_VERSION)) {
+                    if (dbSchema.getVersion().compareTo(fromVersion) < 0) {
+                        throw new RuntimeException("This row is not supported until version "
+                                + fromVersion + "of the Schema");
+                    }
+                }
+                if (!untilVersion.equals(NULL_VERSION)) {
+                    if (dbSchema.getVersion().compareTo(untilVersion) > 0) {
+                        throw new RuntimeException("This row was deprecated in "
+                                + untilVersion + "of the Schema");
+                    }
+                }
                 if (columnName == null) {
                     throw new RuntimeException("Error processing Getter : "+ method.getName());
                 }
@@ -166,6 +206,20 @@ public class TyperUtils {
 
             private Object processGetColumn(Method method) throws Throwable {
                 String columnName = getColumnName(method);
+                Version fromVersion = getFromVersion(method);
+                Version untilVersion = getuntilVersion(method);
+                if (!fromVersion.equals(NULL_VERSION)) {
+                    if (dbSchema.getVersion().compareTo(fromVersion) < 0) {
+                        throw new RuntimeException("This column is not supported until version "
+                                + fromVersion + "of the Schema");
+                    }
+                }
+                if (!untilVersion.equals(NULL_VERSION)) {
+                    if (dbSchema.getVersion().compareTo(untilVersion) > 0) {
+                        throw new RuntimeException("This column was deprecated in "
+                                + untilVersion + "of the Schema");
+                    }
+                }
                 if (columnName == null) {
                     throw new RuntimeException("Error processing GetColumn : "+ method.getName());
                 }

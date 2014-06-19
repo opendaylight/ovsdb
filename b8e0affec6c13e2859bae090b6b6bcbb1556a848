@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_244f01bf",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/notation/Version.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-19T13:39:42Z",
+      "side": 1,
+      "message": "This is based on RFC 7047 Section 3.1\n\n \u003cversion\u003e\n A JSON string that contains a version number that matches [0-9]+\\.[0-9]+\\.[0-9]+\n\nSection 3.2 then states:\n\n \"version\": \u003cversion\u003e                    required\n\nI agree about the ambiguity in the RFC but note that the vSwitchd schema doesn\u0027t specify any semantics for version (see Open_vSwitch table db_version). I\u0027l email the RFC authors for clarity. \n\nNote: vtep schema also uses this version\nhttps://github.com/openvswitch/ovs/blob/master/vtep/vtep.ovsschema",
+      "parentUuid": "fa82b9bf_e1ea6b0e",
+      "revId": "b8e0affec6c13e2859bae090b6b6bcbb1556a848",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_44ba450b",
         "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/notation/Version.java",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-19T10:49:26Z",
       "side": 1,
       "message": "I\u0027ve heard of non-numeric patch... is that applicable here? things like \u0027-SNAPSHOT\u0027 comes to mind. :)",
+      "revId": "b8e0affec6c13e2859bae090b6b6bcbb1556a848",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_84504d5f",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/notation/Version.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-19T13:39:42Z",
+      "side": 1,
+      "message": "No. It\u0027s not in RFC7047 Section 3.1",
+      "parentUuid": "fa82b9bf_44ba450b",
       "revId": "b8e0affec6c13e2859bae090b6b6bcbb1556a848",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -71,6 +107,42 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_444a45ad",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/notation/Version.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-19T13:39:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_644c2943",
+      "revId": "b8e0affec6c13e2859bae090b6b6bcbb1556a848",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e4c83924",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/notation/Version.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-19T13:39:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_e43839a2",
+      "revId": "b8e0affec6c13e2859bae090b6b6bcbb1556a848",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_043c3d92",
         "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/notation/VersionTest.java",
         "patchSetId": 4
@@ -88,6 +160,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_04cc3d34",
+        "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/notation/VersionTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-19T13:39:42Z",
+      "side": 1,
+      "message": "IMO it\u0027s not really necessary as it\u0027s not used elsewhere in the code... but I\u0027ll add it if you would like.",
+      "parentUuid": "fa82b9bf_043c3d92",
+      "revId": "b8e0affec6c13e2859bae090b6b6bcbb1556a848",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_a442310e",
         "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/schema/OvsDBSchemaTest.java",
         "patchSetId": 4
@@ -99,6 +189,24 @@
       "writtenOn": "2014-06-19T10:49:26Z",
       "side": 1,
       "message": "Should \"6.12.0\" be in a xml file somewhere?!? I am little scared of hard coded things like this...",
+      "revId": "b8e0affec6c13e2859bae090b6b6bcbb1556a848",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a4d231d0",
+        "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/schema/OvsDBSchemaTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-19T13:39:42Z",
+      "side": 1,
+      "message": "It is... test_schema.json is in the resources directory ;)",
+      "parentUuid": "fa82b9bf_a442310e",
       "revId": "b8e0affec6c13e2859bae090b6b6bcbb1556a848",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_df3862a2",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/schema/typed/TyperUtils.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-19T21:21:31Z",
+      "side": 1,
+      "message": "Please remove these unused variables :)",
+      "revId": "21d43461dca6d2d8a3e7e3b9a8072b2d14cbc2e6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

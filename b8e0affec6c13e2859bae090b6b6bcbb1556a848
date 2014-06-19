@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_e1ea6b0e",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/notation/Version.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-19T03:51:54Z",
+      "side": 1,
+      "message": "The changes look good. But the RFC 7047 is not definite on this format. This text is from Section 3.2 of RFC 7047 : \n\n\" The \"version\" reports the version of the database schema.  It is REQUIRED to be present.  Open vSwitch semantics for \"version\" are described in [DB-SCHEMA].  Other schemas may use it differently.\".\n\nDoes that mean, this format of major.minor.patch with decimals is specific to ovs-vswitchd schemas and can be different for other schemas ? In that case, should we be including this in the schema-independent library ?",
+      "revId": "b8e0affec6c13e2859bae090b6b6bcbb1556a848",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -20,4 +20,6 @@ import java.lang.annotation.ElementType;;
 public @interface TypedColumn {
     public String name();
     public MethodType method();
+    public String fromVersion() default "0.0.0";
+    public String untilVersion() default "0.0.0";
 }

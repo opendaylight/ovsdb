@@ -162,6 +162,8 @@ public abstract class ColumnType {
                               for(JsonNode node: value.get(1)) {
                                  result.add(getBaseType().toValue(node));
                               }
+                         } else {
+                             result.add(getBaseType().toValue(value));
                          }
                      }
                } else {

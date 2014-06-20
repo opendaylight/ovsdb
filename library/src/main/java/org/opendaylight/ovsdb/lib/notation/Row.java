@@ -46,4 +46,9 @@ public class Row<E extends TableSchema<E>> {
     public void addColumn(String columnName, Column<E, ?> data) {
         this.columns.put(columnName, data);
     }
+
+    @Override
+    public String toString() {
+        return "Row [columns=" + columns + "]";
+    }
 }

@@ -46,4 +46,9 @@ public class Column<E extends TableSchema<E>, D> {
     public void setSchema(ColumnSchema<E, D> schema) {
         this.schema = schema;
     }
+
+    @Override
+    public String toString() {
+        return "Column [schema=" + schema + ", data=" + data + "]";
+    }
 }

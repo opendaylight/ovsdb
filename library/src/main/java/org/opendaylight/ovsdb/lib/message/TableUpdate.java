@@ -17,7 +17,6 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
 public class TableUpdate<E extends TableSchema<E>> {
-
     private UUID uuid;
     private Row<E> old;
     private Row<E> new_;
@@ -45,5 +44,11 @@ public class TableUpdate<E extends TableSchema<E>> {
 
     public void setNew(Row<E> new_) {
         this.new_ = new_;
+    }
+
+    @Override
+    public String toString() {
+        return "TableUpdate [uuid=" + uuid + ", old=" + old + ", new_=" + new_
+                + "]";
     }
 }

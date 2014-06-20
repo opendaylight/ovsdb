@@ -34,6 +34,10 @@ public class TableUpdates extends Response {
         return this.map.get(table.getName());
     }
 
+    public Map<String, TableUpdate> getUpdates() {
+        return map;
+    }
+
     @Override
     public String toString() {
         return "TableUpdates [map=" + map + ", error=" + error + ", details="

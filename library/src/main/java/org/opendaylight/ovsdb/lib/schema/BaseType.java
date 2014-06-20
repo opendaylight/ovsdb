@@ -9,11 +9,12 @@
  */
 package org.opendaylight.ovsdb.lib.schema;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.collect.Sets;
+import java.util.Set;
+
 import org.opendaylight.ovsdb.lib.notation.UUID;
 
-import java.util.Set;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.Sets;
 
 public abstract class BaseType<E extends BaseType<E>> {
 
@@ -86,6 +87,7 @@ public abstract class BaseType<E extends BaseType<E>> {
         long max = Long.MAX_VALUE;
         Set<Integer> enums;
 
+        @Override
         public IntegerBaseType fromString(String typeString) {
             return "integer".equals(typeString) ? new IntegerBaseType() : null;
         }
@@ -162,6 +164,7 @@ public abstract class BaseType<E extends BaseType<E>> {
         double max = Double.MAX_VALUE;
         Set<Double> enums;
 
+        @Override
         public RealBaseType fromString(String typeString) {
             return "real".equals(typeString) ? new RealBaseType() : null;
         }
@@ -235,6 +238,7 @@ public abstract class BaseType<E extends BaseType<E>> {
 
     public static class BooleanBaseType extends BaseType {
 
+        @Override
         public BooleanBaseType fromString(String typeString) {
             return "boolean".equals(typeString) ? new BooleanBaseType() : null;
         }
@@ -265,6 +269,7 @@ public abstract class BaseType<E extends BaseType<E>> {
         int maxLength = Integer.MAX_VALUE;
         Set<String> enums;
 
+        @Override
         public StringBaseType fromString(String typeString) {
             return "string".equals(typeString) ? new StringBaseType() : null;
         }
@@ -330,6 +335,7 @@ public abstract class BaseType<E extends BaseType<E>> {
             this.enums = enums;
         }
 
+        @Override
         public String toString() {
             return "StringBaseType";
         }
@@ -344,6 +350,7 @@ public abstract class BaseType<E extends BaseType<E>> {
         RefType refType;
 
 
+        @Override
         public UuidBaseType fromString(String typeString) {
             return "uuid".equals(typeString) ? new UuidBaseType() : null;
         }
@@ -361,7 +368,14 @@ public abstract class BaseType<E extends BaseType<E>> {
 
         @Override
         public Object toValue(JsonNode value) {
-            return new UUID(value.asText());
+            if(value.isArray()) {
+                if (value.size() == 2) {
+                    if (value.get(0).isTextual() && "uuid".equals(value.get(0).asText())) {
+                        return new UUID(value.get(1).asText());
+                    }
+                }
+            }
+            return null;
         }
 
         @Override
@@ -385,6 +399,7 @@ public abstract class BaseType<E extends BaseType<E>> {
             this.refType = refType;
         }
 
+        @Override
         public String toString() {
             return "UuidBaseType";
         }

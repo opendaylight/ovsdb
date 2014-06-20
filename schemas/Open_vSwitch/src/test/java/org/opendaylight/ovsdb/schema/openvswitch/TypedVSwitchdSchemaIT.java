@@ -60,7 +60,7 @@ public class TypedVSwitchdSchemaIT extends OvsdbTestBase {
 
     @Test
     public void testTypedBridgeOperations() throws IOException, InterruptedException, ExecutionException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        this.monitorBridge();
+        this.monitorTables();
         this.createTypedBridge();
         this.createTypedController();
     }
@@ -103,6 +103,8 @@ public class TypedVSwitchdSchemaIT extends OvsdbTestBase {
         Row bridgeRow = tableCache.get(bridge.getSchema().getName()).get(testBridgeUuid);
         Bridge monitoredBridge = ovs.getTypedRowWrapper(Bridge.class, bridgeRow);
         Assert.assertEquals(monitoredBridge.getNameColumn().getData(), bridge.getNameColumn().getData());
+        Assert.assertNotNull(monitoredBridge.getVersion());
+        Assert.assertNotNull(this.getOpenVSwitchTableUuid());
     }
 
     private void createTypedController() throws IOException, InterruptedException, ExecutionException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
@@ -179,14 +181,27 @@ public class TypedVSwitchdSchemaIT extends OvsdbTestBase {
         Assert.assertTrue(OPEN_VSWITCH_SCHEMA+" schema is not supported by the switch", hasOpenVswitchSchema);
     }
 
-    public void monitorBridge() throws ExecutionException, InterruptedException, IOException {
+    private UUID getOpenVSwitchTableUuid() {
+        OpenVSwitch openVSwitch = ovs.getTypedRowWrapper(OpenVSwitch.class, null);
+        Map<UUID, Row> ovsTable = tableCache.get(openVSwitch.getSchema().getName());
+        if (ovsTable != null) {
+            if (ovsTable.keySet().size() >= 1) {
+                return (UUID)ovsTable.keySet().toArray()[0];
+            }
+        }
+        return null;
+    }
+
+    public void monitorTables() throws ExecutionException, InterruptedException, IOException {
         Assert.assertNotNull(dbSchema);
-        GenericTableSchema bridge = dbSchema.table("Bridge", GenericTableSchema.class);
+        Bridge bridge = ovs.createTypedRowWrapper(Bridge.class);
+        OpenVSwitch openVSwitch = ovs.createTypedRowWrapper(OpenVSwitch.class);
 
         List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
-        MonitorRequestBuilder<GenericTableSchema> builder = MonitorRequestBuilder.builder(bridge);
-        monitorRequests.add(builder.with(new MonitorSelect(true, true, true, true))
-                                   .build());
+        MonitorRequestBuilder<GenericTableSchema> bridgeBuilder = MonitorRequestBuilder.builder(bridge.getSchema());
+        MonitorRequestBuilder<GenericTableSchema> ovsTableBuilder = MonitorRequestBuilder.builder(openVSwitch.getSchema());
+        monitorRequests.add(bridgeBuilder.with(new MonitorSelect(true, true, true, true)).build());
+        monitorRequests.add(ovsTableBuilder.with(new MonitorSelect(true, true, true, true)).build());
 
         MonitorHandle monitor = ovs.monitor(dbSchema, monitorRequests, new UpdateMonitor());
         Assert.assertNotNull(monitor);

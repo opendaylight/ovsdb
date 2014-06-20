@@ -9,5 +9,9 @@
  */
 package org.opendaylight.ovsdb.lib.schema.typed;
 
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
+
 public interface TypedBaseTable {
+    @TypedColumn(name="", method=MethodType.GETTABLESCHEMA)
+    GenericTableSchema getSchema();
 }

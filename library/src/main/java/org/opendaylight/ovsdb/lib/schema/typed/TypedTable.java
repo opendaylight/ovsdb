@@ -10,6 +10,8 @@
 
 package org.opendaylight.ovsdb.lib.schema.typed;
 
+import org.opendaylight.ovsdb.lib.notation.Version;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -20,4 +22,6 @@ import java.lang.annotation.ElementType;;
 public @interface TypedTable {
     public String name();
     public String database();
+    public String fromVersion() default Version.NULL_VERSION_STRING;
+    public String untilVersion() default Version.NULL_VERSION_STRING;
 }

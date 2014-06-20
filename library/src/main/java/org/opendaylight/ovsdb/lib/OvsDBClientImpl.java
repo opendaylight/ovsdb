@@ -24,11 +24,15 @@ import org.opendaylight.ovsdb.lib.message.TableUpdate;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.message.TransactBuilder;
 import org.opendaylight.ovsdb.lib.message.UpdateNotification;
+import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
+import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -298,5 +302,65 @@ public class OvsDBClientImpl implements OvsDBClient {
             this.monitorCallBack = monitorCallBack;
             this.schema = schema;
         }
+    }
+
+    @Override
+    public DatabaseSchema getDatabaseSchema (String dbName) {
+        return schema.get(dbName);
+    }
+
+    /**
+     * This method finds the DatabaseSchema that matches a given Typed Table Class.
+     * With the introduction of TypedTable and TypedColumn annotations, it is possible to express
+     * the Database Name, Table Name & the Database Versions within which the Table is defined and maintained.
+     *
+     * @param klazz Typed Class that represents a Table
+     * @return DatabaseSchema with the Highest known & compatible version for this Table.
+     */
+    private <T> DatabaseSchema getDatabaseSchemaForTypedTable (Class <T> klazz) {
+        TypedTable typedTable = klazz.getAnnotation(TypedTable.class);
+        if (typedTable != null) {
+            return this.getDatabaseSchema(typedTable.database());
+        }
+        return null;
+    }
+
+    /**
+     * User friendly convenient method that make use of TyperUtils.getTypedRowWrapper to create a Typed Row Proxy
+     * given the Typed Table Class
+     *
+     * @param klazz Typed Interface
+     * @return Proxy wrapper for the actual raw Row class.
+     */
+    @Override
+    public <T> T createTypedRowWrapper(Class<T> klazz) {
+        DatabaseSchema dbSchema = getDatabaseSchemaForTypedTable(klazz);
+        return this.createTypedRowWrapper(dbSchema, klazz);
+    }
+
+    /**
+     * User friendly convenient method that make use of getTypedRowWrapper to create a Typed Row Proxy given
+     * DatabaseSchema and Typed Table Class.
+     *
+     * @param dbSchema Database Schema of interest
+     * @param klazz Typed Interface
+     * @return Proxy wrapper for the actual raw Row class.
+     */
+    @Override
+    public <T> T createTypedRowWrapper(DatabaseSchema dbSchema, Class<T> klazz) {
+        return TyperUtils.getTypedRowWrapper(dbSchema, klazz, new Row<GenericTableSchema>());
+    }
+
+    /**
+     * User friendly convenient method to get a Typed Row Proxy given a Typed Table Class and the Row to be wrapped.
+     *
+     * @param klazz Typed Interface
+     * @param row The actual Row that the wrapper is operating on. It can be null if the caller is just interested in getting ColumnSchema.
+     * @return Proxy wrapper for the actual raw Row class.
+     */
+    @Override
+    public <T> T getTypedRowWrapper(final Class<T> klazz, final Row<GenericTableSchema> row) {
+        DatabaseSchema dbSchema = getDatabaseSchemaForTypedTable(klazz);
+        return TyperUtils.getTypedRowWrapper(dbSchema, klazz, row);
     }
 }

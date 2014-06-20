@@ -14,12 +14,14 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.google.common.collect.ImmutableSet;
 import junit.framework.Assert;
 
 import org.junit.After;
@@ -63,6 +65,7 @@ public class TypedVSwitchdSchemaIT extends OvsdbTestBase {
         this.monitorTables();
         this.createTypedBridge();
         this.createTypedController();
+        this.testCreateTypedPortandInterface();
     }
 
     private void createTypedBridge() throws IOException, InterruptedException, ExecutionException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
@@ -147,7 +150,7 @@ public class TypedVSwitchdSchemaIT extends OvsdbTestBase {
                         .value(controller2.getTargetColumn()))
                 .add(op.mutate(bridge.getSchema())
                         .addMutation(bridge.getControllerColumn().getSchema(), Mutator.INSERT,
-                                     Sets.newHashSet(new UUID(transactionUuidStr)))
+                                Sets.newHashSet(new UUID(transactionUuidStr)))
                         .where(bridge.getNameColumn().getSchema().opEqual(testBridgeName))
                         .build());
 
@@ -165,6 +168,50 @@ public class TypedVSwitchdSchemaIT extends OvsdbTestBase {
         bridgeRow = tableCache.get(bridge.getSchema().getName()).get(testBridgeUuid);
         monitoredBridge = ovs.getTypedRowWrapper(Bridge.class, bridgeRow);
         Assert.assertEquals(2, monitoredBridge.getControllerColumn().getData().size());
+    }
+
+    private void testCreateTypedPortandInterface() throws InterruptedException, ExecutionException{
+        String portUuidStr = "testPort";
+        String intfUuidStr = "testIntf";
+        Port port = ovs.createTypedRowWrapper(Port.class);
+        port.setName("testPort");
+        port.setTag(ImmutableSet.of(BigInteger.ONE));
+        port.setMac(ImmutableSet.of("00:00:00:00:00:01"));
+        port.setInterfaces(ImmutableSet.of(new UUID(intfUuidStr)));
+
+        Interface intf = ovs.createTypedRowWrapper(Interface.class);
+        intf.setName(port.getNameColumn().getData());
+        intf.setExternalIds(ImmutableMap.of("vm-id", "12345abcedf78910"));
+
+        Bridge bridge = ovs.getTypedRowWrapper(Bridge.class, null);
+        TransactionBuilder transactionBuilder = ovs.transactBuilder()
+                .add(op.insert(port.getSchema())
+                        .withId(portUuidStr)
+                        .value(port.getNameColumn())
+                        .value(port.getMacColumn()))
+                .add(op.insert(intf.getSchema())
+                        .withId(intfUuidStr)
+                        .value(intf.getNameColumn()))
+                .add(op.update(port.getSchema())
+                        .set(port.getTagColumn())
+                        .set(port.getMacColumn())
+                        .set(port.getInterfacesColumn())
+                        .where(port.getNameColumn().getSchema().opEqual(port.getName()))
+                        .build())
+                .add(op.update(intf.getSchema())
+                        .set(intf.getExternalIdsColumn())
+                        .where(intf.getNameColumn().getSchema().opEqual(intf.getName()))
+                        .build())
+                .add(op.mutate(bridge.getSchema())
+                        .addMutation(bridge.getPortsColumn().getSchema(), Mutator.INSERT, Sets.newHashSet(new UUID(portUuidStr)))
+                        .where(bridge.getNameColumn().getSchema().opEqual(testBridgeName))
+                        .build());
+        ListenableFuture<List<OperationResult>> results = transactionBuilder.execute();
+        List<OperationResult> operationResults = results.get();
+        Assert.assertFalse(operationResults.isEmpty());
+        // Check if Results matches the number of operations in transaction
+        Assert.assertEquals(transactionBuilder.getOperations().size(), operationResults.size());
+        System.out.println("Insert & Mutate operation results for Port and Interface = " + operationResults);
     }
 
     public void testGetDBs() throws ExecutionException, InterruptedException {

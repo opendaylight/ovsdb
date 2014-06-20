@@ -58,14 +58,14 @@ public interface OpenVSwitch extends TypedBaseTable {
     public void setExternalIds(Map<String, String> externalIds);
 
     @TypedColumn(name="next_cfg", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Integer> getNextCfgColumn();
+    public Column<GenericTableSchema, Integer> getNextConfigColumn();
     @TypedColumn(name="next_cfg", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setNextCfg(Integer nextCfg);
+    public void setNextConfig(Integer nextConfig);
 
     @TypedColumn(name="cur_cfg", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Integer> getCur_cfgColumn();
+    public Column<GenericTableSchema, Integer> getCurrentConfigColumn();
     @TypedColumn(name="cur_cfg", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setCur_cfg(Integer cur_cfg);
+    public void setCurrentConfig(Integer currentConfig);
 
     @TypedColumn(name="capabilities", method=MethodType.GETCOLUMN, fromVersion="1.0.0", untilVersion="6.7.0")
     public Column<GenericTableSchema, Map<String, UUID>> getCapabilitiesColumn();

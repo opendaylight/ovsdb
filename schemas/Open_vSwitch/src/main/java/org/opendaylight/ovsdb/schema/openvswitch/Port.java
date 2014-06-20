@@ -31,6 +31,8 @@ public interface Port extends TypedBaseTable {
     public Column<GenericTableSchema, String> getNameColumn();
     @TypedColumn(name="name", method=MethodType.SETDATA, fromVersion="1.0.0")
     public void setName(String name);
+    @TypedColumn(name="name", method=MethodType.GETDATA, fromVersion="1.0.0")
+    public String getName();
 
     @TypedColumn(name="interfaces", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Set<UUID>> getInterfacesColumn();

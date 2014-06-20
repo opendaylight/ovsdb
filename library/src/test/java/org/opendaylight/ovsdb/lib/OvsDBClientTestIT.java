@@ -46,7 +46,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -244,7 +243,7 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
                         .withId(namedUuid)
                         .value(name, testBridgeName)
                         .value(flood_vlans, Sets.newHashSet(100, 101, 4001))
-                        .value(externalIds, Maps.newHashMap(ImmutableMap.of("key","value"))))
+                        .value(externalIds, ImmutableMap.of("key","value")))
                 .add(op.comment("Inserting Bridge br-int"))
                 .add(op.update(bridge)
                         .set(fail_mode, "secure")
@@ -260,7 +259,7 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
                         .where(name.opEqual(testBridgeName))
                         .build())
                 .add(op.mutate(bridge)
-                        .addMutation(externalIds, Mutator.INSERT, Maps.newHashMap(ImmutableMap.of("key2","value2")))
+                        .addMutation(externalIds, Mutator.INSERT, ImmutableMap.of("key2","value2"))
                         .where(name.opEqual(testBridgeName))
                         .build())
                 .add(op.mutate(ovsTable)

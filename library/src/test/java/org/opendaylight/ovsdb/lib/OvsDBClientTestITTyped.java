@@ -39,7 +39,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -55,7 +54,7 @@ public class OvsDBClientTestITTyped extends OvsdbTestBase {
     public void testTypedBridgeCreate() throws IOException, InterruptedException, ExecutionException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         TestBridge rBridge = ovs.createTypedRowWrapper(TestBridge.class);
         rBridge.setName(testBridgeName);
-        rBridge.setStatus(Maps.newHashMap(ImmutableMap.of("key","value")));
+        rBridge.setStatus(ImmutableMap.of("key","value"));
         rBridge.setFloodVlans(Sets.newHashSet(34));
 
         GenericTableSchema ovsTable = dbSchema.table("Open_vSwitch", GenericTableSchema.class);

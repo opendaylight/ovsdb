@@ -11,5 +11,5 @@
 package org.opendaylight.ovsdb.lib.schema.typed;
 
 public enum MethodType {
-    GETCOLUMN, GETDATA, SETDATA
+    GETCOLUMN, GETDATA, SETDATA, GETTABLESCHEMA
 }

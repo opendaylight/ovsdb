@@ -27,13 +27,10 @@ import org.opendaylight.ovsdb.lib.OvsDBClientImpl;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
 import org.opendaylight.ovsdb.lib.message.UpdateNotification;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
-import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,28 +53,26 @@ public class TypedVSwitchdSchemaIT extends OvsdbTestBase {
     }
 
     private void createTypedBridge() throws IOException, InterruptedException, ExecutionException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        GenericTableSchema bridgeSchema = TyperUtils.getTableSchema(dbSchema, Bridge.class);
-        Bridge bridge = TyperUtils.getTypedRowWrapper(dbSchema, Bridge.class, new Row<GenericTableSchema>());
+        Bridge bridge = ovs.createTypedRowWrapper(Bridge.class);
         bridge.setName(testBridgeName);
         bridge.setStatus(Maps.newHashMap(ImmutableMap.of("key","value")));
         bridge.setFloodVlans(Sets.newHashSet(34));
 
-        GenericTableSchema ovsTable = TyperUtils.getTableSchema(dbSchema, OpenVSwitch.class);
-        OpenVSwitch openVSwitch = TyperUtils.getTypedRowWrapper(dbSchema, OpenVSwitch.class, new Row<GenericTableSchema>());
+        OpenVSwitch openVSwitch = ovs.createTypedRowWrapper(OpenVSwitch.class);
         openVSwitch.setBridges(Sets.newHashSet(new UUID(testBridgeName)));
 
         int insertOperationIndex = 0;
 
         TransactionBuilder transactionBuilder = ovs.transactBuilder()
-                .add(op.insert(bridgeSchema)
+                .add(op.insert(bridge.getSchema())
                         .withId(testBridgeName)
                         .value(bridge.getNameColumn()))
-                .add(op.update(bridgeSchema)
+                .add(op.update(bridge.getSchema())
                         .set(bridge.getStatusColumn())
                         .set(bridge.getFloodVlansColumn())
                         .where(bridge.getNameColumn().getSchema().opEqual(bridge.getName()))
                         .and(bridge.getNameColumn().getSchema().opEqual(bridge.getName())).build())
-                .add(op.mutate(ovsTable)
+                .add(op.mutate(openVSwitch.getSchema())
                         .addMutation(openVSwitch.getBridgesColumn().getSchema(), Mutator.INSERT,
                                      openVSwitch.getBridgesColumn().getData()));
 
@@ -120,17 +115,14 @@ public class TypedVSwitchdSchemaIT extends OvsdbTestBase {
 
     @After
     public void tearDown() throws InterruptedException, ExecutionException {
-        GenericTableSchema bridgeSchema = TyperUtils.getTableSchema(dbSchema, Bridge.class);
-        Bridge bridge = TyperUtils.getTypedRowWrapper(dbSchema, Bridge.class, null);
-
-        GenericTableSchema ovsTable = TyperUtils.getTableSchema(dbSchema, OpenVSwitch.class);
-        OpenVSwitch openVSwitch = TyperUtils.getTypedRowWrapper(dbSchema, OpenVSwitch.class, null);
+        Bridge bridge = ovs.getTypedRowWrapper(Bridge.class, null);
+        OpenVSwitch openVSwitch = ovs.getTypedRowWrapper(OpenVSwitch.class, null);
 
         ListenableFuture<List<OperationResult>> results = ovs.transactBuilder()
-                .add(op.delete(bridgeSchema)
+                .add(op.delete(bridge.getSchema())
                         .where(bridge.getNameColumn().getSchema().opEqual(testBridgeName))
                         .build())
-                .add(op.mutate(ovsTable)
+                .add(op.mutate(openVSwitch.getSchema())
                         .addMutation(openVSwitch.getBridgesColumn().getSchema(), Mutator.DELETE, Sets.newHashSet(testBridgeUuid)))
                 .add(op.commit(true))
                 .execute();

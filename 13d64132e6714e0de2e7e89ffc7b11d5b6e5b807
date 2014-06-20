@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_7a78442b",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/OvsDBClientImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 318,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-20T17:04:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_1fab2a1e",
+      "revId": "13d64132e6714e0de2e7e89ffc7b11d5b6e5b807",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_bf71dee1",
         "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/schema/typed/TyperUtils.java",
         "patchSetId": 6
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-20T12:31:34Z",
       "side": 1,
       "message": "Why was this removed?",
+      "revId": "13d64132e6714e0de2e7e89ffc7b11d5b6e5b807",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3a72bc49",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/schema/typed/TyperUtils.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-20T17:04:43Z",
+      "side": 1,
+      "message": "I didnt find any obvious bug due to the presence of this Exception. But anticipating the usage, where it is very common to use toString(), equals and other basic operations on any object and this being a proxy object with invocationHandler, it will cause issues during its usage. Even Asserts might use it FWIW.\n\nSo, it is a fix with well-thought-out :) anticipation.\nOnce we add these basic methods, we are good to go and reenable it.",
+      "parentUuid": "fa82b9bf_bf71dee1",
       "revId": "13d64132e6714e0de2e7e89ffc7b11d5b6e5b807",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

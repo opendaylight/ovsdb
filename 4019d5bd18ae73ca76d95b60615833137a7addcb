@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_da7ab0f0",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/SouthboundHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-20T18:52:00Z",
+      "side": 1,
+      "message": "This is incorrect. it has to be Port UUID. Please remove this change.",
+      "revId": "4019d5bd18ae73ca76d95b60615833137a7addcb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5a6ea030",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/provider/OF10Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-20T18:52:00Z",
+      "side": 1,
+      "message": "If these are unrelated. please split the patch.",
+      "revId": "4019d5bd18ae73ca76d95b60615833137a7addcb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

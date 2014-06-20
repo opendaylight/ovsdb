@@ -35,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -50,12 +49,13 @@ public class TypedVSwitchdSchemaIT extends OvsdbTestBase {
     @Test
     public void testTypedBridgeOperations() throws IOException, InterruptedException, ExecutionException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         this.createTypedBridge();
+        this.createTypedController();
     }
 
     private void createTypedBridge() throws IOException, InterruptedException, ExecutionException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         Bridge bridge = ovs.createTypedRowWrapper(Bridge.class);
         bridge.setName(testBridgeName);
-        bridge.setStatus(Maps.newHashMap(ImmutableMap.of("key","value")));
+        bridge.setStatus(ImmutableMap.of("key","value"));
         bridge.setFloodVlans(Sets.newHashSet(34));
 
         OpenVSwitch openVSwitch = ovs.createTypedRowWrapper(OpenVSwitch.class);
@@ -82,8 +82,64 @@ public class TypedVSwitchdSchemaIT extends OvsdbTestBase {
         // Check if Results matches the number of operations in transaction
         Assert.assertEquals(transactionBuilder.getOperations().size(), operationResults.size());
         System.out.println("Insert & Update operation results = " + operationResults);
+        for (OperationResult result : operationResults) {
+            Assert.assertNull(result.getError());
+        }
         testBridgeUuid = operationResults.get(insertOperationIndex).getUuid();
     }
+
+    private void createTypedController() throws IOException, InterruptedException, ExecutionException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        Controller controller1 = ovs.createTypedRowWrapper(Controller.class);
+        controller1.setTarget("tcp:1.1.1.1:6640");
+        Controller controller2 = ovs.createTypedRowWrapper(Controller.class);
+        controller2.setTarget("tcp:2.2.2.2:6640");
+
+        Bridge bridge = ovs.getTypedRowWrapper(Bridge.class, null);
+
+        String transactionUuidStr = "controller";
+        TransactionBuilder transactionBuilder = ovs.transactBuilder()
+                .add(op.insert(controller1.getSchema())
+                        .withId(transactionUuidStr)
+                        .value(controller1.getTargetColumn()))
+                .add(op.mutate(bridge.getSchema())
+                        .addMutation(bridge.getControllerColumn().getSchema(), Mutator.INSERT,
+                                     Sets.newHashSet(new UUID(transactionUuidStr)))
+                        .where(bridge.getNameColumn().getSchema().opEqual(testBridgeName))
+                        .build());
+
+        ListenableFuture<List<OperationResult>> results = transactionBuilder.execute();
+        List<OperationResult> operationResults = results.get();
+        Assert.assertFalse(operationResults.isEmpty());
+        // Check if Results matches the number of operations in transaction
+        Assert.assertEquals(transactionBuilder.getOperations().size(), operationResults.size());
+        System.out.println("Insert & Mutate operation results for controller1 = " + operationResults);
+        // Check for any errors
+        for (OperationResult result : operationResults) {
+            Assert.assertNull(result.getError());
+        }
+
+        transactionBuilder = ovs.transactBuilder()
+                .add(op.insert(controller2.getSchema())
+                        .withId(transactionUuidStr)
+                        .value(controller2.getTargetColumn()))
+                .add(op.mutate(bridge.getSchema())
+                        .addMutation(bridge.getControllerColumn().getSchema(), Mutator.INSERT,
+                                     Sets.newHashSet(new UUID(transactionUuidStr)))
+                        .where(bridge.getNameColumn().getSchema().opEqual(testBridgeName))
+                        .build());
+
+        results = transactionBuilder.execute();
+        operationResults = results.get();
+        Assert.assertFalse(operationResults.isEmpty());
+        // Check if Results matches the number of operations in transaction
+        Assert.assertEquals(transactionBuilder.getOperations().size(), operationResults.size());
+        System.out.println("Insert & Mutate operation results for controller2 = " + operationResults);
+        // Check for any errors
+        for (OperationResult result : operationResults) {
+            Assert.assertNull(result.getError());
+        }
+    }
+
     public void testGetDBs() throws ExecutionException, InterruptedException {
         ListenableFuture<List<String>> databases = ovs.getDatabases();
         List<String> dbNames = databases.get();

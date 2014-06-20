@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_1fab2a1e",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/OvsDBClientImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 318,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-20T12:31:34Z",
+      "side": 1,
+      "message": "Can you update the Javadoc please?\n @return DatabaseSchema",
+      "revId": "13d64132e6714e0de2e7e89ffc7b11d5b6e5b807",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_bf71dee1",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/schema/typed/TyperUtils.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-20T12:31:34Z",
+      "side": 1,
+      "message": "Why was this removed?",
+      "revId": "13d64132e6714e0de2e7e89ffc7b11d5b6e5b807",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -375,7 +375,7 @@ public class OF10Provider implements NetworkProvider {
 
                         if (tunnelOFPort == -1) {
                             logger.warn("Tunnel Port {} on node {}: OFPort = -1 . Don't panic. It might get converged soon...", tunIntf.getName(), node);
-                            return;
+                            continue;
                         }
                         logger.debug("Identified Tunnel port {} -> OF ({}) on {}", tunIntf.getName(), tunnelOFPort, node);
 
@@ -451,7 +451,7 @@ public class OF10Provider implements NetworkProvider {
 
                         if (tunnelOFPort == -1) {
                             logger.error("Could NOT Identify Tunnel port {} -> OF ({}) on {}", tunIntf.getName(), tunnelOFPort, node);
-                            return;
+                            continue;
                         }
                         logger.debug("Identified Tunnel port {} -> OF ({}) on {}", tunIntf.getName(), tunnelOFPort, node);
 
@@ -786,10 +786,10 @@ public class OF10Provider implements NetworkProvider {
                 status = addTunnelPort(srcNode, network.getProviderNetworkType(), src, dst, network.getProviderSegmentationID());
                 if (status.isSuccess()) {
                     this.programTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), dst, srcNode, intf, true);
-                }
-                addTunnelPort(dstNode, network.getProviderNetworkType(), dst, src, network.getProviderSegmentationID());
-                if (status.isSuccess()) {
-                    this.programTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), src, dstNode, intf, false);
+                    status = addTunnelPort(dstNode, network.getProviderNetworkType(), dst, src, network.getProviderSegmentationID());
+                    if (status.isSuccess()) {
+                        this.programTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), src, dstNode, intf, false);
+                    }
                 }
             }
             return new Status(StatusCode.SUCCESS);
@@ -939,9 +939,16 @@ public class OF10Provider implements NetworkProvider {
                     timeout--;
                     continue;
                 }
-                interfaceUUID = interfaces.toArray()[0].toString();
-                Interface intf = (Interface)ovsdbTable.getRow(node, Interface.NAME.getName(), interfaceUUID);
-                if (intf == null) interfaceUUID = null;
+
+                if (interfaces == null || interfaces.size() == 0) {
+                    logger.error("Reached max timeout retries for interfaces on Tunnel port {} in {}",
+                            portName, tunnelPortUUID);
+                    interfaceUUID = null;
+                } else {
+                    interfaceUUID = interfaces.toArray()[0].toString();
+                    Interface intf = (Interface) ovsdbTable.getRow(node, Interface.NAME.getName(), interfaceUUID);
+                    if (intf == null) interfaceUUID = null;
+                }
             }
 
             if (interfaceUUID == null) {

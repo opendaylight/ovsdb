@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_1a21f8fa",
+        "filename": "schemas/Open_vSwitch/src/main/java/org/opendaylight/ovsdb/schema/openvswitch/FlowSampleCollectorSet.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-20T18:17:04Z",
+      "side": 1,
+      "message": "Can you please also make sure the Missing columns are added and the above comment removed ?",
+      "revId": "4a2004130f21a34042f2aa2b2e6b62fd7927977a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7a228402",
+        "filename": "schemas/Open_vSwitch/src/main/java/org/opendaylight/ovsdb/schema/openvswitch/FlowSampleCollectorSet.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-20T18:17:04Z",
+      "side": 1,
+      "message": "Is there a reason the setXXX calls are NOT annotated with version tags ?\n\nI know it is lame to add it to every call. But at this point, we dont have inheritance of any other intelligence to pick annotations from peers :)",
+      "revId": "4a2004130f21a34042f2aa2b2e6b62fd7927977a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

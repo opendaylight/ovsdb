@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Authors : Madhu Venugopal
+ * Authors : Madhu Venugopal, Dave Tucker
  */
 package org.opendaylight.ovsdb.schema.openvswitch;
 
@@ -21,80 +21,80 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedColumn;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 
 
-/*
- * Reusing the existing Table definitions and a few columns are not defined here
- * TODO : Fill up the missing Columns and include Supported DB Version
+/**
+ * This class is a typed interface to the Open_vSwitch table
  */
-
 @TypedTable(name="Open_vSwitch", database="Open_vSwitch")
 public interface OpenVSwitch extends TypedBaseTable {
-    @TypedColumn(name="bridges", method=MethodType.GETCOLUMN)
-    public Column<GenericTableSchema, Set<UUID>> getBridgesColumn() ;
-    @TypedColumn(name="bridges", method=MethodType.SETDATA)
-    public void setBridges(Set<UUID> bridges) ;
 
-    @TypedColumn(name="curr_cfg", method=MethodType.GETCOLUMN)
-    public Column<GenericTableSchema, Integer> getCurr_cfgColumn() ;
-    @TypedColumn(name="curr_cfg", method=MethodType.SETDATA)
-    public void setCurr_cfg(Integer curr_cfg) ;
+    @TypedColumn(name="bridges", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
+    public Column<GenericTableSchema, Set<UUID>> getBridgesColumn();
+    @TypedColumn(name="bridges", method=MethodType.SETDATA, fromVersion="1.0.0")
+    public void setBridges(Set<UUID> bridges);
 
-    @TypedColumn(name="db_version", method=MethodType.GETCOLUMN)
-    public Column<GenericTableSchema, Set<String>> getDbVersionColumn() ;
-    @TypedColumn(name="db_version", method=MethodType.SETDATA)
-    public void setDbVersion(Set<String> dbVersion) ;
+    @TypedColumn(name="managers", method=MethodType.GETCOLUMN, fromVersion="1.0.0", untilVersion="2.0.0")
+    public Column<GenericTableSchema, Set<UUID>> getManagersColumn();
+    @TypedColumn(name="managers", method=MethodType.SETDATA, fromVersion="1.0.0", untilVersion="2.0.0")
+    public void setManagers(Set<UUID> managers);
 
-    @TypedColumn(name="manager_options", method=MethodType.GETCOLUMN)
-    public Column<GenericTableSchema, Set<UUID>> getManagerOptionsColumn() ;
-    @TypedColumn(name="manager_options", method=MethodType.SETDATA)
-    public void setManagerOptions(Set<UUID> managerOptions) ;
+    @TypedColumn(name="manager_options", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
+    public Column<GenericTableSchema, Set<UUID>> getManagerOptionsColumn();
+    @TypedColumn(name="manager_options", method=MethodType.SETDATA, fromVersion="1.0.0")
+    public void setManagerOptions(Set<UUID> managerOptions);
 
-    @TypedColumn(name="status", method=MethodType.GETCOLUMN)
-    public Column<GenericTableSchema, Map<String, String>> getStatusColumn() ;
-    @TypedColumn(name="status", method=MethodType.SETDATA)
-    public void setStatus(Map<String, String> status) ;
+    @TypedColumn(name="ssl", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
+    public Column<GenericTableSchema, Set<UUID>> getSslColumn();
+    @TypedColumn(name="ssl", method=MethodType.SETDATA, fromVersion="1.0.0")
+    public void setSsl(Set<UUID> ssl);
 
-    @TypedColumn(name="next_cfg", method=MethodType.GETCOLUMN)
-    public Column<GenericTableSchema, Integer> getNextCfgColumn() ;
-    @TypedColumn(name="next_cfg", method=MethodType.SETDATA)
-    public void setNextCfg(Integer nextCfg) ;
-
-    @TypedColumn(name="ovs_version", method=MethodType.GETCOLUMN)
-    public Column<GenericTableSchema, Set<String>> getOvsVersionColumn() ;
-    @TypedColumn(name="ovs_version", method=MethodType.SETDATA)
-    public void setOvsVersion(Set<String> ovsVersion) ;
-
-    @TypedColumn(name="ssl", method=MethodType.GETCOLUMN)
-    public Column<GenericTableSchema, Set<UUID>> getSslColumn() ;
-    @TypedColumn(name="ssl", method=MethodType.SETDATA)
-    public void setSsl(Set<UUID> ssl) ;
-
-    @TypedColumn(name="system_type", method=MethodType.GETCOLUMN)
-    public Column<GenericTableSchema, Set<String>> getSystemTypeColumn() ;
-    @TypedColumn(name="system_type", method=MethodType.SETDATA)
-    public void setSystemType(Set<String> systemType) ;
-
-    @TypedColumn(name="system_version", method=MethodType.GETCOLUMN)
-    public Column<GenericTableSchema, Set<String>> getSystemVersionColumn() ;
-    @TypedColumn(name="system_version", method=MethodType.SETDATA)
-    public void setSystemVersion(Set<String> systemVersion) ;
-
-    @TypedColumn(name="capabilities", method=MethodType.GETCOLUMN)
-    public Column<GenericTableSchema, Map<String, UUID>> getCapabilitiesColumn() ;
-    @TypedColumn(name="capabilities", method=MethodType.SETDATA)
-    public void setCapabilities(Map<String, UUID> capabilities) ;
-
-    @TypedColumn(name="other_config", method=MethodType.GETCOLUMN)
+    @TypedColumn(name="other_config", method=MethodType.GETCOLUMN, fromVersion="5.1.0")
     public Column<GenericTableSchema, Map<String, String>> getOtherConfigColumn() ;
-    @TypedColumn(name="other_config", method=MethodType.SETDATA)
-    public void setOtherConfig(Map<String, String> otherConfig) ;
+    @TypedColumn(name="other_config", method=MethodType.SETDATA, fromVersion="5.1.0")
+    public void setOtherConfig(Map<String, String> otherConfig);
 
-    @TypedColumn(name="external_ids", method=MethodType.GETCOLUMN)
+    @TypedColumn(name="external_ids", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn() ;
-    @TypedColumn(name="external_ids", method=MethodType.SETDATA)
-    public void setExternalIds(Map<String, String> externalIds) ;
+    @TypedColumn(name="external_ids", method=MethodType.SETDATA, fromVersion="1.0.0")
+    public void setExternalIds(Map<String, String> externalIds);
 
-    @TypedColumn(name="statistics", method=MethodType.GETCOLUMN)
-    public Column<GenericTableSchema, Map<String, Integer>> getStatisticsColumn() ;
-    @TypedColumn(name="statistics", method=MethodType.SETDATA)
-    public void setStatistics(Map<String, Integer> statistics) ;
+    @TypedColumn(name="next_cfg", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
+    public Column<GenericTableSchema, Integer> getNextCfgColumn();
+    @TypedColumn(name="next_cfg", method=MethodType.SETDATA, fromVersion="1.0.0")
+    public void setNextCfg(Integer nextCfg);
+
+    @TypedColumn(name="cur_cfg", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
+    public Column<GenericTableSchema, Integer> getCur_cfgColumn();
+    @TypedColumn(name="cur_cfg", method=MethodType.SETDATA, fromVersion="1.0.0")
+    public void setCur_cfg(Integer cur_cfg);
+
+    @TypedColumn(name="capabilities", method=MethodType.GETCOLUMN, fromVersion="1.0.0", untilVersion="6.7.0")
+    public Column<GenericTableSchema, Map<String, UUID>> getCapabilitiesColumn();
+    @TypedColumn(name="capabilities", method=MethodType.SETDATA, fromVersion="1.0.0", untilVersion="6.7.0")
+    public void setCapabilities(Map<String, UUID> capabilities);
+
+    @TypedColumn(name="statistics", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
+    public Column<GenericTableSchema, Map<String, Integer>> getStatisticsColumn();
+    @TypedColumn(name="statistics", method=MethodType.SETDATA, fromVersion="1.0.0")
+    public void setStatistics(Map<String, Integer> statistics);
+
+    @TypedColumn(name="ovs_version", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
+    public Column<GenericTableSchema, Set<String>> getOvsVersionColumn();
+    @TypedColumn(name="ovs_version", method=MethodType.SETDATA, fromVersion="1.0.0")
+    public void setOvsVersion(Set<String> ovsVersion);
+
+    @TypedColumn(name="db_version", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
+    public Column<GenericTableSchema, Set<String>> getDbVersionColumn();
+    @TypedColumn(name="db_version", method=MethodType.SETDATA, fromVersion="1.0.0")
+    public void setDbVersion(Set<String> dbVersion);
+
+    @TypedColumn(name="system_type", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
+    public Column<GenericTableSchema, Set<String>> getSystemTypeColumn();
+    @TypedColumn(name="system_type", method=MethodType.SETDATA, fromVersion="1.0.0")
+    public void setSystemType(Set<String> systemType);
+
+    @TypedColumn(name="system_version", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
+    public Column<GenericTableSchema, Set<String>> getSystemVersionColumn();
+    @TypedColumn(name="system_version", method=MethodType.SETDATA, fromVersion="1.0.0")
+    public void setSystemVersion(Set<String> systemVersion);
+
 }

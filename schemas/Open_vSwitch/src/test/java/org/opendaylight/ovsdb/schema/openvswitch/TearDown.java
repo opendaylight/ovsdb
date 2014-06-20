@@ -35,9 +35,13 @@ public class TearDown extends OpenVswitchSchemaTestBase {
     @Test
     public void tearDown() throws InterruptedException, ExecutionException, IOException, TimeoutException {
         Bridge bridge = this.ovs.getTypedRowWrapper(Bridge.class, null);
+        FlowSampleCollectorSet flowSampleCollectorSet = this.ovs.getTypedRowWrapper(FlowSampleCollectorSet.class, null);
         OpenVSwitch openVSwitch = this.ovs.getTypedRowWrapper(OpenVSwitch.class, null);
 
         ListenableFuture<List<OperationResult>> results = this.ovs.transactBuilder()
+                .add(op.delete(flowSampleCollectorSet.getSchema())
+                        .where(flowSampleCollectorSet.getBridgeColumn().getSchema().opEqual(OpenVswitchSchemaSuiteIT.getTestBridgeUuid()))
+                        .build())
                 .add(op.delete(bridge.getSchema())
                         .where(bridge.getNameColumn().getSchema().opEqual(OpenVswitchSchemaTestBase.TEST_BRIDGE_NAME))
                         .build())

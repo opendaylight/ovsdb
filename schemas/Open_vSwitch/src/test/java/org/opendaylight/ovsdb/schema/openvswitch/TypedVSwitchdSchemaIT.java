@@ -16,6 +16,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -42,6 +43,7 @@ import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,6 +105,7 @@ public class TypedVSwitchdSchemaIT extends OvsdbTestBase {
         Row bridgeRow = tableCache.get(bridge.getSchema().getName()).get(testBridgeUuid);
         Bridge monitoredBridge = ovs.getTypedRowWrapper(Bridge.class, bridgeRow);
         Assert.assertEquals(monitoredBridge.getNameColumn().getData(), bridge.getNameColumn().getData());
+        Assert.assertNotNull(monitoredBridge.getUuid());
         Assert.assertNotNull(monitoredBridge.getVersion());
         Assert.assertNotNull(this.getOpenVSwitchTableUuid());
     }
@@ -194,17 +197,36 @@ public class TypedVSwitchdSchemaIT extends OvsdbTestBase {
 
     public void monitorTables() throws ExecutionException, InterruptedException, IOException {
         Assert.assertNotNull(dbSchema);
-        Bridge bridge = ovs.createTypedRowWrapper(Bridge.class);
-        OpenVSwitch openVSwitch = ovs.createTypedRowWrapper(OpenVSwitch.class);
 
         List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
-        MonitorRequestBuilder<GenericTableSchema> bridgeBuilder = MonitorRequestBuilder.builder(bridge.getSchema());
-        MonitorRequestBuilder<GenericTableSchema> ovsTableBuilder = MonitorRequestBuilder.builder(openVSwitch.getSchema());
-        monitorRequests.add(bridgeBuilder.with(new MonitorSelect(true, true, true, true)).build());
-        monitorRequests.add(ovsTableBuilder.with(new MonitorSelect(true, true, true, true)).build());
+        monitorRequests.add(this.getAllColumnsMonitorRequest(Bridge.class));
+        monitorRequests.add(this.getAllColumnsMonitorRequest(OpenVSwitch.class));
 
         MonitorHandle monitor = ovs.monitor(dbSchema, monitorRequests, new UpdateMonitor());
         Assert.assertNotNull(monitor);
+    }
+
+    /**
+     * As per RFC 7047, section 4.1.5, if a Monitor request is sent without any columns, the update response will not include
+     * the _uuid column.
+     * ----------------------------------------------------------------------------------------------------------------------------------
+     * Each <monitor-request> specifies one or more columns and the manner in which the columns (or the entire table) are to be monitored.
+     * The "columns" member specifies the columns whose values are monitored. It MUST NOT contain duplicates.
+     * If "columns" is omitted, all columns in the table, except for "_uuid", are monitored.
+     * ----------------------------------------------------------------------------------------------------------------------------------
+     * In order to overcome this limitation, this method
+     *
+     * @return MonitorRequest that includes all the Bridge Columns including _uuid
+     */
+    public <T extends TypedBaseTable> MonitorRequest<GenericTableSchema> getAllColumnsMonitorRequest (Class <T> klazz) {
+        TypedBaseTable table = ovs.createTypedRowWrapper(klazz);
+        GenericTableSchema bridgeSchema = table.getSchema();
+        Set<String> columns = bridgeSchema.getColumns();
+        MonitorRequestBuilder<GenericTableSchema> bridgeBuilder = MonitorRequestBuilder.builder(table.getSchema());
+        for (String column : columns) {
+            bridgeBuilder.addColumn(column);
+        }
+        return bridgeBuilder.with(new MonitorSelect(true, true, true, true)).build();
     }
 
     static Map<String, Map<UUID, Row>> tableCache = new HashMap<String, Map<UUID, Row>>();

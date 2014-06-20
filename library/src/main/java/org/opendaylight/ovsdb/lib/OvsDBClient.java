@@ -15,10 +15,12 @@ package org.opendaylight.ovsdb.lib;
 import java.util.List;
 
 import org.opendaylight.ovsdb.lib.message.MonitorRequest;
+import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -108,5 +110,34 @@ public interface OvsDBClient {
      * Stops the echo service, i.e echo requests from the remote would not be acknowledged after this call.
      */
     public void stopEchoService();
+
+    public DatabaseSchema getDatabaseSchema (String dbName);
+
+    /**
+     * User friendly convenient methods that make use of TyperUtils.getTypedRowWrapper to create a Typed Row Proxy
+     * given the Typed Table Class
+     *
+     * @param klazz Typed Interface
+     * @return Proxy wrapper for the actual raw Row class.
+     */
+    public <T> T createTypedRowWrapper(Class<T> klazz);
+    /**
+     * User friendly convenient methods that make use of getTypedRowWrapper to create a Typed Row Proxy given
+     * DatabaseSchema and Typed Table Class.
+     *
+     * @param dbSchema Database Schema of interest
+     * @param klazz Typed Interface
+     * @return Proxy wrapper for the actual raw Row class.
+     */
+    public <T> T createTypedRowWrapper(DatabaseSchema dbSchema, Class<T> klazz);
+
+    /**
+     * User friendly convenient method to get a Typed Row Proxy given a Typed Table Class and the Row to be wrapped.
+     *
+     * @param klazz Typed Interface
+     * @param row The actual Row that the wrapper is operating on. It can be null if the caller is just interested in getting ColumnSchema.
+     * @return Proxy wrapper for the actual raw Row class.
+     */
+    public <T> T getTypedRowWrapper(final Class<T> klazz, final Row<GenericTableSchema> row);
 
 }

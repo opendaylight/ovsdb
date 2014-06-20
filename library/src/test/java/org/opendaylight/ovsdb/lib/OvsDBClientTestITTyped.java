@@ -28,7 +28,6 @@ import org.junit.Test;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
 import org.opendaylight.ovsdb.lib.message.UpdateNotification;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
-import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
@@ -36,7 +35,6 @@ import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,8 +53,7 @@ public class OvsDBClientTestITTyped extends OvsdbTestBase {
 
     @Test
     public void testTypedBridgeCreate() throws IOException, InterruptedException, ExecutionException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        GenericTableSchema rBridgeSchema = TyperUtils.getTableSchema(dbSchema, TestBridge.class);
-        TestBridge rBridge = TyperUtils.getTypedRowWrapper(dbSchema, TestBridge.class, new Row<GenericTableSchema>());
+        TestBridge rBridge = ovs.createTypedRowWrapper(TestBridge.class);
         rBridge.setName(testBridgeName);
         rBridge.setStatus(Maps.newHashMap(ImmutableMap.of("key","value")));
         rBridge.setFloodVlans(Sets.newHashSet(34));
@@ -68,10 +65,10 @@ public class OvsDBClientTestITTyped extends OvsdbTestBase {
         int insertOperationIndex = 0;
 
         TransactionBuilder transactionBuilder = ovs.transactBuilder()
-                .add(op.insert(rBridgeSchema)
+                .add(op.insert(rBridge.getSchema())
                         .withId(namedUuid)
                         .value(rBridge.getNameColumn()))
-                .add(op.update(rBridgeSchema)
+                .add(op.update(rBridge.getSchema())
                         .set(rBridge.getStatusColumn())
                         .set(rBridge.getFloodVlansColumn())
                         .where(rBridge.getNameColumn().getSchema().opEqual(rBridge.getName()))

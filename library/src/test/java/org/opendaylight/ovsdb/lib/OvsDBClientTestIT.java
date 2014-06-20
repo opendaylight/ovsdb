@@ -274,6 +274,9 @@ public class OvsDBClientTestIT extends OvsdbTestBase {
         // Check if Results matches the number of operations in transaction
         Assert.assertEquals(transactionBuilder.getOperations().size(), operationResults.size());
         System.out.println("Insert & Update operation results = " + operationResults);
+        for (OperationResult result : operationResults) {
+            Assert.assertNull(result.getError());
+        }
         testBridgeUuid = operationResults.get(insertOperationIndex).getUuid();
     }
 

@@ -786,10 +786,10 @@ public class OF10Provider implements NetworkProvider {
                 status = addTunnelPort(srcNode, network.getProviderNetworkType(), src, dst, network.getProviderSegmentationID());
                 if (status.isSuccess()) {
                     this.programTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), dst, srcNode, intf, true);
-                }
-                addTunnelPort(dstNode, network.getProviderNetworkType(), dst, src, network.getProviderSegmentationID());
-                if (status.isSuccess()) {
-                    this.programTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), src, dstNode, intf, false);
+                    status = addTunnelPort(dstNode, network.getProviderNetworkType(), dst, src, network.getProviderSegmentationID());
+                    if (status.isSuccess()) {
+                        this.programTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), src, dstNode, intf, false);
+                    }
                 }
             }
             return new Status(StatusCode.SUCCESS);

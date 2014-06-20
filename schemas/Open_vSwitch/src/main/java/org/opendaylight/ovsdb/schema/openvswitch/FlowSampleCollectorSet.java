@@ -19,29 +19,33 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedColumn;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 
-/*
- * Reusing the existing Table definitions and many of columns are not defined here
- * TODO : Fill up the missing Columns and include Supported DB Version
+/**
+ * This class is a typed interface to the Flow_Sample_Collector_Set Table
  */
-@TypedTable(name="Flow_Sample_Collector_Set", database="Open_vSwitch")
+@TypedTable(name="Flow_Sample_Collector_Set", database="Open_vSwitch", fromVersion="7.1.0")
 public interface FlowSampleCollectorSet extends TypedBaseTable {
-    @TypedColumn(name="id", method=MethodType.GETCOLUMN)
+
+    @TypedColumn(name="id", method=MethodType.GETCOLUMN, fromVersion="7.1.0")
     public Column<GenericTableSchema, Integer> getIdColumn();
-    @TypedColumn(name="id", method=MethodType.SETDATA)
+
+    @TypedColumn(name="id", method=MethodType.SETDATA, fromVersion="7.1.0")
     public void setId(Integer id);
 
-    @TypedColumn(name="bridge", method=MethodType.GETCOLUMN)
+    @TypedColumn(name="bridge", method=MethodType.GETCOLUMN, fromVersion="7.1.0")
     public Column<GenericTableSchema, Bridge> getBridgeColumn();
-    @TypedColumn(name="bridge", method=MethodType.SETDATA)
+
+    @TypedColumn(name="bridge", method=MethodType.SETDATA, fromVersion="7.1.0")
     public void setBridge(Bridge bridge);
 
-    @TypedColumn(name="ipfix", method=MethodType.GETCOLUMN)
+    @TypedColumn(name="ipfix", method=MethodType.GETCOLUMN, fromVersion="7.1.0")
     public Column<GenericTableSchema, IPFIX> getIpfixColumn();
-    @TypedColumn(name="ipfix", method=MethodType.SETDATA)
+
+    @TypedColumn(name="ipfix", method=MethodType.SETDATA, fromVersion="7.1.0")
     public void setIpfix(IPFIX ipfix);
 
-    @TypedColumn(name="external_ids", method=MethodType.GETCOLUMN)
+    @TypedColumn(name="external_ids", method=MethodType.GETCOLUMN, fromVersion="7.1.0")
     public Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn();
-    @TypedColumn(name="external_ids", method=MethodType.SETDATA)
+
+    @TypedColumn(name="external_ids", method=MethodType.SETDATA, fromVersion="7.1.0")
     public void setExternalIds(Map<String, String> externalIds);
 }

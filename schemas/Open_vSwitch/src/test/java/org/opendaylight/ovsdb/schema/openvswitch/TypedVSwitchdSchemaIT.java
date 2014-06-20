@@ -13,7 +13,9 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -23,18 +25,28 @@ import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.ovsdb.lib.MonitorCallBack;
+import org.opendaylight.ovsdb.lib.MonitorHandle;
 import org.opendaylight.ovsdb.lib.OvsDBClientImpl;
+import org.opendaylight.ovsdb.lib.message.MonitorRequest;
+import org.opendaylight.ovsdb.lib.message.MonitorRequestBuilder;
+import org.opendaylight.ovsdb.lib.message.MonitorSelect;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
+import org.opendaylight.ovsdb.lib.message.TableUpdate;
+import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.message.UpdateNotification;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
+import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -48,6 +60,7 @@ public class TypedVSwitchdSchemaIT extends OvsdbTestBase {
 
     @Test
     public void testTypedBridgeOperations() throws IOException, InterruptedException, ExecutionException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        this.monitorBridge();
         this.createTypedBridge();
         this.createTypedController();
     }
@@ -86,6 +99,10 @@ public class TypedVSwitchdSchemaIT extends OvsdbTestBase {
             Assert.assertNull(result.getError());
         }
         testBridgeUuid = operationResults.get(insertOperationIndex).getUuid();
+
+        Row bridgeRow = tableCache.get(bridge.getSchema().getName()).get(testBridgeUuid);
+        Bridge monitoredBridge = ovs.getTypedRowWrapper(Bridge.class, bridgeRow);
+        Assert.assertEquals(monitoredBridge.getNameColumn().getData(), bridge.getNameColumn().getData());
     }
 
     private void createTypedController() throws IOException, InterruptedException, ExecutionException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
@@ -118,6 +135,10 @@ public class TypedVSwitchdSchemaIT extends OvsdbTestBase {
             Assert.assertNull(result.getError());
         }
 
+        Row bridgeRow = tableCache.get(bridge.getSchema().getName()).get(testBridgeUuid);
+        Bridge monitoredBridge = ovs.getTypedRowWrapper(Bridge.class, bridgeRow);
+        Assert.assertEquals(1, monitoredBridge.getControllerColumn().getData().size());
+
         transactionBuilder = ovs.transactBuilder()
                 .add(op.insert(controller2.getSchema())
                         .withId(transactionUuidStr)
@@ -138,6 +159,10 @@ public class TypedVSwitchdSchemaIT extends OvsdbTestBase {
         for (OperationResult result : operationResults) {
             Assert.assertNull(result.getError());
         }
+
+        bridgeRow = tableCache.get(bridge.getSchema().getName()).get(testBridgeUuid);
+        monitoredBridge = ovs.getTypedRowWrapper(Bridge.class, bridgeRow);
+        Assert.assertEquals(2, monitoredBridge.getControllerColumn().getData().size());
     }
 
     public void testGetDBs() throws ExecutionException, InterruptedException {
@@ -152,6 +177,44 @@ public class TypedVSwitchdSchemaIT extends OvsdbTestBase {
            }
         }
         Assert.assertTrue(OPEN_VSWITCH_SCHEMA+" schema is not supported by the switch", hasOpenVswitchSchema);
+    }
+
+    public void monitorBridge() throws ExecutionException, InterruptedException, IOException {
+        Assert.assertNotNull(dbSchema);
+        GenericTableSchema bridge = dbSchema.table("Bridge", GenericTableSchema.class);
+
+        List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
+        MonitorRequestBuilder<GenericTableSchema> builder = MonitorRequestBuilder.builder(bridge);
+        monitorRequests.add(builder.with(new MonitorSelect(true, true, true, true))
+                                   .build());
+
+        MonitorHandle monitor = ovs.monitor(dbSchema, monitorRequests, new UpdateMonitor());
+        Assert.assertNotNull(monitor);
+    }
+
+    static Map<String, Map<UUID, Row>> tableCache = new HashMap<String, Map<UUID, Row>>();
+    private static class UpdateMonitor implements MonitorCallBack {
+        @Override
+        public void update(TableUpdates result) {
+            for (String tableName : result.getUpdates().keySet()) {
+                Map<UUID, Row> tUpdate = tableCache.get(tableName);
+                TableUpdate update = result.getUpdates().get(tableName);
+                if (update.getNew() != null) {
+                    if (tUpdate == null) {
+                        tUpdate = new HashMap<UUID, Row>();
+                        tableCache.put(tableName, tUpdate);
+                    }
+                    tUpdate.put(update.getUuid(), update.getNew());
+                } else {
+                    tUpdate.remove(update.getUuid());
+                }
+            }
+        }
+
+        @Override
+        public void exception(Throwable t) {
+            System.out.println("Exception t = " + t);
+        }
     }
 
     @Before
@@ -185,6 +248,7 @@ public class TypedVSwitchdSchemaIT extends OvsdbTestBase {
 
         List<OperationResult> operationResults = results.get();
         System.out.println("Delete operation results = " + operationResults);
+        tableCache = new HashMap<String, Map<UUID, Row>>();
     }
 
     @Override

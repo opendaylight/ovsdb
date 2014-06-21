@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_d51361b6",
+        "filename": "schemas/Open_vSwitch/src/main/java/org/opendaylight/ovsdb/schema/openvswitch/FlowTable.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-21T22:15:39Z",
+      "side": 1,
+      "message": "To clarify - the decision was to *always* use the correct type according to RFC7047 - http://tools.ietf.org/html/rfc7047 - see top of page 10",
+      "parentUuid": "fa82b9bf_154a29c5",
+      "revId": "25106f663b92db2c0dc62778c7f82d397a8256d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_753b7538",
         "filename": "schemas/Open_vSwitch/src/main/java/org/opendaylight/ovsdb/schema/openvswitch/FlowTable.java",
         "patchSetId": 1

@@ -18,15 +18,15 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedColumn;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 
-/*
- * Reusing the existing Table definitions and many of columns are not defined here
- * TODO : Fill up the missing Columns and include Supported DB Version
+/**
+ * This class is a typed interface to the Capability table
+ * Note: This table is deprecated as of schema version 6.7.0
  */
-@TypedTable(name="Capability", database="Open_vSwitch")
+@TypedTable(name="Capability", database="Open_vSwitch", fromVersion="1.0.0", untilVersion="6.7.0")
 public interface Capability extends TypedBaseTable {
-    @TypedColumn(name="details", method=MethodType.GETCOLUMN)
+    @TypedColumn(name="details", method=MethodType.GETCOLUMN, fromVersion="1.0.0", untilVersion="6.7.0")
     public Column<GenericTableSchema, Map<String, String>> getDetailsColumn();
 
-    @TypedColumn(name="details", method=MethodType.SETDATA)
+    @TypedColumn(name="details", method=MethodType.SETDATA, fromVersion="1.0.0", untilVersion="6.7.0")
     public void setDetails(Map<String, String> details);
 }

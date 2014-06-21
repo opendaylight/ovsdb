@@ -13,6 +13,11 @@ package org.opendaylight.ovsdb.lib.schema.typed;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
+
+import org.opendaylight.ovsdb.lib.error.ColumnSchemaNotFoundException;
+import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
+import org.opendaylight.ovsdb.lib.error.TableSchemaNotFoundException;
+import org.opendaylight.ovsdb.lib.error.TyperException;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.Version;
@@ -167,14 +172,14 @@ public class TyperUtils {
         Version untilVersion = getUntilVersion(method);
         if (!fromVersion.equals(Version.NULL)) {
             if (dbSchema.getVersion().compareTo(fromVersion) < 0) {
-                throw new RuntimeException("This row is not supported until version "
-                        + fromVersion + "of the Schema");
+                String message = SchemaVersionMismatchException.createMessage(dbSchema.getVersion(), fromVersion);
+                throw new SchemaVersionMismatchException(message);
             }
         }
         if (!untilVersion.equals(Version.NULL)) {
             if (dbSchema.getVersion().compareTo(untilVersion) > 0) {
-                throw new RuntimeException("This row was deprecated in "
-                        + untilVersion + "of the Schema");
+                String message = SchemaVersionMismatchException.createMessage(dbSchema.getVersion(), untilVersion);
+                throw new SchemaVersionMismatchException(message);
             }
         }
     }
@@ -203,15 +208,17 @@ public class TyperUtils {
                 String columnName = getColumnName(method);
                 checkSchemaVersion(dbSchema, method);
                 if (columnName == null) {
-                    throw new RuntimeException("Error processing Getter : "+ method.getName());
+                    throw new TyperException("Error processing Getter : "+ method.getName());
                 }
                 GenericTableSchema tableSchema = getTableSchema(dbSchema, klazz);
                 if (tableSchema == null) {
-                    throw new RuntimeException("Unable to locate TableSchema for "+getTableName(klazz)+ " in "+ dbSchema.getName());
+                    String message = TableSchemaNotFoundException.createMessage(getTableName(klazz), dbSchema.getName());
+                    throw new TableSchemaNotFoundException(message);
                 }
                 ColumnSchema<GenericTableSchema, Object> columnSchema = getColumnSchema(tableSchema, columnName, (Class<Object>) method.getReturnType());
                 if (columnSchema == null) {
-                    throw new RuntimeException("Unable to locate ColumnSchema for "+columnName+ " in "+ tableSchema.getName());
+                    String message = ColumnSchemaNotFoundException.createMessage(columnName, tableSchema.getName());
+                    throw new ColumnSchemaNotFoundException(message);
                 }
                 if (row == null) {
                     return null;
@@ -223,15 +230,17 @@ public class TyperUtils {
                 String columnName = getColumnName(method);
                 checkSchemaVersion(dbSchema, method);
                 if (columnName == null) {
-                    throw new RuntimeException("Error processing GetColumn : "+ method.getName());
+                    throw new TyperException("Error processing GetColumn : "+ method.getName());
                 }
                 GenericTableSchema tableSchema = getTableSchema(dbSchema, klazz);
                 if (tableSchema == null) {
-                    throw new RuntimeException("Unable to locate TableSchema for "+getTableName(klazz)+ " in "+ dbSchema.getName());
+                    String message = TableSchemaNotFoundException.createMessage(getTableName(klazz), dbSchema.getName());
+                    throw new TableSchemaNotFoundException(message);
                 }
                 ColumnSchema<GenericTableSchema, Object> columnSchema = getColumnSchema(tableSchema, columnName, (Class<Object>) method.getReturnType());
                 if (columnSchema == null) {
-                    throw new RuntimeException("Unable to locate ColumnSchema for "+columnName+ " in "+ tableSchema.getName());
+                    String message = ColumnSchemaNotFoundException.createMessage(columnName, tableSchema.getName());
+                    throw new ColumnSchemaNotFoundException(message);
                 }
                 // When the row is null, that might indicate that the user maybe interested only in the ColumnSchema and not on the Data.
                 if (row == null) {
@@ -242,12 +251,12 @@ public class TyperUtils {
 
             private Object processSetData(Object proxy, Method method, Object[] args) throws Throwable {
                 if (args == null || args.length != 1) {
-                    throw new RuntimeException("Setter method : "+method.getName() + " requires 1 argument");
+                    throw new TyperException("Setter method : "+method.getName() + " requires 1 argument");
                 }
                 checkSchemaVersion(dbSchema, method);
                 String columnName = getColumnName(method);
                 if (columnName == null) {
-                    throw new RuntimeException("Unable to locate Column Name for "+method.getName());
+                    throw new TyperException("Unable to locate Column Name for "+method.getName());
                 }
                 GenericTableSchema tableSchema = getTableSchema(dbSchema, klazz);
                 ColumnSchema<GenericTableSchema, Object> columnSchema = getColumnSchema(tableSchema, columnName,

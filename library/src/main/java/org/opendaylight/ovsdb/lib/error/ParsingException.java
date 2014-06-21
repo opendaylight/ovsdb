@@ -10,7 +10,7 @@
  *
  */
 
-package org.opendaylight.ovsdb.lib;
+package org.opendaylight.ovsdb.lib.error;
 
 public class ParsingException extends RuntimeException {
 

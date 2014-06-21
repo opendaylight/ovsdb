@@ -133,7 +133,7 @@
                 javax.net.ssl,
                 *</Import-Package>
             <Embed-Transitive>true</Embed-Transitive>
-            <Export-Package>org.opendaylight.ovsdb.lib.schema.vswitchd</Export-Package>
+            <Export-Package>org.opendaylight.ovsdb.schema.openvswitch</Export-Package>
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>

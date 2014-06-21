@@ -21,30 +21,28 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedColumn;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 
 
-/*
- * Reusing the existing Table definitions and many of columns are not defined here
- * TODO : Fill up the missing Columns and include Supported DB Version
+/**
+ *  This class is a typed interface to the QoS Table
  */
-
-@TypedTable(name="Qos", database="Open_vSwitch")
+@TypedTable(name="Qos", database="Open_vSwitch", fromVersion="1.0.0")
 public interface Qos extends TypedBaseTable {
-    @TypedColumn(name="queues", method=MethodType.GETCOLUMN)
+    @TypedColumn(name="queues", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Map<Integer, UUID>> getQueuesColumn() ;
-    @TypedColumn(name="queues", method=MethodType.SETDATA)
+    @TypedColumn(name="queues", method=MethodType.SETDATA, fromVersion="1.0.0")
     public void setQueues(Map<Integer, UUID> queues) ;
 
-    @TypedColumn(name="type", method=MethodType.GETCOLUMN)
+    @TypedColumn(name="type", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, String> getTypeColumn() ;
-    @TypedColumn(name="type", method=MethodType.SETDATA)
+    @TypedColumn(name="type", method=MethodType.SETDATA, fromVersion="1.0.0")
     public void setType(String type) ;
 
-    @TypedColumn(name="other_config", method=MethodType.GETCOLUMN)
+    @TypedColumn(name="other_config", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Map<String, String>> getOtherConfigColumn() ;
-    @TypedColumn(name="other_config", method=MethodType.SETDATA)
+    @TypedColumn(name="other_config", method=MethodType.SETDATA, fromVersion="1.0.0")
     public void setOtherConfig(Map<String, String> otherConfig) ;
 
-    @TypedColumn(name="externalIds", method=MethodType.GETCOLUMN)
+    @TypedColumn(name="externalIds", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn() ;
-    @TypedColumn(name="externalIds", method=MethodType.SETDATA)
+    @TypedColumn(name="externalIds", method=MethodType.SETDATA, fromVersion="1.0.0")
     public void setExternalIds(Map<String, String> externalIds) ;
 }

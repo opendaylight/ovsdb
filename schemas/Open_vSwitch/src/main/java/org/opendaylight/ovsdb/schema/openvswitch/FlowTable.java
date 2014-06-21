@@ -10,6 +10,7 @@
 
 package org.opendaylight.ovsdb.schema.openvswitch;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.opendaylight.ovsdb.lib.notation.Column;
@@ -19,24 +20,46 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedColumn;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 
-/*
- * Reusing the existing Table definitions and many of columns are not defined here
- * TODO : Fill up the missing Columns and include Supported DB Version
+/**
+ * This class is a typed interface to the Flow_Table Table
  */
-@TypedTable(name="Flow_Table", database="Open_vSwitch")
+@TypedTable(name="Flow_Table", database="Open_vSwitch", fromVersion="6.5.0")
 public interface FlowTable extends TypedBaseTable {
-    @TypedColumn(name="flow_limit", method=MethodType.GETCOLUMN)
+
+    @TypedColumn(name="flow_limit", method=MethodType.GETCOLUMN, fromVersion="6.5.0")
     public Column<GenericTableSchema, Integer> getFlowLimitColumn() ;
-    @TypedColumn(name="details", method=MethodType.SETDATA)
+
+    @TypedColumn(name="flow_limit", method=MethodType.SETDATA, fromVersion="6.5.0")
     public void setFlowLimit(Integer flowLimit) ;
 
-    @TypedColumn(name="overflow_policy", method=MethodType.GETCOLUMN)
+    @TypedColumn(name="overflow_policy", method=MethodType.GETCOLUMN, fromVersion="6.5.0")
     public Column<GenericTableSchema, Set<String>> getOverflowPolicyColumn() ;
-    @TypedColumn(name="overflow_policy", method=MethodType.SETDATA)
+
+    @TypedColumn(name="overflow_policy", method=MethodType.SETDATA, fromVersion="6.5.0")
     public void setOverflowPolicy(Set<String> overflowPolicy) ;
 
-    @TypedColumn(name="groups", method=MethodType.GETCOLUMN)
+    @TypedColumn(name="groups", method=MethodType.GETCOLUMN, fromVersion="6.5.0")
     public Column<GenericTableSchema, Set<String>> getGroupsColumn() ;
-    @TypedColumn(name="groups", method=MethodType.SETDATA)
+
+    @TypedColumn(name="groups", method=MethodType.SETDATA, fromVersion="6.5.0")
     public void setGroups(Set<String> groups) ;
+
+    @TypedColumn(name="name", method=MethodType.GETCOLUMN, fromVersion="6.5.0")
+    public Column<GenericTableSchema, Set<String>> getNameColumn();
+
+    @TypedColumn(name="name", method=MethodType.SETDATA, fromVersion="6.5.0")
+    public void setName(Set<String> name);
+
+    @TypedColumn(name="prefixes", method=MethodType.GETCOLUMN, fromVersion="7.4.0")
+    public Column<GenericTableSchema, Set<String>> getPrefixesColumn();
+
+    @TypedColumn(name="prefixes", method=MethodType.SETDATA, fromVersion="7.4.0")
+    public void setPrefixes(Set<String> prefixes);
+
+    @TypedColumn(name="external_ids", method=MethodType.GETCOLUMN, fromVersion="7.5.0")
+    public Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn();
+
+    @TypedColumn(name="external_ids", method=MethodType.SETDATA, fromVersion="7.5.0")
+    public void setExternalIds(Map<String, String> externalIds);
+
 }

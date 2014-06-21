@@ -9,6 +9,7 @@
  */
 package org.opendaylight.ovsdb.schema.openvswitch;
 
+import static org.junit.Assert.assertNull;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.io.IOException;
@@ -68,6 +69,9 @@ public class TypedVSwitchdSchemaIT extends OvsdbTestBase {
         this.createTypedBridge();
         this.createTypedController();
         this.testCreateTypedPortandInterface();
+        this.testCreateTypedIpFix();
+        this.testCreateTypedNetFlow();
+        this.testCreateTypedSflow();
     }
 
     private void createTypedBridge() throws IOException, InterruptedException, ExecutionException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
@@ -215,6 +219,124 @@ public class TypedVSwitchdSchemaIT extends OvsdbTestBase {
         // Check if Results matches the number of operations in transaction
         Assert.assertEquals(transactionBuilder.getOperations().size(), operationResults.size());
         System.out.println("Insert & Mutate operation results for Port and Interface = " + operationResults);
+    }
+
+    private void testCreateTypedIpFix() throws InterruptedException, ExecutionException, IllegalArgumentException{
+        String ipfixUuidStr = "testIpfix";
+        String ipfixTarget = "172.16.20.1:4739";
+        Integer obsDomainId = 112;
+        Integer obsPointId = 358;
+        Integer cacheMax = 132;
+        Integer cacheTimeout = 134;
+        Integer sampling = 558;
+        IPFIX ipfix = ovs.createTypedRowWrapper(IPFIX.class);
+        ipfix.setTargets(ImmutableSet.of(ipfixTarget));
+        ipfix.setObsDomainId(ImmutableSet.of(obsDomainId));
+        ipfix.setObsPointId(ImmutableSet.of(obsPointId));
+        ipfix.setCacheMaxFlows(ImmutableSet.of(cacheMax));
+        ipfix.setCacheActiveTimeout(ImmutableSet.of(cacheTimeout));
+        ipfix.setSampling(ImmutableSet.of(sampling));
+        ipfix.setExternalIds(ImmutableMap.of("<3", "ovs"));
+        Bridge bridge = ovs.getTypedRowWrapper(Bridge.class, null);
+        TransactionBuilder transactionBuilder = ovs.transactBuilder()
+                .add(op.insert(ipfix.getSchema())
+                        .withId(ipfixUuidStr)
+                        .value(ipfix.getTargetsColumn())
+                        .value(ipfix.getObsDomainIdColumn())
+                        .value(ipfix.getObsPointIdColumn())
+                        .value(ipfix.getCacheMaxFlowsColumn())
+                        .value(ipfix.getCacheActiveTimeoutColumn())
+                        .value(ipfix.getSamplingColumn())
+                        .value(ipfix.getExternalIdsColumn()))
+                .add(op.mutate(bridge.getSchema())
+                        .addMutation(bridge.getIpfixColumn().getSchema(), Mutator.INSERT,
+                                Sets.newHashSet(new UUID(ipfixUuidStr)))
+                        .where(bridge.getNameColumn().getSchema().opEqual(testBridgeName))
+                        .build());
+        ListenableFuture<List<OperationResult>> results = transactionBuilder.execute();
+        List<OperationResult> operationResults = results.get();
+        Assert.assertFalse(operationResults.isEmpty());
+        // Check if Results matches the number of operations in transaction
+        Assert.assertEquals(transactionBuilder.getOperations().size(), operationResults.size());
+        for (OperationResult result : operationResults) Assert.assertNull(result.getError());
+        logger.info("Insert & Mutate operation results for IPFIX = {} ", operationResults);
+    }
+
+    private void testCreateTypedSflow() throws InterruptedException, ExecutionException, IllegalArgumentException{
+        String sFlowUuidStr = "testSFlow";
+        String sFlowTarget = "172.16.20.200:6343";
+        Integer header = 128;
+        Integer obsPointId = 358;
+        Integer polling = 10;
+        String agent = "172.16.20.210";
+        Integer sampling = 64;
+        SFlow sFlow = ovs.createTypedRowWrapper(SFlow.class);
+        sFlow.setTargets(ImmutableSet.of(sFlowTarget));
+        sFlow.setHeader(ImmutableSet.of(header));
+        sFlow.setPolling(ImmutableSet.of(obsPointId));
+        sFlow.setPolling(ImmutableSet.of(polling));
+        sFlow.setAgent(ImmutableSet.of(agent));
+        sFlow.setSampling(ImmutableSet.of(sampling));
+        sFlow.setExternalIds(ImmutableMap.of("kit", "tah"));
+        Bridge bridge = ovs.getTypedRowWrapper(Bridge.class, null);
+        TransactionBuilder transactionBuilder = ovs.transactBuilder()
+                .add(op.insert(sFlow.getSchema())
+                        .withId(sFlowUuidStr)
+                        .value(sFlow.getTargetsColumn())
+                        .value(sFlow.getHeaderColumn())
+                        .value(sFlow.getPollingColumn())
+                        .value(sFlow.getAgentColumn())
+                        .value(sFlow.getSamplingColumn())
+                        .value(sFlow.getExternalIdsColumn()))
+                .add(op.mutate(bridge.getSchema())
+                        .addMutation(bridge.getSflowColumn().getSchema(), Mutator.INSERT,
+                                Sets.newHashSet(new UUID(sFlowUuidStr)))
+                        .where(bridge.getNameColumn().getSchema().opEqual(testBridgeName))
+                        .build());
+        ListenableFuture<List<OperationResult>> results = transactionBuilder.execute();
+        List<OperationResult> operationResults = results.get();
+        for (OperationResult result : operationResults) {
+            assertNull(result.getError());
+        }
+        Assert.assertFalse(operationResults.isEmpty());
+        // Check if Results matches the number of operations in transaction
+        Assert.assertEquals(transactionBuilder.getOperations().size(), operationResults.size());
+        logger.info("Insert & Mutate operation results for SFlow = {} ", operationResults);
+    }
+
+    private void testCreateTypedNetFlow() throws InterruptedException, ExecutionException, IllegalArgumentException{
+        String netFlowUuidStr = "testNetFlow";
+        String netFlowTargets = "172.16.20.200:6343";
+        BigInteger engineType = BigInteger.valueOf(128);
+        BigInteger engineID = BigInteger.valueOf(32);
+        Integer activityTimeout = 1;
+        NetFlow netFlow = ovs.createTypedRowWrapper(NetFlow.class);
+        netFlow.setTargets(ImmutableSet.of(netFlowTargets));
+        netFlow.setEngineType(ImmutableSet.of(engineType));
+        netFlow.setEngineId(ImmutableSet.of(engineID));
+        netFlow.setActivityTimeout(ImmutableSet.of(activityTimeout));
+        netFlow.setExternalIds(ImmutableMap.of("big", "baby"));
+        Bridge bridge = ovs.getTypedRowWrapper(Bridge.class, null);
+        TransactionBuilder transactionBuilder = ovs.transactBuilder()
+                .add(op.insert(netFlow.getSchema())
+                        .withId(netFlowUuidStr)
+                        .value(netFlow.getTargetsColumn())
+                        .value(netFlow.getEngineTypeColumn())
+                        .value(netFlow.getEngineIdColumn())
+                        .value(netFlow.getActiveTimeoutColumn())
+                        .value(netFlow.getExternalIdsColumn()))
+                .add(op.mutate(bridge.getSchema())
+                        .addMutation(bridge.getNetflowColumn().getSchema(), Mutator.INSERT,
+                                Sets.newHashSet(new UUID(netFlowUuidStr)))
+                        .where(bridge.getNameColumn().getSchema().opEqual(testBridgeName))
+                        .build());
+        ListenableFuture<List<OperationResult>> results = transactionBuilder.execute();
+        List<OperationResult> operationResults = results.get();
+        for (OperationResult result : operationResults) Assert.assertNull(result.getError());
+        Assert.assertFalse(operationResults.isEmpty());
+        // Check if Results matches the number of operations in transaction
+        Assert.assertEquals(transactionBuilder.getOperations().size(), operationResults.size());
+        logger.info("Insert & Mutate operation results for NetFlow = {} ", operationResults);
     }
 
     public void testGetDBs() throws ExecutionException, InterruptedException {

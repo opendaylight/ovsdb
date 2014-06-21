@@ -19,41 +19,38 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedColumn;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 
-
-/*
- * Reusing the existing Table definitions and many of columns are not defined here
- * TODO : Fill up the missing Columns and include Supported DB Version
+/**
+ * This class is a typed interface to the SFlow Table
  */
-
-@TypedTable(name="SFlow", database="Open_vSwitch")
+@TypedTable(name="sFlow", database="Open_vSwitch", fromVersion="1.0.0")
 public interface SFlow extends TypedBaseTable {
-    @TypedColumn(name="targets", method=MethodType.GETCOLUMN)
+    @TypedColumn(name="targets", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Set<String>> getTargetsColumn() ;
-    @TypedColumn(name="targets", method=MethodType.SETDATA)
+    @TypedColumn(name="targets", method=MethodType.SETDATA, fromVersion="1.0.0")
     public void setTargets(Set<String> targets) ;
 
-    @TypedColumn(name="agent", method=MethodType.GETCOLUMN)
+    @TypedColumn(name="agent", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Set<String>> getAgentColumn() ;
-    @TypedColumn(name="agent", method=MethodType.SETDATA)
+    @TypedColumn(name="agent", method=MethodType.SETDATA, fromVersion="1.0.0")
     public void setAgent(Set<String> agent) ;
 
-    @TypedColumn(name="external_ids", method=MethodType.GETCOLUMN)
+    @TypedColumn(name="external_ids", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn() ;
-    @TypedColumn(name="external_ids", method=MethodType.SETDATA)
+    @TypedColumn(name="external_ids", method=MethodType.SETDATA, fromVersion="1.0.0")
     public void setExternalIds(Map<String, String> externalIds) ;
 
-    @TypedColumn(name="header", method=MethodType.GETCOLUMN)
+    @TypedColumn(name="header", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Set<Integer>> getHeaderColumn() ;
-    @TypedColumn(name="header", method=MethodType.SETDATA)
+    @TypedColumn(name="header", method=MethodType.SETDATA, fromVersion="1.0.0")
     public void setHeader(Set<Integer> header) ;
 
-    @TypedColumn(name="polling", method=MethodType.GETCOLUMN)
+    @TypedColumn(name="polling", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Set<Integer>> getPollingColumn() ;
-    @TypedColumn(name="polling", method=MethodType.SETDATA)
+    @TypedColumn(name="polling", method=MethodType.SETDATA, fromVersion="1.0.0")
     public void setPolling(Set<Integer> polling) ;
 
-    @TypedColumn(name="sampling", method=MethodType.GETCOLUMN)
+    @TypedColumn(name="sampling", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Set<Integer>> getSamplingColumn() ;
-    @TypedColumn(name="sampling", method=MethodType.SETDATA)
+    @TypedColumn(name="sampling", method=MethodType.SETDATA, fromVersion="1.0.0")
     public void setSampling(Set<Integer> sampling) ;
 }

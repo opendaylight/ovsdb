@@ -12,6 +12,7 @@ package org.opendaylight.ovsdb.lib.jsonrpc;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.TooLongFrameException;
+import org.opendaylight.ovsdb.lib.error.InvalidEncodingException;
 
 public class ExceptionHandler extends ChannelHandlerAdapter {
 

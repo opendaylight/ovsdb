@@ -12,6 +12,7 @@ package org.opendaylight.ovsdb.lib.schema;
 import java.util.Map;
 import java.util.Set;
 
+import org.opendaylight.ovsdb.lib.error.BadSchemaException;
 import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.notation.Function;
 import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
@@ -33,8 +34,7 @@ public class ColumnSchema<E extends TableSchema<E>, D> {
 
     public static ColumnSchema fromJson(String name, JsonNode json) {
         if (!json.isObject() || !json.has("type")) {
-            //todo specific types of exception
-            throw new RuntimeException("bad column schema root, expected \"type\" as child");
+            throw new BadSchemaException("bad column schema root, expected \"type\" as child");
         }
 
         return new ColumnSchema(name, ColumnType.fromJson(json.get("type")));

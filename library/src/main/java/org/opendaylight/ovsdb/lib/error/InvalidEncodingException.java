@@ -7,7 +7,7 @@
  *
  * Authors : Ashwin Raveendran, Madhu Venugopal
  */
-package org.opendaylight.ovsdb.lib.jsonrpc;
+package org.opendaylight.ovsdb.lib.error;
 
 public class InvalidEncodingException extends RuntimeException {
 

@@ -15,7 +15,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.opendaylight.ovsdb.lib.ParsingException;
+import org.opendaylight.ovsdb.lib.error.ParsingException;
 import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.slf4j.Logger;

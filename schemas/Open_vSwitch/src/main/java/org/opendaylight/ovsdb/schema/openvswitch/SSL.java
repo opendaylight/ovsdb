@@ -17,34 +17,34 @@ import org.opendaylight.ovsdb.lib.schema.typed.MethodType;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedColumn;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
-/*
- * Reusing the existing Table definitions and many of columns are not defined here
- * TODO : Fill up the missing Columns and include Supported DB Version
+
+/**
+ * This class is a typed interface to the SSL Table
  */
-@TypedTable(name="SSL", database="Open_vSwitch")
+@TypedTable(name="SSL", database="Open_vSwitch", fromVersion="1.0.0")
 public interface SSL extends TypedBaseTable {
-    @TypedColumn(name="ca_cert", method=MethodType.GETCOLUMN)
+    @TypedColumn(name="ca_cert", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, String> getCaCertColumn() ;
-    @TypedColumn(name="ca_cert", method=MethodType.SETDATA)
+    @TypedColumn(name="ca_cert", method=MethodType.SETDATA, fromVersion="1.0.0")
     public void setCaCert(String caCert) ;
 
-    @TypedColumn(name="external_ids", method=MethodType.GETCOLUMN)
+    @TypedColumn(name="external_ids", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn() ;
-    @TypedColumn(name="external_ids", method=MethodType.SETDATA)
+    @TypedColumn(name="external_ids", method=MethodType.SETDATA, fromVersion="1.0.0")
     public void setExternalIds(Map<String, String> externalIds) ;
 
-    @TypedColumn(name="bootstrap_ca_cert", method=MethodType.GETCOLUMN)
+    @TypedColumn(name="bootstrap_ca_cert", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Boolean> getBootstrapCaCertColumn() ;
-    @TypedColumn(name="bootstrap_ca_cert", method=MethodType.SETDATA)
+    @TypedColumn(name="bootstrap_ca_cert", method=MethodType.SETDATA, fromVersion="1.0.0")
     public void setBootstrapCaCert(Boolean bootstrapCaCert) ;
 
-    @TypedColumn(name="certificate", method=MethodType.GETCOLUMN)
+    @TypedColumn(name="certificate", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, String> getCertificateColumn() ;
-    @TypedColumn(name="certificate", method=MethodType.SETDATA)
+    @TypedColumn(name="certificate", method=MethodType.SETDATA, fromVersion="1.0.0")
     public void setCertificate(String certificate) ;
 
-    @TypedColumn(name="private_key", method=MethodType.GETCOLUMN)
+    @TypedColumn(name="private_key", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, String> getPrivateKeyColumn() ;
-    @TypedColumn(name="private_key", method=MethodType.SETDATA)
+    @TypedColumn(name="private_key", method=MethodType.SETDATA, fromVersion="1.0.0")
     public void setPrivateKey(String private_key) ;
 }

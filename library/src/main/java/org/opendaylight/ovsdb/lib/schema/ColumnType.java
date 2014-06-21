@@ -11,6 +11,7 @@ package org.opendaylight.ovsdb.lib.schema;
 
 import java.util.Set;
 
+import org.opendaylight.ovsdb.lib.error.TyperException;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonUtils;
 import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
 
@@ -82,7 +83,7 @@ public abstract class ColumnType {
             }
         }
         //todo move to speicfic typed exception
-        throw new RuntimeException(String.format("could not find the right column type %s",
+        throw new TyperException(String.format("could not find the right column type %s",
                 JsonUtils.prettyString(json)));
     }
 

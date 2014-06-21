@@ -7,8 +7,11 @@
  *
  * Authors : Ashwin Raveendran, Madhu Venugopal
  */
-package org.opendaylight.ovsdb.lib.jsonrpc;
+package org.opendaylight.ovsdb.lib.error;
 
+/**
+ * InvalidEncodingException in cases where something is not UTF-8 Encoded.
+ */
 public class InvalidEncodingException extends RuntimeException {
 
     private final String actual;

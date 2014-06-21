@@ -18,6 +18,7 @@ import junit.framework.Assert;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.message.UpdateNotification;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -38,7 +39,7 @@ public class IpfixTestCases extends OpenVswitchSchemaTestBase {
 
     Logger logger = LoggerFactory.getLogger(IpfixTestCases.class);
     Version schemaVersion;
-    Version ipfixFromVersion = Version.fromString("7.3.0");
+    Version ipfixFromVersion = Version.fromString("7.1.0");
 
 
     @Before
@@ -47,12 +48,17 @@ public class IpfixTestCases extends OpenVswitchSchemaTestBase {
         schemaVersion = ovs.getDatabaseSchema("Open_vSwitch").getVersion();
     }
 
-    @Test(expected=RuntimeException.class)
-    public void testUnsupportedTable() {
+    @Test
+    public void testTableNotSupported() {
         // Don't run this test if we can run the IPFIX test
         Assume.assumeTrue(schemaVersion.compareTo(ipfixFromVersion) < 0);
-        IPFIX ipfix = ovs.createTypedRowWrapper(IPFIX.class);
-        ipfix.setTargets(ImmutableSet.of("1.1.1.1:9988"));
+        boolean isExceptionRaised = false;
+        try {
+            IPFIX ipfix = ovs.createTypedRowWrapper(IPFIX.class);
+        } catch (SchemaVersionMismatchException e) {
+            isExceptionRaised = true;
+        }
+        Assert.assertTrue(isExceptionRaised);
     }
 
     @Test

@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_55cbd152",
+        "filename": "schemas/Open_vSwitch/src/main/java/org/opendaylight/ovsdb/schema/openvswitch/SFlow.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-21T16:40:48Z",
+      "side": 1,
+      "message": "Just observed that the table name is sFlow. The table names are case-sensitive. Can you please fix it ?",
+      "revId": "4d39babadc8536d2c2d6379e4d75bd2d41e9125e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

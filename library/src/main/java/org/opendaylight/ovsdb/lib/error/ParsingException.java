@@ -10,8 +10,11 @@
  *
  */
 
-package org.opendaylight.ovsdb.lib;
+package org.opendaylight.ovsdb.lib.error;
 
+/**
+ * The ParsingException is thrown when JSON could not be successfully parsed
+ */
 public class ParsingException extends RuntimeException {
 
     public ParsingException() {

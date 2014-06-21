@@ -11,10 +11,10 @@ package org.opendaylight.ovsdb.lib.schema;
 
 import java.util.Set;
 
-import org.opendaylight.ovsdb.lib.notation.UUID;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
+import org.opendaylight.ovsdb.lib.error.TyperException;
+import org.opendaylight.ovsdb.lib.notation.UUID;
 
 public abstract class BaseType<E extends BaseType<E>> {
 
@@ -38,7 +38,7 @@ public abstract class BaseType<E extends BaseType<E>> {
             }
         } else {
             if (!json.has(keyorval)) {
-                throw new RuntimeException("Not a type");
+                throw new TyperException("Not a type");
             }
 
             for (BaseType baseTypeFactory : types) {

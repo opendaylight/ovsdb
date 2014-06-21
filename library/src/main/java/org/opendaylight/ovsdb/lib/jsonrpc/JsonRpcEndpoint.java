@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.opendaylight.ovsdb.lib.error.UnexpectedResultException;
+import org.opendaylight.ovsdb.lib.error.UnsupportedArgumentException;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,7 +99,7 @@ public class JsonRpcEndpoint {
                         }
 
                         if (params == null) {
-                            throw new RuntimeException("do not understand this argument yet");
+                            throw new UnsupportedArgumentException("do not understand this argument yet");
                         }
                         request.setParams(params);
                     }
@@ -139,7 +141,7 @@ public class JsonRpcEndpoint {
             returnCtxt.getFuture().set(result1);
 
         } else {
-            throw new RuntimeException("donno how to deal with this");
+            throw new UnexpectedResultException("Don't know how to handle this");
         }
     }
 

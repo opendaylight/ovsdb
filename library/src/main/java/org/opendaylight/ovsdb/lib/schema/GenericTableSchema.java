@@ -13,6 +13,7 @@
 package org.opendaylight.ovsdb.lib.schema;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.opendaylight.ovsdb.lib.error.BadSchemaException;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -34,8 +35,7 @@ public class GenericTableSchema extends TableSchema<GenericTableSchema> {
     public GenericTableSchema fromJson(String tableName, JsonNode json) {
 
         if (!json.isObject() || !json.has("columns")) {
-            //todo specific types of exception
-            throw new RuntimeException("bad tableschema root, expected \"columns\" as child");
+            throw new BadSchemaException("bad tableschema root, expected \"columns\" as child");
         }
 
         Map<String, ColumnSchema> columns = new HashMap<>();

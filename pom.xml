@@ -17,6 +17,7 @@
   </prerequisites>
   <modules>
     <module>library</module>
+    <module>schemas/Open_vSwitch</module>
     <module>plugin</module>
     <module>northbound</module>
     <module>neutron</module>

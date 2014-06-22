@@ -103,6 +103,11 @@
       <groupId>io.netty</groupId>
       <artifactId>netty-transport</artifactId>
     </dependency>
+    <dependency>
+      <groupId>javax.inject</groupId>
+      <artifactId>javax.inject</artifactId>
+      <version>1</version>
+    </dependency>
 
     <dependency>
       <groupId>javax.portlet</groupId>
@@ -177,7 +182,8 @@
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam-container-native</artifactId>
+      <artifactId>pax-exam-container-forked</artifactId>
+      <version>${exam.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -220,6 +226,22 @@
             <configuration>
               <skip>true</skip>
             </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.ops4j.pax.exam</groupId>
+        <artifactId>exam-maven-plugin</artifactId>
+        <version>${exam.version}</version>
+        <configuration>
+          <configClass>org.opendaylight.ovsdb.plugin.ContainerConfiguration</configClass>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>start-container</goal>
+              <goal>stop-container</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>

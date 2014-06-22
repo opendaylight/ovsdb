@@ -1,0 +1,23 @@
+# This file contains test cases
+---
+
+name: testFoo
+operation: POST
+uri: http://localhost:8080/ovsdb/nb/v2/node/OVS/${node}/tables/bridge/rows
+json >
+{
+    "some" : "json,
+    "would" : ["go", "here"]
+}
+expected: 200
+
+
+name: testFoo2
+operation: POST
+uri: http://localhost:8080/ovsdb/nb/v2/node/OVS/${node}/tables/bridge/foo
+json >
+{
+    "some" : "json,
+    "would" : ["go", "here"]
+}
+expected: 404

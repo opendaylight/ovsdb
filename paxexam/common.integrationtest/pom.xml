@@ -12,6 +12,11 @@
   <version>1.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
+  <properties>
+    <exam.version>3.5.0</exam.version>
+    <url.version>2.0.0</url.version>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>ch.qos.logback</groupId>
@@ -61,18 +66,22 @@
     <dependency>
       <groupId>org.ops4j.pax.exam</groupId>
       <artifactId>pax-exam-junit4</artifactId>
+      <version>${exam.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.exam</groupId>
       <artifactId>pax-exam-link-mvn</artifactId>
+      <version>${exam.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.url</groupId>
       <artifactId>pax-url-aether</artifactId>
+      <version>${url.version}</version>
       <scope>test</scope>
     </dependency>
+
   </dependencies>
 
   <build>
@@ -92,6 +101,20 @@
             <version>0.0.3-SNAPSHOT</version>
           </dependency>
         </dependencies>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.servicemix.tooling</groupId>
+        <artifactId>depends-maven-plugin</artifactId>
+        <version>1.2</version>
+        <executions>
+          <execution>
+            <id>generate-depends-file</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>generate-depends-file</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -121,6 +144,9 @@
           </execution>
         </executions>
       </plugin>
+      <!-- maven-paxexam-plugin is deprecated
+      https://ops4j1.jira.com/wiki/display/PAXEXAM3/Exam+Maven+Plugin
+
       <plugin>
         <groupId>org.ops4j.pax.exam</groupId>
         <artifactId>maven-paxexam-plugin</artifactId>
@@ -134,6 +160,8 @@
           </execution>
         </executions>
       </plugin>
+      -->
+      <!-- generate dependencies versions -->
     </plugins>
   </build>
   <scm>

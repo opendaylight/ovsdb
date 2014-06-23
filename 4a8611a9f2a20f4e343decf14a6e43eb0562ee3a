@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_35b40a34",
+        "filename": "schemas/hardware_vtep/src/main/java/org/opendaylight/ovsdb/schema/hardwarevtep/PhysicalPort.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-06-23T14:20:07Z",
+      "side": 1,
+      "message": "this is a question, not a review comment really: what/how one determines the need for including map and set in this particular file?\nI assume it has to do with the \u0027@Typed\u0027 syntax, right?",
+      "revId": "4a8611a9f2a20f4e343decf14a6e43eb0562ee3a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

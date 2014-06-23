@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_583c65c8",
+        "filename": "ovsdb/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-23T19:28:36Z",
+      "side": 1,
+      "message": "Though the fix is correct, I want to bring to your attention\nthat you are using a method addPort() that may not survive for Helium.\n\nThats because, the addPort() was something that we added as part of\nnetworkconfig.bridgedomain support. But since the\nnetworkconfig.bridgedomain has a very restrictive addBridge and addPort,\nit wasnt using the full potential of OVSDB.\nHence we introduced the ovsdb.northbound layer which exposes everything\nthat OVSDB has to offer.\n\nAll those changes are in the insertxxx() methods in the same file. The\novsdb.northbound exposes all the CRUD operations on\nall the tables.\n\nI am bringing up to your attention so that you will be ready to make the\nswitch for Helium timeframe.\n\nWith that said, I can merge it as is. But please consider not using this method in the future :). We will deprecate these methods soon.",
+      "revId": "10ba40cbe501241f0c7c30a1c0d350fd78a01b95",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

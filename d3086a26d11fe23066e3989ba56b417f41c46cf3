@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_f5bd42b8",
+        "filename": "schemas/hardware_vtep/src/test/java/org/opendaylight/ovsdb/schema/hardwarevtep/OvsdbTestBase.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-23T16:33:22Z",
+      "side": 1,
+      "message": "s/Open vSwitch/Hardware VTEP/g",
+      "revId": "d3086a26d11fe23066e3989ba56b417f41c46cf3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

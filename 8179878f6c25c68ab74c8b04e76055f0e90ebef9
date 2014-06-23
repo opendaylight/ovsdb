@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_d59d9ebd",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/jsonrpc/JsonRpcEndpoint.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-06-23T14:13:29Z",
+      "side": 0,
+      "message": "lol",
+      "revId": "8179878f6c25c68ab74c8b04e76055f0e90ebef9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

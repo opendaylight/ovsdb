@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_355dea15",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/error/SchemaVersionMismatchException.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-06-23T14:13:29Z",
+      "side": 1,
+      "message": "This exception is used when the a table or row is accessed.",
+      "revId": "412093d689391b1b2e160b6c5811374b5dff7bff",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7567f2e9",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/schema/ColumnSchema.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-06-23T14:13:29Z",
+      "side": 1,
+      "message": "Would it be useful here to add which of the two checks failed (ie, isObect() vs has(\"type\") -- to the exception message?",
+      "revId": "412093d689391b1b2e160b6c5811374b5dff7bff",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1560e6cd",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/schema/GenericTableSchema.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-06-23T14:13:29Z",
+      "side": 1,
+      "message": "same question as before: isObject() vs has(\"columns\") ?",
+      "revId": "412093d689391b1b2e160b6c5811374b5dff7bff",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

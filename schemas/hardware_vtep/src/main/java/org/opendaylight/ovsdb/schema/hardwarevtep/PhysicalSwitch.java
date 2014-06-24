@@ -62,6 +62,12 @@ public interface PhysicalSwitch extends TypedBaseTable {
     public void setTunnelIps(Set<String> tunnelIps);
 
 
+    @TypedColumn(name="tunnels", method=MethodType.GETCOLUMN, fromVersion="1.3.0")
+    public Column<GenericTableSchema, Set<UUID>> getTunnels();
+
+    @TypedColumn(name="tunnels", method=MethodType.SETDATA, fromVersion="1.3.0")
+    public void setTunnels(Set<UUID> tunnels);
+
     @TypedColumn(name="switch_fault_status", method=MethodType.GETCOLUMN, fromVersion="1.1.0")
     public Column<GenericTableSchema, Set<String>> getSwitchFaultStatusColumn();
 

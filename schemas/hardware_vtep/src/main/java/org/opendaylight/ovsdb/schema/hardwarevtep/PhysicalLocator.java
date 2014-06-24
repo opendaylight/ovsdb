@@ -32,15 +32,15 @@ public interface PhysicalLocator extends TypedBaseTable {
     @TypedColumn(name="dst_ip", method=MethodType.SETDATA, fromVersion="1.0.0")
     public void setDstIp(String dstIp);
 
-    @TypedColumn(name="bfd", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
+    @TypedColumn(name="bfd", method=MethodType.GETCOLUMN, fromVersion="1.0.0", untilVersion="1.2.0")
     public Column<GenericTableSchema, Map<String, String>> getBfdColumn();
 
-    @TypedColumn(name="bfd", method=MethodType.SETDATA, fromVersion="1.0.0")
+    @TypedColumn(name="bfd", method=MethodType.SETDATA, fromVersion="1.0.0", untilVersion="1.2.0")
     public void setBfd(Map<String, String> bfd);
 
-    @TypedColumn(name="bfd_status", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
+    @TypedColumn(name="bfd_status", method=MethodType.GETCOLUMN, fromVersion="1.0.0", untilVersion="1.2.0")
     public Column<GenericTableSchema, Map<String, String>> getBfdStatusColumn();
 
-    @TypedColumn(name="bfd_status", method=MethodType.SETDATA, fromVersion="1.0.0")
+    @TypedColumn(name="bfd_status", method=MethodType.SETDATA, fromVersion="1.0.0", untilVersion="1.2.0")
     public void setBfdStatus(Map<String, String> bfdStatus);
 }

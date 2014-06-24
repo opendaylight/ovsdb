@@ -303,9 +303,14 @@ public abstract class BaseType<E extends BaseType<E>> {
         private void populateEnum(StringBaseType baseType, JsonNode node) {
             if (node.has("enum")) {
                 Set<String> s = Sets.newHashSet();
-                JsonNode anEnum = node.get("enum").get(1);
-                for (JsonNode n : anEnum) {
-                    s.add(n.asText());
+                JsonNode enumVal = node.get("enum");
+                if (enumVal.isArray()) {
+                    JsonNode anEnum = enumVal.get(1);
+                    for (JsonNode n : anEnum) {
+                        s.add(n.asText());
+                    }
+                } else if (enumVal.isTextual()) {
+                    s.add(enumVal.asText());
                 }
                 baseType.setEnums(s);
             }

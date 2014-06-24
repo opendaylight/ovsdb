@@ -177,6 +177,11 @@
       <artifactId>ovsdb</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam</artifactId>
+      <version>${exam.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>log4j-over-slf4j</artifactId>
     </dependency>
@@ -234,7 +239,7 @@
         <artifactId>exam-maven-plugin</artifactId>
         <version>${exam.version}</version>
         <configuration>
-          <configClass>org.opendaylight.ovsdb.plugin.ContainerConfiguration</configClass>
+          <configClass>org.opendaylight.ovsdb.plugin.DummyConfiguration</configClass>
         </configuration>
         <executions>
           <execution>

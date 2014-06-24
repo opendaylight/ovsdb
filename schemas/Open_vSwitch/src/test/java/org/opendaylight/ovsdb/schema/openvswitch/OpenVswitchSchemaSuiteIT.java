@@ -28,6 +28,7 @@ import java.util.Map;
         SflowTestCases.class,
         IpfixTestCases.class,
         FlowSampleCollectorSetTestCases.class,
+        FlowTableTestCases.class,
         TearDown.class
 })
 public class OpenVswitchSchemaSuiteIT {

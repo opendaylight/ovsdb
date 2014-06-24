@@ -72,6 +72,7 @@ public class TypedVSwitchdSchemaIT extends OvsdbTestBase {
         this.testCreateTypedIpFix();
         this.testCreateTypeNetFlow();
         this.testCreateTypeSflow();
+        this.testCreateTypeFlowTable();
     }
 
     private void createTypedBridge() throws IOException, InterruptedException, ExecutionException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
@@ -337,6 +338,43 @@ public class TypedVSwitchdSchemaIT extends OvsdbTestBase {
         // Check if Results matches the number of operations in transaction
         Assert.assertEquals(transactionBuilder.getOperations().size(), operationResults.size());
         logger.info("Insert & Mutate operation results for NetFlow = {} ", operationResults);
+    }
+
+    private void testCreateTypeFlowTable() throws InterruptedException, ExecutionException, IllegalArgumentException{
+        String flowTableUuidStr = "testFlowTable";
+        String tableName = "flow_table_row_name";
+        String overflowPolicy = "evict";
+        String groups = "group name";
+        String prefixes = "wildcarding prefixes";
+        Integer flowLimit = 50000;
+        Map<Integer, UUID> flowTableBrRef = new HashMap<>();
+        flowTableBrRef.put(1, new UUID(flowTableUuidStr));
+        FlowTable flowTable = ovs.createTypedRowWrapper(FlowTable.class);
+        flowTable.setName(ImmutableSet.of(tableName));
+        flowTable.setOverflowPolicy(ImmutableSet.of(overflowPolicy));
+        flowTable.setGroups(ImmutableSet.of(groups));
+        flowTable.setPrefixes(ImmutableSet.of(prefixes));
+        flowTable.setFlowLimit(ImmutableSet.of(flowLimit));
+        Bridge bridge = ovs.getTypedRowWrapper(Bridge.class, null);
+        TransactionBuilder transactionBuilder = ovs.transactBuilder()
+                .add(op.insert(flowTable.getSchema())
+                        .withId(flowTableUuidStr)
+                        .value(flowTable.getNameColumn())
+                        .value(flowTable.getOverflowPolicyColumn())
+                        .value(flowTable.getGroupsColumn())
+                        .value(flowTable.getPrefixesColumn())
+                        .value(flowTable.getFlowLimitColumn()))
+                .add(op.mutate(bridge.getSchema())
+                        .addMutation(bridge.getFlowTablesColumn().getSchema(), Mutator.INSERT,(flowTableBrRef))
+                        .where(bridge.getNameColumn().getSchema().opEqual(testBridgeName))
+                        .build());
+        ListenableFuture<List<OperationResult>> results = transactionBuilder.execute();
+        List<OperationResult> operationResults = results.get();
+        for (OperationResult result : operationResults) Assert.assertNull(result.getError());
+        Assert.assertFalse(operationResults.isEmpty());
+        // Check if Results matches the number of operations in transaction
+        Assert.assertEquals(transactionBuilder.getOperations().size(), operationResults.size());
+        logger.info("Insert & Mutate operation results for Flow Table = {} ", operationResults);
     }
 
     public void testGetDBs() throws ExecutionException, InterruptedException {

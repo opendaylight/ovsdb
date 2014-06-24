@@ -27,10 +27,10 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 public interface FlowTable extends TypedBaseTable {
 
     @TypedColumn(name="flow_limit", method=MethodType.GETCOLUMN, fromVersion="6.5.0")
-    public Column<GenericTableSchema, Integer> getFlowLimitColumn() ;
+    public Column<GenericTableSchema, Set<Integer>> getFlowLimitColumn() ;
 
     @TypedColumn(name="flow_limit", method=MethodType.SETDATA, fromVersion="6.5.0")
-    public void setFlowLimit(Integer flowLimit) ;
+    public void setFlowLimit(Set<Integer> flowLimit) ;
 
     @TypedColumn(name="overflow_policy", method=MethodType.GETCOLUMN, fromVersion="6.5.0")
     public Column<GenericTableSchema, Set<String>> getOverflowPolicyColumn() ;

@@ -64,6 +64,7 @@ public class OvsdbNorthboundIT extends OvsdbIntegrationTestBase {
     public static final String USERNAME = "admin";
     public static final String PASSWORD = "admin";
     public static final String BASE_URI = "http://localhost:8088";
+    public static final String MEDIA_TYPE_JSON = "application/json";
 
     @Inject
     private BundleContext bc;
@@ -101,38 +102,62 @@ public class OvsdbNorthboundIT extends OvsdbIntegrationTestBase {
         fExpectedStatusCode = expectedStatusCode;
     }
 
-    private String expandPath(String path){
-        String uri = BASE_URI + path;
-        uri = uri.replace("${node}", node.getNodeIDString());
-        return uri;
+    private String expand(String content){
+        if (content.contains("${node}")) {
+            content = content.replace("${node}", node.getNodeIDString());
+        }
+        if (content.contains("${uuid}")) {
+            content = content.replace("${uuid}", UuidHelper.getUuid());
+        }
+        if (content.contains("${bridge_uuid}")) {
+            content = content.replace("${bridge_uuid}", UuidHelper.getBridgeUuid());
+        }
+        if (content.contains("${port_uuid}")) {
+            content = content.replace("${port_uuid}", UuidHelper.getPortUuid());
+        }
+        return content;
+    }
+
+    private void saveUuid(String path){
+        if (path.contains("bridge")) {
+            UuidHelper.setBridgeUuid(UuidHelper.getUuid());
+        }
+        if (path.contains("port")) {
+            UuidHelper.setPortUuid(UuidHelper.getUuid());
+        }
     }
 
     @Test
-    public void testApi(){
-
+    public void testApi() {
         System.out.println("Running " + fTestCase);
 
         Client client = Client.create();
         client.addFilter(new HTTPBasicAuthFilter(USERNAME , PASSWORD));
-        WebResource webResource = client.resource(expandPath(fPath));
+        String uri = BASE_URI + fPath;
+        WebResource webResource = client.resource(expand(uri));
         ClientResponse response = null;
 
         switch (fOperation) {
             case "GET":
-                response = webResource.accept("application/json")
+                response = webResource.accept(MEDIA_TYPE_JSON)
                         .get(ClientResponse.class);
                 break;
             case "POST":
-                response = webResource.accept("application/json")
-                        .post(ClientResponse.class, fJson);
+                response = webResource.accept(MEDIA_TYPE_JSON)
+                        .header("Content-Type", MEDIA_TYPE_JSON)
+                        .post(ClientResponse.class, expand(fJson));
+                UuidHelper.setUuid(response.getEntity(String.class));
+                saveUuid(fPath);
                 break;
             case "PUT":
-                response = webResource.accept("application/json")
+                response = webResource.accept(MEDIA_TYPE_JSON)
+                        .header("Content-Type", MEDIA_TYPE_JSON)
                         .put(ClientResponse.class, fJson);
                 break;
             case "DELETE":
-                response = webResource.accept("application/json")
-                        .put(ClientResponse.class, fJson);
+                response = webResource.accept(MEDIA_TYPE_JSON)
+                        .delete(ClientResponse.class);
+                UuidHelper.setUuid("");
                 break;
             default:
                 fail("Unsupported operation");
@@ -159,7 +184,7 @@ public class OvsdbNorthboundIT extends OvsdbIntegrationTestBase {
     }
 
     @Before
-    public void areWeReady() {
+    public void areWeReady() throws InterruptedException {
         assertNotNull(bc);
         boolean debugit = false;
         Bundle b[] = bc.getBundles();
@@ -190,6 +215,10 @@ public class OvsdbNorthboundIT extends OvsdbIntegrationTestBase {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        // Wait before making a REST call to avoid overloading Tomcat
+        Thread.sleep(500);
+
     }
 
     @Configuration
@@ -197,8 +226,7 @@ public class OvsdbNorthboundIT extends OvsdbIntegrationTestBase {
         return options(
                 //
                 systemProperty("logback.configurationFile").value(
-                        "file:" + PathUtils.getBaseDir()
-                                + "/src/test/resources/logback.xml"
+                        PathUtils.getBaseDir() + "/src/test/resources/logback.xml"
                 ),
 
                 systemProperty("org.eclipse.gemini.web.tomcat.config.path").value(

@@ -65,3 +65,87 @@
   uri: /ovsdb/nb/v2/node/OVS/${node}/tables/open_vswitch/rows
   json:
   expected: 200
+
+# Bridge
+
+- name: testCreateBridge
+  operation: POST
+  uri: /ovsdb/nb/v2/node/OVS/${node}/tables/bridge/rows
+  json: |
+    {
+      "row": {
+        "Bridge": {
+        "name": "bridge1",
+        "datapath_type": "OPENFLOW"
+        }
+     }
+    }
+  expected: 201
+
+- name: testGetBridgeRow
+  operation: GET
+  uri: /ovsdb/nb/v2/node/OVS/${node}/tables/bridge/rows/${uuid}
+  json:
+  expected: 200
+
+- name: testUpdateBridgeRow
+  operation: PUT
+  uri: /ovsdb/nb/v2/node/OVS/${node}/tables/bridge/rows/${uuid}
+  json: |
+    {
+      "row": {
+        "Bridge": {
+          "stp_enable": true
+        }
+     }
+    }
+  expected: 200
+
+# Port
+
+- name: testCreatePort
+  operation: POST
+  uri: /ovsdb/nb/v2/node/OVS/${node}/tables/port/rows
+  json: |
+    {
+      "parent_uuid":"${bridge_uuid}",
+        "row":{
+          "Port":{
+            "name":"testPort1"
+          }
+        }
+    }
+  expected: 201
+
+- name: testGetPortRow
+  operation: GET
+  uri: /ovsdb/nb/v2/node/OVS/${node}/tables/port/rows/${uuid}
+  json:
+  expected: 200
+
+#- name: testUpdatePortRow
+#  operation: PUT
+#  uri: /ovsdb/nb/v2/node/OVS/${node}/tables/port/rows/${uuid}
+#  json: |
+#    {
+#       "row": {
+#         "Port": {
+#            "fake_bridge": true
+#         }
+#       }
+#    }
+#  expected: 200
+
+# Cleanup
+
+- name: testDeletePortRow
+  operation: DELETE
+  uri: /ovsdb/nb/v2/node/OVS/${node}/tables/port/rows/${port_uuid}
+  json:
+  expected: 204
+
+- name: testDeleteBridgeRow
+  operation: DELETE
+  uri: /ovsdb/nb/v2/node/OVS/${node}/tables/bridge/rows/${bridge_uuid}
+  json:
+  expected: 204

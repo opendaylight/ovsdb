@@ -10,6 +10,8 @@
 
 package org.opendaylight.ovsdb.integrationtest.northbound;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -63,20 +65,27 @@ public class OvsdbNorthboundIT extends OvsdbIntegrationTestBase {
     private Logger log = LoggerFactory.getLogger(OvsdbNorthboundIT.class);
     public static final String USERNAME = "admin";
     public static final String PASSWORD = "admin";
-    public static final String BASE_URI = "http://localhost:8088";
+    public static final String BASE_URI = "http://localhost:8888";
+    public static final String MEDIA_TYPE_JSON = "application/json";
+    public static final String NODE_ID_REPLACEMENT_PATTERN = "${node}";
+    public static final String UUID_REPLACEMENT_PATTERN = "${uuid}";
+    public static final String BRIDGE_UUID_REPLACEMENT_PATTERN = "${bridge_uuid}";
+    public static final String PORT_UUID_REPLACEMENT_PATTERN = "${port_uuid}";
+    public static final String QOS_UUID_REPLACEMENT_PATTERN = "${qos_uuid}";
+    public static final String OVS_UUID_REPLACEMENT_PATTERN = "${ovs_uuid}";
 
     @Inject
     private BundleContext bc;
     private Node node = null;
     private IUserManager userManager;
 
-    @Parameterized.Parameters(name="{index}:({0})")
+    @Parameterized.Parameters(name = "ApiTest{index}:{0}")
     public static List<Object[]> getData() throws FileNotFoundException {
         ClassLoader classloader = OvsdbNorthboundIT.class.getClassLoader();
         InputStream input = classloader.getResourceAsStream("northbound.yaml");
         Yaml yaml = new Yaml();
         List<Map<String, Object>> object = (List<Map<String, Object>>) yaml.load(input);
-        List parameters = Lists.newArrayList();
+        List<Object[]> parameters = Lists.newArrayList();
 
         for (Map<String, Object> o : object){
             Object[] l = o.values().toArray();
@@ -101,46 +110,106 @@ public class OvsdbNorthboundIT extends OvsdbIntegrationTestBase {
         fExpectedStatusCode = expectedStatusCode;
     }
 
-    private String expandPath(String path){
-        String uri = BASE_URI + path;
-        uri = uri.replace("${node}", node.getNodeIDString());
-        return uri;
-    }
-
     @Test
-    public void testApi(){
-
-        System.out.println("Running " + fTestCase);
-
+    public void testApi() {
+        System.out.println("Running " + fTestCase + "...\n");
         Client client = Client.create();
         client.addFilter(new HTTPBasicAuthFilter(USERNAME , PASSWORD));
-        WebResource webResource = client.resource(expandPath(fPath));
+        String uri = BASE_URI + fPath;
+        WebResource webResource = client.resource(expand(uri));
         ClientResponse response = null;
 
         switch (fOperation) {
             case "GET":
-                response = webResource.accept("application/json")
+                response = webResource.accept(MEDIA_TYPE_JSON)
                         .get(ClientResponse.class);
                 break;
             case "POST":
-                response = webResource.accept("application/json")
-                        .post(ClientResponse.class, fJson);
+                response = webResource.accept(MEDIA_TYPE_JSON)
+                        .header("Content-Type", MEDIA_TYPE_JSON)
+                        .post(ClientResponse.class, expand(fJson));
+                UuidHelper.setUuid(response.getEntity(String.class));
+                saveUuid(fPath);
                 break;
             case "PUT":
-                response = webResource.accept("application/json")
+                response = webResource.accept(MEDIA_TYPE_JSON)
+                        .header("Content-Type", MEDIA_TYPE_JSON)
                         .put(ClientResponse.class, fJson);
                 break;
             case "DELETE":
-                response = webResource.accept("application/json")
-                        .put(ClientResponse.class, fJson);
+                response = webResource.delete(ClientResponse.class);
+                UuidHelper.setUuid("");
                 break;
             default:
                 fail("Unsupported operation");
         }
-
-        System.out.println("" + response.toString());
         assertEquals(fExpectedStatusCode, response.getStatus());
 
+    }
+
+    private String expand(String content){
+        if (content.contains(NODE_ID_REPLACEMENT_PATTERN)) {
+            content = content.replace(NODE_ID_REPLACEMENT_PATTERN,
+                    node.getNodeIDString());
+        }
+        if (content.contains(UUID_REPLACEMENT_PATTERN)) {
+            content = content.replace(UUID_REPLACEMENT_PATTERN,
+                    UuidHelper.getUuid());
+        }
+        if (content.contains(BRIDGE_UUID_REPLACEMENT_PATTERN)) {
+            content = content.replace(BRIDGE_UUID_REPLACEMENT_PATTERN,
+                    UuidHelper.getBridgeUuid());
+        }
+        if (content.contains(PORT_UUID_REPLACEMENT_PATTERN)) {
+            content = content.replace(PORT_UUID_REPLACEMENT_PATTERN,
+                    UuidHelper.getPortUuid());
+        }
+        if (content.contains(QOS_UUID_REPLACEMENT_PATTERN)) {
+            content = content.replace(QOS_UUID_REPLACEMENT_PATTERN,
+                    UuidHelper.getQosUuid());
+        }
+        if (content.contains(OVS_UUID_REPLACEMENT_PATTERN)) {
+            content = content.replace(OVS_UUID_REPLACEMENT_PATTERN,
+                    getOvsUuid());
+        }
+        return content;
+    }
+
+    private void saveUuid(String path){
+        if (path.contains("bridge")) {
+            UuidHelper.setBridgeUuid(UuidHelper.getUuid());
+        }
+        if (path.contains("port")) {
+            UuidHelper.setPortUuid(UuidHelper.getUuid());
+        }
+        if (path.contains("qos")) {
+            UuidHelper.setQosUuid(UuidHelper.getUuid());
+        }
+    }
+
+    private String getOvsUuid() {
+        if (UuidHelper.getOvsUuid() == null) {
+            Client client = Client.create();
+            client.addFilter(new HTTPBasicAuthFilter(USERNAME, PASSWORD));
+            String uri = OvsdbNorthboundIT.BASE_URI + "/ovsdb/nb/v2/node/OVS/${node}/tables/open_vswitch/rows";
+            WebResource webResource = client.resource(expand(uri));
+            ClientResponse response = webResource.accept(MEDIA_TYPE_JSON)
+                    .get(ClientResponse.class);
+
+            String row = response.getEntity(String.class);
+
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode rowsNode = objectMapper.readTree(row).get("rows");
+                // The first fieldName is the UUID
+                String uuid = rowsNode.fieldNames().next();
+                UuidHelper.setOvsUuid(uuid);
+            } catch (IOException e) {
+                fail("Cannot get the UUID for the Open_vSwitch table");
+            }
+        }
+
+        return UuidHelper.getOvsUuid();
     }
 
      private String stateToString(int state) {
@@ -159,7 +228,7 @@ public class OvsdbNorthboundIT extends OvsdbIntegrationTestBase {
     }
 
     @Before
-    public void areWeReady() {
+    public void areWeReady() throws InterruptedException {
         assertNotNull(bc);
         boolean debugit = false;
         Bundle b[] = bc.getBundles();
@@ -190,6 +259,10 @@ public class OvsdbNorthboundIT extends OvsdbIntegrationTestBase {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        // Wait before making a REST call to avoid overloading Tomcat
+        Thread.sleep(500);
+
     }
 
     @Configuration
@@ -197,8 +270,7 @@ public class OvsdbNorthboundIT extends OvsdbIntegrationTestBase {
         return options(
                 //
                 systemProperty("logback.configurationFile").value(
-                        "file:" + PathUtils.getBaseDir()
-                                + "/src/test/resources/logback.xml"
+                        PathUtils.getBaseDir() + "/src/test/resources/logback.xml"
                 ),
 
                 systemProperty("org.eclipse.gemini.web.tomcat.config.path").value(

@@ -5,9 +5,9 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Authors : Ashwin Raveendran
+ * Authors : Ashwin Raveendran, Madhu Venugopal
  */
-package org.opendaylight.ovsdb.lib;
+package org.opendaylight.ovsdb.lib.impl;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -17,6 +17,13 @@ import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
+import org.opendaylight.ovsdb.lib.EchoServiceCallbackFilters;
+import org.opendaylight.ovsdb.lib.LockAquisitionCallback;
+import org.opendaylight.ovsdb.lib.LockStolenCallback;
+import org.opendaylight.ovsdb.lib.MonitorCallBack;
+import org.opendaylight.ovsdb.lib.MonitorHandle;
+import org.opendaylight.ovsdb.lib.OvsdbClient;
+import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
 import org.opendaylight.ovsdb.lib.jsonrpc.Params;
 import org.opendaylight.ovsdb.lib.message.MonitorRequest;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
@@ -48,22 +55,24 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
 
-public class OvsDBClientImpl implements OvsDBClient {
+public class OvsdbClientImpl implements OvsdbClient {
 
-    protected static final Logger logger = LoggerFactory.getLogger(OvsDBClientImpl.class);
+    protected static final Logger logger = LoggerFactory.getLogger(OvsdbClientImpl.class);
     private ExecutorService executorService;
     private OvsdbRPC rpc;
     private Map<String, DatabaseSchema> schema = Maps.newHashMap();
     private HashMap<String, CallbackContext> monitorCallbacks = Maps.newHashMap();
     private Queue<Throwable> exceptions;
     private OvsdbRPC.Callback rpcCallback;
+    private OvsdbConnectionInfo connectionInfo;
 
-    public OvsDBClientImpl(OvsdbRPC rpc, ExecutorService executorService) {
+    public OvsdbClientImpl(OvsdbRPC rpc, OvsdbConnectionInfo connectionInfo, ExecutorService executorService) {
         this.rpc = rpc;
         this.executorService = executorService;
+        this.connectionInfo = connectionInfo;
     }
 
-    OvsDBClientImpl() {
+    OvsdbClientImpl() {
     }
 
     void setupUpdateListener() {
@@ -237,7 +246,7 @@ public class OvsDBClientImpl implements OvsDBClient {
                                 DatabaseSchema s = result.get(database);
                                 s.populateInternallyGeneratedColumns();
                                 if (cacheResult) {
-                                    OvsDBClientImpl.this.schema.put(database, s);
+                                    OvsdbClientImpl.this.schema.put(database, s);
                                 }
                                 return s;
                             } else {
@@ -362,5 +371,10 @@ public class OvsDBClientImpl implements OvsDBClient {
     public <T> T getTypedRowWrapper(final Class<T> klazz, final Row<GenericTableSchema> row) {
         DatabaseSchema dbSchema = getDatabaseSchemaForTypedTable(klazz);
         return TyperUtils.getTypedRowWrapper(dbSchema, klazz, row);
+    }
+
+    @Override
+    public OvsdbConnectionInfo getConnectionInfo() {
+        return connectionInfo;
     }
 }

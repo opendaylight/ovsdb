@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_8cae2be5",
+        "filename": "schemas/Open_vSwitch/src/main/java/org/opendaylight/ovsdb/schema/openvswitch/FlowTable.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-25T11:15:50Z",
+      "side": 1,
+      "message": "I know that this is lame and the infra must provide a way to automatically use appropriate fromVersion for methods inherited from the class fromVersion.\nBut, since we dont have that support now, please change the fromVersion to 6.5.0.",
+      "revId": "52737eed9ad42fcfe4ad1ff78984b0e13ab697af",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4cb4a334",
+        "filename": "schemas/Open_vSwitch/src/main/java/org/opendaylight/ovsdb/schema/openvswitch/FlowTable.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-25T11:15:50Z",
+      "side": 1,
+      "message": "Also here.",
+      "revId": "52737eed9ad42fcfe4ad1ff78984b0e13ab697af",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0c8a1b6a",
+        "filename": "schemas/Open_vSwitch/src/main/java/org/opendaylight/ovsdb/schema/openvswitch/IPFIX.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-25T11:15:50Z",
+      "side": 1,
+      "message": "Please change it to IPFIX Table.",
+      "revId": "52737eed9ad42fcfe4ad1ff78984b0e13ab697af",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4c8b4368",
+        "filename": "schemas/Open_vSwitch/src/test/java/org/opendaylight/ovsdb/schema/openvswitch/TypedVSwitchdSchemaIT.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-25T11:15:50Z",
+      "side": 1,
+      "message": "minor nit. Please change it to ipfixTarget :)",
+      "revId": "52737eed9ad42fcfe4ad1ff78984b0e13ab697af",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_2c8eff79",
+        "filename": "schemas/Open_vSwitch/src/test/java/org/opendaylight/ovsdb/schema/openvswitch/TypedVSwitchdSchemaIT.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-25T11:15:50Z",
+      "side": 1,
+      "message": "Love this easter egg :)",
+      "revId": "52737eed9ad42fcfe4ad1ff78984b0e13ab697af",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

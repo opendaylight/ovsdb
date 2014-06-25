@@ -111,6 +111,8 @@ public interface OvsDBClient {
      */
     public void stopEchoService();
 
+    public OvsDBConnectionInfo getConnectionInfo();
+
     public DatabaseSchema getDatabaseSchema (String dbName);
 
     /**

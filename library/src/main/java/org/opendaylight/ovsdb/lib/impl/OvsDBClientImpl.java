@@ -5,9 +5,9 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Authors : Ashwin Raveendran
+ * Authors : Ashwin Raveendran, Madhu Venugopal
  */
-package org.opendaylight.ovsdb.lib;
+package org.opendaylight.ovsdb.lib.impl;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -17,6 +17,13 @@ import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
+import org.opendaylight.ovsdb.lib.EchoServiceCallbackFilters;
+import org.opendaylight.ovsdb.lib.LockAquisitionCallback;
+import org.opendaylight.ovsdb.lib.LockStolenCallback;
+import org.opendaylight.ovsdb.lib.MonitorCallBack;
+import org.opendaylight.ovsdb.lib.MonitorHandle;
+import org.opendaylight.ovsdb.lib.OvsDBClient;
+import org.opendaylight.ovsdb.lib.OvsDBConnectionInfo;
 import org.opendaylight.ovsdb.lib.jsonrpc.Params;
 import org.opendaylight.ovsdb.lib.message.MonitorRequest;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
@@ -57,10 +64,12 @@ public class OvsDBClientImpl implements OvsDBClient {
     private HashMap<String, CallbackContext> monitorCallbacks = Maps.newHashMap();
     private Queue<Throwable> exceptions;
     private OvsdbRPC.Callback rpcCallback;
+    private OvsDBConnectionInfo connectionInfo;
 
-    public OvsDBClientImpl(OvsdbRPC rpc, ExecutorService executorService) {
+    public OvsDBClientImpl(OvsdbRPC rpc, OvsDBConnectionInfo connectionInfo, ExecutorService executorService) {
         this.rpc = rpc;
         this.executorService = executorService;
+        this.connectionInfo = connectionInfo;
     }
 
     OvsDBClientImpl() {
@@ -362,5 +371,10 @@ public class OvsDBClientImpl implements OvsDBClient {
     public <T> T getTypedRowWrapper(final Class<T> klazz, final Row<GenericTableSchema> row) {
         DatabaseSchema dbSchema = getDatabaseSchemaForTypedTable(klazz);
         return TyperUtils.getTypedRowWrapper(dbSchema, klazz, row);
+    }
+
+    @Override
+    public OvsDBConnectionInfo getConnectionInfo() {
+        return connectionInfo;
     }
 }

@@ -12,16 +12,14 @@ package org.opendaylight.ovsdb.schema.hardwarevtep;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.TimeoutException;
 
 import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.ovsdb.lib.OvsDBClientImpl;
-import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
+import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.message.UpdateNotification;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.slf4j.Logger;
@@ -32,7 +30,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 public class TypedHardwareVTepSchemaIT extends OvsdbTestBase {
 
     Logger logger = LoggerFactory.getLogger(TypedHardwareVTepSchemaIT.class);
-    OvsDBClientImpl ovs;
+    OvsdbClient ovs;
     DatabaseSchema dbSchema = null;
 
     @Test
@@ -51,16 +49,11 @@ public class TypedHardwareVTepSchemaIT extends OvsdbTestBase {
     }
 
     @Before
-    public  void setUp() throws IOException, ExecutionException, InterruptedException {
+    public  void setUp() throws IOException, ExecutionException, InterruptedException, TimeoutException {
         if (ovs != null) {
             return;
         }
-        OvsdbRPC rpc = getTestConnection();
-        if (rpc == null) {
-            System.out.println("Unable to Establish Test Connection");
-        }
-        ExecutorService executorService = Executors.newFixedThreadPool(3);
-        ovs = new OvsDBClientImpl(rpc, executorService);
+        ovs = getTestConnection();
         testGetDBs();
         dbSchema = ovs.getSchema(HARDWARE_VTEP_SCHEMA, true).get();
     }

@@ -17,15 +17,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.TimeoutException;
 
 import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
+import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
 import org.opendaylight.ovsdb.lib.message.UpdateNotification;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -42,10 +41,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ListenableFuture;
 
-public class OvsDBClientTestITTyped extends OvsdbTestBase {
+public class OvsdbClientTestITTyped extends OvsdbTestBase {
 
-    Logger logger = LoggerFactory.getLogger(OvsDBClientTestITTyped.class);
-    OvsDBClientImpl ovs;
+    Logger logger = LoggerFactory.getLogger(OvsdbClientTestITTyped.class);
+    OvsdbClient ovs;
     DatabaseSchema dbSchema = null;
     static String testBridgeName = "br-test";
     static UUID testBridgeUuid = null;
@@ -99,16 +98,11 @@ public class OvsDBClientTestITTyped extends OvsdbTestBase {
     }
 
     @Before
-    public  void setUp() throws IOException, ExecutionException, InterruptedException {
+    public  void setUp() throws IOException, ExecutionException, InterruptedException, TimeoutException {
         if (ovs != null) {
             return;
         }
-        OvsdbRPC rpc = getTestConnection();
-        if (rpc == null) {
-            System.out.println("Unable to Establish Test Connection");
-        }
-        ExecutorService executorService = Executors.newFixedThreadPool(3);
-        ovs = new OvsDBClientImpl(rpc, executorService);
+        ovs = this.getTestConnection();
         testGetDBs();
         dbSchema = ovs.getSchema(OPEN_VSWITCH_SCHEMA, true).get();
     }
@@ -131,6 +125,7 @@ public class OvsDBClientTestITTyped extends OvsdbTestBase {
 
         List<OperationResult> operationResults = results.get();
         System.out.println("Delete operation results = " + operationResults);
+        OvsdbConnectionService.getService().disconnect(ovs);
     }
 
     @Override

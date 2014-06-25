@@ -6,9 +6,9 @@
     </encoder>
   </appender>
 
-  <logger name="org.opendaylight.ovsdb.*" level="INFO" />
+  <logger name="org.opendaylight.ovsdb" level="INFO" />
 
-  <root level="error">
+  <root level="ERROR">
     <appender-ref ref="STDOUT" />
   </root>
 </configuration>

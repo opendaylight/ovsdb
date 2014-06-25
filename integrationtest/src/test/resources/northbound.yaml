@@ -1,0 +1,67 @@
+# This file contains test cases for the OVSDB Northbound API
+---
+- name: testGetBridgeRows
+  operation: GET
+  uri: /ovsdb/nb/v2/node/OVS/${node}/tables/bridge/rows
+  json:
+  expected: 200
+
+- name: testGetPortRows
+  operation: GET
+  uri: /ovsdb/nb/v2/node/OVS/${node}/tables/port/rows
+  json:
+  expected: 200
+
+- name: testGetInterfaceRows
+  operation: GET
+  uri: /ovsdb/nb/v2/node/OVS/${node}/tables/interface/rows
+  json:
+  expected: 200
+
+- name: testGetControllerRows
+  operation: GET
+  uri: /ovsdb/nb/v2/node/OVS/${node}/tables/controller/rows
+  json:
+  expected: 200
+
+- name: testGetSslRows
+  operation: GET
+  uri: /ovsdb/nb/v2/node/OVS/${node}/tables/ssl/rows
+  json:
+  expected: 200
+
+- name: testGetSflowRows
+  operation: GET
+  uri: /ovsdb/nb/v2/node/OVS/${node}/tables/sflow/rows
+  json:
+  expected: 200
+
+- name: testGetQosRows
+  operation: GET
+  uri: /ovsdb/nb/v2/node/OVS/${node}/tables/qos/rows
+  json:
+  expected: 200
+
+- name: testGetQueueRows
+  operation: GET
+  uri: /ovsdb/nb/v2/node/OVS/${node}/tables/queue/rows
+  json:
+  expected: 200
+
+- name: testGetNetflowRows
+  operation: GET
+  uri: /ovsdb/nb/v2/node/OVS/${node}/tables/netflow/rows
+  json:
+  expected: 200
+
+- name: testGetManagerRows
+  operation: GET
+  uri: /ovsdb/nb/v2/node/OVS/${node}/tables/manager/rows
+  json:
+  expected: 200
+
+- name: testGetOpenVswitchRows
+  operation: GET
+  uri: /ovsdb/nb/v2/node/OVS/${node}/tables/open_vswitch/rows
+  json:
+  expected: 200

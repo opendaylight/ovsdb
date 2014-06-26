@@ -7,7 +7,7 @@
  *
  * Authors : Madhu Venugopal
  */
-package org.opendaylight.ovsdb.plugin;
+package org.opendaylight.ovsdb.integrationtest;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -17,8 +17,9 @@ import java.util.Properties;
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
+import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 
-public abstract class OvsdbTestBase {
+public abstract class OvsdbIntegrationTestBase {
     private final static String identifier = "TEST";
 
     public Node getTestConnection() throws IOException {

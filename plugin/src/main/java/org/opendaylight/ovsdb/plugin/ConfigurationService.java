@@ -327,6 +327,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                     interfaceRow.setName(portIdentifier);
 
                     if (type != null) {
+                        logger.debug("Port type : " + type);
                         if (type.equalsIgnoreCase(OvsdbType.PortType.TUNNEL.name())) {
                             interfaceRow.setType((String)configs.get(ConfigConstants.TUNNEL_TYPE));
                             if (options == null) options = new OvsDBMap<String, String>();
@@ -334,7 +335,8 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                         } else if (type.equalsIgnoreCase(OvsdbType.PortType.VLAN.name())) {
                             tags = new OvsDBSet<BigInteger>();
                             tags.add(BigInteger.valueOf(Integer.parseInt((String)configs.get(ConfigConstants.VLAN))));
-                        } else if (type.equalsIgnoreCase(OvsdbType.PortType.PATCH.name())) {
+                        } else if (type.equalsIgnoreCase(OvsdbType.PortType.PATCH.name()) ||
+                                   type.equalsIgnoreCase(OvsdbType.PortType.INTERNAL.name())) {
                             interfaceRow.setType(type.toLowerCase());
                         }
                     }

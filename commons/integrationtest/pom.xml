@@ -5,12 +5,17 @@
     <groupId>org.opendaylight.ovsdb</groupId>
     <artifactId>commons.ovsdb</artifactId>
     <version>1.0.1-SNAPSHOT</version>
-    <relativePath>../../commons/parent</relativePath>
+    <relativePath>../parent</relativePath>
   </parent>
 
-  <artifactId>common.integrationtest</artifactId>
+  <artifactId>commons.integrationtest</artifactId>
   <version>1.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
+
+  <properties>
+    <exam.version>3.5.0</exam.version>
+    <url.version>1.6.0</url.version>
+  </properties>
 
   <dependencies>
     <dependency>
@@ -61,16 +66,19 @@
     <dependency>
       <groupId>org.ops4j.pax.exam</groupId>
       <artifactId>pax-exam-junit4</artifactId>
+      <version>${exam.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.exam</groupId>
       <artifactId>pax-exam-link-mvn</artifactId>
+      <version>${exam.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.url</groupId>
       <artifactId>pax-url-aether</artifactId>
+      <version>${url.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -128,6 +136,7 @@
         <executions>
           <execution>
             <id>generate-config</id>
+            <phase>none</phase>
             <goals>
               <goal>generate-depends-file</goal>
             </goals>

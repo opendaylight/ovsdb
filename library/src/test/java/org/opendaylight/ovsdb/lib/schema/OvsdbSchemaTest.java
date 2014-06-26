@@ -20,11 +20,11 @@ import java.io.IOException;
 import java.io.InputStream;
 
 
-public class OvsDBSchemaTest {
+public class OvsdbSchemaTest {
 
     @Test
     public void testSchema() throws IOException {
-        InputStream resourceAsStream = OvsDBSchemaTest.class.getResourceAsStream("test_schema.json");
+        InputStream resourceAsStream = OvsdbSchemaTest.class.getResourceAsStream("test_schema.json");
         ObjectMapper mapper = new ObjectMapper();
         JsonNode jsonNode = mapper.readTree(resourceAsStream);
         System.out.println("jsonNode = " + jsonNode.get("id"));

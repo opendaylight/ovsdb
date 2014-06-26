@@ -14,16 +14,14 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.TimeoutException;
 
-import com.google.common.collect.ImmutableSet;
 import junit.framework.Assert;
 
 import org.junit.After;
@@ -31,11 +29,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.ovsdb.lib.MonitorCallBack;
 import org.opendaylight.ovsdb.lib.MonitorHandle;
-import org.opendaylight.ovsdb.lib.OvsDBClientImpl;
+import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.message.MonitorRequest;
 import org.opendaylight.ovsdb.lib.message.MonitorRequestBuilder;
 import org.opendaylight.ovsdb.lib.message.MonitorSelect;
-import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
 import org.opendaylight.ovsdb.lib.message.TableUpdate;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.message.UpdateNotification;
@@ -51,6 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -58,7 +56,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 public class TypedVSwitchdSchemaIT extends OvsdbTestBase {
 
     Logger logger = LoggerFactory.getLogger(TypedVSwitchdSchemaIT.class);
-    OvsDBClientImpl ovs;
+    OvsdbClient ovs;
     DatabaseSchema dbSchema = null;
     static String testBridgeName = "br_test";
     static UUID testBridgeUuid = null;
@@ -424,16 +422,11 @@ public class TypedVSwitchdSchemaIT extends OvsdbTestBase {
     }
 
     @Before
-    public  void setUp() throws IOException, ExecutionException, InterruptedException {
+    public  void setUp() throws IOException, ExecutionException, InterruptedException, TimeoutException {
         if (ovs != null) {
             return;
         }
-        OvsdbRPC rpc = getTestConnection();
-        if (rpc == null) {
-            System.out.println("Unable to Establish Test Connection");
-        }
-        ExecutorService executorService = Executors.newFixedThreadPool(3);
-        ovs = new OvsDBClientImpl(rpc, executorService);
+        ovs = getTestConnection();
         testGetDBs();
         dbSchema = ovs.getSchema(OPEN_VSWITCH_SCHEMA, true).get();
     }

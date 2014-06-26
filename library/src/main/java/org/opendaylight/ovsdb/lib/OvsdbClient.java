@@ -29,7 +29,7 @@ import com.google.common.util.concurrent.ListenableFuture;
  * The main interface to interact with a device speaking ovsdb protocol in an asynchronous fashion and hence most
  * operations return a Future object representing the eventual response data from the remote.
  */
-public interface OvsDBClient {
+public interface OvsdbClient {
 
     /**
      * Gets the list of database names exposed by this ovsdb capable device
@@ -110,6 +110,8 @@ public interface OvsDBClient {
      * Stops the echo service, i.e echo requests from the remote would not be acknowledged after this call.
      */
     public void stopEchoService();
+
+    public OvsdbConnectionInfo getConnectionInfo();
 
     public DatabaseSchema getDatabaseSchema (String dbName);
 

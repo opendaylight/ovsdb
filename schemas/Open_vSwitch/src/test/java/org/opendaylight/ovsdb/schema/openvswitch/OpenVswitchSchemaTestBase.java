@@ -5,12 +5,26 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Authors : Madhu Venugopal
+ * Authors : Madhu Venugopal, Dave Tucker
  */
 
 package org.opendaylight.ovsdb.schema.openvswitch;
+
+import com.google.common.util.concurrent.ListenableFuture;
+import junit.framework.Assert;
+import org.junit.Before;
+import org.opendaylight.ovsdb.lib.OvsdbClient;
+import org.opendaylight.ovsdb.lib.OvsdbConnection;
+import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
+import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
+import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
+import org.opendaylight.ovsdb.lib.notation.Row;
+import org.opendaylight.ovsdb.lib.notation.UUID;
+
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -20,27 +34,43 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import junit.framework.Assert;
-
-import org.opendaylight.ovsdb.lib.OvsdbClient;
-import org.opendaylight.ovsdb.lib.OvsdbConnection;
-import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
-import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
-import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
-
-public abstract class OvsdbTestBase implements OvsdbRPC.Callback{
+public abstract class OpenVswitchSchemaTestBase implements OvsdbRPC.Callback{
     private final static String SERVER_IPADDRESS = "ovsdbserver.ipaddress";
     private final static String SERVER_PORT = "ovsdbserver.port";
     private final static String CONNECTION_TYPE = "ovsdbserver.connection";
     private final static String CONNECTION_TYPE_ACTIVE = "active";
     private final static String CONNECTION_TYPE_PASSIVE = "passive";
-
     private final static String DEFAULT_SERVER_PORT = "6640";
-
+    protected static final String TEST_BRIDGE_NAME = "br_test";
     /**
-     * Represents the Open Vswitch Schema
+     * Represents the Open vSwitch Schema
      */
-    public final static String OPEN_VSWITCH_SCHEMA = "Open_vSwitch";
+    protected final static String OPEN_VSWITCH_SCHEMA = "Open_vSwitch";
+
+    protected OvsdbClient ovs = null;
+
+    @Before
+    public void setUp() throws InterruptedException, ExecutionException, TimeoutException, IOException {
+
+        this.ovs = OpenVswitchSchemaSuiteIT.getOvsdbClient();
+
+        if (this.ovs == null) {
+            this.ovs = getTestConnection();
+            OpenVswitchSchemaSuiteIT.setOvsdbClient(this.ovs);
+
+            ListenableFuture<List<String>> databases = ovs.getDatabases();
+            List<String> dbNames = databases.get();
+            Assert.assertNotNull(dbNames);
+            boolean hasOpenVswitchSchema = false;
+            for (String dbName : dbNames) {
+                if (dbName.equals(OPEN_VSWITCH_SCHEMA)) {
+                    hasOpenVswitchSchema = true;
+                    break;
+                }
+            }
+            Assert.assertTrue(OPEN_VSWITCH_SCHEMA + " schema is not supported by the switch", hasOpenVswitchSchema);
+        }
+    }
 
     public Properties loadProperties() {
         Properties props = new Properties(System.getProperties());
@@ -85,6 +115,17 @@ public abstract class OvsdbTestBase implements OvsdbRPC.Callback{
             return passiveConnection.get(60, TimeUnit.SECONDS);
         }
         Assert.fail("Connection parameter ("+CONNECTION_TYPE+") must be either active or passive");
+        return null;
+    }
+
+    public UUID getOpenVSwitchTableUuid(OvsdbClient ovs, Map<String, Map<UUID, Row>> tableCache) {
+        OpenVSwitch openVSwitch = ovs.getTypedRowWrapper(OpenVSwitch.class, null);
+        Map<UUID, Row> ovsTable = tableCache.get(openVSwitch.getSchema().getName());
+        if (ovsTable != null) {
+            if (ovsTable.keySet().size() >= 1) {
+                return (UUID)ovsTable.keySet().toArray()[0];
+            }
+        }
         return null;
     }
 

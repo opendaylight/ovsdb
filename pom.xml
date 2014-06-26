@@ -22,8 +22,20 @@
     <module>northbound</module>
     <module>neutron</module>
     <module>commons/parent</module>
+    <module>commons/integrationtest</module>
     <module>distribution/opendaylight</module>
   </modules>
+  <profiles>
+    <profile>
+      <id>integrationtests</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+          <module>integrationtest</module>
+      </modules>
+    </profile>
+  </profiles>
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</developerConnection>

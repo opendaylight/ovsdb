@@ -290,7 +290,8 @@ public class OvsdbNorthboundIT extends OvsdbIntegrationTestBase {
                 ConfigurationBundles.controllerBundles(),
                 ConfigurationBundles.controllerNorthboundBundles(),
                 ConfigurationBundles.ovsdbLibraryBundles(),
-                mavenBundle("org.opendaylight.ovsdb", "ovsdb.northbound").versionAsInProject(),
+                mavenBundle("org.opendaylight.ovsdb", "ovsdb_plugin").versionAsInProject(),
+                mavenBundle("org.opendaylight.ovsdb", "ovsdb_northbound").versionAsInProject(),
                 junitBundles()
         );
     }

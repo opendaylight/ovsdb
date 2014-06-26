@@ -12,6 +12,7 @@ package org.opendaylight.ovsdb.integrationtest.plugin;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperty;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
@@ -63,6 +64,7 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
 
             ConfigurationBundles.controllerBundles(),
             ConfigurationBundles.ovsdbLibraryBundles(),
+            mavenBundle("org.opendaylight.ovsdb", "ovsdb_plugin").versionAsInProject(),
             junitBundles()
         );
     }

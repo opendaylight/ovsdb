@@ -4,13 +4,13 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.ovsdb</groupId>
-    <artifactId>commons.integrationtest</artifactId>
+    <artifactId>ovsdb_commons_integrationtest</artifactId>
     <version>1.0.1-SNAPSHOT</version>
     <relativePath>../commons/integrationtest</relativePath>
   </parent>
 
-  <artifactId>integrationtest</artifactId>
-  <version>0.5.1-SNAPSHOT</version>
+  <artifactId>ovsdb_integrationtest</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <properties>
@@ -507,15 +507,6 @@
       <artifactId>org.apache.catalina.filters.CorsFilter</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>ovsdb</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>ovsdb.northbound</artifactId>
-      <version>0.5.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
       <groupId>org.ops4j.pax.exam</groupId>
       <artifactId>pax-exam</artifactId>
       <version>${exam.version}</version>
@@ -608,13 +599,11 @@
       <version>4.11</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>
       <version>1.10</version>
     </dependency>
-
     <!-- Add Pax Exam -->
     <dependency>
       <groupId>org.ops4j.pax.exam</groupId>
@@ -705,5 +694,4 @@
     <tag>HEAD</tag>
     <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
   </scm>
-
 </project>

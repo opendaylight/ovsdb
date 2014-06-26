@@ -12,13 +12,23 @@
 
 package org.opendaylight.ovsdb.lib.operations;
 
+import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 
 public class Operations {
     public static Operations op = new Operations();
 
     public <E extends TableSchema<E>> Insert<E> insert(TableSchema<E> schema) {
         return new Insert<>(schema);
+    }
+
+    public <E extends TableSchema<E>> Insert<E> insert(TypedBaseTable<E> typedTable) {
+        return new Insert<>(typedTable);
+    }
+
+    public <E extends TableSchema<E>> Insert<E> insert(TableSchema<E> schema, Row<E> row) {
+        return new Insert<>(schema, row);
     }
 
     public <E extends TableSchema<E>> Update<E> update(TableSchema<E> schema) {

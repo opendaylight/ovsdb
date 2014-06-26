@@ -17,7 +17,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedColumn;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 
 @TypedTable(name="Logical_Binding_Stats", database="hardware_vtep", fromVersion="1.0.0")
-public interface LogicalBindingStats extends TypedBaseTable {
+public interface LogicalBindingStats extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name="bytes_from_local", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Integer> getBytesFromLocalColumn();

@@ -18,7 +18,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedColumn;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 
 @TypedTable(name="Ucast_Macs_Local", database="hardware_vtep", fromVersion="1.0.0")
-public interface UcastMacsLocal extends TypedBaseTable {
+public interface UcastMacsLocal extends TypedBaseTable<GenericTableSchema> {
     @TypedColumn(name="MAC", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, String> getMacColumn();
 

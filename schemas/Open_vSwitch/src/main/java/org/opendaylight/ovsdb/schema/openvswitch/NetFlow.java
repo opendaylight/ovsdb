@@ -24,7 +24,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
  * This class is a typed interface to the NetFlow Table
  */
 @TypedTable(name="NetFlow", database="Open_vSwitch", fromVersion="1.0.0")
-public interface NetFlow extends TypedBaseTable {
+public interface NetFlow extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name="targets", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Set<String>> getTargetsColumn();

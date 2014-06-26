@@ -24,7 +24,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
  * TODO : Fill up the missing Columns and include Supported DB Version
  */
 @TypedTable(name="Flow_Sample_Collector_Set", database="Open_vSwitch")
-public interface FlowSampleCollectorSet extends TypedBaseTable {
+public interface FlowSampleCollectorSet extends TypedBaseTable<GenericTableSchema> {
     @TypedColumn(name="id", method=MethodType.GETCOLUMN)
     public Column<GenericTableSchema, Integer> getIdColumn();
     @TypedColumn(name="id", method=MethodType.SETDATA)

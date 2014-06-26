@@ -26,6 +26,7 @@ public class TyperUtils {
     private static final String GET_STARTS_WITH="get";
     private static final String SET_STARTS_WITH="set";
     private static final String GETCOLUMN_ENDS_WITH="Column";
+    private static final String GETROW_ENDS_WITH="Row";
 
     private static <T> String getTableName (Class<T> klazz) {
         TypedTable typedTable = klazz.getAnnotation(TypedTable.class);
@@ -71,6 +72,18 @@ public class TyperUtils {
         TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
         if (typedColumn != null) {
             return typedColumn.method().equals(MethodType.GETTABLESCHEMA) ? true : false;
+        }
+        return false;
+    }
+
+    private static boolean isGetRow (Method method) {
+        TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
+        if (typedColumn != null) {
+            return typedColumn.method().equals(MethodType.GETROW) ? true : false;
+        }
+
+        if (method.getName().startsWith(GET_STARTS_WITH) && method.getName().endsWith(GETROW_ENDS_WITH)) {
+            return true;
         }
         return false;
     }
@@ -219,6 +232,10 @@ public class TyperUtils {
                 return row.getColumn(columnSchema).getData();
             }
 
+            private Object processGetRow() throws Throwable {
+                return row;
+            }
+
             private Object processGetColumn(Method method) throws Throwable {
                 String columnName = getColumnName(method);
                 checkSchemaVersion(dbSchema, method);
@@ -266,6 +283,8 @@ public class TyperUtils {
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                 if (isGetTableSchema(method)) {
                     return processGetTableSchema();
+                } else if (isGetRow(method)) {
+                    return processGetRow();
                 } else if (isSetData(method)) {
                     return processSetData(proxy, method, args);
                 } else if(isGetData(method)) {

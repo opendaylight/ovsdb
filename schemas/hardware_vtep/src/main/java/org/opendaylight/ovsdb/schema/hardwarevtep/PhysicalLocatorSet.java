@@ -20,7 +20,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedColumn;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 
 @TypedTable(name="Physical_Locator_Set", database="hardware_vtep", fromVersion="1.0.0")
-public interface PhysicalLocatorSet extends TypedBaseTable {
+public interface PhysicalLocatorSet extends TypedBaseTable<GenericTableSchema> {
     @TypedColumn(name="locators", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Set<UUID>> getLocatorsColumn();
 

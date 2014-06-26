@@ -46,7 +46,7 @@ public class OvsdbClientTestITTyped extends OvsdbTestBase {
     Logger logger = LoggerFactory.getLogger(OvsdbClientTestITTyped.class);
     OvsdbClient ovs;
     DatabaseSchema dbSchema = null;
-    static String testBridgeName = "br-test";
+    static String testBridgeName = "br_test";
     static UUID testBridgeUuid = null;
 
     @Test
@@ -63,14 +63,8 @@ public class OvsdbClientTestITTyped extends OvsdbTestBase {
         int insertOperationIndex = 0;
 
         TransactionBuilder transactionBuilder = ovs.transactBuilder()
-                .add(op.insert(rBridge.getSchema())
-                        .withId(namedUuid)
-                        .value(rBridge.getNameColumn()))
-                .add(op.update(rBridge.getSchema())
-                        .set(rBridge.getStatusColumn())
-                        .set(rBridge.getFloodVlansColumn())
-                        .where(rBridge.getNameColumn().getSchema().opEqual(rBridge.getName()))
-                        .and(rBridge.getNameColumn().getSchema().opEqual(rBridge.getName())).build())
+                .add(op.insert(rBridge)
+                        .withId(namedUuid))
                 .add(op.mutate(ovsTable)
                         .addMutation(bridges, Mutator.INSERT, Sets.newHashSet(new UUID(namedUuid))));
 

@@ -22,7 +22,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
  * TODO : Fill up the missing Columns and include Supported DB Version
  */
 @TypedTable(name="SSL", database="Open_vSwitch")
-public interface SSL extends TypedBaseTable {
+public interface SSL extends TypedBaseTable<GenericTableSchema> {
     @TypedColumn(name="ca_cert", method=MethodType.GETCOLUMN)
     public Column<GenericTableSchema, String> getCaCertColumn() ;
     @TypedColumn(name="ca_cert", method=MethodType.SETDATA)

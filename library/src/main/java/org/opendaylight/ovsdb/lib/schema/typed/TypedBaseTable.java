@@ -10,22 +10,26 @@
 package org.opendaylight.ovsdb.lib.schema.typed;
 
 import org.opendaylight.ovsdb.lib.notation.Column;
+import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
+import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
-public interface TypedBaseTable {
+public interface TypedBaseTable <E extends TableSchema<E>> {
     @TypedColumn(name="", method=MethodType.GETTABLESCHEMA)
-    GenericTableSchema getSchema();
+    E getSchema();
+
+    @TypedColumn(name="", method=MethodType.GETROW)
+    Row<E> getRow();
 
     @TypedColumn(name="_uuid", method=MethodType.GETDATA)
     public UUID getUuid();
 
     @TypedColumn(name="_uuid", method=MethodType.GETCOLUMN)
-    public Column<GenericTableSchema, UUID> getUuidColumn();
+    public Column<E, UUID> getUuidColumn();
 
     @TypedColumn(name="_version", method=MethodType.GETDATA)
     public UUID getVersion();
 
     @TypedColumn(name="_version", method=MethodType.GETCOLUMN)
-    public Column<GenericTableSchema, UUID> getVersionColumn();
+    public Column<E, UUID> getVersionColumn();
 }

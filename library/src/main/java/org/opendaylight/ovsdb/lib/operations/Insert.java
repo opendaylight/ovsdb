@@ -9,11 +9,14 @@
  */
 package org.opendaylight.ovsdb.lib.operations;
 
+import java.util.Collection;
 import java.util.Map;
 
 import org.opendaylight.ovsdb.lib.notation.Column;
+import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Maps;
@@ -30,7 +33,7 @@ public class Insert<E extends TableSchema<E>> extends Operation<E> {
 
     private Map<String, Object> row = Maps.newHashMap();
 
-    public Insert<E> on(TableSchema schema){
+    public Insert<E> on(TableSchema<E> schema){
         this.setTableSchema(schema);
         return this;
     }
@@ -44,6 +47,18 @@ public class Insert<E extends TableSchema<E>> extends Operation<E> {
 
     public Insert(TableSchema<E> schema) {
         super(schema, INSERT);
+    }
+
+    public Insert(TableSchema<E> schema, Row<E> row) {
+        super(schema, INSERT);
+        Collection<Column<E,?>> columns = row.getColumns();
+        for (Column<E,?> column : columns) {
+            this.value(column);
+        }
+    }
+
+    public Insert(TypedBaseTable<E> typedTable) {
+        this(typedTable.getSchema(), typedTable.getRow());
     }
 
     public <D, C extends TableSchema<C>> Insert<E> value(ColumnSchema<C, D> columnSchema, D value) {

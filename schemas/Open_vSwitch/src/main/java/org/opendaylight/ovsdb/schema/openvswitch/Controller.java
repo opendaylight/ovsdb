@@ -22,7 +22,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
  */
 
 @TypedTable(name="Controller", database="Open_vSwitch")
-public interface Controller extends TypedBaseTable {
+public interface Controller extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name="target", method=MethodType.GETCOLUMN)
     public Column<GenericTableSchema, String> getTargetColumn();

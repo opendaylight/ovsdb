@@ -20,7 +20,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedColumn;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 
 @TypedTable(name="Tunnel", database="hardware_vtep", fromVersion="1.3.0")
-public interface Tunnel extends TypedBaseTable {
+public interface Tunnel extends TypedBaseTable<GenericTableSchema> {
     @TypedColumn(name="local", method=MethodType.GETCOLUMN, fromVersion="1.3.0")
     public Column<GenericTableSchema, UUID> getLocalColumn();
 

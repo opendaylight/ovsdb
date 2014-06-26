@@ -26,7 +26,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
  * TODO : Fill up the missing Columns and include Supported DB Version
  */
 @TypedTable(name="Mirror", database="Open_vSwitch")
-public interface Mirror extends TypedBaseTable {
+public interface Mirror extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name="name", method=MethodType.GETCOLUMN)
     public Column<GenericTableSchema, String> getNameColumn();

@@ -27,7 +27,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
  */
 
 @TypedTable(name="Qos", database="Open_vSwitch")
-public interface Qos extends TypedBaseTable {
+public interface Qos extends TypedBaseTable<GenericTableSchema> {
     @TypedColumn(name="queues", method=MethodType.GETCOLUMN)
     public Column<GenericTableSchema, Map<Integer, UUID>> getQueuesColumn() ;
     @TypedColumn(name="queues", method=MethodType.SETDATA)

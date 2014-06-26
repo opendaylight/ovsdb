@@ -20,7 +20,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedColumn;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 
 @TypedTable(name="Physical_Switch", database="hardware_vtep", fromVersion="1.0.0")
-public interface PhysicalSwitch extends TypedBaseTable {
+public interface PhysicalSwitch extends TypedBaseTable<GenericTableSchema> {
     @TypedColumn(name="name", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, String> getNameColumn();
 

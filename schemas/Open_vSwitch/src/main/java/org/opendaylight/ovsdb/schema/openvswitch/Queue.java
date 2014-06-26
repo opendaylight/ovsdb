@@ -27,7 +27,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
  */
 
 @TypedTable(name="Queue", database="Open_vSwitch")
-public interface Queue extends TypedBaseTable {
+public interface Queue extends TypedBaseTable<GenericTableSchema> {
     @TypedColumn(name="dscp", method=MethodType.GETCOLUMN)
     public Column<GenericTableSchema, Set<Integer>> getDscpColumn() ;
     @TypedColumn(name="dscp", method=MethodType.SETDATA)

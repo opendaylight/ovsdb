@@ -24,7 +24,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
  * This class is a typed interface to the IPFIX Table
  */
 @TypedTable(name="IPFIX", database="Open_vSwitch", fromVersion="7.1.0")
-public interface IPFIX extends TypedBaseTable {
+public interface IPFIX extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name="targets", method=MethodType.GETCOLUMN, fromVersion="7.1.0")
     public Column<GenericTableSchema, Set<String>> getTargetsColumn();

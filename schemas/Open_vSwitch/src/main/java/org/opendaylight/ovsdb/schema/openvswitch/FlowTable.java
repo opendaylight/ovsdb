@@ -24,7 +24,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
  * This class is a typed interface to the Flow_Table Table
  */
 @TypedTable(name="Flow_Table", database="Open_vSwitch", fromVersion="6.5.0")
-public interface FlowTable extends TypedBaseTable {
+public interface FlowTable extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name="flow_limit", method=MethodType.GETCOLUMN, fromVersion="6.5.0")
     public Column<GenericTableSchema, Integer> getFlowLimitColumn() ;

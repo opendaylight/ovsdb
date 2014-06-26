@@ -18,7 +18,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedColumn;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 
 @TypedTable(name="Arp_Sources_Local", database="hardware_vtep", fromVersion="1.2.0")
-public interface ArpSourcesLocal extends TypedBaseTable {
+public interface ArpSourcesLocal extends TypedBaseTable<GenericTableSchema> {
     @TypedColumn(name="src_mac", method=MethodType.GETCOLUMN, fromVersion="1.2.0")
     public Column<GenericTableSchema, String> getSrcMacColumn();
 

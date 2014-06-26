@@ -84,9 +84,8 @@ public class TypedVSwitchdSchemaIT extends OvsdbTestBase {
         int insertOperationIndex = 0;
 
         TransactionBuilder transactionBuilder = ovs.transactBuilder()
-                .add(op.insert(bridge.getSchema())
-                        .withId(testBridgeName)
-                        .value(bridge.getNameColumn()))
+                .add(op.insert(bridge)
+                        .withId(testBridgeName))
                 .add(op.update(bridge.getSchema())
                         .set(bridge.getStatusColumn())
                         .set(bridge.getFloodVlansColumn())
@@ -387,7 +386,7 @@ public class TypedVSwitchdSchemaIT extends OvsdbTestBase {
      */
     public <T extends TypedBaseTable> MonitorRequest<GenericTableSchema> getAllColumnsMonitorRequest (Class <T> klazz) {
         TypedBaseTable table = ovs.createTypedRowWrapper(klazz);
-        GenericTableSchema bridgeSchema = table.getSchema();
+        GenericTableSchema bridgeSchema = (GenericTableSchema) table.getSchema();
         Set<String> columns = bridgeSchema.getColumns();
         MonitorRequestBuilder<GenericTableSchema> bridgeBuilder = MonitorRequestBuilder.builder(table.getSchema());
         for (String column : columns) {

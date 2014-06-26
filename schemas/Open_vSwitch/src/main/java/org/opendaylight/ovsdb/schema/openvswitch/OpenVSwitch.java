@@ -25,7 +25,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
  * This class is a typed interface to the Open_vSwitch table
  */
 @TypedTable(name="Open_vSwitch", database="Open_vSwitch")
-public interface OpenVSwitch extends TypedBaseTable {
+public interface OpenVSwitch extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name="bridges", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Set<UUID>> getBridgesColumn();

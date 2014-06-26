@@ -21,7 +21,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedColumn;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 
 @TypedTable(name="Global", database="hardware_vtep", fromVersion="1.0.0")
-public interface Global extends TypedBaseTable {
+public interface Global extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name="managers", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Set<UUID>> getManagersColumn();

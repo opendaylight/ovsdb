@@ -23,7 +23,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
  * This class is a typed interface to the SFlow Table
  */
 @TypedTable(name="sFlow", database="Open_vSwitch", fromVersion="1.0.0")
-public interface SFlow extends TypedBaseTable {
+public interface SFlow extends TypedBaseTable<GenericTableSchema> {
     @TypedColumn(name="targets", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Set<String>> getTargetsColumn() ;
     @TypedColumn(name="targets", method=MethodType.SETDATA, fromVersion="1.0.0")

@@ -17,6 +17,7 @@ import java.util.concurrent.TimeoutException;
 import junit.framework.Assert;
 
 import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
@@ -45,7 +46,7 @@ public class TypedHardwareVTepSchemaIT extends OvsdbTestBase {
                 break;
            }
         }
-        Assert.assertTrue(HARDWARE_VTEP_SCHEMA+" schema is not supported by the switch", hasHardwareVTepSchema);
+        Assume.assumeTrue(hasHardwareVTepSchema);
     }
 
     @Before

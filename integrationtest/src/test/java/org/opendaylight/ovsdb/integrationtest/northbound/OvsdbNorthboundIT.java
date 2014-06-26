@@ -10,22 +10,35 @@
 
 package org.opendaylight.ovsdb.integrationtest.northbound;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeNotNull;
+import static org.ops4j.pax.exam.CoreOptions.junitBundles;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperty;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.junit.runners.Parameterized;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.usermanager.IUserManager;
 import org.opendaylight.ovsdb.integrationtest.ConfigurationBundles;
 import org.opendaylight.ovsdb.integrationtest.OvsdbIntegrationTestBase;
+import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExamParameterized;
@@ -39,24 +52,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
-import javax.inject.Inject;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.ops4j.pax.exam.CoreOptions.junitBundles;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperty;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 
 @RunWith(PaxExamParameterized.class)
 @ExamReactorStrategy(PerClass.class)
@@ -77,6 +79,7 @@ public class OvsdbNorthboundIT extends OvsdbIntegrationTestBase {
     @Inject
     private BundleContext bc;
     private Node node = null;
+    private OvsdbClient client = null;
     private IUserManager userManager;
 
     @Parameterized.Parameters(name = "ApiTest{index}:{0}")
@@ -113,6 +116,10 @@ public class OvsdbNorthboundIT extends OvsdbIntegrationTestBase {
     @Test
     public void testApi() {
         System.out.println("Running " + fTestCase + "...\n");
+        /*
+         * TODO : Remove this assumeNotNull once the new library migration is completed.
+         */
+        assumeNotNull(node);
         Client client = Client.create();
         client.addFilter(new HTTPBasicAuthFilter(USERNAME , PASSWORD));
         String uri = BASE_URI + fPath;
@@ -260,9 +267,9 @@ public class OvsdbNorthboundIT extends OvsdbIntegrationTestBase {
         assertTrue(this.userManager != null);
 
         try {
-            node = getTestConnection();
-        } catch (IOException e) {
-            e.printStackTrace();
+            client = getTestConnection();
+        } catch (Exception e) {
+            fail("Exception : "+e.getMessage());
         }
 
         // Wait before making a REST call to avoid overloading Tomcat

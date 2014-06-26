@@ -17,6 +17,8 @@
     <ovsdb.library.version>1.0.0-SNAPSHOT</ovsdb.library.version>
     <ovsdb.plugin.version>1.0.0-SNAPSHOT</ovsdb.plugin.version>
     <ovsdb.northbound.version>0.6.0-SNAPSHOT</ovsdb.northbound.version>
+    <schema.Open_vSwitch.version>1.0.0-SNAPSHOT</schema.Open_vSwitch.version>
+    <schema.hardware_vtep.version>1.0.0-SNAPSHOT</schema.hardware_vtep.version>
   </properties>
 
   <dependencies>
@@ -79,6 +81,17 @@
       <artifactId>ovsdb_northbound</artifactId>
       <version>${ovsdb.northbound.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>ovsdb_schema.Open_vSwitch</artifactId>
+      <version>${schema.Open_vSwitch.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>ovsdb_schema.hardware_vtep</artifactId>
+      <version>${schema.hardware_vtep.version}</version>
+    </dependency>
+
     <!-- Add Pax Exam -->
     <dependency>
       <groupId>org.ops4j.pax.exam</groupId>

@@ -10,12 +10,12 @@
 
 package org.opendaylight.ovsdb.integrationtest;
 
-import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.options.DefaultCompositeOption;
-
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+
+import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.options.DefaultCompositeOption;
 
 
 public class ConfigurationBundles {
@@ -185,6 +185,13 @@ public class ConfigurationBundles {
                 mavenBundle("javax.portlet", "portlet-api").versionAsInProject(),
                 mavenBundle("com.google.guava", "guava").versionAsInProject(),
                 mavenBundle("org.opendaylight.ovsdb", "ovsdb_library").versionAsInProject()
+        );
+    }
+
+    public static Option ovsdbDefaultSchemaBundles() {
+        return new DefaultCompositeOption(
+                mavenBundle("org.opendaylight.ovsdb", "ovsdb_schema.Open_vSwitch").versionAsInProject(),
+                mavenBundle("org.opendaylight.ovsdb", "ovsdb_schema.hardware_vtep").versionAsInProject()
         );
     }
 

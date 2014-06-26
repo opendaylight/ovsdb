@@ -23,6 +23,10 @@
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-core</artifactId>
     </dependency>
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.dependencymanager</artifactId>
+      </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
@@ -118,6 +122,7 @@
                 org.osgi.framework,
                 javax.net.ssl,
                 *</Import-Package>
+            <Bundle-Activator>org.opendaylight.ovsdb.lib.Activator</Bundle-Activator>
             <Embed-Transitive>true</Embed-Transitive>
             <Export-Package>org.opendaylight.ovsdb.lib,
                 org.opendaylight.ovsdb.lib.table,

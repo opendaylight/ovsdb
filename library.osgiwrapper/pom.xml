@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.opendaylight.ovsdb</groupId>
+    <artifactId>ovsdb_commons</artifactId>
+    <version>1.1.0-SNAPSHOT</version>
+    <relativePath>../commons/parent</relativePath>
+  </parent>
+  <artifactId>ovsdb_library.osgiwrapper</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>bundle</packaging>
+
+  <properties>
+    <skip.integrationtest>true</skip.integrationtest>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal</artifactId>
+      <version>0.7.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>ovsdb_library</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>org.eclipse.osgi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <testResources>
+      <testResource>
+        <filtering>true</filtering>
+        <directory>src/test/resources</directory>
+      </testResource>
+    </testResources>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>2.3.6</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Import-Package>org.apache.commons.lang3.builder,
+                org.apache.commons.lang3.tuple,
+                org.apache.felix.dm,
+                org.slf4j,
+                org.eclipse.osgi.framework.console,
+                org.osgi.framework,
+                javax.net.ssl,
+                org.opendaylight.controller.sal.core,
+                *</Import-Package>
+
+            <Bundle-Activator>org.opendaylight.ovsdb.lib.wrapper.Activator</Bundle-Activator>
+
+            <!-- Embedding the non-osgi ovsdb library -->
+            <Embed-Dependency>ovsdb_library;type=!pom;inline=false</Embed-Dependency>
+            <Embed-Transitive>true</Embed-Transitive>
+
+            <!-- Exporting all the useful ovsdb library packages -->
+            <Export-Package>org.opendaylight.ovsdb.lib,
+                org.opendaylight.ovsdb.lib.table,
+                org.opendaylight.ovsdb.lib.jsonrpc,
+                org.opendaylight.ovsdb.lib.notation,
+                org.opendaylight.ovsdb.lib.database,
+                org.opendaylight.ovsdb.lib.operations,
+                org.opendaylight.ovsdb.lib.message,
+                org.opendaylight.ovsdb.lib.schema,
+                org.opendaylight.ovsdb.lib.schema.typed</Export-Package>
+          </instructions>
+          <manifestLocation>${project.basedir}/META-INF</manifestLocation>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
+  </scm>
+</project>

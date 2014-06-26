@@ -1,0 +1,7 @@
+Code-Review+2: Dave Tucker <djt@redhat.com>
+Verified+1: Dave Tucker <djt@redhat.com>
+Submitted-by: Dave Tucker <djt@redhat.com>
+Submitted-at: Thu, 26 Jun 2014 18:37:23 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/8359
+Project: ovsdb
+Branch: refs/heads/topic/schema

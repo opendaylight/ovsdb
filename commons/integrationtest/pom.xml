@@ -136,6 +136,7 @@
         <executions>
           <execution>
             <id>generate-config</id>
+            <phase>none</phase>
             <goals>
               <goal>generate-depends-file</goal>
             </goals>

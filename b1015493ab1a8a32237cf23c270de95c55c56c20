@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_5c721212",
+        "filename": "library.osgiwrapper/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-26T15:48:39Z",
+      "side": 1,
+      "message": "I added the dependency to make it easier for the ODL bundles to consume the library service.\nBut based on our discussion, it is worthwhile to make it a pure OSGI service with no ODL dependency using Apache DM.",
+      "parentUuid": "fa82b9bf_9c25fa0a",
+      "revId": "b1015493ab1a8a32237cf23c270de95c55c56c20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_3c1e2ebc",
         "filename": "library.osgiwrapper/src/main/java/org/opendaylight/ovsdb/lib/wrapper/Activator.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-26T15:43:36Z",
       "side": 1,
       "message": "Can we use the standard classes offered by Felix DM?\nhttp://felix.apache.org/documentation/subprojects/apache-felix-dependency-manager/apache-felix-dependency-manager-getting-started.html\n\nThis way the library can be used independently of OpenDaylight in other OSGi containers e.g for other Net Virt or NFV controllers.",
+      "revId": "b1015493ab1a8a32237cf23c270de95c55c56c20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_fc62063d",
+        "filename": "library.osgiwrapper/src/main/java/org/opendaylight/ovsdb/lib/wrapper/Activator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-26T15:48:39Z",
+      "side": 1,
+      "message": "Yep. fair enough and it will be done.",
+      "parentUuid": "fa82b9bf_3c1e2ebc",
       "revId": "b1015493ab1a8a32237cf23c270de95c55c56c20",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

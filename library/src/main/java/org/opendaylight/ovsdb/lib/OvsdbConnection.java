@@ -46,4 +46,10 @@ public interface OvsdbConnection {
      * @param listener Passive Connection listener interested in Passive OVSDB connection requests.
      */
     public void registerForPassiveConnection(OvsdbConnectionListener listener);
+
+    /**
+     * Method to unregister from listening to Passive Connections from ConnectionService.
+     * @param listener Passive Connection listener.
+     */
+    public void unregisterFromPassiveConnection(OvsdbConnectionListener listener);
 }

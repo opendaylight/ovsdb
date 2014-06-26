@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_f91458a1",
+        "filename": "integrationtest/src/test/java/org/opendaylight/ovsdb/integrationtest/northbound/OvsdbNorthboundIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-26T08:06:22Z",
+      "side": 1,
+      "message": "the GET operation on \"rows\" resource will return a json map with an \"uuid\" key and json Row Object. Isnt it better to perform a JSON parsing and use the \"key\" as the UUID instead of this brute-force approach of yanking the UUID from the string ?",
+      "revId": "b45117aff64ff91ada4aef1596e3a7233747bf83",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_391e40bc",
+        "filename": "integrationtest/src/test/java/org/opendaylight/ovsdb/integrationtest/northbound/OvsdbNorthboundIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-26T08:06:22Z",
+      "side": 1,
+      "message": "Should we consider handling @After that performs a cleanup operation ?\nIf everything goes fine and if there is a matching DELETE for every CREATE, cleanup will be automatic. But if there is a mismatch in YAML or any failure during the execution, the DUT will be left with stale data \u0026 will cause issues during the subsequent runs.\n\nThis may not be true for the Docker based IT, where we start from scratch anyways for every test-run. But if we had to use a non-Docker based test environment (like my development machine), then this is a headache.\n\nWe can consider addressing this comment in later Gerrits and not necessarily an urgent one.",
+      "revId": "b45117aff64ff91ada4aef1596e3a7233747bf83",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

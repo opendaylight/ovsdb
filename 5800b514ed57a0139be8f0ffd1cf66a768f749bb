@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_923e4127",
+        "filename": "schemas/Open_vSwitch/src/main/java/org/opendaylight/ovsdb/schema/openvswitch/FlowSampleCollectorSet.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-27T19:24:52Z",
+      "side": 1,
+      "message": "Shouldnt this be UUID ?",
+      "revId": "5800b514ed57a0139be8f0ffd1cf66a768f749bb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_524439b6",
+        "filename": "schemas/Open_vSwitch/src/main/java/org/opendaylight/ovsdb/schema/openvswitch/FlowSampleCollectorSet.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-27T19:24:52Z",
+      "side": 1,
+      "message": "Same as above.",
+      "revId": "5800b514ed57a0139be8f0ffd1cf66a768f749bb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

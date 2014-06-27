@@ -48,4 +48,10 @@ public class VersionTest {
         assertTrue(b.compareTo(d) < 0);
 
     }
+
+    @Test
+    public void testCompare() throws Exception {
+        Version a = Version.fromString("6.9.3");
+        Version b = Version.fromString("7.1.0");
+    }
 }

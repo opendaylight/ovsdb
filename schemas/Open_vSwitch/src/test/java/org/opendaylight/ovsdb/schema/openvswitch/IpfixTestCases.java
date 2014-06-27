@@ -40,7 +40,7 @@ public class IpfixTestCases extends OpenVswitchSchemaTestBase {
     Logger logger = LoggerFactory.getLogger(IpfixTestCases.class);
     Version schemaVersion;
     Version ipfixFromVersion = Version.fromString("7.1.0");
-
+    Version ipfixCacheFromVersion = Version.fromString("7.3.0");
 
     @Before
     public void setUp() throws ExecutionException, InterruptedException, TimeoutException, IOException {
@@ -65,7 +65,6 @@ public class IpfixTestCases extends OpenVswitchSchemaTestBase {
     public void testCreateTypedIpFix() throws InterruptedException, ExecutionException, IllegalArgumentException{
         // Don't run this test if the table is not supported
         Assume.assumeTrue(schemaVersion.compareTo(ipfixFromVersion) >= 0);
-
         String ipfixUuidStr = "testIpfix";
         String ipfixTarget = "172.16.20.1:4739";
         Integer obsDomainId = 112;
@@ -78,21 +77,17 @@ public class IpfixTestCases extends OpenVswitchSchemaTestBase {
         ipfix.setTargets(ImmutableSet.of(ipfixTarget));
         ipfix.setObsDomainId(ImmutableSet.of(obsDomainId));
         ipfix.setObsPointId(ImmutableSet.of(obsPointId));
-        ipfix.setCacheMaxFlows(ImmutableSet.of(cacheMax));
-        ipfix.setCacheActiveTimeout(ImmutableSet.of(cacheTimeout));
+        // Only set these rows if the schema version supports it
+        if (schemaVersion.compareTo(ipfixCacheFromVersion) >= 0) {
+            ipfix.setCacheMaxFlows(ImmutableSet.of(cacheMax));
+            ipfix.setCacheActiveTimeout(ImmutableSet.of(cacheTimeout));
+        }
         ipfix.setSampling(ImmutableSet.of(sampling));
         ipfix.setExternalIds(ImmutableMap.of("<3", "ovs"));
         Bridge bridge = ovs.getTypedRowWrapper(Bridge.class, null);
         TransactionBuilder transactionBuilder = ovs.transactBuilder()
-                .add(op.insert(ipfix.getSchema())
-                        .withId(ipfixUuidStr)
-                        .value(ipfix.getTargetsColumn())
-                        .value(ipfix.getObsDomainIdColumn())
-                        .value(ipfix.getObsPointIdColumn())
-                        .value(ipfix.getCacheMaxFlowsColumn())
-                        .value(ipfix.getCacheActiveTimeoutColumn())
-                        .value(ipfix.getSamplingColumn())
-                        .value(ipfix.getExternalIdsColumn()))
+                .add(op.insert(ipfix)
+                        .withId(ipfixUuidStr))
                 .add(op.mutate(bridge.getSchema())
                         .addMutation(bridge.getIpfixColumn().getSchema(), Mutator.INSERT,
                                 Sets.newHashSet(new UUID(ipfixUuidStr)))

@@ -9,21 +9,18 @@
  */
 package org.opendaylight.ovsdb.plugin;
 
-import io.netty.channel.Channel;
-
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
-import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
+import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Connection {
     private Node node;
     private String identifier;
-    private Channel channel;
-    private OvsdbRPC rpc;
+    private OvsdbClient client;
 
     public Long getIdCounter() {
         return idCounter;
@@ -37,12 +34,12 @@ public class Connection {
 
     private static final Logger logger = LoggerFactory.getLogger(Connection.class);
 
-    public Connection(String identifier, Channel channel) {
+    public Connection(String identifier, OvsdbClient client) {
 
         super();
 
         this.identifier = identifier;
-        this.channel = channel;
+        this.client = client;
         this.idCounter = 0L;
         try {
             node = new Node("OVS", identifier);
@@ -59,12 +56,12 @@ public class Connection {
         this.identifier = identifier;
     }
 
-    public Channel getChannel() {
-        return this.channel;
+    public OvsdbClient getClient() {
+        return this.client;
     }
 
-    public void setChannel(Channel channel) {
-        this.channel = channel;
+    public void setClient(OvsdbClient client) {
+        this.client = client;
     }
 
     public Node getNode() {
@@ -75,21 +72,7 @@ public class Connection {
         this.node = node;
     }
 
-    public OvsdbRPC getRpc() {
-        return rpc;
-    }
-
-    public void setRpc(OvsdbRPC rpc) {
-        this.rpc = rpc;
-    }
-
-    public void sendMessage(String message) {
-        channel.writeAndFlush(message);
-        this.idCounter++;
-    }
-
     public Status disconnect() {
-        channel.close();
         return new Status(StatusCode.SUCCESS);
     }
 

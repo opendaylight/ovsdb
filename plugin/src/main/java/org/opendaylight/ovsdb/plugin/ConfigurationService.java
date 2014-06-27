@@ -32,12 +32,6 @@ import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.lib.database.OVSInstance;
 import org.opendaylight.ovsdb.lib.database.OvsdbType;
 import org.opendaylight.ovsdb.lib.message.TransactBuilder;
-import org.opendaylight.ovsdb.lib.operations.DeleteOperation;
-import org.opendaylight.ovsdb.lib.operations.InsertOperation;
-import org.opendaylight.ovsdb.lib.operations.MutateOperation;
-import org.opendaylight.ovsdb.lib.operations.Operation;
-import org.opendaylight.ovsdb.lib.operations.OperationResult;
-import org.opendaylight.ovsdb.lib.operations.UpdateOperation;
 import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.notation.Function;
 import org.opendaylight.ovsdb.lib.notation.Mutation;
@@ -45,6 +39,12 @@ import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
 import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.operations.DeleteOperation;
+import org.opendaylight.ovsdb.lib.operations.InsertOperation;
+import org.opendaylight.ovsdb.lib.operations.MutateOperation;
+import org.opendaylight.ovsdb.lib.operations.Operation;
+import org.opendaylight.ovsdb.lib.operations.OperationResult;
+import org.opendaylight.ovsdb.lib.operations.UpdateOperation;
 import org.opendaylight.ovsdb.lib.table.Bridge;
 import org.opendaylight.ovsdb.lib.table.Controller;
 import org.opendaylight.ovsdb.lib.table.IPFIX;
@@ -136,7 +136,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
 
     private Connection getConnection (Node node) {
         Connection connection = connectionService.getConnection(node);
-        if (connection == null || !connection.getChannel().isActive()) {
+        if (connection == null || !connection.getClient().isActive()) {
             return null;
         }
 
@@ -234,7 +234,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                                                     addBridgeRequest,
                                                     updateCfgVerRequest)));
 
-            ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
+            ListenableFuture<List<OperationResult>> transResponse = connection.getClient().transactBuilder().execute();
             List<OperationResult> tr = transResponse.get();
             List<Operation> requests = transaction.getRequests();
             Status status = new Status(StatusCode.SUCCESS);
@@ -360,7 +360,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                     transaction.addOperations(new ArrayList<Operation>
                             (Arrays.asList(addBrMutRequest, addPortRequest, addIntfRequest)));
 
-                    ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
+                    ListenableFuture<List<OperationResult>> transResponse = connection.getClient().transactBuilder().execute();
                     List<OperationResult> tr = transResponse.get();
                     List<Operation> requests = transaction.getRequests();
                     Status status = new Status(StatusCode.SUCCESS);
@@ -523,7 +523,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             TransactBuilder transaction = new TransactBuilder();
             transaction.addOperations(new ArrayList<Operation>(Arrays.asList(delPortRequest)));
 
-            ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
+            ListenableFuture<List<OperationResult>> transResponse = connection.getClient().transactBuilder().execute();
             List<OperationResult> tr = transResponse.get();
             List<Operation> requests = transaction.getRequests();
             Status status = new Status(StatusCode.SUCCESS);
@@ -619,7 +619,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             TransactBuilder transaction = new TransactBuilder();
             transaction.addOperations(new ArrayList<Operation>(Arrays.asList(delBrRequest)));
 
-            ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
+            ListenableFuture<List<OperationResult>> transResponse = connection.getClient().transactBuilder().execute();
             List<OperationResult> tr = transResponse.get();
             List<Operation> requests = transaction.getRequests();
             Status status = new Status(StatusCode.SUCCESS);
@@ -770,7 +770,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             transaction.addOperations(new ArrayList<Operation>(
                                       Arrays.asList(updateRequest)));
 
-            ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
+            ListenableFuture<List<OperationResult>> transResponse = connection.getClient().transactBuilder().execute();
             List<OperationResult> tr = transResponse.get();
             List<Operation> requests = transaction.getRequests();
             Status status = new Status(StatusCode.SUCCESS);
@@ -1486,7 +1486,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                 return new StatusWithUuid(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
             }
 
-            ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
+            ListenableFuture<List<OperationResult>> transResponse = connection.getClient().transactBuilder().execute();
             List<OperationResult> tr = transResponse.get();
             List<Operation> requests = transaction.getRequests();
             StatusWithUuid status = new StatusWithUuid(StatusCode.SUCCESS);
@@ -1688,7 +1688,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             transaction.addOperations(new ArrayList<Operation>(Arrays.asList(delRequest)));
 
             // This executes the transaction.
-            ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
+            ListenableFuture<List<OperationResult>> transResponse = connection.getClient().transactBuilder().execute();
 
             // Pull the responses
             List<OperationResult> tr = transResponse.get();
@@ -1752,7 +1752,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             transaction.addOperations(new ArrayList<Operation>(Arrays.asList(delRequest)));
 
             // This executes the transaction.
-            ListenableFuture<List<OperationResult>> transResponse = connection.getRpc().transact(transaction);
+            ListenableFuture<List<OperationResult>> transResponse = connection.getClient().transactBuilder().execute();
 
             // Pull the responses
             List<OperationResult> tr = transResponse.get();

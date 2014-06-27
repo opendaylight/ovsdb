@@ -686,6 +686,7 @@
               <!--  TODO remove this includes section once the plugin migration is complete -->
               <includes>
                 <include>**/*LibraryIT*</include>
+                <include>**/*PluginIT*</include>
               </includes>
             </configuration>
           </execution>

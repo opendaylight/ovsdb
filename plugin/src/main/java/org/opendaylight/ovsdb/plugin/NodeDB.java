@@ -12,11 +12,11 @@ package org.opendaylight.ovsdb.plugin;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
-import com.google.common.collect.Maps;
-
 import org.apache.commons.collections.MapUtils;
-import org.opendaylight.ovsdb.lib.database.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.table.Table;
+
+import com.google.common.collect.Maps;
 
 public class NodeDB {
     private DatabaseSchema schema;
@@ -67,7 +67,7 @@ public class NodeDB {
     }
 
     public void printTableCache() {
-        MapUtils.debugPrint(System.out, null, schema.getTables());
+        System.out.println(schema.getTables());
         MapUtils.debugPrint(System.out, null, cache);
     }
 }

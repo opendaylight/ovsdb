@@ -9,6 +9,8 @@
  */
 package org.opendaylight.ovsdb.lib.impl;
 
+import io.netty.channel.Channel;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -24,6 +26,7 @@ import org.opendaylight.ovsdb.lib.MonitorCallBack;
 import org.opendaylight.ovsdb.lib.MonitorHandle;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
+import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo.ConnectionType;
 import org.opendaylight.ovsdb.lib.jsonrpc.Params;
 import org.opendaylight.ovsdb.lib.message.MonitorRequest;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
@@ -65,11 +68,14 @@ public class OvsdbClientImpl implements OvsdbClient {
     private Queue<Throwable> exceptions;
     private OvsdbRPC.Callback rpcCallback;
     private OvsdbConnectionInfo connectionInfo;
+    private Channel channel;
 
-    public OvsdbClientImpl(OvsdbRPC rpc, OvsdbConnectionInfo connectionInfo, ExecutorService executorService) {
+    public OvsdbClientImpl(OvsdbRPC rpc, Channel channel, ConnectionType type, ExecutorService executorService) {
         this.rpc = rpc;
         this.executorService = executorService;
-        this.connectionInfo = connectionInfo;
+        this.channel = channel;
+
+        this.connectionInfo = new OvsdbConnectionInfo(channel, type);
     }
 
     OvsdbClientImpl() {
@@ -376,5 +382,15 @@ public class OvsdbClientImpl implements OvsdbClient {
     @Override
     public OvsdbConnectionInfo getConnectionInfo() {
         return connectionInfo;
+    }
+
+    @Override
+    public boolean isActive() {
+        return channel.isActive();
+    }
+
+    @Override
+    public void disconnect() {
+        channel.disconnect();
     }
 }

@@ -9,26 +9,10 @@
  */
 package org.opendaylight.ovsdb.plugin;
 
-import io.netty.bootstrap.Bootstrap;
-import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.AdaptiveRecvByteBufAllocator;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.string.StringEncoder;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
-import io.netty.util.CharsetUtil;
 
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,26 +32,21 @@ import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
-import org.opendaylight.ovsdb.lib.database.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcDecoder;
-import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcEndpoint;
-import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcServiceBinderHandler;
-import org.opendaylight.ovsdb.lib.message.MonitorRequestBuilder;
+import org.opendaylight.ovsdb.lib.OvsdbClient;
+import org.opendaylight.ovsdb.lib.OvsdbConnection;
+import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
+import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
-import org.opendaylight.ovsdb.lib.message.temp.TableUpdates;
 import org.opendaylight.ovsdb.lib.message.UpdateNotification;
 import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
+import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.table.Bridge;
 import org.opendaylight.ovsdb.lib.table.Controller;
 import org.opendaylight.ovsdb.lib.table.Open_vSwitch;
 import org.opendaylight.ovsdb.lib.table.Table;
-import org.opendaylight.ovsdb.lib.table.Tables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ListenableFuture;
 
 
@@ -75,7 +54,7 @@ import com.google.common.util.concurrent.ListenableFuture;
  * Represents the openflow plugin component in charge of programming the flows
  * the flow programming and relay them to functional modules above SAL.
  */
-public class ConnectionService implements IPluginInConnectionService, IConnectionServiceInternal, OvsdbRPC.Callback {
+public class ConnectionService implements IPluginInConnectionService, IConnectionServiceInternal, OvsdbRPC.Callback, OvsdbConnectionListener {
     protected static final Logger logger = LoggerFactory.getLogger(ConnectionService.class);
 
     // Properties that can be set in config.ini
@@ -87,6 +66,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
     private static final Integer defaultOvsdbPort = 6640;
     private static final boolean defaultAutoConfigureController = true;
 
+    private OvsdbConnection connectionLib;
     private static Integer ovsdbListenPort = defaultOvsdbPort;
     private static boolean autoConfigureController = defaultAutoConfigureController;
     private ConcurrentMap<String, Connection> ovsdbConnections;
@@ -106,6 +86,14 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         if (this.inventoryServiceInternal == inventoryServiceInternal) {
             this.inventoryServiceInternal = null;
         }
+    }
+
+    public void setOvsdbConnection(OvsdbConnection connectionService) {
+        connectionLib = connectionService;
+    }
+
+    public void unsetOvsdbConnection(OvsdbConnection connectionService) {
+        connectionLib = null;
     }
 
     public void init() {
@@ -135,7 +123,6 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
      * the services provided by the class are registered in the service registry
      */
     void start() {
-        startOvsdbManager();
     }
 
     /**
@@ -182,31 +169,8 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         }
 
         try {
-            Bootstrap bootstrap = new Bootstrap();
-            bootstrap.group(new NioEventLoopGroup());
-            bootstrap.channel(NioSocketChannel.class);
-            bootstrap.option(ChannelOption.TCP_NODELAY, true);
-            bootstrap.option(ChannelOption.RCVBUF_ALLOCATOR, new AdaptiveRecvByteBufAllocator(65535, 65535, 65535));
-
-            bootstrap.handler(new ChannelInitializer<SocketChannel>() {
-                @Override
-                public void initChannel(SocketChannel channel) throws Exception {
-                    if (handlers == null) {
-                        channel.pipeline().addLast(
-                                //new LoggingHandler(LogLevel.INFO),
-                                new JsonRpcDecoder(100000),
-                                new StringEncoder(CharsetUtil.UTF_8));
-                    } else {
-                        for (ChannelHandler handler : handlers) {
-                            channel.pipeline().addLast(handler);
-                        }
-                    }
-                }
-            });
-
-            ChannelFuture future = bootstrap.connect(address, port).sync();
-            Channel channel = future.channel();
-            return handleNewConnection(identifier, channel, this);
+            OvsdbClient client = connectionLib.connect(address, port);
+            return handleNewConnection(identifier, client, this);
         } catch (InterruptedException e) {
             logger.error("Thread was interrupted during connect", e);
         } catch (ExecutionException e) {
@@ -246,29 +210,10 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
     public void notifyNodeDisconnectFromMaster(Node arg0) {
     }
 
-    private Node handleNewConnection(String identifier, Channel channel, ConnectionService instance) throws InterruptedException, ExecutionException {
-        Connection connection = new Connection(identifier, channel);
+    private Node handleNewConnection(String identifier, OvsdbClient client, ConnectionService instance) throws InterruptedException, ExecutionException {
+        Connection connection = new Connection(identifier, client);
         Node node = connection.getNode();
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        objectMapper.setSerializationInclusion(Include.NON_NULL);
-
-        JsonRpcEndpoint factory = new JsonRpcEndpoint(objectMapper, channel);
-        JsonRpcServiceBinderHandler binderHandler = new JsonRpcServiceBinderHandler(factory);
-        binderHandler.setContext(node);
-        channel.pipeline().addLast(binderHandler);
-
-        OvsdbRPC ovsdb = factory.getClient(node, OvsdbRPC.class);
-        connection.setRpc(ovsdb);
-        ovsdb.registerCallback(instance);
         ovsdbConnections.put(identifier, connection);
-
-        ChannelConnectionHandler handler = new ChannelConnectionHandler();
-        handler.setNode(node);
-        handler.setConnectionService(this);
-        ChannelFuture closeFuture = channel.closeFuture();
-        closeFuture.addListener(handler);
         // Keeping the Initial inventory update(s) on its own thread.
         new Thread() {
             Connection connection;
@@ -299,9 +244,9 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
     }
 
     private void initializeInventoryForNewNode (Connection connection) throws InterruptedException, ExecutionException {
-        Channel channel = connection.getChannel();
-        InetAddress address = ((InetSocketAddress)channel.remoteAddress()).getAddress();
-        int port = ((InetSocketAddress)channel.remoteAddress()).getPort();
+        OvsdbClient client = connection.getClient();
+        InetAddress address = client.getConnectionInfo().getRemoteAddress();
+        int port = client.getConnectionInfo().getRemotePort();
         IPAddressProperty addressProp = new IPAddressProperty(address);
         L4PortProperty l4Port = new L4PortProperty(port);
         Set<Property> props = new HashSet<Property>();
@@ -310,13 +255,13 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         inventoryServiceInternal.addNode(connection.getNode(), props);
 
         List<String> dbNames = Arrays.asList(Open_vSwitch.NAME.getName());
-        ListenableFuture<DatabaseSchema> dbSchemaF = null;//TODO : fix it up to new structue : connection.getRpc().get_schema(dbNames);
+        ListenableFuture<DatabaseSchema> dbSchemaF = client.getSchema("Open_vSwitch", true);
         DatabaseSchema databaseSchema = dbSchemaF.get();
         inventoryServiceInternal.updateDatabaseSchema(connection.getNode(), databaseSchema);
-
+/*
         MonitorRequestBuilder monitorReq = null; //ashwin(not sure if we need) : new MonitorRequestBuilder();
         for (Table<?> table : Tables.getTables()) {
-            if (databaseSchema.getTables().keySet().contains(table.getTableName().getName())) {
+            if (databaseSchema.getTables().contains(table.getTableName().getName())) {
                 //ashwin(not sure if we need) monitorReq.monitor(table);
             } else {
                 logger.debug("We know about table {} but it is not in the schema of {}", table.getTableName().getName(), connection.getNode().getNodeIDString());
@@ -329,7 +274,6 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
             logger.error("Error configuring monitor, error : {}, details : {}",
                     updates.getError(),
                     updates.getDetails());
-            /* FIXME: This should be cause for alarm */
             throw new RuntimeException("Failed to setup a monitor in OVSDB");
         }
         UpdateNotification monitor = new UpdateNotification();
@@ -338,57 +282,8 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         if (autoConfigureController) {
             this.updateOFControllers(connection.getNode());
         }
+        */
         inventoryServiceInternal.notifyNodeAdded(connection.getNode());
-    }
-
-    private void startOvsdbManager() {
-        new Thread() {
-            @Override
-            public void run() {
-                ovsdbManager();
-            }
-        }.start();
-    }
-
-    private void ovsdbManager() {
-        EventLoopGroup bossGroup = new NioEventLoopGroup();
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
-        try {
-            ServerBootstrap b = new ServerBootstrap();
-            b.group(bossGroup, workerGroup)
-             .channel(NioServerSocketChannel.class)
-             .option(ChannelOption.SO_BACKLOG, 100)
-             .handler(new LoggingHandler(LogLevel.INFO))
-             .childHandler(new ChannelInitializer<SocketChannel>() {
-                 @Override
-                 public void initChannel(SocketChannel channel) throws Exception {
-                     logger.debug("New Passive channel created : "+ channel.toString());
-                     InetAddress address = channel.remoteAddress().getAddress();
-                     int port = channel.remoteAddress().getPort();
-                     String identifier = address.getHostAddress()+":"+port;
-                     channel.pipeline().addLast(
-                             new LoggingHandler(LogLevel.INFO),
-                             new JsonRpcDecoder(100000),
-                             new StringEncoder(CharsetUtil.UTF_8));
-
-                     Node node = handleNewConnection(identifier, channel, ConnectionService.this);
-                     logger.debug("Connected Node : "+node.toString());
-                 }
-             });
-            b.option(ChannelOption.TCP_NODELAY, true);
-            b.option(ChannelOption.RCVBUF_ALLOCATOR, new AdaptiveRecvByteBufAllocator(65535, 65535, 65535));
-            // Start the server.
-            ChannelFuture f = b.bind(ovsdbListenPort).sync();
-            serverListenChannel =  f.channel();
-            // Wait until the server socket is closed.
-            serverListenChannel.closeFuture().sync();
-        } catch (InterruptedException e) {
-            logger.error("Thread interrupted", e);
-        } finally {
-            // Shut down all event loops to terminate all threads.
-            bossGroup.shutdownGracefully();
-            workerGroup.shutdownGracefully();
-        }
     }
 
     private IClusterGlobalServices clusterServices;
@@ -451,7 +346,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         }
 
         try {
-            controllerIP = ((InetSocketAddress)connection.getChannel().localAddress()).getAddress();
+            controllerIP = connection.getClient().getConnectionInfo().getLocalAddress();
             controllers.add(controllerIP);
             return controllers;
         } catch (Exception e) {
@@ -540,5 +435,27 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
     @Override
     public void stolen(Object context, List<String> ids) {
         // TODO Auto-generated method stub
+    }
+
+    private String getConnectionIdentifier(OvsdbClient client) {
+        OvsdbConnectionInfo info = client.getConnectionInfo();
+        return info.getRemoteAddress().getHostAddress()+":"+info.getRemotePort();
+    }
+
+    @Override
+    public void connected(OvsdbClient client) {
+        logger.info("PLUGIN RECEIVED NOW CONNECTION FROM LIBRARY :  "+ client.getConnectionInfo().toString());
+        String identifier = getConnectionIdentifier(client);
+        try {
+            Node node = handleNewConnection(identifier, client, ConnectionService.this);
+        } catch (InterruptedException | ExecutionException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void disconnected(OvsdbClient client) {
+        logger.info("PLUGIN RECEIVED CONNECTION DISCONNECT FROM LIBRARY :  "+ client.getConnectionInfo().toString());
     }
 }

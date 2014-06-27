@@ -203,7 +203,7 @@
       <id>integrationtest</id>
       <activation></activation>
       <properties>
-        <skip.integrationtest>false</skip.integrationtest>
+        <skip.integrationtest>true</skip.integrationtest>
       </properties>
     </profile>
   </profiles>

@@ -113,6 +113,10 @@ public interface OvsdbClient {
 
     public OvsdbConnectionInfo getConnectionInfo();
 
+    public boolean isActive();
+
+    public void disconnect();
+
     public DatabaseSchema getDatabaseSchema (String dbName);
 
     /**

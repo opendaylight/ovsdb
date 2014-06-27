@@ -28,7 +28,6 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.CharsetUtil;
 
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -36,7 +35,6 @@ import java.util.concurrent.Executors;
 
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
-import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo.ConnectionType;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcDecoder;
@@ -142,12 +140,7 @@ public class OvsdbConnectionService implements OvsdbConnection {
         channel.pipeline().addLast(binderHandler);
 
         OvsdbRPC rpc = factory.getClient(channel, OvsdbRPC.class);
-        InetSocketAddress channelAddress = (InetSocketAddress)channel.remoteAddress();
-        InetAddress address = channelAddress.getAddress();
-        int port = channelAddress.getPort();
-
-        OvsdbConnectionInfo info = new OvsdbConnectionInfo(address, port, type);
-        OvsdbClientImpl client = new OvsdbClientImpl(rpc, info, executorService);
+        OvsdbClientImpl client = new OvsdbClientImpl(rpc, channel, type, executorService);
         connections.put(client, channel);
         ChannelFuture closeFuture = channel.closeFuture();
         closeFuture.addListener(new ChannelConnectionHandler(client));

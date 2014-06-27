@@ -10,28 +10,37 @@
 
 package org.opendaylight.ovsdb.lib;
 
+import io.netty.channel.Channel;
+
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 public class OvsdbConnectionInfo {
     public enum ConnectionType {
         ACTIVE, PASSIVE
     }
 
-    InetAddress address;
-    int port;
-    ConnectionType type;
+    private Channel channel;
+    private ConnectionType type;
 
-    public OvsdbConnectionInfo(InetAddress address, int port, ConnectionType type) {
-        this.address = address;
-        this.port = port;
+    public OvsdbConnectionInfo(Channel channel, ConnectionType type) {
+        this.channel = channel;
         this.type = type;
     }
 
-    public InetAddress getAddress() {
-        return address;
+    public InetAddress getRemoteAddress() {
+        return ((InetSocketAddress)channel.remoteAddress()).getAddress();
     }
-    public int getPort() {
-        return port;
+    public int getRemotePort() {
+        return ((InetSocketAddress)channel.remoteAddress()).getPort();
     }
+
+    public InetAddress getLocalAddress() {
+        return ((InetSocketAddress)channel.localAddress()).getAddress();
+    }
+    public int getLocalPort() {
+        return ((InetSocketAddress)channel.localAddress()).getPort();
+    }
+
     public ConnectionType getType() {
         return type;
     }
@@ -40,9 +49,10 @@ public class OvsdbConnectionInfo {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((address == null) ? 0 : address.hashCode());
-        result = prime * result + port;
-        result = prime * result + ((type == null) ? 0 : type.hashCode());
+        result = prime * result + ((channel == null) ? 0 : getRemoteAddress().hashCode());
+        result = prime * result + ((type == null) ? 0 : getRemotePort());
+        result = prime * result + ((channel == null) ? 0 : getLocalAddress().hashCode());
+        result = prime * result + ((type == null) ? 0 : getLocalPort());
         return result;
     }
 
@@ -55,20 +65,29 @@ public class OvsdbConnectionInfo {
         if (getClass() != obj.getClass())
             return false;
         OvsdbConnectionInfo other = (OvsdbConnectionInfo) obj;
-        if (address == null) {
-            if (other.address != null)
+        if (channel == null) {
+            if (other.channel != null)
                 return false;
-        } else if (!address.equals(other.address))
+        } else if (!getRemoteAddress().equals(other.getRemoteAddress())) {
             return false;
-        if (port != other.port)
+        } else if (!getLocalAddress().equals(other.getLocalAddress())) {
             return false;
+        } else if (getRemotePort() != other.getRemotePort()) {
+            return false;
+        } else if (getLocalPort() != other.getLocalPort()) {
+            return false;
+        }
         if (type != other.type)
             return false;
         return true;
     }
+
     @Override
     public String toString() {
-        return "ConnectionInfo [address=" + address + ", port=" + port
-                + ", type=" + type + "]";
+        return "ConnectionInfo [Remote-address=" + this.getRemoteAddress().getHostAddress() +
+                             ", Remote-port=" + this.getRemotePort() +
+                             ", Local-address" + this.getLocalAddress().getHostAddress() +
+                             ", Local-port=" + this.getLocalPort() +
+                             ", type=" + type + "]";
     }
 }

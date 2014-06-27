@@ -9,28 +9,37 @@
  */
 package org.opendaylight.ovsdb.integrationtest.plugin;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeNotNull;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperty;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.ovsdb.integrationtest.ConfigurationBundles;
 import org.opendaylight.ovsdb.integrationtest.OvsdbIntegrationTestBase;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
+import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -87,6 +96,29 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
         }
     }
 
+    public Node getPluginTestConnection() throws IOException, InterruptedException, ExecutionException, TimeoutException {
+        Properties props = loadProperties();
+        String addressStr = props.getProperty(SERVER_IPADDRESS);
+        String portStr = props.getProperty(SERVER_PORT, DEFAULT_SERVER_PORT);
+        String connectionType = props.getProperty(CONNECTION_TYPE, "active");
+
+        // If the connection type is active, controller connects to the ovsdb-server
+        if (connectionType.equalsIgnoreCase(CONNECTION_TYPE_ACTIVE)) {
+            if (addressStr == null) {
+                fail(usage());
+            }
+
+            Map<ConnectionConstants, String> params = new HashMap<ConnectionConstants, String>();
+            params.put(ConnectionConstants.ADDRESS, addressStr);
+            params.put(ConnectionConstants.PORT, portStr);
+
+            IConnectionServiceInternal connection = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+            return connection.connect(IDENTIFIER, params);
+        }
+        fail("Connection parameter ("+CONNECTION_TYPE+") must be active");
+        return null;
+    }
+
     @Before
     public void areWeReady() throws InterruptedException {
         assertNotNull(bc);
@@ -104,10 +136,9 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
             log.debug("Do some debugging because some bundle is unresolved");
         }
 
-        // Assert if true, if false we are good to go!
         assertFalse(debugit);
         try {
-            client = getTestConnection();
+            node = getPluginTestConnection();
         } catch (Exception e) {
             fail("Exception : "+e.getMessage());
         }
@@ -116,12 +147,16 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
 
     @Test
     public void tableTest() throws Exception {
-        assertNotNull("Invalid Node. Check connection params", client);
-        Thread.sleep(3000); // Wait for a few seconds to get the Schema exchange done
-        /*
-         * TODO : Remove the assumeNotNull once the Plugin is migrated to the new lib
-         */
-        assumeNotNull(node);
+        Thread.sleep(5000);
+        IConnectionServiceInternal connection = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+
+        // Check for the ovsdb Connection as seen by the Plugin layer
+        assertNotNull(connection.getNodes());
+        assertTrue(connection.getNodes().size() > 0);
+        assertEquals(Node.fromString("OVS|"+IDENTIFIER), connection.getNodes().get(0));
+
+        System.out.println("Nodes = "+connection.getNodes());
+
         List<String> tables = ovsdbConfigService.getTables(node);
         System.out.println("Tables = "+tables);
         assertNotNull(tables);

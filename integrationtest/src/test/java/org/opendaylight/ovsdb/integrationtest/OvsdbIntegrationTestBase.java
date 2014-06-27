@@ -29,14 +29,14 @@ import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 
 public abstract class OvsdbIntegrationTestBase {
-    private final static String identifier = "TEST";
-    private final static String SERVER_IPADDRESS = "ovsdbserver.ipaddress";
-    private final static String SERVER_PORT = "ovsdbserver.port";
-    private final static String CONNECTION_TYPE = "ovsdbserver.connection";
-    private final static String CONNECTION_TYPE_ACTIVE = "active";
-    private final static String CONNECTION_TYPE_PASSIVE = "passive";
+    protected final static String IDENTIFIER = "TEST";
+    protected final static String SERVER_IPADDRESS = "ovsdbserver.ipaddress";
+    protected final static String SERVER_PORT = "ovsdbserver.port";
+    protected final static String CONNECTION_TYPE = "ovsdbserver.connection";
+    protected final static String CONNECTION_TYPE_ACTIVE = "active";
+    protected final static String CONNECTION_TYPE_PASSIVE = "passive";
 
-    private final static String DEFAULT_SERVER_PORT = "6640";
+    protected final static String DEFAULT_SERVER_PORT = "6640";
 
     /**
      * Represents the Open Vswitch Schema
@@ -90,7 +90,7 @@ public abstract class OvsdbIntegrationTestBase {
         return null;
     }
 
-    private String usage() {
+    protected String usage() {
         return "Integration Test needs a valid connection configuration as follows :\n" +
                "active connection : mvn -Pintegrationtest -Dovsdbserver.ipaddress=x.x.x.x -Dovsdbserver.port=yyyy verify\n"+
                "passive connection : mvn -Pintegrationtest -Dovsdbserver.connection=passive verify\n";

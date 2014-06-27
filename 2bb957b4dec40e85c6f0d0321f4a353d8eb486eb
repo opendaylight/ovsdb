@@ -1,0 +1,7 @@
+Code-Review+2: Madhu Venugopal <mavenugo@gmail.com>
+Verified+1: jenkins-ovsdb <jenkins-ovsdb@opendaylight.org>
+Submitted-by: Madhu Venugopal <mavenugo@gmail.com>
+Submitted-at: Fri, 27 Jun 2014 18:47:51 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/8387
+Project: ovsdb
+Branch: refs/heads/topic/schema

@@ -24,7 +24,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 /**
  * This class is a typed interface to the Port Table
  */
-@TypedTable(name="Port", database="Open_vSwitch")
+@TypedTable(name="Port", database="Open_vSwitch", fromVersion="1.0.0")
 public interface Port extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name="name", method=MethodType.GETCOLUMN, fromVersion="1.0.0")

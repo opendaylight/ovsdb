@@ -16,6 +16,24 @@
       "revId": "27244204a93f94b58805965821ba49d51e916820",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5272f911",
+        "filename": "schemas/Open_vSwitch/src/test/java/org/opendaylight/ovsdb/schema/openvswitch/IpfixTestCases.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-27T20:00:49Z",
+      "side": 1,
+      "message": "Based on our discussion, it is okay to keep such checks case by case in order to make sure that the developer knows what he is doing.\n\nBut lets try to avoid code repetition.\nAlso pls make use of op.insert(ipfix) call instead of individually setting the columns.",
+      "parentUuid": "fa82b9bf_120c71a4",
+      "revId": "27244204a93f94b58805965821ba49d51e916820",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

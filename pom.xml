@@ -28,7 +28,7 @@
   </modules>
   <profiles>
     <profile>
-      <id>integrationtests</id>
+      <id>integrationtest</id>
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>

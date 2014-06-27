@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_120c71a4",
+        "filename": "schemas/Open_vSwitch/src/test/java/org/opendaylight/ovsdb/schema/openvswitch/IpfixTestCases.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-06-27T19:21:17Z",
+      "side": 1,
+      "message": "Though the changes look good for this specific case, I would rather address it as more generic case rather than a case that addresses just the IPFIX.\n\nSo, lets revisit this a bit in a more generic schema approach.\nI have a few ideas and I will experiment with it.",
+      "revId": "27244204a93f94b58805965821ba49d51e916820",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

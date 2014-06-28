@@ -41,7 +41,7 @@ public class GenericTableSchema extends TableSchema<GenericTableSchema> {
         Map<String, ColumnSchema> columns = new HashMap<>();
         for (Iterator<Map.Entry<String, JsonNode>> iter = json.get("columns").fields(); iter.hasNext(); ) {
             Map.Entry<String, JsonNode> column = iter.next();
-            logger.debug("%s:%s", tableName, column.getKey());
+            logger.debug("{}:{}", tableName, column.getKey());
             columns.put(column.getKey(), ColumnSchema.fromJson(column.getKey(), column.getValue()));
         }
 

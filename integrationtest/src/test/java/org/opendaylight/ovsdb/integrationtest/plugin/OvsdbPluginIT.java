@@ -39,6 +39,8 @@ import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.ovsdb.integrationtest.ConfigurationBundles;
 import org.opendaylight.ovsdb.integrationtest.OvsdbIntegrationTestBase;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
+import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
+import org.opendaylight.ovsdb.plugin.Connection;
 import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
 import org.ops4j.pax.exam.Configuration;
@@ -102,6 +104,7 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
         String portStr = props.getProperty(SERVER_PORT, DEFAULT_SERVER_PORT);
         String connectionType = props.getProperty(CONNECTION_TYPE, "active");
 
+        IConnectionServiceInternal connection = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
         // If the connection type is active, controller connects to the ovsdb-server
         if (connectionType.equalsIgnoreCase(CONNECTION_TYPE_ACTIVE)) {
             if (addressStr == null) {
@@ -111,11 +114,16 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
             Map<ConnectionConstants, String> params = new HashMap<ConnectionConstants, String>();
             params.put(ConnectionConstants.ADDRESS, addressStr);
             params.put(ConnectionConstants.PORT, portStr);
-
-            IConnectionServiceInternal connection = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
             return connection.connect(IDENTIFIER, params);
+        }  else if (connectionType.equalsIgnoreCase(CONNECTION_TYPE_PASSIVE)) {
+            // Wait for 10 seconds for the Passive connection to be initiated by the ovsdb-server.
+            Thread.sleep(10000);
+            List<Node> nodes = connection.getNodes();
+            assertNotNull(nodes);
+            assertTrue(nodes.size() > 0);
+            return nodes.get(0);
         }
-        fail("Connection parameter ("+CONNECTION_TYPE+") must be active");
+        fail("Connection parameter ("+CONNECTION_TYPE+") must be active or passive");
         return null;
     }
 
@@ -148,14 +156,21 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
     @Test
     public void tableTest() throws Exception {
         Thread.sleep(5000);
-        IConnectionServiceInternal connection = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+        IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
 
         // Check for the ovsdb Connection as seen by the Plugin layer
-        assertNotNull(connection.getNodes());
-        assertTrue(connection.getNodes().size() > 0);
-        assertEquals(Node.fromString("OVS|"+IDENTIFIER), connection.getNodes().get(0));
+        assertNotNull(connectionService.getNodes());
+        assertTrue(connectionService.getNodes().size() > 0);
+        Node node = connectionService.getNodes().get(0);
+        Connection connection = connectionService.getConnection(node);
+        OvsdbConnectionInfo connectionInfo = connection.getClient().getConnectionInfo();
+        String identifier = IDENTIFIER;
+        if (connectionInfo.getType().equals(OvsdbConnectionInfo.ConnectionType.PASSIVE)) {
+            identifier = connectionInfo.getRemoteAddress().getHostAddress()+":"+connectionInfo.getRemotePort();
+        }
+        assertEquals(Node.fromString("OVS|"+identifier), connectionService.getNodes().get(0));
 
-        System.out.println("Nodes = "+connection.getNodes());
+        System.out.println("Nodes = "+ connectionService.getNodes());
 
         List<String> tables = ovsdbConfigService.getTables(node);
         System.out.println("Tables = "+tables);

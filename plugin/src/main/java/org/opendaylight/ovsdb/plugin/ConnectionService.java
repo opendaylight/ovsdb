@@ -90,6 +90,10 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
 
     public void setOvsdbConnection(OvsdbConnection connectionService) {
         connectionLib = connectionService;
+        // It is not correct to register the service here. Rather, we should depend on the
+        // Service created by createServiceDependency() and hook to it via Apache DM.
+        // Using this temporarily till the Service Dependency is resolved.
+        connectionLib.registerForPassiveConnection(this);
     }
 
     public void unsetOvsdbConnection(OvsdbConnection connectionService) {
@@ -170,7 +174,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
 
         try {
             OvsdbClient client = connectionLib.connect(address, port);
-            return handleNewConnection(identifier, client, this);
+            return handleNewConnection(identifier, client);
         } catch (InterruptedException e) {
             logger.error("Thread was interrupted during connect", e);
         } catch (ExecutionException e) {
@@ -210,7 +214,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
     public void notifyNodeDisconnectFromMaster(Node arg0) {
     }
 
-    private Node handleNewConnection(String identifier, OvsdbClient client, ConnectionService instance) throws InterruptedException, ExecutionException {
+    private Node handleNewConnection(String identifier, OvsdbClient client) throws InterruptedException, ExecutionException {
         Connection connection = new Connection(identifier, client);
         Node node = connection.getNode();
         ovsdbConnections.put(identifier, connection);
@@ -442,20 +446,19 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         return info.getRemoteAddress().getHostAddress()+":"+info.getRemotePort();
     }
 
+
     @Override
     public void connected(OvsdbClient client) {
-        logger.info("PLUGIN RECEIVED NOW CONNECTION FROM LIBRARY :  "+ client.getConnectionInfo().toString());
         String identifier = getConnectionIdentifier(client);
         try {
-            Node node = handleNewConnection(identifier, client, ConnectionService.this);
+            ConnectionService connection = (ConnectionService)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+            Node node = connection.handleNewConnection(identifier, client);
         } catch (InterruptedException | ExecutionException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
 
     @Override
     public void disconnected(OvsdbClient client) {
-        logger.info("PLUGIN RECEIVED CONNECTION DISCONNECT FROM LIBRARY :  "+ client.getConnectionInfo().toString());
     }
 }

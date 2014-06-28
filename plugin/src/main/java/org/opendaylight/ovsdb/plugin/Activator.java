@@ -25,7 +25,6 @@ import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.INodeConnectorFactory;
 import org.opendaylight.controller.sal.utils.INodeFactory;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
-import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,8 +94,8 @@ public class Activator extends ComponentActivatorAbstractBase {
             props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "OVS");
             c.setInterface(
                     new String[] {IPluginInConnectionService.class.getName(),
-                                  IConnectionServiceInternal.class.getName(),
-                                  OvsdbConnectionListener.class.getName()}, props);
+                                  IConnectionServiceInternal.class.getName()}, props);
+
             c.add(createServiceDependency()
                     .setService(InventoryServiceInternal.class)
                     .setCallbacks("setInventoryServiceInternal", "unsetInventoryServiceInternal")

@@ -17,6 +17,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import com.google.common.collect.ImmutableSet;
 
 import junit.framework.Assert;
 
@@ -46,9 +47,9 @@ public class ControllerTestCases extends OpenVswitchSchemaTestBase {
     @Test
     public void createTypedController() throws IOException, InterruptedException, ExecutionException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         Controller controller1 = ovs.createTypedRowWrapper(Controller.class);
-        controller1.setTarget("tcp:1.1.1.1:6640");
+        controller1.setTarget(ImmutableSet.of("tcp:1.1.1.1:6640"));
         Controller controller2 = ovs.createTypedRowWrapper(Controller.class);
-        controller2.setTarget("tcp:2.2.2.2:6640");
+        controller2.setTarget(ImmutableSet.of("tcp:2.2.2.2:6640"));
 
         Bridge bridge = ovs.getTypedRowWrapper(Bridge.class, null);
 

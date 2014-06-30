@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 
+import com.google.common.collect.ImmutableSet;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
@@ -493,7 +494,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         for (InetAddress ofControllerAddress : ofControllerAddrs) {
             String newController = "tcp:"+ofControllerAddress.getHostAddress()+":"+ofControllerPort;
             Controller controllerRow = connection.getClient().createTypedRowWrapper(Controller.class);
-            controllerRow.setTarget(newController);
+            controllerRow.setTarget(ImmutableSet.of(newController));
             status = this.insertRow(node, controllerRow.getSchema().getName(), bridgeUUID, controllerRow.getRow());
         }
         return status.isSuccess();
@@ -978,7 +979,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         Connection connection = connectionService.getConnection(node);
         OvsdbClient client = connection.getClient();
         Manager manager = client.createTypedRowWrapper(Manager.class);
-        manager.setTarget(managerip);
+        manager.setTarget(ImmutableSet.of(managerip));
 
         OpenVSwitch openVSwitch = connection.getClient().getTypedRowWrapper(OpenVSwitch.class, null);
         ConcurrentMap<String, Row> row = this.getRows(node, openVSwitch.getSchema().getName());

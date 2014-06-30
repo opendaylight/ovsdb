@@ -16,29 +16,119 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedColumn;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 
-/*
- * Reusing the existing Table definitions and many of columns are not defined here
- * TODO : Fill up the missing Columns and include Supported DB Version
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * This class is a typed interface to the Controller Table
  */
 
-@TypedTable(name="Controller", database="Open_vSwitch")
+@TypedTable (name="Controller", database="Open_vSwitch", fromVersion="1.0.0")
 public interface Controller extends TypedBaseTable<GenericTableSchema> {
 
-    @TypedColumn(name="target", method=MethodType.GETCOLUMN)
+    @TypedColumn (name = "target", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
     public Column<GenericTableSchema, String> getTargetColumn();
 
-    @TypedColumn(name="target", method=MethodType.SETDATA)
+    @TypedColumn (name = "target", method = MethodType.SETDATA, fromVersion = "1.0.0")
     public void setTarget(String target);
 
-    @TypedColumn(name="controller_burst_limit", method=MethodType.GETCOLUMN)
+    @TypedColumn (name = "controller_burst_limit", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
     public Column<GenericTableSchema, Integer> getBurstLimitColumn();
 
-    @TypedColumn(name="controller_burst_limit", method=MethodType.SETDATA)
+    @TypedColumn (name = "controller_burst_limit", method = MethodType.SETDATA, fromVersion = "1.0.0")
     public void setBurstLimit(Integer burstLimit);
 
-    @TypedColumn(name="controller_rate_limit", method=MethodType.GETCOLUMN)
+    @TypedColumn (name = "controller_rate_limit", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
     public Column<GenericTableSchema, Integer> getRateLimitColumn();
 
-    @TypedColumn(name="controller_rate_limit", method=MethodType.SETDATA)
-    public void setRateLimit(Integer burstLimit);
+    @TypedColumn (name = "controller_rate_limit", method = MethodType.SETDATA, fromVersion = "1.0.0")
+    public void setRateLimit(Integer rateLimit);
+
+    @TypedColumn (name = "connection_mode", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
+    public Column<GenericTableSchema, Set<String>> getConnectionModeColumn();
+
+    @TypedColumn (name = "connection_mode", method = MethodType.SETDATA, fromVersion = "1.0.0")
+    public void setConnectionMode(Set<String> connectionMode);
+
+    @TypedColumn (name = "enable_async_messages", method = MethodType.GETCOLUMN, fromVersion = "6.7.0")
+    public Column<GenericTableSchema, Set<Boolean>> getEnableAsyncMessagesColumn();
+
+    @TypedColumn (name = "enable_async_messages", method = MethodType.SETDATA, fromVersion = "6.7.0")
+    public void setEnableAsyncMessages(Set<Boolean> enableAsyncMessages);
+
+    @TypedColumn (name = "external_ids", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
+    public Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn();
+
+    @TypedColumn (name = "external_ids", method = MethodType.SETDATA, fromVersion = "1.0.0")
+    public void setExternalIds(Map<String, String> externalIds);
+
+    @TypedColumn (name = "local_netmask", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
+    public Column<GenericTableSchema, Set<String>> getLocalNetmaskColumn();
+
+    @TypedColumn (name = "local_netmask", method = MethodType.SETDATA, fromVersion = "1.0.0")
+    public void setLocalNetmask(Set<String> localNetmask);
+
+    @TypedColumn (name = "local_gateway", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
+    public Column<GenericTableSchema, Set<String>> getLocalGatewayColumn();
+
+    @TypedColumn (name = "local_gateway", method = MethodType.SETDATA, fromVersion = "1.0.0")
+    public void setLocalGateway(Set<String> localGateway);
+
+    @TypedColumn (name = "status", method = MethodType.GETCOLUMN, fromVersion = "1.1.0")
+    public Column<GenericTableSchema, Map<String, String>> getStatusColumn();
+
+    @TypedColumn (name = "status", method = MethodType.SETDATA, fromVersion = "1.1.0")
+    public void setStatus(Map<String, String> status);
+
+    @TypedColumn (name = "role", method = MethodType.GETCOLUMN, fromVersion = "1.1.0")
+    public Column<GenericTableSchema, Set<String>> getRoleColumn();
+
+    @TypedColumn (name = "role", method = MethodType.SETDATA, fromVersion = "1.1.0")
+    public void setRole(Set<String> role);
+
+    @TypedColumn (name = "inactivity_probe", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
+    public Column<GenericTableSchema, Set<Integer>> getInactivityProbeColumn();
+
+    @TypedColumn (name = "inactivity_probe", method = MethodType.SETDATA, fromVersion = "1.0.0")
+    public void setInactivityProbe(Set<Integer> inactivityProbe);
+
+    @TypedColumn (name = "is_connected", method = MethodType.GETCOLUMN, fromVersion = "1.1.0")
+    public Column<GenericTableSchema, Boolean> getIsConnectedColumn();
+
+    @TypedColumn (name = "is_connected", method = MethodType.SETDATA, fromVersion = "1.1.0")
+    public void setIsConnected(Boolean isConnected);
+
+    @TypedColumn (name = "other_config", method = MethodType.GETCOLUMN, fromVersion = "6.8.0")
+    public Column<GenericTableSchema, Map<String, String>> getOtherConfigColumn();
+
+    @TypedColumn (name = "other_config", method = MethodType.SETDATA, fromVersion = "6.8.0")
+    public void setOtherConfig(Map<String, String> otherConfig);
+
+    @TypedColumn (name = "max_backoff", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
+    public Column<GenericTableSchema, Integer> getMaxBackoffColumn();
+
+    @TypedColumn (name = "max_backoff", method = MethodType.SETDATA, fromVersion = "1.0.0")
+    public void setMaxBackoff(Integer maxBackoff);
+
+    @TypedColumn (name = "local_ip", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
+    public Column<GenericTableSchema, Set<String>> getLocalIpColumn();
+
+    @TypedColumn (name = "local_ip", method = MethodType.SETDATA, fromVersion = "1.0.0")
+    public void setLocalIp(Set<String> localIp);
+
+    @TypedColumn (name = "discover_update_resolv_conf", method = MethodType.GETCOLUMN,
+                  fromVersion="1.0.0", untilVersion="3.0.0")
+    public Column<GenericTableSchema, Set<String>> getDiscoverUpdateResolvConfColumn();
+
+    @TypedColumn (name = "discover_update_resolv_conf", method = MethodType.SETDATA,
+                  fromVersion="1.0.0", untilVersion="3.0.0")
+    public void setDiscoverUpdateResolvConf(Set<String> discoverUpdateResolvConf);
+
+    @TypedColumn (name = "discover_accept_regex", method = MethodType.GETCOLUMN,
+                  fromVersion="1.0.0", untilVersion="3.0.0")
+    public Column<GenericTableSchema, Set<String>> getDiscoverAcceptRegexColumn();
+
+    @TypedColumn (name = "discover_accept_regex", method = MethodType.SETDATA,
+                  fromVersion="1.0.0", untilVersion="3.0.0")
+    public void setDiscoverAcceptRegex(Set<String> discoverAcceptRegex);
 }

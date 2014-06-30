@@ -40,10 +40,9 @@ public interface OvsdbClient {
     /**
      * Asynchronously returns the schema object for a specific database
      * @param database name of the database schema
-     * @param cacheResult if the results be cached by this instance
      * @return DatabaseSchema future
      */
-    ListenableFuture<DatabaseSchema> getSchema(String database, boolean cacheResult);
+    ListenableFuture<DatabaseSchema> getSchema(String database);
 
     /**
      * Allows for a mini DSL way of collecting the transactions to be executed against the ovsdb instance.

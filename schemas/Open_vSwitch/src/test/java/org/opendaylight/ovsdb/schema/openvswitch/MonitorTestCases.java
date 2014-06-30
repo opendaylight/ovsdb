@@ -10,8 +10,16 @@
 
 package org.opendaylight.ovsdb.schema.openvswitch;
 
-import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
 import junit.framework.Assert;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.ovsdb.lib.MonitorCallBack;
@@ -30,23 +38,18 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
+import com.google.common.collect.Lists;
 
 public class MonitorTestCases extends OpenVswitchSchemaTestBase {
 
     Logger logger = LoggerFactory.getLogger(PortAndInterfaceTestCases.class);
     DatabaseSchema dbSchema = null;
 
+    @Override
     @Before
     public void setUp() throws ExecutionException, InterruptedException, TimeoutException, IOException {
         super.setUp();
-        dbSchema = this.ovs.getSchema(OPEN_VSWITCH_SCHEMA, true).get();
+        dbSchema = this.ovs.getSchema(OPEN_VSWITCH_SCHEMA).get();
     }
 
     @Test

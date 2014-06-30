@@ -259,7 +259,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         inventoryServiceInternal.addNode(connection.getNode(), props);
 
         List<String> dbNames = Arrays.asList(Open_vSwitch.NAME.getName());
-        ListenableFuture<DatabaseSchema> dbSchemaF = client.getSchema("Open_vSwitch", true);
+        ListenableFuture<DatabaseSchema> dbSchemaF = client.getSchema("Open_vSwitch");
         DatabaseSchema databaseSchema = dbSchemaF.get();
         inventoryServiceInternal.updateDatabaseSchema(connection.getNode(), databaseSchema);
 /*

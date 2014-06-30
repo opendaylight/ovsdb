@@ -175,7 +175,7 @@ public class OvsdbLibraryIT extends OvsdbIntegrationTestBase {
         assertNotNull("Invalid Client. Check connection params", client);
         Thread.sleep(3000); // Wait for a few seconds to get the Schema exchange done
         if (isSchemaSupported(OPEN_VSWITCH_SCHEMA)) {
-            DatabaseSchema dbSchema = client.getSchema(OPEN_VSWITCH_SCHEMA, true).get();
+            DatabaseSchema dbSchema = client.getSchema(OPEN_VSWITCH_SCHEMA).get();
             assertNotNull(dbSchema);
             System.out.println(OPEN_VSWITCH_SCHEMA + " schema in "+ client.getConnectionInfo() +
                                                      " with Tables : " + dbSchema.getTables());
@@ -185,7 +185,7 @@ public class OvsdbLibraryIT extends OvsdbIntegrationTestBase {
         }
 
         if (isSchemaSupported(HARDWARE_VTEP)) {
-            DatabaseSchema dbSchema = client.getSchema(HARDWARE_VTEP, true).get();
+            DatabaseSchema dbSchema = client.getSchema(HARDWARE_VTEP).get();
             assertNotNull(dbSchema);
             System.out.println(HARDWARE_VTEP + " schema in "+ client.getConnectionInfo() +
                                                " with Tables : " + dbSchema.getTables());

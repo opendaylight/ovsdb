@@ -348,7 +348,7 @@ public class OvsdbClientTestIT extends OvsdbTestBase {
         ovs = getTestConnection();
         System.out.println("Connection Info :" + ovs.getConnectionInfo().toString());
         testGetDBs();
-        dbSchema = ovs.getSchema(OPEN_VSWITCH_SCHEMA, true).get();
+        dbSchema = ovs.getSchema(OPEN_VSWITCH_SCHEMA).get();
     }
 
     @After

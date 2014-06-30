@@ -56,7 +56,7 @@ public class TypedHardwareVTepSchemaIT extends OvsdbTestBase {
         }
         ovs = getTestConnection();
         testGetDBs();
-        dbSchema = ovs.getSchema(HARDWARE_VTEP_SCHEMA, true).get();
+        dbSchema = ovs.getSchema(HARDWARE_VTEP_SCHEMA).get();
     }
 
     @After

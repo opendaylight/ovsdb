@@ -238,11 +238,11 @@ public class OvsdbClientImpl implements OvsdbClient {
     }
 
     @Override
-    public ListenableFuture<DatabaseSchema> getSchema(final String database, final boolean cacheResult) {
+    public ListenableFuture<DatabaseSchema> getSchema(final String database) {
 
         DatabaseSchema databaseSchema = schema.get(database);
 
-        if (databaseSchema == null || cacheResult) {
+        if (databaseSchema == null) {
             return Futures.transform(
                     getSchemaFromDevice(Lists.newArrayList(database)),
                     new Function<Map<String, DatabaseSchema>, DatabaseSchema>() {
@@ -251,17 +251,13 @@ public class OvsdbClientImpl implements OvsdbClient {
                             if (result.containsKey(database)) {
                                 DatabaseSchema s = result.get(database);
                                 s.populateInternallyGeneratedColumns();
-                                if (cacheResult) {
-                                    OvsdbClientImpl.this.schema.put(database, s);
-                                }
+                                OvsdbClientImpl.this.schema.put(database, s);
                                 return s;
                             } else {
                                 return null;
                             }
                         }
                     }, executorService);
-
-
         } else {
             return Futures.immediateFuture(databaseSchema);
         }

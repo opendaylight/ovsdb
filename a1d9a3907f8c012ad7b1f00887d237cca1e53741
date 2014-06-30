@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_a3121555",
+        "filename": "schemas/Open_vSwitch/src/main/java/org/opendaylight/ovsdb/schema/openvswitch/Qos.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-30T21:51:29Z",
+      "side": 1,
+      "message": "This should be TypedBaseTable\u003cGenericTableSchema\u003e\nMadhu added this in https://git.opendaylight.org/gerrit/#/c/8385/ to support the simplified \"insert\" operation",
+      "revId": "a1d9a3907f8c012ad7b1f00887d237cca1e53741",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_03298189",
+        "filename": "schemas/Open_vSwitch/src/main/java/org/opendaylight/ovsdb/schema/openvswitch/Queue.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-30T21:51:29Z",
+      "side": 1,
+      "message": "Same as previous comment.",
+      "revId": "a1d9a3907f8c012ad7b1f00887d237cca1e53741",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_232e0593",
+        "filename": "schemas/Open_vSwitch/src/main/java/org/opendaylight/ovsdb/schema/openvswitch/SSL.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-30T21:51:29Z",
+      "side": 1,
+      "message": "Same as previous comment...",
+      "revId": "a1d9a3907f8c012ad7b1f00887d237cca1e53741",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a339b5d8",
+        "filename": "schemas/Open_vSwitch/src/test/java/org/opendaylight/ovsdb/schema/openvswitch/QosTestCases.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-30T21:51:29Z",
+      "side": 1,
+      "message": "It\u0027s now possible to to use the simplified Insert operation....\ns/port.getSchema()/port/g and remove the .value lines.\nhttps://git.opendaylight.org/gerrit/#/c/8385/",
+      "revId": "a1d9a3907f8c012ad7b1f00887d237cca1e53741",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_433229f3",
+        "filename": "schemas/Open_vSwitch/src/test/java/org/opendaylight/ovsdb/schema/openvswitch/QueueTestCases.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-06-30T21:51:29Z",
+      "side": 1,
+      "message": "Per previous comment... will save you a couple of lines of code...",
+      "revId": "a1d9a3907f8c012ad7b1f00887d237cca1e53741",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

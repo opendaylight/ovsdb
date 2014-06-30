@@ -9,6 +9,9 @@
  */
 package org.opendaylight.ovsdb.plugin;
 
+import static org.opendaylight.ovsdb.lib.operations.Operations.op;
+
+import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -18,7 +21,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
@@ -29,22 +34,31 @@ import org.opendaylight.controller.sal.networkconfig.bridgedomain.ConfigConstant
 import org.opendaylight.controller.sal.networkconfig.bridgedomain.IPluginInBridgeDomainConfigService;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
+import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.database.OVSInstance;
 import org.opendaylight.ovsdb.lib.database.OvsdbType;
 import org.opendaylight.ovsdb.lib.message.TransactBuilder;
+import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.notation.Function;
 import org.opendaylight.ovsdb.lib.notation.Mutation;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
 import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
+import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.DeleteOperation;
+import org.opendaylight.ovsdb.lib.operations.Insert;
 import org.opendaylight.ovsdb.lib.operations.InsertOperation;
 import org.opendaylight.ovsdb.lib.operations.MutateOperation;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
+import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.operations.UpdateOperation;
+import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
+import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
+import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.table.Bridge;
 import org.opendaylight.ovsdb.lib.table.Controller;
 import org.opendaylight.ovsdb.lib.table.IPFIX;
@@ -64,6 +78,7 @@ import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -688,58 +703,112 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         return false;
     }
 
-    @Override
-    public StatusWithUuid insertRow(Node node, String tableName, String parent_uuid, Table<?> row) {
-        logger.debug("tableName : {}, parent_uuid : {} Row : {}", tableName, parent_uuid, row.toString());
-        StatusWithUuid statusWithUUID = null;
+    /*
+     * There are a few Open_vSwitch schema specific special case handling to be done for
+     * the older API (such as by inserting a mandatory Interface row automatically upon inserting
+     * a Port row.
+     */
+    private void handleSpecialInsertCase(OvsdbClient client, String databaseName,
+            String tableName, String uuid, Row<GenericTableSchema> row, TransactionBuilder transactionBuilder) {
+        if (databaseName.equals(OvsVswitchdSchemaConstants.DATABASE_NAME) && tableName.equals("Port")) {
+            DatabaseSchema dbSchema = client.getDatabaseSchema(databaseName);
+            TableSchema<GenericTableSchema> tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
+            ColumnSchema<GenericTableSchema, Set<UUID>> columnSchema = tableSchema.multiValuedColumn("interfaces", UUID.class);
+            String namedUuid = "Special_"+tableName;
+            List<Operation> priorOperations = transactionBuilder.getOperations();
+            Insert portOperation = (Insert)priorOperations.get(0);
+            portOperation.value(columnSchema, new UUID(namedUuid));
 
-        // Schema based Table handling will help fix this static Table handling.
-
-        if (row.getTableName().getName().equalsIgnoreCase("Bridge")) {
-            statusWithUUID = insertBridgeRow(node, parent_uuid, (Bridge)row);
+            Column<GenericTableSchema, ?> nameColumn = row.getColumn(tableSchema.column("name"));
+            List<Column<GenericTableSchema, ?>> columns = new ArrayList<Column<GenericTableSchema, ?>>();
+            columns.add(nameColumn);
+            Row<GenericTableSchema> intfRow = new Row<GenericTableSchema>(columns);
+            this.processInsertTransaction(client, databaseName, "Interface", null, null, null, namedUuid, intfRow, transactionBuilder);
         }
-        else if (row.getTableName().getName().equalsIgnoreCase("Capability")) {
-            return new StatusWithUuid(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
-        }
-        else if (row.getTableName().getName().equalsIgnoreCase("Controller")) {
-            statusWithUUID = insertControllerRow(node, parent_uuid, (Controller)row);
-        }
-        else if (row.getTableName().getName().equalsIgnoreCase("Interface")) {
-            statusWithUUID = insertInterfaceRow(node, parent_uuid, (Interface)row);
-        }
-        else if (row.getTableName().getName().equalsIgnoreCase("Manager")) {
-            statusWithUUID = insertManagerRow(node, parent_uuid, (Manager)row);
-        }
-        else if (row.getTableName().getName().equalsIgnoreCase("Mirror")) {
-            statusWithUUID = insertMirrorRow(node, parent_uuid, (Mirror)row);
-        }
-        else if (row.getTableName().getName().equalsIgnoreCase("NetFlow")) {
-            statusWithUUID = insertNetFlowRow(node, parent_uuid, (NetFlow)row);
-        }
-        else if (row.getTableName().getName().equalsIgnoreCase("Open_vSwitch")) {
-            statusWithUUID = insertOpen_vSwitchRow(node, (Open_vSwitch)row);
-        }
-        else if (row.getTableName().getName().equalsIgnoreCase("Port")) {
-            statusWithUUID = insertPortRow(node, parent_uuid, (Port)row);
-        }
-        else if (row.getTableName().getName().equalsIgnoreCase("QoS")) {
-            statusWithUUID = insertQosRow(node, parent_uuid, (Qos)row);
-        }
-        else if (row.getTableName().getName().equalsIgnoreCase("Queue")) {
-            statusWithUUID = insertQueueRow(node, parent_uuid, (Queue)row);
-        }
-        else if (row.getTableName().getName().equalsIgnoreCase("sFlow")) {
-            statusWithUUID = insertSflowRow(node, parent_uuid, (SFlow)row);
-        }
-        else if (row.getTableName().getName().equalsIgnoreCase("IPFIX")) {
-            statusWithUUID = insertIpFixRow(node, parent_uuid, (IPFIX) row);
-        }
-        else if (row.getTableName().getName().equalsIgnoreCase("SSL")) {
-            statusWithUUID = insertSSLRow(node, parent_uuid, (SSL)row);
-        }
-        return statusWithUUID;
     }
 
+    /*
+     * A common Transaction that takes in old API style Parent_uuid and inserts a mutation on
+     * the parent table for the newly inserted Child.
+     * Due to some additional special case(s), the Transaction is further amended by handleSpecialInsertCase
+     */
+    private void processInsertTransaction(OvsdbClient client, String databaseName, String childTable,
+                                    String parentTable, String parent_uuid, String parentColumn, String namedUuid,
+                                    Row<GenericTableSchema> row, TransactionBuilder transactionBuilder) {
+        logger.debug("processTransaction : {} {} {} \n {} {} {} \n {}", client.getConnectionInfo(), databaseName, childTable, parentTable, parent_uuid, parentColumn, row.toString());
+        DatabaseSchema dbSchema = client.getDatabaseSchema(databaseName);
+        TableSchema<GenericTableSchema> childTableSchema = dbSchema.table(childTable, GenericTableSchema.class);
+        transactionBuilder.add(op.insert(childTableSchema, row)
+                        .withId(namedUuid));
+
+        if (parentColumn != null) {
+            TableSchema<GenericTableSchema> parentTableSchema = dbSchema.table(parentTable, GenericTableSchema.class);
+            ColumnSchema<GenericTableSchema, UUID> parentColumnSchema = parentTableSchema.column(parentColumn, UUID.class);
+            ColumnSchema<GenericTableSchema, UUID> _uuid = parentTableSchema.column("_uuid", UUID.class);
+
+            transactionBuilder
+                .add(op.mutate(parentTableSchema)
+                        .addMutation(parentColumnSchema, Mutator.INSERT, new UUID(namedUuid))
+                        .where(_uuid.opEqual(new UUID(parent_uuid)))
+                        .build());
+        }
+        /*
+         * There are a few Open_vSwitch schema specific special case handling to be done for
+         * the older API (such as by inserting a mandatory Interface row automatically upon inserting
+         * a Port row.
+         */
+        handleSpecialInsertCase(client, databaseName, childTable, namedUuid, row, transactionBuilder);
+    }
+
+    /*
+     * Though this is a New API that takes in Row object, this still is considered a
+     * Deprecated call because of the assumption with a Single Row insertion.
+     * An ideal insertRow must be able to take in multiple Rows, which includes the
+     * Row being inserted in one Table and other Rows that needs mutate in other Tables.
+     */
+    @Override
+    public StatusWithUuid insertRow(Node node, String tableName, String parent_uuid, Row<GenericTableSchema> row) throws InterruptedException, ExecutionException, JsonParseException, IOException {
+        logger.debug("insertRow {} {} {} {}", node, tableName, parent_uuid, row);
+
+        String[] parentColumn = OvsVswitchdSchemaConstants.getParentColumnToMutate(tableName);
+        if (parentColumn == null) {
+            parentColumn = new String[]{null, null};
+        }
+
+        Connection connection = connectionService.getConnection(node);
+        OvsdbClient client = connection.getClient();
+        TransactionBuilder transactionBuilder = client.transactBuilder();
+
+        String namedUuid = "Transaction_"+ tableName;
+        this.processInsertTransaction(client, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName,
+                                parentColumn[0], parent_uuid, parentColumn[1], namedUuid,
+                                row, transactionBuilder);
+
+        ListenableFuture<List<OperationResult>> results = transactionBuilder.execute();
+        List<OperationResult> operationResults = results.get();
+        if (operationResults.isEmpty() || (transactionBuilder.getOperations().size() != operationResults.size())) {
+            return new StatusWithUuid(StatusCode.INTERNALERROR);
+        }
+        logger.debug("Insert row : {} operation results : {} ", row, operationResults);
+        for (OperationResult result : operationResults) {
+            if (result.getError() != null) {
+                return new StatusWithUuid(StatusCode.BADREQUEST, result.getError());
+            }
+        }
+        UUID uuid = operationResults.get(0).getUuid();
+        return new StatusWithUuid(StatusCode.SUCCESS, uuid);
+    }
+
+    /*
+     * Deprecated Old Insert Row API that was using static library schema Objects.
+     */
+    @Override
+    @Deprecated
+    public StatusWithUuid insertRow(Node node, String tableName, String parent_uuid, Table<?> row) {
+        logger.debug("Deprecated API : tableName : {}, parent_uuid : {} Row : {}", tableName, parent_uuid, row.toString());
+        StatusWithUuid statusWithUUID = null;
+        return statusWithUUID;
+    }
 
     @Override
     public Status updateRow (Node node, String tableName, String parentUUID, String rowUUID, Table<?> row) {
@@ -902,625 +971,6 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         ConcurrentMap<String, ConcurrentMap<String, Table<?>>> cache  = inventoryServiceInternal.getCache(node);
         if (cache == null) return null;
         return new ArrayList<String>(cache.keySet());
-    }
-
-    private StatusWithUuid insertBridgeRow(Node node, String open_VSwitch_uuid, Bridge bridgeRow) {
-
-        String insertErrorMsg = "bridge";
-        String rowName=bridgeRow.getName();
-
-        try{
-            Map<String, Table<?>> ovsTable = inventoryServiceInternal.getTableCache(node, Open_vSwitch.NAME.getName());
-
-            if (ovsTable == null) {
-                return new StatusWithUuid(StatusCode.NOTFOUND, "There are no Open_vSwitch instance in the Open_vSwitch table");
-            }
-
-            String newBridge = "new_bridge";
-
-            Operation addSwitchRequest = null;
-
-            String ovsTableUUID = open_VSwitch_uuid;
-            if (ovsTableUUID == null) ovsTableUUID = (String) ovsTable.keySet().toArray()[0];
-            UUID bridgeUuid = new UUID(newBridge);
-            Mutation bm = new Mutation("bridges", Mutator.INSERT, bridgeUuid);
-            List<Mutation> mutations = new ArrayList<Mutation>();
-            mutations.add(bm);
-
-            UUID uuid = new UUID(ovsTableUUID);
-            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
-            List<Condition> where = new ArrayList<Condition>();
-            where.add(condition);
-            addSwitchRequest = new MutateOperation(Open_vSwitch.NAME.getName(), where, mutations);
-
-            InsertOperation addBridgeRequest = new InsertOperation(Bridge.NAME.getName(), newBridge, bridgeRow);
-
-            TransactBuilder transaction = new TransactBuilder();
-            transaction.addOperations(new ArrayList<Operation>(
-                                      Arrays.asList(addSwitchRequest,
-                                                    addBridgeRequest)));
-
-            int bridgeInsertIndex = transaction.getRequests().indexOf(addBridgeRequest);
-
-            return _insertTableRow(node,transaction,bridgeInsertIndex,insertErrorMsg,rowName);
-
-        } catch(Exception e){
-            logger.error("Error in insertBridgeRow(): ",e);
-        }
-        return new StatusWithUuid(StatusCode.INTERNALERROR);
-    }
-
-
-    private StatusWithUuid insertPortRow(Node node, String bridge_uuid, Port portRow) {
-
-        String insertErrorMsg = "port";
-        String rowName=portRow.getName();
-
-        try{
-            Map<String, Table<?>> brTable = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
-            if (brTable == null ||  brTable.get(bridge_uuid) == null) {
-                return new StatusWithUuid(StatusCode.NOTFOUND, "Bridge with UUID "+bridge_uuid+" Not found");
-            }
-            String newPort = "new_port";
-            UUID portUUID = new UUID(newPort);
-            Mutation bm = new Mutation("ports", Mutator.INSERT, portUUID);
-            List<Mutation> mutations = new ArrayList<Mutation>();
-            mutations.add(bm);
-
-            UUID uuid = new UUID(bridge_uuid);
-            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
-            List<Condition> where = new ArrayList<Condition>();
-            where.add(condition);
-            Operation addBrMutRequest = new MutateOperation(Bridge.NAME.getName(), where, mutations);
-
-            // Default OVS schema is to have 1 or more interface part of Bridge. Hence it is mandatory to
-            // Insert an Interface in a Port add case
-
-            String newInterface = "new_interface";
-            Interface interfaceRow = new Interface();
-            interfaceRow.setName(portRow.getName());
-            InsertOperation addIntfRequest = new InsertOperation(Interface.NAME.getName(),
-                    newInterface, interfaceRow);
-
-            OvsDBSet<UUID> interfaces = new OvsDBSet<UUID>();
-            UUID interfaceid = new UUID(newInterface);
-            interfaces.add(interfaceid);
-            portRow.setInterfaces(interfaces);
-
-            InsertOperation addPortRequest = new InsertOperation(Port.NAME.getName(), newPort, portRow);
-
-            TransactBuilder transaction = new TransactBuilder();
-            transaction.addOperations(new ArrayList<Operation>
-            (Arrays.asList(addBrMutRequest, addPortRequest, addIntfRequest)));
-            int portInsertIndex = transaction.getRequests().indexOf(addPortRequest);
-
-            return _insertTableRow(node,transaction,portInsertIndex,insertErrorMsg,rowName);
-
-            } catch (Exception e) {
-            logger.error("Error in insertPortRow(): ",e);
-        }
-        return new StatusWithUuid(StatusCode.INTERNALERROR);
-    }
-
-    private StatusWithUuid insertInterfaceRow(Node node, String port_uuid, Interface interfaceRow) {
-
-        String insertErrorMsg = "interface";
-        String rowName=interfaceRow.getName();
-
-        try{
-
-            // Interface table must have entry in Port table, checking port table for port
-            Map<String, Table<?>> portTable = inventoryServiceInternal.getTableCache(node, Port.NAME.getName());
-            if (portTable == null ||  portTable.get(port_uuid) == null) {
-                return new StatusWithUuid(StatusCode.NOTFOUND, "Port with UUID "+port_uuid+" Not found");
-            }
-            // MUTATOR, need to insert the interface UUID to LIST of interfaces in PORT TABLE for port_uuid
-            String newInterface = "new_interface";
-            UUID interfaceUUID = new UUID(newInterface);
-            Mutation portTableMutation = new Mutation("interfaces", Mutator.INSERT, interfaceUUID); // field name to append is "interfaces"
-            List<Mutation> mutations = new ArrayList<Mutation>();
-            mutations.add(portTableMutation);
-
-            // Create the Operation which will be used in Transact to perform the PORT TABLE mutation
-            UUID uuid = new UUID(port_uuid);
-            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
-            List<Condition> where = new ArrayList<Condition>();
-            where.add(condition);
-            Operation addPortMutationRequest = new MutateOperation(Port.NAME.getName(), where, mutations);
-
-            // Create the interface row request
-            InsertOperation addIntfRequest = new InsertOperation(Interface.NAME.getName(),newInterface, interfaceRow);
-
-            // Transaction to insert/modify tables - validate using "sudo ovsdb-client dump" on host running OVSDB process
-            TransactBuilder transaction = new TransactBuilder();
-            transaction.addOperations(new ArrayList<Operation>(Arrays.asList(addIntfRequest,addPortMutationRequest)));
-
-            // Check the results. Iterates over the results of the Array of transaction Operations, and reports STATUS
-            int interfaceInsertIndex = transaction.getRequests().indexOf(addIntfRequest);
-
-            return _insertTableRow(node,transaction,interfaceInsertIndex,insertErrorMsg,rowName);
-
-        } catch (Exception e) {
-            logger.error("Error in insertInterfaceRow(): ",e);
-        }
-        return new StatusWithUuid(StatusCode.INTERNALERROR);
-    }
-
-    private StatusWithUuid insertOpen_vSwitchRow(Node node, Open_vSwitch row) {
-        return new StatusWithUuid(StatusCode.NOTIMPLEMENTED, "Insert operation for this Table is not implemented yet.");
-    }
-
-    private StatusWithUuid insertControllerRow(Node node, String bridge_uuid, Controller row) {
-
-        String insertErrorMsg = "controller";
-        String rowName=row.getTableName().toString();
-
-        try{
-
-            Map<String, Table<?>> brTable = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
-            if (brTable == null ||  brTable.get(bridge_uuid) == null) {
-                return new StatusWithUuid(StatusCode.NOTFOUND, "Bridge with UUID "+bridge_uuid+" Not found");
-            }
-
-            Map<String, Table<?>> controllerCache = inventoryServiceInternal.getTableCache(node, Controller.NAME.getName());
-
-            String uuid_name = "new_controller";
-            boolean controllerExists = false;
-            if (controllerCache != null) {
-                for (String uuid : controllerCache.keySet()) {
-                    Controller controller = (Controller)controllerCache.get(uuid);
-                    if (controller.getTarget().equals(row.getTarget())) {
-                        uuid_name = uuid;
-                        controllerExists = true;
-                        break;
-                    }
-                }
-            }
-
-            UUID controllerUUID = new UUID(uuid_name);
-            Mutation bm = new Mutation("controller", Mutator.INSERT, controllerUUID);
-            List<Mutation> mutations = new ArrayList<Mutation>();
-            mutations.add(bm);
-
-            UUID uuid = new UUID(bridge_uuid);
-            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
-            List<Condition> where = new ArrayList<Condition>();
-            where.add(condition);
-            Operation addBrMutRequest = new MutateOperation(Bridge.NAME.getName(), where, mutations);
-            InsertOperation addControllerRequest = null;
-
-            TransactBuilder transaction = new TransactBuilder();
-            transaction.addOperation(addBrMutRequest);
-            int portInsertIndex = -1;
-            if (!controllerExists) {
-                addControllerRequest = new InsertOperation(Controller.NAME.getName(), uuid_name, row);
-                transaction.addOperation(addControllerRequest);
-                portInsertIndex = transaction.getRequests().indexOf(addControllerRequest);
-            }
-
-            StatusWithUuid status = _insertTableRow(node,transaction,portInsertIndex,insertErrorMsg,rowName);
-            if (status.isSuccess() && controllerExists) {
-                // We won't get the uuid from the transact, so we set it here
-                status = new StatusWithUuid(status.getCode(), controllerUUID);
-            }
-            return status;
-
-        } catch (Exception e) {
-            logger.error("Error in insertControllerRow(): ",e);
-        }
-        return new StatusWithUuid(StatusCode.INTERNALERROR);
-    }
-
-    private StatusWithUuid insertSSLRow(Node node, String parent_uuid, SSL row) {
-        String insertErrorMsg = "SSL";
-        String rowName=row.NAME.getName();
-
-        try{
-            Map<String, Table<?>> ovsTable = inventoryServiceInternal.getTableCache(node, Open_vSwitch.NAME.getName());
-
-            if (ovsTable == null) {
-                return new StatusWithUuid(StatusCode.NOTFOUND, "There are no Open_vSwitch instance in the Open_vSwitch table");
-            }
-
-            String newSSL = "new_SSL";
-
-            Operation addOpen_vSwitchRequest = null;
-
-            String ovsTableUUID = parent_uuid;
-            if (ovsTableUUID == null) ovsTableUUID = (String) ovsTable.keySet().toArray()[0];
-            UUID sslUuid = new UUID(newSSL);
-            Mutation sslMutation = new Mutation("ssl", Mutator.INSERT, sslUuid);
-            List<Mutation> mutations = new ArrayList<Mutation>();
-            mutations.add(sslMutation);
-
-            UUID uuid = new UUID(ovsTableUUID);
-            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
-            List<Condition> where = new ArrayList<Condition>();
-            where.add(condition);
-            addOpen_vSwitchRequest = new MutateOperation(Open_vSwitch.NAME.getName(), where, mutations);
-
-            InsertOperation addSSLRequest = new InsertOperation(SSL.NAME.getName(), newSSL, row);
-
-            TransactBuilder transaction = new TransactBuilder();
-            transaction.addOperations(new ArrayList<Operation>(
-                                      Arrays.asList(addSSLRequest,
-                                                    addOpen_vSwitchRequest)));
-
-            int sslInsertIndex = transaction.getRequests().indexOf(addSSLRequest);
-
-            return _insertTableRow(node,transaction,sslInsertIndex,insertErrorMsg,rowName);
-
-        } catch(Exception e){
-            logger.error("Error in insertSSLRow(): ",e);
-        }
-        return new StatusWithUuid(StatusCode.INTERNALERROR);
-    }
-
-        private StatusWithUuid insertIpFixRow(Node node, String parent_uuid, IPFIX row) {
-
-        String insertErrorMsg = "ipfix";
-        String rowName=row.NAME.getName();
-
-        try{
-            Map<String, Table<?>> brTable = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
-            if (brTable == null ||  brTable.get(parent_uuid) == null) {
-                return new StatusWithUuid(StatusCode.NOTFOUND, "Bridge with UUID "+parent_uuid+" Not found");
-            }
-
-            if (parent_uuid == null) {
-                return new StatusWithUuid(StatusCode.BADREQUEST, "Require parent Bridge UUID.");
-            }
-
-            UUID uuid = new UUID(parent_uuid);
-            String newIpFix = "new_ipfix";
-            Operation addBridgeRequest = null;
-            UUID ipfixUuid = new UUID(newIpFix);
-            Mutation ipfixMutation = new Mutation("ipfix", Mutator.INSERT, ipfixUuid);
-            List<Mutation> mutations = new ArrayList<Mutation>();
-            mutations.add(ipfixMutation);
-
-            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
-            List<Condition> where = new ArrayList<Condition>();
-            where.add(condition);
-            addBridgeRequest = new MutateOperation(Bridge.NAME.getName(), where, mutations);
-            InsertOperation addIpFixRequest = new InsertOperation(IPFIX.NAME.getName(), newIpFix, row);
-
-            TransactBuilder transaction = new TransactBuilder();
-            transaction.addOperations(
-                    new ArrayList<Operation>(Arrays.asList(addIpFixRequest,addBridgeRequest)));
-            int ipfixInsertIndex = transaction.getRequests().indexOf(addIpFixRequest);
-
-            return _insertTableRow(node,transaction,ipfixInsertIndex,insertErrorMsg,rowName);
-
-        } catch (Exception e) {
-            logger.error("Error in insertInterfaceRow(): ",e);
-        }
-        return new StatusWithUuid(StatusCode.INTERNALERROR);
-    }
-
-    private StatusWithUuid insertSflowRow(Node node, String parent_uuid, SFlow row) {
-
-        String insertErrorMsg = "sFlow";
-        String rowName=row.NAME.getName();
-
-        try{
-            Map<String, Table<?>> brTable = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
-            if (brTable == null ||  brTable.get(parent_uuid) == null) {
-                return new StatusWithUuid(StatusCode.NOTFOUND, "Bridge with UUID "+parent_uuid+" Not found");
-            }
-
-            if (parent_uuid == null) {
-                return new StatusWithUuid(StatusCode.BADREQUEST, "Require parent Bridge UUID.");
-            }
-
-            UUID uuid = new UUID(parent_uuid);
-
-            String newSflow = "new_sflow";
-
-            Operation addBridgeRequest = null;
-
-            UUID sflowUuid = new UUID(newSflow);
-            Mutation sflowMutation = new Mutation("sflow", Mutator.INSERT, sflowUuid);
-            List<Mutation> mutations = new ArrayList<Mutation>();
-            mutations.add(sflowMutation);
-
-            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
-            List<Condition> where = new ArrayList<Condition>();
-            where.add(condition);
-            addBridgeRequest = new MutateOperation(Bridge.NAME.getName(), where, mutations);
-
-            InsertOperation addSflowRequest = new InsertOperation(SFlow.NAME.getName(), newSflow, row);
-
-            TransactBuilder transaction = new TransactBuilder();
-            transaction.addOperations(new ArrayList<Operation>(
-                                      Arrays.asList(addSflowRequest,
-                                                    addBridgeRequest)));
-
-            int sflowInsertIndex = transaction.getRequests().indexOf(addSflowRequest);
-
-
-            return _insertTableRow(node,transaction,sflowInsertIndex,insertErrorMsg,rowName);
-
-        } catch (Exception e) {
-            logger.error("Error in insertInterfaceRow(): ",e);
-        }
-        return new StatusWithUuid(StatusCode.INTERNALERROR);
-    }
-
-    private StatusWithUuid insertQueueRow(Node node, String parent_uuid, Queue row) {
-        String insertErrorMsg = "Queue";
-        String rowName=row.NAME.getName();
-
-        try{
-            Map<String, Table<?>> qosTable = inventoryServiceInternal.getTableCache(node, Qos.NAME.getName());
-            if (qosTable == null ||  qosTable.get(parent_uuid) == null) {
-                return new StatusWithUuid(StatusCode.NOTFOUND, "QoS with UUID "+parent_uuid+" Not found");
-            }
-
-            if (parent_uuid == null) {
-                return new StatusWithUuid(StatusCode.BADREQUEST, "Require parent QoS UUID.");
-            }
-
-            // NOTE: Queue Table is "isroot" meaning it can have a hanging reference. This is different from
-            // standing insertRow due to the parent column type being a map, where one of the items may not be known
-            // at time of insert. Therefore this is a simple insert, rather than mutate/insert.
-            String newQueue = "new_queue";
-            InsertOperation addQueueRequest = new InsertOperation(Queue.NAME.getName(), newQueue, row);
-
-            TransactBuilder transaction = new TransactBuilder();
-            transaction.addOperations(new ArrayList<Operation>(Arrays.asList(addQueueRequest)));
-
-            int queueInsertIndex = transaction.getRequests().indexOf(addQueueRequest);
-
-            return _insertTableRow(node,transaction,queueInsertIndex,insertErrorMsg,rowName);
-
-        } catch (Exception e) {
-            logger.error("Error in insertQueueRow(): ",e);
-        }
-        return new StatusWithUuid(StatusCode.INTERNALERROR);    }
-
-    private StatusWithUuid insertQosRow(Node node, String parent_uuid, Qos row) {
-        String insertErrorMsg = "Qos";
-        String rowName=row.NAME.getName();
-
-        try{
-
-            String newQos = "new_qos";
-
-            // QoS Table "isroot" meaning it can have hanging references. If parent_uuid is not supplied in API call this becomes a simple
-            // insert operation, rather than the typical mutate/insert parent/child insert.
-            if (parent_uuid != null) {
-                // Port (parent) table check for UUID existance.
-                Map<String, Table<?>> portTable = inventoryServiceInternal.getTableCache(node, Port.NAME.getName());
-                if (portTable == null ||  portTable.get(parent_uuid) == null) {
-                    return new StatusWithUuid(StatusCode.NOTFOUND, "Port with UUID "+parent_uuid+" Not found");
-                }
-
-                UUID qosUuid = new UUID(newQos);
-                Mutation qosMutation = new Mutation("qos", Mutator.INSERT, qosUuid);
-                List<Mutation> mutations = new ArrayList<Mutation>();
-                mutations.add(qosMutation);
-
-                Operation addPortRequest = null;
-                UUID uuid = new UUID(parent_uuid);
-                Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
-                List<Condition> where = new ArrayList<Condition>();
-                where.add(condition);
-                addPortRequest = new MutateOperation(Port.NAME.getName(), where, mutations);
-
-                InsertOperation addQosRequest = new InsertOperation(Qos.NAME.getName(), newQos, row);
-
-                TransactBuilder transaction = new TransactBuilder();
-                transaction.addOperations(new ArrayList<Operation>(Arrays.asList(addQosRequest,addPortRequest)));
-
-                int qosInsertIndex = transaction.getRequests().indexOf(addQosRequest);
-
-                return _insertTableRow(node,transaction,qosInsertIndex,insertErrorMsg,rowName);
-
-            } else {
-                InsertOperation addQosRequest = new InsertOperation(Qos.NAME.getName(), newQos, row);
-
-                TransactBuilder transaction = new TransactBuilder();
-                transaction.addOperations(new ArrayList<Operation>(Arrays.asList(addQosRequest)));
-
-                int qosInsertIndex = transaction.getRequests().indexOf(addQosRequest);
-
-                return _insertTableRow(node,transaction,qosInsertIndex,insertErrorMsg,rowName);
-            }
-
-        } catch (Exception e) {
-            logger.error("Error in insertQosRow(): ",e);
-        }
-        return new StatusWithUuid(StatusCode.INTERNALERROR);
-    }
-
-
-    private StatusWithUuid insertNetFlowRow(Node node, String parent_uuid, NetFlow row) {
-        String insertErrorMsg = "netFlow";
-        String rowName=row.NAME.getName();
-
-        try{
-            Map<String, Table<?>> brTable = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
-            if (brTable == null ||  brTable.get(parent_uuid) == null) {
-                return new StatusWithUuid(StatusCode.NOTFOUND, "Bridge with UUID "+parent_uuid+" Not found");
-            }
-
-            if (parent_uuid == null) {
-                return new StatusWithUuid(StatusCode.BADREQUEST, "Require parent Bridge UUID.");
-            }
-
-            UUID uuid = new UUID(parent_uuid);
-            String newNetflow = "new_netflow";
-
-            Operation addBridgeRequest = null;
-
-            UUID netFlowUuid = new UUID(newNetflow);
-            Mutation netFlowMutation = new Mutation("netflow", Mutator.INSERT, netFlowUuid);
-            List<Mutation> mutations = new ArrayList<Mutation>();
-            mutations.add(netFlowMutation);
-
-            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
-            List<Condition> where = new ArrayList<Condition>();
-            where.add(condition);
-            addBridgeRequest = new MutateOperation(Bridge.NAME.getName(), where, mutations);
-
-            InsertOperation addNetflowRequest = new InsertOperation(NetFlow.NAME.getName(), newNetflow, row);
-
-            TransactBuilder transaction = new TransactBuilder();
-            transaction.addOperations(new ArrayList<Operation>(
-                                      Arrays.asList(addNetflowRequest,
-                                                    addBridgeRequest)));
-
-            int netflowInsertIndex = transaction.getRequests().indexOf(addNetflowRequest);
-
-
-            return _insertTableRow(node,transaction,netflowInsertIndex,insertErrorMsg,rowName);
-
-        } catch (Exception e) {
-            logger.error("Error in insertNetFlowRow(): ",e);
-        }
-        return new StatusWithUuid(StatusCode.INTERNALERROR);
-    }
-
-    private StatusWithUuid insertMirrorRow(Node node, String parent_uuid, Mirror row) {
-        String insertErrorMsg = "mirror";
-        String rowName=row.NAME.getName();
-
-        try{
-            Map<String, Table<?>> brTable = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
-            if (brTable == null ||  brTable.get(parent_uuid) == null) {
-                return new StatusWithUuid(StatusCode.NOTFOUND, "Bridge with UUID "+parent_uuid+" Not found");
-            }
-
-            if (parent_uuid == null) {
-                return new StatusWithUuid(StatusCode.BADREQUEST, "Require parent Bridge UUID.");
-            }
-
-            UUID uuid = new UUID(parent_uuid);
-            String newMirror = "new_mirror";
-
-            Operation addBridgeRequest = null;
-
-            UUID mirrorUuid = new UUID(newMirror);
-            Mutation mirrorMutation = new Mutation("mirrors", Mutator.INSERT, mirrorUuid);
-            List<Mutation> mutations = new ArrayList<Mutation>();
-            mutations.add(mirrorMutation);
-
-            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
-            List<Condition> where = new ArrayList<Condition>();
-            where.add(condition);
-            addBridgeRequest = new MutateOperation(Bridge.NAME.getName(), where, mutations);
-
-            InsertOperation addMirrorRequest = new InsertOperation(Mirror.NAME.getName(), newMirror, row);
-
-            TransactBuilder transaction = new TransactBuilder();
-            transaction.addOperations(new ArrayList<Operation>(
-                                      Arrays.asList(addBridgeRequest, addMirrorRequest)));
-
-            int mirrorInsertIndex = transaction.getRequests().indexOf(addMirrorRequest);
-
-            return _insertTableRow(node,transaction,mirrorInsertIndex,insertErrorMsg,rowName);
-
-            } catch (Exception e) {
-            logger.error("Error in insertMirrorRow(): ",e);
-        }
-        return new StatusWithUuid(StatusCode.INTERNALERROR);
-    }
-
-    private StatusWithUuid insertManagerRow(Node node, String parent_uuid, Manager row) {
-        String insertErrorMsg = "manager";
-        String rowName=row.NAME.getName();
-
-        try{
-            Map<String, Table<?>> ovsTable = inventoryServiceInternal.getTableCache(node, Open_vSwitch.NAME.getName());
-
-            if (ovsTable == null) {
-                return new StatusWithUuid(StatusCode.NOTFOUND, "There are no Open_vSwitch instance in the Open_vSwitch table");
-            }
-
-            String newManager = "new_manager";
-
-            Operation addSwitchRequest = null;
-
-            String ovsTableUUID = parent_uuid;
-            if (ovsTableUUID == null) ovsTableUUID = (String) ovsTable.keySet().toArray()[0];
-            UUID managerUuid = new UUID(newManager);
-            Mutation managerMutation = new Mutation("manager_options", Mutator.INSERT, managerUuid);
-            List<Mutation> mutations = new ArrayList<Mutation>();
-            mutations.add(managerMutation);
-
-            UUID uuid = new UUID(ovsTableUUID);
-            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
-            List<Condition> where = new ArrayList<Condition>();
-            where.add(condition);
-            addSwitchRequest = new MutateOperation(Open_vSwitch.NAME.getName(), where, mutations);
-
-            InsertOperation addManagerRequest = new InsertOperation(Manager.NAME.getName(), newManager, row);
-
-            TransactBuilder transaction = new TransactBuilder();
-            transaction.addOperations(new ArrayList<Operation>(
-                                      Arrays.asList(addSwitchRequest,
-                                                    addManagerRequest)));
-
-            int managerInsertIndex = transaction.getRequests().indexOf(addManagerRequest);
-
-            return _insertTableRow(node,transaction,managerInsertIndex,insertErrorMsg,rowName);
-
-        } catch(Exception e){
-            logger.error("Error in insertManagerRow(): ",e);
-        }
-        return new StatusWithUuid(StatusCode.INTERNALERROR);
-    }
-
-    private StatusWithUuid _insertTableRow(Node node, TransactBuilder transaction, Integer insertIndex, String insertErrorMsg,String rowName){
-
-        try{
-            //Check for connection before calling RPC to perform transaction
-            if (connectionService == null) {
-                logger.error("Couldn't refer to the ConnectionService");
-                return new StatusWithUuid(StatusCode.NOSERVICE);
-            }
-
-            Connection connection = this.getConnection(node);
-            if (connection == null) {
-                return new StatusWithUuid(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
-            }
-
-            ListenableFuture<List<OperationResult>> transResponse = connection.getClient().transactBuilder().execute();
-            List<OperationResult> tr = transResponse.get();
-            List<Operation> requests = transaction.getRequests();
-            StatusWithUuid status = new StatusWithUuid(StatusCode.SUCCESS);
-            for (int i = 0; i < tr.size() ; i++) {
-                if (i < requests.size()) requests.get(i).setResult(tr.get(i));
-                if (tr.get(i) != null && tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
-                    OperationResult result = tr.get(i);
-                    status = new StatusWithUuid(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
-                }
-            }
-
-            if (tr.size() > requests.size()) {
-                OperationResult result = tr.get(tr.size()-1);
-                logger.error("Error creating {} : {}\n Error : {}\n Details : {}",     insertErrorMsg,
-                                                                                       rowName,
-                                                                                       result.getError(),
-                                                                                       result.getDetails());
-                status = new StatusWithUuid(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
-            }
-            if (status.isSuccess()) {
-                if (insertIndex >= 0 && insertIndex < tr.size() && tr.get(insertIndex) != null) {
-                    UUID uuid = tr.get(insertIndex).getUuid();
-                    status = new StatusWithUuid(StatusCode.SUCCESS, uuid);
-                } else {
-                    // We can't get the uuid from the transact as the insertIndex is invalid or -1
-                    // return null uuid.
-                    status = new StatusWithUuid(StatusCode.SUCCESS, (UUID) null);
-                }
-            }
-            return status;
-        } catch(Exception e){
-            logger.error("Error in _insertTableRow(): ",e);
-        }
-        return new StatusWithUuid(StatusCode.INTERNALERROR);
     }
 
 

@@ -71,6 +71,6 @@ public class OperationResult {
     @Override
     public String toString() {
         return "OperationResult [count=" + count + ", uuid=" + uuid + ", rows="
-                + rows + ", error=" + error + "]";
+                + rows + ", error=" + error + ", details=" + details + "]";
     }
 }

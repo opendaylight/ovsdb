@@ -140,7 +140,7 @@ public abstract class TableSchema<E extends TableSchema<E>> {
         return tableUpdate;
     }
 
-    protected Row<E> createRow(ObjectNode rowNode) {
+    public Row<E> createRow(ObjectNode rowNode) {
         List<Column<E, ?>> columns = Lists.newArrayList();
         for (Iterator<Map.Entry<String, JsonNode>> iter = rowNode.fields(); iter.hasNext();) {
             Map.Entry<String, JsonNode> next = iter.next();

@@ -101,7 +101,7 @@ public class DatabaseSchema {
         Map<String, TableSchema> tables = new HashMap<>();
         for (Iterator<Map.Entry<String, JsonNode>> iter = json.get("tables").fields(); iter.hasNext(); ) {
             Map.Entry<String, JsonNode> table = iter.next();
-            logger.debug("Read schema for table[{}]:{}", table.getKey(), table.getValue());
+            logger.trace("Read schema for table[{}]:{}", table.getKey(), table.getValue());
 
             //todo : this needs to done by a factory
             tables.put(table.getKey(), new GenericTableSchema().fromJson(table.getKey(), table.getValue()));

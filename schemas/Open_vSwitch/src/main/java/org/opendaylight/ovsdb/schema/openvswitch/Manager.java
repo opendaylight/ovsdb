@@ -16,14 +16,60 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedColumn;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 
-/*
- * Reusing the existing Table definitions and many of columns are not defined here
- * TODO : Fill up the missing Columns and include Supported DB Version
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * This class is a typed interface to the Manager Table
  */
-@TypedTable(name="Manager", database="Open_vSwitch")
+@TypedTable (name="Manager", database="Open_vSwitch", fromVersion = "1.0.0")
 public interface Manager extends TypedBaseTable<GenericTableSchema> {
-    @TypedColumn(name="target", method=MethodType.GETCOLUMN)
-    public Column<GenericTableSchema, String> getTargetColumn() ;
-    @TypedColumn(name="target", method=MethodType.SETDATA)
-    public void setTarget(String target) ;
+
+    @TypedColumn (name="target", method= MethodType.GETCOLUMN, fromVersion = "1.0.0")
+    public Column<GenericTableSchema, Set<String>> getTargetColumn();
+
+    @TypedColumn (name="target", method= MethodType.SETDATA, fromVersion = "1.0.0")
+    public void setTarget(Set<String> target) ;
+
+    @TypedColumn (name = "is_connected", method = MethodType.GETCOLUMN, fromVersion = "1.1.0")
+    public Column<GenericTableSchema, Boolean> getIsConnectedColumn();
+
+    @TypedColumn (name = "is_connected", method = MethodType.SETDATA, fromVersion = "1.1.0")
+    public void setIsConnected(Boolean isConnected);
+
+    @TypedColumn (name = "other_config", method = MethodType.GETCOLUMN, fromVersion = "6.8.0")
+    public Column<GenericTableSchema, Map<String, String>> getOtherConfigColumn();
+
+    @TypedColumn (name = "other_config", method = MethodType.SETDATA, fromVersion = "6.8.0")
+    public void setOtherConfig(Map<String, String> otherConfig);
+
+    @TypedColumn (name = "external_ids", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
+    public Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn();
+
+    @TypedColumn (name = "external_ids", method = MethodType.SETDATA, fromVersion = "1.0.0")
+    public void setExternalIds(Map<String, String> externalIds);
+
+    @TypedColumn (name = "max_backoff", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
+    public Column<GenericTableSchema, Set<Integer>> getMaxBackoffColumn();
+
+    @TypedColumn (name = "max_backoff", method = MethodType.SETDATA, fromVersion = "1.0.0")
+    public void setMaxBackoff(Set<Integer> maxBackoff);
+
+    @TypedColumn (name = "status", method = MethodType.GETCOLUMN, fromVersion = "1.1.0")
+    public Column<GenericTableSchema, Map<String, String>> getStatusColumn();
+
+    @TypedColumn (name = "status", method = MethodType.SETDATA, fromVersion = "1.1.0")
+    public void setStatus(Map<String, String> status);
+
+    @TypedColumn (name = "inactivity_probe", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
+    public Column<GenericTableSchema, Set<Integer>> getInactivityProbeColumn();
+
+    @TypedColumn (name = "inactivity_probe", method = MethodType.SETDATA, fromVersion = "1.0.0")
+    public void setInactivityProbe(Set<Integer> inactivityProbe);
+
+    @TypedColumn (name = "connection_mode", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
+    public Column<GenericTableSchema, Set<String>> getConnectionModeColumn();
+
+    @TypedColumn (name = "connection_mode", method = MethodType.SETDATA, fromVersion = "1.0.0")
+    public void setConnectionMode(Set<String> connectionMode);
 }

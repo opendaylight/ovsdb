@@ -687,6 +687,7 @@
               <includes>
                 <include>**/*LibraryIT*</include>
                 <include>**/*PluginIT*</include>
+                <include>**/*NorthboundIT*</include>
               </includes>
             </configuration>
           </execution>

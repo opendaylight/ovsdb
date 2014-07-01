@@ -15,7 +15,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeNotNull;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
@@ -38,7 +37,6 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.usermanager.IUserManager;
 import org.opendaylight.ovsdb.integrationtest.ConfigurationBundles;
 import org.opendaylight.ovsdb.integrationtest.OvsdbIntegrationTestBase;
-import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExamParameterized;
@@ -79,7 +77,6 @@ public class OvsdbNorthboundIT extends OvsdbIntegrationTestBase {
     @Inject
     private BundleContext bc;
     private Node node = null;
-    private OvsdbClient client = null;
     private IUserManager userManager;
 
     @Parameterized.Parameters(name = "ApiTest{index}:{0}")
@@ -116,10 +113,7 @@ public class OvsdbNorthboundIT extends OvsdbIntegrationTestBase {
     @Test
     public void testApi() {
         System.out.println("Running " + fTestCase + "...\n");
-        /*
-         * TODO : Remove this assumeNotNull once the new library migration is completed.
-         */
-        assumeNotNull(node);
+
         Client client = Client.create();
         client.addFilter(new HTTPBasicAuthFilter(USERNAME , PASSWORD));
         String uri = BASE_URI + fPath;
@@ -151,7 +145,6 @@ public class OvsdbNorthboundIT extends OvsdbIntegrationTestBase {
                 fail("Unsupported operation");
         }
         assertEquals(fExpectedStatusCode, response.getStatus());
-
     }
 
     private String expand(String content){
@@ -267,7 +260,7 @@ public class OvsdbNorthboundIT extends OvsdbIntegrationTestBase {
         assertTrue(this.userManager != null);
 
         try {
-            client = getTestConnection();
+            node = getPluginTestConnection();
         } catch (Exception e) {
             fail("Exception : "+e.getMessage());
         }
@@ -297,6 +290,7 @@ public class OvsdbNorthboundIT extends OvsdbIntegrationTestBase {
                 ConfigurationBundles.controllerBundles(),
                 ConfigurationBundles.controllerNorthboundBundles(),
                 ConfigurationBundles.ovsdbLibraryBundles(),
+                ConfigurationBundles.ovsdbDefaultSchemaBundles(),
                 mavenBundle("org.opendaylight.ovsdb", "ovsdb_plugin").versionAsInProject(),
                 mavenBundle("org.opendaylight.ovsdb", "ovsdb_northbound").versionAsInProject(),
                 junitBundles()

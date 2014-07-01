@@ -16,9 +16,11 @@ package org.opendaylight.ovsdb.lib.notation;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 public class Column<E extends TableSchema<E>, D> {
-
+    @JsonIgnore
     private ColumnSchema<E, D> schema;
     private D data;
 

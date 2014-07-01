@@ -26,7 +26,7 @@ public class NodeDB {
         ConcurrentMap<String, ConcurrentMap<String,Row>> retMap = Maps.newConcurrentMap();
         for (String tableName : tdbMap.keySet()) {
             TableDB tdb = tdbMap.get(tableName);
-            retMap.put(tableName, tdb.getTableCache(tableName));
+            if (tdb != null && tdb.getTableCache(tableName) != null) retMap.put(tableName, tdb.getTableCache(tableName));
         }
         return retMap;
     }

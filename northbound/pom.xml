@@ -54,6 +54,17 @@
       <artifactId>ovsdb_plugin</artifactId>
       <version>1.0.0-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>${guava.version}</version>
+    </dependency>
 
   </dependencies>
   <build>
@@ -73,20 +84,25 @@
               com.sun.jersey.spi.container.servlet,
               org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.authorization,
-              org.opendaylight.ovsdb.lib.table,
-              org.opendaylight.ovsdb.lib.notation,
               org.opendaylight.ovsdb.plugin,
+              org.opendaylight.ovsdb.lib,
+              org.opendaylight.ovsdb.lib.table,
+              org.opendaylight.ovsdb.lib.jsonrpc,
+              org.opendaylight.ovsdb.lib.notation,
+              org.opendaylight.ovsdb.lib.database,
+              org.opendaylight.ovsdb.lib.operations,
+              org.opendaylight.ovsdb.lib.message,
+              org.opendaylight.ovsdb.lib.schema,
+              org.opendaylight.ovsdb.lib.schema.typed,
               javax.ws.rs,
               javax.ws.rs.core,
               javax.xml.bind,
               javax.xml.bind.annotation,
               org.slf4j,
               org.apache.catalina.filters,
-              com.fasterxml.jackson.databind.annotation,
-              com.fasterxml.jackson.annotation,
-              !org.codehaus.enunciate.jaxrs</Import-Package>
+              !org.codehaus.enunciate.jaxrs,*</Import-Package>
             <Export-Package></Export-Package>
-            <Web-ContextPath>/ovsdb/nb/v2</Web-ContextPath>
+            <Web-ContextPath>/ovsdb/nb</Web-ContextPath>
             <Jaxrs-Resources>,${classes;ANNOTATION;javax.ws.rs.Path}</Jaxrs-Resources>
           </instructions>
           <manifestLocation>${project.basedir}/src/main/resources/META-INF</manifestLocation>

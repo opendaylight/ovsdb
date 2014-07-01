@@ -11,21 +11,21 @@ package org.opendaylight.ovsdb.northbound;
 
 import java.util.Map;
 
-import org.opendaylight.ovsdb.lib.table.Table;
+import org.opendaylight.ovsdb.lib.notation.Row;
 
-public class OVSDBRows {
-    Map<String, Table<?>> rows;
+public class OvsdbRows {
+    Map<String, Row> rows;
 
-    public OVSDBRows(Map<String, Table<?>> rows) {
+    public OvsdbRows(Map<String, Row> rows) {
         super();
         this.rows = rows;
     }
 
-    public Map<String, Table<?>> getRows() {
+    public Map<String, Row> getRows() {
         return rows;
     }
 
-    public void setRows(Map<String, Table<?>> rows) {
+    public void setRows(Map<String, Row> rows) {
         this.rows = rows;
     }
 }

@@ -9,8 +9,9 @@
  */
 package org.opendaylight.ovsdb.northbound;
 
-import java.util.List;
+import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -38,14 +39,19 @@ import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
-import org.opendaylight.controller.sal.utils.StatusCode;
+import org.opendaylight.ovsdb.lib.OvsdbClient;
+import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.lib.table.Table;
-import org.opendaylight.ovsdb.lib.table.Tables;
+import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.plugin.Connection;
+import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
+import org.opendaylight.ovsdb.plugin.OvsVswitchdSchemaConstants;
 import org.opendaylight.ovsdb.plugin.StatusWithUuid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
 * OVSDB Northbound REST API.<br>
@@ -63,9 +69,9 @@ import org.slf4j.LoggerFactory;
 * HTTPS Authentication is disabled by default.
 */
 
-@Path("/")
-public class OVSDBNorthbound {
-    protected static final Logger logger = LoggerFactory.getLogger(OVSDBNorthbound.class);
+@Path("/v2/")
+public class OvsdbNorthboundV2 {
+    protected static final Logger logger = LoggerFactory.getLogger(OvsdbNorthboundV2.class);
 
     @Context
     private UriInfo _uriInfo;
@@ -94,24 +100,13 @@ public class OVSDBNorthbound {
                 + " : Table Name in URL does not match the row name in request body");
     }
 
-    private String getOVSTableName(String tableName) {
-        List<Table> tables = Tables.getTables();
-        for (Table table : tables) {
-            if (table.getTableName().getName().equalsIgnoreCase(tableName)) {
-                return table.getTableName().getName();
-            }
-        }
-        // TODO Auto-generated method stub
-        return null;
-    }
-
     /**
-     * Create a Row
+     * Create a Row for Open_vSwitch schema
      *
      * @param nodeType type of node e.g OVS
      * @param nodeId ID of the node
      * @param tableName name of the OVSDB table
-     * @param row the {@link OVSDBRow} Row that is being inserted
+     * @param row the {@link OvsdbRow} Row that is being inserted
      *
      * @return Response as dictated by the HTTP Response Status code
      *
@@ -311,6 +306,9 @@ public class OVSDBNorthbound {
      *   }
      * }
      * </pre>
+     * @throws IOException
+     * @throws ExecutionException
+     * @throws InterruptedException
      */
 
     @Path("/node/{nodeType}/{nodeId}/tables/{tableName}/rows")
@@ -320,16 +318,10 @@ public class OVSDBNorthbound {
         @ResponseCode(code = 401, condition = "User not authorized to perform this operation")})
     @Consumes({ MediaType.APPLICATION_JSON})
     public Response addRow(@PathParam("nodeType") String nodeType, @PathParam("nodeId") String nodeId,
-                           @PathParam("tableName") String tableName, @TypeHint(OVSDBRow.class) OVSDBRow row) {
+                           @PathParam("tableName") String tableName, JsonNode rowJson) throws IOException, InterruptedException, ExecutionException {
 
         if (!NorthboundUtils.isAuthorized(getUserName(), "default", Privilege.WRITE, this)) {
             throw new UnauthorizedException("User is not authorized to perform this operation");
-        }
-
-        String ovsTableName = getOVSTableName(tableName);
-        if (ovsTableName == null) {
-            Status status = new Status(StatusCode.NOTFOUND, "Table "+tableName+" is not currently supported");
-            return NorthboundUtils.getResponse(status);
         }
 
         OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class,
@@ -338,23 +330,28 @@ public class OVSDBNorthbound {
             throw new ServiceUnavailableException("OVS Configuration Service " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
-        if (row != null && row.getRow() != null) {
-            handleNameMismatch(tableName, row.getRow().getTableName().getName());
-            Node node = Node.fromString(nodeType, nodeId);
-            StatusWithUuid statusWithUUID = ovsdbTable.insertRow(node, ovsTableName, row.getParent_uuid(), row.getRow());
+        Node node = Node.fromString(nodeType, nodeId);
+        IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+        Connection connection = connectionService.getConnection(node);
+        OvsdbClient client = connection.getClient();
+        OvsdbRow localRow = OvsdbRow.fromJsonNode(client, OvsVswitchdSchemaConstants.DATABASE_NAME, rowJson);
+        String bckCompatibleTableName = this.getBackwardCompatibleTableName(client, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName);
 
-            if (statusWithUUID.isSuccess()) {
-                UUID uuid = statusWithUUID.getUuid();
-                return Response.status(Response.Status.CREATED)
-                        .header("Location", String.format("%s/%s", _uriInfo.getAbsolutePath().toString(),
-                                                                    uuid.toString()))
-                        .entity(uuid.toString())
-                        .build();
-            } else {
-                return NorthboundUtils.getResponse(statusWithUUID);
-            }
+        if (localRow == null) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
         }
-        return Response.status(Response.Status.BAD_REQUEST).build();
+
+        StatusWithUuid statusWithUuid = ovsdbTable.insertRow(node, bckCompatibleTableName, localRow.getParentUuid(), localRow.getRow());
+
+        if (statusWithUuid.isSuccess()) {
+            UUID uuid = statusWithUuid.getUuid();
+            return Response.status(Response.Status.CREATED)
+                    .header("Location", String.format("%s/%s", _uriInfo.getAbsolutePath().toString(),
+                                                                uuid.toString()))
+                    .entity(uuid.toString())
+                    .build();
+        }
+        return NorthboundUtils.getResponse(statusWithUuid);
     }
 
     /**
@@ -409,16 +406,13 @@ public class OVSDBNorthbound {
         @ResponseCode(code = 400, condition = "Invalid data passed"),
         @ResponseCode(code = 401, condition = "User not authorized to perform this operation")})
     @Consumes({ MediaType.APPLICATION_JSON})
-    @TypeHint(OVSDBRow.class)
-    public OVSDBRow getRow(@PathParam("nodeType") String nodeType, @PathParam("nodeId") String nodeId,
+    @TypeHint(Row.class)
+    public Row getRow(@PathParam("nodeType") String nodeType, @PathParam("nodeId") String nodeId,
                            @PathParam("tableName") String tableName, @PathParam("rowUuid") String rowUuid) {
 
         if (!NorthboundUtils.isAuthorized(getUserName(), "default", Privilege.WRITE, this)) {
             throw new UnauthorizedException("User is not authorized to perform this operation");
         }
-
-        String ovsTableName = getOVSTableName(tableName);
-        if (ovsTableName == null) return null;
 
         OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class,
                                                                                             this);
@@ -427,13 +421,18 @@ public class OVSDBNorthbound {
         }
 
         Node node = Node.fromString(nodeType, nodeId);
-        Table<?> row = null;
+        IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+        Connection connection = connectionService.getConnection(node);
+        OvsdbClient client = connection.getClient();
+        String bckCompatibleTableName = this.getBackwardCompatibleTableName(client, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName);
+
+        Row row = null;
         try {
-            row = ovsdbTable.getRow(node, ovsTableName, rowUuid);
+            row = ovsdbTable.getRow(node, bckCompatibleTableName, rowUuid);
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
         }
-        return new OVSDBRow(null, row);
+        return row;
     }
 
     /**
@@ -490,15 +489,12 @@ public class OVSDBNorthbound {
         @ResponseCode(code = 400, condition = "Invalid data passed"),
         @ResponseCode(code = 401, condition = "User not authorized to perform this operation")})
     @Consumes({ MediaType.APPLICATION_JSON})
-    @TypeHint(OVSDBRows.class)
-    public OVSDBRows getAllRows(@PathParam("nodeType") String nodeType, @PathParam("nodeId") String nodeId,
+    @TypeHint(OvsdbRows.class)
+    public OvsdbRows getAllRows(@PathParam("nodeType") String nodeType, @PathParam("nodeId") String nodeId,
                                @PathParam("tableName") String tableName) {
         if (!NorthboundUtils.isAuthorized(getUserName(), "default", Privilege.WRITE, this)) {
             throw new UnauthorizedException("User is not authorized to perform this operation");
         }
-
-        String ovsTableName = getOVSTableName(tableName);
-        if (ovsTableName == null) return null;
 
         OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class,
                                                                                             this);
@@ -507,15 +503,20 @@ public class OVSDBNorthbound {
         }
 
         Node node = Node.fromString(nodeType, nodeId);
-        Map<String, Table<?>> rows = null;
+        IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+        Connection connection = connectionService.getConnection(node);
+        OvsdbClient client = connection.getClient();
+        String bckCompatibleTableName = this.getBackwardCompatibleTableName(client, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName);
+        Map<String, Row> rows = null;
         try {
-            rows = ovsdbTable.getRows(node, ovsTableName);
+            rows = ovsdbTable.getRows(node, bckCompatibleTableName);
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
         }
-        return new OVSDBRows(rows);
+        return new OvsdbRows(rows);
     }
 
+    /*
     /**
      * Update a Row
      *
@@ -563,31 +564,31 @@ public class OVSDBNorthbound {
     @Consumes({ MediaType.APPLICATION_JSON})
     public Response updateRow(@PathParam("nodeType") String nodeType, @PathParam("nodeId") String nodeId,
                            @PathParam("tableName") String tableName, @PathParam("rowUuid") String rowUuid,
-                           @TypeHint(OVSDBRow.class) OVSDBRow row) {
+                           JsonNode rowJson) {
 
         if (!NorthboundUtils.isAuthorized(getUserName(), "default", Privilege.WRITE, this)) {
             throw new UnauthorizedException("User is not authorized to perform this operation");
         }
 
-        String ovsTableName = getOVSTableName(tableName);
-        if (ovsTableName == null) {
-            Status status = new Status(StatusCode.NOTFOUND, "Table "+tableName+" is not currently supported");
-            return NorthboundUtils.getResponse(status);
-        }
-
         OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class,
                                                                                             this);
         if (ovsdbTable == null) {
-            throw new ServiceUnavailableException("UserManager " + RestMessages.SERVICEUNAVAILABLE.toString());
+            throw new ServiceUnavailableException("OVS Configuration Service " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
-        if (row != null && row.getRow() != null) {
-            handleNameMismatch(tableName, row.getRow().getTableName().getName());
-            Node node = Node.fromString(nodeType, nodeId);
-            Status status = ovsdbTable.updateRow(node, ovsTableName, row.getParent_uuid(), rowUuid, row.getRow());
-            return NorthboundUtils.getResponse(status);
+        Node node = Node.fromString(nodeType, nodeId);
+        IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+        Connection connection = connectionService.getConnection(node);
+        OvsdbClient client = connection.getClient();
+        String bckCompatibleTableName = this.getBackwardCompatibleTableName(client, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName);
+        OvsdbRow localRow = OvsdbRow.fromJsonNode(client, OvsVswitchdSchemaConstants.DATABASE_NAME, rowJson);
+
+        if (localRow == null) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
         }
-        return Response.status(Response.Status.BAD_REQUEST).build();
+
+        Status status = ovsdbTable.updateRow(node, bckCompatibleTableName, localRow.getParentUuid(), rowUuid, localRow.getRow());
+        return NorthboundUtils.getResponse(status);
     }
 
     /**
@@ -635,6 +636,7 @@ public class OVSDBNorthbound {
      * DELETE http://localhost:8080/ovsdb/nb/v2/node/OVS/HOST1/tables/manager/rows/6f4c602c-026f-4390-beea-d50d6d448100
      * </pre>
      */
+
     @Path("/node/{nodeType}/{nodeId}/tables/{tableName}/rows/{uuid}")
     @DELETE
     @StatusCodes({ @ResponseCode(code = 204, condition = "User Deleted Successfully"),
@@ -648,21 +650,31 @@ public class OVSDBNorthbound {
             throw new UnauthorizedException("User is not authorized to perform this operation");
         }
 
-        String ovsTableName = getOVSTableName(tableName);
-        if (ovsTableName == null) {
-            Status status = new Status(StatusCode.NOTFOUND, "Table "+tableName+" is not currently supported");
-            return NorthboundUtils.getResponse(status);
+        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class,
+                this);
+        if (ovsdbTable == null) {
+            throw new ServiceUnavailableException("OVS Configuration Service " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
-        OVSDBConfigService ovsdbTable = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-        if (ovsdbTable == null) {
-            throw new ServiceUnavailableException("UserManager " + RestMessages.SERVICEUNAVAILABLE.toString());
-        }
         Node node = Node.fromString(nodeType, nodeId);
-        Status status = ovsdbTable.deleteRow(node, ovsTableName, uuid);
+        IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+        Connection connection = connectionService.getConnection(node);
+        OvsdbClient client = connection.getClient();
+        String bckCompatibleTableName = this.getBackwardCompatibleTableName(client, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName);
+
+        Status status = ovsdbTable.deleteRow(node, bckCompatibleTableName, uuid);
         if (status.isSuccess()) {
             return Response.noContent().build();
         }
         return NorthboundUtils.getResponse(status);
+    }
+
+    private String getBackwardCompatibleTableName(OvsdbClient client, String databaseName, String tableName) {
+        DatabaseSchema dbSchema = client.getDatabaseSchema(databaseName);
+        if (dbSchema == null || tableName == null) return tableName;
+        for (String dbTableName : dbSchema.getTables()) {
+            if (dbTableName.equalsIgnoreCase(tableName)) return dbTableName;
+        }
+        return tableName;
     }
 }

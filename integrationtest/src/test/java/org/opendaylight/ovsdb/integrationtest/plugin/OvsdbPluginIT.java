@@ -21,21 +21,14 @@ import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperty;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
@@ -107,35 +100,6 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
         default:
             return "Not CONVERTED";
         }
-    }
-
-    public Node getPluginTestConnection() throws IOException, InterruptedException, ExecutionException, TimeoutException {
-        Properties props = loadProperties();
-        String addressStr = props.getProperty(SERVER_IPADDRESS);
-        String portStr = props.getProperty(SERVER_PORT, DEFAULT_SERVER_PORT);
-        String connectionType = props.getProperty(CONNECTION_TYPE, "active");
-
-        IConnectionServiceInternal connection = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
-        // If the connection type is active, controller connects to the ovsdb-server
-        if (connectionType.equalsIgnoreCase(CONNECTION_TYPE_ACTIVE)) {
-            if (addressStr == null) {
-                fail(usage());
-            }
-
-            Map<ConnectionConstants, String> params = new HashMap<ConnectionConstants, String>();
-            params.put(ConnectionConstants.ADDRESS, addressStr);
-            params.put(ConnectionConstants.PORT, portStr);
-            return connection.connect(IDENTIFIER, params);
-        }  else if (connectionType.equalsIgnoreCase(CONNECTION_TYPE_PASSIVE)) {
-            // Wait for 10 seconds for the Passive connection to be initiated by the ovsdb-server.
-            Thread.sleep(10000);
-            List<Node> nodes = connection.getNodes();
-            assertNotNull(nodes);
-            assertTrue(nodes.size() > 0);
-            return nodes.get(0);
-        }
-        fail("Connection parameter ("+CONNECTION_TYPE+") must be active or passive");
-        return null;
     }
 
     @Before

@@ -215,7 +215,9 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
      * plugin layer.
      */
     public String getSpecialCaseParentUUID(Node node, String databaseName, String childTableName) {
-        if (databaseName.equals(OvsVswitchdSchemaConstants.DATABASE_NAME) && childTableName.equals("Bridge")) {
+        if (!databaseName.equals(OvsVswitchdSchemaConstants.DATABASE_NAME)) return null;
+        String[] parentColumn = OvsVswitchdSchemaConstants.getParentColumnToMutate(childTableName);
+        if (parentColumn != null && parentColumn[0].equals(OvsVswitchdSchemaConstants.DATABASE_NAME)) {
             Connection connection = connectionService.getConnection(node);
             OpenVSwitch openVSwitch = connection.getClient().getTypedRowWrapper(OpenVSwitch.class, null);
             ConcurrentMap<String, Row> row = this.getRows(node, openVSwitch.getSchema().getName());
@@ -313,10 +315,10 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
                                     String parentTable, String parentColumn, String uuid, TransactionBuilder transactionBuilder) {
         DatabaseSchema dbSchema = client.getDatabaseSchema(databaseName);
         TableSchema<GenericTableSchema> childTableSchema = dbSchema.table(childTable, GenericTableSchema.class);
-        TableSchema<GenericTableSchema> parentTableSchema = dbSchema.table(parentTable, GenericTableSchema.class);
-        ColumnSchema<GenericTableSchema, UUID> parentColumnSchema = parentTableSchema.column(parentColumn, UUID.class);
 
         if (parentColumn != null) {
+            TableSchema<GenericTableSchema> parentTableSchema = dbSchema.table(parentTable, GenericTableSchema.class);
+            ColumnSchema<GenericTableSchema, UUID> parentColumnSchema = parentTableSchema.column(parentColumn, UUID.class);
             transactionBuilder
                 .add(op.mutate(parentTableSchema)
                         .addMutation(parentColumnSchema, Mutator.DELETE, new UUID(uuid))

@@ -24,9 +24,10 @@ public class OvsVswitchdSchemaConstants {
         addParentColumnToMutate("Interface", "Port", "interfaces");
         addParentColumnToMutate("SSL", "Open_vSwitch", "ssl");
         addParentColumnToMutate("IPFIX", "Bridge", "ipfix");
-        addParentColumnToMutate("SFlow", "Bridge", "sflow");
-        addParentColumnToMutate("Qos", "Port", "qos");
-        addParentColumnToMutate("Netflow", "Bridge", "netflow");
+        addParentColumnToMutate("sFlow", "Bridge", "sflow");
+        addParentColumnToMutate("Flow_Table", "Bridge", "flow_tables");
+        addParentColumnToMutate("QoS", "Port", "qos");
+        addParentColumnToMutate("NetFlow", "Bridge", "netflow");
         addParentColumnToMutate("Mirror", "Bridge", "mirrors");
         addParentColumnToMutate("Manager", "Open_vSwitch", "manager_options");
         addParentColumnToMutate("Controller", "Bridge", "controller");

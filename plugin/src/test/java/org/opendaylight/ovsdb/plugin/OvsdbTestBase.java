@@ -19,6 +19,7 @@ import junit.framework.Assert;
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
 
 public abstract class OvsdbTestBase {
     private final static String identifier = "TEST";
@@ -39,11 +40,13 @@ public abstract class OvsdbTestBase {
     public class TestObjects {
         public final ConnectionService connectionService;
         public final InventoryService inventoryService;
+        public final ConfigurationService configurationService;
         public final Node node;
 
-        public TestObjects(ConnectionService connectionService, Node node, InventoryService inventoryService) {
+        public TestObjects(ConnectionService connectionService, Node node, InventoryService inventoryService, ConfigurationService configurationService) {
             this.connectionService = connectionService;
             this.inventoryService = inventoryService;
+            this.configurationService = configurationService;
             this.node = node;
         }
     }
@@ -68,6 +71,12 @@ public abstract class OvsdbTestBase {
         InventoryService inventory = new InventoryService();
         inventory.init();
         connectionService.setInventoryServiceInternal(inventory);
+        connectionService.setOvsdbConnection(OvsdbConnectionService.getService());
+        ConfigurationService configurationService = new ConfigurationService();
+        configurationService.setConnectionServiceInternal(connectionService);
+        configurationService.setInventoryServiceInternal(inventory);
+        inventory.setConfigurationService(configurationService);
+
         Map<ConnectionConstants, String> params = new HashMap<ConnectionConstants, String>();
 
         params.put(ConnectionConstants.ADDRESS, address);
@@ -77,7 +86,13 @@ public abstract class OvsdbTestBase {
         if (node == null) {
             throw new IOException("Failed to connect to the ovsdb server");
         }
-        return new TestObjects(connectionService, node, inventory);
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } // TODO : Remove this once Select is operational
+        return new TestObjects(connectionService, node, inventory, configurationService);
     }
 
 }

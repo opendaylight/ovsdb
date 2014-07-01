@@ -44,9 +44,7 @@ public class OvsdbTestGetBridgeDomainsIT extends OvsdbTestBase {
          * @param node Node serving this configuration service
          *
          */
-        ConfigurationService configurationService = new ConfigurationService();
-        configurationService.setConnectionServiceInternal(connectionService);
-        configurationService.setInventoryServiceInternal(inventoryService);
+        ConfigurationService configurationService = testObjects.configurationService;
         List<String> ls = configurationService.getBridgeDomains(node);
     }
 }

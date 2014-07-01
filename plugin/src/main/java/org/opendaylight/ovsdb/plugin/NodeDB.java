@@ -13,61 +13,109 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.collections.MapUtils;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.table.Table;
+import org.opendaylight.ovsdb.lib.notation.Row;
 
 import com.google.common.collect.Maps;
 
 public class NodeDB {
-    private DatabaseSchema schema;
-    ConcurrentMap<String, ConcurrentMap<String, Table<?>>> cache = Maps.newConcurrentMap();
+    ConcurrentMap<String, ConcurrentMap<String, TableDB>> dbCache = Maps.newConcurrentMap();
 
-    public DatabaseSchema getSchema() {
-        return schema;
-    }
-
-    public void setSchema(DatabaseSchema schema) {
-        this.schema = schema;
-    }
-
-    public ConcurrentMap<String, ConcurrentMap<String, Table<?>>> getTableCache() {
-        return cache;
-    }
-
-    public ConcurrentMap<String, Table<?>> getTableCache(String tableName) {
-        return cache.get(tableName);
-    }
-
-    private void setTableCache(String tableName,  ConcurrentMap<String, Table<?>> tableCache) {
-        cache.put(tableName, tableCache);
-    }
-
-    public Table<?> getRow (String tableName, String uuid) {
-        Map<String, Table<?>> tableCache = getTableCache(tableName);
-        if (tableCache != null) {
-            return tableCache.get(uuid);
+    public ConcurrentMap<String, ConcurrentMap<String,Row>> getDatabase(String dbName) {
+        ConcurrentMap<String, TableDB> tdbMap = dbCache.get(dbName);
+        if (tdbMap == null) return null;
+        ConcurrentMap<String, ConcurrentMap<String,Row>> retMap = Maps.newConcurrentMap();
+        for (String tableName : tdbMap.keySet()) {
+            TableDB tdb = tdbMap.get(tableName);
+            retMap.put(tableName, tdb.getTableCache(tableName));
         }
-        return null;
+        return retMap;
     }
 
-    public void updateRow(String tableName, String uuid, Table<?> row) {
-        ConcurrentMap<String, Table<?>> tableCache = getTableCache(tableName);
-        if (tableCache == null) {
-            tableCache = Maps.newConcurrentMap();
-            setTableCache(tableName, tableCache);
-        }
-        tableCache.put(uuid, row);
+    public ConcurrentMap<String, Row> getTableCache(String dbName, String tableName) {
+        ConcurrentMap<String, ConcurrentMap<String,Row>> tdbMap = getDatabase(dbName);
+        if (tdbMap == null) return null;
+        return tdbMap.get(tableName);
     }
 
-    public void removeRow(String tableName, String uuid) {
-        Map<String, Table<?>> tableCache = getTableCache(tableName);
-        if (tableCache != null) {
-            tableCache.remove(uuid);
+    private void setDBCache(String dbName,  ConcurrentMap<String, TableDB> table) {
+        dbCache.put(dbName, table);
+    }
+
+    public Row getRow (String dbName, String tableName, String uuid) {
+        ConcurrentMap<String, ConcurrentMap<String, Row>> db = getDatabase(dbName);
+        if (db == null) return null;
+        ConcurrentMap<String, Row> tdb = db.get(tableName);
+        if (tdb == null) return null;
+        return tdb.get(uuid);
+    }
+
+    public void updateRow(String dbName, String tableName, String uuid, Row row) {
+        ConcurrentMap<String, TableDB> db = dbCache.get(dbName);
+        if (db == null) {
+            db = Maps.newConcurrentMap();
+            setDBCache(dbName, db);
         }
+        TableDB tdb = db.get(tableName);
+        if (tdb == null) {
+            tdb = new TableDB();
+            db.put(tableName, tdb);
+        }
+        tdb.updateRow(tableName, uuid, row);
+    }
+
+    public void removeRow(String dbName, String tableName, String uuid) {
+        ConcurrentMap<String, TableDB> db = dbCache.get(dbName);
+        if (db == null) return;
+        TableDB tdb = db.get(tableName);
+        if (tdb == null) return;
+        tdb.removeRow(tableName, uuid);
     }
 
     public void printTableCache() {
-        System.out.println(schema.getTables());
-        MapUtils.debugPrint(System.out, null, cache);
+        MapUtils.debugPrint(System.out, null, dbCache);
+    }
+
+    public class TableDB {
+        ConcurrentMap<String, ConcurrentMap<String, Row>> cache = Maps.newConcurrentMap();
+
+        public ConcurrentMap<String, ConcurrentMap<String, Row>> getTableCache() {
+            return cache;
+        }
+
+        public ConcurrentMap<String, Row> getTableCache(String tableName) {
+            return cache.get(tableName);
+        }
+
+        private void setTableCache(String tableName,  ConcurrentMap<String, Row> tableCache) {
+            cache.put(tableName, tableCache);
+        }
+
+        public Row getRow (String tableName, String uuid) {
+            Map<String, Row> tableCache = getTableCache(tableName);
+            if (tableCache != null) {
+                return tableCache.get(uuid);
+            }
+            return null;
+        }
+
+        public void updateRow(String tableName, String uuid, Row row) {
+            ConcurrentMap<String, Row> tableCache = getTableCache(tableName);
+            if (tableCache == null) {
+                tableCache = Maps.newConcurrentMap();
+                setTableCache(tableName, tableCache);
+            }
+            tableCache.put(uuid, row);
+        }
+
+        public void removeRow(String tableName, String uuid) {
+            Map<String, Row> tableCache = getTableCache(tableName);
+            if (tableCache != null) {
+                tableCache.remove(uuid);
+            }
+        }
+
+        public void printTableCache() {
+            MapUtils.debugPrint(System.out, null, cache);
+        }
     }
 }

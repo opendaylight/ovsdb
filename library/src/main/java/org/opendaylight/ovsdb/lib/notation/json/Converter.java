@@ -9,7 +9,7 @@
  */
 package org.opendaylight.ovsdb.lib.notation.json;
 
-import org.opendaylight.ovsdb.lib.message.temp.TableUpdates;
+import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.message.UpdateNotification;
 import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
 import org.opendaylight.ovsdb.lib.notation.OvsDBSet;

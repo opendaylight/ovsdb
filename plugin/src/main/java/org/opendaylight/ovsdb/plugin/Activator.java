@@ -84,6 +84,10 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(InventoryServiceInternal.class)
                     .setCallbacks("setInventoryServiceInternal", "unsetInventoryServiceInternal")
                     .setRequired(true));
+            c.add(createServiceDependency()
+                    .setService(IClusterGlobalServices.class)
+                    .setCallbacks("setClusterServices", "unsetClusterServices")
+                    .setRequired(false));
         }
 
         if (imp.equals(ConnectionService.class)) {
@@ -101,10 +105,6 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setCallbacks("setInventoryServiceInternal", "unsetInventoryServiceInternal")
                     .setRequired(true));
             c.add(createServiceDependency()
-                    .setService(IClusterGlobalServices.class)
-                    .setCallbacks("setClusterServices", "unsetClusterServices")
-                    .setRequired(false));
-            c.add(createServiceDependency()
                     .setService(OvsdbConnection.class)
                     .setCallbacks("setOvsdbConnection", "unsetOvsdbConnection")
                     .setRequired(true));
@@ -121,6 +121,11 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setCallbacks("setPluginOutInventoryServices",
                             "unsetPluginOutInventoryServices")
                     .setRequired(true));
+            c.add(createServiceDependency()
+                    .setService(OVSDBConfigService.class)
+                    .setCallbacks("setConfigService", "unsetConfigService")
+                    .setRequired(false));
+
         }
 
         if (imp.equals(NodeFactory.class)) {

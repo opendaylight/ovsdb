@@ -20,11 +20,14 @@
     <module>schemas/Open_vSwitch</module>
     <module>schemas/hardware_vtep</module>
     <module>plugin</module>
-    <module>northbound</module>
-    <module>neutron</module>
     <module>commons/parent</module>
     <module>commons/integrationtest</module>
+    <!-- 
+    TODO : remove this comment & let these modules build once the Library migraion is complete.
+    <module>northbound</module> 
+    <module>neutron</module>
     <module>distribution/opendaylight</module>
+     -->
   </modules>
   <profiles>
     <profile>

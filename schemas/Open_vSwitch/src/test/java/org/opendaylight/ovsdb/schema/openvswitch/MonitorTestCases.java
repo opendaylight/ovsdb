@@ -106,7 +106,7 @@ public class MonitorTestCases extends OpenVswitchSchemaTestBase {
 
     private class UpdateMonitor implements MonitorCallBack {
         @Override
-        public void update(TableUpdates result) {
+        public void update(TableUpdates result, DatabaseSchema dbSchema) {
             for (String tableName : result.getUpdates().keySet()) {
                 Map<UUID, Row> tUpdate = OpenVswitchSchemaSuiteIT.getTableCache().get(tableName);
                 TableUpdate update = result.getUpdates().get(tableName);

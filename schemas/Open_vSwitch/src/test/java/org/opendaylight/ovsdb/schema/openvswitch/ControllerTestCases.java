@@ -10,9 +10,16 @@
 
 package org.opendaylight.ovsdb.schema.openvswitch;
 
-import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.ListenableFuture;
+import static org.opendaylight.ovsdb.lib.operations.Operations.op;
+
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
 import junit.framework.Assert;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.ovsdb.lib.message.UpdateNotification;
@@ -24,17 +31,13 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
-
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
+import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.ListenableFuture;
 
 public class ControllerTestCases extends OpenVswitchSchemaTestBase {
     Logger logger = LoggerFactory.getLogger(ControllerTestCases.class);
 
+    @Override
     @Before
     public void setUp() throws ExecutionException, InterruptedException, TimeoutException, IOException {
         super.setUp();
@@ -71,6 +74,7 @@ public class ControllerTestCases extends OpenVswitchSchemaTestBase {
             Assert.assertNull(result.getError());
         }
 
+        Thread.sleep(3000); // Wait for cache to catchup
         Row bridgeRow = OpenVswitchSchemaSuiteIT.getTableCache().get(bridge.getSchema().getName()).get(OpenVswitchSchemaSuiteIT.getTestBridgeUuid());
         Bridge monitoredBridge = ovs.getTypedRowWrapper(Bridge.class, bridgeRow);
         Assert.assertEquals(1, monitoredBridge.getControllerColumn().getData().size());
@@ -95,7 +99,7 @@ public class ControllerTestCases extends OpenVswitchSchemaTestBase {
         for (OperationResult result : operationResults) {
             Assert.assertNull(result.getError());
         }
-
+        Thread.sleep(3000); // Wait for cache to catchup
         bridgeRow = OpenVswitchSchemaSuiteIT.getTableCache().get(bridge.getSchema().getName()).get(OpenVswitchSchemaSuiteIT.getTestBridgeUuid());
         monitoredBridge = ovs.getTypedRowWrapper(Bridge.class, bridgeRow);
         Assert.assertEquals(2, monitoredBridge.getControllerColumn().getData().size());

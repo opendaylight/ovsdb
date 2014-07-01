@@ -14,6 +14,9 @@
   <properties>
     <!-- used for filtering the integration test resource -->
     <skip.integrationtest>true</skip.integrationtest>
+    <ovsdb.library.version>1.0.0-SNAPSHOT</ovsdb.library.version>
+    <schema.Open_vSwitch.version>1.0.0-SNAPSHOT</schema.Open_vSwitch.version>
+    <schema.hardware_vtep.version>1.0.0-SNAPSHOT</schema.hardware_vtep.version>
   </properties>
   <dependencies>
     <dependency>
@@ -116,6 +119,16 @@
       <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>ovsdb_schema.Open_vSwitch</artifactId>
+      <version>${schema.Open_vSwitch.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>ovsdb_schema.hardware_vtep</artifactId>
+      <version>${schema.hardware_vtep.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
@@ -150,11 +163,11 @@
                             org.opendaylight.controller.clustering.services,
                             org.opendaylight.controller.sal.networkconfig.bridgedomain,
                             org.opendaylight.ovsdb.lib.table,
-                            org.opendaylight.ovsdb.plugin,
                             org.opendaylight.ovsdb.lib.notation,
                             org.opendaylight.ovsdb.lib.database,
                             org.opendaylight.ovsdb.lib.operations,
                             org.opendaylight.ovsdb.lib.message,
+                            org.opendaylight.ovsdb.schema.openvswitch,
                             org.apache.commons.lang3.builder,
                             org.apache.commons.lang3.tuple,
                             org.apache.felix.dm,
@@ -203,7 +216,7 @@
       <id>integrationtest</id>
       <activation></activation>
       <properties>
-        <skip.integrationtest>true</skip.integrationtest>
+        <skip.integrationtest>false</skip.integrationtest>
       </properties>
     </profile>
   </profiles>

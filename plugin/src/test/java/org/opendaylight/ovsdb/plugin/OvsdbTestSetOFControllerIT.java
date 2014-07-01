@@ -25,14 +25,12 @@ public class OvsdbTestSetOFControllerIT extends OvsdbTestBase {
     @Test
     public void setController() throws Throwable{
         TestObjects testObjects = getTestConnection();
-        ConnectionService connectionService = testObjects.connectionService;
         Node node = testObjects.node;
 
         Map<ConfigConstants, Object> configs = new HashMap<ConfigConstants, Object>();
         configs.put(ConfigConstants.DEST_IP, "192.168.254.1");
         configs.put(ConfigConstants.CUSTOM, "6633");
-        ConfigurationService configurationService = new ConfigurationService();
-        configurationService.setConnectionServiceInternal(connectionService);
+        ConfigurationService configurationService = testObjects.configurationService;
         configurationService.setBridgeOFController(node, BRIDGE_NAME);
 
     }

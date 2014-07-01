@@ -10,10 +10,16 @@
 
 package org.opendaylight.ovsdb.schema.openvswitch;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.ListenableFuture;
+import static org.opendaylight.ovsdb.lib.operations.Operations.op;
+
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
 import junit.framework.Assert;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.ovsdb.lib.message.UpdateNotification;
@@ -25,17 +31,15 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
-
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.ListenableFuture;
+;
 
 public class BridgeTestCases extends OpenVswitchSchemaTestBase {
     Logger logger = LoggerFactory.getLogger(BridgeTestCases.class);
 
+    @Override
     @Before
     public void setUp() throws ExecutionException, InterruptedException, TimeoutException, IOException {
         super.setUp();
@@ -78,6 +82,7 @@ public class BridgeTestCases extends OpenVswitchSchemaTestBase {
         }
         OpenVswitchSchemaSuiteIT.setTestBridgeUuid(operationResults.get(insertOperationIndex).getUuid());
 
+        Thread.sleep(3000); // Wait for cache to catchup
         Row bridgeRow = OpenVswitchSchemaSuiteIT.getTableCache().get(bridge.getSchema().getName()).get(OpenVswitchSchemaSuiteIT.getTestBridgeUuid());
         Bridge monitoredBridge = ovs.getTypedRowWrapper(Bridge.class, bridgeRow);
         Assert.assertEquals(monitoredBridge.getNameColumn().getData(), bridge.getNameColumn().getData());

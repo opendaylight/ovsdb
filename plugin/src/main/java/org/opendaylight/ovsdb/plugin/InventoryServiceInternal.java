@@ -16,19 +16,16 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
-import org.opendaylight.ovsdb.lib.message.temp.TableUpdates;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.table.Table;
+import org.opendaylight.ovsdb.lib.message.TableUpdates;
+import org.opendaylight.ovsdb.lib.notation.Row;
 
 public interface InventoryServiceInternal extends IPluginInInventoryService {
-    public ConcurrentMap<String, ConcurrentMap<String, Table<?>>> getCache(Node n);
-    public ConcurrentMap<String, Table<?>> getTableCache(Node n, String tableName);
-    public Table<?> getRow (Node n, String tableName, String uuid);
-    public void updateRow(Node n, String tableName, String uuid, Table<?> row);
-    public void removeRow(Node n, String tableName, String uuid);
-    public void processTableUpdates(Node n, TableUpdates tableUpdates);
-    public void updateDatabaseSchema(Node n, DatabaseSchema schema);
-    public DatabaseSchema getDatabaseSchema(Node n);
+    public ConcurrentMap<String, ConcurrentMap<String, Row>> getCache(Node n, String databaseName);
+    public ConcurrentMap<String, Row> getTableCache(Node n, String databaseName, String tableName);
+    public Row getRow (Node n, String databaseName, String tableName, String uuid);
+    public void updateRow(Node n, String databaseName, String tableName, String uuid, Row row);
+    public void removeRow(Node n, String databaseName, String tableName, String uuid);
+    public void processTableUpdates(Node n, String databaseName,TableUpdates tableUpdates);
     public void printCache(Node n);
 
     public void addNode(Node n, Set<Property> props);

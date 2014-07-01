@@ -35,8 +35,7 @@ public class OvsdbTestBridgeConfigIT extends OvsdbTestBase {
         //Will accept multiple array pairs. Pairs must be arrays not maps.
         configs.put(ConfigConstants.CUSTOM, exterIDPairs);
 
-        ConfigurationService configurationService = new ConfigurationService();
-        configurationService.setConnectionServiceInternal(connectionService);
+        ConfigurationService configurationService = testObjects.configurationService;
         configurationService.addBridgeDomainConfig(node, BRIDGE_NAME, configs);
     }
 

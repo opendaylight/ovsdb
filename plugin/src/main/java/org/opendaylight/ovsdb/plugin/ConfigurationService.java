@@ -11,14 +11,12 @@ package org.opendaylight.ovsdb.plugin;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +25,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
+import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -35,51 +34,31 @@ import org.opendaylight.controller.sal.networkconfig.bridgedomain.IPluginInBridg
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
-import org.opendaylight.ovsdb.lib.database.OVSInstance;
 import org.opendaylight.ovsdb.lib.database.OvsdbType;
-import org.opendaylight.ovsdb.lib.message.TransactBuilder;
 import org.opendaylight.ovsdb.lib.notation.Column;
-import org.opendaylight.ovsdb.lib.notation.Condition;
-import org.opendaylight.ovsdb.lib.notation.Function;
-import org.opendaylight.ovsdb.lib.notation.Mutation;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
-import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
 import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.lib.operations.DeleteOperation;
 import org.opendaylight.ovsdb.lib.operations.Insert;
-import org.opendaylight.ovsdb.lib.operations.InsertOperation;
-import org.opendaylight.ovsdb.lib.operations.MutateOperation;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.operations.UpdateOperation;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
-import org.opendaylight.ovsdb.lib.table.Bridge;
-import org.opendaylight.ovsdb.lib.table.Controller;
-import org.opendaylight.ovsdb.lib.table.IPFIX;
-import org.opendaylight.ovsdb.lib.table.Interface;
-import org.opendaylight.ovsdb.lib.table.Manager;
-import org.opendaylight.ovsdb.lib.table.Mirror;
-import org.opendaylight.ovsdb.lib.table.NetFlow;
-import org.opendaylight.ovsdb.lib.table.Open_vSwitch;
-import org.opendaylight.ovsdb.lib.table.Port;
-import org.opendaylight.ovsdb.lib.table.Qos;
-import org.opendaylight.ovsdb.lib.table.Queue;
-import org.opendaylight.ovsdb.lib.table.SFlow;
-import org.opendaylight.ovsdb.lib.table.SSL;
-import org.opendaylight.ovsdb.lib.table.Table;
+import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
+import org.opendaylight.ovsdb.schema.openvswitch.Controller;
+import org.opendaylight.ovsdb.schema.openvswitch.Interface;
+import org.opendaylight.ovsdb.schema.openvswitch.Manager;
+import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
+import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ListenableFuture;
 
 public class ConfigurationService implements IPluginInBridgeDomainConfigService, OVSDBConfigService,
@@ -91,6 +70,8 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     IConnectionServiceInternal connectionService;
     InventoryServiceInternal inventoryServiceInternal;
     boolean forceConnect = false;
+    protected static final String OPENFLOW_10 = "1.0";
+    protected static final String OPENFLOW_13 = "1.3";
 
     void init() {
     }
@@ -149,6 +130,18 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         }
     }
 
+    private IClusterGlobalServices clusterServices;
+
+    public void setClusterServices(IClusterGlobalServices i) {
+        this.clusterServices = i;
+    }
+
+    public void unsetClusterServices(IClusterGlobalServices i) {
+        if (this.clusterServices == i) {
+            this.clusterServices = null;
+        }
+    }
+
     private Connection getConnection (Node node) {
         Connection connection = connectionService.getConnection(node);
         if (connection == null || !connection.getClient().isActive()) {
@@ -157,552 +150,6 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
 
         return connection;
     }
-
-    /**
-     * Add a new bridge
-     * @param node Node serving this configuration service
-     * @param bridgeIdentifier String representation of a Bridge Connector
-     * @return Bridge Connector configurations
-     */
-    @Override
-    public Status createBridgeDomain(Node node, String bridgeIdentifier,
-            Map<ConfigConstants, Object> configs) {
-        try{
-            if (connectionService == null) {
-                logger.error("Couldn't refer to the ConnectionService");
-                return new Status(StatusCode.NOSERVICE);
-            }
-
-            Connection connection = this.getConnection(node);
-            if (connection == null) {
-                return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
-            }
-
-            Map<String, Table<?>> ovsTable = inventoryServiceInternal.getTableCache(node, Open_vSwitch.NAME.getName());
-            String newBridge = "new_bridge";
-            String newInterface = "new_interface";
-            String newPort = "new_port";
-            String newSwitch = "new_switch";
-
-            Operation addSwitchRequest = null;
-
-            if(ovsTable != null){
-                String ovsTableUUID = (String) ovsTable.keySet().toArray()[0];
-                UUID bridgeUuidPair = new UUID(newBridge);
-                Mutation bm = new Mutation("bridges", Mutator.INSERT, bridgeUuidPair);
-                List<Mutation> mutations = new ArrayList<Mutation>();
-                mutations.add(bm);
-
-                UUID uuid = new UUID(ovsTableUUID);
-                Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
-                List<Condition> where = new ArrayList<Condition>();
-                where.add(condition);
-                addSwitchRequest = new MutateOperation(Open_vSwitch.NAME.getName(), where, mutations);
-            }
-            else{
-                Open_vSwitch ovsTableRow = new Open_vSwitch();
-                OvsDBSet<UUID> bridges = new OvsDBSet<UUID>();
-                UUID bridgeUuidPair = new UUID(newBridge);
-                bridges.add(bridgeUuidPair);
-                ovsTableRow.setBridges(bridges);
-                addSwitchRequest = new InsertOperation(Open_vSwitch.NAME.getName(), newSwitch, ovsTableRow);
-            }
-
-            Bridge bridgeRow = new Bridge();
-            bridgeRow.setName(bridgeIdentifier);
-            OvsDBSet<UUID> ports = new OvsDBSet<UUID>();
-            UUID port = new UUID(newPort);
-            ports.add(port);
-            bridgeRow.setPorts(ports);
-            InsertOperation addBridgeRequest = new InsertOperation(Bridge.NAME.getName(), newBridge, bridgeRow);
-
-            Port portRow = new Port();
-            portRow.setName(bridgeIdentifier);
-            OvsDBSet<UUID> interfaces = new OvsDBSet<UUID>();
-            UUID interfaceid = new UUID(newInterface);
-            interfaces.add(interfaceid);
-            portRow.setInterfaces(interfaces);
-            InsertOperation addPortRequest = new InsertOperation(Port.NAME.getName(), newPort, portRow);
-
-            Interface interfaceRow = new Interface();
-            interfaceRow.setName(bridgeIdentifier);
-            interfaceRow.setType("internal");
-            InsertOperation addIntfRequest = new InsertOperation(Interface.NAME.getName(), newInterface, interfaceRow);
-
-            /* Update config version */
-            String ovsTableUUID = (String) ovsTable.keySet().toArray()[0];
-            Mutation bm = new Mutation("next_cfg", Mutator.SUM, 1);
-            List<Mutation> mutations = new ArrayList<Mutation>();
-            mutations.add(bm);
-
-            UUID uuid = new UUID(ovsTableUUID);
-            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
-            List<Condition> where = new ArrayList<Condition>();
-            where.add(condition);
-            MutateOperation updateCfgVerRequest = new MutateOperation(Open_vSwitch.NAME.getName(), where, mutations);
-
-            TransactBuilder transaction = new TransactBuilder();
-            transaction.addOperations(new ArrayList<Operation>(
-                                      Arrays.asList(addSwitchRequest,
-                                                    addIntfRequest,
-                                                    addPortRequest,
-                                                    addBridgeRequest,
-                                                    updateCfgVerRequest)));
-
-            ListenableFuture<List<OperationResult>> transResponse = connection.getClient().transactBuilder().execute();
-            List<OperationResult> tr = transResponse.get();
-            List<Operation> requests = transaction.getRequests();
-            Status status = new Status(StatusCode.SUCCESS);
-            for (int i = 0; i < tr.size() ; i++) {
-                if (i < requests.size()) requests.get(i).setResult(tr.get(i));
-                if (tr.get(i) != null && tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
-                    OperationResult result = tr.get(i);
-                    status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
-                }
-            }
-
-            if (tr.size() > requests.size()) {
-                OperationResult result = tr.get(tr.size()-1);
-                logger.error("Error creating Bridge : {}\n Error : {}\n Details : {}", bridgeIdentifier,
-                                                                                       result.getError(),
-                                                                                       result.getDetails());
-                status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
-            }
-            if (status.isSuccess()) {
-                setBridgeOFController(node, bridgeIdentifier);
-            }
-            return status;
-        } catch(Exception e){
-            logger.error("Error in createBridgeDomain(): ",e);
-        }
-        return new Status(StatusCode.INTERNALERROR);
-    }
-
-    /**
-     * Create a Port Attached to a Bridge
-     * Ex. ovs-vsctl add-port br0 vif0
-     * @param node Node serving this configuration service
-     * @param bridgeIdentifier String representation of a Bridge Domain
-     * @param portIdentifier String representation of a user defined Port Name
-     */
-    @Override
-    public Status addPort(Node node, String bridgeIdentifier, String portIdentifier,
-                          Map<ConfigConstants, Object> configs) {
-        try{
-            if (connectionService == null) {
-                logger.error("Couldn't refer to the ConnectionService");
-                return new Status(StatusCode.NOSERVICE);
-            }
-            Connection connection = this.getConnection(node);
-            if (connection == null) {
-                return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
-            }
-            if (connection != null) {
-                Map<String, Table<?>> brTable = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
-                String newBridge = "new_bridge";
-                String newInterface = "new_interface";
-                String newPort = "new_port";
-
-                if(brTable != null){
-                    Operation addBrMutRequest = null;
-                    String brUuid = null;
-                    for (String uuid : brTable.keySet()) {
-                        Bridge bridge = (Bridge) brTable.get(uuid);
-                        if (bridge.getName().contains(bridgeIdentifier)) {
-                            brUuid = uuid;
-                        }
-                    }
-
-                    UUID brUuidPair = new UUID(newPort);
-                    Mutation bm = new Mutation("ports", Mutator.INSERT, brUuidPair);
-                    List<Mutation> mutations = new ArrayList<Mutation>();
-                    mutations.add(bm);
-
-                    UUID uuid = new UUID(brUuid);
-                    Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
-                    List<Condition> where = new ArrayList<Condition>();
-                    where.add(condition);
-                    addBrMutRequest = new MutateOperation(Bridge.NAME.getName(), where, mutations);
-
-                    OvsDBMap<String, String> options = null;
-                    String type = null;
-                    OvsDBSet<BigInteger> tags = null;
-                    if (configs != null) {
-                        type = (String) configs.get(ConfigConstants.TYPE);
-                        Map<String, String> customConfigs = (Map<String, String>) configs.get(ConfigConstants.CUSTOM);
-                        if (customConfigs != null) {
-                            options = new OvsDBMap<String, String>();
-                            for (String customConfig : customConfigs.keySet()) {
-                                options.put(customConfig, customConfigs.get(customConfig));
-                            }
-                        }
-                    }
-
-                    Interface interfaceRow = new Interface();
-                    interfaceRow.setName(portIdentifier);
-
-                    if (type != null) {
-                        logger.debug("Port type : " + type);
-                        if (type.equalsIgnoreCase(OvsdbType.PortType.TUNNEL.name())) {
-                            interfaceRow.setType((String)configs.get(ConfigConstants.TUNNEL_TYPE));
-                            if (options == null) options = new OvsDBMap<String, String>();
-                            options.put("remote_ip", (String)configs.get(ConfigConstants.DEST_IP));
-                        } else if (type.equalsIgnoreCase(OvsdbType.PortType.VLAN.name())) {
-                            tags = new OvsDBSet<BigInteger>();
-                            tags.add(BigInteger.valueOf(Integer.parseInt((String)configs.get(ConfigConstants.VLAN))));
-                        } else if (type.equalsIgnoreCase(OvsdbType.PortType.PATCH.name()) ||
-                                   type.equalsIgnoreCase(OvsdbType.PortType.INTERNAL.name())) {
-                            interfaceRow.setType(type.toLowerCase());
-                        }
-                    }
-                    if (options != null) {
-                        interfaceRow.setOptions(options);
-                    }
-
-                    InsertOperation addIntfRequest = new InsertOperation(Interface.NAME.getName(),
-                            newInterface, interfaceRow);
-
-                    Port portRow = new Port();
-                    portRow.setName(portIdentifier);
-                    if (tags != null) portRow.setTag(tags);
-                    OvsDBSet<UUID> interfaces = new OvsDBSet<UUID>();
-                    UUID interfaceid = new UUID(newInterface);
-                    interfaces.add(interfaceid);
-                    portRow.setInterfaces(interfaces);
-                    InsertOperation addPortRequest = new InsertOperation(Port.NAME.getName(), newPort, portRow);
-
-                    TransactBuilder transaction = new TransactBuilder();
-                    transaction.addOperations(new ArrayList<Operation>
-                            (Arrays.asList(addBrMutRequest, addPortRequest, addIntfRequest)));
-
-                    ListenableFuture<List<OperationResult>> transResponse = connection.getClient().transactBuilder().execute();
-                    List<OperationResult> tr = transResponse.get();
-                    List<Operation> requests = transaction.getRequests();
-                    Status status = new Status(StatusCode.SUCCESS);
-                    for (int i = 0; i < tr.size() ; i++) {
-                        if (i < requests.size()) requests.get(i).setResult(tr.get(i));
-                        if (tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
-                            OperationResult result = tr.get(i);
-                            status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
-                        }
-                    }
-
-                    if (tr.size() > requests.size()) {
-                        OperationResult result = tr.get(tr.size()-1);
-                        logger.error("Error creating Bridge : {}\n Error : {}\n Details : {}", bridgeIdentifier,
-                                result.getError(),
-                                result.getDetails());
-                        status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
-                    }
-                    return status;
-                }
-                return new Status(StatusCode.INTERNALERROR);
-            }
-        } catch(Exception e){
-            logger.error("Error in addPort()",e);
-        }
-        return new Status(StatusCode.INTERNALERROR);
-    }
-
-    /**
-     * Implements the OVS Connection for Managers
-     *
-     * @param node Node serving this configuration service
-     * @param managerip String Representing IP and connection types
-     */
-    @SuppressWarnings("unchecked")
-    public boolean setManager(Node node, String managerip) {
-        try{
-            if (connectionService == null) {
-                logger.error("Couldn't refer to the ConnectionService");
-                return false;
-            }
-            Connection connection = this.getConnection(node);
-            if (connection == null) {
-                return false;
-            }
-
-            if (connection != null) {
-                String newmanager = "new_manager";
-
-                OVSInstance instance = OVSInstance.monitorOVS();
-
-                Map ovsoutter = new LinkedHashMap();
-                Map ovsinner = new LinkedHashMap();
-                ArrayList ovsalist1 = new ArrayList();
-                ArrayList ovsalist2 = new ArrayList();
-                ArrayList ovsalist3 = new ArrayList();
-                ArrayList ovsalist4 = new ArrayList();
-
-                //OVS Table Update
-                ovsoutter.put("where", ovsalist1);
-                ovsalist1.add(ovsalist2);
-                ovsalist2.add("_uuid");
-                ovsalist2.add("==");
-                ovsalist2.add(ovsalist3);
-                ovsalist3.add("uuid");
-                ovsalist3.add(instance.getUuid());
-                ovsoutter.put("op", "update");
-                ovsoutter.put("table", "Open_vSwitch");
-                ovsoutter.put("row", ovsinner);
-                ovsinner.put("manager_options", ovsalist4);
-                ovsalist4.add("named-uuid");
-                ovsalist4.add(newmanager);
-
-                Map mgroutside = new LinkedHashMap();
-                Map mgrinside = new LinkedHashMap();
-
-                //Manager Table Insert
-                mgroutside.put("uuid-name", newmanager);
-                mgroutside.put("op", "insert");
-                mgroutside.put("table","Manager");
-                mgroutside.put("row", mgrinside);
-                mgrinside.put("target", managerip);
-
-                Object[] params = {"Open_vSwitch", ovsoutter, mgroutside};
-                OvsdbMessage msg = new OvsdbMessage("transact", params);
-
-                //connection.sendMessage(msg);
-
-            }
-        }catch(Exception e){
-            logger.error("Error in setManager(): ",e);
-        }
-        return true;
-    }
-
-    @Override
-    public Status addBridgeDomainConfig(Node node, String bridgeIdentfier,
-            Map<ConfigConstants, Object> configs) {
-        String mgmt = (String)configs.get(ConfigConstants.MGMT);
-        if (mgmt != null) {
-            if (setManager(node, mgmt)) return new Status(StatusCode.SUCCESS);
-        }
-        return new Status(StatusCode.BADREQUEST);
-    }
-
-    @Override
-    public Status addPortConfig(Node node, String bridgeIdentifier, String portIdentifier,
-            Map<ConfigConstants, Object> configs) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Status deletePort(Node node, String bridgeIdentifier, String portIdentifier) {
-
-            try{
-                if (connectionService == null) {
-                    logger.error("Couldn't refer to the ConnectionService");
-                    return new Status(StatusCode.NOSERVICE);
-                }
-
-                Connection connection = this.getConnection(node);
-                if (connection == null) {
-                    return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
-                }
-
-                Map<String, Table<?>> brTable = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
-                Map<String, Table<?>> portTable = inventoryServiceInternal.getTableCache(node, Port.NAME.getName());
-                Operation delPortRequest = null;
-                String brUuid = null;
-                String portUuid = null;
-                if(brTable != null){
-                    for (String uuid : brTable.keySet()) {
-                        Bridge bridge = (Bridge) brTable.get(uuid);
-                        if (bridge.getName().contains(bridgeIdentifier)) {
-                            brUuid = uuid;
-                        }
-                    }
-                }
-            if(portTable != null){
-                for (String uuid : portTable.keySet()) {
-                    Port port = (Port) portTable.get(uuid);
-                    if (port.getName().contains(portIdentifier)) {
-                        portUuid = uuid;
-                    }
-                }
-            }
-
-            UUID portUuidPair = new UUID(portUuid);
-            Mutation bm = new Mutation("ports", Mutator.DELETE, portUuidPair);
-            List<Mutation> mutations = new ArrayList<Mutation>();
-            mutations.add(bm);
-
-            UUID uuid = new UUID(brUuid);
-            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
-            List<Condition> where = new ArrayList<Condition>();
-            where.add(condition);
-            delPortRequest = new MutateOperation(Bridge.NAME.getName(), where, mutations);
-
-            TransactBuilder transaction = new TransactBuilder();
-            transaction.addOperations(new ArrayList<Operation>(Arrays.asList(delPortRequest)));
-
-            ListenableFuture<List<OperationResult>> transResponse = connection.getClient().transactBuilder().execute();
-            List<OperationResult> tr = transResponse.get();
-            List<Operation> requests = transaction.getRequests();
-            Status status = new Status(StatusCode.SUCCESS);
-            for (int i = 0; i < tr.size() ; i++) {
-                if (i < requests.size()) requests.get(i).setResult(tr.get(i));
-                if (tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
-                    OperationResult result = tr.get(i);
-                    status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
-                }
-            }
-
-            if (tr.size() > requests.size()) {
-                OperationResult result = tr.get(tr.size()-1);
-                logger.error("Error creating Bridge : {}\n Error : {}\n Details : {}", bridgeIdentifier,
-                        result.getError(),
-                        result.getDetails());
-                status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
-            }
-            return status;
-        } catch(Exception e){
-            logger.error("Error in deletePort()",e);
-        }
-        return new Status(StatusCode.INTERNALERROR);
-    }
-
-    @Override
-    public Node getBridgeDomainNode(Node node, String bridgeIdentifier) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Map<ConfigConstants, Object> getPortConfigs(Node node, String bridgeIdentifier,
-            String portIdentifier) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Status removeBridgeDomainConfig(Node node, String bridgeIdentifier,
-            Map<ConfigConstants, Object> configs) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Status removePortConfig(Node node, String bridgeIdentifier, String portIdentifier,
-            Map<ConfigConstants, Object> configs) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Status deleteBridgeDomain(Node node, String bridgeIdentifier) {
-
-        try {
-            if (connectionService == null) {
-                logger.error("Couldn't refer to the ConnectionService");
-                return new Status(StatusCode.NOSERVICE);
-            }
-            Connection connection = this.getConnection(node);
-            if (connection == null) {
-                return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
-            }
-            Map<String, Table<?>> ovsTable = inventoryServiceInternal.getTableCache(node, Open_vSwitch.NAME.getName());
-            Map<String, Table<?>> brTable = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
-            Operation delBrRequest = null;
-            String ovsUuid = null;
-            String brUuid = null;
-
-            if (brTable != null) {
-                for (String uuid : brTable.keySet()) {
-                    Bridge bridge = (Bridge) brTable.get(uuid);
-                    if (bridge.getName().contains(bridgeIdentifier)) {
-                        brUuid = uuid;
-                    }
-                }
-            }
-            if (ovsTable != null) {
-                ovsUuid = (String) ovsTable.keySet().toArray()[0];
-            }
-            UUID bridgeUuidPair = new UUID(brUuid);
-            Mutation bm = new Mutation("bridges", Mutator.DELETE, bridgeUuidPair);
-            List<Mutation> mutations = new ArrayList<Mutation>();
-            mutations.add(bm);
-
-            UUID uuid = new UUID(ovsUuid);
-            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
-            List<Condition> where = new ArrayList<Condition>();
-            where.add(condition);
-            delBrRequest = new MutateOperation(Open_vSwitch.NAME.getName(), where, mutations);
-
-            TransactBuilder transaction = new TransactBuilder();
-            transaction.addOperations(new ArrayList<Operation>(Arrays.asList(delBrRequest)));
-
-            ListenableFuture<List<OperationResult>> transResponse = connection.getClient().transactBuilder().execute();
-            List<OperationResult> tr = transResponse.get();
-            List<Operation> requests = transaction.getRequests();
-            Status status = new Status(StatusCode.SUCCESS);
-            for (int i = 0; i < tr.size(); i++) {
-                if (i < requests.size()) requests.get(i).setResult(tr.get(i));
-                if (tr.get(i) != null && tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
-                    OperationResult result = tr.get(i);
-                    status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
-                }
-            }
-
-            if (tr.size() > requests.size()) {
-                OperationResult result = tr.get(tr.size() - 1);
-                logger.error("Error deleting Bridge : {}\n Error : {}\n Details : {}",
-                        bridgeIdentifier, result.getError(), result.getDetails());
-                status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
-            }
-            return status;
-        } catch (Exception e) {
-            logger.error("Error in deleteBridgeDomain(): ",e);
-        }
-        return new Status(StatusCode.INTERNALERROR);
-    }
-
-    @Override
-    public Map<ConfigConstants, Object> getBridgeDomainConfigs(Node node, String bridgeIdentifier) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public List<String> getBridgeDomains(Node node) {
-        List<String> brlist = new ArrayList<String>();
-        Map<String, Table<?>> brTableCache = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
-        if(brTableCache != null){
-            for (String uuid : brTableCache.keySet()) {
-                Bridge bridge = (Bridge) brTableCache.get(uuid);
-                brlist.add(bridge.getName());
-            }
-        }
-        return brlist;
-    }
-
-    @Override
-    public NodeConnector getNodeConnector(Node arg0, String arg1, String arg2) {
-        return null;
-    }
-
-    Boolean setBridgeOFController(Node node, String bridgeIdentifier) {
-        if (connectionService == null) {
-            logger.error("Couldn't refer to the ConnectionService");
-            return false;
-        }
-
-        try{
-            Map<String, Table<?>> brTableCache = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
-            for (String uuid : brTableCache.keySet()) {
-                Bridge bridge = (Bridge)brTableCache.get(uuid);
-                if (bridge.getName().contains(bridgeIdentifier)) {
-                    return connectionService.setOFController(node, uuid);
-                }
-            }
-        } catch(Exception e) {
-            logger.error("Error in setBridgeOFController()",e);
-        }
-        return false;
-    }
-
     /*
      * There are a few Open_vSwitch schema specific special case handling to be done for
      * the older API (such as by inserting a mandatory Interface row automatically upon inserting
@@ -710,7 +157,9 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
      */
     private void handleSpecialInsertCase(OvsdbClient client, String databaseName,
             String tableName, String uuid, Row<GenericTableSchema> row, TransactionBuilder transactionBuilder) {
-        if (databaseName.equals(OvsVswitchdSchemaConstants.DATABASE_NAME) && tableName.equals("Port")) {
+        Port port = client.getTypedRowWrapper(Port.class, null);
+        if (databaseName.equals(OvsVswitchdSchemaConstants.DATABASE_NAME) && tableName.equals(port.getSchema().getName())) {
+            port = client.getTypedRowWrapper(Port.class, row);
             DatabaseSchema dbSchema = client.getDatabaseSchema(databaseName);
             TableSchema<GenericTableSchema> tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
             ColumnSchema<GenericTableSchema, Set<UUID>> columnSchema = tableSchema.multiValuedColumn("interfaces", UUID.class);
@@ -719,7 +168,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             Insert portOperation = (Insert)priorOperations.get(0);
             portOperation.value(columnSchema, new UUID(namedUuid));
 
-            Column<GenericTableSchema, ?> nameColumn = row.getColumn(tableSchema.column("name"));
+            Column<GenericTableSchema, ?> nameColumn = port.getNameColumn();
             List<Column<GenericTableSchema, ?>> columns = new ArrayList<Column<GenericTableSchema, ?>>();
             columns.add(nameColumn);
             Row<GenericTableSchema> intfRow = new Row<GenericTableSchema>(columns);
@@ -733,9 +182,8 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
      * Due to some additional special case(s), the Transaction is further amended by handleSpecialInsertCase
      */
     private void processInsertTransaction(OvsdbClient client, String databaseName, String childTable,
-                                    String parentTable, String parent_uuid, String parentColumn, String namedUuid,
+                                    String parentTable, String parentUuid, String parentColumn, String namedUuid,
                                     Row<GenericTableSchema> row, TransactionBuilder transactionBuilder) {
-        logger.debug("processTransaction : {} {} {} \n {} {} {} \n {}", client.getConnectionInfo(), databaseName, childTable, parentTable, parent_uuid, parentColumn, row.toString());
         DatabaseSchema dbSchema = client.getDatabaseSchema(databaseName);
         TableSchema<GenericTableSchema> childTableSchema = dbSchema.table(childTable, GenericTableSchema.class);
         transactionBuilder.add(op.insert(childTableSchema, row)
@@ -749,7 +197,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             transactionBuilder
                 .add(op.mutate(parentTableSchema)
                         .addMutation(parentColumnSchema, Mutator.INSERT, new UUID(namedUuid))
-                        .where(_uuid.opEqual(new UUID(parent_uuid)))
+                        .where(_uuid.opEqual(new UUID(parentUuid)))
                         .build());
         }
         /*
@@ -761,15 +209,30 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     }
 
     /*
+     * TODO : Move all the Special Cases out of ConfigurationService and into the Schema specific bundles.
+     * But that makes plugin more reliant on the Typed Bundles more than just API wrapper.
+     * Keeping these Special Handling locally till we introduce the full schema independent APIs in the
+     * plugin layer.
+     */
+    public String getSpecialCaseParentUUID(Node node, String databaseName, String childTableName) {
+        if (databaseName.equals(OvsVswitchdSchemaConstants.DATABASE_NAME) && childTableName.equals("Bridge")) {
+            Connection connection = connectionService.getConnection(node);
+            OpenVSwitch openVSwitch = connection.getClient().getTypedRowWrapper(OpenVSwitch.class, null);
+            ConcurrentMap<String, Row> row = this.getRows(node, openVSwitch.getSchema().getName());
+            if (row == null || row.size() == 0) return null;
+            return (String)row.keySet().toArray()[0];
+        }
+        return null;
+    }
+
+    /*
      * Though this is a New API that takes in Row object, this still is considered a
      * Deprecated call because of the assumption with a Single Row insertion.
      * An ideal insertRow must be able to take in multiple Rows, which includes the
      * Row being inserted in one Table and other Rows that needs mutate in other Tables.
      */
     @Override
-    public StatusWithUuid insertRow(Node node, String tableName, String parent_uuid, Row<GenericTableSchema> row) throws InterruptedException, ExecutionException, JsonParseException, IOException {
-        logger.debug("insertRow {} {} {} {}", node, tableName, parent_uuid, row);
-
+    public StatusWithUuid insertRow(Node node, String tableName, String parentUuid, Row<GenericTableSchema> row) {
         String[] parentColumn = OvsVswitchdSchemaConstants.getParentColumnToMutate(tableName);
         if (parentColumn == null) {
             parentColumn = new String[]{null, null};
@@ -777,457 +240,287 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
 
         Connection connection = connectionService.getConnection(node);
         OvsdbClient client = connection.getClient();
+
+        if (parentUuid == null) {
+            parentUuid = this.getSpecialCaseParentUUID(node, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName);
+        }
+        logger.debug("insertRow Connection : {} Table : {} ParentTable : {} Parent UUID: {} ParentColumn : {} Row : {}",
+                     client.getConnectionInfo(), tableName, parentColumn[0], parentColumn[1], parentUuid, row);
+
         TransactionBuilder transactionBuilder = client.transactBuilder();
 
         String namedUuid = "Transaction_"+ tableName;
         this.processInsertTransaction(client, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName,
-                                parentColumn[0], parent_uuid, parentColumn[1], namedUuid,
+                                parentColumn[0], parentUuid, parentColumn[1], namedUuid,
                                 row, transactionBuilder);
 
         ListenableFuture<List<OperationResult>> results = transactionBuilder.execute();
-        List<OperationResult> operationResults = results.get();
-        if (operationResults.isEmpty() || (transactionBuilder.getOperations().size() != operationResults.size())) {
-            return new StatusWithUuid(StatusCode.INTERNALERROR);
-        }
-        logger.debug("Insert row : {} operation results : {} ", row, operationResults);
-        for (OperationResult result : operationResults) {
-            if (result.getError() != null) {
-                return new StatusWithUuid(StatusCode.BADREQUEST, result.getError());
+        List<OperationResult> operationResults;
+        try {
+            operationResults = results.get();
+            if (operationResults.isEmpty() || (transactionBuilder.getOperations().size() != operationResults.size())) {
+                return new StatusWithUuid(StatusCode.INTERNALERROR);
             }
-        }
-        UUID uuid = operationResults.get(0).getUuid();
-        return new StatusWithUuid(StatusCode.SUCCESS, uuid);
-    }
-
-    /*
-     * Deprecated Old Insert Row API that was using static library schema Objects.
-     */
-    @Override
-    @Deprecated
-    public StatusWithUuid insertRow(Node node, String tableName, String parent_uuid, Table<?> row) {
-        logger.debug("Deprecated API : tableName : {}, parent_uuid : {} Row : {}", tableName, parent_uuid, row.toString());
-        StatusWithUuid statusWithUUID = null;
-        return statusWithUUID;
-    }
-
-    @Override
-    public Status updateRow (Node node, String tableName, String parentUUID, String rowUUID, Table<?> row) {
-        try{
-            if (connectionService == null) {
-                logger.error("Couldn't refer to the ConnectionService");
-                return new Status(StatusCode.NOSERVICE);
-            }
-
-            Connection connection = this.getConnection(node);
-            if (connection == null) {
-                return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
-            }
-
-            Map<String, Table<?>> ovsTable = inventoryServiceInternal.getTableCache(node, Open_vSwitch.NAME.getName());
-
-            if (ovsTable == null) {
-                return new Status(StatusCode.NOTFOUND, "There are no Open_vSwitch instance in the Open_vSwitch table");
-            }
-
-            UUID uuid = new UUID(rowUUID);
-            Condition condition = new Condition("_uuid", Function.EQUALS, uuid);
-            List<Condition> where = new ArrayList<Condition>();
-            where.add(condition);
-            Operation updateRequest = new UpdateOperation(tableName, where, row);
-
-            TransactBuilder transaction = new TransactBuilder();
-            transaction.addOperations(new ArrayList<Operation>(
-                                      Arrays.asList(updateRequest)));
-
-            ListenableFuture<List<OperationResult>> transResponse = connection.getClient().transactBuilder().execute();
-            List<OperationResult> tr = transResponse.get();
-            List<Operation> requests = transaction.getRequests();
-            Status status = new Status(StatusCode.SUCCESS);
-            for (int i = 0; i < tr.size() ; i++) {
-                if (i < requests.size()) requests.get(i).setResult(tr.get(i));
-                if (tr.get(i) != null && tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
-                    OperationResult result = tr.get(i);
-                    status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+            for (OperationResult result : operationResults) {
+                if (result.getError() != null) {
+                    return new StatusWithUuid(StatusCode.BADREQUEST, result.getError());
                 }
             }
+            UUID uuid = operationResults.get(0).getUuid();
+            return new StatusWithUuid(StatusCode.SUCCESS, uuid);
+        } catch (InterruptedException | ExecutionException e) {
+            // TODO Auto-generated catch block
+            return new StatusWithUuid(StatusCode.INTERNALERROR, e.getLocalizedMessage());
+        }
 
-            if (tr.size() > requests.size()) {
-                OperationResult result = tr.get(tr.size()-1);
-                logger.error("Error Updating Row : {}/{}\n Error : {}\n Details : {}", tableName, row,
-                                                                                       result.getError(),
-                                                                                       result.getDetails());
-                status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+    }
+
+    @Override
+    public Status updateRow (Node node, String tableName, String parentUUID, String rowUUID, Row row) {
+        String databaseName = OvsVswitchdSchemaConstants.DATABASE_NAME;
+        Connection connection = connectionService.getConnection(node);
+        OvsdbClient client = connection.getClient();
+
+        logger.debug("updateRow : Connection : {} databaseName : {} tableName : {} rowUUID : {} row : {}",
+                      client.getConnectionInfo(), databaseName, tableName, rowUUID, row.toString());
+        try{
+            TransactionBuilder transactionBuilder = client.transactBuilder();
+            DatabaseSchema dbSchema = client.getDatabaseSchema(databaseName);
+            TableSchema<GenericTableSchema> tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
+            ColumnSchema<GenericTableSchema, UUID> _uuid = tableSchema.column("_uuid", UUID.class);
+            transactionBuilder.add(op.update(tableSchema, row)
+                                     .where(_uuid.opEqual(new UUID(rowUUID)))
+                                     .build());
+
+            ListenableFuture<List<OperationResult>> results = transactionBuilder.execute();
+            List<OperationResult> operationResults = results.get();
+            if (operationResults.isEmpty() || (transactionBuilder.getOperations().size() != operationResults.size())) {
+                return new StatusWithUuid(StatusCode.INTERNALERROR);
             }
-            if (status.isSuccess()) {
-                status = new Status(StatusCode.SUCCESS);
+            for (OperationResult result : operationResults) {
+                if (result.getError() != null) {
+                    return new StatusWithUuid(StatusCode.BADREQUEST, result.getError());
+                }
             }
-            return status;
+            return new StatusWithUuid(StatusCode.SUCCESS);
         } catch(Exception e){
             logger.error("Error in updateRow(): ",e);
         }
         return new Status(StatusCode.INTERNALERROR);
     }
 
+    private void processDeleteTransaction(OvsdbClient client, String databaseName, String childTable,
+                                    String parentTable, String parentColumn, String uuid, TransactionBuilder transactionBuilder) {
+        DatabaseSchema dbSchema = client.getDatabaseSchema(databaseName);
+        TableSchema<GenericTableSchema> childTableSchema = dbSchema.table(childTable, GenericTableSchema.class);
+        TableSchema<GenericTableSchema> parentTableSchema = dbSchema.table(parentTable, GenericTableSchema.class);
+        ColumnSchema<GenericTableSchema, UUID> parentColumnSchema = parentTableSchema.column(parentColumn, UUID.class);
+
+        if (parentColumn != null) {
+            transactionBuilder
+                .add(op.mutate(parentTableSchema)
+                        .addMutation(parentColumnSchema, Mutator.DELETE, new UUID(uuid))
+                        .where(parentColumnSchema.opIncludes(new UUID(uuid)))
+                        .build());
+        }
+
+        ColumnSchema<GenericTableSchema, UUID> _uuid = childTableSchema.column("_uuid", UUID.class);
+        transactionBuilder.add(op.delete(childTableSchema)
+                .where(_uuid.opEqual(new UUID(uuid)))
+                .build());
+    }
+
     @Override
     public Status deleteRow(Node node, String tableName, String uuid) {
-        if (tableName.equalsIgnoreCase("Bridge")) {
-            return deleteBridgeRow(node, uuid);
-        }
-        else if (tableName.equalsIgnoreCase("Capbility")) {
-            return new Status(StatusCode.NOTIMPLEMENTED, "Delete operation for this Table is not implemented yet.");
-        }
-        else if (tableName.equalsIgnoreCase("Controller")) {
-            return deleteControllerRow(node, uuid);
-        }
-        else if (tableName.equalsIgnoreCase("Interface")) {
-            return deleteInterfaceRow(node, uuid);
-        }
-        else if (tableName.equalsIgnoreCase("Manager")) {
-            return deleteManagerRow(node, uuid);
-        }
-        else if (tableName.equalsIgnoreCase("Mirror")) {
-            return deleteMirrorRow(node, uuid);
-        }
-        else if (tableName.equalsIgnoreCase("NetFlow")) {
-            return deleteNetFlowRow(node, uuid);
-        }
-        else if (tableName.equalsIgnoreCase("Open_vSwitch")) {
-            return deleteOpen_vSwitchRow(node, uuid);
-        }
-        else if (tableName.equalsIgnoreCase("Port")) {
-            return deletePortRow(node, uuid);
-        }
-        else if (tableName.equalsIgnoreCase("QoS")) {
-            return deleteQosRow(node, uuid);
-        }
-        else if (tableName.equalsIgnoreCase("Queue")) {
-            return deleteQueueRow(node, uuid);
-        }
-        else if (tableName.equalsIgnoreCase("sFlow")) {
-            return deleteSflowRow(node, uuid);
-        }
-        else if (tableName.equalsIgnoreCase("IPFIX")) {
-            return deleteIpFixRow(node, uuid);
-        }
-        else if (tableName.equalsIgnoreCase("SSL")) {
-            return deleteSSLRow(node, uuid);
-        }
-        return new Status(StatusCode.NOTFOUND, "Table "+tableName+" not supported");
-    }
+        String databaseName = OvsVswitchdSchemaConstants.DATABASE_NAME;
+        Connection connection = connectionService.getConnection(node);
+        OvsdbClient client = connection.getClient();
 
-    @Override
-    public ConcurrentMap<String, Table<?>> getRows(Node node, String tableName) throws Exception{
-        try{
-            if (inventoryServiceInternal == null) {
-                throw new Exception("Inventory Service is Unavailable.");
+        String[] parentColumn = OvsVswitchdSchemaConstants.getParentColumnToMutate(tableName);
+        if (parentColumn == null) {
+            parentColumn = new String[]{null, null};
+        }
+
+        logger.debug("deleteRow : Connection : {} databaseName : {} tableName : {} Uuid : {} ParentTable : {} ParentColumn : {}",
+                client.getConnectionInfo(), databaseName, tableName, uuid, parentColumn[0], parentColumn[1]);
+
+        TransactionBuilder transactionBuilder = client.transactBuilder();
+        this.processDeleteTransaction(client, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName,
+                                      parentColumn[0], parentColumn[1], uuid, transactionBuilder);
+
+        ListenableFuture<List<OperationResult>> results = transactionBuilder.execute();
+        List<OperationResult> operationResults;
+        try {
+            operationResults = results.get();
+            if (operationResults.isEmpty() || (transactionBuilder.getOperations().size() != operationResults.size())) {
+                return new StatusWithUuid(StatusCode.INTERNALERROR);
             }
-            ConcurrentMap<String, Table<?>> ovsTable = inventoryServiceInternal.getTableCache(node, tableName);
-            return ovsTable;
-        } catch(Exception e){
-            throw new Exception("Unable to read table due to "+e.getMessage());
-        }
-    }
-
-    @Override
-    public Table<?> getRow(Node node, String tableName, String uuid) throws Exception {
-        try{
-            if (inventoryServiceInternal == null) {
-                throw new Exception("Inventory Service is Unavailable.");
+            for (OperationResult result : operationResults) {
+                if (result.getError() != null) {
+                    return new StatusWithUuid(StatusCode.BADREQUEST, result.getError());
+                }
             }
-            Map<String, Table<?>> ovsTable = inventoryServiceInternal.getTableCache(node, tableName);
-            if (ovsTable == null) return null;
-            return ovsTable.get(uuid);
-        } catch(Exception e){
-            throw new Exception("Unable to read table due to "+e.getMessage());
+        } catch (InterruptedException | ExecutionException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
+
+        return new Status(StatusCode.SUCCESS);
     }
 
     @Override
-    public String getSerializedRows(Node node, String tableName) throws Exception{
-        try{
-            Map<String, Table<?>> ovsTable = this.getRows(node, tableName);
-            if (ovsTable == null) return null;
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.writeValueAsString(ovsTable);
-        } catch(Exception e){
-            throw new Exception("Unable to read table due to "+e.getMessage());
-        }
+    public ConcurrentMap<String, Row> getRows(Node node, String tableName) {
+        ConcurrentMap<String, Row> ovsTable = inventoryServiceInternal.getTableCache(node, OvsVswitchdSchemaConstants.DATABASE_NAME,  tableName);
+        return ovsTable;
     }
 
     @Override
-    public String getSerializedRow(Node node, String tableName, String uuid) throws Exception {
-        try{
-            Table<?> row = this.getRow(node, tableName, uuid);
-            if (row == null) return null;
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.writeValueAsString(row);
-        } catch(Exception e){
-            throw new Exception("Unable to read table due to "+e.getMessage());
-        }
+    public Row getRow(Node node, String tableName, String uuid) {
+        Map<String, Row> ovsTable = inventoryServiceInternal.getTableCache(node, OvsVswitchdSchemaConstants.DATABASE_NAME,  tableName);
+        if (ovsTable == null) return null;
+        return ovsTable.get(uuid);
     }
 
     @Override
     public List<String> getTables(Node node) {
-        ConcurrentMap<String, ConcurrentMap<String, Table<?>>> cache  = inventoryServiceInternal.getCache(node);
+        ConcurrentMap<String, ConcurrentMap<String, Row>> cache  = inventoryServiceInternal.getCache(node, OvsVswitchdSchemaConstants.DATABASE_NAME);
         if (cache == null) return null;
         return new ArrayList<String>(cache.keySet());
     }
 
+    private List<InetAddress> getControllerIPAddresses(Connection connection) {
+        List<InetAddress> controllers = null;
+        InetAddress controllerIP = null;
 
-    private Status deleteBridgeRow(Node node, String uuid) {
-        // Set up variables for generic _deleteTableRow()
-        String parentTableName=Open_vSwitch.NAME.getName();
-        String childTableName=Bridge.NAME.getName();
-        String parentColumn = "bridges";
+        controllers = new ArrayList<InetAddress>();
+        String addressString = System.getProperty("ovsdb.controller.address");
 
-        return _deleteTableRow(node,uuid,parentTableName,childTableName,parentColumn);
-    }
-
-    private Status deletePortRow(Node node, String uuid) {
-        // Set up variables for generic _deleteTableRow()
-        String parentTableName=Bridge.NAME.getName();
-        String childTableName=Port.NAME.getName();
-        String parentColumn = "ports";
-
-        return _deleteTableRow(node,uuid,parentTableName,childTableName,parentColumn);
-    }
-
-    private Status deleteInterfaceRow(Node node, String uuid) {
-        // Since Port<-Interface tables have a 1:n relationship, need to test if this is the last interface
-        // assigned to a port before attempting delete.
-        Map<String, Table<?>> portTable = inventoryServiceInternal.getTableCache(node, Port.NAME.getName());
-        Map<String, Table<?>> interfaceTable = inventoryServiceInternal.getTableCache(node, Interface.NAME.getName());
-        // Check that the UUID exists
-        if (portTable == null || interfaceTable == null || uuid == null || interfaceTable.get(uuid) == null) {
-            return new Status(StatusCode.NOTFOUND, "");
+        if (addressString != null) {
+            try {
+                controllerIP = InetAddress.getByName(addressString);
+                if (controllerIP != null) {
+                    controllers.add(controllerIP);
+                    return controllers;
+                }
+            } catch (UnknownHostException e) {
+                logger.error("Host {} is invalid", addressString);
+            }
         }
 
-        // Since the above past, it's safe to use the generic _deleteTableRow method
-        // Set up variables for generic _deleteTableRow()
-        String parentTableName=Port.NAME.getName();
-        String childTableName=Interface.NAME.getName();
-        String parentColumn = "interfaces";
-
-        return _deleteTableRow(node,uuid,parentTableName,childTableName,parentColumn);
-    }
-
-    private Status deleteControllerRow(Node node, String uuid) {
-        // Set up variables for generic _deleteTableRow()
-        String parentTableName=Bridge.NAME.getName();
-        String childTableName=Controller.NAME.getName();
-        String parentColumn = "controller";
-
-        return _deleteTableRow(node,uuid,parentTableName,childTableName,parentColumn);
-    }
-
-    private Status deleteOpen_vSwitchRow(Node node, String uuid) {
-        return new Status(StatusCode.NOTIMPLEMENTED, "delete operation for this Table is not implemented yet.");
-    }
-
-    private Status deleteSSLRow(Node node, String uuid) {
-        // Set up variables for generic _deleteTableRow()
-        String parentTableName=Open_vSwitch.NAME.getName();
-        String childTableName=SSL.NAME.getName();
-        String parentColumn = "ssl";
-
-        return _deleteTableRow(node,uuid,parentTableName,childTableName,parentColumn);
-    }
-
-    private Status deleteSflowRow(Node node, String uuid) {
-        // Set up variables for generic _deleteTableRow()
-        String parentTableName=Bridge.NAME.getName();
-        String childTableName=SFlow.NAME.getName();
-        String parentColumn = "sflow";
-
-        return _deleteTableRow(node,uuid,parentTableName,childTableName,parentColumn);
-    }
-
-    private Status deleteIpFixRow(Node node, String uuid) {
-        // Set up variables for generic _deleteTableRow()
-        String parentTableName=Bridge.NAME.getName();
-        String childTableName=IPFIX.NAME.getName();
-        String parentColumn = "ipfix";
-
-        return _deleteTableRow(node,uuid,parentTableName,childTableName,parentColumn);
-    }
-
-    private Status deleteQueueRow(Node node, String uuid) {
-        // Set up variables for _deleteRootTableRow()
-        // This doesn't do a mutate on parent, but simply deletes row
-        String childTableName=Queue.NAME.getName();
-
-        return _deleteRootTableRow(node,uuid,childTableName);
-    }
-
-    private Status deleteQosRow(Node node, String uuid) {
-        // Set up variables for generic _deleteTableRow()
-        String parentTableName=Port.NAME.getName();
-        String childTableName=Qos.NAME.getName();
-        String parentColumn = "qos";
-
-        return _deleteTableRow(node,uuid,parentTableName,childTableName,parentColumn);
-    }
-
-    private Status deleteNetFlowRow(Node node, String uuid) {
-        // Set up variables for generic _deleteTableRow()
-        String parentTableName=Bridge.NAME.getName();
-        String childTableName=NetFlow.NAME.getName();
-        String parentColumn = "netflow";
-
-        return _deleteTableRow(node,uuid,parentTableName,childTableName,parentColumn);
-    }
-
-    private Status deleteMirrorRow(Node node, String uuid) {
-        // Set up variables for generic _deleteTableRow()
-        String parentTableName=Bridge.NAME.getName();
-        String childTableName=Mirror.NAME.getName();
-        String parentColumn = "mirrors";
-        return _deleteTableRow(node,uuid,parentTableName,childTableName,parentColumn);
-    }
-
-    private Status deleteManagerRow(Node node, String uuid) {
-        // Set up variables for generic _deleteTableRow()
-        String parentTableName=Open_vSwitch.NAME.getName();
-        String childTableName=Manager.NAME.getName();
-        String parentColumn = "manager_options";
-
-        return _deleteTableRow(node,uuid,parentTableName,childTableName,parentColumn);
-    }
-
-    private Status _deleteTableRow(Node node,String uuid,String parentTableName, String childTableName, String parentColumn) {
-        try {
-            // Check there is a connectionService
-            if (connectionService == null) {
-                logger.error("Couldn't refer to the ConnectionService");
-                return new Status(StatusCode.NOSERVICE);
-            }
-
-            // Establish the connection
-            Connection connection = this.getConnection(node);
-            if (connection == null) {
-                return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
-            }
-
-            // Remove from Parent and Child
-            Map<String, Table<?>> parentTable = inventoryServiceInternal.getTableCache(node, parentTableName);
-            Map<String, Table<?>> childTable = inventoryServiceInternal.getTableCache(node, childTableName);
-
-            // Check that the UUID exists
-            if (parentTable == null || childTable == null || uuid == null || childTable.get(uuid) == null) {
-                return new Status(StatusCode.NOTFOUND, "");
-            }
-
-            // Initialise the actual request var
-            Operation delRequest = null;
-
-            // Prepare the mutator to remove the child UUID from the parentColumn list in the parent TABLE
-            UUID rowUuid = new UUID(uuid);
-            Mutation mutator = new Mutation(parentColumn, Mutator.DELETE, rowUuid);
-            List<Mutation> mutations = new ArrayList<Mutation>();
-            mutations.add(mutator);
-
-            Status status = new Status(StatusCode.SUCCESS);
-
-            // INCLUDES condition ensures that it captures all rows in the parent table (ie duplicates) that have the child UUID
-            Condition condition = new Condition(parentColumn, Function.INCLUDES, rowUuid);
-            List<Condition> where = new ArrayList<Condition>();
-            where.add(condition);
-            delRequest = new MutateOperation(parentTableName, where, mutations);
-
-            TransactBuilder transaction = new TransactBuilder();
-            transaction.addOperations(new ArrayList<Operation>(Arrays.asList(delRequest)));
-
-            // This executes the transaction.
-            ListenableFuture<List<OperationResult>> transResponse = connection.getClient().transactBuilder().execute();
-
-            // Pull the responses
-            List<OperationResult> tr = transResponse.get();
-            List<Operation> requests = transaction.getRequests();
-
-            for (int i = 0; i < tr.size(); i++) {
-                if (i < requests.size()) requests.get(i).setResult(tr.get(i));
-                if (tr.get(i) != null && tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
-                    OperationResult result = tr.get(i);
-                    status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+        if (clusterServices != null) {
+            controllers = clusterServices.getClusteredControllers();
+            if (controllers != null && controllers.size() > 0) {
+                if (controllers.size() == 1) {
+                    InetAddress controller = controllers.get(0);
+                    if (!controller.equals(InetAddress.getLoopbackAddress())) {
+                        return controllers;
+                    }
+                } else {
+                    return controllers;
                 }
             }
-
-            if (tr.size() > requests.size()) {
-                OperationResult result = tr.get(tr.size() - 1);
-                logger.error("Error deleting: {}\n Error : {}\n Details : {}",
-                        uuid, result.getError(), result.getDetails());
-                status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
-            }
-            return status;
-        } catch (Exception e) {
-            logger.error("Error in _deleteTableRow",e);
         }
-        return new Status(StatusCode.INTERNALERROR);
+
+        addressString = System.getProperty("of.address");
+
+        if (addressString != null) {
+            try {
+                controllerIP = InetAddress.getByName(addressString);
+                if (controllerIP != null) {
+                    controllers.add(controllerIP);
+                    return controllers;
+                }
+            } catch (UnknownHostException e) {
+                logger.error("Host {} is invalid", addressString);
+            }
+        }
+
+        try {
+            controllerIP = connection.getClient().getConnectionInfo().getLocalAddress();
+            controllers.add(controllerIP);
+            return controllers;
+        } catch (Exception e) {
+            logger.debug("Invalid connection provided to getControllerIPAddresses", e);
+        }
+        return controllers;
     }
 
-    private Status _deleteRootTableRow(Node node,String uuid,String TableName) {
-        try {
-            // Check there is a connectionService
-            if (connectionService == null) {
-                logger.error("Couldn't refer to the ConnectionService");
-                return new Status(StatusCode.NOSERVICE);
+    private short getControllerOFPort() {
+        Short defaultOpenFlowPort = 6633;
+        Short openFlowPort = defaultOpenFlowPort;
+        String portString = System.getProperty("of.listenPort");
+        if (portString != null) {
+            try {
+                openFlowPort = Short.decode(portString).shortValue();
+            } catch (NumberFormatException e) {
+                logger.warn("Invalid port:{}, use default({})", portString,
+                        openFlowPort);
             }
+        }
+        return openFlowPort;
+    }
 
-            // Establish the connection
-            Connection connection = this.getConnection(node);
-            if (connection == null) {
-                return new Status(StatusCode.NOSERVICE, "Connection to ovsdb-server not available");
-            }
+    @Override
+    public Boolean setOFController(Node node, String bridgeUUID) throws InterruptedException, ExecutionException {
+        Connection connection = this.getConnection(node);
+        if (connection == null) {
+            return false;
+        }
 
-            Map<String, Table<?>> table = inventoryServiceInternal.getTableCache(node, TableName);
+        OvsDBSet<String> protocols = new OvsDBSet<String>();
 
-            // Check that the UUID exists
-            if (table == null || table.get(uuid) == null) {
-                return new Status(StatusCode.NOTFOUND, "");
-            }
+        String ofVersion = System.getProperty("ovsdb.of.version", OPENFLOW_10);
+        switch (ofVersion) {
+            case OPENFLOW_13:
+                protocols.add("OpenFlow13");
+                break;
+            case OPENFLOW_10:
+            default:
+                protocols.add("OpenFlow10");
+                break;
+        }
 
-            // Initialise the actual request var
-            Operation delRequest = null;
+        Bridge bridge = connection.getClient().createTypedRowWrapper(Bridge.class);
+        bridge.setProtocols(protocols);
+        Status status = this.updateRow(node, bridge.getSchema().getName(), null, bridgeUUID, bridge.getRow());
+        logger.debug("Bridge {} updated to {} with Status {}", bridgeUUID, protocols.toArray()[0], status);
+        if (!status.isSuccess()) return status.isSuccess();
 
-            UUID rowUuid = new UUID(uuid);
+        List<InetAddress> ofControllerAddrs = this.getControllerIPAddresses(connection);
+        short ofControllerPort = getControllerOFPort();
+        for (InetAddress ofControllerAddress : ofControllerAddrs) {
+            String newController = "tcp:"+ofControllerAddress.getHostAddress()+":"+ofControllerPort;
+            Controller controllerRow = connection.getClient().createTypedRowWrapper(Controller.class);
+            controllerRow.setTarget(newController);
+            status = this.insertRow(node, controllerRow.getSchema().getName(), bridgeUUID, controllerRow.getRow());
+        }
+        return status.isSuccess();
+    }
 
-            Status status = new Status(StatusCode.SUCCESS);
 
-            Condition condition = new Condition("_uuid", Function.EQUALS, rowUuid);
-            List<Condition> where = new ArrayList<Condition>();
-            where.add(condition);
-            delRequest = new DeleteOperation(TableName, where);
+    Boolean setBridgeOFController(Node node, String bridgeIdentifier) {
+        if (connectionService == null) {
+            logger.error("Couldn't refer to the ConnectionService");
+            return false;
+        }
 
-            TransactBuilder transaction = new TransactBuilder();
-            transaction.addOperations(new ArrayList<Operation>(Arrays.asList(delRequest)));
+        try{
+            Connection connection = connectionService.getConnection(node);
+            Bridge bridge = connection.getClient().getTypedRowWrapper(Bridge.class, null);
 
-            // This executes the transaction.
-            ListenableFuture<List<OperationResult>> transResponse = connection.getClient().transactBuilder().execute();
-
-            // Pull the responses
-            List<OperationResult> tr = transResponse.get();
-            List<Operation> requests = transaction.getRequests();
-
-            for (int i = 0; i < tr.size(); i++) {
-                if (i < requests.size()) requests.get(i).setResult(tr.get(i));
-                if (tr.get(i) != null && tr.get(i).getError() != null && tr.get(i).getError().trim().length() > 0) {
-                    OperationResult result = tr.get(i);
-                    status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
+            Map<String, Row> brTableCache = inventoryServiceInternal.getTableCache(node, OvsVswitchdSchemaConstants.DATABASE_NAME, bridge.getSchema().getName());
+            for (String uuid : brTableCache.keySet()) {
+                bridge = connection.getClient().getTypedRowWrapper(Bridge.class, brTableCache.get(uuid));
+                if (bridge.getName().contains(bridgeIdentifier)) {
+                    return setOFController(node, uuid);
                 }
             }
-
-            if (tr.size() > requests.size()) {
-                OperationResult result = tr.get(tr.size() - 1);
-                logger.error("Error deleting: {}\n Error : {}\n Details : {}",
-                        uuid, result.getError(), result.getDetails());
-                status = new Status(StatusCode.BADREQUEST, result.getError() + " : " + result.getDetails());
-            }
-            return status;
-        } catch (Exception e) {
-            logger.error("Error in _deleteRootTableRow",e);
+        } catch(Exception e) {
+            logger.error("Error in setBridgeOFController()",e);
         }
-        return new Status(StatusCode.INTERNALERROR);
+        return false;
     }
+
 
     public void _ovsconnect (CommandInterpreter ci) {
         String bridgeName = ci.nextArgument();
@@ -1544,6 +837,282 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         help.append("\t addTunnel <Node> <Bridge> <Port> <tunnel-type> <remote-ip>      - Add Tunnel\n");
         help.append("\t printCache <Node>                                               - Prints Table Cache");
         return help.toString();
+    }
+
+
+    /**
+     * Add a new bridge
+     * @param node Node serving this configuration service
+     * @param bridgeIdentifier String representation of a Bridge Connector
+     * @return Bridge Connector configurations
+     */
+    @Override
+    @Deprecated
+    public Status createBridgeDomain(Node node, String bridgeIdentifier, Map<ConfigConstants, Object> configs) {
+        Connection connection = connectionService.getConnection(node);
+        OvsdbClient client = connection.getClient();
+        Bridge bridge = client.createTypedRowWrapper(Bridge.class);
+        bridge.setName(bridgeIdentifier);
+
+        String ovsTableUuid = this.getSpecialCaseParentUUID(node, OvsVswitchdSchemaConstants.DATABASE_NAME, bridge.getSchema().getName());
+        return this.insertRow(node, bridge.getSchema().getName(), ovsTableUuid, bridge.getRow());
+    }
+
+    /**
+     * Create a Port Attached to a Bridge
+     * Ex. ovs-vsctl add-port br0 vif0
+     * @param node Node serving this configuration service
+     * @param bridgeIdentifier String representation of a Bridge Domain
+     * @param portIdentifier String representation of a user defined Port Name
+     */
+    @Override
+    @Deprecated
+    public Status addPort(Node node, String bridgeIdentifier, String portIdentifier,
+                          Map<ConfigConstants, Object> configs) {
+        Connection connection = connectionService.getConnection(node);
+        OvsdbClient client = connection.getClient();
+
+        Bridge bridge = client.getTypedRowWrapper(Bridge.class, null);
+        ConcurrentMap<String, Row> rows = this.getRows(node, bridge.getSchema().getName());
+        if (rows == null || rows.size() == 0) {
+            return new Status(StatusCode.NOTFOUND);
+        }
+        for (String bridgeUuid : rows.keySet()) {
+            Row bridgeRow = rows.get(bridgeUuid);
+            bridge = client.getTypedRowWrapper(Bridge.class, bridgeRow);
+            if (bridge.getName().equals(bridgeIdentifier)) break;
+        }
+        if (bridge.getName() == null || !bridge.getName().equals(bridgeIdentifier)) {
+            return new Status(StatusCode.NOTFOUND);
+        }
+
+        Map<String, String> options = null;
+        String type = null;
+        Set<BigInteger> tags = null;
+        if (configs != null) {
+            type = (String) configs.get(ConfigConstants.TYPE);
+            Map<String, String> customConfigs = (Map<String, String>) configs.get(ConfigConstants.CUSTOM);
+            if (customConfigs != null) {
+                options = new HashMap<String, String>();
+                for (String customConfig : customConfigs.keySet()) {
+                    options.put(customConfig, customConfigs.get(customConfig));
+                }
+            }
+        }
+
+        if (type != null) {
+            logger.debug("Port type : " + type);
+            if (type.equalsIgnoreCase(OvsdbType.PortType.VLAN.name())) {
+                tags = new HashSet<BigInteger>();
+                tags.add(BigInteger.valueOf(Integer.parseInt((String)configs.get(ConfigConstants.VLAN))));
+            }
+        }
+
+        Port port = client.createTypedRowWrapper(Port.class);
+        port.setName(portIdentifier);
+        if (tags != null) port.setTag(tags);
+        StatusWithUuid portStatus = this.insertRow(node, port.getSchema().getName(), bridge.getUuid().toString(), port.getRow());
+
+        if (!portStatus.isSuccess()) return portStatus;
+        // Ugly hack by adding a sleep for the Monitor Update to catch up.
+        // TODO : Remove this once the Select operation is in place.
+        // We are currently relying on the local Cache for any GET operation and that might fail if we try to
+        // fetch the last installed entry. Hence we need the Select operation to work.
+
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        Interface interfaceRow = client.createTypedRowWrapper(Interface.class);
+        ConcurrentMap<String, Row> intfRows = this.getRows(node, interfaceRow.getSchema().getName());
+        if (intfRows == null || intfRows.size() == 0) {
+            return new Status(StatusCode.NOTFOUND);
+        }
+        for (String intfUuid : intfRows.keySet()) {
+            Row intfRow = rows.get(intfUuid);
+            interfaceRow = client.getTypedRowWrapper(Interface.class, intfRow);
+            if (interfaceRow == null || interfaceRow.getName() == null) continue;
+            if (interfaceRow.getName().equals(portIdentifier)) break;
+        }
+        if (interfaceRow.getName() == null || !interfaceRow.getName().equals(portIdentifier)) {
+            return new Status(StatusCode.NOTFOUND);
+        }
+
+        if (type != null) {
+            logger.debug("Interface type : " + type);
+            if (type.equalsIgnoreCase(OvsdbType.PortType.TUNNEL.name())) {
+                interfaceRow.setType((String)configs.get(ConfigConstants.TUNNEL_TYPE));
+                if (options == null) options = new HashMap<String, String>();
+                options.put("remote_ip", (String)configs.get(ConfigConstants.DEST_IP));
+            } else if (type.equalsIgnoreCase(OvsdbType.PortType.PATCH.name()) ||
+                       type.equalsIgnoreCase(OvsdbType.PortType.INTERNAL.name())) {
+                interfaceRow.setType(type.toLowerCase());
+            }
+        }
+        if (options != null) {
+            interfaceRow.setOptions(options);
+        }
+
+        Status intfStatus = null;
+        intfStatus = this.updateRow(node, interfaceRow.getSchema().getName(), portStatus.getUuid().toString(),
+                                    interfaceRow.getUuid().toString(), interfaceRow.getRow());
+
+        if (intfStatus.isSuccess()) return portStatus;
+        return intfStatus;
+    }
+
+    /**
+     * Implements the OVS Connection for Managers
+     *
+     * @param node Node serving this configuration service
+     * @param managerip String Representing IP and connection types
+     */
+    @SuppressWarnings("unchecked")
+    @Deprecated
+    public boolean setManager(Node node, String managerip) {
+        Connection connection = connectionService.getConnection(node);
+        OvsdbClient client = connection.getClient();
+        Manager manager = client.createTypedRowWrapper(Manager.class);
+        manager.setTarget(managerip);
+
+        OpenVSwitch openVSwitch = connection.getClient().getTypedRowWrapper(OpenVSwitch.class, null);
+        ConcurrentMap<String, Row> row = this.getRows(node, openVSwitch.getSchema().getName());
+        if (row == null || row.size() == 0) {
+            return false;
+        }
+        String ovsTableUuid = (String)row.keySet().toArray()[0];
+
+        Status status = this.insertRow(node, manager.getSchema().getName(), ovsTableUuid, manager.getRow());
+        return status.isSuccess();
+    }
+
+    @Override
+    @Deprecated
+    public Status addBridgeDomainConfig(Node node, String bridgeIdentfier,
+            Map<ConfigConstants, Object> configs) {
+        String mgmt = (String)configs.get(ConfigConstants.MGMT);
+        if (mgmt != null) {
+            if (setManager(node, mgmt)) return new Status(StatusCode.SUCCESS);
+        }
+        return new Status(StatusCode.BADREQUEST);
+    }
+
+    @Override
+    @Deprecated
+    public Status deletePort(Node node, String bridgeIdentifier, String portIdentifier) {
+        Connection connection = connectionService.getConnection(node);
+        OvsdbClient client = connection.getClient();
+
+        Port port = client.getTypedRowWrapper(Port.class, null);
+        ConcurrentMap<String, Row> rows = this.getRows(node, port.getSchema().getName());
+        if (rows == null || rows.size() == 0) {
+            return new Status(StatusCode.NOTFOUND);
+        }
+        for (String portUuid : rows.keySet()) {
+            Row bridgeRow = rows.get(portUuid);
+            port = client.getTypedRowWrapper(Port.class, bridgeRow);
+            if (port.getName().equals(portIdentifier)) break;
+        }
+        if (port.getName() == null || !port.getName().equals(portIdentifier)) {
+            return new Status(StatusCode.NOTFOUND);
+        }
+        return this.deleteRow(node, port.getSchema().getName(), port.getUuid().toString());
+    }
+
+    @Override
+    @Deprecated
+    public Status deleteBridgeDomain(Node node, String bridgeIdentifier) {
+        Connection connection = connectionService.getConnection(node);
+        OvsdbClient client = connection.getClient();
+
+        Bridge bridge = client.getTypedRowWrapper(Bridge.class, null);
+        ConcurrentMap<String, Row> rows = this.getRows(node, bridge.getSchema().getName());
+        if (rows == null || rows.size() == 0) {
+            return new Status(StatusCode.NOTFOUND);
+        }
+        for (String bridgeUuid : rows.keySet()) {
+            Row bridgeRow = rows.get(bridgeUuid);
+            bridge = client.getTypedRowWrapper(Bridge.class, bridgeRow);
+            if (bridge.getName().equals(bridgeIdentifier)) break;
+        }
+        if (bridge.getName() == null || !bridge.getName().equals(bridgeIdentifier)) {
+            return new Status(StatusCode.NOTFOUND);
+        }
+        return this.deleteRow(node, bridge.getSchema().getName(), bridge.getUuid().toString());
+    }
+
+    @Override
+    public List<String> getBridgeDomains(Node node) {
+        if (connectionService == null) {
+            logger.error("Couldn't refer to the ConnectionService");
+            return null;
+        }
+
+        Connection connection = connectionService.getConnection(node);
+        Bridge bridge = connection.getClient().getTypedRowWrapper(Bridge.class, null);
+        List<String> brlist = new ArrayList<String>();
+        Map<String, Row> brTableCache = inventoryServiceInternal.getTableCache(node, OvsVswitchdSchemaConstants.DATABASE_NAME, bridge.getSchema().getName());
+        if(brTableCache != null){
+            for (String uuid : brTableCache.keySet()) {
+                bridge = connection.getClient().getTypedRowWrapper(Bridge.class, brTableCache.get(uuid));
+                brlist.add(bridge.getName());
+            }
+        }
+        return brlist;
+    }
+
+    @Override
+    public NodeConnector getNodeConnector(Node arg0, String arg1, String arg2) {
+        return null;
+    }
+
+    @Override
+    @Deprecated
+    public Status addPortConfig(Node node, String bridgeIdentifier, String portIdentifier,
+            Map<ConfigConstants, Object> configs) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    @Deprecated
+    public Node getBridgeDomainNode(Node node, String bridgeIdentifier) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    @Deprecated
+    public Map<ConfigConstants, Object> getPortConfigs(Node node, String bridgeIdentifier,
+            String portIdentifier) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    @Deprecated
+    public Status removeBridgeDomainConfig(Node node, String bridgeIdentifier,
+            Map<ConfigConstants, Object> configs) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    @Deprecated
+    public Status removePortConfig(Node node, String bridgeIdentifier, String portIdentifier,
+            Map<ConfigConstants, Object> configs) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    @Deprecated
+    public Map<ConfigConstants, Object> getBridgeDomainConfigs(Node node, String bridgeIdentifier) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
 

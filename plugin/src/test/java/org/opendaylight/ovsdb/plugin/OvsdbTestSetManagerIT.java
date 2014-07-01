@@ -21,7 +21,6 @@ public class OvsdbTestSetManagerIT extends OvsdbTestBase {
     @Test
     public void setManager() throws Throwable{
         TestObjects testObjects = getTestConnection();
-        ConnectionService connectionService = testObjects.connectionService;
         Node node = testObjects.node;
 
 
@@ -38,8 +37,7 @@ public class OvsdbTestSetManagerIT extends OvsdbTestBase {
          * @param String with IP and connection type ex. type:ip:port
          *
          */
-        ConfigurationService configurationService = new ConfigurationService();
-        configurationService.setConnectionServiceInternal(connectionService);
+        ConfigurationService configurationService = testObjects.configurationService;
         configurationService.setManager(node, manager);
     }
 

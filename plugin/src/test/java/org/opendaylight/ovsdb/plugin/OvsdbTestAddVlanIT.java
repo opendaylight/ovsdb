@@ -39,8 +39,7 @@ public class OvsdbTestAddVlanIT extends OvsdbTestBase {
          * @param portIdentifier String representation of a user defined Port Name
          * @param vlanid Integer note: only one VID is accepted with tag=x method
          */
-        ConfigurationService configurationService = new ConfigurationService();
-        configurationService.setConnectionServiceInternal(connectionService);
+        ConfigurationService configurationService = testObjects.configurationService;
         Map<ConfigConstants, Object> configs = new HashMap<ConfigConstants, Object>();
         configs.put(ConfigConstants.TYPE, "VLAN");
         configs.put(ConfigConstants.VLAN, vlanid+"");

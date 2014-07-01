@@ -20,11 +20,11 @@
     <module>schemas/Open_vSwitch</module>
     <module>schemas/hardware_vtep</module>
     <module>plugin</module>
-    <module>northbound</module>
-    <module>neutron</module>
+    <!-- <module>northbound</module> -->
+    <!-- <module>neutron</module> -->
     <module>commons/parent</module>
     <module>commons/integrationtest</module>
-    <module>distribution/opendaylight</module>
+    <!-- <module>distribution/opendaylight</module> -->
   </modules>
   <profiles>
     <profile>

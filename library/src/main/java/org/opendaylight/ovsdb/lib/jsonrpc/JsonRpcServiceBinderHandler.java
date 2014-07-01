@@ -13,6 +13,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +27,7 @@ import com.google.common.util.concurrent.SettableFuture;
 public class JsonRpcServiceBinderHandler extends ChannelInboundHandlerAdapter {
     protected static final Logger logger = LoggerFactory.getLogger(JsonRpcServiceBinderHandler.class);
     Map<Object, SettableFuture<Object>> waitingForReply = Maps.newHashMap();
+    ExecutorService executorService = Executors.newFixedThreadPool(10);
     JsonRpcEndpoint factory = null;
     Object context = null;
 
@@ -41,23 +44,32 @@ public class JsonRpcServiceBinderHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    public void channelRead(final ChannelHandlerContext ctx, final Object msg) throws Exception {
 
-        if (msg instanceof JsonNode) {
-            JsonNode jsonNode = (JsonNode) msg;
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (msg instanceof JsonNode) {
+                    JsonNode jsonNode = (JsonNode) msg;
 
-            if (jsonNode.has("result")) {
-                factory.processResult(jsonNode);
-            } else if (jsonNode.hasNonNull("method")) {
-                if (jsonNode.has("id") && !Strings.isNullOrEmpty(jsonNode.get("id").asText())) {
-                    factory.processRequest(context, jsonNode);
+                    if (jsonNode.has("result")) {
+                        try {
+                            factory.processResult(jsonNode);
+                        } catch (NoSuchMethodException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                    } else if (jsonNode.hasNonNull("method")) {
+                        if (jsonNode.has("id") && !Strings.isNullOrEmpty(jsonNode.get("id").asText())) {
+                            factory.processRequest(context, jsonNode);
+                        }
+                    }
+
+                    return;
                 }
+                ctx.channel().close();
             }
-
-            return;
-        }
-
-        ctx.channel().close();
+        });
     }
 
     @Override

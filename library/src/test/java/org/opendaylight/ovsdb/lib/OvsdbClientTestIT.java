@@ -97,7 +97,7 @@ public class OvsdbClientTestIT extends OvsdbTestBase {
 
         MonitorHandle monitor = ovs.monitor(dbSchema, monitorRequests, new MonitorCallBack() {
             @Override
-            public void update(TableUpdates result) {
+            public void update(TableUpdates result, DatabaseSchema dbSchema) {
                 results.add(result);
                 System.out.println("result = " + result);
             }
@@ -168,7 +168,7 @@ public class OvsdbClientTestIT extends OvsdbTestBase {
 
         MonitorHandle monitor = ovs.monitor(dbSchema, monitorRequests, new MonitorCallBack() {
             @Override
-            public void update(TableUpdates result) {
+            public void update(TableUpdates result, DatabaseSchema dbSchema) {
                 results.add(result);
             }
 

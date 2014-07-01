@@ -13,10 +13,11 @@
 package org.opendaylight.ovsdb.lib;
 
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
+import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 
 public interface MonitorCallBack {
 
-    void update(TableUpdates result);
+    void update(TableUpdates result, DatabaseSchema dbSchema);
 
     void exception(Throwable t);
 }

@@ -12,8 +12,8 @@ package org.opendaylight.ovsdb.plugin;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 
+import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -24,7 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 
-import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.connection.IPluginInConnectionService;
 import org.opendaylight.controller.sal.core.Node;
@@ -32,21 +31,24 @@ import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
+import org.opendaylight.ovsdb.lib.MonitorCallBack;
+import org.opendaylight.ovsdb.lib.MonitorHandle;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
-import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
-import org.opendaylight.ovsdb.lib.message.UpdateNotification;
-import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
+import org.opendaylight.ovsdb.lib.message.MonitorRequest;
+import org.opendaylight.ovsdb.lib.message.MonitorRequestBuilder;
+import org.opendaylight.ovsdb.lib.message.MonitorSelect;
+import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.table.Bridge;
-import org.opendaylight.ovsdb.lib.table.Controller;
-import org.opendaylight.ovsdb.lib.table.Open_vSwitch;
-import org.opendaylight.ovsdb.lib.table.Table;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
+import org.opendaylight.ovsdb.lib.schema.TableSchema;
+import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
 
 
@@ -54,21 +56,15 @@ import com.google.common.util.concurrent.ListenableFuture;
  * Represents the openflow plugin component in charge of programming the flows
  * the flow programming and relay them to functional modules above SAL.
  */
-public class ConnectionService implements IPluginInConnectionService, IConnectionServiceInternal, OvsdbRPC.Callback, OvsdbConnectionListener {
+public class ConnectionService implements IPluginInConnectionService, IConnectionServiceInternal, OvsdbConnectionListener {
     protected static final Logger logger = LoggerFactory.getLogger(ConnectionService.class);
 
     // Properties that can be set in config.ini
     private static final String OVSDB_LISTENPORT = "ovsdb.listenPort";
-    private static final String OVSDB_AUTOCONFIGURECONTROLLER = "ovsdb.autoconfigurecontroller";
-    protected static final String OPENFLOW_10 = "1.0";
-    protected static final String OPENFLOW_13 = "1.3";
-
     private static final Integer defaultOvsdbPort = 6640;
-    private static final boolean defaultAutoConfigureController = true;
 
     private OvsdbConnection connectionLib;
     private static Integer ovsdbListenPort = defaultOvsdbPort;
-    private static boolean autoConfigureController = defaultAutoConfigureController;
     private ConcurrentMap<String, Connection> ovsdbConnections;
     private List<ChannelHandler> handlers = null;
     private InventoryServiceInternal inventoryServiceInternal;
@@ -108,10 +104,6 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
             listenPort = Integer.decode(portString).intValue();
         }
         ovsdbListenPort = listenPort;
-
-        // Keep the default value if the property is not set
-        if (System.getProperty(OVSDB_AUTOCONFIGURECONTROLLER) != null)
-            autoConfigureController = Boolean.getBoolean(OVSDB_AUTOCONFIGURECONTROLLER);
     }
 
     /**
@@ -218,6 +210,10 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         Connection connection = new Connection(identifier, client);
         Node node = connection.getNode();
         ovsdbConnections.put(identifier, connection);
+        List<String> dbs = client.getDatabases().get();
+        for (String db : dbs) {
+            client.getSchema(db).get();
+        }
         // Keeping the Initial inventory update(s) on its own thread.
         new Thread() {
             Connection connection;
@@ -227,7 +223,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
             public void run() {
                 try {
                     initializeInventoryForNewNode(connection);
-                } catch (InterruptedException | ExecutionException e) {
+                } catch (InterruptedException | ExecutionException | IOException e) {
                     logger.error("Failed to initialize inventory for node with identifier " + identifier, e);
                     ovsdbConnections.remove(identifier);
                 }
@@ -247,7 +243,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         inventoryServiceInternal.removeNode(node);
     }
 
-    private void initializeInventoryForNewNode (Connection connection) throws InterruptedException, ExecutionException {
+    private void initializeInventoryForNewNode (Connection connection) throws InterruptedException, ExecutionException, IOException {
         OvsdbClient client = connection.getClient();
         InetAddress address = client.getConnectionInfo().getRemoteAddress();
         int port = client.getConnectionInfo().getRemotePort();
@@ -258,187 +254,77 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         props.add(l4Port);
         inventoryServiceInternal.addNode(connection.getNode(), props);
 
-        List<String> dbNames = Arrays.asList(Open_vSwitch.NAME.getName());
-        ListenableFuture<DatabaseSchema> dbSchemaF = client.getSchema("Open_vSwitch");
+        OpenVSwitch openVSwitch = connection.getClient().getTypedRowWrapper(OpenVSwitch.class, null);
+        List<String> dbNames = Arrays.asList(openVSwitch.getSchema().getName());
+        ListenableFuture<DatabaseSchema> dbSchemaF = client.getSchema(OvsVswitchdSchemaConstants.DATABASE_NAME);
         DatabaseSchema databaseSchema = dbSchemaF.get();
-        inventoryServiceInternal.updateDatabaseSchema(connection.getNode(), databaseSchema);
-/*
-        MonitorRequestBuilder monitorReq = null; //ashwin(not sure if we need) : new MonitorRequestBuilder();
-        for (Table<?> table : Tables.getTables()) {
-            if (databaseSchema.getTables().contains(table.getTableName().getName())) {
-                //ashwin(not sure if we need) monitorReq.monitor(table);
-            } else {
-                logger.debug("We know about table {} but it is not in the schema of {}", table.getTableName().getName(), connection.getNode().getNodeIDString());
-            }
-        }
-
-        ListenableFuture<TableUpdates> monResponse = null; //TODO : ashwin(not sure if we need)connection.getRpc().monitor(monitorReq);
-        TableUpdates updates = monResponse.get();
-        if (updates.getError() != null) {
-            logger.error("Error configuring monitor, error : {}, details : {}",
-                    updates.getError(),
-                    updates.getDetails());
-            throw new RuntimeException("Failed to setup a monitor in OVSDB");
-        }
-        UpdateNotification monitor = new UpdateNotification();
-        monitor.setUpdate(updates);
-        this.update(connection.getNode(), monitor);
-        if (autoConfigureController) {
-            this.updateOFControllers(connection.getNode());
-        }
-        */
+        this.monitorTables(connection.getNode());
         inventoryServiceInternal.notifyNodeAdded(connection.getNode());
     }
 
-    private IClusterGlobalServices clusterServices;
-
-    public void setClusterServices(IClusterGlobalServices i) {
-        this.clusterServices = i;
-    }
-
-    public void unsetClusterServices(IClusterGlobalServices i) {
-        if (this.clusterServices == i) {
-            this.clusterServices = null;
+    public void monitorTables(Node node) throws ExecutionException, InterruptedException, IOException {
+        OvsdbClient client = ovsdbConnections.get(node.getID()).getClient();
+        List<String> databases = client.getDatabases().get();
+        if (databases == null) {
+            logger.error("Unable to get Databases for the ovsdb connection : {}", client.getConnectionInfo());
+            return;
         }
-    }
-
-    private List<InetAddress> getControllerIPAddresses(Connection connection) {
-        List<InetAddress> controllers = null;
-        InetAddress controllerIP = null;
-
-        controllers = new ArrayList<InetAddress>();
-        String addressString = System.getProperty("ovsdb.controller.address");
-
-        if (addressString != null) {
-            try {
-                controllerIP = InetAddress.getByName(addressString);
-                if (controllerIP != null) {
-                    controllers.add(controllerIP);
-                    return controllers;
-                }
-            } catch (UnknownHostException e) {
-                logger.error("Host {} is invalid", addressString);
+        for (String database : databases) {
+            DatabaseSchema dbSchema = client.getSchema(database).get();
+            if (dbSchema == null) {
+                logger.error("Unable to get Database Schema for the ovsdb connection : {} , database : {}", client.getConnectionInfo(), database);
+                return;
             }
-        }
-
-        if (clusterServices != null) {
-            controllers = clusterServices.getClusteredControllers();
-            if (controllers != null && controllers.size() > 0) {
-                if (controllers.size() == 1) {
-                    InetAddress controller = controllers.get(0);
-                    if (!controller.equals(InetAddress.getLoopbackAddress())) {
-                        return controllers;
-                    }
-                } else {
-                    return controllers;
-                }
+            Set<String> tables = dbSchema.getTables();
+            if (tables == null) {
+                logger.warn("Database {} without any tables. Strange !", database);
+                continue;
             }
-        }
-
-        addressString = System.getProperty("of.address");
-
-        if (addressString != null) {
-            try {
-                controllerIP = InetAddress.getByName(addressString);
-                if (controllerIP != null) {
-                    controllers.add(controllerIP);
-                    return controllers;
-                }
-            } catch (UnknownHostException e) {
-                logger.error("Host {} is invalid", addressString);
+            List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
+            for (String tableName : tables) {
+                GenericTableSchema tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
+                monitorRequests.add(this.getAllColumnsMonitorRequest(tableSchema));
             }
-        }
-
-        try {
-            controllerIP = connection.getClient().getConnectionInfo().getLocalAddress();
-            controllers.add(controllerIP);
-            return controllers;
-        } catch (Exception e) {
-            logger.debug("Invalid connection provided to getControllerIPAddresses", e);
-        }
-        return controllers;
-    }
-
-    private short getControllerOFPort() {
-        Short defaultOpenFlowPort = 6633;
-        Short openFlowPort = defaultOpenFlowPort;
-        String portString = System.getProperty("of.listenPort");
-        if (portString != null) {
-            try {
-                openFlowPort = Short.decode(portString).shortValue();
-            } catch (NumberFormatException e) {
-                logger.warn("Invalid port:{}, use default({})", portString,
-                        openFlowPort);
-            }
-        }
-        return openFlowPort;
-    }
-
-    @Override
-    public Boolean setOFController(Node node, String bridgeUUID) throws InterruptedException, ExecutionException {
-        Connection connection = this.getConnection(node);
-        if (connection == null) {
-            return false;
-        }
-
-        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-        OvsDBSet<String> protocols = new OvsDBSet<String>();
-
-        String ofVersion = System.getProperty("ovsdb.of.version", OPENFLOW_10);
-        switch (ofVersion) {
-            case OPENFLOW_13:
-                protocols.add("OpenFlow13");
-                break;
-            case OPENFLOW_10:
-            default:
-                protocols.add("OpenFlow10");
-                break;
-        }
-
-        Bridge bridge = new Bridge();
-        bridge.setProtocols(protocols);
-        Status status = ovsdbTable.updateRow(node, Bridge.NAME.getName(), null, bridgeUUID, bridge);
-        logger.debug("Bridge {} updated to {} with Status {}", bridgeUUID, protocols.toArray()[0], status);
-
-        List<InetAddress> ofControllerAddrs = this.getControllerIPAddresses(connection);
-        short ofControllerPort = getControllerOFPort();
-        for (InetAddress ofControllerAddress : ofControllerAddrs) {
-            String newController = "tcp:"+ofControllerAddress.getHostAddress()+":"+ofControllerPort;
-            Controller controllerRow = new Controller();
-            controllerRow.setTarget(newController);
-            if (ovsdbTable != null) {
-                ovsdbTable.insertRow(node, Controller.NAME.getName(), bridgeUUID, controllerRow);
-            }
-        }
-        return true;
-    }
-
-    private void updateOFControllers (Node node) {
-        Map<String, Table<?>> bridges = inventoryServiceInternal.getTableCache(node, Bridge.NAME.getName());
-        if (bridges == null) return;
-        for (String bridgeUUID : bridges.keySet()) {
-            try {
-                this.setOFController(node, bridgeUUID);
-            } catch (Exception e) {
-                logger.error("Failed updateOFControllers", e);
-            }
+            MonitorHandle monitor = client.monitor(dbSchema, monitorRequests, new UpdateMonitor(node));
         }
     }
 
-    @Override
-    public void update(Object context, UpdateNotification updateNotification) {
-        if (updateNotification == null) return;
-        inventoryServiceInternal.processTableUpdates((Node)context, updateNotification.getUpdate());
+    /**
+     * As per RFC 7047, section 4.1.5, if a Monitor request is sent without any columns, the update response will not include
+     * the _uuid column.
+     * ----------------------------------------------------------------------------------------------------------------------------------
+     * Each <monitor-request> specifies one or more columns and the manner in which the columns (or the entire table) are to be monitored.
+     * The "columns" member specifies the columns whose values are monitored. It MUST NOT contain duplicates.
+     * If "columns" is omitted, all columns in the table, except for "_uuid", are monitored.
+     * ----------------------------------------------------------------------------------------------------------------------------------
+     * In order to overcome this limitation, this method
+     *
+     * @return MonitorRequest that includes all the Bridge Columns including _uuid
+     */
+    public <T extends TableSchema<T>> MonitorRequest<T> getAllColumnsMonitorRequest (T tableSchema) {
+        Set<String> columns = tableSchema.getColumns();
+        MonitorRequestBuilder<T> monitorBuilder = MonitorRequestBuilder.builder(tableSchema);
+        for (String column : columns) {
+            monitorBuilder.addColumn(column);
+        }
+        return monitorBuilder.with(new MonitorSelect(true, true, true, true)).build();
     }
 
-    @Override
-    public void locked(Object context, List<String> ids) {
-        // TODO Auto-generated method stub
-    }
+    private class UpdateMonitor implements MonitorCallBack {
+        Node node = null;
+        public UpdateMonitor(Node node) {
+            this.node = node;
+        }
 
-    @Override
-    public void stolen(Object context, List<String> ids) {
-        // TODO Auto-generated method stub
+        @Override
+        public void update(TableUpdates result, DatabaseSchema dbSchema) {
+            inventoryServiceInternal.processTableUpdates(node, dbSchema.getName(), result);
+        }
+
+        @Override
+        public void exception(Throwable t) {
+            System.out.println("Exception t = " + t);
+        }
     }
 
     private String getConnectionIdentifier(OvsdbClient client) {

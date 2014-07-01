@@ -9,7 +9,6 @@
  */
 package org.opendaylight.ovsdb.plugin;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,6 +17,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -32,13 +32,10 @@ import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
 import org.opendaylight.controller.sal.inventory.IPluginOutInventoryService;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
-import org.opendaylight.ovsdb.lib.message.temp.TableUpdate;
-import org.opendaylight.ovsdb.lib.message.temp.TableUpdate.Row;
-import org.opendaylight.ovsdb.lib.message.temp.TableUpdates;
-import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.table.Bridge;
-import org.opendaylight.ovsdb.lib.table.Table;
+import org.opendaylight.ovsdb.lib.message.TableUpdate;
+import org.opendaylight.ovsdb.lib.message.TableUpdates;
+import org.opendaylight.ovsdb.lib.notation.Row;
+import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +55,7 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
     private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps;
     private ConcurrentMap<Node, NodeDB> dbCache = Maps.newConcurrentMap();
     private ScheduledExecutorService executor;
+    private OVSDBConfigService configurationService;
 
     /**
      * Function called by the dependency manager when all the required
@@ -107,6 +105,14 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
             this.pluginOutInventoryServices.remove(service);
     }
 
+    public void setConfigurationService(OVSDBConfigService service) {
+        configurationService = service;
+    }
+
+    public void unsetConfigurationService(OVSDBConfigService service) {
+        configurationService = null;
+    }
+
     /**
      * Retrieve nodes from openflow
      */
@@ -126,46 +132,46 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
 
 
     @Override
-    public ConcurrentMap<String, ConcurrentMap<String, Table<?>>> getCache(Node n) {
+    public ConcurrentMap<String, ConcurrentMap<String, Row>> getCache(Node n, String databaseName) {
         NodeDB db = dbCache.get(n);
         if (db == null) return null;
-        return db.getTableCache();
+        return db.getDatabase(databaseName);
     }
 
 
     @Override
-    public ConcurrentMap<String, Table<?>> getTableCache(Node n, String tableName) {
+    public ConcurrentMap<String, Row> getTableCache(Node n, String databaseName, String tableName) {
         NodeDB db = dbCache.get(n);
         if (db == null) return null;
-        return db.getTableCache(tableName);
+        return db.getTableCache(databaseName, tableName);
     }
 
 
     @Override
-    public Table<?> getRow(Node n, String tableName, String uuid) {
+    public Row getRow(Node n, String databaseName, String tableName, String uuid) {
         NodeDB db = dbCache.get(n);
         if (db == null) return null;
-        return db.getRow(tableName, uuid);
+        return db.getRow(databaseName, tableName, uuid);
     }
 
     @Override
-    public void updateRow(Node n, String tableName, String uuid, Table<?> row) {
+    public void updateRow(Node n, String databaseName, String tableName, String uuid, Row row) {
         NodeDB db = dbCache.get(n);
         if (db == null) {
             db = new NodeDB();
             dbCache.put(n, db);
         }
-        db.updateRow(tableName, uuid, row);
+        db.updateRow(databaseName, tableName, uuid, row);
     }
 
     @Override
-    public void removeRow(Node n, String tableName, String uuid) {
+    public void removeRow(Node n, String databaseName, String tableName, String uuid) {
         NodeDB db = dbCache.get(n);
-        if (db != null) db.removeRow(tableName, uuid);
+        if (db != null) db.removeRow(databaseName, tableName, uuid);
     }
 
     @Override
-    public void processTableUpdates(Node n, TableUpdates tableUpdates) {
+    public void processTableUpdates(Node n, String databaseName, TableUpdates tableUpdates) {
         NodeDB db = dbCache.get(n);
         if (db == null) {
             db = new NodeDB();
@@ -173,36 +179,34 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
         }
 
         OVSDBInventoryListener inventoryListener = (OVSDBInventoryListener)ServiceHelper.getGlobalInstance(OVSDBInventoryListener.class, this);
-        Set<Table.Name> available = tableUpdates.availableUpdates();
-        for (Table.Name name : available) {
-            TableUpdate tableUpdate = tableUpdates.getUpdate(name);
-            Collection<TableUpdate.Row<?>> rows = tableUpdate.getRows();
-            for (Row<?> row : rows) {
-                String uuid = row.getId();
-                Table<?> newRow = (Table<?>)row.getNew();
-                Table<?> oldRow = (Table<?>)row.getOld();
-                if (newRow != null) {
-                    db.updateRow(name.getName(), uuid, newRow);
-                    if (name.getName().equalsIgnoreCase("bridge")) {
-                        logger.debug("Received Bridge Table udpate for node {}", n);
-                        // OVSDB has the Bridge name info while OpenFlow Spec is not
-                        // Clear on that. From a user/manageability standpoint, it is easier
-                        // to handle Bridge names compared to dpids.
-                        // Updating the Openflow bridge name via the SAL Description update.
+        for (String tableName : tableUpdates.getUpdates().keySet()) {
+            Map<String, Row> tCache = db.getTableCache(databaseName, tableName);
+            TableUpdate update = tableUpdates.getUpdates().get(tableName);
 
-                        // updateOFBridgeName(n, (Bridge)newRow);
-                    }
-                    if ((oldRow == null) && (inventoryListener != null)) {
-                        inventoryListener.rowAdded(n, name.getName(), uuid, newRow);
-                    } else if (inventoryListener != null) {
-                        inventoryListener.rowUpdated(n, name.getName(), uuid, oldRow, newRow);
-                    }
-                } else if (oldRow != null) {
-                    if (inventoryListener != null) {
-                        inventoryListener.rowRemoved(n, name.getName(), uuid, oldRow, null);
-                    }
-                    db.removeRow(name.getName(), uuid);
+            if (update.getNew() != null) {
+                boolean isNewRow = (tCache == null || tCache.get(update.getUuid().toString()) == null) ? true : false;
+                db.updateRow(databaseName, tableName, update.getUuid().toString(), update.getNew());
+                if (isNewRow) {
+                    this.handleOpenVSwitchSpecialCase(n, databaseName, tableName, update);
+                    if (inventoryListener != null) inventoryListener.rowAdded(n, tableName, update.getUuid().toString(), update.getNew());
+                } else {
+                    if (inventoryListener != null) inventoryListener.rowUpdated(n, tableName, update.getUuid().toString(), update.getOld(), update.getNew());
                 }
+            } else if (update.getOld() != null){
+                if (tCache != null) {
+                    if (inventoryListener != null) inventoryListener.rowRemoved(n, tableName, update.getUuid().toString(), update.getOld(), update.getNew());
+                }
+                db.removeRow(databaseName, tableName, update.getUuid().toString());
+            }
+        }
+    }
+
+    private void handleOpenVSwitchSpecialCase(Node node, String databaseName, String tableName, TableUpdate update) {
+        if (OvsVswitchdSchemaConstants.shouldConfigureController(databaseName, tableName)) {
+            try {
+                if (configurationService != null) configurationService.setOFController(node, update.getUuid().toString());
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -211,7 +215,7 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
         Runnable updateNameRunnable = new Runnable() {
             @Override
             public void run() {
-                OvsDBSet<String> dpids = bridge.getDatapath_id();
+                Set<String> dpids = bridge.getDatapathIdColumn().getData();
                 String bridgeName = bridge.getName();
                 if (dpids == null || bridgeName == null) return;
                 for (String dpid : dpids) {
@@ -273,23 +277,6 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
         for (IPluginOutInventoryService service : pluginOutInventoryServices) {
             service.updateNode(node, type, props);
         }
-    }
-
-    @Override
-    public DatabaseSchema getDatabaseSchema(Node n) {
-        NodeDB db = dbCache.get(n);
-        if (db != null) return db.getSchema();
-        return null;
-    }
-
-    @Override
-    public void updateDatabaseSchema(Node n, DatabaseSchema schema) {
-        NodeDB db = dbCache.get(n);
-        if (db == null) {
-            db = new NodeDB();
-            dbCache.put(n, db);
-        }
-        db.setSchema(schema);
     }
 
     @Override

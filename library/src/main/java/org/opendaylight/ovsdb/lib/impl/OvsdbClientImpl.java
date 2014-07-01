@@ -85,8 +85,8 @@ public class OvsdbClientImpl implements OvsdbClient {
         if (rpcCallback == null) {
             OvsdbRPC.Callback temp = new OvsdbRPC.Callback() {
                 @Override
-                public void update(Object node, UpdateNotification upadateNotification) {
-                    Object key = upadateNotification.getContext();
+                public void update(Object node, UpdateNotification updateNotification) {
+                    Object key = updateNotification.getContext();
                     CallbackContext callbackContext = monitorCallbacks.get(key);
                     MonitorCallBack monitorCallBack = callbackContext.monitorCallBack;
                     if (monitorCallBack == null) {
@@ -94,7 +94,7 @@ public class OvsdbClientImpl implements OvsdbClient {
                         logger.info("callback received with context {}, but no known handler. Ignoring!", key);
                         return;
                     }
-                    _transformingCallback(upadateNotification.getUpdates(), monitorCallBack, callbackContext.schema);
+                    _transformingCallback(updateNotification.getUpdates(), monitorCallBack, callbackContext.schema);
                 }
 
                 @Override
@@ -127,7 +127,7 @@ public class OvsdbClientImpl implements OvsdbClient {
 
             }
             TableUpdates updates = new TableUpdates(tableUpdateMap);
-            monitorCallBack.update(updates);
+            monitorCallBack.update(updates, dbSchema);
         }
     }
 

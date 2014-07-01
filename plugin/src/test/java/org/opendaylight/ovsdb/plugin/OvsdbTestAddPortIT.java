@@ -41,8 +41,7 @@ public class OvsdbTestAddPortIT extends OvsdbTestBase {
          * @param bridgeDomainIdentifier String representation of a Bridge Domain
          * @param portIdentifier String representation of a user defined Port Name
          */
-        ConfigurationService configurationService = new ConfigurationService();
-        configurationService.setConnectionServiceInternal(connectionService);
+        ConfigurationService configurationService = testObjects.configurationService;
         configurationService.addPort(node, BRIDGE_NAME, PORT_NAME, null);
     }
 }

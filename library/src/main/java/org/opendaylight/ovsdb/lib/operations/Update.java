@@ -12,13 +12,16 @@
 
 package org.opendaylight.ovsdb.lib.operations;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Condition;
+import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -40,6 +43,18 @@ public class Update<E extends TableSchema<E>> extends Operation<E> implements Co
 
     public Update<E> on(TableSchema schema){
         return this;
+    }
+
+    public Update(TableSchema<E> schema, Row<E> row) {
+        super(schema, UPDATE);
+        Collection<Column<E,?>> columns = row.getColumns();
+        for (Column<E,?> column : columns) {
+            this.set(column);
+        }
+    }
+
+    public Update(TypedBaseTable<E> typedTable) {
+        this(typedTable.getSchema(), typedTable.getRow());
     }
 
     public <T extends TableSchema<T>, D> Update<E> set(ColumnSchema<T, D> columnSchema, D value) {

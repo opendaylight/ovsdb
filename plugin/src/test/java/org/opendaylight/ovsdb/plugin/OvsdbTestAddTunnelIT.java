@@ -26,7 +26,6 @@ public class OvsdbTestAddTunnelIT extends OvsdbTestBase {
     @Test
     public void addTunnel() throws Throwable{
         TestObjects testObjects = getTestConnection();
-        ConnectionService connectionService = testObjects.connectionService;
         Node node = testObjects.node;
 
         /**
@@ -55,8 +54,7 @@ public class OvsdbTestAddTunnelIT extends OvsdbTestBase {
          * @param tunencap is the tunnel encapsulation options being CAPWAP, GRE or VXLAN
          * The Bridge must already be defined before calling addTunnel.
          */
-        ConfigurationService configurationService = new ConfigurationService();
-        configurationService.setConnectionServiceInternal(connectionService);
+        ConfigurationService configurationService = testObjects.configurationService;
         Map<ConfigConstants, Object> configs = new HashMap<ConfigConstants, Object>();
         configs.put(ConfigConstants.TYPE, "TUNNEL");
         configs.put(ConfigConstants.TUNNEL_TYPE, tunencap);

@@ -64,6 +64,14 @@ public class ColumnSchema<E extends TableSchema<E>, D> {
         return new Condition(this.getName(), Function.LESS_THAN_OR_EQUALS, data);
     }
 
+    public Condition opIncludes(D data) {
+        return new Condition(this.getName(), Function.INCLUDES, data);
+    }
+
+    public Condition opExcludes(D data) {
+        return new Condition(this.getName(), Function.EXCLUDES, data);
+    }
+
     // --- Operations on the column ----------//:w
 
 

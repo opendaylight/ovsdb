@@ -76,11 +76,15 @@
       <artifactId>ovsdb_plugin</artifactId>
       <version>${ovsdb.plugin.version}</version>
     </dependency>
+<!--
+    TODO : Remove this comment once the Northbound migration is complete.
+
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>ovsdb_northbound</artifactId>
       <version>${ovsdb.northbound.version}</version>
     </dependency>
+-->
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>ovsdb_schema.Open_vSwitch</artifactId>

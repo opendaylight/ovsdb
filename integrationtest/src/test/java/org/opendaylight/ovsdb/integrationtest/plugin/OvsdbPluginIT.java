@@ -12,6 +12,7 @@ package org.opendaylight.ovsdb.integrationtest.plugin;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
@@ -25,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -36,13 +38,18 @@ import org.junit.runner.RunWith;
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
+import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.ovsdb.integrationtest.ConfigurationBundles;
 import org.opendaylight.ovsdb.integrationtest.OvsdbIntegrationTestBase;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
+import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.plugin.Connection;
 import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
+import org.opendaylight.ovsdb.plugin.StatusWithUuid;
+import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
+import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -51,6 +58,9 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 
 @RunWith(PaxExam.class)
 public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
@@ -78,6 +88,7 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
 
             ConfigurationBundles.controllerBundles(),
             ConfigurationBundles.ovsdbLibraryBundles(),
+            ConfigurationBundles.ovsdbDefaultSchemaBundles(),
             mavenBundle("org.opendaylight.ovsdb", "ovsdb_plugin").versionAsInProject(),
             junitBundles()
         );
@@ -154,7 +165,7 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
     }
 
     @Test
-    public void tableTest() throws Exception {
+    public void apiTests() throws Exception {
         Thread.sleep(5000);
         IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
 
@@ -169,11 +180,77 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
             identifier = connectionInfo.getRemoteAddress().getHostAddress()+":"+connectionInfo.getRemotePort();
         }
         assertEquals(Node.fromString("OVS|"+identifier), connectionService.getNodes().get(0));
-
         System.out.println("Nodes = "+ connectionService.getNodes());
+        /*
+         * Test sequence :
+         * 1. Print Cache and Assert to make sure the bridge is not created yet.
+         * 2. Create a bridge with a valid parent_uuid & Assert to make sure the return status is success.
+         * 3. Assert to make sure the bridge is created with a valid Uuid.
+         * 4. Delete the bridge & Assert to make sure the return status is success.
+         * 5. Assert to make sure the bridge is deleted
+         */
 
+        this.endToEndApiTest(connection, getOpenVSwitchTableUUID(connection));
+
+        /*
+         * Repeat all of the above tests without the parent_uuid
+         */
+
+        this.endToEndApiTest(connection, null);
+    }
+
+    public void endToEndApiTest(Connection connection, String parentUuid) throws Exception {
+        // 1. Print Cache and Assert to make sure the bridge is not created yet.
+        printCache();
+
+        // 2. Create a bridge with a valid parent_uuid & Assert to make sure the return status is success.
+        StatusWithUuid status = insertBridge(connection, parentUuid);
+        assertTrue(status.isSuccess());
+
+        Thread.sleep(2000); // TODO : Remove this Sleep once the Select operation is resolved.
+
+        // 3. Assert to make sure the bridge is created with a valid Uuid.
+        printCache();
+        Bridge bridge = connection.getClient().getTypedRowWrapper(Bridge.class, null);
+        Row bridgeRow = ovsdbConfigService.getRow(node, bridge.getSchema().getName(), status.getUuid().toString());
+        assertNotNull(bridgeRow);
+        bridge = connection.getClient().getTypedRowWrapper(Bridge.class, bridgeRow);
+        assertEquals(bridge.getUuid(), status.getUuid());
+
+        // 4. Delete the bridge & Assert to make sure the return status is success.
+        Status delStatus = ovsdbConfigService.deleteRow(node, bridge.getSchema().getName(), status.getUuid().toString());
+        assertTrue(delStatus.isSuccess());
+        Thread.sleep(2000); // TODO : Remove this Sleep once the Select operation is resolved.
+
+        // 5. Assert to make sure the bridge is deleted
+        bridgeRow = ovsdbConfigService.getRow(node, bridge.getSchema().getName(), status.getUuid().toString());
+        assertNull(bridgeRow);
+    }
+
+    public StatusWithUuid insertBridge(Connection connection, String parentUuid) throws Exception {
+        Bridge bridge = connection.getClient().createTypedRowWrapper(Bridge.class);
+        bridge.setName("br_test1");
+        bridge.setStatus(ImmutableMap.of("key", "value"));
+        bridge.setFloodVlans(Sets.newHashSet(34));
+        return ovsdbConfigService.insertRow(node, bridge.getSchema().getName(), parentUuid, bridge.getRow());
+    }
+
+    public String getOpenVSwitchTableUUID(Connection connection) throws Exception {
+        OpenVSwitch openVSwitch = connection.getClient().getTypedRowWrapper(OpenVSwitch.class, null);
+        ConcurrentMap<String, Row> row = ovsdbConfigService.getRows(node, openVSwitch.getSchema().getName());
+        if (row == null || row.size() == 0) return null;
+        return (String)row.keySet().toArray()[0];
+    }
+
+    public void printCache() throws Exception {
         List<String> tables = ovsdbConfigService.getTables(node);
         System.out.println("Tables = "+tables);
         assertNotNull(tables);
+        for (String table : tables) {
+            System.out.println("Table "+table);
+            ConcurrentMap<String,Row> row = ovsdbConfigService.getRows(node, table);
+            System.out.println(row);
+        }
     }
+
 }

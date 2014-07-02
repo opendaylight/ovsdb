@@ -326,6 +326,7 @@ public class OvsdbClientTestIT extends OvsdbTestBase {
     }
 
     public void testGetDBs() throws ExecutionException, InterruptedException {
+        Assert.assertTrue(ovs.isActive());
         ListenableFuture<List<String>> databases = ovs.getDatabases();
         List<String> dbNames = databases.get();
         Assert.assertNotNull(dbNames);

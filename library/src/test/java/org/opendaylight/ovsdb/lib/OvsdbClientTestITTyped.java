@@ -97,6 +97,8 @@ public class OvsdbClientTestITTyped extends OvsdbTestBase {
             return;
         }
         ovs = this.getTestConnection();
+        Assert.assertNotNull(ovs);
+        Assert.assertTrue(ovs.isActive());
         testGetDBs();
         dbSchema = ovs.getSchema(OPEN_VSWITCH_SCHEMA, true).get();
     }

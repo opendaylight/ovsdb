@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import junit.framework.Assert;
@@ -325,9 +326,10 @@ public class OvsdbClientTestIT extends OvsdbTestBase {
         System.out.println("Abort operation results = " + operationResults);
     }
 
-    public void testGetDBs() throws ExecutionException, InterruptedException {
+    public void testGetDBs() throws ExecutionException, InterruptedException, TimeoutException {
+        Assert.assertTrue(ovs.isActive());
         ListenableFuture<List<String>> databases = ovs.getDatabases();
-        List<String> dbNames = databases.get();
+        List<String> dbNames = databases.get(60, TimeUnit.SECONDS);
         Assert.assertNotNull(dbNames);
         boolean hasOpenVswitchSchema = false;
         for(String dbName : dbNames) {
@@ -339,14 +341,12 @@ public class OvsdbClientTestIT extends OvsdbTestBase {
         Assert.assertTrue(OPEN_VSWITCH_SCHEMA+" schema is not supported by the switch", hasOpenVswitchSchema);
     }
 
-    @Before
     public  void setUp() throws IOException, ExecutionException, InterruptedException, TimeoutException {
         if (ovs != null) {
             return;
         }
-
-        ovs = getTestConnection();
-        System.out.println("Connection Info :" + ovs.getConnectionInfo().toString());
+        ovs = this.getTestConnection();
+        Assert.assertNotNull(ovs);
         testGetDBs();
         dbSchema = ovs.getSchema(OPEN_VSWITCH_SCHEMA, true).get();
     }

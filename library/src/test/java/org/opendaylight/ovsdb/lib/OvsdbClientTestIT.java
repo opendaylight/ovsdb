@@ -326,6 +326,7 @@ public class OvsdbClientTestIT extends OvsdbTestBase {
     }
 
     public void testGetDBs() throws ExecutionException, InterruptedException {
+        Assert.assertTrue(ovs.isActive());
         ListenableFuture<List<String>> databases = ovs.getDatabases();
         List<String> dbNames = databases.get();
         Assert.assertNotNull(dbNames);
@@ -339,14 +340,12 @@ public class OvsdbClientTestIT extends OvsdbTestBase {
         Assert.assertTrue(OPEN_VSWITCH_SCHEMA+" schema is not supported by the switch", hasOpenVswitchSchema);
     }
 
-    @Before
     public  void setUp() throws IOException, ExecutionException, InterruptedException, TimeoutException {
         if (ovs != null) {
             return;
         }
-
-        ovs = getTestConnection();
-        System.out.println("Connection Info :" + ovs.getConnectionInfo().toString());
+        ovs = this.getTestConnection();
+        Assert.assertNotNull(ovs);
         testGetDBs();
         dbSchema = ovs.getSchema(OPEN_VSWITCH_SCHEMA, true).get();
     }

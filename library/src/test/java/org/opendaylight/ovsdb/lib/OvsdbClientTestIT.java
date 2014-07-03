@@ -233,7 +233,7 @@ public class OvsdbClientTestIT extends OvsdbTestBase {
 
         String namedUuid = "br_test";
         int insertOperationIndex = 0;
-        UUID parentTable = getOpenVSwitchTableUuid();
+        UUID parentTable = selectOpenVSwitchTableUuid();
         TransactionBuilder transactionBuilder = ovs.transactBuilder()
                  /*
                   * Make sure that the position of insert operation matches the insertOperationIndex.
@@ -360,7 +360,7 @@ public class OvsdbClientTestIT extends OvsdbTestBase {
         GenericTableSchema ovsTable = dbSchema.table("Open_vSwitch", GenericTableSchema.class);
         ColumnSchema<GenericTableSchema, Set<UUID>> bridges = ovsTable.multiValuedColumn("bridges", UUID.class);
         ColumnSchema<GenericTableSchema, UUID> _uuid = ovsTable.column("_uuid", UUID.class);
-        UUID parentTable = getOpenVSwitchTableUuid();
+        UUID parentTable = selectOpenVSwitchTableUuid();
 
         ListenableFuture<List<OperationResult>> results = ovs.transactBuilder()
                 .add(op.delete(bridge)

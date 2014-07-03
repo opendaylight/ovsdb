@@ -57,7 +57,7 @@ public interface OvsdbClient {
      * cancel on the Future would cause OVSDB cancel operation to be fired against
      * the device.
      */
-    ListenableFuture<List<OperationResult>> transact(List<Operation> operations);
+    ListenableFuture<List<OperationResult>> transact(final List<Operation> operations);
 
 
     /**

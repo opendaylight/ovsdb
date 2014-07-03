@@ -9,14 +9,11 @@
  */
 package org.opendaylight.ovsdb.lib.message;
 
-import java.util.List;
-
-import org.opendaylight.ovsdb.lib.operations.OperationResult;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.util.concurrent.ListenableFuture;
-
 import org.opendaylight.ovsdb.lib.jsonrpc.Params;
+
+import java.util.List;
 
 public interface OvsdbRPC {
     public static final String REGISTER_CALLBACK_METHOD = "registerCallback";
@@ -30,7 +27,7 @@ public interface OvsdbRPC {
 
     public ListenableFuture<List<String>> list_dbs();
 
-    public ListenableFuture<List<OperationResult>> transact(TransactBuilder transact);
+    public ListenableFuture<List<JsonNode>> transact(TransactBuilder transact);
 
     public ListenableFuture<Response> cancel(String id);
 

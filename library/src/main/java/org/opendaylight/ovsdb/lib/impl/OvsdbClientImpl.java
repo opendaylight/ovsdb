@@ -9,31 +9,22 @@
  */
 package org.opendaylight.ovsdb.lib.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.Channel;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-
-import org.opendaylight.ovsdb.lib.EchoServiceCallbackFilters;
-import org.opendaylight.ovsdb.lib.LockAquisitionCallback;
-import org.opendaylight.ovsdb.lib.LockStolenCallback;
-import org.opendaylight.ovsdb.lib.MonitorCallBack;
-import org.opendaylight.ovsdb.lib.MonitorHandle;
-import org.opendaylight.ovsdb.lib.OvsdbClient;
-import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
+import org.opendaylight.ovsdb.lib.*;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo.ConnectionType;
 import org.opendaylight.ovsdb.lib.jsonrpc.Params;
-import org.opendaylight.ovsdb.lib.message.MonitorRequest;
-import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
-import org.opendaylight.ovsdb.lib.message.TableUpdate;
-import org.opendaylight.ovsdb.lib.message.TableUpdates;
-import org.opendaylight.ovsdb.lib.message.TransactBuilder;
-import org.opendaylight.ovsdb.lib.message.UpdateNotification;
+import org.opendaylight.ovsdb.lib.message.*;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
@@ -46,16 +37,8 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Function;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
 
 
 public class OvsdbClientImpl implements OvsdbClient {
@@ -69,6 +52,7 @@ public class OvsdbClientImpl implements OvsdbClient {
     private OvsdbRPC.Callback rpcCallback;
     private OvsdbConnectionInfo connectionInfo;
     private Channel channel;
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public OvsdbClientImpl(OvsdbRPC rpc, Channel channel, ConnectionType type, ExecutorService executorService) {
         this.rpc = rpc;
@@ -132,7 +116,7 @@ public class OvsdbClientImpl implements OvsdbClient {
     }
 
     @Override
-    public ListenableFuture<List<OperationResult>> transact(List<Operation> operations) {
+    public ListenableFuture<List<OperationResult>> transact(final List<Operation> operations) {
 
         //todo, we may not need transactionbuilder if we can have JSON objects
         TransactBuilder builder = new TransactBuilder();
@@ -140,7 +124,27 @@ public class OvsdbClientImpl implements OvsdbClient {
             builder.addOperation(o);
         }
 
-        return rpc.transact(builder);
+        return Futures.transform(rpc.transact(builder), new Function<List<JsonNode>, List<OperationResult>>() {
+            @Override
+            public List<OperationResult> apply(List<JsonNode> jsonNodes) {
+                final List<OperationResult> operationResults = new ArrayList<>();
+                for (int i =0; i< jsonNodes.size(); i++) {
+                    JsonNode jsonNode = jsonNodes.get(i);
+                    Operation op = operations.get(i);
+                    // TODO: Needs refactoring after OperationResult is cleaned up
+                    OperationResult or = new OperationResult();
+                    if (jsonNode.size() > 0) {
+                        if (jsonNode.get("rows") != null) {
+                            or.setRows(op.getTableSchema().createRows(jsonNode));
+                        } else {
+                            or = objectMapper.convertValue(jsonNode, OperationResult.class);
+                        }
+                    }
+                    operationResults.add(or);
+                }
+                return operationResults;
+            }
+        });
     }
 
     @Override

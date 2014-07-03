@@ -12,6 +12,7 @@ package org.opendaylight.ovsdb.lib.schema;
 import java.lang.reflect.Constructor;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
@@ -157,6 +158,32 @@ public abstract class TableSchema<E extends TableSchema<E>> {
             }
         }
         return new Row<>(columns);
+    }
+
+    public ArrayList<Row<E>> createRows(JsonNode rowsNode) {
+        ArrayList<Row<E>> rows = Lists.newArrayList();
+        for (JsonNode rowNode : rowsNode.get("rows")) {
+            List<Column<E, ?>> columns = Lists.newArrayList();
+            for (Iterator<Map.Entry<String, JsonNode>> iter = rowNode.fields(); iter.hasNext(); ) {
+                Map.Entry<String, JsonNode> next = iter.next();
+
+                ColumnSchema<E, Object> schema = column(next.getKey(), Object.class);
+            /*
+             * Ideally the ColumnSchema shouldn't be null at this stage. But there can be cases in which
+             * the OVSDB manager Schema implementation might decide to include some "hidden" columns that
+             * are NOT reported in getSchema, but decide to report it in unfiltered monitor.
+             * Hence adding some safety checks around that.
+             */
+                if (schema != null) {
+                    Object o = schema.valueFromJson(next.getValue());
+                    columns.add(new Column<>(schema, o));
+                }
+            }
+
+            rows.add(new Row<>(columns));
+        }
+
+        return rows;
     }
 
     /*

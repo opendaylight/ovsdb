@@ -12,6 +12,7 @@ package org.opendaylight.ovsdb.neutron;
 import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
 import java.util.concurrent.ConcurrentMap;
 
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
@@ -132,7 +133,8 @@ public class PortHandler extends BaseHandler
         IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
         INeutronNetworkCRUD neutronNetworkService = (INeutronNetworkCRUD)ServiceHelper.getGlobalInstance(INeutronNetworkCRUD.class, this);
         NeutronNetwork neutronNetwork = neutronNetworkService.getNetwork(port.getNetworkUUID());
-        OVSDBInventoryListener inventoryListener = (OVSDBInventoryListener)ServiceHelper.getGlobalInstance(OVSDBInventoryListener.class, this);
+        Object[] listeners = ServiceHelper.getGlobalInstances(OVSDBInventoryListener.class, this, null);
+        OVSDBInventoryListener inventoryListeners[] = Arrays.copyOf(listeners, listeners.length, OVSDBInventoryListener[].class);
         List<Node> nodes = connectionService.getNodes();
         for (Node node : nodes) {
             try {
@@ -152,8 +154,10 @@ public class PortHandler extends BaseHandler
                         }
                         if (neutronPortId.equalsIgnoreCase(port.getPortUUID())) {
                             logger.trace("neutronPortDeleted: Delete interface {}", intf.getName());
-                            inventoryListener.rowRemoved(node, Interface.NAME.getName(), intfUUID,
+                            for (OVSDBInventoryListener inventoryListener : inventoryListeners) {
+                                inventoryListener.rowRemoved(node, Interface.NAME.getName(), intfUUID,
                                                          intf, neutronNetwork);
+                            }
                             break;
                         }
                     }

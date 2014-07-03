@@ -16,6 +16,24 @@
       "revId": "e6d4850c1151388d6244ef271fa9675803b5e587",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_faa2fb49",
+        "filename": "schemas/Open_vSwitch/src/test/java/org/opendaylight/ovsdb/schema/openvswitch/MonitorTestCases.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-03T16:18:45Z",
+      "side": 1,
+      "message": "Yes. it isnt necessary. But it is a good practice to have for Compiler and IDEs to make sense of it.\nPlease refer to http://docs.oracle.com/javase/tutorial/java/annotations/predefined.html and it will be clear that like Deprecated, Override is also a Compile time Retention policy which means it has no impact on the runtime behaviour of a method. It just indicates to the Compiler and IDEs to have more intelligent checks.\n\nSo, it is no harm in having it here.",
+      "parentUuid": "fa82b9bf_1a3a3f99",
+      "revId": "e6d4850c1151388d6244ef271fa9675803b5e587",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

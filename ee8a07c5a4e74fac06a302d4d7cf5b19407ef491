@@ -16,6 +16,24 @@
       "revId": "ee8a07c5a4e74fac06a302d4d7cf5b19407ef491",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_952860e3",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbClientImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 2091
+      },
+      "writtenOn": "2014-07-03T22:36:58Z",
+      "side": 1,
+      "message": "I initially thought about using Operation.getOp, for the same reason you\u0027ve mentioned decided the check on rows. Agree on having utility method  isSelectOperationResponse(jsonNode), will submit patch shortly with this change.",
+      "parentUuid": "fa82b9bf_b5c9e45a",
+      "revId": "ee8a07c5a4e74fac06a302d4d7cf5b19407ef491",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

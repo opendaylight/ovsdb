@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_5a91a7ef",
+        "filename": "integrationtest/src/test/resources/logback.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-03T16:25:33Z",
+      "side": 1,
+      "message": "Nope. my bad. will change it back.",
+      "parentUuid": "fa82b9bf_fa443b1c",
+      "revId": "3bc980cd403c57f8bed80801e40cd8910be57574",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_da5617ce",
         "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/jsonrpc/JsonRpcServiceBinderHandler.java",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_7a8eebd1",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/jsonrpc/JsonRpcServiceBinderHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-03T16:25:33Z",
+      "side": 1,
+      "message": "Good point. will do.",
+      "parentUuid": "fa82b9bf_da5617ce",
+      "revId": "3bc980cd403c57f8bed80801e40cd8910be57574",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_9afbafc0",
         "filename": "pom.xml",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2014-07-03T14:02:09Z",
       "side": 1,
       "message": "Note: This is being merged to get the branch up to date with Madhu\u0027s local changes. These pom changes should be reverted as soon as the northbound and neutron bundles are migrated.",
+      "revId": "3bc980cd403c57f8bed80801e40cd8910be57574",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1abf9f62",
+        "filename": "pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-03T16:25:33Z",
+      "side": 1,
+      "message": "Will also add this as a comment.",
+      "parentUuid": "fa82b9bf_9afbafc0",
       "revId": "3bc980cd403c57f8bed80801e40cd8910be57574",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

@@ -65,7 +65,7 @@ public class OvsdbNorthboundIT extends OvsdbIntegrationTestBase {
     private Logger log = LoggerFactory.getLogger(OvsdbNorthboundIT.class);
     public static final String USERNAME = "admin";
     public static final String PASSWORD = "admin";
-    public static final String BASE_URI = "http://localhost:8888";
+    public static final String BASE_URI = "http://localhost:8088";
     public static final String MEDIA_TYPE_JSON = "application/json";
     public static final String NODE_ID_REPLACEMENT_PATTERN = "${node}";
     public static final String UUID_REPLACEMENT_PATTERN = "${uuid}";

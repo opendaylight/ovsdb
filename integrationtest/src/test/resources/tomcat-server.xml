@@ -10,9 +10,9 @@
   <Listener className="org.apache.catalina.core.ThreadLocalLeakPreventionListener" />
 
   <Service name="Catalina">
-    <Connector port="8888" protocol="org.apache.coyote.http11.Http11NioProtocol"
+    <Connector port="8088" protocol="org.apache.coyote.http11.Http11NioProtocol"
                connectionTimeout="20000"
-               redirectPort="8443" />
+               redirectPort="8843" />
 
     <!--
             Please remove the comments around the following Connector tag to enable HTTPS Authentication support.

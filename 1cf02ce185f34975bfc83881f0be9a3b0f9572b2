@@ -1,0 +1,7 @@
+Verified+1: jenkins-ovsdb <jenkins-ovsdb@opendaylight.org>
+Code-Review+2: Dave Tucker <djt@redhat.com>
+Submitted-by: Dave Tucker <djt@redhat.com>
+Submitted-at: Mon, 07 Jul 2014 16:24:26 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/8717
+Project: ovsdb
+Branch: refs/heads/topic/schema

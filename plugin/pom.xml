@@ -162,7 +162,6 @@
                             org.opendaylight.controller.sal.connection,
                             org.opendaylight.controller.clustering.services,
                             org.opendaylight.controller.sal.networkconfig.bridgedomain,
-                            org.opendaylight.ovsdb.lib.table,
                             org.opendaylight.ovsdb.lib.notation,
                             org.opendaylight.ovsdb.lib.database,
                             org.opendaylight.ovsdb.lib.operations,

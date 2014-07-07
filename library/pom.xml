@@ -125,15 +125,11 @@
             <Bundle-Activator>org.opendaylight.ovsdb.lib.Activator</Bundle-Activator>
             <Embed-Transitive>true</Embed-Transitive>
             <Export-Package>org.opendaylight.ovsdb.lib,
-                org.opendaylight.ovsdb.lib.table,
                 org.opendaylight.ovsdb.lib.jsonrpc,
                 org.opendaylight.ovsdb.lib.notation,
                 org.opendaylight.ovsdb.lib.database,
                 org.opendaylight.ovsdb.lib.operations,
                 org.opendaylight.ovsdb.lib.message,
-
-                <!-- TODO : Remove the following temp package switfly once the plugin migration is complete -->
-                org.opendaylight.ovsdb.lib.message.temp,
                 org.opendaylight.ovsdb.lib.schema,
                 org.opendaylight.ovsdb.lib.schema.typed</Export-Package>
           </instructions>

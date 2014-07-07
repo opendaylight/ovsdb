@@ -112,6 +112,7 @@ public class OvsdbLibraryIT extends OvsdbIntegrationTestBase {
         }
         if (debugit) {
             log.debug("Do some debugging because some bundle is unresolved");
+            Thread.sleep(600000);
         }
 
         // Assert if true, if false we are good to go!

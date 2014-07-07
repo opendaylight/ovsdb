@@ -27,6 +27,7 @@ public class OvsVswitchdSchemaConstants {
         addParentColumnToMutate("sFlow", "Bridge", "sflow");
         addParentColumnToMutate("Flow_Table", "Bridge", "flow_tables");
         addParentColumnToMutate("QoS", "Port", "qos");
+        addParentColumnToMutate("Queue", "Qos", "queues");
         addParentColumnToMutate("NetFlow", "Bridge", "netflow");
         addParentColumnToMutate("Mirror", "Bridge", "mirrors");
         addParentColumnToMutate("Manager", "Open_vSwitch", "manager_options");

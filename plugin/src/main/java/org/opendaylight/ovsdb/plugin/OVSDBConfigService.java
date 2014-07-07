@@ -17,6 +17,7 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 
 public interface OVSDBConfigService {
 
@@ -99,5 +100,9 @@ public interface OVSDBConfigService {
      * @throws InterruptedException
      * @throws ExecutionException
      */
-    Boolean setOFController(Node node, String bridgeUUID) throws InterruptedException, ExecutionException;
+    public Boolean setOFController(Node node, String bridgeUUID) throws InterruptedException, ExecutionException;
+
+    public <T extends TypedBaseTable<?>> String getTableName(Node node, Class<T> typedClass);
+    public <T extends TypedBaseTable<?>> T getTypedRow(Node node, Class<T> typedClass, Row row);
+    public <T extends TypedBaseTable<?>> T createTypedRow(Node node, Class<T> typedClass);
 }

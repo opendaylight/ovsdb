@@ -10,7 +10,7 @@
 package org.opendaylight.ovsdb.neutron;
 
 import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.ovsdb.lib.table.Table;
+import org.opendaylight.ovsdb.lib.notation.Row;
 
 public class SouthboundEvent {
     public enum Type { NODE, ROW };
@@ -20,7 +20,7 @@ public class SouthboundEvent {
     private Node node;
     private String tableName;
     private String uuid;
-    private Table<?> row;
+    private Row row;
     private Object context;
     public SouthboundEvent(Node node, Action action) {
         super();
@@ -28,7 +28,7 @@ public class SouthboundEvent {
         this.action = action;
         this.node = node;
     }
-    public SouthboundEvent(Node node, String tableName, String uuid, Table<?> row, Action action) {
+    public SouthboundEvent(Node node, String tableName, String uuid, Row row, Action action) {
         super();
         this.type = Type.ROW;
         this.action = action;
@@ -37,7 +37,7 @@ public class SouthboundEvent {
         this.uuid = uuid;
         this.row = row;
     }
-    public SouthboundEvent(Node node, String tableName, String uuid, Table<?> row, Object context, Action action) {
+    public SouthboundEvent(Node node, String tableName, String uuid, Row row, Object context, Action action) {
         super();
         this.type = Type.ROW;
         this.action = action;
@@ -62,7 +62,7 @@ public class SouthboundEvent {
     public String getUuid() {
         return uuid;
     }
-    public Table<?> getRow() {
+    public Row getRow() {
         return row;
     }
     public Object getContext() {

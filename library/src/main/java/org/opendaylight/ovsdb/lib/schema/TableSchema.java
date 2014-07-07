@@ -156,7 +156,7 @@ public abstract class TableSchema<E extends TableSchema<E>> {
                 columns.add(new Column<>(schema, o));
             }
         }
-        return new Row<>(columns);
+        return new Row<>(this, columns);
     }
 
     /*

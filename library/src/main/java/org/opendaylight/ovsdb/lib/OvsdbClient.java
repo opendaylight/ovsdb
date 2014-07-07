@@ -23,6 +23,7 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -126,7 +127,7 @@ public interface OvsdbClient {
      * @param klazz Typed Interface
      * @return Proxy wrapper for the actual raw Row class.
      */
-    public <T> T createTypedRowWrapper(Class<T> klazz);
+    public <T extends TypedBaseTable<?>> T createTypedRowWrapper(Class<T> klazz);
     /**
      * User friendly convenient methods that make use of getTypedRowWrapper to create a Typed Row Proxy given
      * DatabaseSchema and Typed Table Class.
@@ -135,7 +136,7 @@ public interface OvsdbClient {
      * @param klazz Typed Interface
      * @return Proxy wrapper for the actual raw Row class.
      */
-    public <T> T createTypedRowWrapper(DatabaseSchema dbSchema, Class<T> klazz);
+    public <T extends TypedBaseTable<?>> T createTypedRowWrapper(DatabaseSchema dbSchema, Class<T> klazz);
 
     /**
      * User friendly convenient method to get a Typed Row Proxy given a Typed Table Class and the Row to be wrapped.
@@ -144,6 +145,6 @@ public interface OvsdbClient {
      * @param row The actual Row that the wrapper is operating on. It can be null if the caller is just interested in getting ColumnSchema.
      * @return Proxy wrapper for the actual raw Row class.
      */
-    public <T> T getTypedRowWrapper(final Class<T> klazz, final Row<GenericTableSchema> row);
+    public <T extends TypedBaseTable<?>> T getTypedRowWrapper(final Class<T> klazz, final Row<GenericTableSchema> row);
 
 }

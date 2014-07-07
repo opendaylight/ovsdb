@@ -12,7 +12,8 @@ package org.opendaylight.ovsdb.neutron;
 
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.ovsdb.lib.table.Interface;
+import org.opendaylight.ovsdb.schema.openvswitch.Interface;
+
 
 public interface ITenantNetworkManager {
     public static final String EXTERNAL_ID_VM_ID = "vm-id";

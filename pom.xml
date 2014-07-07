@@ -23,11 +23,8 @@
     <module>commons/parent</module>
     <module>commons/integrationtest</module>
     <module>northbound</module>
-    <!--
-    TODO : remove this comment & let these modules build once the Library migraion is complete.
     <module>neutron</module>
     <module>distribution/opendaylight</module>
-     -->
   </modules>
   <profiles>
     <profile>

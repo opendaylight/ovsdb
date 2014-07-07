@@ -16,6 +16,24 @@
       "revId": "12aa5fcc3fd08315063ea9262a98cbbb9deae166",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_965dc317",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/OvsVswitchdSchemaConstants.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-07T21:44:46Z",
+      "side": 1,
+      "message": "I see. As this is named ParentColumnToMutate I assumed that this is for all Parent\u003c-\u003eChild refTable type relationships where a mutate is required. I guess the confusion comes in with \"QoS\" which, like \"Queue\", is also a root table.\n\nIf the fix needs to be different, can you please update the bug report and I\u0027ll abandon this change.",
+      "parentUuid": "fa82b9bf_9bd64ef0",
+      "revId": "12aa5fcc3fd08315063ea9262a98cbbb9deae166",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -43,6 +43,7 @@ public abstract class OvsdbIntegrationTestBase {
     protected final static String CONNECTION_TYPE = "ovsdbserver.connection";
     protected final static String CONNECTION_TYPE_ACTIVE = "active";
     protected final static String CONNECTION_TYPE_PASSIVE = "passive";
+    protected final static int CONNECTION_INIT_TIMEOUT = 10000;
 
     protected final static String DEFAULT_SERVER_PORT = "6640";
 
@@ -75,8 +76,8 @@ public abstract class OvsdbIntegrationTestBase {
             params.put(ConnectionConstants.PORT, portStr);
             return connection.connect(IDENTIFIER, params);
         }  else if (connectionType.equalsIgnoreCase(CONNECTION_TYPE_PASSIVE)) {
-            // Wait for 10 seconds for the Passive connection to be initiated by the ovsdb-server.
-            Thread.sleep(10000);
+            // Wait for CONNECTION_INIT_TIMEOUT for the Passive connection to be initiated by the ovsdb-server.
+            Thread.sleep(CONNECTION_INIT_TIMEOUT);
             List<Node> nodes = connection.getNodes();
             assertNotNull(nodes);
             assertTrue(nodes.size() > 0);

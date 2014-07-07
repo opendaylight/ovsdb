@@ -138,7 +138,6 @@
               org.opendaylight.controller.sal.action,
               org.opendaylight.ovsdb.plugin,
               org.opendaylight.ovsdb.lib.notation,
-              org.opendaylight.ovsdb.lib.table,
               org.opendaylight.controller.sal.binding.api,
               org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819,
               org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes,

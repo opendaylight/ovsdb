@@ -23,7 +23,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 
-import com.google.common.collect.ImmutableSet;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
@@ -35,7 +34,6 @@ import org.opendaylight.controller.sal.networkconfig.bridgedomain.IPluginInBridg
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
-import org.opendaylight.ovsdb.lib.database.OvsdbType;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
@@ -61,6 +59,7 @@ import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListenableFuture;
 
 public class ConfigurationService implements IPluginInBridgeDomainConfigService, OVSDBConfigService,
@@ -931,7 +930,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
 
         if (type != null) {
             logger.debug("Port type : " + type);
-            if (type.equalsIgnoreCase(OvsdbType.PortType.VLAN.name())) {
+            if (type.equalsIgnoreCase(OvsVswitchdSchemaConstants.PortType.VLAN.name())) {
                 tags = new HashSet<BigInteger>();
                 tags.add(BigInteger.valueOf(Integer.parseInt((String)configs.get(ConfigConstants.VLAN))));
             }
@@ -972,12 +971,12 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
 
         if (type != null) {
             logger.debug("Interface type : " + type);
-            if (type.equalsIgnoreCase(OvsdbType.PortType.TUNNEL.name())) {
+            if (type.equalsIgnoreCase(OvsVswitchdSchemaConstants.PortType.TUNNEL.name())) {
                 interfaceRow.setType((String)configs.get(ConfigConstants.TUNNEL_TYPE));
                 if (options == null) options = new HashMap<String, String>();
                 options.put("remote_ip", (String)configs.get(ConfigConstants.DEST_IP));
-            } else if (type.equalsIgnoreCase(OvsdbType.PortType.PATCH.name()) ||
-                       type.equalsIgnoreCase(OvsdbType.PortType.INTERNAL.name())) {
+            } else if (type.equalsIgnoreCase(OvsVswitchdSchemaConstants.PortType.PATCH.name()) ||
+                       type.equalsIgnoreCase(OvsVswitchdSchemaConstants.PortType.INTERNAL.name())) {
                 interfaceRow.setType(type.toLowerCase());
             }
         }

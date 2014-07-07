@@ -40,4 +40,24 @@ public class OvsVswitchdSchemaConstants {
         if (autoConfigureController && databaseName.equals(DATABASE_NAME) && tableName.equals("Bridge")) return true;
         return false;
     }
+
+    public enum PortType {
+        VLAN("vlan"),
+        TUNNEL("Tunnel"),
+        BONDING("Bonding"),
+        PATCH("patch"),
+        INTERNAL("internal");
+
+        private PortType(String name) {
+            this.name = name;
+        }
+
+        private String name;
+
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
+
 }

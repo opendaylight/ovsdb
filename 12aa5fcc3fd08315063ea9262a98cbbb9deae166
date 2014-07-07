@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_9bd64ef0",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/OvsVswitchdSchemaConstants.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-07T18:35:19Z",
+      "side": 1,
+      "message": "Queue is a Root table. Hence it can live on its own and hence it should not be added to the ParentColumnToMutate section.\n\nJust as a rule of thumb, this section is populated based on the isRoot schema and this static way to add parent-child relationship should be replaced with a more dynamic isRoot based validation in the library/plugin layer. \n\nBut since it is a non-trivial work, I had kept it simpler for the migration.\nThis work will be done after the collapse.\n\nHence I prefer we not submit this fix.",
+      "revId": "12aa5fcc3fd08315063ea9262a98cbbb9deae166",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

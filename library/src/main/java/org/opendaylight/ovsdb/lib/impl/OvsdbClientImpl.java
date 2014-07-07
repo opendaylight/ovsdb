@@ -42,6 +42,7 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.slf4j.Logger;
@@ -340,7 +341,7 @@ public class OvsdbClientImpl implements OvsdbClient {
      * @return Proxy wrapper for the actual raw Row class.
      */
     @Override
-    public <T> T createTypedRowWrapper(Class<T> klazz) {
+    public <T extends TypedBaseTable<?>> T createTypedRowWrapper(Class<T> klazz) {
         DatabaseSchema dbSchema = getDatabaseSchemaForTypedTable(klazz);
         return this.createTypedRowWrapper(dbSchema, klazz);
     }
@@ -354,7 +355,7 @@ public class OvsdbClientImpl implements OvsdbClient {
      * @return Proxy wrapper for the actual raw Row class.
      */
     @Override
-    public <T> T createTypedRowWrapper(DatabaseSchema dbSchema, Class<T> klazz) {
+    public <T extends TypedBaseTable<?>> T createTypedRowWrapper(DatabaseSchema dbSchema, Class<T> klazz) {
         return TyperUtils.getTypedRowWrapper(dbSchema, klazz, new Row<GenericTableSchema>());
     }
 
@@ -366,7 +367,8 @@ public class OvsdbClientImpl implements OvsdbClient {
      * @return Proxy wrapper for the actual raw Row class.
      */
     @Override
-    public <T> T getTypedRowWrapper(final Class<T> klazz, final Row<GenericTableSchema> row) {
+
+    public <T extends TypedBaseTable<?>> T getTypedRowWrapper(final Class<T> klazz, final Row<GenericTableSchema> row) {
         DatabaseSchema dbSchema = getDatabaseSchemaForTypedTable(klazz);
         return TyperUtils.getTypedRowWrapper(dbSchema, klazz, row);
     }

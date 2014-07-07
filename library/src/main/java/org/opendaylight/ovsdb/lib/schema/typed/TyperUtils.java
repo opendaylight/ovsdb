@@ -13,7 +13,6 @@ package org.opendaylight.ovsdb.lib.schema.typed;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
-
 import org.opendaylight.ovsdb.lib.error.ColumnSchemaNotFoundException;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.error.TableSchemaNotFoundException;
@@ -235,6 +234,7 @@ public class TyperUtils {
         if (!isValid(dbSchema, klazz)) {
             return null;
         }
+        if (row != null) row.setTableSchema(getTableSchema(dbSchema, klazz));
         return Reflection.newProxy(klazz, new InvocationHandler() {
             private Object processGetData(Method method) throws Throwable {
                 String columnName = getColumnName(method);
@@ -252,7 +252,7 @@ public class TyperUtils {
                     String message = ColumnSchemaNotFoundException.createMessage(columnName, tableSchema.getName());
                     throw new ColumnSchemaNotFoundException(message);
                 }
-                if (row == null) {
+                if (row == null || row.getColumn(columnSchema) == null) {
                     return null;
                 }
                 return row.getColumn(columnSchema).getData();

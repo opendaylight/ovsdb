@@ -9,9 +9,9 @@
  */
 package org.opendaylight.ovsdb.neutron.provider;
 
-import java.math.BigInteger;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,20 +28,18 @@ import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.switchmanager.Switch;
-import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
-import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
+import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.lib.table.Bridge;
-import org.opendaylight.ovsdb.lib.table.Interface;
-import org.opendaylight.ovsdb.lib.table.Port;
-import org.opendaylight.ovsdb.lib.table.Table;
-import org.opendaylight.ovsdb.neutron.NetworkHandler;
 import org.opendaylight.ovsdb.neutron.IAdminConfigManager;
 import org.opendaylight.ovsdb.neutron.IInternalNetworkManager;
 import org.opendaylight.ovsdb.neutron.ITenantNetworkManager;
+import org.opendaylight.ovsdb.neutron.NetworkHandler;
 import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
 import org.opendaylight.ovsdb.plugin.StatusWithUuid;
+import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
+import org.opendaylight.ovsdb.schema.openvswitch.Interface;
+import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,8 +113,9 @@ public class OF10Provider implements NetworkProvider {
         }
         try {
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brNetId);
-            Set<String> dpids = bridge.getDatapath_id();
+            Row row = ovsdbTable.getRow(node, ovsdbTable.getTableName(node, Bridge.class), brNetId);
+            Bridge bridge = ovsdbTable.getTypedRow(node, Bridge.class, row);
+            Set<String> dpids = bridge.getDatapathIdColumn().getData();
             if (dpids == null || dpids.size() ==  0) return;
             Long dpidLong = Long.valueOf(HexEncode.stringToLong((String)dpids.toArray()[0]));
             Node ofNode = new Node(Node.NodeIDType.OPENFLOW, dpidLong);
@@ -146,8 +145,9 @@ public class OF10Provider implements NetworkProvider {
         }
         try {
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brNetId);
-            Set<String> dpids = bridge.getDatapath_id();
+            Row row = ovsdbTable.getRow(node, ovsdbTable.getTableName(node, Bridge.class), brNetId);
+            Bridge bridge = ovsdbTable.getTypedRow(node, Bridge.class, row);
+            Set<String> dpids = bridge.getDatapathIdColumn().getData();
             if (dpids == null || dpids.size() ==  0) return;
             Long dpidLong = Long.valueOf(HexEncode.stringToLong((String)dpids.toArray()[0]));
             Node ofNode = new Node(Node.NodeIDType.OPENFLOW, dpidLong);
@@ -176,8 +176,9 @@ public class OF10Provider implements NetworkProvider {
         }
         try {
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brNetId);
-            Set<String> dpids = bridge.getDatapath_id();
+            Row row = ovsdbTable.getRow(node, ovsdbTable.getTableName(node, Bridge.class), brNetId);
+            Bridge bridge = ovsdbTable.getTypedRow(node, Bridge.class, row);
+            Set<String> dpids = bridge.getDatapathIdColumn().getData();
             if (dpids == null || dpids.size() ==  0) return;
             Long dpidLong = Long.valueOf(HexEncode.stringToLong((String)dpids.toArray()[0]));
             Node ofNode = new Node(Node.NodeIDType.OPENFLOW, dpidLong);
@@ -210,8 +211,9 @@ public class OF10Provider implements NetworkProvider {
         }
         try {
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brNetId);
-            Set<String> dpids = bridge.getDatapath_id();
+            Row row = ovsdbTable.getRow(node, ovsdbTable.getTableName(node, Bridge.class), brNetId);
+            Bridge bridge = ovsdbTable.getTypedRow(node, Bridge.class, row);
+            Set<String> dpids = bridge.getDatapathIdColumn().getData();
             if (dpids == null || dpids.size() ==  0) return;
             Long dpidLong = Long.valueOf(HexEncode.stringToLong((String)dpids.toArray()[0]));
             Node ofNode = new Node(Node.NodeIDType.OPENFLOW, dpidLong);
@@ -238,8 +240,9 @@ public class OF10Provider implements NetworkProvider {
         }
         try {
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brNetId);
-            Set<String> dpids = bridge.getDatapath_id();
+            Row row = ovsdbTable.getRow(node, ovsdbTable.getTableName(node, Bridge.class), brNetId);
+            Bridge bridge = ovsdbTable.getTypedRow(node, Bridge.class, row);
+            Set<String> dpids = bridge.getDatapathIdColumn().getData();
             if (dpids == null || dpids.size() ==  0) return;
             Long dpidLong = Long.valueOf(HexEncode.stringToLong((String)dpids.toArray()[0]));
             Node ofNode = new Node(Node.NodeIDType.OPENFLOW, dpidLong);
@@ -292,8 +295,9 @@ public class OF10Provider implements NetworkProvider {
         }
         try {
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brNetId);
-            Set<String> dpids = bridge.getDatapath_id();
+            Row row = ovsdbTable.getRow(node, ovsdbTable.getTableName(node, Bridge.class), brNetId);
+            Bridge bridge = ovsdbTable.getTypedRow(node, Bridge.class, row);
+            Set<String> dpids = bridge.getDatapathIdColumn().getData();
             if (dpids == null || dpids.size() ==  0) return;
             Long dpidLong = Long.valueOf(HexEncode.stringToLong((String)dpids.toArray()[0]));
             Node ofNode = new Node(Node.NodeIDType.OPENFLOW, dpidLong);
@@ -329,7 +333,7 @@ public class OF10Provider implements NetworkProvider {
             logger.debug("No InternalVlan provisioned for Tenant Network {}",networkId);
             return;
         }
-        Map<String, String> externalIds = intf.getExternal_ids();
+        Map<String, String> externalIds = intf.getExternalIdsColumn().getData();
         if (externalIds == null) {
             logger.error("No external_ids seen in {}", intf);
             return;
@@ -345,17 +349,17 @@ public class OF10Provider implements NetworkProvider {
         int patchOFPort = -1;
         try {
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Map<String, Table<?>> intfs = ovsdbTable.getRows(node, Interface.NAME.getName());
+            Map<String, Row> intfs = ovsdbTable.getRows(node, ovsdbTable.getTableName(node, Interface.class));
             if (intfs != null) {
-                for (Table<?> row : intfs.values()) {
-                    Interface patchIntf = (Interface)row;
+                for (Row row : intfs.values()) {
+                    Interface patchIntf = ovsdbTable.getTypedRow(node, Interface.class, row);
                     if (patchIntf.getName().equalsIgnoreCase(patchInt)) {
-                        Set<BigInteger> of_ports = patchIntf.getOfport();
+                        Set<Integer> of_ports = patchIntf.getOpenFlowPortColumn().getData();
                         if (of_ports == null || of_ports.size() <= 0) {
                             logger.error("Could NOT Identified Patch port {} on {}", patchInt, node);
                             continue;
                         }
-                        patchOFPort = Long.valueOf(((BigInteger)of_ports.toArray()[0]).longValue()).intValue();
+                        patchOFPort = Long.valueOf(((Integer)of_ports.toArray()[0]).longValue()).intValue();
                         logger.debug("Identified Patch port {} -> OF ({}) on {}", patchInt, patchOFPort, node);
                         break;
                     }
@@ -363,15 +367,15 @@ public class OF10Provider implements NetworkProvider {
                 if (patchOFPort == -1) {
                     logger.error("Cannot identify {} interface on {}", patchInt, node);
                 }
-                for (Table<?> row : intfs.values()) {
+                for (Row row : intfs.values()) {
                     Interface tunIntf = (Interface)row;
                     if (tunIntf.getName().equals(this.getTunnelName(tunnelType, segmentationId, dst))) {
-                        Set<BigInteger> of_ports = tunIntf.getOfport();
+                        Set<Integer> of_ports = tunIntf.getOpenFlowPortColumn().getData();
                         if (of_ports == null || of_ports.size() <= 0) {
                             logger.warn("Could not Identify Tunnel port {} on {}. Don't panic. It might get converged soon...", tunIntf.getName(), node);
                             continue;
                         }
-                        int tunnelOFPort = Long.valueOf(((BigInteger)of_ports.toArray()[0]).longValue()).intValue();
+                        int tunnelOFPort = Long.valueOf(((Integer)of_ports.toArray()[0]).longValue()).intValue();
 
                         if (tunnelOFPort == -1) {
                             logger.warn("Tunnel Port {} on node {}: OFPort = -1 . Don't panic. It might get converged soon...", tunIntf.getName(), node);
@@ -405,7 +409,7 @@ public class OF10Provider implements NetworkProvider {
             logger.debug("No InternalVlan provisioned for Tenant Network {}",networkId);
             return;
         }
-        Map<String, String> externalIds = intf.getExternal_ids();
+        Map<String, String> externalIds = intf.getExternalIdsColumn().getData();
         if (externalIds == null) {
             logger.error("No external_ids seen in {}", intf);
             return;
@@ -421,17 +425,17 @@ public class OF10Provider implements NetworkProvider {
         int patchOFPort = -1;
         try {
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Map<String, Table<?>> intfs = ovsdbTable.getRows(node, Interface.NAME.getName());
+            Map<String, Row> intfs = ovsdbTable.getRows(node, ovsdbTable.getTableName(node, Interface.class));
             if (intfs != null) {
-                for (Table<?> row : intfs.values()) {
-                    Interface patchIntf = (Interface)row;
+                for (Row row : intfs.values()) {
+                    Interface patchIntf = ovsdbTable.getTypedRow(node, Interface.class, row);
                     if (patchIntf.getName().equalsIgnoreCase(patchInt)) {
-                        Set<BigInteger> of_ports = patchIntf.getOfport();
+                        Set<Integer> of_ports = patchIntf.getOpenFlowPortColumn().getData();
                         if (of_ports == null || of_ports.size() <= 0) {
                             logger.error("Could NOT Identified Patch port {} on {}", patchInt, node);
                             continue;
                         }
-                        patchOFPort = Long.valueOf(((BigInteger)of_ports.toArray()[0]).longValue()).intValue();
+                        patchOFPort = Long.valueOf(((Integer)of_ports.toArray()[0]).longValue()).intValue();
                         logger.debug("Identified Patch port {} -> OF ({}) on {}", patchInt, patchOFPort, node);
                         break;
                     }
@@ -439,15 +443,15 @@ public class OF10Provider implements NetworkProvider {
                 if (patchOFPort == -1) {
                     logger.error("Cannot identify {} interface on {}", patchInt, node);
                 }
-                for (Table<?> row : intfs.values()) {
-                    Interface tunIntf = (Interface)row;
+                for (Row row : intfs.values()) {
+                    Interface tunIntf = ovsdbTable.getTypedRow(node, Interface.class, row);
                     if (tunIntf.getName().equals(this.getTunnelName(tunnelType, segmentationId, dst))) {
-                        Set<BigInteger> of_ports = tunIntf.getOfport();
+                        Set<Integer> of_ports = tunIntf.getOpenFlowPortColumn().getData();
                         if (of_ports == null || of_ports.size() <= 0) {
                             logger.error("Could NOT Identify Tunnel port {} on {}", tunIntf.getName(), node);
                             continue;
                         }
-                        int tunnelOFPort = Long.valueOf(((BigInteger)of_ports.toArray()[0]).longValue()).intValue();
+                        int tunnelOFPort = Long.valueOf(((Integer)of_ports.toArray()[0]).longValue()).intValue();
 
                         if (tunnelOFPort == -1) {
                             logger.error("Could NOT Identify Tunnel port {} -> OF ({}) on {}", tunIntf.getName(), tunnelOFPort, node);
@@ -580,17 +584,17 @@ public class OF10Provider implements NetworkProvider {
         int ofPort = -1;
         try {
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Map<String, Table<?>> intfs = ovsdbTable.getRows(node, Interface.NAME.getName());
+            Map<String, Row> intfs = ovsdbTable.getRows(node, ovsdbTable.getTableName(node, Interface.class));
             if (intfs != null) {
-                for (Table<?> row : intfs.values()) {
-                    Interface intf = (Interface)row;
+                for (Row row : intfs.values()) {
+                    Interface intf = ovsdbTable.getTypedRow(node, Interface.class, row);
                     if (intf.getName().equalsIgnoreCase(portName)) {
-                        Set<BigInteger> of_ports = intf.getOfport();
+                        Set<Integer> of_ports = intf.getOpenFlowPortColumn().getData();
                         if (of_ports == null || of_ports.size() <= 0) {
                             logger.error("Could not identify patch port {} on {}", portName, node);
                             continue;
                         }
-                        ofPort = Long.valueOf(((BigInteger)of_ports.toArray()[0]).longValue()).intValue();
+                        ofPort = Long.valueOf(((Integer)of_ports.toArray()[0]).longValue()).intValue();
                         logger.debug("Identified port {} -> OF ({}) on {}", portName, ofPort, node);
                         break;
                     }
@@ -686,8 +690,9 @@ public class OF10Provider implements NetworkProvider {
 
         try {
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brUUID);
-            Set<String> dpids = bridge.getDatapath_id();
+            Row row = ovsdbTable.getRow(node, ovsdbTable.getTableName(node, Bridge.class), brUUID);
+            Bridge bridge = ovsdbTable.getTypedRow(node, Bridge.class, row);
+            Set<String> dpids = bridge.getDatapathIdColumn().getData();
             if (dpids == null || dpids.size() ==  0) {
                 return null;
             }
@@ -803,21 +808,21 @@ public class OF10Provider implements NetworkProvider {
         Status status = new Status(StatusCode.SUCCESS);
         logger.debug("handleInterfaceDelete: srcNode: {}, networkType: {}, intf: {}, type: {}, isLast: {}",
                 srcNode, (network != null) ? network.getProviderNetworkType() : "",
-                intf.getName(), intf.getType(), isLastInstanceOnNode);
+                intf.getName(), intf.getTypeColumn().getData(), isLastInstanceOnNode);
 
         List<String> phyIfName = adminConfigManager.getAllPhysicalInterfaceNames(srcNode);
         if ((network != null) && network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
             if (isLastInstanceOnNode) {
                 this.removeVlanRules(network, srcNode, intf);
             }
-        } else if (intf.getType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) || intf.getType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)) {
+        } else if (intf.getTypeColumn().getData().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) || intf.getTypeColumn().getData().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)) {
             /* Delete tunnel port */
             try {
-                OvsDBMap<String, String> options = intf.getOptions();
+                Map<String, String> options = intf.getOptionsColumn().getData();
                 InetAddress src = InetAddress.getByName(options.get("local_ip"));
                 InetAddress dst = InetAddress.getByName(options.get("remote_ip"));
                 String key = options.get("key");
-                status = deleteTunnelPort(srcNode, intf.getType(), src, dst, key);
+                status = deleteTunnelPort(srcNode, intf.getTypeColumn().getData(), src, dst, key);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
             }
@@ -853,10 +858,10 @@ public class OF10Provider implements NetworkProvider {
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
             String portName = getTunnelName(tunnelType, key, dst);
 
-            Map<String, Table<?>> tunIntfs = ovsdbTable.getRows(node, Interface.NAME.getName());
+            Map<String, Row> tunIntfs = ovsdbTable.getRows(node, ovsdbTable.getTableName(node, Interface.class));
             if (tunIntfs != null) {
-                for (Table<?> row : tunIntfs.values()) {
-                    Interface tunIntf = (Interface)row;
+                for (Row row : tunIntfs.values()) {
+                    Interface tunIntf = ovsdbTable.getTypedRow(node, Interface.class, row);
                     if (tunIntf.getName().equals(portName)) return tunIntf;
                 }
 
@@ -869,11 +874,13 @@ public class OF10Provider implements NetworkProvider {
 
     private boolean isTunnelPresent(Node node, String tunnelName, String bridgeUUID) throws Exception {
         OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-        Bridge bridge = (Bridge)ovsdbTable.getRow(node, Bridge.NAME.getName(), bridgeUUID);
+        Row row = ovsdbTable.getRow(node, ovsdbTable.getTableName(node, Bridge.class), bridgeUUID);
+        Bridge bridge = ovsdbTable.getTypedRow(node, Bridge.class, row);
         if (bridge != null) {
-            Set<UUID> ports = bridge.getPorts();
+            Set<UUID> ports = bridge.getPortsColumn().getData();
             for (UUID portUUID : ports) {
-                Port port = (Port)ovsdbTable.getRow(node, Port.NAME.getName(), portUUID.toString());
+                Row portRow = ovsdbTable.getRow(node, ovsdbTable.getTableName(node, Port.class), portUUID.toString());
+                Port port = ovsdbTable.getTypedRow(node, Port.class, portRow);
                 if (port != null && port.getName().equalsIgnoreCase(tunnelName)) return true;
             }
         }
@@ -882,11 +889,13 @@ public class OF10Provider implements NetworkProvider {
 
     private String getPortUuid(Node node, String portName, String bridgeUUID) throws Exception {
         OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-        Bridge bridge = (Bridge)ovsdbTable.getRow(node, Bridge.NAME.getName(), bridgeUUID);
+        Row row = ovsdbTable.getRow(node, ovsdbTable.getTableName(node, Bridge.class), bridgeUUID);
+        Bridge bridge = ovsdbTable.getTypedRow(node, Bridge.class, row);
         if (bridge != null) {
-            Set<UUID> ports = bridge.getPorts();
+            Set<UUID> ports = bridge.getPortsColumn().getData();
             for (UUID portUUID : ports) {
-                Port port = (Port)ovsdbTable.getRow(node, Port.NAME.getName(), portUUID.toString());
+                Row portRow = ovsdbTable.getRow(node, ovsdbTable.getTableName(node, Port.class), portUUID.toString());
+                Port port = ovsdbTable.getTypedRow(node, Port.class, portRow);
                 if (port != null && port.getName().equalsIgnoreCase(portName)) return portUUID.toString();
             }
         }
@@ -898,10 +907,10 @@ public class OF10Provider implements NetworkProvider {
             String bridgeUUID = null;
             String tunnelBridgeName = adminConfigManager.getNetworkBridgeName();
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Map<String, Table<?>> bridgeTable = ovsdbTable.getRows(node, Bridge.NAME.getName());
+            Map<String, Row> bridgeTable = ovsdbTable.getRows(node, ovsdbTable.getTableName(node, Bridge.class));
             if (bridgeTable != null) {
                 for (String uuid : bridgeTable.keySet()) {
-                    Bridge bridge = (Bridge)bridgeTable.get(uuid);
+                    Bridge bridge = ovsdbTable.getTypedRow(node, Bridge.class, bridgeTable.get(uuid));
                     if (bridge.getName().equals(tunnelBridgeName)) {
                         bridgeUUID = uuid;
                         break;
@@ -919,9 +928,9 @@ public class OF10Provider implements NetworkProvider {
                 return new Status(StatusCode.SUCCESS);
             }
 
-            Port tunnelPort = new Port();
+            Port tunnelPort = ovsdbTable.createTypedRow(node, Port.class);
             tunnelPort.setName(portName);
-            StatusWithUuid statusWithUuid = ovsdbTable.insertRow(node, Port.NAME.getName(), bridgeUUID, tunnelPort);
+            StatusWithUuid statusWithUuid = ovsdbTable.insertRow(node, ovsdbTable.getTableName(node, Port.class), bridgeUUID, tunnelPort.getRow());
             if (!statusWithUuid.isSuccess()) {
                 logger.error("Failed to insert Tunnel port {} in {}", portName, bridgeUUID);
                 return statusWithUuid;
@@ -931,8 +940,9 @@ public class OF10Provider implements NetworkProvider {
             String interfaceUUID = null;
             int timeout = 6;
             while ((interfaceUUID == null) && (timeout > 0)) {
-                tunnelPort = (Port)ovsdbTable.getRow(node, Port.NAME.getName(), tunnelPortUUID);
-                OvsDBSet<UUID> interfaces = tunnelPort.getInterfaces();
+                Row row = ovsdbTable.getRow(node, ovsdbTable.getTableName(node, Port.class), tunnelPortUUID);
+                tunnelPort = ovsdbTable.getTypedRow(node, Port.class, row);
+                Set<UUID> interfaces = tunnelPort.getInterfacesColumn().getData();
                 if (interfaces == null || interfaces.size() == 0) {
                     // Wait for the OVSDB update to sync up the Local cache.
                     Thread.sleep(500);
@@ -940,7 +950,8 @@ public class OF10Provider implements NetworkProvider {
                     continue;
                 }
                 interfaceUUID = interfaces.toArray()[0].toString();
-                Interface intf = (Interface)ovsdbTable.getRow(node, Interface.NAME.getName(), interfaceUUID);
+                Row intfRow = ovsdbTable.getRow(node, ovsdbTable.getTableName(node, Interface.class), interfaceUUID);
+                Interface intf = ovsdbTable.getTypedRow(node, Interface.class, intfRow);
                 if (intf == null) interfaceUUID = null;
             }
 
@@ -949,14 +960,14 @@ public class OF10Provider implements NetworkProvider {
                 return new Status(StatusCode.INTERNALERROR);
             }
 
-            Interface tunInterface = new Interface();
+            Interface tunInterface = ovsdbTable.createTypedRow(node, Interface.class);
             tunInterface.setType(tunnelType);
-            OvsDBMap<String, String> options = new OvsDBMap<String, String>();
+            Map<String, String> options = new HashMap<String, String>();
             options.put("key", key);
             options.put("local_ip", src.getHostAddress());
             options.put("remote_ip", dst.getHostAddress());
             tunInterface.setOptions(options);
-            Status status = ovsdbTable.updateRow(node, Interface.NAME.getName(), tunnelPortUUID, interfaceUUID, tunInterface);
+            Status status = ovsdbTable.updateRow(node, ovsdbTable.getTableName(node, Interface.class), tunnelPortUUID, interfaceUUID, tunInterface.getRow());
             logger.debug("Tunnel {} add status : {}", tunInterface, status);
             return status;
         } catch (Exception e) {
@@ -969,10 +980,10 @@ public class OF10Provider implements NetworkProvider {
         try {
             String bridgeUUID = null;
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Map<String, Table<?>> bridgeTable = ovsdbTable.getRows(node, Bridge.NAME.getName());
+            Map<String, Row> bridgeTable = ovsdbTable.getRows(node, ovsdbTable.getTableName(node, Bridge.class));
             if (bridgeTable != null) {
                 for (String uuid : bridgeTable.keySet()) {
-                    Bridge bridge = (Bridge)bridgeTable.get(uuid);
+                    Bridge bridge = ovsdbTable.getTypedRow(node, Bridge.class, bridgeTable.get(uuid));
                     if (bridge.getName().equals(bridgeName)) {
                         bridgeUUID = uuid;
                         break;
@@ -986,7 +997,7 @@ public class OF10Provider implements NetworkProvider {
             String portUUID = this.getPortUuid(node, portName, bridgeUUID);
             Status status = new Status(StatusCode.SUCCESS);
             if (portUUID != null) {
-                status = ovsdbTable.deleteRow(node, Port.NAME.getName(), portUUID);
+                status = ovsdbTable.deleteRow(node, ovsdbTable.getTableName(node, Port.class), portUUID);
                 if (!status.isSuccess()) {
                     logger.error("Failed to delete port {} in {} status : {}", portName, bridgeUUID, status);
                     return status;
@@ -1043,8 +1054,9 @@ public class OF10Provider implements NetworkProvider {
 
         try {
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Bridge bridge = (Bridge) ovsdbTable.getRow(node, Bridge.NAME.getName(), brIntId);
-            Set<String> dpids = bridge.getDatapath_id();
+            Row row = ovsdbTable.getRow(node, ovsdbTable.getTableName(node, Bridge.class), brIntId);
+            Bridge bridge = ovsdbTable.getTypedRow(node, Bridge.class, row);
+            Set<String> dpids = bridge.getDatapathIdColumn().getData();
             if (dpids == null || dpids.size() ==  0) return;
             Long dpidLong = Long.valueOf(HexEncode.stringToLong((String)dpids.toArray()[0]));
             Node ofNode = new Node(Node.NodeIDType.OPENFLOW, dpidLong);
@@ -1127,10 +1139,10 @@ public class OF10Provider implements NetworkProvider {
     private String getInternalBridgeUUID (Node node, String bridgeName) {
         try {
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Map<String, Table<?>> bridgeTable = ovsdbTable.getRows(node, Bridge.NAME.getName());
+            Map<String, Row> bridgeTable = ovsdbTable.getRows(node, ovsdbTable.getTableName(node, Bridge.class));
             if (bridgeTable == null) return null;
             for (String key : bridgeTable.keySet()) {
-                Bridge bridge = (Bridge)bridgeTable.get(key);
+                Bridge bridge = ovsdbTable.getTypedRow(node, Bridge.class, bridgeTable.get(key));
                 if (bridge.getName().equals(bridgeName)) return key;
             }
         } catch (Exception e) {

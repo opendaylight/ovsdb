@@ -19,11 +19,11 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
+import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.lib.table.Interface;
-import org.opendaylight.ovsdb.lib.table.Port;
-import org.opendaylight.ovsdb.lib.table.Table;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
+import org.opendaylight.ovsdb.schema.openvswitch.Interface;
+import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,17 +49,18 @@ public class NodeConfiguration {
         OVSDBConfigService ovsdbTable = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
 
         try {
-            Map<String, Table<?>> portRows = ovsdbTable.getRows(node, Port.NAME.getName());
+            Map<String, Row> portRows = ovsdbTable.getRows(node, ovsdbTable.getTableName(node, Port.class));
 
             if (portRows == null){
                 logger.info("Interface table is null for Node {}", node);
                 return;
             }
 
-            for (Table<?> row : portRows.values()) {
-                Port port = (Port)row;
+            for (Row row : portRows.values()) {
+                Port port = ovsdbTable.getTypedRow(node, Port.class, row);
 
-                BigInteger[] tags = port.getTag().toArray(new BigInteger[0]);
+                if (port.getTagColumn() == null) continue;
+                BigInteger[] tags = port.getTagColumn().getData().toArray(new BigInteger[0]);
                 if (tags.length == 1)
                 {
                     //There is only one tag here
@@ -70,8 +71,9 @@ public class NodeConfiguration {
                    continue;
                 }
 
-                for (UUID ifaceId : port.getInterfaces()) {
-                    Interface iface = (Interface)ovsdbTable.getRow(node, Interface.NAME.getName(), ifaceId.toString());
+                for (UUID ifaceId : port.getInterfacesColumn().getData()) {
+                    Row ifaceRow = ovsdbTable.getRow(node, ovsdbTable.getTableName(node, Interface.class), ifaceId.toString());
+                    Interface iface = ovsdbTable.getTypedRow(node, Interface.class, ifaceRow);
 
                     if (iface == null) {
                         logger.error("Interface table is null for Po");

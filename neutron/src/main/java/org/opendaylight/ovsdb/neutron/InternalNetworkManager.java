@@ -9,24 +9,24 @@
  */
 package org.opendaylight.ovsdb.neutron;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
-import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
-import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
+import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.lib.table.Bridge;
-import org.opendaylight.ovsdb.lib.table.Interface;
-import org.opendaylight.ovsdb.lib.table.Port;
-import org.opendaylight.ovsdb.lib.table.Table;
 import org.opendaylight.ovsdb.neutron.provider.IProviderNetworkManager;
-import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
 import org.opendaylight.ovsdb.plugin.StatusWithUuid;
+import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
+import org.opendaylight.ovsdb.schema.openvswitch.Interface;
+import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,13 +50,14 @@ public class InternalNetworkManager implements IInternalNetworkManager {
     public InternalNetworkManager() {
     }
 
+    @Override
     public String getInternalBridgeUUID (Node node, String bridgeName) {
         try {
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Map<String, Table<?>> bridgeTable = ovsdbTable.getRows(node, Bridge.NAME.getName());
+            Map<String, Row> bridgeTable = ovsdbTable.getRows(node, ovsdbTable.getTableName(node, Bridge.class));
             if (bridgeTable == null) return null;
             for (String key : bridgeTable.keySet()) {
-                Bridge bridge = (Bridge)bridgeTable.get(key);
+                Bridge bridge = ovsdbTable.getTypedRow(node, Bridge.class, bridgeTable.get(key));
                 if (bridge.getName().equals(bridgeName)) return key;
             }
         } catch (Exception e) {
@@ -68,10 +69,10 @@ public class InternalNetworkManager implements IInternalNetworkManager {
     public Bridge getInternalBridge (Node node, String bridgeName) {
         try {
             OVSDBConfigService ovsdbTable = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Map<String, Table<?>> bridgeTable = ovsdbTable.getRows(node, Bridge.NAME.getName());
+            Map<String, Row> bridgeTable = ovsdbTable.getRows(node, ovsdbTable.getTableName(node, Bridge.class));
             if (bridgeTable != null) {
                 for (String key : bridgeTable.keySet()) {
-                    Bridge bridge = (Bridge) bridgeTable.get(key);
+                    Bridge bridge = ovsdbTable.getTypedRow(node, Bridge.class, bridgeTable.get(key));
                     if (bridge.getName().equals(bridgeName)) {
                         return bridge;
                     }
@@ -83,6 +84,7 @@ public class InternalNetworkManager implements IInternalNetworkManager {
         return null;
     }
 
+    @Override
     public boolean isInternalNetworkNeutronReady(Node node) {
         if (this.getInternalBridgeUUID(node, adminConfigManager.getIntegrationBridgeName()) != null) {
             return true;
@@ -91,6 +93,7 @@ public class InternalNetworkManager implements IInternalNetworkManager {
         }
     }
 
+    @Override
     public boolean isInternalNetworkOverlayReady(Node node) {
         if (!this.isInternalNetworkNeutronReady(node)) {
             return false;
@@ -102,12 +105,14 @@ public class InternalNetworkManager implements IInternalNetworkManager {
         }
     }
 
+    @Override
     public boolean isPortOnBridge (Node node, Bridge bridge, String portName) {
         OVSDBConfigService ovsdbTable = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
 
-        for (UUID portsUUID : bridge.getPorts()) {
+        for (UUID portsUUID : bridge.getPortsColumn().getData()) {
             try {
-                Port port = (Port) ovsdbTable.getRow(node, Port.NAME.getName(), portsUUID.toString());
+                Row portRow = ovsdbTable.getRow(node, ovsdbTable.getTableName(node, Port.class), portsUUID.toString());
+                Port port = ovsdbTable.getTypedRow(node, Port.class, portRow);
                 if ((port != null) && port.getName().equalsIgnoreCase(portName)) {
                     return true;
                 }
@@ -137,6 +142,7 @@ public class InternalNetworkManager implements IInternalNetworkManager {
      * - OF 1.0 requires br-int, br-net and a patch connecting them.
      * - OF 1.3 requires br-int.
      */
+    @Override
     public boolean isInternalNetworkTunnelReady (Node node) {
         /* Is br-int created? */
         Bridge intBridge = this.getInternalBridge(node, adminConfigManager.getIntegrationBridgeName());
@@ -167,6 +173,7 @@ public class InternalNetworkManager implements IInternalNetworkManager {
      * physical device added to br-net.
      * - OF 1.3 requires br-int and physical device added to br-int.
      */
+    @Override
     public boolean isInternalNetworkVlanReady (Node node, NeutronNetwork network) {
         /* is br-int created */
         Bridge intBridge = this.getInternalBridge(node, adminConfigManager.getIntegrationBridgeName());
@@ -218,6 +225,7 @@ public class InternalNetworkManager implements IInternalNetworkManager {
                 Interface br-int
                     type: internal
      */
+    @Override
     public void createIntegrationBridge (Node node) throws Exception {
         String brInt = adminConfigManager.getIntegrationBridgeName();
 
@@ -282,6 +290,7 @@ public class InternalNetworkManager implements IInternalNetworkManager {
                 Interface br-int
                     type: internal
      */
+    @Override
     public boolean createNetNetwork (Node node, NeutronNetwork network) throws Exception {
         Status status;
 
@@ -351,7 +360,8 @@ public class InternalNetworkManager implements IInternalNetworkManager {
         }
 
         /* Check if the port already exists. */
-        Bridge bridge = (Bridge)ovsdbTable.getRow(node, Bridge.NAME.getName(), bridgeUUID);
+        Row row = ovsdbTable.getRow(node, ovsdbTable.getTableName(node, Bridge.class), bridgeUUID);
+        Bridge bridge = ovsdbTable.getTypedRow(node, Bridge.class, row);
         if (bridge != null) {
             if (isPortOnBridge(node, bridge, portName)) {
                 logger.debug("addPortToBridge: Port {} already in Bridge {}, Node {}", portName, bridgeName, node);
@@ -362,9 +372,9 @@ public class InternalNetworkManager implements IInternalNetworkManager {
             return new Status(StatusCode.NOTFOUND, "Could not find "+portName+" in "+bridgeName);
         }
 
-        Port port = new Port();
+        Port port = ovsdbTable.createTypedRow(node, Port.class);
         port.setName(portName);
-        StatusWithUuid statusWithUuid = ovsdbTable.insertRow(node, Port.NAME.getName(), bridgeUUID, port);
+        StatusWithUuid statusWithUuid = ovsdbTable.insertRow(node, port.getSchema().getName(), bridgeUUID, port.getRow());
         if (!statusWithUuid.isSuccess()) {
             logger.error("addPortToBridge: Failed to add Port {} in Bridge {}, Node {}", portName, bridgeName, node);
             return statusWithUuid;
@@ -374,8 +384,9 @@ public class InternalNetworkManager implements IInternalNetworkManager {
         String interfaceUUID = null;
         int timeout = 6;
         while ((interfaceUUID == null) && (timeout > 0)) {
-            port = (Port)ovsdbTable.getRow(node, Port.NAME.getName(), portUUID);
-            OvsDBSet<UUID> interfaces = port.getInterfaces();
+            Row portRow = ovsdbTable.getRow(node, port.getSchema().getName(), portUUID);
+            port = ovsdbTable.getTypedRow(node, Port.class, portRow);
+            Set<UUID> interfaces = port.getInterfacesColumn().getData();
             if (interfaces == null || interfaces.size() == 0) {
                 // Wait for the OVSDB update to sync up the Local cache.
                 Thread.sleep(500);
@@ -383,7 +394,7 @@ public class InternalNetworkManager implements IInternalNetworkManager {
                 continue;
             }
             interfaceUUID = interfaces.toArray()[0].toString();
-            Interface intf = (Interface)ovsdbTable.getRow(node, Interface.NAME.getName(), interfaceUUID);
+            Row intf = ovsdbTable.getRow(node, ovsdbTable.getTableName(node, Interface.class), interfaceUUID);
             if (intf == null) {
                 interfaceUUID = null;
             }
@@ -404,7 +415,8 @@ public class InternalNetworkManager implements IInternalNetworkManager {
                 node, bridgeUUID, portName, peerPortName);
 
         /* Check if the port already exists. */
-        Bridge bridge = (Bridge)ovsdbTable.getRow(node, Bridge.NAME.getName(), bridgeUUID);
+        Row bridgeRow = ovsdbTable.getRow(node, ovsdbTable.getTableName(node, Bridge.class), bridgeUUID);
+        Bridge bridge = ovsdbTable.getTypedRow(node, Bridge.class, bridgeRow);
         if (bridge != null) {
             if (isPortOnBridge(node, bridge, portName)) {
                 logger.debug("addPatchPort: Port {} already in Bridge, Node {}", portName, node);
@@ -415,10 +427,10 @@ public class InternalNetworkManager implements IInternalNetworkManager {
             return new Status(StatusCode.NOTFOUND, "Could not find "+portName+" in Bridge");
         }
 
-        Port patchPort = new Port();
+        Port patchPort = ovsdbTable.createTypedRow(node, Port.class);
         patchPort.setName(portName);
         // Create patch port and interface
-        StatusWithUuid statusWithUuid = ovsdbTable.insertRow(node, Port.NAME.getName(), bridgeUUID, patchPort);
+        StatusWithUuid statusWithUuid = ovsdbTable.insertRow(node, patchPort.getSchema().getName(), bridgeUUID, patchPort.getRow());
         if (!statusWithUuid.isSuccess()) return statusWithUuid;
 
         String patchPortUUID = statusWithUuid.getUuid().toString();
@@ -426,8 +438,9 @@ public class InternalNetworkManager implements IInternalNetworkManager {
         String interfaceUUID = null;
         int timeout = 6;
         while ((interfaceUUID == null) && (timeout > 0)) {
-            patchPort = (Port)ovsdbTable.getRow(node, Port.NAME.getName(), patchPortUUID);
-            OvsDBSet<UUID> interfaces = patchPort.getInterfaces();
+            Row portRow = ovsdbTable.getRow(node, patchPort.getSchema().getName(), patchPortUUID);
+            patchPort = ovsdbTable.getTypedRow(node, Port.class, portRow);
+            Set<UUID> interfaces = patchPort.getInterfacesColumn().getData();
             if (interfaces == null || interfaces.size() == 0) {
                 // Wait for the OVSDB update to sync up the Local cache.
                 Thread.sleep(500);
@@ -441,24 +454,24 @@ public class InternalNetworkManager implements IInternalNetworkManager {
             return new Status(StatusCode.INTERNALERROR);
         }
 
-        Interface intf = new Interface();
+        Interface intf = ovsdbTable.createTypedRow(node, Interface.class);
         intf.setType("patch");
-        OvsDBMap<String, String> options = new OvsDBMap<String, String>();
+        Map<String, String> options = new HashMap<String, String>();
         options.put("peer", peerPortName);
         intf.setOptions(options);
-        return ovsdbTable.updateRow(node, Interface.NAME.getName(), patchPortUUID, interfaceUUID, intf);
+        return ovsdbTable.updateRow(node, intf.getSchema().getName(), patchPortUUID, interfaceUUID, intf.getRow());
     }
 
     private Status addInternalBridge (Node node, String bridgeName, String localPatchName, String remotePatchName) throws Exception {
         OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
 
         String bridgeUUID = this.getInternalBridgeUUID(node, bridgeName);
-        Bridge bridge = new Bridge();
-        OvsDBSet<String> failMode = new OvsDBSet<String>();
+        Bridge bridge = ovsdbTable.createTypedRow(node, Bridge.class);
+        Set<String> failMode = new HashSet<String>();
         failMode.add("secure");
-        bridge.setFail_mode(failMode);
+        bridge.setFailMode(failMode);
 
-        OvsDBSet<String> protocols = new OvsDBSet<String>();
+        Set<String> protocols = new HashSet<String>();
         if (providerNetworkManager == null) {
             logger.error("Provider Network Manager is not available");
             return new Status(StatusCode.INTERNALERROR);
@@ -473,22 +486,21 @@ public class InternalNetworkManager implements IInternalNetworkManager {
         if (bridgeUUID == null) {
             bridge.setName(bridgeName);
 
-            StatusWithUuid statusWithUuid = ovsdbTable.insertRow(node, Bridge.NAME.getName(), null, bridge);
+            StatusWithUuid statusWithUuid = ovsdbTable.insertRow(node, bridge.getSchema().getName(), null, bridge.getRow());
             if (!statusWithUuid.isSuccess()) return statusWithUuid;
             bridgeUUID = statusWithUuid.getUuid().toString();
-            Port port = new Port();
+            Port port = ovsdbTable.createTypedRow(node, Port.class);
             port.setName(bridgeName);
-            Status status = ovsdbTable.insertRow(node, Port.NAME.getName(), bridgeUUID, port);
+            Status status = ovsdbTable.insertRow(node, port.getSchema().getName(), bridgeUUID, port.getRow());
             logger.debug("addInternalBridge: Inserting Bridge {} {} with protocols {} and status {}",
                     bridgeName, bridgeUUID, protocols, status);
         } else {
-            Status status = ovsdbTable.updateRow(node, Bridge.NAME.getName(), null, bridgeUUID, bridge);
+            Status status = ovsdbTable.updateRow(node, bridge.getSchema().getName(), null, bridgeUUID, bridge.getRow());
             logger.debug("addInternalBridge: Updating Bridge {} {} with protocols {} and status {}",
                     bridgeName, bridgeUUID, protocols, status);
         }
 
-        IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
-        connectionService.setOFController(node, bridgeUUID);
+        ovsdbTable.setOFController(node, bridgeUUID);
 
         if (localPatchName != null && remotePatchName != null && providerNetworkManager.getProvider().hasPerTenantTunneling()) {
             return addPatchPort(node, bridgeUUID, localPatchName, remotePatchName);
@@ -496,6 +508,7 @@ public class InternalNetworkManager implements IInternalNetworkManager {
         return new Status(StatusCode.SUCCESS);
     }
 
+    @Override
     public void prepareInternalNetwork(Node node) {
         try {
             this.createIntegrationBridge(node);
@@ -513,6 +526,7 @@ public class InternalNetworkManager implements IInternalNetworkManager {
     /*
      * Check if the full network setup is available. If not, create it.
      */
+    @Override
     public boolean checkAndCreateNetwork (Node node, NeutronNetwork network) {
         boolean isCreated = false;
         if (network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {

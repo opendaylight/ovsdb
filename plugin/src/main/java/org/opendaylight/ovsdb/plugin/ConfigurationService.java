@@ -49,6 +49,7 @@ import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
@@ -172,7 +173,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             Column<GenericTableSchema, ?> nameColumn = port.getNameColumn();
             List<Column<GenericTableSchema, ?>> columns = new ArrayList<Column<GenericTableSchema, ?>>();
             columns.add(nameColumn);
-            Row<GenericTableSchema> intfRow = new Row<GenericTableSchema>(columns);
+            Row<GenericTableSchema> intfRow = new Row<GenericTableSchema>(tableSchema, columns);
             this.processInsertTransaction(client, databaseName, "Interface", null, null, null, namedUuid, intfRow, transactionBuilder);
         }
     }
@@ -247,7 +248,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         if (parentUuid == null) {
             parentUuid = this.getSpecialCaseParentUUID(node, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName);
         }
-        logger.debug("insertRow Connection : {} Table : {} ParentTable : {} Parent UUID: {} ParentColumn : {} Row : {}",
+        logger.debug("insertRow Connection : {} Table : {} ParentTable : {} Parent Column: {} Parent UUID : {} Row : {}",
                      client.getConnectionInfo(), tableName, parentColumn[0], parentColumn[1], parentUuid, row);
 
         TransactionBuilder transactionBuilder = client.transactBuilder();
@@ -524,6 +525,31 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         return false;
     }
 
+    @Override
+    public <T extends TypedBaseTable<?>> String getTableName(Node node, Class<T> typedClass) {
+        Connection connection = connectionService.getConnection(node);
+        if (connection == null) return null;
+        OvsdbClient client = connection.getClient();
+        TypedBaseTable<?> typedTable = client.getTypedRowWrapper(typedClass, null);
+        if (typedTable == null) return null;
+        return typedTable.getSchema().getName();
+    }
+
+    @Override
+    public <T extends TypedBaseTable<?>> T getTypedRow(Node node, Class<T> typedClass, Row row) {
+        Connection connection = connectionService.getConnection(node);
+        if (connection == null) return null;
+        OvsdbClient client = connection.getClient();
+        return (T)client.getTypedRowWrapper(typedClass, row);
+    }
+
+    @Override
+    public <T extends TypedBaseTable<?>> T createTypedRow(Node node, Class<T> typedClass) {
+        Connection connection = connectionService.getConnection(node);
+        if (connection == null) return null;
+        OvsdbClient client = connection.getClient();
+        return client.createTypedRowWrapper(typedClass);
+    }
 
     public void _ovsconnect (CommandInterpreter ci) {
         String bridgeName = ci.nextArgument();

@@ -154,6 +154,7 @@
           <excludes>
             <!--  Exclude integration tests -->
             <exclude>**/*IT*</exclude>
+            <exclude>**/*TestCases*</exclude>
           </excludes>
         </configuration>
       </plugin>

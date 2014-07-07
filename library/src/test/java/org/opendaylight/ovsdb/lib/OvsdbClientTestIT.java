@@ -95,7 +95,7 @@ public class OvsdbClientTestIT extends OvsdbTestBase {
 
         final List<Object> results = Lists.newArrayList();
 
-        MonitorHandle monitor = ovs.monitor(dbSchema, monitorRequests, new MonitorCallBack() {
+        TableUpdates updates = ovs.monitor(dbSchema, monitorRequests, new MonitorCallBack() {
             @Override
             public void update(TableUpdates result, DatabaseSchema dbSchema) {
                 results.add(result);
@@ -108,7 +108,7 @@ public class OvsdbClientTestIT extends OvsdbTestBase {
                 System.out.println("t = " + t);
             }
         });
-
+        if (updates != null) results.add(updates);
         for (int i = 0; i < 3 ; i++) { //wait 3 seconds to get a result
             System.out.println("waiting on monitor response for Bridge Table...");
             if (!results.isEmpty()) break;
@@ -118,7 +118,7 @@ public class OvsdbClientTestIT extends OvsdbTestBase {
         Assert.assertTrue(!results.isEmpty());
         Object result = results.get(0);
         Assert.assertTrue(result instanceof TableUpdates);
-        TableUpdates updates = (TableUpdates) result;
+        updates = (TableUpdates) result;
         TableUpdate<GenericTableSchema> update = updates.getUpdate(bridge);
         Row<GenericTableSchema> aNew = update.getNew();
         if (filter) {
@@ -166,7 +166,7 @@ public class OvsdbClientTestIT extends OvsdbTestBase {
 
         final List<Object> results = Lists.newArrayList();
 
-        MonitorHandle monitor = ovs.monitor(dbSchema, monitorRequests, new MonitorCallBack() {
+        TableUpdates updates = ovs.monitor(dbSchema, monitorRequests, new MonitorCallBack() {
             @Override
             public void update(TableUpdates result, DatabaseSchema dbSchema) {
                 results.add(result);
@@ -179,16 +179,17 @@ public class OvsdbClientTestIT extends OvsdbTestBase {
             }
         });
 
+        if (updates != null) results.add(updates);
         for (int i = 0; i < 3 ; i++) { //wait 5 seconds to get a result
-            System.out.println("waiting on monitor response for open_vSwtich Table...");
             if (!results.isEmpty()) break;
+            System.out.println("waiting on monitor response for open_vSwtich Table...");
             Thread.sleep(1000);
         }
 
         Assert.assertTrue(!results.isEmpty());
         Object result = results.get(0); // open_vSwitch table has just 1 row.
         Assert.assertTrue(result instanceof TableUpdates);
-        TableUpdates updates = (TableUpdates) result;
+        updates = (TableUpdates) result;
         TableUpdate<GenericTableSchema> update = updates.getUpdate(ovsTable);
         Assert.assertNotNull(update.getUuid());
         return update.getUuid();

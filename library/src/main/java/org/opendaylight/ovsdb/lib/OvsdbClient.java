@@ -15,6 +15,7 @@ package org.opendaylight.ovsdb.lib;
 import java.util.List;
 
 import org.opendaylight.ovsdb.lib.message.MonitorRequest;
+import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
@@ -66,7 +67,7 @@ public interface OvsdbClient {
      *                       handle is used to later cancel ({@link #cancelMonitor(MonitorHandle)}) the monitor.
      * @param callback receives the monitor response
      */
-    public <E extends TableSchema<E>> MonitorHandle monitor(DatabaseSchema schema, List<MonitorRequest<E>> monitorRequests,
+    public <E extends TableSchema<E>> TableUpdates monitor(DatabaseSchema schema, List<MonitorRequest<E>> monitorRequests,
                                  MonitorCallBack callback);
 
     /**

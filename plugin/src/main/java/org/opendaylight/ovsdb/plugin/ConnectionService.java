@@ -15,7 +15,6 @@ import io.netty.channel.ChannelHandler;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +31,6 @@ import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.lib.MonitorCallBack;
-import org.opendaylight.ovsdb.lib.MonitorHandle;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
@@ -44,12 +42,10 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
-import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.ListenableFuture;
 
 
 /**
@@ -254,16 +250,6 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         props.add(l4Port);
         inventoryServiceInternal.addNode(connection.getNode(), props);
 
-        OpenVSwitch openVSwitch = connection.getClient().getTypedRowWrapper(OpenVSwitch.class, null);
-        List<String> dbNames = Arrays.asList(openVSwitch.getSchema().getName());
-        ListenableFuture<DatabaseSchema> dbSchemaF = client.getSchema(OvsVswitchdSchemaConstants.DATABASE_NAME);
-        DatabaseSchema databaseSchema = dbSchemaF.get();
-        this.monitorTables(connection.getNode());
-        inventoryServiceInternal.notifyNodeAdded(connection.getNode());
-    }
-
-    public void monitorTables(Node node) throws ExecutionException, InterruptedException, IOException {
-        OvsdbClient client = ovsdbConnections.get(node.getID()).getClient();
         List<String> databases = client.getDatabases().get();
         if (databases == null) {
             logger.error("Unable to get Databases for the ovsdb connection : {}", client.getConnectionInfo());
@@ -271,22 +257,31 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         }
         for (String database : databases) {
             DatabaseSchema dbSchema = client.getSchema(database).get();
-            if (dbSchema == null) {
-                logger.error("Unable to get Database Schema for the ovsdb connection : {} , database : {}", client.getConnectionInfo(), database);
-                return;
-            }
-            Set<String> tables = dbSchema.getTables();
-            if (tables == null) {
-                logger.warn("Database {} without any tables. Strange !", database);
-                continue;
-            }
-            List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
-            for (String tableName : tables) {
-                GenericTableSchema tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
-                monitorRequests.add(this.getAllColumnsMonitorRequest(tableSchema));
-            }
-            MonitorHandle monitor = client.monitor(dbSchema, monitorRequests, new UpdateMonitor(node));
+            TableUpdates updates = this.monitorTables(connection.getNode(), dbSchema);
+            inventoryServiceInternal.processTableUpdates(connection.getNode(), dbSchema.getName(), updates);
         }
+        inventoryServiceInternal.notifyNodeAdded(connection.getNode());
+    }
+
+    public TableUpdates monitorTables(Node node, DatabaseSchema dbSchema) throws ExecutionException, InterruptedException, IOException {
+        String identifier = (String) node.getID();
+        Connection connection = ovsdbConnections.get(identifier);
+        OvsdbClient client = connection.getClient();
+        if (dbSchema == null) {
+            logger.error("Unable to get Database Schema for the ovsdb connection : {} , database : {}", client.getConnectionInfo(), dbSchema.getName());
+            return null;
+        }
+        Set<String> tables = dbSchema.getTables();
+        if (tables == null) {
+            logger.warn("Database {} without any tables. Strange !", dbSchema.getName());
+            return null;
+        }
+        List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
+        for (String tableName : tables) {
+            GenericTableSchema tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
+            monitorRequests.add(this.getAllColumnsMonitorRequest(tableSchema));
+        }
+        return client.monitor(dbSchema, monitorRequests, new UpdateMonitor(node));
     }
 
     /**

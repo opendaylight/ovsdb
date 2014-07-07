@@ -23,7 +23,6 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.ovsdb.lib.MonitorCallBack;
-import org.opendaylight.ovsdb.lib.MonitorHandle;
 import org.opendaylight.ovsdb.lib.message.MonitorRequest;
 import org.opendaylight.ovsdb.lib.message.MonitorRequestBuilder;
 import org.opendaylight.ovsdb.lib.message.MonitorSelect;
@@ -60,8 +59,9 @@ public class MonitorTestCases extends OpenVswitchSchemaTestBase {
         monitorRequests.add(this.getAllColumnsMonitorRequest(Bridge.class));
         monitorRequests.add(this.getAllColumnsMonitorRequest(OpenVSwitch.class));
 
-        MonitorHandle monitor = ovs.monitor(dbSchema, monitorRequests, new UpdateMonitor());
-        Assert.assertNotNull(monitor);
+        TableUpdates updates = ovs.monitor(dbSchema, monitorRequests, new UpdateMonitor());
+        Assert.assertNotNull(updates);
+        this.updateTableCache(updates);
     }
 
     /**
@@ -104,22 +104,26 @@ public class MonitorTestCases extends OpenVswitchSchemaTestBase {
 
     }
 
+    private void updateTableCache(TableUpdates updates) {
+        for (String tableName : updates.getUpdates().keySet()) {
+            Map<UUID, Row> tUpdate = OpenVswitchSchemaSuiteIT.getTableCache().get(tableName);
+            TableUpdate update = updates.getUpdates().get(tableName);
+            if (update.getNew() != null) {
+                if (tUpdate == null) {
+                    tUpdate = new HashMap<>();
+                    OpenVswitchSchemaSuiteIT.getTableCache().put(tableName, tUpdate);
+                }
+                tUpdate.put(update.getUuid(), update.getNew());
+            } else {
+                tUpdate.remove(update.getUuid());
+            }
+        }
+    }
+
     private class UpdateMonitor implements MonitorCallBack {
         @Override
         public void update(TableUpdates result, DatabaseSchema dbSchema) {
-            for (String tableName : result.getUpdates().keySet()) {
-                Map<UUID, Row> tUpdate = OpenVswitchSchemaSuiteIT.getTableCache().get(tableName);
-                TableUpdate update = result.getUpdates().get(tableName);
-                if (update.getNew() != null) {
-                    if (tUpdate == null) {
-                        tUpdate = new HashMap<>();
-                        OpenVswitchSchemaSuiteIT.getTableCache().put(tableName, tUpdate);
-                    }
-                    tUpdate.put(update.getUuid(), update.getNew());
-                } else {
-                    tUpdate.remove(update.getUuid());
-                }
-            }
+            updateTableCache(result);
         }
 
         @Override

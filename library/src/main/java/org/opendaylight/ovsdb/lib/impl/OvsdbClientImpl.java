@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
 import org.opendaylight.ovsdb.lib.EchoServiceCallbackFilters;
@@ -52,7 +53,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
@@ -94,7 +94,8 @@ public class OvsdbClientImpl implements OvsdbClient {
                         logger.info("callback received with context {}, but no known handler. Ignoring!", key);
                         return;
                     }
-                    _transformingCallback(updateNotification.getUpdates(), monitorCallBack, callbackContext.schema);
+                    TableUpdates updates = _transformingCallback(updateNotification.getUpdates(), callbackContext.schema);
+                    monitorCallBack.update(updates, callbackContext.schema);
                 }
 
                 @Override
@@ -113,7 +114,7 @@ public class OvsdbClientImpl implements OvsdbClient {
     }
 
 
-    protected void _transformingCallback(JsonNode tableUpdatesJson, MonitorCallBack monitorCallBack, DatabaseSchema dbSchema) {
+    protected TableUpdates _transformingCallback(JsonNode tableUpdatesJson, DatabaseSchema dbSchema) {
         //todo(ashwin): we should move all the JSON parsing logic to a utility class
         if (tableUpdatesJson instanceof ObjectNode) {
             Map<String, TableUpdate> tableUpdateMap = Maps.newHashMap();
@@ -126,9 +127,9 @@ public class OvsdbClientImpl implements OvsdbClient {
                 tableUpdateMap.put(entry.getKey(), table.updatesFromJson(entry.getValue()));
 
             }
-            TableUpdates updates = new TableUpdates(tableUpdateMap);
-            monitorCallBack.update(updates, dbSchema);
+            return new TableUpdates(tableUpdateMap);
         }
+        return null;
     }
 
     @Override
@@ -144,7 +145,7 @@ public class OvsdbClientImpl implements OvsdbClient {
     }
 
     @Override
-    public <E extends TableSchema<E>> MonitorHandle monitor(final DatabaseSchema dbSchema,
+    public <E extends TableSchema<E>> TableUpdates monitor(final DatabaseSchema dbSchema,
                                                             List<MonitorRequest<E>> monitorRequest,
                                                             final MonitorCallBack callback) {
 
@@ -165,19 +166,14 @@ public class OvsdbClientImpl implements OvsdbClient {
                 return Lists.<Object>newArrayList(dbSchema.getName(), monitorHandle.getId(), reqMap);
             }
         });
-        Futures.addCallback(monitor, new FutureCallback<JsonNode>() {
-            @Override
-            public void onSuccess(JsonNode result) {
-                _transformingCallback(result, callback, dbSchema);
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                callback.exception(t);
-            }
-        });
-
-        return monitorHandle;
+        JsonNode result;
+        try {
+            result = monitor.get();
+        } catch (InterruptedException | ExecutionException e) {
+            return null;
+        }
+        TableUpdates updates = _transformingCallback(result, dbSchema);
+        return updates;
     }
 
     private void registerCallback(MonitorHandle monitorHandle, MonitorCallBack callback, DatabaseSchema schema) {

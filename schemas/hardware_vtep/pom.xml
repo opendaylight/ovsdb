@@ -116,10 +116,8 @@
         <configuration>
           <instructions>
             <Import-Package>org.opendaylight.ovsdb.lib,
-                org.opendaylight.ovsdb.lib.table,
                 org.opendaylight.ovsdb.lib.jsonrpc,
                 org.opendaylight.ovsdb.lib.notation,
-                org.opendaylight.ovsdb.lib.database,
                 org.opendaylight.ovsdb.lib.operations,
                 org.opendaylight.ovsdb.lib.message,
                 org.opendaylight.ovsdb.lib.schema,

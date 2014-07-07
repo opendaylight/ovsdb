@@ -12,6 +12,7 @@ package org.opendaylight.ovsdb.lib.schema;
 import java.lang.reflect.Constructor;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
@@ -157,6 +158,15 @@ public abstract class TableSchema<E extends TableSchema<E>> {
             }
         }
         return new Row<>(this, columns);
+    }
+
+    public ArrayList<Row<E>> createRows(JsonNode rowsNode) {
+        ArrayList<Row<E>> rows = Lists.newArrayList();
+        for (JsonNode rowNode : rowsNode.get("rows")) {
+            rows.add(createRow((ObjectNode)rowNode));
+        }
+
+        return rows;
     }
 
     /*

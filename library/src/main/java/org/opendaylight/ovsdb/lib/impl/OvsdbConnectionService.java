@@ -37,6 +37,7 @@ import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo.ConnectionType;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
+import org.opendaylight.ovsdb.lib.jsonrpc.ExceptionHandler;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcDecoder;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcEndpoint;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcServiceBinderHandler;
@@ -99,7 +100,8 @@ public class OvsdbConnectionService implements OvsdbConnection {
                     channel.pipeline().addLast(
                             //new LoggingHandler(LogLevel.INFO),
                             new JsonRpcDecoder(100000),
-                            new StringEncoder(CharsetUtil.UTF_8));
+                            new StringEncoder(CharsetUtil.UTF_8),
+                            new ExceptionHandler());
                 }
             });
 
@@ -186,7 +188,8 @@ public class OvsdbConnectionService implements OvsdbConnection {
                      logger.debug("New Passive channel created : "+ channel.toString());
                      channel.pipeline().addLast(
                              new JsonRpcDecoder(100000),
-                             new StringEncoder(CharsetUtil.UTF_8));
+                             new StringEncoder(CharsetUtil.UTF_8),
+                             new ExceptionHandler());
 
                      handleNewPassiveConnection(channel);
                  }

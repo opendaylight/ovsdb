@@ -687,7 +687,9 @@
               <includes>
                 <include>**/*LibraryIT*</include>
                 <include>**/*PluginIT*</include>
+              <!-- Disabling NorthboundIT tests till the Jenkins / Tomcat issues is resolved in LF servers
                 <include>**/*NorthboundIT*</include>
+              -->
               </includes>
             </configuration>
           </execution>

@@ -14,6 +14,7 @@ import java.util.Set;
 import org.opendaylight.ovsdb.lib.error.TyperException;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonUtils;
 import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
@@ -97,9 +98,17 @@ public abstract class ColumnType {
      */
     protected abstract ColumnType fromJsonNode(JsonNode json);
 
+    /*
+     * Per RFC 7047, Section 3.2 <type> :
+     * If "min" or "max" is not specified, each defaults to 1.  If "max" is specified as "unlimited", then there is no specified maximum
+     * number of elements, although the implementation will enforce some limit.  After considering defaults, "min" must be exactly 0 or
+     * exactly 1, "max" must be at least 1, and "max" must be greater than or equal to "min".
+     *
+     * If "min" and "max" are both 1 and "value" is not specified, the
+     * type is the scalar type specified by "key".
+     */
     public boolean isMultiValued() {
-        //todo check if this is the right logic
-        return this.min != this.max && this.min != 1;
+        return this.min != this.max;
     }
 
     public abstract Object valueFromJson(JsonNode value);
@@ -116,7 +125,7 @@ public abstract class ColumnType {
     }
 
     public static class AtomicColumnType extends ColumnType {
-
+        static final org.slf4j.Logger logger = LoggerFactory.getLogger(AtomicColumnType.class);
         public AtomicColumnType() {
         }
 
@@ -141,10 +150,10 @@ public abstract class ColumnType {
                 }
 
                 if ((node = json.get("max")) != null) {
-                    if (node.isLong()){
+                    if (node.isNumber()){
                         atomicColumnType.setMax(node.asLong());
-                    } else if (node.isTextual() && "unlimited".equals(node.asText())) {
-                        max = Long.MAX_VALUE;
+                    } else if ("unlimited".equals(node.asText())) {
+                        atomicColumnType.setMax(Long.MAX_VALUE);
                     }
                 }
                 return atomicColumnType;
@@ -157,19 +166,19 @@ public abstract class ColumnType {
         public Object valueFromJson(JsonNode value) {
             if (isMultiValued()) {
                 Set<Object> result = Sets.newHashSet();
-               if(value.isArray()) {
-                     if (value.size() == 2) {
-                         if (value.get(0).isTextual() && "set".equals(value.get(0).asText())) {
-                              for(JsonNode node: value.get(1)) {
-                                 result.add(getBaseType().toValue(node));
-                              }
-                         } else {
-                             result.add(getBaseType().toValue(value));
-                         }
-                     }
-               } else {
-                   result.add(getBaseType().toValue(value));
-               }
+                if(value.isArray()) {
+                    if (value.size() == 2) {
+                        if (value.get(0).isTextual() && "set".equals(value.get(0).asText())) {
+                            for(JsonNode node: value.get(1)) {
+                                result.add(getBaseType().toValue(node));
+                            }
+                        } else {
+                            result.add(getBaseType().toValue(value));
+                        }
+                    }
+                } else {
+                    result.add(getBaseType().toValue(value));
+                }
                 return result;
             } else {
                 return getBaseType().toValue(value);
@@ -216,7 +225,7 @@ public abstract class ColumnType {
                 if (node.isLong()){
                     keyValueColumnType.setMax(node.asLong());
                 } else if (node.isTextual() && "unlimited".equals(node.asText())) {
-                    max = Long.MAX_VALUE;
+                    keyValueColumnType.setMax(Long.MAX_VALUE);
                 }
             }
 

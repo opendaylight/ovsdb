@@ -211,14 +211,20 @@ public class OvsdbConnectionService implements OvsdbConnection {
         startOvsdbManager();
     }
 
-    private static void handleNewPassiveConnection(Channel channel) {
-        OvsdbClient client = getChannelClient(channel, ConnectionType.PASSIVE, Executors.newFixedThreadPool(NUM_THREADS));
-        for (OvsdbConnectionListener listener : connectionListeners) {
-            listener.connected(client);
-        }
+    private static ExecutorService executorService = Executors.newFixedThreadPool(10);
+    private static void handleNewPassiveConnection(final Channel channel) {
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                OvsdbClient client = getChannelClient(channel, ConnectionType.PASSIVE, Executors.newFixedThreadPool(NUM_THREADS));
+                for (OvsdbConnectionListener listener : connectionListeners) {
+                    listener.connected(client);
+                }
+            }
+        });
     }
 
-    public static void channelClosed(OvsdbClient client) {
+    public static void channelClosed(final OvsdbClient client) {
         logger.info("Connection closed {}", client.getConnectionInfo().toString());
         connections.remove(client);
         for (OvsdbConnectionListener listener : connectionListeners) {

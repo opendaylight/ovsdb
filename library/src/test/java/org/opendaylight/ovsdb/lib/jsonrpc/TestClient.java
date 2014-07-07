@@ -21,7 +21,7 @@ import java.net.Socket;
 public class TestClient extends TestCase {
 
         String serverurl = "127.0.0.1";
-        int serverport = 8080;
+        int serverport = 12345;
 
         NettyBootStrapper bootstrapper = new NettyBootStrapper();
         JsonRpcDecoder jsonRpcDecoder = new JsonRpcDecoder(100000);

@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_f1a9b990",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/Activator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-08T09:51:36Z",
+      "side": 1,
+      "message": "These are used by AD-SAL services to match the appropriate context.\nIn this case, the scope is a \"Global\" scope and not per-container.\n\nBTW, this was the root-cause of the issue that I was facing with Passive connections that are not consistently reflected in printCache.",
+      "parentUuid": "fa82b9bf_f1f1b901",
+      "revId": "0577979d7734a8897d35b9ac4d95cbcb3e198425",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_310881d9",
         "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/ConnectionService.java",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_11af7d95",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/ConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-08T09:51:36Z",
+      "side": 1,
+      "message": "My mistake. I was experimenting with these changes, but forgot to move it back to its place :-)",
+      "parentUuid": "fa82b9bf_310881d9",
+      "revId": "0577979d7734a8897d35b9ac4d95cbcb3e198425",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_31ec012a",
         "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/InventoryService.java",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2014-07-08T09:13:37Z",
       "side": 1,
       "message": "This is already handled by the framework for you. As such, callbacks for setting/unsetting aren\u0027t required. \n\nprivate volatile IPluginOutConnectionService",
+      "revId": "0577979d7734a8897d35b9ac4d95cbcb3e198425",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b197b147",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/InventoryService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-08T09:51:36Z",
+      "side": 1,
+      "message": "My mistake. I was experimenting with these changes, but forgot to remove this entirely :-)\nThere is no need for a service reference to connectionservice at this point (till we support clustering at the ovsdb plugin layer).",
+      "parentUuid": "fa82b9bf_31ec012a",
       "revId": "0577979d7734a8897d35b9ac4d95cbcb3e198425",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

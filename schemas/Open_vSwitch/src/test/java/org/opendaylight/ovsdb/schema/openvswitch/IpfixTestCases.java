@@ -67,11 +67,11 @@ public class IpfixTestCases extends OpenVswitchSchemaTestBase {
         Assume.assumeTrue(schemaVersion.compareTo(ipfixFromVersion) >= 0);
         String ipfixUuidStr = "testIpfix";
         String ipfixTarget = "172.16.20.1:4739";
-        Integer obsDomainId = 112;
-        Integer obsPointId = 358;
-        Integer cacheMax = 132;
-        Integer cacheTimeout = 134;
-        Integer sampling = 558;
+        Long obsDomainId = 112L;
+        Long obsPointId = 358L;
+        Long cacheMax = 132L;
+        Long cacheTimeout = 134L;
+        Long sampling = 558L;
 
         IPFIX ipfix = ovs.createTypedRowWrapper(IPFIX.class);
         ipfix.setTargets(ImmutableSet.of(ipfixTarget));

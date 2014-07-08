@@ -51,8 +51,8 @@ public class ManagerTestCases extends OpenVswitchSchemaTestBase {
         OpenVSwitch openVSwitch = ovs.getTypedRowWrapper(OpenVSwitch.class, null);
 
         Manager manager = ovs.createTypedRowWrapper(Manager.class);
-        manager.setInactivityProbe(Sets.newHashSet(8192));
-        manager.setMaxBackoff(Sets.newHashSet(4094));
+        manager.setInactivityProbe(Sets.newHashSet(8192L));
+        manager.setMaxBackoff(Sets.newHashSet(4094L));
         manager.setTarget(Sets.newHashSet("172.16.50.50:6640"));
         manager.setExternalIds(externalIds);
 

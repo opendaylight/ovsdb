@@ -43,17 +43,17 @@ public interface PhysicalPort extends TypedBaseTable<GenericTableSchema> {
 
 
     @TypedColumn(name="vlan_bindings", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Map<Integer, UUID>> getVlanBindingsColumn();
+    public Column<GenericTableSchema, Map<Long, UUID>> getVlanBindingsColumn();
 
     @TypedColumn(name="vlan_bindings", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setVlanBindings(Map<Integer, UUID> vlanBindings);
+    public void setVlanBindings(Map<Long, UUID> vlanBindings);
 
 
     @TypedColumn(name="vlan_stats", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Map<Integer, UUID>> getVlanStatsColumn();
+    public Column<GenericTableSchema, Map<Long, UUID>> getVlanStatsColumn();
 
     @TypedColumn(name="vlan_stats", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setVlanStats(Map<Integer, UUID> vlanStats);
+    public void setVlanStats(Map<Long, UUID> vlanStats);
 
 
     @TypedColumn(name="port_fault_status", method=MethodType.GETCOLUMN, fromVersion="1.1.0")

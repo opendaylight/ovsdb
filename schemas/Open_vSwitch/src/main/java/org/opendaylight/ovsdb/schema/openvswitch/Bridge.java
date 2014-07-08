@@ -120,15 +120,15 @@ public interface Bridge extends TypedBaseTable<GenericTableSchema> {
     public void setExternalIds(Map<String, String> externalIds);
 
     @TypedColumn(name="flood_vlans", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Integer>> getFloodVlansColumn();
+    public Column<GenericTableSchema, Set<Long>> getFloodVlansColumn();
 
     @TypedColumn(name="flood_vlans", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setFloodVlans(Set<Integer> vlans);
+    public void setFloodVlans(Set<Long> vlans);
 
     @TypedColumn(name="flow_tables", method=MethodType.GETCOLUMN, fromVersion="6.5.0")
-    public Column<GenericTableSchema, Map<Integer, UUID>> getFlowTablesColumn();
+    public Column<GenericTableSchema, Map<Long, UUID>> getFlowTablesColumn();
 
     @TypedColumn(name="flow_tables", method=MethodType.SETDATA, fromVersion="6.5.0")
-    public void setFlowTables(Map<Integer, UUID> flowTables);
+    public void setFlowTables(Map<Long, UUID> flowTables);
 
 }

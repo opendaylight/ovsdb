@@ -58,14 +58,14 @@ public interface OpenVSwitch extends TypedBaseTable<GenericTableSchema> {
     public void setExternalIds(Map<String, String> externalIds);
 
     @TypedColumn(name="next_cfg", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Integer> getNextConfigColumn();
+    public Column<GenericTableSchema, Long> getNextConfigColumn();
     @TypedColumn(name="next_cfg", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setNextConfig(Integer nextConfig);
+    public void setNextConfig(Long nextConfig);
 
     @TypedColumn(name="cur_cfg", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Integer> getCurrentConfigColumn();
+    public Column<GenericTableSchema, Long> getCurrentConfigColumn();
     @TypedColumn(name="cur_cfg", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setCurrentConfig(Integer currentConfig);
+    public void setCurrentConfig(Long currentConfig);
 
     @TypedColumn(name="capabilities", method=MethodType.GETCOLUMN, fromVersion="1.0.0", untilVersion="6.7.0")
     public Column<GenericTableSchema, Map<String, UUID>> getCapabilitiesColumn();
@@ -73,9 +73,9 @@ public interface OpenVSwitch extends TypedBaseTable<GenericTableSchema> {
     public void setCapabilities(Map<String, UUID> capabilities);
 
     @TypedColumn(name="statistics", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Map<String, Integer>> getStatisticsColumn();
+    public Column<GenericTableSchema, Map<String, Long>> getStatisticsColumn();
     @TypedColumn(name="statistics", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setStatistics(Map<String, Integer> statistics);
+    public void setStatistics(Map<String, Long> statistics);
 
     @TypedColumn(name="ovs_version", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Set<String>> getOvsVersionColumn();

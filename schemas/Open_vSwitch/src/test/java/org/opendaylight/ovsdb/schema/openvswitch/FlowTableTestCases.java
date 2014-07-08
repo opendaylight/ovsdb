@@ -73,9 +73,10 @@ public class FlowTableTestCases extends OpenVswitchSchemaTestBase {
         String overflowPolicy = "evict";
         String groups = "group name";
         String prefixes = "wildcarding prefixes";
-        Integer flowLimit = 50000;
-        Map<Integer, UUID> flowTableBrRef = new HashMap<>();
-        flowTableBrRef.put(1, new UUID(flowTableUuidStr));
+        Long flowLimit = 50000L;
+        //Map<Integer, UUID> flowTableBrRef = new HashMap<>();
+        Map<Long, UUID> flowTableBrRef = new HashMap<>();
+        flowTableBrRef.put(1L, new UUID(flowTableUuidStr));
         FlowTable flowTable = ovs.createTypedRowWrapper(FlowTable.class);
         flowTable.setName(ImmutableSet.of(tableName));
         flowTable.setOverflowPolicy(ImmutableSet.of(overflowPolicy));
@@ -88,6 +89,8 @@ public class FlowTableTestCases extends OpenVswitchSchemaTestBase {
         }
         flowTable.setFlowLimit(ImmutableSet.of(flowLimit));
         Bridge bridge = ovs.getTypedRowWrapper(Bridge.class, null);
+        //.add(op.mutate(ovsTable)
+        //        .addMutation(bridges, Mutator.INSERT, Sets.newHashSet(new UUID(namedUuid))));
         TransactionBuilder transactionBuilder = ovs.transactBuilder()
                 .add(op.insert(flowTable)
                         .withId(flowTableUuidStr))

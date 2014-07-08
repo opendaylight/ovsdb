@@ -354,7 +354,7 @@ public class OF10Provider implements NetworkProvider {
                 for (Row row : intfs.values()) {
                     Interface patchIntf = ovsdbTable.getTypedRow(node, Interface.class, row);
                     if (patchIntf.getName().equalsIgnoreCase(patchInt)) {
-                        Set<Integer> of_ports = patchIntf.getOpenFlowPortColumn().getData();
+                        Set<Long> of_ports = patchIntf.getOpenFlowPortColumn().getData();
                         if (of_ports == null || of_ports.size() <= 0) {
                             logger.error("Could NOT Identified Patch port {} on {}", patchInt, node);
                             continue;
@@ -370,7 +370,7 @@ public class OF10Provider implements NetworkProvider {
                 for (Row row : intfs.values()) {
                     Interface tunIntf = (Interface)row;
                     if (tunIntf.getName().equals(this.getTunnelName(tunnelType, segmentationId, dst))) {
-                        Set<Integer> of_ports = tunIntf.getOpenFlowPortColumn().getData();
+                        Set<Long> of_ports = tunIntf.getOpenFlowPortColumn().getData();
                         if (of_ports == null || of_ports.size() <= 0) {
                             logger.warn("Could not Identify Tunnel port {} on {}. Don't panic. It might get converged soon...", tunIntf.getName(), node);
                             continue;
@@ -430,7 +430,7 @@ public class OF10Provider implements NetworkProvider {
                 for (Row row : intfs.values()) {
                     Interface patchIntf = ovsdbTable.getTypedRow(node, Interface.class, row);
                     if (patchIntf.getName().equalsIgnoreCase(patchInt)) {
-                        Set<Integer> of_ports = patchIntf.getOpenFlowPortColumn().getData();
+                        Set<Long> of_ports = patchIntf.getOpenFlowPortColumn().getData();
                         if (of_ports == null || of_ports.size() <= 0) {
                             logger.error("Could NOT Identified Patch port {} on {}", patchInt, node);
                             continue;
@@ -446,7 +446,7 @@ public class OF10Provider implements NetworkProvider {
                 for (Row row : intfs.values()) {
                     Interface tunIntf = ovsdbTable.getTypedRow(node, Interface.class, row);
                     if (tunIntf.getName().equals(this.getTunnelName(tunnelType, segmentationId, dst))) {
-                        Set<Integer> of_ports = tunIntf.getOpenFlowPortColumn().getData();
+                        Set<Long> of_ports = tunIntf.getOpenFlowPortColumn().getData();
                         if (of_ports == null || of_ports.size() <= 0) {
                             logger.error("Could NOT Identify Tunnel port {} on {}", tunIntf.getName(), node);
                             continue;
@@ -589,7 +589,7 @@ public class OF10Provider implements NetworkProvider {
                 for (Row row : intfs.values()) {
                     Interface intf = ovsdbTable.getTypedRow(node, Interface.class, row);
                     if (intf.getName().equalsIgnoreCase(portName)) {
-                        Set<Integer> of_ports = intf.getOpenFlowPortColumn().getData();
+                        Set<Long> of_ports = intf.getOpenFlowPortColumn().getData();
                         if (of_ports == null || of_ports.size() <= 0) {
                             logger.error("Could not identify patch port {} on {}", portName, node);
                             continue;

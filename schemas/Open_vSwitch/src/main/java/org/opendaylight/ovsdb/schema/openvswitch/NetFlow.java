@@ -9,7 +9,6 @@
  */
 package org.opendaylight.ovsdb.schema.openvswitch;
 
-import java.math.BigInteger;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,16 +32,16 @@ public interface NetFlow extends TypedBaseTable<GenericTableSchema> {
     public void setTargets(Set<String> targets);
 
     @TypedColumn(name="active_timeout", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Integer>> getActiveTimeoutColumn();
+    public Column<GenericTableSchema, Set<Long>> getActiveTimeoutColumn();
 
     @TypedColumn(name="active_timeout", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setActiveTimeout(Integer activeTimeout);
+    public void setActiveTimeout(Long activeTimeout);
 
     @TypedColumn(name="engine_type", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<BigInteger>> getEngineTypeColumn();
+    public Column<GenericTableSchema, Set<Long>> getEngineTypeColumn();
 
     @TypedColumn(name="engine_type", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setEngineType(Set<BigInteger> engineType);
+    public void setEngineType(Set<Long> engineType);
 
     @TypedColumn(name="external_ids", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn();
@@ -51,10 +50,10 @@ public interface NetFlow extends TypedBaseTable<GenericTableSchema> {
     public void setExternalIds(Map<String, String> externalIds);
 
     @TypedColumn(name="active_timeout", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Integer>> getActivityTimeoutColumn();
+    public Column<GenericTableSchema, Set<Long>> getActivityTimeoutColumn();
 
     @TypedColumn(name="active_timeout", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setActivityTimeout(Set<Integer> activityTimeout);
+    public void setActivityTimeout(Set<Long> activityTimeout);
 
     @TypedColumn(name="add_id_to_interface", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Set<Boolean>> getAddIdToInterfaceColumn();
@@ -63,9 +62,9 @@ public interface NetFlow extends TypedBaseTable<GenericTableSchema> {
     public void setAddIdToInterface(Boolean addIdToInterface);
 
     @TypedColumn(name="engine_id", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<BigInteger>> getEngineIdColumn();
+    public Column<GenericTableSchema, Set<Long>> getEngineIdColumn();
 
     @TypedColumn(name="engine_id", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setEngineId(Set<BigInteger> engineId);
+    public void setEngineId(Set<Long> engineId);
 
 }

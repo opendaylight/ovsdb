@@ -61,7 +61,7 @@ public class FlowSampleCollectorSetTestCases extends OpenVswitchSchemaTestBase {
         // Don't run this test if the table is not supported
         Assume.assumeTrue(schemaVersion.compareTo(flowSampleCollectorSetFromVersion) >= 0);
         FlowSampleCollectorSet flowSampleCollectorSet = ovs.createTypedRowWrapper(FlowSampleCollectorSet.class);
-        flowSampleCollectorSet.setId(1);
+        flowSampleCollectorSet.setId(Long.valueOf(1));
         flowSampleCollectorSet.setExternalIds(ImmutableMap.of("<3", "ovs"));
         flowSampleCollectorSet.setBridge(OpenVswitchSchemaSuiteIT.getTestBridgeUuid());
         Bridge bridge = ovs.getTypedRowWrapper(Bridge.class, null);

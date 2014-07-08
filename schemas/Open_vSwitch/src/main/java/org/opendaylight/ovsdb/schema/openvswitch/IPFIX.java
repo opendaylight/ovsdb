@@ -32,29 +32,29 @@ public interface IPFIX extends TypedBaseTable<GenericTableSchema> {
     public void setTargets(Set<String> targets);
 
     @TypedColumn(name="sampling", method=MethodType.GETCOLUMN, fromVersion="7.1.0")
-    public Column<GenericTableSchema, Set<Integer>> getSamplingColumn();
+    public Column<GenericTableSchema, Set<Long>> getSamplingColumn();
     @TypedColumn(name="sampling", method=MethodType.SETDATA, fromVersion="7.1.0")
-    public void setSampling(Set<Integer> sampling);
+    public void setSampling(Set<Long> sampling);
 
     @TypedColumn(name="obs_domain_id", method=MethodType.GETCOLUMN, fromVersion="7.1.0")
-    public Column<GenericTableSchema, Set<Integer>> getObsDomainIdColumn();
+    public Column<GenericTableSchema, Set<Long>> getObsDomainIdColumn();
     @TypedColumn(name="obs_domain_id", method=MethodType.SETDATA, fromVersion="7.1.0")
-    public void setObsDomainId(Set<Integer> obs_domain_id);
+    public void setObsDomainId(Set<Long> obs_domain_id);
 
     @TypedColumn(name="obs_point_id", method=MethodType.GETCOLUMN, fromVersion="7.1.0")
-    public Column<GenericTableSchema, Set<Integer>> getObsPointIdColumn();
+    public Column<GenericTableSchema, Set<Long>> getObsPointIdColumn();
     @TypedColumn(name="obs_point_id", method=MethodType.SETDATA, fromVersion="7.1.0")
-    public void setObsPointId(Set<Integer> obsPointId);
+    public void setObsPointId(Set<Long> obsPointId);
 
     @TypedColumn(name="cache_active_timeout", method=MethodType.GETCOLUMN, fromVersion="7.3.0")
-    public Column<GenericTableSchema, Set<Integer>> getCacheActiveTimeoutColumn();
+    public Column<GenericTableSchema, Set<Long>> getCacheActiveTimeoutColumn();
     @TypedColumn(name="cache_active_timeout", method=MethodType.SETDATA, fromVersion="7.3.0")
-    public void setCacheActiveTimeout(Set<Integer> cacheActiveTimeout);
+    public void setCacheActiveTimeout(Set<Long> cacheActiveTimeout);
 
     @TypedColumn(name="cache_max_flows", method=MethodType.GETCOLUMN, fromVersion="7.3.0")
-    public Column<GenericTableSchema, Set<Integer>> getCacheMaxFlowsColumn();
+    public Column<GenericTableSchema, Set<Long>> getCacheMaxFlowsColumn();
     @TypedColumn(name="cache_max_flows", method=MethodType.SETDATA, fromVersion="7.3.0")
-    public void setCacheMaxFlows(Set<Integer> cacheMaxFlows);
+    public void setCacheMaxFlows(Set<Long> cacheMaxFlows);
 
     @TypedColumn(name="external_ids", method=MethodType.GETCOLUMN, fromVersion="7.1.0")
     public Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn();

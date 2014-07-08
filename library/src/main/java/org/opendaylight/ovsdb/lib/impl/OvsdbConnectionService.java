@@ -28,6 +28,7 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.CharsetUtil;
 
 import java.net.InetAddress;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -233,5 +234,9 @@ public class OvsdbConnectionService implements OvsdbConnection {
         for (OvsdbConnectionListener listener : connectionListeners) {
             listener.disconnected(client);
         }
+    }
+    @Override
+    public Collection<OvsdbClient> getConnections() {
+        return connections.keySet();
     }
 }

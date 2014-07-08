@@ -11,8 +11,6 @@ package org.opendaylight.ovsdb.plugin;
 
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.utils.Status;
-import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,8 +70,8 @@ public class Connection {
         this.node = node;
     }
 
-    public Status disconnect() {
-        return new Status(StatusCode.SUCCESS);
+    public void disconnect() {
+        client.disconnect();
     }
 
     @Override

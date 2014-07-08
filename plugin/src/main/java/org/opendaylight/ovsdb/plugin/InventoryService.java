@@ -51,8 +51,8 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
             .getLogger(InventoryService.class);
     private final Set<IPluginOutInventoryService> pluginOutInventoryServices =
             new CopyOnWriteArraySet<IPluginOutInventoryService>();
-    private ConcurrentMap<Node, Map<String, Property>> nodeProps;
-    private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps;
+    private ConcurrentMap<Node, Map<String, Property>> nodeProps = new ConcurrentHashMap<Node, Map<String, Property>>();
+    private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps = new ConcurrentHashMap<NodeConnector, Map<String, Property>>();
     private ConcurrentMap<Node, NodeDB> dbCache = Maps.newConcurrentMap();
     private ScheduledExecutorService executor;
     private OVSDBConfigService configurationService;
@@ -63,8 +63,6 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
      *
      */
     public void init() {
-        nodeProps = new ConcurrentHashMap<Node, Map<String, Property>>();
-        nodeConnectorProps = new ConcurrentHashMap<NodeConnector, Map<String, Property>>();
         Node.NodeIDType.registerIDType("OVS", String.class);
         NodeConnector.NodeConnectorIDType.registerIDType("OVS", String.class, "OVS");
         this.executor = Executors.newSingleThreadScheduledExecutor();
@@ -113,17 +111,11 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
         configurationService = null;
     }
 
-    /**
-     * Retrieve nodes from openflow
-     */
     @Override
     public ConcurrentMap<Node, Map<String, Property>> getNodeProps() {
         return nodeProps;
     }
 
-    /**
-     * Retrieve nodeConnectors from openflow
-     */
     @Override
     public ConcurrentMap<NodeConnector, Map<String, Property>> getNodeConnectorProps(
             Boolean refresh) {

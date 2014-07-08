@@ -28,7 +28,6 @@ import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
-import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.neutron.IAdminConfigManager;
@@ -193,7 +192,7 @@ public class OF13Provider implements NetworkProvider {
             for (UUID portUUID : ports) {
                 Row portRow = ovsdbTable.getRow(node, ovsdbTable.getTableName(node, Port.class), portUUID.toString());
                 Port port = ovsdbTable.getTypedRow(node, Port.class, portRow);
-                if (port != null && port.getName().equalsIgnoreCase(tunnelName)) return true;
+                if (port != null && tunnelName.equalsIgnoreCase(port.getName())) return true;
             }
         }
         return false;
@@ -208,7 +207,7 @@ public class OF13Provider implements NetworkProvider {
             for (UUID portUUID : ports) {
                 Row portRow = ovsdbTable.getRow(node, ovsdbTable.getTableName(node, Port.class), portUUID.toString());
                 Port port = ovsdbTable.getTypedRow(node, Port.class, portRow);
-                if (port != null && port.getName().equalsIgnoreCase(name)) return portUUID.toString();
+                if (port != null && name.equalsIgnoreCase(port.getName())) return portUUID.toString();
             }
         }
         return null;
@@ -262,7 +261,8 @@ public class OF13Provider implements NetworkProvider {
                     continue;
                 }
                 interfaceUUID = interfaces.toArray()[0].toString();
-                Interface intf = (Interface)ovsdbTable.getRow(node, ovsdbTable.getTableName(node, Interface.class), interfaceUUID);
+                Row intfRow = ovsdbTable.getRow(node, ovsdbTable.getTableName(node, Interface.class), interfaceUUID);
+                Interface intf = ovsdbTable.getTypedRow(node, Interface.class, intfRow);
                 if (intf == null) interfaceUUID = null;
             }
 
@@ -818,7 +818,7 @@ public class OF13Provider implements NetworkProvider {
                 logger.error("Could NOT Identify OF value for port {} on {}", intf.getName(), node);
                 return;
             }
-            long localPort = ((Integer)of_ports.toArray()[0]).longValue();
+            long localPort = (Long)of_ports.toArray()[0];
 
             Map<String, String> externalIds = intf.getExternalIdsColumn().getData();
             if (externalIds == null) {
@@ -859,7 +859,7 @@ public class OF13Provider implements NetworkProvider {
                 logger.error("Could NOT Identify OF value for port {} on {}", intf.getName(), node);
                 return;
             }
-            long localPort = ((Integer)of_ports.toArray()[0]).longValue();
+            long localPort = (Long)of_ports.toArray()[0];
 
             Map<String, String> externalIds = intf.getExternalIdsColumn().getData();
             if (externalIds == null) {
@@ -903,7 +903,7 @@ public class OF13Provider implements NetworkProvider {
                 logger.error("Could NOT Identify OF value for port {} on {}", intf.getName(), node);
                 return;
             }
-            long localPort = ((Integer)of_ports.toArray()[0]).longValue();
+            long localPort = (Long)of_ports.toArray()[0];
 
             Map<String, String> externalIds = intf.getExternalIdsColumn().getData();
             if (externalIds == null) {
@@ -927,7 +927,7 @@ public class OF13Provider implements NetworkProvider {
                             logger.error("Could NOT Identify Tunnel port {} on {}", tunIntf.getName(), node);
                             continue;
                         }
-                        long tunnelOFPort = ((Integer)of_ports.toArray()[0]).longValue();
+                        long tunnelOFPort = (Long)of_ports.toArray()[0];
 
                         if (tunnelOFPort == -1) {
                             logger.error("Could NOT Identify Tunnel port {} -> OF ({}) on {}", tunIntf.getName(), tunnelOFPort, node);
@@ -967,7 +967,7 @@ public class OF13Provider implements NetworkProvider {
                 logger.error("Could NOT Identify OF value for port {} on {}", intf.getName(), node);
                 return;
             }
-            long localPort = ((BigInteger)of_ports.toArray()[0]).longValue();
+            long localPort = (Long)of_ports.toArray()[0];
 
             Map<String, String> externalIds = intf.getExternalIdsColumn().getData();
             if (externalIds == null) {
@@ -991,7 +991,7 @@ public class OF13Provider implements NetworkProvider {
                             logger.error("Could NOT Identify Tunnel port {} on {}", tunIntf.getName(), node);
                             continue;
                         }
-                        long tunnelOFPort = ((BigInteger)of_ports.toArray()[0]).longValue();
+                        long tunnelOFPort = (Long)of_ports.toArray()[0];
 
                         if (tunnelOFPort == -1) {
                             logger.error("Could NOT Identify Tunnel port {} -> OF ({}) on {}", tunIntf.getName(), tunnelOFPort, node);
@@ -1075,7 +1075,7 @@ public class OF13Provider implements NetworkProvider {
                             logger.error("Could NOT Identify eth port {} on {}", ethIntf.getName(), node);
                             continue;
                         }
-                        long ethOFPort = ((BigInteger)of_ports.toArray()[0]).longValue();
+                        long ethOFPort = (Long)of_ports.toArray()[0];
 
                         if (ethOFPort == -1) {
                             logger.error("Could NOT Identify eth port {} -> OF ({}) on {}", ethIntf.getName(), ethOFPort, node);
@@ -1136,7 +1136,7 @@ public class OF13Provider implements NetworkProvider {
                             logger.error("Could NOT Identify eth port {} on {}", ethIntf.getName(), node);
                             continue;
                         }
-                        long ethOFPort = ((BigInteger)of_ports.toArray()[0]).longValue();
+                        long ethOFPort = (Long)of_ports.toArray()[0];
 
                         if (ethOFPort == -1) {
                             logger.error("Could NOT Identify eth port {} -> OF ({}) on {}", ethIntf.getName(), ethOFPort, node);
@@ -1159,34 +1159,6 @@ public class OF13Provider implements NetworkProvider {
 
     @Override
     public Status handleInterfaceUpdate(NeutronNetwork network, Node srcNode, Interface intf) {
-        ISwitchManager switchManager = (ISwitchManager) ServiceHelper.getInstance(ISwitchManager.class, "default", this);
-        if (switchManager == null) {
-            logger.error("Unable to identify SwitchManager");
-        } else {
-            Long dpid = this.getIntegrationBridgeOFDPID(srcNode);
-            if (dpid == 0L) {
-                logger.debug("Openflow Datapath-ID not set for the integration bridge in {}", srcNode);
-                return new Status(StatusCode.NOTFOUND);
-            }
-            Set<Node> ofNodes = switchManager.getNodes();
-            boolean ofNodeFound = false;
-            if (ofNodes != null) {
-                for (Node ofNode : ofNodes) {
-                    if (ofNode.toString().contains(dpid+"")) {
-                        logger.debug("Identified the Openflow node via toString {}", ofNode);
-                        ofNodeFound = true;
-                        break;
-                    }
-                }
-            } else {
-                logger.error("Unable to find any Node from SwitchManager");
-            }
-            if (!ofNodeFound) {
-                logger.error("Unable to find OF Node for {} with update {} on node {}", dpid, intf, srcNode);
-                return new Status(StatusCode.NOTFOUND);
-            }
-        }
-
         IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
         List<Node> nodes = connectionService.getNodes();
         nodes.remove(srcNode);

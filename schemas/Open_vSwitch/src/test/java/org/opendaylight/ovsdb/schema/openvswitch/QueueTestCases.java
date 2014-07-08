@@ -48,10 +48,10 @@ public class QueueTestCases extends OpenVswitchSchemaTestBase {
          * since it wouldn't add any conceivable value.
          */
         String queueUuidStr = "queueUuidStr";
-        Integer dscpVal = 4;
+        Long dscpVal = Long.valueOf(4);
         Queue queue = ovs.createTypedRowWrapper(Queue.class);
         // Example of explicit ImmutableSet/Map Attribute declaration
-        ImmutableSet<Integer> dscp = ImmutableSet.of(dscpVal);
+        ImmutableSet<Long> dscp = ImmutableSet.of(dscpVal);
         ImmutableMap<String, String> externalIds = ImmutableMap.of("little", "coat");
         // Example of condensing the attributes bindings in one line
         queue.setOtherConfig(ImmutableMap.of("war", "onfun"));
@@ -61,7 +61,7 @@ public class QueueTestCases extends OpenVswitchSchemaTestBase {
         // Get the parent Qos table row UUID to insert the queue.
         Qos qos = ovs.getTypedRowWrapper(Qos.class, null);
         // Queue key that is mapped to the queue record/value/ofp_action_enqueue
-        Integer queueKey = Integer.valueOf(0);
+        Long queueKey = 0L;
         // The transaction index for the Queue insert is used to store the Queue UUID
         int insertQueueOperationIndex = 0;
         // Reference the Port row to insert the Queue with UID or Port name

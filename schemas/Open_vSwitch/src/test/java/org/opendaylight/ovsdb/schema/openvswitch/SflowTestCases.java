@@ -46,11 +46,11 @@ public class SflowTestCases extends OpenVswitchSchemaTestBase {
     public void testCreateTypedSflow() throws InterruptedException, ExecutionException, IllegalArgumentException{
         String sFlowUuidStr = "testSFlow";
         String sFlowTarget = "172.16.20.200:6343";
-        Integer header = 128;
-        Integer obsPointId = 358;
-        Integer polling = 10;
+        Long header = 128L;
+        Long obsPointId = 358L;
+        Long polling =10L;
         String agent = "172.16.20.210";
-        Integer sampling = 64;
+        Long sampling = 64L;
         SFlow sFlow = ovs.createTypedRowWrapper(SFlow.class);
         sFlow.setTargets(ImmutableSet.of(sFlowTarget));
         sFlow.setHeader(ImmutableSet.of(header));

@@ -40,17 +40,17 @@ public interface SFlow extends TypedBaseTable<GenericTableSchema> {
     public void setExternalIds(Map<String, String> externalIds) ;
 
     @TypedColumn(name="header", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Integer>> getHeaderColumn() ;
+    public Column<GenericTableSchema, Set<Long>> getHeaderColumn() ;
     @TypedColumn(name="header", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setHeader(Set<Integer> header) ;
+    public void setHeader(Set<Long> header) ;
 
     @TypedColumn(name="polling", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Integer>> getPollingColumn() ;
+    public Column<GenericTableSchema, Set<Long>> getPollingColumn() ;
     @TypedColumn(name="polling", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setPolling(Set<Integer> polling) ;
+    public void setPolling(Set<Long> polling) ;
 
     @TypedColumn(name="sampling", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Integer>> getSamplingColumn() ;
+    public Column<GenericTableSchema, Set<Long>> getSamplingColumn() ;
     @TypedColumn(name="sampling", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setSampling(Set<Integer> sampling) ;
+    public void setSampling(Set<Long> sampling) ;
 }

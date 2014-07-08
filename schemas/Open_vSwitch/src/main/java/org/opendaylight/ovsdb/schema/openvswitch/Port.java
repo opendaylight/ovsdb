@@ -9,7 +9,6 @@
  */
 package org.opendaylight.ovsdb.schema.openvswitch;
 
-import java.math.BigInteger;
 import java.util.Map;
 import java.util.Set;
 
@@ -40,14 +39,14 @@ public interface Port extends TypedBaseTable<GenericTableSchema> {
     public void setInterfaces(Set<UUID> interfaces);
 
     @TypedColumn(name="trunks", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<BigInteger>> getTrunksColumn();
+    public Column<GenericTableSchema, Set<Long>> getTrunksColumn();
     @TypedColumn(name="trunks", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setTrunks(Set<BigInteger> trunks);
+    public void setTrunks(Set<Long> trunks);
 
     @TypedColumn(name="tag", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<BigInteger>> getTagColumn();
+    public Column<GenericTableSchema, Set<Long>> getTagColumn();
     @TypedColumn(name="tag", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setTag(Set<BigInteger> tag);
+    public void setTag(Set<Long> tag);
 
     @TypedColumn(name="vlan_mode", method=MethodType.GETCOLUMN, fromVersion="6.1.0")
     public Column<GenericTableSchema, Set<String>> getVlanModeColumn();
@@ -80,14 +79,14 @@ public interface Port extends TypedBaseTable<GenericTableSchema> {
     public void setLacp(Set<String> lacp);
 
     @TypedColumn(name="bond_updelay", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<BigInteger>> getBondUpDelayColumn();
+    public Column<GenericTableSchema, Set<Long>> getBondUpDelayColumn();
     @TypedColumn(name="bond_updelay", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setBondUpDelay(Set<BigInteger> bondUpDelay);
+    public void setBondUpDelay(Set<Long> bondUpDelay);
 
     @TypedColumn(name="bond_downdelay", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<BigInteger>> getBondDownDelayColumn();
+    public Column<GenericTableSchema, Set<Long>> getBondDownDelayColumn();
     @TypedColumn(name="bond_downdelay", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setBondDownDelay(Set<BigInteger> bondDownDelay);
+    public void setBondDownDelay(Set<Long> bondDownDelay);
 
     @TypedColumn(name="bond_fake_iface", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Set<Boolean>> getBondFakeInterfaceColumn();
@@ -105,9 +104,9 @@ public interface Port extends TypedBaseTable<GenericTableSchema> {
     public void setStatus(Map<String, String> status);
 
     @TypedColumn(name="statistics", method=MethodType.GETCOLUMN, fromVersion="6.3.0")
-    public Column<GenericTableSchema, Map<String, BigInteger>> getStatisticsColumn();
+    public Column<GenericTableSchema, Map<String, Long>> getStatisticsColumn();
     @TypedColumn(name="statistics", method=MethodType.SETDATA)
-    public void setStatistics(Map<String, BigInteger> statistics);
+    public void setStatistics(Map<String, Long> statistics);
 
     @TypedColumn(name="other_config", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Map<String, String>> getOtherConfigColumn();

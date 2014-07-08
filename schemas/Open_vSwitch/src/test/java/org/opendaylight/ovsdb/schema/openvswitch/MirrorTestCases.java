@@ -46,8 +46,8 @@ public class MirrorTestCases extends OpenVswitchSchemaTestBase {
 
         String mirrorUuidStr = "testMirror";
         String mirrorName = "my_name_is_mirror";
-        Integer outputVid = 1024;
-        Integer selectVid = 2048;
+        Long outputVid = 1024L;
+        Long selectVid = Long.valueOf(2048);
 
         Mirror mirror = ovs.createTypedRowWrapper(Mirror.class);
         mirror.setName(ImmutableSet.of(mirrorName));

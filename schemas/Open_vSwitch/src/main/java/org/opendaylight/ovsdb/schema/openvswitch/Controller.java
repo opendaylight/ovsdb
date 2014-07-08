@@ -33,16 +33,16 @@ public interface Controller extends TypedBaseTable<GenericTableSchema> {
     public void setTarget(Set <String> target);
 
     @TypedColumn (name = "controller_burst_limit", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
-    public Column<GenericTableSchema, Integer> getBurstLimitColumn();
+    public Column<GenericTableSchema, Long> getBurstLimitColumn();
 
     @TypedColumn (name = "controller_burst_limit", method = MethodType.SETDATA, fromVersion = "1.0.0")
-    public void setBurstLimit(Integer burstLimit);
+    public void setBurstLimit(Long burstLimit);
 
     @TypedColumn (name = "controller_rate_limit", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
-    public Column<GenericTableSchema, Integer> getRateLimitColumn();
+    public Column<GenericTableSchema, Long> getRateLimitColumn();
 
     @TypedColumn (name = "controller_rate_limit", method = MethodType.SETDATA, fromVersion = "1.0.0")
-    public void setRateLimit(Integer rateLimit);
+    public void setRateLimit(Long rateLimit);
 
     @TypedColumn (name = "connection_mode", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
     public Column<GenericTableSchema, Set<String>> getConnectionModeColumn();
@@ -87,10 +87,10 @@ public interface Controller extends TypedBaseTable<GenericTableSchema> {
     public void setRole(Set<String> role);
 
     @TypedColumn (name = "inactivity_probe", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
-    public Column<GenericTableSchema, Set<Integer>> getInactivityProbeColumn();
+    public Column<GenericTableSchema, Set<Long>> getInactivityProbeColumn();
 
     @TypedColumn (name = "inactivity_probe", method = MethodType.SETDATA, fromVersion = "1.0.0")
-    public void setInactivityProbe(Set<Integer> inactivityProbe);
+    public void setInactivityProbe(Set<Long> inactivityProbe);
 
     @TypedColumn (name = "is_connected", method = MethodType.GETCOLUMN, fromVersion = "1.1.0")
     public Column<GenericTableSchema, Boolean> getIsConnectedColumn();
@@ -105,10 +105,10 @@ public interface Controller extends TypedBaseTable<GenericTableSchema> {
     public void setOtherConfig(Map<String, String> otherConfig);
 
     @TypedColumn (name = "max_backoff", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
-    public Column<GenericTableSchema, Integer> getMaxBackoffColumn();
+    public Column<GenericTableSchema, Long> getMaxBackoffColumn();
 
     @TypedColumn (name = "max_backoff", method = MethodType.SETDATA, fromVersion = "1.0.0")
-    public void setMaxBackoff(Integer maxBackoff);
+    public void setMaxBackoff(Long maxBackoff);
 
     @TypedColumn (name = "local_ip", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
     public Column<GenericTableSchema, Set<String>> getLocalIpColumn();

@@ -41,8 +41,8 @@ public interface LogicalSwitch extends TypedBaseTable<GenericTableSchema> {
 
 
     @TypedColumn(name="tunnel_key", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Integer>> getTunnelKeyColumn();
+    public Column<GenericTableSchema, Set<Long>> getTunnelKeyColumn();
 
     @TypedColumn(name="tunnel_key", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setTunnelKey(Set<Integer> tunnelKey);
+    public void setTunnelKey(Set<Long> tunnelKey);
 }

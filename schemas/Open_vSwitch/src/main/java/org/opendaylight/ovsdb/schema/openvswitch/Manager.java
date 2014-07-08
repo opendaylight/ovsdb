@@ -50,10 +50,10 @@ public interface Manager extends TypedBaseTable<GenericTableSchema> {
     public void setExternalIds(Map<String, String> externalIds);
 
     @TypedColumn (name = "max_backoff", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
-    public Column<GenericTableSchema, Set<Integer>> getMaxBackoffColumn();
+    public Column<GenericTableSchema, Set<Long>> getMaxBackoffColumn();
 
     @TypedColumn (name = "max_backoff", method = MethodType.SETDATA, fromVersion = "1.0.0")
-    public void setMaxBackoff(Set<Integer> maxBackoff);
+    public void setMaxBackoff(Set<Long> maxBackoff);
 
     @TypedColumn (name = "status", method = MethodType.GETCOLUMN, fromVersion = "1.1.0")
     public Column<GenericTableSchema, Map<String, String>> getStatusColumn();
@@ -62,10 +62,10 @@ public interface Manager extends TypedBaseTable<GenericTableSchema> {
     public void setStatus(Map<String, String> status);
 
     @TypedColumn (name = "inactivity_probe", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
-    public Column<GenericTableSchema, Set<Integer>> getInactivityProbeColumn();
+    public Column<GenericTableSchema, Set<Long>> getInactivityProbeColumn();
 
     @TypedColumn (name = "inactivity_probe", method = MethodType.SETDATA, fromVersion = "1.0.0")
-    public void setInactivityProbe(Set<Integer> inactivityProbe);
+    public void setInactivityProbe(Set<Long> inactivityProbe);
 
     @TypedColumn (name = "connection_mode", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
     public Column<GenericTableSchema, Set<String>> getConnectionModeColumn();

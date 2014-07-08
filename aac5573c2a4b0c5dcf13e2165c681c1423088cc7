@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_2e3fbb88",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 918,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-08T23:53:17Z",
+      "side": 1,
+      "message": "Couple of stray comments to clean up..",
+      "revId": "aac5573c2a4b0c5dcf13e2165c681c1423088cc7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

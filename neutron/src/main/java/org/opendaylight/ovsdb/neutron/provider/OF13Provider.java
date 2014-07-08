@@ -813,7 +813,7 @@ public class OF13Provider implements NetworkProvider {
                 return;
             }
 
-            Set<Integer> of_ports = intf.getOpenFlowPortColumn().getData();
+            Set<Long> of_ports = intf.getOpenFlowPortColumn().getData();
             if (of_ports == null || of_ports.size() <= 0) {
                 logger.error("Could NOT Identify OF value for port {} on {}", intf.getName(), node);
                 return;
@@ -854,7 +854,7 @@ public class OF13Provider implements NetworkProvider {
                 return;
             }
 
-            Set<Integer> of_ports = intf.getOpenFlowPortColumn().getData();
+            Set<Long> of_ports = intf.getOpenFlowPortColumn().getData();
             if (of_ports == null || of_ports.size() <= 0) {
                 logger.error("Could NOT Identify OF value for port {} on {}", intf.getName(), node);
                 return;
@@ -898,7 +898,7 @@ public class OF13Provider implements NetworkProvider {
             }
             OVSDBConfigService ovsdbTable = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
 
-            Set<Integer> of_ports = intf.getOpenFlowPortColumn().getData();
+            Set<Long> of_ports = intf.getOpenFlowPortColumn().getData();
             if (of_ports == null || of_ports.size() <= 0) {
                 logger.error("Could NOT Identify OF value for port {} on {}", intf.getName(), node);
                 return;
@@ -962,7 +962,7 @@ public class OF13Provider implements NetworkProvider {
             }
             OVSDBConfigService ovsdbTable = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
 
-            Set<Integer> of_ports = intf.getOpenFlowPortColumn().getData();
+            Set<Long> of_ports = intf.getOpenFlowPortColumn().getData();
             if (of_ports == null || of_ports.size() <= 0) {
                 logger.error("Could NOT Identify OF value for port {} on {}", intf.getName(), node);
                 return;
@@ -1026,7 +1026,7 @@ public class OF13Provider implements NetworkProvider {
             }
             OVSDBConfigService ovsdbTable = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
 
-            Set<Integer> of_ports = intf.getOpenFlowPortColumn().getData();
+            Set<Long> of_ports = intf.getOpenFlowPortColumn().getData();
             int timeout = 6;
             while ((of_ports == null) && (timeout > 0)) {
                 of_ports = intf.getOpenFlowPortColumn().getData();
@@ -1107,7 +1107,7 @@ public class OF13Provider implements NetworkProvider {
             }
             OVSDBConfigService ovsdbTable = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
 
-            Set<Integer> of_ports = intf.getOpenFlowPortColumn().getData();
+            Set<Long> of_ports = intf.getOpenFlowPortColumn().getData();
             if (of_ports == null || of_ports.size() <= 0) {
                 logger.error("Could NOT Identify OF value for port {} on {}", intf.getName(), node);
                 return;

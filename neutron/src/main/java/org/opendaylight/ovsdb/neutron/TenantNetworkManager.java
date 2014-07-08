@@ -9,7 +9,6 @@
  */
 package org.opendaylight.ovsdb.neutron;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -319,8 +318,8 @@ public class TenantNetworkManager implements ITenantNetworkManager {
         }
         OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
         Port port = ovsdbTable.createTypedRow(node, Port.class);
-        OvsDBSet<BigInteger> tags = new OvsDBSet<BigInteger>();
-        tags.add(BigInteger.valueOf(vlan));
+        OvsDBSet<Long> tags = new OvsDBSet<Long>();
+        tags.add(Long.valueOf(vlan));
         port.setTag(tags);
         ovsdbTable.updateRow(node, port.getSchema().getName(), null, portUUID, port.getRow());
         if (enableContainer) this.addPortToTenantNetworkContainer(node, portUUID, network);
@@ -357,16 +356,16 @@ public class TenantNetworkManager implements ITenantNetworkManager {
             for (UUID intfUUID : interfaces) {
                 Interface intf = (Interface)ovsdbTable.getRow(node,ovsdbTable.getTableName(node, Interface.class), intfUUID.toString());
                 if (intf == null) continue;
-                Set<Integer> of_ports = intf.getOpenFlowPortColumn().getData();
+                Set<Long> of_ports = intf.getOpenFlowPortColumn().getData();
                 if (of_ports == null) continue;
-                for (Integer of_port : of_ports) {
+                for (Long of_port : of_ports) {
                     ContainerConfig config = new ContainerConfig();
                     config.setContainer(BaseHandler.convertNeutronIDToKey(network.getID()));
                     logger.debug("Adding Port {} to Container : {}", port.toString(), config.getContainer());
                     List<String> ncList = new ArrayList<String>();
                     Node ofNode = new Node(Node.NodeIDType.OPENFLOW, dpidLong);
                     NodeConnector nc = NodeConnector.fromStringNoNode(Node.NodeIDType.OPENFLOW.toString(),
-                                                                      Long.valueOf(of_port.longValue()).intValue()+"",
+                                                                      of_port.intValue()+"",
                                                                       ofNode);
                     ncList.add(nc.toString());
                     config.addNodeConnectors(ncList);

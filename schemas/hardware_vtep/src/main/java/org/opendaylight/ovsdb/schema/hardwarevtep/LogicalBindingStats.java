@@ -20,26 +20,26 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 public interface LogicalBindingStats extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name="bytes_from_local", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Integer> getBytesFromLocalColumn();
+    public Column<GenericTableSchema, Long> getBytesFromLocalColumn();
 
     @TypedColumn(name="bytes_from_local", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setBytesFromLocal(Integer bytesFromLocal);
+    public void setBytesFromLocal(Long bytesFromLocal);
 
     @TypedColumn(name="packets_from_local", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Integer> getPacketsFromLocalColumn();
+    public Column<GenericTableSchema, Long> getPacketsFromLocalColumn();
 
     @TypedColumn(name="packets_from_local", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setPacketsFromLocal(Integer packetsFromLocal);
+    public void setPacketsFromLocal(Long packetsFromLocal);
 
     @TypedColumn(name="bytes_to_local", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Integer> getBytesToLocalColumn();
+    public Column<GenericTableSchema, Long> getBytesToLocalColumn();
 
     @TypedColumn(name="bytes_to_local", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setBytesToLocal(Integer bytesToLocal);
+    public void setBytesToLocal(Long bytesToLocal);
 
     @TypedColumn(name="packets_to_local", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Integer> getPacketsToLocalColumn();
+    public Column<GenericTableSchema, Long> getPacketsToLocalColumn();
 
     @TypedColumn(name="packets_to_local", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setPacketsToLocal(Integer packetsToLocal);
+    public void setPacketsToLocal(Long packetsToLocal);
 }

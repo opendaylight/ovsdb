@@ -27,10 +27,10 @@ import java.util.Set;
 public interface Queue extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn (name="dscp", method= MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Integer>> getDscpColumn() ;
+    public Column<GenericTableSchema, Set<Long>> getDscpColumn() ;
 
     @TypedColumn (name="dscp", method= MethodType.SETDATA, fromVersion="6.4.0")
-    public void setDscp(Set<Integer> dscp) ;
+    public void setDscp(Set<Long> dscp) ;
 
     @TypedColumn (name="other_config", method= MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Map<String, String>> getOtherConfigColumn() ;

@@ -195,7 +195,7 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
         Bridge bridge = connection.getClient().createTypedRowWrapper(Bridge.class);
         bridge.setName("br_test1");
         bridge.setStatus(ImmutableMap.of("key", "value"));
-        bridge.setFloodVlans(Sets.newHashSet(34));
+        bridge.setFloodVlans(Sets.newHashSet(34L));
         return ovsdbConfigService.insertRow(node, bridge.getSchema().getName(), parentUuid, bridge.getRow());
     }
 

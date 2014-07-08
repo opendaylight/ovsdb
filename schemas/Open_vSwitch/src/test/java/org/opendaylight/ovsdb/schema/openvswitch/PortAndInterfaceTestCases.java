@@ -26,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -49,7 +48,7 @@ public class PortAndInterfaceTestCases extends OpenVswitchSchemaTestBase {
         String intfUuidStr = "testIntf";
         Port port = ovs.createTypedRowWrapper(Port.class);
         port.setName("testPort");
-        port.setTag(ImmutableSet.of(BigInteger.ONE));
+        port.setTag(ImmutableSet.of(1L));
         port.setMac(ImmutableSet.of("00:00:00:00:00:01"));
         port.setInterfaces(ImmutableSet.of(new UUID(intfUuidStr)));
 

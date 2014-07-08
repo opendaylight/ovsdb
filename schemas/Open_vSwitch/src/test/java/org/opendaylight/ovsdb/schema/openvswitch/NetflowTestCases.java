@@ -26,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -46,9 +45,9 @@ public class NetflowTestCases extends OpenVswitchSchemaTestBase {
     public void testCreateTypedNetFlow() throws InterruptedException, ExecutionException, IllegalArgumentException{
         String netFlowUuidStr = "testNetFlow";
         String netFlowTargets = "172.16.20.200:6343";
-        BigInteger engineType = BigInteger.valueOf(128);
-        BigInteger engineID = BigInteger.valueOf(32);
-        Integer activityTimeout = 1;
+        Long engineType = 128L;
+        Long engineID = 32L;
+        Long activityTimeout = 1L;
         NetFlow netFlow = ovs.createTypedRowWrapper(NetFlow.class);
         netFlow.setTargets(ImmutableSet.of(netFlowTargets));
         netFlow.setEngineType(ImmutableSet.of(engineType));

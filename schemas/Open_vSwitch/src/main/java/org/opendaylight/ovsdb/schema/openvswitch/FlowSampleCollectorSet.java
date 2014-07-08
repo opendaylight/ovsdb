@@ -27,10 +27,10 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 public interface FlowSampleCollectorSet extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name="id", method=MethodType.GETCOLUMN, fromVersion="7.1.0")
-    public Column<GenericTableSchema, Integer> getIdColumn();
+    public Column<GenericTableSchema, Long> getIdColumn();
 
     @TypedColumn(name="id", method=MethodType.SETDATA, fromVersion="7.1.0")
-    public void setId(Integer id);
+    public void setId(Long id);
 
     @TypedColumn(name="bridge", method=MethodType.GETCOLUMN, fromVersion="7.1.0")
     public Column<GenericTableSchema, UUID> getBridgeColumn();

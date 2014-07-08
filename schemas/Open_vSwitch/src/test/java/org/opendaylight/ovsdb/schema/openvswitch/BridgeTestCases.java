@@ -51,7 +51,7 @@ public class BridgeTestCases extends OpenVswitchSchemaTestBase {
         Assert.assertNotNull(bridge);
         bridge.setName(TEST_BRIDGE_NAME);
         bridge.setStatus(ImmutableMap.of("key", "value"));
-        bridge.setFloodVlans(Sets.newHashSet(34));
+        bridge.setFloodVlans(Sets.newHashSet(34L));
 
         OpenVSwitch openVSwitch = this.ovs.createTypedRowWrapper(OpenVSwitch.class);
         openVSwitch.setBridges(Sets.newHashSet(new UUID(TEST_BRIDGE_NAME)));

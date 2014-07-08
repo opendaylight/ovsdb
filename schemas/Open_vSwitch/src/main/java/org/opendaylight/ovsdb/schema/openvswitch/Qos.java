@@ -28,10 +28,10 @@ import java.util.Set;
 public interface Qos extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn (name="queues", method= MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Map<Integer, UUID>> getQueuesColumn() ;
+    public Column<GenericTableSchema, Map<Long, UUID>> getQueuesColumn() ;
 
     @TypedColumn (name="queues", method= MethodType.SETDATA, fromVersion="1.0.0")
-    public void setQueues(Map<Integer, UUID> queues) ;
+    public void setQueues(Map<Long, UUID> queues) ;
 
     @TypedColumn (name="type", method= MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Set<String>> getTypeColumn() ;

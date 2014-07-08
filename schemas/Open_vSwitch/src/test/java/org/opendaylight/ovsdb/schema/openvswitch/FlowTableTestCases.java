@@ -73,9 +73,9 @@ public class FlowTableTestCases extends OpenVswitchSchemaTestBase {
         String overflowPolicy = "evict";
         String groups = "group name";
         String prefixes = "wildcarding prefixes";
-        Integer flowLimit = 50000;
-        Map<Integer, UUID> flowTableBrRef = new HashMap<>();
-        flowTableBrRef.put(1, new UUID(flowTableUuidStr));
+        Long flowLimit = 50000L;
+        Map<Long, UUID> flowTableBrRef = new HashMap<>();
+        flowTableBrRef.put(1L, new UUID(flowTableUuidStr));
         FlowTable flowTable = ovs.createTypedRowWrapper(FlowTable.class);
         flowTable.setName(ImmutableSet.of(tableName));
         flowTable.setOverflowPolicy(ImmutableSet.of(overflowPolicy));

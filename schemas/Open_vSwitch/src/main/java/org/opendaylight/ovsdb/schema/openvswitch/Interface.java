@@ -9,7 +9,6 @@
  */
 package org.opendaylight.ovsdb.schema.openvswitch;
 
-import java.math.BigInteger;
 import java.util.Map;
 import java.util.Set;
 
@@ -44,14 +43,14 @@ public interface Interface extends TypedBaseTable<GenericTableSchema> {
     public void setOptions(Map<String, String> options);
 
     @TypedColumn(name="ingress_policing_rate", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Integer>> getIngressPolicingRateColumn();
+    public Column<GenericTableSchema, Set<Long>> getIngressPolicingRateColumn();
     @TypedColumn(name="ingress_policing_rate", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setIngressPolicingRate(Set<Integer> ingressPolicingRate);
+    public void setIngressPolicingRate(Set<Long> ingressPolicingRate);
 
     @TypedColumn(name="ingress_policing_burst", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Integer>> getIngressPolicingBurstColumn();
+    public Column<GenericTableSchema, Set<Long>> getIngressPolicingBurstColumn();
     @TypedColumn(name="ingress_policing_burst", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setIngressPolicingBurst(Set<Integer> ingressPolicingBurst);
+    public void setIngressPolicingBurst(Set<Long> ingressPolicingBurst);
 
     @TypedColumn(name="mac_in_use", method=MethodType.GETCOLUMN, fromVersion="7.1.0")
     public Column<GenericTableSchema,Set<String>> getMacInUseColumn();
@@ -64,9 +63,9 @@ public interface Interface extends TypedBaseTable<GenericTableSchema> {
     public void setMac(Set<String> mac);
 
     @TypedColumn(name="ifindex", method=MethodType.GETCOLUMN, fromVersion="7.2.1")
-    public Column<GenericTableSchema, BigInteger> getIfIndexColumn();
+    public Column<GenericTableSchema, Long> getIfIndexColumn();
     @TypedColumn(name="ifindex", method=MethodType.SETDATA, fromVersion="7.2.1")
-    public void setIfIndex(BigInteger ifIndex);
+    public void setIfIndex(Long ifIndex);
 
     @TypedColumn(name="external_ids", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn();
@@ -74,12 +73,12 @@ public interface Interface extends TypedBaseTable<GenericTableSchema> {
     public void setExternalIds(Map<String, String> externalIds);
 
     @TypedColumn(name="ofport", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Integer>> getOpenFlowPortColumn();
+    public Column<GenericTableSchema, Set<Long>> getOpenFlowPortColumn();
     @TypedColumn(name="ofport", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setOpenFlowPort(Set<Integer> openFlowPort);
+    public void setOpenFlowPort(Set<Long> openFlowPort);
 
     @TypedColumn(name="ofport_request", method=MethodType.GETCOLUMN, fromVersion="6.2.0")
-    public Column<GenericTableSchema, Set<Integer>> getOpenFlowPortRequestColumn();
+    public Column<GenericTableSchema, Set<Long>> getOpenFlowPortRequestColumn();
     @TypedColumn(name="ofport_request", method=MethodType.SETDATA, fromVersion="6.2.0")
     public void setOpenFlowPortRequest(String openFlowPortRequest);
 
@@ -99,24 +98,24 @@ public interface Interface extends TypedBaseTable<GenericTableSchema> {
     public void setMonitor(String monitor);
 
     @TypedColumn(name="cfm_mpid", method=MethodType.GETCOLUMN, fromVersion="4.0.0")
-    public Column<GenericTableSchema, Set<Integer>> getCfmMpidColumn();
+    public Column<GenericTableSchema, Set<Long>> getCfmMpidColumn();
     @TypedColumn(name="cfm_mpid", method=MethodType.SETDATA)
-    public void setCfmMpid(Set<Integer> cfmMpid);
+    public void setCfmMpid(Set<Long> cfmMpid);
 
     @TypedColumn(name="cfm_remote_mpid", method=MethodType.GETCOLUMN, fromVersion="4.0.0", untilVersion="5.2.0")
-    public Column<GenericTableSchema, Set<Integer>> getCfmRemoteMpidColumn();
+    public Column<GenericTableSchema, Set<Long>> getCfmRemoteMpidColumn();
     @TypedColumn(name="cfm_remote_mpid", method=MethodType.SETDATA, fromVersion="4.0.0", untilVersion="5.2.0")
-    public void setCfmRemoteMpid(Set<Integer> cfmRemoteMpid);
+    public void setCfmRemoteMpid(Set<Long> cfmRemoteMpid);
 
     @TypedColumn(name="cfm_remote_mpids", method=MethodType.GETCOLUMN, fromVersion="6.0.0")
-    public Column<GenericTableSchema, Set<Integer>> getCfmRemoteMpidsColumn();
+    public Column<GenericTableSchema, Set<Long>> getCfmRemoteMpidsColumn();
     @TypedColumn(name="cfm_remote_mpids", method=MethodType.SETDATA, fromVersion="6.0.0")
-    public void setCfmRemoteMpids(Set<Integer> cfmRemoteMpids);
+    public void setCfmRemoteMpids(Set<Long> cfmRemoteMpids);
 
     @TypedColumn(name="cfm_flap_count", method=MethodType.GETCOLUMN, fromVersion="7.3.0")
-    public Column<GenericTableSchema, Set<Integer>> getCfmFlapCountColumn();
+    public Column<GenericTableSchema, Set<Long>> getCfmFlapCountColumn();
     @TypedColumn(name="cfm_flap_count", method=MethodType.SETDATA, fromVersion="7.3.0")
-    public void setCfmFlapCount(Set<Integer> cfmFlapCount);
+    public void setCfmFlapCount(Set<Long> cfmFlapCount);
 
     @TypedColumn(name="cfm_fault", method=MethodType.GETCOLUMN, fromVersion="4.0.0")
     public Column<GenericTableSchema, Set<Boolean>> getCfmFaultColumn();
@@ -134,9 +133,9 @@ public interface Interface extends TypedBaseTable<GenericTableSchema> {
     public void setCfmRemoteOpState(Set<String> cfmRemoteOpState);
 
     @TypedColumn(name="cfm_health", method=MethodType.GETCOLUMN, fromVersion="6.9.0")
-    public Column<GenericTableSchema, Set<Integer>> getCfmHealthColumn();
+    public Column<GenericTableSchema, Set<Long>> getCfmHealthColumn();
     @TypedColumn(name="cfmHealth", method=MethodType.SETDATA, fromVersion="6.9.0")
-    public void setCfmHealth(Set<Integer> cfmHealth);
+    public void setCfmHealth(Set<Long> cfmHealth);
 
     @TypedColumn(name="lacp_current", method=MethodType.GETCOLUMN, fromVersion="3.3.0")
     public Column<GenericTableSchema, Set<Boolean>> getLacpCurrentColumn();
@@ -149,9 +148,9 @@ public interface Interface extends TypedBaseTable<GenericTableSchema> {
     public void setOtherConfig(Map<String, String> otherConfig);
 
     @TypedColumn(name="statistics", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Map<String, Integer>> getStatisticsColumn();
+    public Column<GenericTableSchema, Map<String, Long>> getStatisticsColumn();
     @TypedColumn(name="statistics", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setStatistics(Map<String, Integer> statistics);
+    public void setStatistics(Map<String, Long> statistics);
 
     @TypedColumn(name="status", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Map<String, String>> getStatusColumn();
@@ -174,19 +173,19 @@ public interface Interface extends TypedBaseTable<GenericTableSchema> {
     public void setLinkResets(Set<String> linkResets);
 
     @TypedColumn(name="link_speed", method=MethodType.GETCOLUMN, fromVersion="1.0.6")
-    public Column<GenericTableSchema, Set<Integer>> getLinkSpeedColumn();
+    public Column<GenericTableSchema, Set<Long>> getLinkSpeedColumn();
     @TypedColumn(name="link_speed", method=MethodType.SETDATA, fromVersion="1.0.6")
-    public void setLinkSpeed(Set<Integer>linkSpeed);
+    public void setLinkSpeed(Set<Long>linkSpeed);
 
     @TypedColumn(name="duplex", method=MethodType.GETCOLUMN, fromVersion="1.0.6")
     public Column<GenericTableSchema, Set<String>> getDuplexColumn();
     @TypedColumn(name="duplex", method=MethodType.SETDATA, fromVersion="1.0.6")
-    public void setDuplex(Set<Integer> duplex);
+    public void setDuplex(Set<Long> duplex);
 
     @TypedColumn(name="mtu", method=MethodType.GETCOLUMN, fromVersion="1.0.6")
-    public Column<GenericTableSchema, Set<Integer>> getMtuColumn();
+    public Column<GenericTableSchema, Set<Long>> getMtuColumn();
     @TypedColumn(name="mtu", method=MethodType.SETDATA, fromVersion="1.0.6")
-    public void setMtu(Set<Integer> mtu);
+    public void setMtu(Set<Long> mtu);
 
     @TypedColumn(name="error", method=MethodType.GETCOLUMN, fromVersion="7.7.0")
     public Column<GenericTableSchema, Set<String>> getErrorColumn();

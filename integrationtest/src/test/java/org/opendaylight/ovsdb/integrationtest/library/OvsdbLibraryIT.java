@@ -138,7 +138,7 @@ public class OvsdbLibraryIT extends OvsdbIntegrationTestBase {
         Bridge bridge = client.createTypedRowWrapper(Bridge.class);
         bridge.setName(testBridgeName);
         bridge.setStatus(ImmutableMap.of("key","value"));
-        bridge.setFloodVlans(Sets.newHashSet(34));
+        bridge.setFloodVlans(Sets.newHashSet(34L));
 
         OpenVSwitch openVSwitch = client.createTypedRowWrapper(OpenVSwitch.class);
         openVSwitch.setBridges(Sets.newHashSet(new UUID(testBridgeName)));

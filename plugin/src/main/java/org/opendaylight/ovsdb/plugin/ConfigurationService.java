@@ -11,7 +11,6 @@ package org.opendaylight.ovsdb.plugin;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
-import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -916,7 +915,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
 
         Map<String, String> options = null;
         String type = null;
-        Set<BigInteger> tags = null;
+        Set<Long> tags = null;
         if (configs != null) {
             type = (String) configs.get(ConfigConstants.TYPE);
             Map<String, String> customConfigs = (Map<String, String>) configs.get(ConfigConstants.CUSTOM);
@@ -931,8 +930,8 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         if (type != null) {
             logger.debug("Port type : " + type);
             if (type.equalsIgnoreCase(OvsVswitchdSchemaConstants.PortType.VLAN.name())) {
-                tags = new HashSet<BigInteger>();
-                tags.add(BigInteger.valueOf(Integer.parseInt((String)configs.get(ConfigConstants.VLAN))));
+                tags = new HashSet<Long>();
+                tags.add(Long.parseLong((String)configs.get(ConfigConstants.VLAN)));
             }
         }
 

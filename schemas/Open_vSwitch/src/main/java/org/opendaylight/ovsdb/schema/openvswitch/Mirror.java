@@ -48,10 +48,10 @@ public interface Mirror extends TypedBaseTable<GenericTableSchema> {
     public void setSelectDstPort(Set<UUID> selectDstPrt);
 
     @TypedColumn(name="select_vlan", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Integer>> getSelectVlanColumn();
+    public Column<GenericTableSchema, Set<Long>> getSelectVlanColumn();
 
     @TypedColumn(name="select_vlan", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setSelectVlan(Set<Integer> selectVlan);
+    public void setSelectVlan(Set<Long> selectVlan);
 
     @TypedColumn(name="output_port", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Set<UUID>> getOutputPortColumn();
@@ -60,16 +60,16 @@ public interface Mirror extends TypedBaseTable<GenericTableSchema> {
     public void setOutputPort(Set<UUID> outputPort);
 
     @TypedColumn (name="output_vlan", method= MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Integer>> getOutputVlanColumn();
+    public Column<GenericTableSchema, Set<Long>> getOutputVlanColumn();
 
     @TypedColumn (name="output_vlan", method= MethodType.SETDATA, fromVersion="1.0.0")
-    public void setOutputVlan(Set<Integer> outputVlan);
+    public void setOutputVlan(Set<Long> outputVlan);
 
     @TypedColumn (name="statistics", method= MethodType.GETCOLUMN, fromVersion="6.4.0")
-    public Column<GenericTableSchema, Map<String, Integer>> getStatisticsColumn();
+    public Column<GenericTableSchema, Map<String, Long>> getStatisticsColumn();
 
     @TypedColumn (name="statistics", method= MethodType.SETDATA, fromVersion="6.4.0")
-    public void setStatistics(Map<String, Integer> statistics);
+    public void setStatistics(Map<String, Long> statistics);
 
     @TypedColumn (name="external_ids", method= MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn();

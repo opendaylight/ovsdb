@@ -11,6 +11,7 @@
 package org.opendaylight.ovsdb.lib;
 
 import java.net.InetAddress;
+import java.util.Collection;
 
 /**
  * OvsDBConnection Interface provides OVSDB connection management APIs which includes
@@ -46,4 +47,11 @@ public interface OvsdbConnection {
      * @param listener Passive Connection listener interested in Passive OVSDB connection requests.
      */
     public void registerForPassiveConnection(OvsdbConnectionListener listener);
+
+    /**
+     * Returns a Collection of all the active OVSDB Connections.
+     *
+     * @return Collection of all the active OVSDB Connections
+     */
+    public Collection<OvsdbClient> getConnections();
 }

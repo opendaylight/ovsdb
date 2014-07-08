@@ -113,6 +113,7 @@ public class Activator extends ComponentActivatorAbstractBase {
         if (imp.equals(InventoryService.class)) {
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "OVS");
+            props.put("scope", "Global");
             c.setInterface(
                     new String[] {IPluginInInventoryService.class.getName(),
                             InventoryServiceInternal.class.getName()}, props);

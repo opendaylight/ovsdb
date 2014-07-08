@@ -45,32 +45,27 @@ public class JsonRpcServiceBinderHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(final ChannelHandlerContext ctx, final Object msg) throws Exception {
-        executorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                if (msg instanceof JsonNode) {
-                    JsonNode jsonNode = (JsonNode) msg;
-                    if (jsonNode.has("result")) {
-                        try {
-                            factory.processResult(jsonNode);
-                        } catch (NoSuchMethodException e) {
-                             /*
-                               ChannelRead is a method invoked during Netty message receive event.
-                               The only sane thing we can do is to print a meaningful error message.
-                             */
-                            logger.error("NoSuchMethodException when handling "+msg.toString(), e);
-                        }
-                    } else if (jsonNode.hasNonNull("method")) {
-                        if (jsonNode.has("id") && !Strings.isNullOrEmpty(jsonNode.get("id").asText())) {
-                            factory.processRequest(context, jsonNode);
-                        }
-                    }
-
-                    return;
+        if (msg instanceof JsonNode) {
+            JsonNode jsonNode = (JsonNode) msg;
+            if (jsonNode.has("result")) {
+                try {
+                    factory.processResult(jsonNode);
+                } catch (NoSuchMethodException e) {
+                     /*
+                       ChannelRead is a method invoked during Netty message receive event.
+                       The only sane thing we can do is to print a meaningful error message.
+                     */
+                    logger.error("NoSuchMethodException when handling "+msg.toString(), e);
                 }
-                ctx.channel().close();
+            } else if (jsonNode.hasNonNull("method")) {
+                if (jsonNode.has("id") && !Strings.isNullOrEmpty(jsonNode.get("id").asText())) {
+                    factory.processRequest(context, jsonNode);
+                }
             }
-        });
+
+            return;
+        }
+        ctx.channel().close();
     }
 
     @Override

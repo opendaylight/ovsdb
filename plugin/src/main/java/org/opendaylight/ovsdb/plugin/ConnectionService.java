@@ -9,12 +9,12 @@
  */
 package org.opendaylight.ovsdb.plugin;
 
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +27,6 @@ import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.connection.IPluginInConnectionService;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.Property;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.lib.MonitorCallBack;
@@ -56,15 +55,12 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
     protected static final Logger logger = LoggerFactory.getLogger(ConnectionService.class);
 
     // Properties that can be set in config.ini
-    private static final String OVSDB_LISTENPORT = "ovsdb.listenPort";
     private static final Integer defaultOvsdbPort = 6640;
 
     private OvsdbConnection connectionLib;
-    private static Integer ovsdbListenPort = defaultOvsdbPort;
-    private ConcurrentMap<String, Connection> ovsdbConnections;
+    private ConcurrentMap<String, Connection> ovsdbConnections = new ConcurrentHashMap<String, Connection>();
     private List<ChannelHandler> handlers = null;
     private InventoryServiceInternal inventoryServiceInternal;
-    private Channel serverListenChannel = null;
 
     public InventoryServiceInternal getInventoryServiceInternal() {
         return inventoryServiceInternal;
@@ -82,10 +78,6 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
 
     public void setOvsdbConnection(OvsdbConnection connectionService) {
         connectionLib = connectionService;
-        // It is not correct to register the service here. Rather, we should depend on the
-        // Service created by createServiceDependency() and hook to it via Apache DM.
-        // Using this temporarily till the Service Dependency is resolved.
-        connectionLib.registerForPassiveConnection(this);
     }
 
     public void unsetOvsdbConnection(OvsdbConnection connectionService) {
@@ -93,13 +85,6 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
     }
 
     public void init() {
-        ovsdbConnections = new ConcurrentHashMap<String, Connection>();
-        int listenPort = defaultOvsdbPort;
-        String portString = System.getProperty(OVSDB_LISTENPORT);
-        if (portString != null) {
-            listenPort = Integer.decode(portString).intValue();
-        }
-        ovsdbListenPort = listenPort;
     }
 
     /**
@@ -115,6 +100,15 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
      * the services provided by the class are registered in the service registry
      */
     void start() {
+        // It is not correct to register the service here. Rather, we should depend on the
+        // Service created by createServiceDependency() and hook to it via Apache DM.
+        // Using this temporarily till the Service Dependency is resolved.
+        connectionLib.registerForPassiveConnection(this);
+
+        Collection<OvsdbClient> connections = connectionLib.getConnections();
+        for (OvsdbClient client : connections) {
+            this.connected(client);
+        }
     }
 
     /**
@@ -126,7 +120,6 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         for (Connection connection : ovsdbConnections.values()) {
             connection.disconnect();
         }
-        serverListenChannel.disconnect();
     }
 
     @Override
@@ -135,7 +128,9 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         Connection connection = ovsdbConnections.get(identifier);
         if (connection != null) {
             ovsdbConnections.remove(identifier);
-            return connection.disconnect();
+            connection.disconnect();
+            inventoryServiceInternal.removeNode(node);
+            return new Status(StatusCode.SUCCESS);
         } else {
             return new Status(StatusCode.NOTFOUND);
         }
@@ -268,7 +263,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         Connection connection = ovsdbConnections.get(identifier);
         OvsdbClient client = connection.getClient();
         if (dbSchema == null) {
-            logger.error("Unable to get Database Schema for the ovsdb connection : {} , database : {}", client.getConnectionInfo(), dbSchema.getName());
+            logger.error("Unable to get Database Schema for the ovsdb connection : {}", client.getConnectionInfo());
             return null;
         }
         Set<String> tables = dbSchema.getTables();
@@ -332,8 +327,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
     public void connected(OvsdbClient client) {
         String identifier = getConnectionIdentifier(client);
         try {
-            ConnectionService connection = (ConnectionService)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
-            Node node = connection.handleNewConnection(identifier, client);
+            this.handleNewConnection(identifier, client);
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
@@ -341,5 +335,8 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
 
     @Override
     public void disconnected(OvsdbClient client) {
+        Connection connection = ovsdbConnections.get(this.getConnectionIdentifier(client));
+        if (connection == null) return;
+        this.disconnect(connection.getNode());
     }
 }

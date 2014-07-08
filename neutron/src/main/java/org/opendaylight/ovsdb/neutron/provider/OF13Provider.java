@@ -1219,7 +1219,7 @@ public class OF13Provider implements NetworkProvider {
             Map<String, Row> intfs = ovsdbTable.getRows(node, ovsdbTable.getTableName(node, Interface.class));
             if (intfs != null) {
                 for (Row row : intfs.values()) {
-                    Interface intf = (Interface)row;
+                    Interface intf = ovsdbTable.getTypedRow(node, Interface.class, row);
                     NeutronNetwork network = tenantNetworkManager.getTenantNetworkForInterface(intf);
                     logger.debug("Trigger Interface update for {}", intf);
                     if (network != null) {

@@ -83,6 +83,7 @@ public class OvsdbClientTestIT extends OvsdbTestBase {
         List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
         ColumnSchema<GenericTableSchema, Set<Integer>> flood_vlans = bridge.multiValuedColumn("flood_vlans", Integer.class);
         ColumnSchema<GenericTableSchema, Map<String, String>> externalIds = bridge.multiValuedColumn("external_ids", String.class, String.class);
+        ColumnSchema<GenericTableSchema, String> name = bridge.column("name", String.class);
         MonitorRequestBuilder<GenericTableSchema> builder = MonitorRequestBuilder.builder(bridge);
         if (filter) {
             builder.addColumn(bridge.column("name"))
@@ -120,79 +121,37 @@ public class OvsdbClientTestIT extends OvsdbTestBase {
         Assert.assertTrue(result instanceof TableUpdates);
         updates = (TableUpdates) result;
         TableUpdate<GenericTableSchema> update = updates.getUpdate(bridge);
-        Row<GenericTableSchema> aNew = update.getNew();
-        if (filter) {
-            Assert.assertEquals(builder.getColumns().size(), aNew.getColumns().size());
-        } else {
-            // As per RFC7047, Section 4.1.5 : If "columns" is omitted, all columns in the table, except for "_uuid", are monitored.
-            Assert.assertEquals(bridge.getColumns().size() - 1, aNew.getColumns().size());
-        }
-        for (Column<GenericTableSchema, ?> column: aNew.getColumns()) {
-            if (column.getSchema().equals(flood_vlans)) {
-                // Test for the 5 flood_vlans inserted in Bridge br-test in createBridgeTransaction
-                Set<Integer> data = column.getData(flood_vlans);
-                Assert.assertTrue(!data.isEmpty());
-                Assert.assertEquals(5, data.size());
-            } else if (column.getSchema().equals(externalIds)) {
-                // Test for the {"key", "value"} external_ids inserted in Bridge br-test in createBridgeTransaction
-                Map<String, String> data = column.getData(externalIds);
-                Assert.assertNotNull(data.get("key"));
-                Assert.assertEquals("value", data.get("key"));
-                // Test for {"key2", "value2"} external_ids mutation-inserted in Bridge br-test in createBridgeTransaction
-                Assert.assertNotNull(data.get("key2"));
-                Assert.assertEquals("value2", data.get("key2"));
+        Assert.assertTrue(update.getRows().size() > 0);
+        for (UUID uuid : update.getRows().keySet()) {
+            Row<GenericTableSchema> aNew = update.getNew(uuid);
+            if (!aNew.getColumn(name).getData().equals(testBridgeName)) continue;
+            if (filter) {
+                Assert.assertEquals(builder.getColumns().size(), aNew.getColumns().size());
+            } else {
+                // As per RFC7047, Section 4.1.5 : If "columns" is omitted, all columns in the table, except for "_uuid", are monitored.
+                Assert.assertEquals(bridge.getColumns().size() - 1, aNew.getColumns().size());
             }
-        }
-    }
-
-    /*
-     * Ideally we should be using selectOpenVSwitchTableUuid() instead of this method.
-     * But Row.java needs some Jackson Jitsu to obtain the appropriate Row Json mapped to Java object
-     * for Select operation.
-     * Hence using the Monitor approach to obtain the uuid of the open_vSwitch table entry.
-     * Replace this method with selectOpenVSwitchTableUuid() once it is functional,
-     */
-    private UUID getOpenVSwitchTableUuid() throws ExecutionException, InterruptedException {
-        Assert.assertNotNull(dbSchema);
-        GenericTableSchema ovsTable = dbSchema.table("Open_vSwitch", GenericTableSchema.class);
-        List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
-        ColumnSchema<GenericTableSchema, UUID> _uuid = ovsTable.column("_uuid", UUID.class);
-
-        monitorRequests.add(
-                MonitorRequestBuilder.builder(ovsTable)
-                        .addColumn(_uuid)
-                        .with(new MonitorSelect(true, true, true, true))
-                        .build());
-
-        final List<Object> results = Lists.newArrayList();
-
-        TableUpdates updates = ovs.monitor(dbSchema, monitorRequests, new MonitorCallBack() {
-            @Override
-            public void update(TableUpdates result, DatabaseSchema dbSchema) {
-                results.add(result);
+            for (Column<GenericTableSchema, ?> column: aNew.getColumns()) {
+                if (column.getSchema().equals(flood_vlans)) {
+                    // Test for the 5 flood_vlans inserted in Bridge br-test in createBridgeTransaction
+                    Set<Integer> data = column.getData(flood_vlans);
+                    Assert.assertNotNull(data);
+                    Assert.assertTrue(!data.isEmpty());
+                    Assert.assertEquals(5, data.size());
+                } else if (column.getSchema().equals(externalIds)) {
+                    // Test for the {"key", "value"} external_ids inserted in Bridge br-test in createBridgeTransaction
+                    Map<String, String> data = column.getData(externalIds);
+                    Assert.assertNotNull(data);
+                    Assert.assertNotNull(data.get("key"));
+                    Assert.assertEquals("value", data.get("key"));
+                    // Test for {"key2", "value2"} external_ids mutation-inserted in Bridge br-test in createBridgeTransaction
+                    Assert.assertNotNull(data.get("key2"));
+                    Assert.assertEquals("value2", data.get("key2"));
+                }
             }
-
-            @Override
-            public void exception(Throwable t) {
-                results.add(t);
-                System.out.println("t = " + t);
-            }
-        });
-
-        if (updates != null) results.add(updates);
-        for (int i = 0; i < 3 ; i++) { //wait 5 seconds to get a result
-            if (!results.isEmpty()) break;
-            System.out.println("waiting on monitor response for open_vSwtich Table...");
-            Thread.sleep(1000);
+            return;
         }
-
-        Assert.assertTrue(!results.isEmpty());
-        Object result = results.get(0); // open_vSwitch table has just 1 row.
-        Assert.assertTrue(result instanceof TableUpdates);
-        updates = (TableUpdates) result;
-        TableUpdate<GenericTableSchema> update = updates.getUpdate(ovsTable);
-        Assert.assertNotNull(update.getUuid());
-        return update.getUuid();
+        Assert.fail("Bridge being monitored :"+testBridgeName+" Not found");
     }
 
     /*

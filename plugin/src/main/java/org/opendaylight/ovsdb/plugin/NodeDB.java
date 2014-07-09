@@ -9,26 +9,23 @@
  */
 package org.opendaylight.ovsdb.plugin;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.collections.MapUtils;
+import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Row;
 
 import com.google.common.collect.Maps;
 
 public class NodeDB {
-    ConcurrentMap<String, ConcurrentMap<String, TableDB>> dbCache = Maps.newConcurrentMap();
+    ConcurrentMap<String, TableDB> dbCache = Maps.newConcurrentMap();
 
-    public ConcurrentMap<String, ConcurrentMap<String,Row>> getDatabase(String dbName) {
-        ConcurrentMap<String, TableDB> tdbMap = dbCache.get(dbName);
-        if (tdbMap == null) return null;
-        ConcurrentMap<String, ConcurrentMap<String,Row>> retMap = Maps.newConcurrentMap();
-        for (String tableName : tdbMap.keySet()) {
-            TableDB tdb = tdbMap.get(tableName);
-            if (tdb != null && tdb.getTableCache(tableName) != null) retMap.put(tableName, tdb.getTableCache(tableName));
-        }
-        return retMap;
+    public ConcurrentMap<String, ConcurrentMap<String, Row>> getDatabase(String dbName) {
+        TableDB tdb = dbCache.get(dbName);
+        if (tdb == null) return null;
+        return tdb.getTableCache();
     }
 
     public ConcurrentMap<String, Row> getTableCache(String dbName, String tableName) {
@@ -37,42 +34,51 @@ public class NodeDB {
         return tdbMap.get(tableName);
     }
 
-    private void setDBCache(String dbName,  ConcurrentMap<String, TableDB> table) {
+    private void setDBCache(String dbName,  TableDB table) {
         dbCache.put(dbName, table);
     }
 
     public Row getRow (String dbName, String tableName, String uuid) {
-        ConcurrentMap<String, ConcurrentMap<String, Row>> db = getDatabase(dbName);
-        if (db == null) return null;
-        ConcurrentMap<String, Row> tdb = db.get(tableName);
+        ConcurrentMap<String, Row> tdb = this.getTableCache(dbName, tableName);
         if (tdb == null) return null;
         return tdb.get(uuid);
     }
 
     public void updateRow(String dbName, String tableName, String uuid, Row row) {
-        ConcurrentMap<String, TableDB> db = dbCache.get(dbName);
+        TableDB db = dbCache.get(dbName);
         if (db == null) {
-            db = Maps.newConcurrentMap();
+            db = new TableDB();
             setDBCache(dbName, db);
         }
-        TableDB tdb = db.get(tableName);
-        if (tdb == null) {
-            tdb = new TableDB();
-            db.put(tableName, tdb);
-        }
-        tdb.updateRow(tableName, uuid, row);
+        db.updateRow(tableName, uuid, row);
     }
 
     public void removeRow(String dbName, String tableName, String uuid) {
-        ConcurrentMap<String, TableDB> db = dbCache.get(dbName);
+        TableDB db = dbCache.get(dbName);
         if (db == null) return;
-        TableDB tdb = db.get(tableName);
-        if (tdb == null) return;
-        tdb.removeRow(tableName, uuid);
+        db.removeRow(tableName, uuid);
     }
 
     public void printTableCache() {
-        MapUtils.debugPrint(System.out, null, dbCache);
+        for (String dbName : dbCache.keySet()) {
+            System.out.println("Database "+dbName);
+            ConcurrentMap<String, ConcurrentMap<String,Row>> tableDB = this.getDatabase(dbName);
+            if (tableDB == null) continue;
+            for (String tableName : tableDB.keySet()) {
+                ConcurrentMap<String, Row> tableRows = this.getTableCache(dbName, tableName);
+                System.out.println("\t Table "+tableName);
+                for (String uuid : tableRows.keySet()) {
+                    Row row = tableRows.get(uuid);
+                    Collection<Column> columns = row.getColumns();
+                    System.out.print("\t\t"+uuid+ "==");
+                    for (Column column : columns) {
+                        if (column.getData() != null) System.out.print(column.getSchema().getName()+" : "+ column.getData());
+                    }
+                    System.out.println("");
+                }
+                System.out.println("-----------------------------------------------------------");
+            }
+        }
     }
 
     public class TableDB {

@@ -10,10 +10,11 @@
 package org.opendaylight.ovsdb.lib.schema;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.opendaylight.ovsdb.lib.message.TableUpdate;
@@ -124,20 +125,20 @@ public abstract class TableSchema<E extends TableSchema<E>> {
     }
 
     public TableUpdate<E> updatesFromJson(JsonNode value) {
+        TableUpdate<E> tableUpdate = new TableUpdate<>();
+        Iterator<Entry<String, JsonNode>> fields = value.fields();
+        while (fields.hasNext()) {
+            Map.Entry<String, JsonNode> idOldNew = fields.next();
+            String uuid = idOldNew.getKey();
 
-        Map.Entry<String, JsonNode> idOldNew = value.fields().next();
-        String uuid = idOldNew.getKey();
+            ObjectNode new_ = (ObjectNode) idOldNew.getValue().get("new");
+            ObjectNode old = (ObjectNode) idOldNew.getValue().get("old");
 
-        ObjectNode new_ = (ObjectNode) idOldNew.getValue().get("new");
-        ObjectNode old = (ObjectNode) idOldNew.getValue().get("old");
+            Row<E> newRow = new_ != null ? createRow(new_) : null;
+            Row<E> oldRow = old != null ? createRow(old) : null;
 
-        Row<E> newRow = new_ != null ? createRow(new_) : null;
-        Row<E> oldRow = old != null ? createRow(old) : null;
-
-        TableUpdate<E> tableUpdate = new TableUpdate<>(new UUID(uuid));
-        tableUpdate.setNew(newRow);
-        tableUpdate.setOld(oldRow);
-
+            tableUpdate.addRow(new UUID(uuid), oldRow, newRow);
+        }
         return tableUpdate;
     }
 

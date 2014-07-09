@@ -108,14 +108,16 @@ public class MonitorTestCases extends OpenVswitchSchemaTestBase {
         for (String tableName : updates.getUpdates().keySet()) {
             Map<UUID, Row> tUpdate = OpenVswitchSchemaSuiteIT.getTableCache().get(tableName);
             TableUpdate update = updates.getUpdates().get(tableName);
-            if (update.getNew() != null) {
-                if (tUpdate == null) {
-                    tUpdate = new HashMap<>();
-                    OpenVswitchSchemaSuiteIT.getTableCache().put(tableName, tUpdate);
+            for (UUID uuid : (Set<UUID>)update.getRows().keySet()) {
+                if (update.getNew(uuid) != null) {
+                    if (tUpdate == null) {
+                        tUpdate = new HashMap<>();
+                        OpenVswitchSchemaSuiteIT.getTableCache().put(tableName, tUpdate);
+                    }
+                    tUpdate.put(uuid, update.getNew(uuid));
+                } else {
+                    tUpdate.remove(uuid);
                 }
-                tUpdate.put(update.getUuid(), update.getNew());
-            } else {
-                tUpdate.remove(update.getUuid());
             }
         }
     }

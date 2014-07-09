@@ -35,6 +35,7 @@ import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.ovsdb.lib.message.TableUpdate;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Row;
+import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -174,29 +175,31 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
         for (String tableName : tableUpdates.getUpdates().keySet()) {
             Map<String, Row> tCache = db.getTableCache(databaseName, tableName);
             TableUpdate update = tableUpdates.getUpdates().get(tableName);
+            for (UUID uuid : (Set<UUID>)update.getRows().keySet()) {
 
-            if (update.getNew() != null) {
-                boolean isNewRow = (tCache == null || tCache.get(update.getUuid().toString()) == null) ? true : false;
-                db.updateRow(databaseName, tableName, update.getUuid().toString(), update.getNew());
+            if (update.getNew(uuid) != null) {
+                boolean isNewRow = (tCache == null || tCache.get(uuid.toString()) == null) ? true : false;
+                db.updateRow(databaseName, tableName, uuid.toString(), update.getNew(uuid));
                 if (isNewRow) {
-                    this.handleOpenVSwitchSpecialCase(n, databaseName, tableName, update);
-                    if (inventoryListener != null) inventoryListener.rowAdded(n, tableName, update.getUuid().toString(), update.getNew());
+                    this.handleOpenVSwitchSpecialCase(n, databaseName, tableName, uuid);
+                    if (inventoryListener != null) inventoryListener.rowAdded(n, tableName, uuid.toString(), update.getNew(uuid));
                 } else {
-                    if (inventoryListener != null) inventoryListener.rowUpdated(n, tableName, update.getUuid().toString(), update.getOld(), update.getNew());
+                    if (inventoryListener != null) inventoryListener.rowUpdated(n, tableName, uuid.toString(), update.getOld(uuid), update.getNew(uuid));
                 }
-            } else if (update.getOld() != null){
+            } else if (update.getOld(uuid) != null){
                 if (tCache != null) {
-                    if (inventoryListener != null) inventoryListener.rowRemoved(n, tableName, update.getUuid().toString(), update.getOld(), update.getNew());
+                    if (inventoryListener != null) inventoryListener.rowRemoved(n, tableName, uuid.toString(), update.getOld(uuid), update.getNew(uuid));
                 }
-                db.removeRow(databaseName, tableName, update.getUuid().toString());
+                db.removeRow(databaseName, tableName, uuid.toString());
+            }
             }
         }
     }
 
-    private void handleOpenVSwitchSpecialCase(Node node, String databaseName, String tableName, TableUpdate update) {
+    private void handleOpenVSwitchSpecialCase(Node node, String databaseName, String tableName, UUID uuid) {
         if (OvsVswitchdSchemaConstants.shouldConfigureController(databaseName, tableName)) {
             try {
-                if (configurationService != null) configurationService.setOFController(node, update.getUuid().toString());
+                if (configurationService != null) configurationService.setOFController(node, uuid.toString());
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }

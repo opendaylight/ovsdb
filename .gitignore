@@ -24,3 +24,5 @@ report.html
 *.swp
 .gitignore
 target-ide/
+.vagrant
+.DS_Store

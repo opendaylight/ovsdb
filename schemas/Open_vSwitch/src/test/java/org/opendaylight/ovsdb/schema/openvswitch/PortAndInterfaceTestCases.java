@@ -57,7 +57,7 @@ public class PortAndInterfaceTestCases extends OpenVswitchSchemaTestBase {
         intf.setExternalIds(ImmutableMap.of("vm-id", "12345abcedf78910"));
 
         Bridge bridge = ovs.getTypedRowWrapper(Bridge.class, null);
-        TransactionBuilder transactionBuilder = ovs.transactBuilder()
+        TransactionBuilder transactionBuilder = ovs.transactBuilder(OpenVswitchSchemaSuiteIT.dbSchema)
                 .add(op.insert(port.getSchema())
                         .withId(portUuidStr)
                         .value(port.getNameColumn())

@@ -10,17 +10,6 @@
 
 package org.opendaylight.ovsdb.schema.openvswitch;
 
-import com.google.common.util.concurrent.ListenableFuture;
-import junit.framework.Assert;
-import org.junit.Before;
-import org.opendaylight.ovsdb.lib.OvsdbClient;
-import org.opendaylight.ovsdb.lib.OvsdbConnection;
-import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
-import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
-import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
-import org.opendaylight.ovsdb.lib.notation.Row;
-import org.opendaylight.ovsdb.lib.notation.UUID;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.List;
@@ -33,6 +22,19 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import junit.framework.Assert;
+
+import org.junit.Before;
+import org.opendaylight.ovsdb.lib.OvsdbClient;
+import org.opendaylight.ovsdb.lib.OvsdbConnection;
+import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
+import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
+import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
+import org.opendaylight.ovsdb.lib.notation.Row;
+import org.opendaylight.ovsdb.lib.notation.UUID;
+
+import com.google.common.util.concurrent.ListenableFuture;
 
 public abstract class OpenVswitchSchemaTestBase implements OvsdbRPC.Callback{
     private final static String SERVER_IPADDRESS = "ovsdbserver.ipaddress";

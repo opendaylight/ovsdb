@@ -60,7 +60,7 @@ public class SflowTestCases extends OpenVswitchSchemaTestBase {
         sFlow.setSampling(ImmutableSet.of(sampling));
         sFlow.setExternalIds(ImmutableMap.of("kit", "tah"));
         Bridge bridge = ovs.getTypedRowWrapper(Bridge.class, null);
-        TransactionBuilder transactionBuilder = ovs.transactBuilder()
+        TransactionBuilder transactionBuilder = ovs.transactBuilder(OpenVswitchSchemaSuiteIT.dbSchema)
                 .add(op.insert(sFlow.getSchema())
                         .withId(sFlowUuidStr)
                         .value(sFlow.getTargetsColumn())

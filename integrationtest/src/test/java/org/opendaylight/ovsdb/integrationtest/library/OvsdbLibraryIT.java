@@ -134,7 +134,7 @@ public class OvsdbLibraryIT extends OvsdbIntegrationTestBase {
 
     static String testBridgeName = "br_test";
     static UUID testBridgeUuid = null;
-    private void createTypedBridge() throws IOException, InterruptedException, ExecutionException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    private void createTypedBridge(DatabaseSchema dbSchema) throws IOException, InterruptedException, ExecutionException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         Bridge bridge = client.createTypedRowWrapper(Bridge.class);
         bridge.setName(testBridgeName);
         bridge.setStatus(ImmutableMap.of("key","value"));
@@ -145,7 +145,7 @@ public class OvsdbLibraryIT extends OvsdbIntegrationTestBase {
 
         int insertOperationIndex = 0;
 
-        TransactionBuilder transactionBuilder = client.transactBuilder()
+        TransactionBuilder transactionBuilder = client.transactBuilder(dbSchema)
                 .add(op.insert(bridge.getSchema())
                         .withId(testBridgeName)
                         .value(bridge.getNameColumn()))
@@ -182,7 +182,7 @@ public class OvsdbLibraryIT extends OvsdbIntegrationTestBase {
                                                      " with Tables : " + dbSchema.getTables());
 
             // A simple Typed Test to make sure a Typed wrapper bundle can coexist in an OSGi environment
-            createTypedBridge();
+            createTypedBridge(dbSchema);
         }
 
         if (isSchemaSupported(HARDWARE_VTEP)) {
@@ -197,8 +197,8 @@ public class OvsdbLibraryIT extends OvsdbIntegrationTestBase {
     public void tearDown() throws InterruptedException, ExecutionException {
         Bridge bridge = client.getTypedRowWrapper(Bridge.class, null);
         OpenVSwitch openVSwitch = client.getTypedRowWrapper(OpenVSwitch.class, null);
-
-        ListenableFuture<List<OperationResult>> results = client.transactBuilder()
+        DatabaseSchema dbSchema = client.getSchema(OPEN_VSWITCH_SCHEMA).get();
+        ListenableFuture<List<OperationResult>> results = client.transactBuilder(dbSchema)
                 .add(op.delete(bridge.getSchema())
                         .where(bridge.getNameColumn().getSchema().opEqual(testBridgeName))
                         .build())

@@ -58,7 +58,7 @@ public class BridgeTestCases extends OpenVswitchSchemaTestBase {
 
         int insertOperationIndex = 0;
 
-        TransactionBuilder transactionBuilder = this.ovs.transactBuilder()
+        TransactionBuilder transactionBuilder = this.ovs.transactBuilder(OpenVswitchSchemaSuiteIT.dbSchema)
                 .add(op.insert(bridge.getSchema())
                         .withId(TEST_BRIDGE_NAME)
                         .value(bridge.getNameColumn()))

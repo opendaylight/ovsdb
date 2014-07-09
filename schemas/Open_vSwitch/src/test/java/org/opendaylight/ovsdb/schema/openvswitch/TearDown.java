@@ -61,7 +61,7 @@ public class TearDown extends OpenVswitchSchemaTestBase {
         Queue queue = this.ovs.getTypedRowWrapper(Queue.class, null);
         Manager manager = this.ovs.getTypedRowWrapper(Manager.class, null);
 
-        TransactionBuilder transactionBuilder = this.ovs.transactBuilder();
+        TransactionBuilder transactionBuilder = this.ovs.transactBuilder(OpenVswitchSchemaSuiteIT.dbSchema);
 
         if (schemaVersion.compareTo(flowSampleCollectorSetFromVersion) >= 0) {
             FlowSampleCollectorSet flowSampleCollectorSet = this.ovs.getTypedRowWrapper(FlowSampleCollectorSet.class, null);

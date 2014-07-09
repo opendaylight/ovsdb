@@ -165,7 +165,7 @@ public class OvsdbClientTestIT extends OvsdbTestBase {
         List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
         ColumnSchema<GenericTableSchema, UUID> _uuid = ovsTable.column("_uuid", UUID.class);
 
-        List<OperationResult> results = ovs.transactBuilder()
+        List<OperationResult> results = ovs.transactBuilder(dbSchema)
                .add(op.select(ovsTable)
                       .column(_uuid))
                       .execute()
@@ -193,7 +193,7 @@ public class OvsdbClientTestIT extends OvsdbTestBase {
         String namedUuid = "br_test";
         int insertOperationIndex = 0;
         UUID parentTable = selectOpenVSwitchTableUuid();
-        TransactionBuilder transactionBuilder = ovs.transactBuilder()
+        TransactionBuilder transactionBuilder = ovs.transactBuilder(dbSchema)
                  /*
                   * Make sure that the position of insert operation matches the insertOperationIndex.
                   * This will be used later when the Results are processed.
@@ -248,7 +248,7 @@ public class OvsdbClientTestIT extends OvsdbTestBase {
          * Adding a separate Assert operation in a transaction. Lets not mix this with other
          * valid transactions as above.
          */
-        ListenableFuture<List<OperationResult>> results = ovs.transactBuilder()
+        ListenableFuture<List<OperationResult>> results = ovs.transactBuilder(dbSchema)
                 .add(op.delete(bridge)
                         .where(name.opEqual(testBridgeName))
                         .build())
@@ -271,7 +271,7 @@ public class OvsdbClientTestIT extends OvsdbTestBase {
          * Adding a separate Abort operation in a transaction. Lets not mix this with other
          * valid transactions as above.
          */
-        ListenableFuture<List<OperationResult>> results = ovs.transactBuilder()
+        ListenableFuture<List<OperationResult>> results = ovs.transactBuilder(dbSchema)
                 .add(op.delete(bridge)
                         .where(name.opEqual(testBridgeName))
                         .build())
@@ -321,7 +321,7 @@ public class OvsdbClientTestIT extends OvsdbTestBase {
         ColumnSchema<GenericTableSchema, UUID> _uuid = ovsTable.column("_uuid", UUID.class);
         UUID parentTable = selectOpenVSwitchTableUuid();
 
-        ListenableFuture<List<OperationResult>> results = ovs.transactBuilder()
+        ListenableFuture<List<OperationResult>> results = ovs.transactBuilder(dbSchema)
                 .add(op.delete(bridge)
                         .where(name.opEqual(testBridgeName))
                         .build())

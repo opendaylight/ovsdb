@@ -57,7 +57,7 @@ public class SslTestCases extends OpenVswitchSchemaTestBase {
         OpenVSwitch openVSwitch = ovs.getTypedRowWrapper(OpenVSwitch.class, null);
         // The transaction index for the SSL insert is used to store the SSL UUID
         int insertSslOperationIndex = 0;
-        TransactionBuilder transactionBuilder = ovs.transactBuilder()
+        TransactionBuilder transactionBuilder = ovs.transactBuilder(OpenVswitchSchemaSuiteIT.dbSchema)
                 .add(op.insert(ssl.getSchema())
                         .withId(sslUuidStr)
                         .value(ssl.getCertificateColumn())

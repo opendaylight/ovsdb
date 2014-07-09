@@ -88,7 +88,7 @@ public class FlowTableTestCases extends OpenVswitchSchemaTestBase {
         }
         flowTable.setFlowLimit(ImmutableSet.of(flowLimit));
         Bridge bridge = ovs.getTypedRowWrapper(Bridge.class, null);
-        TransactionBuilder transactionBuilder = ovs.transactBuilder()
+        TransactionBuilder transactionBuilder = ovs.transactBuilder(OpenVswitchSchemaSuiteIT.dbSchema)
                 .add(op.insert(flowTable)
                         .withId(flowTableUuidStr))
                 .add(op.mutate(bridge.getSchema())

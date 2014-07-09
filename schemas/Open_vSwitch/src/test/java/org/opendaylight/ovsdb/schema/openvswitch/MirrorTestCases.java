@@ -58,7 +58,7 @@ public class MirrorTestCases extends OpenVswitchSchemaTestBase {
         Bridge bridge = ovs.getTypedRowWrapper(Bridge.class, null);
 
         int insertMirrorOperationIndex = 0;
-        TransactionBuilder transactionBuilder = ovs.transactBuilder()
+        TransactionBuilder transactionBuilder = ovs.transactBuilder(OpenVswitchSchemaSuiteIT.dbSchema)
                 .add(op.insert(mirror.getSchema())
                         .withId(mirrorUuidStr)
                         .value(mirror.getNameColumn())

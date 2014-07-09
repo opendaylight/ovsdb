@@ -17,7 +17,6 @@ import java.util.Set;
 
 import org.opendaylight.ovsdb.lib.error.ParsingException;
 import org.opendaylight.ovsdb.lib.notation.Version;
-import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,10 +51,6 @@ public class DatabaseSchema {
 
     public boolean hasTable(String table) {
         return this.getTables().contains(table);
-    }
-
-    public TransactionBuilder beginTransaction() {
-        return new TransactionBuilder(this);
     }
 
     public <E extends TableSchema<E>> E table(String tableName, Class<E> clazz) {

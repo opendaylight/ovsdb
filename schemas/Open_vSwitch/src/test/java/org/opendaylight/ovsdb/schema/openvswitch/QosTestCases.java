@@ -75,7 +75,7 @@ public class QosTestCases extends OpenVswitchSchemaTestBase {
         int insertQosOperationIndex = 2;
         Bridge bridge = ovs.getTypedRowWrapper(Bridge.class, null);
 
-        TransactionBuilder transactionBuilder = ovs.transactBuilder()
+        TransactionBuilder transactionBuilder = ovs.transactBuilder(OpenVswitchSchemaSuiteIT.dbSchema)
                 .add(op.insert(port.getSchema())
                         .withId(portUuidStr)
                         .value(port.getNameColumn()))

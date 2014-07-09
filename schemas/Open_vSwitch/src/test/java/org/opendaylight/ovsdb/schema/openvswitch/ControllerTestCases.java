@@ -54,7 +54,7 @@ public class ControllerTestCases extends OpenVswitchSchemaTestBase {
         Bridge bridge = ovs.getTypedRowWrapper(Bridge.class, null);
 
         String transactionUuidStr = "controller";
-        TransactionBuilder transactionBuilder = ovs.transactBuilder()
+        TransactionBuilder transactionBuilder = ovs.transactBuilder(OpenVswitchSchemaSuiteIT.dbSchema)
                 .add(op.insert(controller1.getSchema())
                         .withId(transactionUuidStr)
                         .value(controller1.getTargetColumn()))
@@ -80,7 +80,7 @@ public class ControllerTestCases extends OpenVswitchSchemaTestBase {
         Bridge monitoredBridge = ovs.getTypedRowWrapper(Bridge.class, bridgeRow);
         Assert.assertEquals(1, monitoredBridge.getControllerColumn().getData().size());
 
-        transactionBuilder = ovs.transactBuilder()
+        transactionBuilder = ovs.transactBuilder(OpenVswitchSchemaSuiteIT.dbSchema)
                 .add(op.insert(controller2.getSchema())
                         .withId(transactionUuidStr)
                         .value(controller2.getTargetColumn()))

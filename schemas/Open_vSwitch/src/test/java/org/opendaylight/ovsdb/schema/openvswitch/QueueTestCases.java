@@ -65,7 +65,7 @@ public class QueueTestCases extends OpenVswitchSchemaTestBase {
         // The transaction index for the Queue insert is used to store the Queue UUID
         int insertQueueOperationIndex = 0;
         // Reference the Port row to insert the Queue with UID or Port name
-        TransactionBuilder transactionBuilder = ovs.transactBuilder()
+        TransactionBuilder transactionBuilder = ovs.transactBuilder(OpenVswitchSchemaSuiteIT.dbSchema)
                 .add(op.insert(queue.getSchema())
                         .withId(queueUuidStr)
                         .value(queue.getDscpColumn())

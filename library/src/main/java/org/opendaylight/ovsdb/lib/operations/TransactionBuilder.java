@@ -27,12 +27,9 @@ public class TransactionBuilder {
     OvsdbClientImpl ovs;
     ArrayList<Operation> operations = Lists.newArrayList();
 
-    public TransactionBuilder(OvsdbClientImpl ovs) {
+    public TransactionBuilder(OvsdbClientImpl ovs, DatabaseSchema schema) {
         this.ovs = ovs;
-    }
-
-    public TransactionBuilder(DatabaseSchema eDatabaseSchema) {
-        this.eDatabaseSchema = eDatabaseSchema;
+        eDatabaseSchema = schema;
     }
 
     public ArrayList<Operation> getOperations() {
@@ -49,6 +46,6 @@ public class TransactionBuilder {
     }
 
     public ListenableFuture<List<OperationResult>> execute() {
-        return ovs.transact(operations);
+        return ovs.transact(eDatabaseSchema, operations);
     }
 }

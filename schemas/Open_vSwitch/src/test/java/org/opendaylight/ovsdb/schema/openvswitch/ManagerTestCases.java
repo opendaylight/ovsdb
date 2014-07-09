@@ -57,7 +57,7 @@ public class ManagerTestCases extends OpenVswitchSchemaTestBase {
         manager.setExternalIds(externalIds);
 
         int insertSslOperationIndex = 0;
-        TransactionBuilder transactionBuilder = ovs.transactBuilder()
+        TransactionBuilder transactionBuilder = ovs.transactBuilder(OpenVswitchSchemaSuiteIT.dbSchema)
                 .add(op.insert(manager.getSchema())
                         .withId(mgrUuidStr)
                         .value(manager.getTargetColumn())

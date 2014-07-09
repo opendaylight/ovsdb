@@ -42,24 +42,23 @@ import com.google.common.collect.Lists;
 public class MonitorTestCases extends OpenVswitchSchemaTestBase {
 
     Logger logger = LoggerFactory.getLogger(PortAndInterfaceTestCases.class);
-    DatabaseSchema dbSchema = null;
 
     @Override
     @Before
     public void setUp() throws ExecutionException, InterruptedException, TimeoutException, IOException {
         super.setUp();
-        dbSchema = this.ovs.getSchema(OPEN_VSWITCH_SCHEMA).get();
+        OpenVswitchSchemaSuiteIT.dbSchema = this.ovs.getSchema(OPEN_VSWITCH_SCHEMA).get();
     }
 
     @Test
     public void monitorTables() throws ExecutionException, InterruptedException, IOException {
-        Assert.assertNotNull(dbSchema);
+        Assert.assertNotNull(OpenVswitchSchemaSuiteIT.dbSchema);
 
         List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
         monitorRequests.add(this.getAllColumnsMonitorRequest(Bridge.class));
         monitorRequests.add(this.getAllColumnsMonitorRequest(OpenVSwitch.class));
 
-        TableUpdates updates = ovs.monitor(dbSchema, monitorRequests, new UpdateMonitor());
+        TableUpdates updates = ovs.monitor(OpenVswitchSchemaSuiteIT.dbSchema, monitorRequests, new UpdateMonitor());
         Assert.assertNotNull(updates);
         this.updateTableCache(updates);
     }

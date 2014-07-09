@@ -65,7 +65,7 @@ public class FlowSampleCollectorSetTestCases extends OpenVswitchSchemaTestBase {
         flowSampleCollectorSet.setExternalIds(ImmutableMap.of("<3", "ovs"));
         flowSampleCollectorSet.setBridge(OpenVswitchSchemaSuiteIT.getTestBridgeUuid());
         Bridge bridge = ovs.getTypedRowWrapper(Bridge.class, null);
-        TransactionBuilder transactionBuilder = ovs.transactBuilder()
+        TransactionBuilder transactionBuilder = ovs.transactBuilder(OpenVswitchSchemaSuiteIT.dbSchema)
                 .add(op.insert(flowSampleCollectorSet.getSchema())
                         .value(flowSampleCollectorSet.getIdColumn())
                         .value(flowSampleCollectorSet.getExternalIdsColumn())

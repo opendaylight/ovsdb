@@ -50,7 +50,7 @@ public interface OvsdbClient {
      * Allows for a mini DSL way of collecting the transactions to be executed against the ovsdb instance.
      * @return TransactionBuilder
      */
-    TransactionBuilder transactBuilder();
+    TransactionBuilder transactBuilder(DatabaseSchema dbSchema);
 
     /**
      * Execute the list of operations in a single Transactions. Similar to the transactBuilder() method
@@ -59,7 +59,7 @@ public interface OvsdbClient {
      * cancel on the Future would cause OVSDB cancel operation to be fired against
      * the device.
      */
-    ListenableFuture<List<OperationResult>> transact(List<Operation> operations);
+    ListenableFuture<List<OperationResult>> transact(DatabaseSchema dbSchema, List<Operation> operations);
 
 
     /**

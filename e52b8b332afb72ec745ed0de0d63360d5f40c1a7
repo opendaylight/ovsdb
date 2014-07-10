@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_373f0e89",
+        "filename": "schemas/hardware_vtep/src/test/java/org/opendaylight/ovsdb/schema/hardwarevtep/HardwareVtepSchemaTestBase.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-10T21:05:16Z",
+      "side": 1,
+      "message": "supportsHWVTEP\n\nshould be:\n\nsupportsHwVtep\n\nbetter would be:\n\nsupportsHardwareVtepSchema",
+      "revId": "e52b8b332afb72ec745ed0de0d63360d5f40c1a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f74c4644",
+        "filename": "schemas/hardware_vtep/src/test/java/org/opendaylight/ovsdb/schema/hardwarevtep/HardwareVtepSchemaTestBase.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-10T21:05:16Z",
+      "side": 1,
+      "message": "Also note a Boolean is by default null\nThis would be best:\n\nBoolean supportsHardwareVtepSchema;\n\nNo need for static access",
+      "revId": "e52b8b332afb72ec745ed0de0d63360d5f40c1a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_776036a5",
+        "filename": "schemas/hardware_vtep/src/test/java/org/opendaylight/ovsdb/schema/hardwarevtep/HardwareVtepSchemaTestBase.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-10T21:05:16Z",
+      "side": 1,
+      "message": "This local variable has the same variable in the class scope.\nI\u0027d suggest the following\n\n if (supportsHardwareVtepSchema \u003d\u003d null) {\n   supportsHardwareVtepSchema \u003d false;\n   // Drop in to your for loop below\n\nThe result of supportsHardwareVtepSchema will persist for all other tests in the sub-class.",
+      "revId": "e52b8b332afb72ec745ed0de0d63360d5f40c1a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5744121a",
+        "filename": "schemas/hardware_vtep/src/test/java/org/opendaylight/ovsdb/schema/hardwarevtep/HardwareVtepSchemaTestBase.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-10T21:05:16Z",
+      "side": 1,
+      "message": "Drop this assertion as if the vtep schema is not supported all tests will fail",
+      "revId": "e52b8b332afb72ec745ed0de0d63360d5f40c1a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

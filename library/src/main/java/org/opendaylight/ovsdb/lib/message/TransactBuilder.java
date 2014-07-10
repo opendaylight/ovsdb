@@ -9,15 +9,21 @@
  */
 package org.opendaylight.ovsdb.lib.message;
 
-import com.google.common.collect.Lists;
+import java.util.List;
 
 import org.opendaylight.ovsdb.lib.jsonrpc.Params;
 import org.opendaylight.ovsdb.lib.operations.Operation;
-import java.util.List;
+import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+
+import com.google.common.collect.Lists;
 
 public class TransactBuilder implements Params {
 
     List<Operation> requests = Lists.newArrayList();
+    DatabaseSchema dbSchema;
+    public TransactBuilder (DatabaseSchema dbSchema) {
+        this.dbSchema = dbSchema;
+    }
 
     public List<Operation> getRequests() {
         return requests;
@@ -25,7 +31,7 @@ public class TransactBuilder implements Params {
 
     @Override
     public List<Object> params() {
-        List<Object> lists = Lists.newArrayList((Object)"Open_vSwitch");
+        List<Object> lists = Lists.newArrayList((Object)dbSchema.getName());
         lists.addAll(requests);
         return lists;
     }

@@ -62,7 +62,7 @@ public class OvsdbClientTestITTyped extends OvsdbTestBase {
         String namedUuid = "br_test";
         int insertOperationIndex = 0;
 
-        TransactionBuilder transactionBuilder = ovs.transactBuilder()
+        TransactionBuilder transactionBuilder = ovs.transactBuilder(dbSchema)
                 .add(op.insert(rBridge)
                         .withId(namedUuid))
                 .add(op.mutate(ovsTable)
@@ -108,7 +108,7 @@ public class OvsdbClientTestITTyped extends OvsdbTestBase {
         GenericTableSchema ovsTable = dbSchema.table("Open_vSwitch", GenericTableSchema.class);
         ColumnSchema<GenericTableSchema, Set<UUID>> bridges = ovsTable.multiValuedColumn("bridges", UUID.class);
 
-        ListenableFuture<List<OperationResult>> results = ovs.transactBuilder()
+        ListenableFuture<List<OperationResult>> results = ovs.transactBuilder(dbSchema)
                 .add(op.delete(bridge)
                         .where(name.opEqual(testBridgeName))
                         .build())

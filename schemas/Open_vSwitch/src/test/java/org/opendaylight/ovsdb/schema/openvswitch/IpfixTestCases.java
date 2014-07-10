@@ -85,7 +85,7 @@ public class IpfixTestCases extends OpenVswitchSchemaTestBase {
         ipfix.setSampling(ImmutableSet.of(sampling));
         ipfix.setExternalIds(ImmutableMap.of("<3", "ovs"));
         Bridge bridge = ovs.getTypedRowWrapper(Bridge.class, null);
-        TransactionBuilder transactionBuilder = ovs.transactBuilder()
+        TransactionBuilder transactionBuilder = ovs.transactBuilder(OpenVswitchSchemaSuiteIT.dbSchema)
                 .add(op.insert(ipfix)
                         .withId(ipfixUuidStr))
                 .add(op.mutate(bridge.getSchema())

@@ -249,7 +249,8 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         logger.debug("insertRow Connection : {} Table : {} ParentTable : {} Parent Column: {} Parent UUID : {} Row : {}",
                      client.getConnectionInfo(), tableName, parentColumn[0], parentColumn[1], parentUuid, row);
 
-        TransactionBuilder transactionBuilder = client.transactBuilder();
+        DatabaseSchema dbSchema = client.getDatabaseSchema(OvsVswitchdSchemaConstants.DATABASE_NAME);
+        TransactionBuilder transactionBuilder = client.transactBuilder(dbSchema);
 
         String namedUuid = "Transaction_"+ tableName;
         this.processInsertTransaction(client, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName,
@@ -286,8 +287,8 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         logger.debug("updateRow : Connection : {} databaseName : {} tableName : {} rowUUID : {} row : {}",
                       client.getConnectionInfo(), databaseName, tableName, rowUUID, row.toString());
         try{
-            TransactionBuilder transactionBuilder = client.transactBuilder();
             DatabaseSchema dbSchema = client.getDatabaseSchema(databaseName);
+            TransactionBuilder transactionBuilder = client.transactBuilder(dbSchema);
             TableSchema<GenericTableSchema> tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
             ColumnSchema<GenericTableSchema, UUID> _uuid = tableSchema.column("_uuid", UUID.class);
             transactionBuilder.add(op.update(tableSchema, row)
@@ -346,7 +347,8 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         logger.debug("deleteRow : Connection : {} databaseName : {} tableName : {} Uuid : {} ParentTable : {} ParentColumn : {}",
                 client.getConnectionInfo(), databaseName, tableName, uuid, parentColumn[0], parentColumn[1]);
 
-        TransactionBuilder transactionBuilder = client.transactBuilder();
+        DatabaseSchema dbSchema = client.getDatabaseSchema(databaseName);
+        TransactionBuilder transactionBuilder = client.transactBuilder(dbSchema);
         this.processDeleteTransaction(client, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName,
                                       parentColumn[0], parentColumn[1], uuid, transactionBuilder);
 

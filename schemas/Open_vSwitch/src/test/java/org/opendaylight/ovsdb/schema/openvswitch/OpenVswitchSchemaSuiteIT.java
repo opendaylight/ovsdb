@@ -9,14 +9,15 @@
  */
 package org.opendaylight.ovsdb.schema.openvswitch;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
@@ -39,6 +40,7 @@ import java.util.Map;
 public class OpenVswitchSchemaSuiteIT {
 
     // Keep this data between test runs
+    static DatabaseSchema dbSchema;
     static OvsdbClient ovsdbClient;
     static UUID testBridgeUuid;
     static UUID testSslUuid;

@@ -55,7 +55,7 @@ public class NetflowTestCases extends OpenVswitchSchemaTestBase {
         netFlow.setActivityTimeout(ImmutableSet.of(activityTimeout));
         netFlow.setExternalIds(ImmutableMap.of("big", "baby"));
         Bridge bridge = ovs.getTypedRowWrapper(Bridge.class, null);
-        TransactionBuilder transactionBuilder = ovs.transactBuilder()
+        TransactionBuilder transactionBuilder = ovs.transactBuilder(OpenVswitchSchemaSuiteIT.dbSchema)
                 .add(op.insert(netFlow.getSchema())
                         .withId(netFlowUuidStr)
                         .value(netFlow.getTargetsColumn())

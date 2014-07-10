@@ -368,7 +368,7 @@ public class OF10Provider implements NetworkProvider {
                     logger.error("Cannot identify {} interface on {}", patchInt, node);
                 }
                 for (Row row : intfs.values()) {
-                    Interface tunIntf = (Interface)row;
+                    Interface tunIntf = ovsdbTable.getTypedRow(node, Interface.class, row);
                     if (tunIntf.getName().equals(this.getTunnelName(tunnelType, segmentationId, dst))) {
                         Set<Long> of_ports = tunIntf.getOpenFlowPortColumn().getData();
                         if (of_ports == null || of_ports.size() <= 0) {

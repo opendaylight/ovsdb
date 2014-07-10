@@ -16,6 +16,24 @@
       "revId": "faee4edc0e5739409d7acbf2134640846df2930d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f4b1a48f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-10T16:42:49Z",
+      "side": 1,
+      "message": "Agree with Madhu. As a convention I avoid using the bug in the title to an put it in the body. Commit Title should explain what I did. Message can elaborate on if that fixes or updates the bug ;)",
+      "parentUuid": "fa82b9bf_94c378ec",
+      "revId": "faee4edc0e5739409d7acbf2134640846df2930d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

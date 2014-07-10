@@ -105,7 +105,7 @@ public class OF10Provider implements NetworkProvider {
      * The logic is to simply match on the incoming tunnel OF-Port (which carries the TenantNetwork GRE-Key)
      * and rewrite the Corresponding internal Vlan and pass it on to br-int via the patch port.
      */
-    private void programLocalIngressTunnelBridgeRules(Node node, int tunnelOFPort, int internalVlan, int patchPort) {
+    private void programLocalIngressTunnelBridgeRules(Node node, long tunnelOFPort, int internalVlan, long patchPort) {
         String brNetId = internalNetworkManager.getInternalBridgeUUID(node, adminConfigManager.getNetworkBridgeName());
         if (brNetId == null) {
             logger.error("Failed to initialize Flow Rules for {}", node);
@@ -137,7 +137,7 @@ public class OF10Provider implements NetworkProvider {
         }
     }
 
-    private void removeLocalIngressTunnelBridgeRules(Node node, int tunnelOFPort, int internalVlan, int patchPort) {
+    private void removeLocalIngressTunnelBridgeRules(Node node, long tunnelOFPort, int internalVlan, long patchPort) {
         String brNetId = internalNetworkManager.getInternalBridgeUUID(node, adminConfigManager.getNetworkBridgeName());
         if (brNetId == null) {
             logger.error("Failed to remove Flow Rules for {}", node);
@@ -167,8 +167,8 @@ public class OF10Provider implements NetworkProvider {
      * and output the traffic to the appropriate GRE Tunnel (which carries the GRE-Key for that Tenant Network).
      * Also perform the Strip-Vlan action.
      */
-    private void programRemoteEgressTunnelBridgeRules(Node node, int patchPort, String attachedMac,
-            int internalVlan, int tunnelOFPort) {
+    private void programRemoteEgressTunnelBridgeRules(Node node, long patchPort, String attachedMac,
+            int internalVlan, long tunnelOFPort) {
         String brNetId = internalNetworkManager.getInternalBridgeUUID(node, adminConfigManager.getNetworkBridgeName());
         if (brNetId == null) {
             logger.error("Failed to initialize Flow Rules for {}", node);
@@ -202,8 +202,8 @@ public class OF10Provider implements NetworkProvider {
         }
     }
 
-    private void removeRemoteEgressTunnelBridgeRules(Node node, int patchPort, String attachedMac,
-            int internalVlan, int tunnelOFPort) {
+    private void removeRemoteEgressTunnelBridgeRules(Node node, long patchPort, String attachedMac,
+            int internalVlan, long tunnelOFPort) {
         String brNetId = internalNetworkManager.getInternalBridgeUUID(node, adminConfigManager.getNetworkBridgeName());
         if (brNetId == null) {
             logger.error("Failed to initialize Flow Rules for {}", node);
@@ -232,7 +232,7 @@ public class OF10Provider implements NetworkProvider {
      * and output the traffic to all the GRE-Tunnels for this Tenant Network (which carries the GRE-Key).
      * Also perform the Strip-Vlan action.
      */
-    private void programFloodEgressTunnelBridgeRules(Node node, int patchPort, int internalVlan, int tunnelOFPort) {
+    private void programFloodEgressTunnelBridgeRules(Node node, long patchPort, int internalVlan, long tunnelOFPort) {
         String brNetId = internalNetworkManager.getInternalBridgeUUID(node, adminConfigManager.getNetworkBridgeName());
         if (brNetId == null) {
             logger.error("Failed to initialize Flow Rules for {}", node);
@@ -287,7 +287,7 @@ public class OF10Provider implements NetworkProvider {
         }
     }
 
-    private void removeFloodEgressTunnelBridgeRules(Node node, int patchPort, int internalVlan, int tunnelOFPort) {
+    private void removeFloodEgressTunnelBridgeRules(Node node, long patchPort, int internalVlan, long tunnelOFPort) {
         String brNetId = internalNetworkManager.getInternalBridgeUUID(node, adminConfigManager.getNetworkBridgeName());
         if (brNetId == null) {
             logger.error("Failed to remove Flow Rules for {}", node);
@@ -346,7 +346,7 @@ public class OF10Provider implements NetworkProvider {
         }
         String patchInt = adminConfigManager.getPatchToIntegration();
 
-        int patchOFPort = -1;
+        long patchOFPort = -1;
         try {
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
             Map<String, Row> intfs = ovsdbTable.getRows(node, ovsdbTable.getTableName(node, Interface.class));
@@ -359,7 +359,7 @@ public class OF10Provider implements NetworkProvider {
                             logger.error("Could NOT Identified Patch port {} on {}", patchInt, node);
                             continue;
                         }
-                        patchOFPort = Long.valueOf(((Integer)of_ports.toArray()[0]).longValue()).intValue();
+                        patchOFPort = (long)of_ports.toArray()[0];
                         logger.debug("Identified Patch port {} -> OF ({}) on {}", patchInt, patchOFPort, node);
                         break;
                     }
@@ -375,7 +375,7 @@ public class OF10Provider implements NetworkProvider {
                             logger.warn("Could not Identify Tunnel port {} on {}. Don't panic. It might get converged soon...", tunIntf.getName(), node);
                             continue;
                         }
-                        int tunnelOFPort = Long.valueOf(((Integer)of_ports.toArray()[0]).longValue()).intValue();
+                        long tunnelOFPort = (long)of_ports.toArray()[0];
 
                         if (tunnelOFPort == -1) {
                             logger.warn("Tunnel Port {} on node {}: OFPort = -1 . Don't panic. It might get converged soon...", tunIntf.getName(), node);
@@ -422,7 +422,7 @@ public class OF10Provider implements NetworkProvider {
         }
         String patchInt = adminConfigManager.getPatchToIntegration();
 
-        int patchOFPort = -1;
+        long patchOFPort = -1;
         try {
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
             Map<String, Row> intfs = ovsdbTable.getRows(node, ovsdbTable.getTableName(node, Interface.class));
@@ -435,7 +435,7 @@ public class OF10Provider implements NetworkProvider {
                             logger.error("Could NOT Identified Patch port {} on {}", patchInt, node);
                             continue;
                         }
-                        patchOFPort = Long.valueOf(((Integer)of_ports.toArray()[0]).longValue()).intValue();
+                        patchOFPort = (long)of_ports.toArray()[0];
                         logger.debug("Identified Patch port {} -> OF ({}) on {}", patchInt, patchOFPort, node);
                         break;
                     }
@@ -451,7 +451,7 @@ public class OF10Provider implements NetworkProvider {
                             logger.error("Could NOT Identify Tunnel port {} on {}", tunIntf.getName(), node);
                             continue;
                         }
-                        int tunnelOFPort = Long.valueOf(((Integer)of_ports.toArray()[0]).longValue()).intValue();
+                        long tunnelOFPort = (long)of_ports.toArray()[0];
 
                         if (tunnelOFPort == -1) {
                             logger.error("Could NOT Identify Tunnel port {} -> OF ({}) on {}", tunIntf.getName(), tunnelOFPort, node);
@@ -473,23 +473,23 @@ public class OF10Provider implements NetworkProvider {
         }
     }
 
-    private String getIntModVlanFlowName (int inOFPort, String fromVlan, String toVlan) {
+    private String getIntModVlanFlowName (long inOFPort, String fromVlan, String toVlan) {
         return "int_mod_"+inOFPort+"_"+fromVlan+"_"+toVlan;
     }
 
-    private String getIntDropFlowName (int inOFPort) {
+    private String getIntDropFlowName (long inOFPort) {
         return "int_drop_"+inOFPort;
     }
 
-    private String getNetModVlanFlowName (int inOFPort, String fromVlan, String toVlan) {
+    private String getNetModVlanFlowName (long inOFPort, String fromVlan, String toVlan) {
         return "net_mod_"+inOFPort+"_"+fromVlan+"_"+toVlan;
     }
 
-    private String getNetDropFlowName (int inOFPort) {
+    private String getNetDropFlowName (long inOFPort) {
         return "net_drop_"+inOFPort;
     }
 
-    private String getNetFwdFlowName (int inOFPort, int outOFPort, String vlan) {
+    private String getNetFwdFlowName (long inOFPort, long outOFPort, String vlan) {
         return "net_fwd_"+vlan+"_"+inOFPort+"_"+outOFPort;
     }
 
@@ -504,7 +504,7 @@ public class OF10Provider implements NetworkProvider {
     }
 
     /* in_port=p actions=drop */
-    private void programDropRule (Node node, Node ofNode, int inOFPort, String flowName) {
+    private void programDropRule (Node node, Node ofNode, long inOFPort, String flowName) {
         logger.debug("programDropRule: node: {} / {}, inOfPort: {}, flowName: {}",
                 node, ofNode, inOFPort, flowName);
 
@@ -526,8 +526,8 @@ public class OF10Provider implements NetworkProvider {
         }
     }
 
-    /* in_port=p2,dl_vlan=v actions=mod_vlan_vid,[NORMAL|output:p2] */
-    private void programModVlanRule (Node node, Node ofNode, int inOFPort, int outOFPort, String fromVlan,
+    /* in_port=p1,dl_vlan=v actions=mod_vlan_vid,[NORMAL|output:p2] */
+    private void programModVlanRule (Node node, Node ofNode, long inOFPort, long outOFPort, String fromVlan,
                                      String toVlan, String flowName) {
         logger.debug("programModVlanRule: node: {} / {}, inOfPort: {}, fromVlan: {}, toVlan: {}, flowName: {}",
                 node, ofNode, inOFPort, fromVlan, toVlan, flowName);
@@ -557,8 +557,8 @@ public class OF10Provider implements NetworkProvider {
     }
 
     /* in_port=p1,dl_vlan=v actions=output:p2 */
-    private void programForwardRule (Node node, Node ofNode, int inOFPort, int outOFPort, String vlan, String flowName) {
-        logger.debug("programModVlanRule: node: {} / {}, inOfPort: {}, outOFPort: {}, flowName: {}",
+    private void programForwardRule (Node node, Node ofNode, long inOFPort, long outOFPort, String vlan, String flowName) {
+        logger.debug("programForwardRule: node: {} / {}, inOfPort: {}, outOFPort: {}, flowName: {}",
                 node, ofNode, inOFPort, outOFPort, flowName);
 
         try {
@@ -580,8 +580,8 @@ public class OF10Provider implements NetworkProvider {
         }
     }
 
-    public int getOFPort (Node node, String portName) {
-        int ofPort = -1;
+    public long getOFPort (Node node, String portName) {
+        long ofPort = -1;
         try {
             OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
             Map<String, Row> intfs = ovsdbTable.getRows(node, ovsdbTable.getTableName(node, Interface.class));
@@ -594,7 +594,7 @@ public class OF10Provider implements NetworkProvider {
                             logger.error("Could not identify patch port {} on {}", portName, node);
                             continue;
                         }
-                        ofPort = Long.valueOf(((Integer)of_ports.toArray()[0]).longValue()).intValue();
+                        ofPort = (Long)of_ports.toArray()[0];
                         logger.debug("Identified port {} -> OF ({}) on {}", portName, ofPort, node);
                         break;
                     }
@@ -611,9 +611,9 @@ public class OF10Provider implements NetworkProvider {
      * Transient class to return all the vlan network data needed for flow programming.
      */
     public class vlanNet {
-        public int patchIntOfPort;
-        public int patchNetOfPort;
-        public int physicalOfPort;
+        public long patchIntOfPort;
+        public long patchNetOfPort;
+        public long physicalOfPort;
         public int internalVlan;
 
         public vlanNet (NeutronNetwork network, Node node, Interface intf) {
@@ -633,15 +633,15 @@ public class OF10Provider implements NetworkProvider {
             }
         }
 
-        public int getPatchIntOfPort () {
+        public long getPatchIntOfPort () {
             return patchIntOfPort;
         }
 
-        public int getPatchNetOfPort () {
+        public long getPatchNetOfPort () {
             return patchNetOfPort;
         }
 
-        public int getphysicalOfPort () {
+        public long getphysicalOfPort () {
             return physicalOfPort;
         }
 
@@ -726,8 +726,8 @@ public class OF10Provider implements NetworkProvider {
         vlanNet vlanNet = new vlanNet(network, node, intf);
         if (vlanNet.isValid()) {
             String netBrName = adminConfigManager.getNetworkBridgeName();
-            String intModVlanFlowName = getIntModVlanFlowName(vlanNet.getPatchNetOfPort(), network.getProviderSegmentationID(), vlanNet.getInternalVlan()+"");
-            String netModVlanFlowName = getNetModVlanFlowName(vlanNet.getPatchNetOfPort(), vlanNet.getInternalVlan()+"", network.getProviderSegmentationID());
+            String intModVlanFlowName = getIntModVlanFlowName(vlanNet.getPatchNetOfPort(), vlanNet.getInternalVlan()+"", network.getProviderSegmentationID());
+            String netModVlanFlowName = getNetModVlanFlowName(vlanNet.getPatchNetOfPort(), network.getProviderSegmentationID(), vlanNet.getInternalVlan()+"");
 
             Node netOFNode = getOFNode(node, netBrName);
             if (netOFNode == null) {
@@ -748,8 +748,8 @@ public class OF10Provider implements NetworkProvider {
         vlanNet vlanNet = new vlanNet(network, node, intf);
         if (vlanNet.isValid()) {
             String netBrName = adminConfigManager.getNetworkBridgeName();
-            String intModVlanFlowName = getIntModVlanFlowName(vlanNet.getPatchNetOfPort(), network.getProviderSegmentationID(), vlanNet.getInternalVlan()+"");
-            String netModVlanFlowName = getNetModVlanFlowName(vlanNet.getPatchNetOfPort(), vlanNet.getInternalVlan()+"", network.getProviderSegmentationID());
+            String intModVlanFlowName = getIntModVlanFlowName(vlanNet.getPatchNetOfPort(), vlanNet.getInternalVlan()+"", network.getProviderSegmentationID());
+            String netModVlanFlowName = getNetModVlanFlowName(vlanNet.getPatchNetOfPort(), network.getProviderSegmentationID(), vlanNet.getInternalVlan()+"");
 
             Node netOFNode = getOFNode(node, netBrName);
             if (netOFNode == null) {

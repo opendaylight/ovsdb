@@ -9,15 +9,13 @@
  */
 package org.opendaylight.ovsdb.lib.schema;
 
-import java.util.Set;
-
 import org.opendaylight.ovsdb.lib.error.TyperException;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonUtils;
 import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
+import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.collect.Sets;
 
 
 public abstract class ColumnType {
@@ -165,7 +163,7 @@ public abstract class ColumnType {
         @Override
         public Object valueFromJson(JsonNode value) {
             if (isMultiValued()) {
-                Set<Object> result = Sets.newHashSet();
+                OvsDBSet<Object> result = new OvsDBSet<Object>();
                 if(value.isArray()) {
                     if (value.size() == 2) {
                         if (value.get(0).isTextual() && "set".equals(value.get(0).asText())) {

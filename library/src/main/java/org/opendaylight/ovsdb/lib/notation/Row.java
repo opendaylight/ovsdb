@@ -16,12 +16,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.opendaylight.ovsdb.lib.notation.json.RowSerializer;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.Maps;
 
+@JsonSerialize(using = RowSerializer.class)
 public class Row<E extends TableSchema<E>> {
     @JsonIgnore
     private TableSchema<E> tableSchema;

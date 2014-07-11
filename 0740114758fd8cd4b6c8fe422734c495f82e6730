@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_5d5af32a",
+        "filename": "distribution/opendaylight/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-11T13:13:43Z",
+      "side": 0,
+      "message": "The reason we added the ovsdb_ prefix was to provide a way for developers to differentiate a bundle when imported into eclipse. \nEclipse by default will represent a project by its Artifact-id and hence changing it the way it is done now will show up as \"library\" and is not useful. Especially when multi project imports are done in the same workspace. It can be a very confusing thing for the eclipse user.\n\nSince we have to standardize on the org.opendaylight.ovsdb as the groupId, we dont have a choice to move the \"ovsdb\" from group to artifactId. And hence the redundancy :-(",
+      "revId": "0740114758fd8cd4b6c8fe422734c495f82e6730",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

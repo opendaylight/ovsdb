@@ -2,4 +2,3 @@
 host=git.opendaylight.org
 port=29418
 project=ovsdb.git
-defaultbranch=topic/schema

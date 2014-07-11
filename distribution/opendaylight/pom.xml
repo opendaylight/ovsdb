@@ -7,14 +7,14 @@ see https://git.opendaylight.org/gerrit/#/c/390/
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.ovsdb</groupId>
-    <artifactId>ovsdb_commons</artifactId>
+    <artifactId>commons</artifactId>
     <version>1.1.0-SNAPSHOT</version>
     <relativePath>../../commons/parent/</relativePath>
   </parent>
 
   <artifactId>distribution.ovsdb</artifactId>
   <packaging>pom</packaging>
-  <name>ovsdb Distribution</name>
+  <name>distribution</name>
   <dependencies>
     <!-- openflowjava -->
     <dependency>
@@ -55,32 +55,32 @@ see https://git.opendaylight.org/gerrit/#/c/390/
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>ovsdb_library</artifactId>
+      <artifactId>library</artifactId>
       <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>ovsdb_neutron</artifactId>
+      <artifactId>neutron</artifactId>
       <version>0.7.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>ovsdb_northbound</artifactId>
+      <artifactId>northbound</artifactId>
       <version>0.6.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>ovsdb_plugin</artifactId>
+      <artifactId>plugin</artifactId>
       <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>ovsdb_schema.Open_vSwitch</artifactId>
+      <artifactId>schema.openvswitch</artifactId>
       <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>ovsdb_schema.hardware_vtep</artifactId>
+      <artifactId>schema.hardwarevtep</artifactId>
       <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>

@@ -16,9 +16,9 @@ import java.util.Map;
 
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
-import org.opendaylight.ovsdb.lib.table.Open_vSwitch;
-import org.opendaylight.ovsdb.lib.table.internal.Table;
-import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
+import org.opendaylight.ovsdb.lib.notation.Row;
+import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
+import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,60 +70,71 @@ public class AdminConfigManager implements IAdminConfigManager{
         if (providerMappingsConfigName == null) providerMappingsConfigName = DEFAULT_PROVIDER_MAPPINGS_CONFIG_STRING;
     }
 
+    @Override
     public String getIntegrationBridgeName() {
         return integrationBridgeName;
     }
 
+    @Override
     public void setIntegrationBridgeName(String integrationBridgeName) {
         this.integrationBridgeName = integrationBridgeName;
     }
 
+    @Override
     public String getNetworkBridgeName() { return networkBridgeName; }
 
+    @Override
     public void setNetworkBridgeName(String networkBridgeName) {
         this.networkBridgeName = networkBridgeName;
     }
 
+    @Override
     public String getExternalBridgeName() {
         return externalBridgeName;
     }
 
+    @Override
     public void setExternalBridgeName (String externalBridgeName) {
         this.externalBridgeName = externalBridgeName;
     }
 
+    @Override
     public String getPatchToIntegration() {
         return patchToIntegration;
     }
 
+    @Override
     public void setPatchToIntegration(String patchToIntegration) {
         this.patchToIntegration = patchToIntegration;
     }
 
+    @Override
     public String getPatchToNetwork() { return patchToNetwork; }
 
+    @Override
     public void setPatchToNetwork(String patchToNetwork) {
         this.patchToNetwork = patchToNetwork;
     }
 
+    @Override
     public InetAddress getTunnelEndPoint(Node node) {
         InetAddress address = null;
-        OVSDBConfigService ovsdbConfig = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+        OvsdbConfigService ovsdbConfig = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class, this);
         try {
-            Map<String, Table<?>> ovsTable = ovsdbConfig.getRows(node, Open_vSwitch.NAME.getName());
+            Map<String, Row> ovsTable = ovsdbConfig.getRows(node, ovsdbConfig.getTableName(node, OpenVSwitch.class));
 
             if (ovsTable == null) {
-                logger.error("Open_vSwitch table is null for Node {} ", node);
+                logger.error("OpenVSwitch table is null for Node {} ", node);
                 return null;
             }
 
             // While there is only one entry in the HashMap, we can't access it by index...
-            for (Table<?> row : ovsTable.values()) {
-                Open_vSwitch ovsRow = (Open_vSwitch)row;
-                Map<String, String> configs = ovsRow.getOther_config();
+            for (Row row : ovsTable.values()) {
+                OpenVSwitch ovsRow = ovsdbConfig.getTypedRow(node, OpenVSwitch.class, row);
+                Map<String, String> configs = ovsRow.getOtherConfigColumn().getData();
 
                 if (configs == null) {
-                    logger.debug("Open_vSwitch table is null for Node {} ", node);
+                    logger.debug("OpenVSwitch table is null for Node {} ", node);
                     continue;
                 }
 
@@ -151,27 +162,28 @@ public class AdminConfigManager implements IAdminConfigManager{
      * Provider mappings will be of the following format:
      * provider_mappings=physnet1:eth1[,physnet2:eth2]
      */
-      public String getPhysicalInterfaceName (Node node, String physicalNetwork) {
+      @Override
+    public String getPhysicalInterfaceName (Node node, String physicalNetwork) {
           String phyIf = null;
 
-          OVSDBConfigService ovsdbConfig = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+          OvsdbConfigService ovsdbConfig = (OvsdbConfigService) ServiceHelper.getGlobalInstance(OvsdbConfigService.class, this);
           try {
-            Map<String, Table<?>> ovsTable = ovsdbConfig.getRows(node, Open_vSwitch.NAME.getName());
+            Map<String, Row> ovsTable = ovsdbConfig.getRows(node, ovsdbConfig.getTableName(node, OpenVSwitch.class));
 
             if (ovsTable == null) {
-                logger.error("Open_vSwitch table is null for Node {} ", node);
+                logger.error("OpenVSwitch table is null for Node {} ", node);
                 return null;
             }
 
-            // Loop through all the Open_vSwitch rows looking for the first occurrence of other_config.
+            // Loop through all the OpenVSwitch rows looking for the first occurrence of other_config.
             // The specification does not restrict the number of rows so we choose the first we find.
-            for (Table<?> row : ovsTable.values()) {
+            for (Row row : ovsTable.values()) {
                 String providerMaps;
-                Open_vSwitch ovsRow = (Open_vSwitch) row;
-                Map<String, String> configs = ovsRow.getOther_config();
+                OpenVSwitch ovsRow = ovsdbConfig.getTypedRow(node, OpenVSwitch.class, row);
+                Map<String, String> configs = ovsRow.getOtherConfigColumn().getData();
 
                 if (configs == null) {
-                    logger.debug("Open_vSwitch table is null for Node {} ", node);
+                    logger.debug("OpenVSwitch table is null for Node {} ", node);
                     continue;
                 }
 
@@ -212,26 +224,27 @@ public class AdminConfigManager implements IAdminConfigManager{
      * bridge_mappings=physnet1:eth1,physnet2:eth2
      * Method will return list = {eth1, eth2}
      */
+    @Override
     public List<String> getAllPhysicalInterfaceNames(Node node) {
         List<String> phyIfName = new ArrayList<String>();
 
         try {
-            OVSDBConfigService ovsdbConfig = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-            Map<String, Table<?>> ovsTable = ovsdbConfig.getRows(node, Open_vSwitch.NAME.getName());
+            OvsdbConfigService ovsdbConfig = (OvsdbConfigService) ServiceHelper.getGlobalInstance(OvsdbConfigService.class, this);
+            Map<String, Row> ovsTable = ovsdbConfig.getRows(node, ovsdbConfig.getTableName(node, OpenVSwitch.class));
 
             if (ovsTable == null) {
-                logger.error("Open_vSwitch table is null for Node {} ", node);
+                logger.error("OpenVSwitch table is null for Node {} ", node);
                 return null;
             }
 
             // While there is only one entry in the HashMap, we can't access it by index...
-            for (Table<?> row : ovsTable.values()) {
+            for (Row row : ovsTable.values()) {
                 String bridgeMaps;
-                Open_vSwitch ovsRow = (Open_vSwitch) row;
-                Map<String, String> configs = ovsRow.getOther_config();
+                OpenVSwitch ovsRow = ovsdbConfig.getTypedRow(node, OpenVSwitch.class, row);
+                Map<String, String> configs = ovsRow.getOtherConfigColumn().getData();
 
                 if (configs == null) {
-                    logger.debug("Open_vSwitch table is null for Node {} ", node);
+                    logger.debug("OpenVSwitch table is null for Node {} ", node);
                     continue;
                 }
 
@@ -257,9 +270,4 @@ public class AdminConfigManager implements IAdminConfigManager{
 
         return phyIfName;
     }
-
-    public boolean isInterested (String tableName) {
-        return tableName.equalsIgnoreCase(Open_vSwitch.NAME.getName());
-    }
-
 }

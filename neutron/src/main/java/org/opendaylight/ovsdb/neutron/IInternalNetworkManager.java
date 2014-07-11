@@ -12,7 +12,7 @@ package org.opendaylight.ovsdb.neutron;
 
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.ovsdb.lib.table.Bridge;
+import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 
 public interface IInternalNetworkManager {
     public String getInternalBridgeUUID (Node node, String bridgeName);

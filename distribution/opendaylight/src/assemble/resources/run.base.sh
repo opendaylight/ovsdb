@@ -9,18 +9,19 @@ OF_FILTER=
 # Be extra careful to pass on usage from run.internal.sh, but add our
 # usage as well in the standard way
 function usage {
-    $CONTROLLER_RUNSH -help | sed 's/\[-help\]/\[-help\] \[-of13\] \[-bundlefilter \<bundlefilter\> \]/' | sed "s;$CONTROLLER_RUNSH;$0;"
+    $CONTROLLER_RUNSH -help | sed 's/\[-help\]/\[-help\] \[-of10\] \[-bundlefilter \<bundlefilter\> \]/' | sed "s;$CONTROLLER_RUNSH;$0;"
     exit 1
 }
 
-OF13=0
+OF13=1
 BUNDLEFILTER=
 while true ; do
     (( i += 1 ))
     case "${@:$i:1}" in
-        -of13) OF13=1 ;;
+        -of10) OF13=0 ; (( i += 1 ));;
+        -of13) OF13=1 ; (( i += 1 ));;
         -bundlefilter) (( i += 1 )); BUNDLEFILTER="|${@:$i:1}";;
-        -help) usage ;;
+        -help) (( i += 1 )); helparg=${@:$i:1}; usage ;;
         "") break ;;
     esac
 done
@@ -39,7 +40,8 @@ fi
 
 # Make sure we suck out our additional args so as to not confuse
 # run.internal.sh
-NEWARGS=`echo $@|sed 's/-of13//'|sed 's/-bundlefilter[ ]*[^ ]*//'`
+NEWARGS=`echo $@|sed 's/-of13//'|sed 's/-of10//'|sed 's/-bundlefilter[ ]*[^ ]*//'`
+
 
 # Build the filter string
 FILTERBEGINING='^(?!'

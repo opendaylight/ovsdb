@@ -19,10 +19,10 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
-import org.opendaylight.ovsdb.lib.table.Interface;
-import org.opendaylight.ovsdb.lib.table.internal.Table;
+import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
-import org.opendaylight.ovsdb.plugin.OVSDBInventoryListener;
+import org.opendaylight.ovsdb.plugin.OvsdbInventoryListener;
+import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -139,7 +139,7 @@ public class NetworkHandler extends BaseHandler
         List <NeutronNetwork> networks = new ArrayList<NeutronNetwork>();
         if (neutronNetworkService != null) {
             networks = neutronNetworkService.getAllNetworks();
-            OVSDBInventoryListener inventoryListener = (OVSDBInventoryListener)ServiceHelper.getGlobalInstance(OVSDBInventoryListener.class, this);
+            OvsdbInventoryListener inventoryListener = (OvsdbInventoryListener)ServiceHelper.getGlobalInstance(OvsdbInventoryListener.class, this);
             if (networks.isEmpty()) {
                 logger.trace("neutronNetworkDeleted: last tenant network, delete tunnel ports...");
                 IConnectionServiceInternal connectionService = (IConnectionServiceInternal)
@@ -149,20 +149,20 @@ public class NetworkHandler extends BaseHandler
                 for (Node node : nodes) {
                     List<String> phyIfName = adminConfigManager.getAllPhysicalInterfaceNames(node);
                     try {
-                        ConcurrentMap<String, Table<?>> interfaces = this.ovsdbConfigService.getRows(node, Interface.NAME.getName());
+                        ConcurrentMap<String, Row> interfaces = this.ovsdbConfigService.getRows(node, ovsdbConfigService.getTableName(node, Interface.class));
                         if (interfaces != null) {
                             for (String intfUUID : interfaces.keySet()) {
-                                Interface intf = (Interface) interfaces.get(intfUUID);
-                                String intfType = intf.getType();
+                                Interface intf = ovsdbConfigService.getTypedRow(node, Interface.class, interfaces.get(intfUUID));
+                                String intfType = intf.getTypeColumn().getData();
                                 if (intfType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) || intfType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)) {
                                     /* delete tunnel ports on this node */
                                     logger.trace("Delete tunnel intf {}", intf);
-                                    inventoryListener.rowRemoved(node, Interface.NAME.getName(), intfUUID,
-                                            intf, null);
+                                    inventoryListener.rowRemoved(node, intf.getSchema().getName(), intfUUID,
+                                            intf.getRow(), null);
                                 } else if (!phyIfName.isEmpty() && phyIfName.contains(intf.getName())) {
                                     logger.trace("Delete physical intf {}", intf);
-                                    inventoryListener.rowRemoved(node, Interface.NAME.getName(), intfUUID,
-                                            intf, null);
+                                    inventoryListener.rowRemoved(node, intf.getSchema().getName(), intfUUID,
+                                            intf.getRow(), null);
                                 }
                             }
                         }

@@ -9,7 +9,6 @@
  */
 package org.opendaylight.ovsdb.neutron;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,16 +28,16 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
-import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
+import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
+import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.lib.table.Bridge;
-import org.opendaylight.ovsdb.lib.table.Interface;
-import org.opendaylight.ovsdb.lib.table.Open_vSwitch;
-import org.opendaylight.ovsdb.lib.table.Port;
-import org.opendaylight.ovsdb.lib.table.internal.Table;
 import org.opendaylight.ovsdb.neutron.provider.IProviderNetworkManager;
 import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
-import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
+import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
+import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
+import org.opendaylight.ovsdb.schema.openvswitch.Interface;
+import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
+import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +56,7 @@ public class TenantNetworkManager implements ITenantNetworkManager {
         }
     }
 
+    @Override
     public int getInternalVlan(Node node, String networkId) {
         String nodeUuid = getNodeUUID(node);
         if (nodeUuid == null) {
@@ -85,6 +85,7 @@ public class TenantNetworkManager implements ITenantNetworkManager {
         return nodeConfigurationCache.get(nodeUuid);
     }
 
+    @Override
     public void reclaimTenantNetworkInternalVlan(Node node, String portUUID, NeutronNetwork network) {
         String nodeUuid = getNodeUUID(node);
         if (nodeUuid == null) {
@@ -109,6 +110,7 @@ public class TenantNetworkManager implements ITenantNetworkManager {
         logger.debug("Removed Vlan {} on {}", vlan, portUUID);
     }
 
+    @Override
     public void networkCreated (String networkId) {
         IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
         List<Node> nodes = connectionService.getNodes();
@@ -121,9 +123,9 @@ public class TenantNetworkManager implements ITenantNetworkManager {
 
     private String getNodeUUID(Node node) {
         String nodeUuid = new String();
-        OVSDBConfigService ovsdbConfigService = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+        OvsdbConfigService ovsdbConfigService = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class, this);
         try {
-            Map<String, Table<?>> ovsTable = ovsdbConfigService.getRows(node, Open_vSwitch.NAME.getName());
+            Map<String, Row> ovsTable = ovsdbConfigService.getRows(node, ovsdbConfigService.getTableName(node, OpenVSwitch.class));
             nodeUuid = (String)ovsTable.keySet().toArray()[0];
         }
         catch (Exception e) {
@@ -133,6 +135,7 @@ public class TenantNetworkManager implements ITenantNetworkManager {
         return nodeUuid;
     }
 
+    @Override
     public int networkCreated (Node node, String networkId) {
         String nodeUuid = getNodeUUID(node);
         if (nodeUuid == null) {
@@ -174,6 +177,7 @@ public class TenantNetworkManager implements ITenantNetworkManager {
      * Are there any TenantNetwork VM present on this Node ?
      * This method uses Interface Table's external-id field to locate the VM.
      */
+    @Override
     public boolean isTenantNetworkPresentInNode(Node node, String segmentationId) {
         String networkId = this.getNetworkIdForSegmentationId(segmentationId);
         if (networkId == null) {
@@ -202,17 +206,17 @@ public class TenantNetworkManager implements ITenantNetworkManager {
                 return false;
             }
         }
-        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+        OvsdbConfigService ovsdbTable = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class, this);
         try {
             /*
             // Vlan Tag based identification
-            Map<String, Table<?>> portTable = ovsdbTable.getRows(node, Port.NAME.getName());
+            Map<String, Row> portTable = ovsdbTable.getRows(node, Port.NAME.getName());
             if (portTable == null) {
                 logger.debug("Port table is null for Node {} ", node);
                 return false;
             }
 
-            for (Table<?> row : portTable.values()) {
+            for (Row row : portTable.values()) {
                 Port port = (Port)row;
                 Set<BigInteger> tags = port.getTag();
                 if (tags.contains(internalVlan)) {
@@ -223,15 +227,15 @@ public class TenantNetworkManager implements ITenantNetworkManager {
             }
              */
             // External-id based more accurate VM Location identification
-            Map<String, Table<?>> ifTable = ovsdbTable.getRows(node, Interface.NAME.getName());
+            Map<String, Row> ifTable = ovsdbTable.getRows(node, ovsdbTable.getTableName(node, Interface.class));
             if (ifTable == null) {
                 logger.debug("Interface table is null for Node {} ", node);
                 return false;
             }
 
-            for (Table<?> row : ifTable.values()) {
-                Interface intf = (Interface)row;
-                Map<String, String> externalIds = intf.getExternal_ids();
+            for (Row row : ifTable.values()) {
+                Interface intf = ovsdbTable.getTypedRow(node, Interface.class, row);
+                Map<String, String> externalIds = intf.getExternalIdsColumn().getData();
                 if (externalIds != null && externalIds.get(EXTERNAL_ID_INTERFACE_ID) != null) {
                     if (this.isInterfacePresentInTenantNetwork(externalIds.get(EXTERNAL_ID_INTERFACE_ID), networkId)) {
                         logger.debug("Tenant Network {} with Segmentation-id {} is present in Node {} / Interface {}",
@@ -252,6 +256,7 @@ public class TenantNetworkManager implements ITenantNetworkManager {
         return false;
     }
 
+    @Override
     public String getNetworkIdForSegmentationId (String segmentationId) {
         INeutronNetworkCRUD neutronNetworkService = (INeutronNetworkCRUD)ServiceHelper.getGlobalInstance(INeutronNetworkCRUD.class, this);
         List <NeutronNetwork> networks = neutronNetworkService.getAllNetworks();
@@ -268,10 +273,11 @@ public class TenantNetworkManager implements ITenantNetworkManager {
         return false;
     }
 
+    @Override
     public NeutronNetwork getTenantNetworkForInterface (Interface intf) {
         logger.trace("getTenantNetworkForInterface for {}", intf);
         if (intf == null) return null;
-        Map<String, String> externalIds = intf.getExternal_ids();
+        Map<String, String> externalIds = intf.getExternalIdsColumn().getData();
         logger.trace("externalIds {}", externalIds);
         if (externalIds == null) return null;
         String neutronPortId = externalIds.get(EXTERNAL_ID_INTERFACE_ID);
@@ -286,6 +292,7 @@ public class TenantNetworkManager implements ITenantNetworkManager {
         return neutronNetwork;
     }
 
+    @Override
     public void programTenantNetworkInternalVlan(Node node, String portUUID, NeutronNetwork network) {
 
         String nodeUuid = getNodeUUID(node);
@@ -309,12 +316,12 @@ public class TenantNetworkManager implements ITenantNetworkManager {
             logger.error("Unable to get an internalVlan for Network {}", network);
             return;
         }
-        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
-        Port port = new Port();
-        OvsDBSet<BigInteger> tags = new OvsDBSet<BigInteger>();
-        tags.add(BigInteger.valueOf(vlan));
+        OvsdbConfigService ovsdbTable = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class, this);
+        Port port = ovsdbTable.createTypedRow(node, Port.class);
+        OvsdbSet<Long> tags = new OvsdbSet<Long>();
+        tags.add(Long.valueOf(vlan));
         port.setTag(tags);
-        ovsdbTable.updateRow(node, Port.NAME.getName(), null, portUUID, port);
+        ovsdbTable.updateRow(node, port.getSchema().getName(), null, portUUID, port.getRow());
         if (enableContainer) this.addPortToTenantNetworkContainer(node, portUUID, network);
     }
 
@@ -324,14 +331,15 @@ public class TenantNetworkManager implements ITenantNetworkManager {
             logger.error("ContainerManager is not accessible");
             return;
         }
-        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+        OvsdbConfigService ovsdbTable = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class, this);
         try {
-            Port port = (Port)ovsdbTable.getRow(node, Port.NAME.getName(), portUUID);
+            Row portRow = ovsdbTable.getRow(node, ovsdbTable.getTableName(node, Port.class), portUUID);
+            Port port = ovsdbTable.getTypedRow(node, Port.class, portRow);
             if (port == null) {
                 logger.trace("Unable to identify Port with UUID {}", portUUID);
                 return;
             }
-            Set<UUID> interfaces = port.getInterfaces();
+            Set<UUID> interfaces = port.getInterfacesColumn().getData();
             if (interfaces == null) {
                 logger.trace("No interfaces available to fetch the OF Port");
                 return;
@@ -341,23 +349,23 @@ public class TenantNetworkManager implements ITenantNetworkManager {
                 logger.debug("Unable to spot Bridge for Port {} in node {}", port, node);
                 return;
             }
-            Set<String> dpids = bridge.getDatapath_id();
+            Set<String> dpids = bridge.getDatapathIdColumn().getData();
             if (dpids == null || dpids.size() ==  0) return;
             Long dpidLong = Long.valueOf(HexEncode.stringToLong((String)dpids.toArray()[0]));
 
             for (UUID intfUUID : interfaces) {
-                Interface intf = (Interface)ovsdbTable.getRow(node, Interface.NAME.getName(), intfUUID.toString());
+                Interface intf = (Interface)ovsdbTable.getRow(node,ovsdbTable.getTableName(node, Interface.class), intfUUID.toString());
                 if (intf == null) continue;
-                Set<BigInteger> of_ports = intf.getOfport();
+                Set<Long> of_ports = intf.getOpenFlowPortColumn().getData();
                 if (of_ports == null) continue;
-                for (BigInteger of_port : of_ports) {
+                for (Long of_port : of_ports) {
                     ContainerConfig config = new ContainerConfig();
                     config.setContainer(BaseHandler.convertNeutronIDToKey(network.getID()));
                     logger.debug("Adding Port {} to Container : {}", port.toString(), config.getContainer());
                     List<String> ncList = new ArrayList<String>();
                     Node ofNode = new Node(Node.NodeIDType.OPENFLOW, dpidLong);
                     NodeConnector nc = NodeConnector.fromStringNoNode(Node.NodeIDType.OPENFLOW.toString(),
-                                                                      Long.valueOf(of_port.longValue()).intValue()+"",
+                                                                      of_port.intValue()+"",
                                                                       ofNode);
                     ncList.add(nc.toString());
                     config.addNodeConnectors(ncList);
@@ -379,13 +387,13 @@ public class TenantNetworkManager implements ITenantNetworkManager {
     }
 
     private Bridge getBridgeIdForPort (Node node, String uuid) {
-        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+        OvsdbConfigService ovsdbTable = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class, this);
         try {
-            Map<String, Table<?>> bridges = ovsdbTable.getRows(node, Bridge.NAME.getName());
+            Map<String, Row> bridges = ovsdbTable.getRows(node, ovsdbTable.getTableName(node, Bridge.class));
             if (bridges == null) return null;
             for (String bridgeUUID : bridges.keySet()) {
-                Bridge bridge = (Bridge)bridges.get(bridgeUUID);
-                Set<UUID> portUUIDs = bridge.getPorts();
+                Bridge bridge = ovsdbTable.getTypedRow(node, Bridge.class, bridges.get(bridgeUUID));
+                Set<UUID> portUUIDs = bridge.getPortsColumn().getData();
                 logger.trace("Scanning Bridge {} to identify Port : {} ",bridge, uuid);
                 for (UUID portUUID : portUUIDs) {
                     if (portUUID.toString().equalsIgnoreCase(uuid)) {
@@ -400,6 +408,7 @@ public class TenantNetworkManager implements ITenantNetworkManager {
         return null;
     }
 
+    @Override
     public void networkDeleted(String id) {
         if (!enableContainer) return;
 

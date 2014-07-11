@@ -13,7 +13,7 @@ package org.opendaylight.ovsdb.neutron.provider;
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.Status;
-import org.opendaylight.ovsdb.lib.table.Interface;
+import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 
 public interface NetworkProvider {
 

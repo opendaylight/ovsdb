@@ -20,10 +20,10 @@ import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
-import org.opendaylight.ovsdb.lib.table.Interface;
-import org.opendaylight.ovsdb.lib.table.internal.Table;
+import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
-import org.opendaylight.ovsdb.plugin.OVSDBInventoryListener;
+import org.opendaylight.ovsdb.plugin.OvsdbInventoryListener;
+import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,15 +132,15 @@ public class PortHandler extends BaseHandler
         IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
         INeutronNetworkCRUD neutronNetworkService = (INeutronNetworkCRUD)ServiceHelper.getGlobalInstance(INeutronNetworkCRUD.class, this);
         NeutronNetwork neutronNetwork = neutronNetworkService.getNetwork(port.getNetworkUUID());
-        OVSDBInventoryListener inventoryListener = (OVSDBInventoryListener)ServiceHelper.getGlobalInstance(OVSDBInventoryListener.class, this);
+        OvsdbInventoryListener inventoryListener = (OvsdbInventoryListener)ServiceHelper.getGlobalInstance(OvsdbInventoryListener.class, this);
         List<Node> nodes = connectionService.getNodes();
         for (Node node : nodes) {
             try {
-                ConcurrentMap<String, Table<?>> interfaces = this.ovsdbConfigService.getRows(node, Interface.NAME.getName());
+                ConcurrentMap<String, Row> interfaces = this.ovsdbConfigService.getRows(node, ovsdbConfigService.getTableName(node, Interface.class));
                 if (interfaces != null) {
                     for (String intfUUID : interfaces.keySet()) {
-                        Interface intf = (Interface) interfaces.get(intfUUID);
-                        Map<String, String> externalIds = intf.getExternal_ids();
+                        Interface intf = ovsdbConfigService.getTypedRow(node, Interface.class, interfaces.get(intfUUID));
+                        Map<String, String> externalIds = intf.getExternalIdsColumn().getData();
                         if (externalIds == null) {
                             logger.trace("No external_ids seen in {}", intf);
                             continue;
@@ -152,8 +152,8 @@ public class PortHandler extends BaseHandler
                         }
                         if (neutronPortId.equalsIgnoreCase(port.getPortUUID())) {
                             logger.trace("neutronPortDeleted: Delete interface {}", intf.getName());
-                            inventoryListener.rowRemoved(node, Interface.NAME.getName(), intfUUID,
-                                                         intf, neutronNetwork);
+                            inventoryListener.rowRemoved(node, intf.getSchema().getName(), intfUUID,
+                                                         intf.getRow(), neutronNetwork);
                             break;
                         }
                     }

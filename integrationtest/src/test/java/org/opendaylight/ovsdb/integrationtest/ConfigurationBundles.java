@@ -10,12 +10,12 @@
 
 package org.opendaylight.ovsdb.integrationtest;
 
-import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.options.DefaultCompositeOption;
-
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+
+import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.options.DefaultCompositeOption;
 
 
 public class ConfigurationBundles {
@@ -147,7 +147,6 @@ public class ConfigurationBundles {
                 mavenBundle("org.opendaylight.controller.thirdparty", "com.sun.jersey.jersey-servlet").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller.thirdparty", "net.sf.jung2").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller.thirdparty", "org.apache.catalina.filters.CorsFilter").versionAsInProject().noStart(),
-                mavenBundle("org.opendaylight.ovsdb", "ovsdb").versionAsInProject(),
                 mavenBundle("org.ow2.asm", "asm-all").versionAsInProject(),
                 mavenBundle("org.ow2.chameleon.management", "chameleon-mbeans").versionAsInProject(),
                 mavenBundle("org.slf4j", "jcl-over-slf4j").versionAsInProject(),
@@ -185,7 +184,14 @@ public class ConfigurationBundles {
                 mavenBundle("com.fasterxml.jackson.core", "jackson-databind").versionAsInProject(),
                 mavenBundle("javax.portlet", "portlet-api").versionAsInProject(),
                 mavenBundle("com.google.guava", "guava").versionAsInProject(),
-                mavenBundle("org.opendaylight.ovsdb", "ovsdb").versionAsInProject()
+                mavenBundle("org.opendaylight.ovsdb", "library").versionAsInProject()
+        );
+    }
+
+    public static Option ovsdbDefaultSchemaBundles() {
+        return new DefaultCompositeOption(
+                mavenBundle("org.opendaylight.ovsdb", "schema.openvswitch").versionAsInProject(),
+                mavenBundle("org.opendaylight.ovsdb", "schema.hardwarevtep").versionAsInProject()
         );
     }
 

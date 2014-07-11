@@ -5,19 +5,13 @@
   <parent>
     <groupId>org.opendaylight.ovsdb</groupId>
     <artifactId>commons.integrationtest</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
     <relativePath>../commons/integrationtest</relativePath>
   </parent>
 
   <artifactId>integrationtest</artifactId>
-  <version>0.5.1-SNAPSHOT</version>
+  <version>1.1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
-
-  <properties>
-    <sonar.jacoco.itReportPath>../implementation/target/jacoco-it.exec</sonar.jacoco.itReportPath>
-    <!-- Sonar jacoco plugin to get integration test coverage info -->
-    <sonar.jacoco.reportPath>../implementation/target/jacoco.exec</sonar.jacoco.reportPath>
-  </properties>
 
   <dependencies>
     <dependency>
@@ -507,15 +501,6 @@
       <artifactId>org.apache.catalina.filters.CorsFilter</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>ovsdb</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>ovsdb.northbound</artifactId>
-      <version>0.5.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
       <groupId>org.ops4j.pax.exam</groupId>
       <artifactId>pax-exam</artifactId>
       <version>${exam.version}</version>
@@ -608,13 +593,11 @@
       <version>4.11</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>
       <version>1.10</version>
     </dependency>
-
     <!-- Add Pax Exam -->
     <dependency>
       <groupId>org.ops4j.pax.exam</groupId>
@@ -639,32 +622,39 @@
     </dependency>
   </dependencies>
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>${lifecycle.mapping.version}</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.apache.servicemix.tooling</groupId>
+                    <artifactId>depends-maven-plugin</artifactId>
+                    <executions>
+                      <execution>
+                        <id>generate-depends-file</id>
+                        <goals>
+                          <goal>generate-depends-file</goal>
+                        </goals>
+                      </execution>
+                    </executions>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore/>
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <configuration>
-          <destFile>../implementation/target/jacoco-it.exec</destFile>
-          <includes>
-            <include>org.opendaylight.controller.*</include>
-            <include>org.opendaylight.ovsdb.*</include>
-          </includes>
-        </configuration>
-        <executions>
-          <execution>
-            <id>pre-test</id>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>post-test</id>
-            <configuration>
-              <skip>true</skip>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
       <plugin>
         <groupId>org.apache.servicemix.tooling</groupId>
         <artifactId>depends-maven-plugin</artifactId>
@@ -693,6 +683,15 @@
               <reuseForks>false</reuseForks>
               <parallel>none</parallel>
               <threadCount>1</threadCount>
+              <!--  Including just the Library integration tests till Plugin migration is done -->
+              <!--  TODO remove this includes section once the plugin migration is complete -->
+              <includes>
+                <include>**/*LibraryIT*</include>
+                <include>**/*PluginIT*</include>
+              <!-- Disabling NorthboundIT tests till the Jenkins / Tomcat issues is resolved in LF servers
+                <include>**/*NorthboundIT*</include>
+              -->
+              </includes>
             </configuration>
           </execution>
         </executions>
@@ -705,5 +704,4 @@
     <tag>HEAD</tag>
     <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
   </scm>
-
 </project>

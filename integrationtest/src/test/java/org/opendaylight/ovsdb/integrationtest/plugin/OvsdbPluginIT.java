@@ -82,7 +82,7 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
             ConfigurationBundles.controllerBundles(),
             ConfigurationBundles.ovsdbLibraryBundles(),
             ConfigurationBundles.ovsdbDefaultSchemaBundles(),
-            mavenBundle("org.opendaylight.ovsdb", "ovsdb_plugin").versionAsInProject(),
+            mavenBundle("org.opendaylight.ovsdb", "plugin").versionAsInProject(),
             junitBundles()
         );
     }

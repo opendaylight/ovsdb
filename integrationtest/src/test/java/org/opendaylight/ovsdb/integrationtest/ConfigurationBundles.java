@@ -184,14 +184,14 @@ public class ConfigurationBundles {
                 mavenBundle("com.fasterxml.jackson.core", "jackson-databind").versionAsInProject(),
                 mavenBundle("javax.portlet", "portlet-api").versionAsInProject(),
                 mavenBundle("com.google.guava", "guava").versionAsInProject(),
-                mavenBundle("org.opendaylight.ovsdb", "ovsdb_library").versionAsInProject()
+                mavenBundle("org.opendaylight.ovsdb", "library").versionAsInProject()
         );
     }
 
     public static Option ovsdbDefaultSchemaBundles() {
         return new DefaultCompositeOption(
-                mavenBundle("org.opendaylight.ovsdb", "ovsdb_schema.Open_vSwitch").versionAsInProject(),
-                mavenBundle("org.opendaylight.ovsdb", "ovsdb_schema.hardware_vtep").versionAsInProject()
+                mavenBundle("org.opendaylight.ovsdb", "schema.openvswitch").versionAsInProject(),
+                mavenBundle("org.opendaylight.ovsdb", "schema.hardwarevtep").versionAsInProject()
         );
     }
 

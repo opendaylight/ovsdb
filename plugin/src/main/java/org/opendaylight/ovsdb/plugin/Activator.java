@@ -124,9 +124,8 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setRequired(true));
             c.add(createServiceDependency()
                     .setService(OVSDBConfigService.class)
-                    .setCallbacks("setConfigService", "unsetConfigService")
+                    .setCallbacks("setConfigurationService", "unsetConfigurationService")
                     .setRequired(false));
-
         }
 
         if (imp.equals(NodeFactory.class)) {

@@ -39,7 +39,7 @@ import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.plugin.Connection;
 import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
-import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
+import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
 import org.opendaylight.ovsdb.plugin.StatusWithUuid;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
@@ -60,7 +60,7 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
     private Logger log = LoggerFactory.getLogger(OvsdbPluginIT.class);
     @Inject
     private BundleContext bc;
-    private OVSDBConfigService ovsdbConfigService = null;
+    private OvsdbConfigService ovsdbConfigService = null;
     private Node node = null;
     private OvsdbClient client = null;
 
@@ -125,7 +125,7 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
         } catch (Exception e) {
             fail("Exception : "+e.getMessage());
         }
-        this.ovsdbConfigService = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+        this.ovsdbConfigService = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class, this);
     }
 
     @Test

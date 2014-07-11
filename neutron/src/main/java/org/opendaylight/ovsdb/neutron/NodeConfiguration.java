@@ -21,7 +21,7 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
+import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.slf4j.Logger;
@@ -46,7 +46,7 @@ public class NodeConfiguration {
     private void initializeNodeConfiguration(Node node) {
         int vlan = 0;
         String networkId = new String();
-        OVSDBConfigService ovsdbTable = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+        OvsdbConfigService ovsdbTable = (OvsdbConfigService) ServiceHelper.getGlobalInstance(OvsdbConfigService.class, this);
 
         try {
             Map<String, Row> portRows = ovsdbTable.getRows(node, ovsdbTable.getTableName(node, Port.class));

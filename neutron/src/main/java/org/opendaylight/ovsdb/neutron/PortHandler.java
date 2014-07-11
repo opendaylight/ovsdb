@@ -22,7 +22,7 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
-import org.opendaylight.ovsdb.plugin.OVSDBInventoryListener;
+import org.opendaylight.ovsdb.plugin.OvsdbInventoryListener;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,7 +132,7 @@ public class PortHandler extends BaseHandler
         IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
         INeutronNetworkCRUD neutronNetworkService = (INeutronNetworkCRUD)ServiceHelper.getGlobalInstance(INeutronNetworkCRUD.class, this);
         NeutronNetwork neutronNetwork = neutronNetworkService.getNetwork(port.getNetworkUUID());
-        OVSDBInventoryListener inventoryListener = (OVSDBInventoryListener)ServiceHelper.getGlobalInstance(OVSDBInventoryListener.class, this);
+        OvsdbInventoryListener inventoryListener = (OvsdbInventoryListener)ServiceHelper.getGlobalInstance(OvsdbInventoryListener.class, this);
         List<Node> nodes = connectionService.getNodes();
         for (Node node : nodes) {
             try {

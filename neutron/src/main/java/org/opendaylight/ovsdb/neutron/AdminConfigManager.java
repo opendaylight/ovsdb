@@ -17,7 +17,7 @@ import java.util.Map;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.ovsdb.lib.notation.Row;
-import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
+import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,7 +119,7 @@ public class AdminConfigManager implements IAdminConfigManager{
     @Override
     public InetAddress getTunnelEndPoint(Node node) {
         InetAddress address = null;
-        OVSDBConfigService ovsdbConfig = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+        OvsdbConfigService ovsdbConfig = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class, this);
         try {
             Map<String, Row> ovsTable = ovsdbConfig.getRows(node, ovsdbConfig.getTableName(node, OpenVSwitch.class));
 
@@ -166,7 +166,7 @@ public class AdminConfigManager implements IAdminConfigManager{
     public String getPhysicalInterfaceName (Node node, String physicalNetwork) {
           String phyIf = null;
 
-          OVSDBConfigService ovsdbConfig = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+          OvsdbConfigService ovsdbConfig = (OvsdbConfigService) ServiceHelper.getGlobalInstance(OvsdbConfigService.class, this);
           try {
             Map<String, Row> ovsTable = ovsdbConfig.getRows(node, ovsdbConfig.getTableName(node, OpenVSwitch.class));
 
@@ -229,7 +229,7 @@ public class AdminConfigManager implements IAdminConfigManager{
         List<String> phyIfName = new ArrayList<String>();
 
         try {
-            OVSDBConfigService ovsdbConfig = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+            OvsdbConfigService ovsdbConfig = (OvsdbConfigService) ServiceHelper.getGlobalInstance(OvsdbConfigService.class, this);
             Map<String, Row> ovsTable = ovsdbConfig.getRows(node, ovsdbConfig.getTableName(node, OpenVSwitch.class));
 
             if (ovsTable == null) {

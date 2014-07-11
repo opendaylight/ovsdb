@@ -19,7 +19,7 @@ import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 
-public interface OVSDBConfigService {
+public interface OvsdbConfigService {
 
     /**
      * This version of insertRow is a short-term replacement for the older & now deprecated method of the same name.

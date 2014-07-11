@@ -21,15 +21,15 @@ import java.util.Set;
 
 @JsonDeserialize(converter = Converter.SetConverter.class)
 @JsonSerialize(using = OvsDBSetSerializer.class)
-public class OvsDBSet<T> extends ForwardingSet<T> {
+public class OvsdbSet<T> extends ForwardingSet<T> {
 
     Set<T> target = null;
 
-    public OvsDBSet() {
+    public OvsdbSet() {
         this(Sets.<T>newHashSet());
     }
 
-    public OvsDBSet(Set<T> backing) {
+    public OvsdbSet(Set<T> backing) {
        this.target = backing;
     }
 
@@ -38,7 +38,7 @@ public class OvsDBSet<T> extends ForwardingSet<T> {
         return target;
     }
 
-    public static<D> OvsDBSet<D> fromSet(Set<D> value) {
-        return new OvsDBSet<>(value);
+    public static<D> OvsdbSet<D> fromSet(Set<D> value) {
+        return new OvsdbSet<>(value);
     }
 }

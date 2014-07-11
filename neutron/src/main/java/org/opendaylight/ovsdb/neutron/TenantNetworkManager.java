@@ -28,12 +28,12 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
-import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
+import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.neutron.provider.IProviderNetworkManager;
 import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
-import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
+import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
@@ -123,7 +123,7 @@ public class TenantNetworkManager implements ITenantNetworkManager {
 
     private String getNodeUUID(Node node) {
         String nodeUuid = new String();
-        OVSDBConfigService ovsdbConfigService = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+        OvsdbConfigService ovsdbConfigService = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class, this);
         try {
             Map<String, Row> ovsTable = ovsdbConfigService.getRows(node, ovsdbConfigService.getTableName(node, OpenVSwitch.class));
             nodeUuid = (String)ovsTable.keySet().toArray()[0];
@@ -206,7 +206,7 @@ public class TenantNetworkManager implements ITenantNetworkManager {
                 return false;
             }
         }
-        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+        OvsdbConfigService ovsdbTable = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class, this);
         try {
             /*
             // Vlan Tag based identification
@@ -316,9 +316,9 @@ public class TenantNetworkManager implements ITenantNetworkManager {
             logger.error("Unable to get an internalVlan for Network {}", network);
             return;
         }
-        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+        OvsdbConfigService ovsdbTable = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class, this);
         Port port = ovsdbTable.createTypedRow(node, Port.class);
-        OvsDBSet<Long> tags = new OvsDBSet<Long>();
+        OvsdbSet<Long> tags = new OvsdbSet<Long>();
         tags.add(Long.valueOf(vlan));
         port.setTag(tags);
         ovsdbTable.updateRow(node, port.getSchema().getName(), null, portUUID, port.getRow());
@@ -331,7 +331,7 @@ public class TenantNetworkManager implements ITenantNetworkManager {
             logger.error("ContainerManager is not accessible");
             return;
         }
-        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+        OvsdbConfigService ovsdbTable = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class, this);
         try {
             Row portRow = ovsdbTable.getRow(node, ovsdbTable.getTableName(node, Port.class), portUUID);
             Port port = ovsdbTable.getTypedRow(node, Port.class, portRow);
@@ -387,7 +387,7 @@ public class TenantNetworkManager implements ITenantNetworkManager {
     }
 
     private Bridge getBridgeIdForPort (Node node, String uuid) {
-        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+        OvsdbConfigService ovsdbTable = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class, this);
         try {
             Map<String, Row> bridges = ovsdbTable.getRows(node, ovsdbTable.getTableName(node, Bridge.class));
             if (bridges == null) return null;

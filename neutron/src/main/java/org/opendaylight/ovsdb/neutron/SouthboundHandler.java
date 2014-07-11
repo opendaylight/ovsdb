@@ -28,14 +28,14 @@ import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.neutron.provider.IProviderNetworkManager;
-import org.opendaylight.ovsdb.plugin.OVSDBInventoryListener;
+import org.opendaylight.ovsdb.plugin.OvsdbInventoryListener;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SouthboundHandler extends BaseHandler implements OVSDBInventoryListener, IInventoryListener {
+public class SouthboundHandler extends BaseHandler implements OvsdbInventoryListener, IInventoryListener {
     static final Logger logger = LoggerFactory.getLogger(SouthboundHandler.class);
     //private Thread eventThread;
     private ExecutorService eventHandler;

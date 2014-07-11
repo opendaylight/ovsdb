@@ -35,7 +35,7 @@ import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
-import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
+import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.Insert;
@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListenableFuture;
 
-public class ConfigurationService implements IPluginInBridgeDomainConfigService, OVSDBConfigService,
+public class ConfigurationService implements IPluginInBridgeDomainConfigService, OvsdbConfigService,
                                              CommandProvider
 {
     private static final Logger logger = LoggerFactory
@@ -471,7 +471,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             return false;
         }
 
-        OvsDBSet<String> protocols = new OvsDBSet<String>();
+        OvsdbSet<String> protocols = new OvsdbSet<String>();
 
         String ofVersion = System.getProperty("ovsdb.of.version", OPENFLOW_10);
         switch (ofVersion) {

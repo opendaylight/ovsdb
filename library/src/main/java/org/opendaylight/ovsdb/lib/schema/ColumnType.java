@@ -11,8 +11,8 @@ package org.opendaylight.ovsdb.lib.schema;
 
 import org.opendaylight.ovsdb.lib.error.TyperException;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonUtils;
-import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
-import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
+import org.opendaylight.ovsdb.lib.notation.OvsdbMap;
+import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -163,7 +163,7 @@ public abstract class ColumnType {
         @Override
         public Object valueFromJson(JsonNode value) {
             if (isMultiValued()) {
-                OvsDBSet<Object> result = new OvsDBSet<Object>();
+                OvsdbSet<Object> result = new OvsdbSet<Object>();
                 if(value.isArray()) {
                     if (value.size() == 2) {
                         if (value.get(0).isTextual() && "set".equals(value.get(0).asText())) {
@@ -235,7 +235,7 @@ public abstract class ColumnType {
             if (node.isArray()) {
                 if (node.size() == 2) {
                     if (node.get(0).isTextual() && "map".equals(node.get(0).asText())) {
-                        OvsDBMap<Object, Object> map = new OvsDBMap<Object, Object>();
+                        OvsdbMap<Object, Object> map = new OvsdbMap<Object, Object>();
                         for (JsonNode pairNode : node.get(1)) {
                             if (pairNode.isArray() && node.size() == 2) {
                                 Object key = getKeyType().toValue(pairNode.get(0));

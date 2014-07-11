@@ -45,7 +45,7 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.plugin.Connection;
 import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
-import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
+import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
 import org.opendaylight.ovsdb.plugin.OvsVswitchdSchemaConstants;
 import org.opendaylight.ovsdb.plugin.StatusWithUuid;
 import org.slf4j.Logger;
@@ -324,7 +324,7 @@ public class OvsdbNorthboundV2 {
             throw new UnauthorizedException("User is not authorized to perform this operation");
         }
 
-        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class,
+        OvsdbConfigService ovsdbTable = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class,
                                                                                             this);
         if (ovsdbTable == null) {
             throw new ServiceUnavailableException("OVS Configuration Service " + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -414,7 +414,7 @@ public class OvsdbNorthboundV2 {
             throw new UnauthorizedException("User is not authorized to perform this operation");
         }
 
-        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class,
+        OvsdbConfigService ovsdbTable = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class,
                                                                                             this);
         if (ovsdbTable == null) {
             throw new ServiceUnavailableException("UserManager " + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -496,7 +496,7 @@ public class OvsdbNorthboundV2 {
             throw new UnauthorizedException("User is not authorized to perform this operation");
         }
 
-        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class,
+        OvsdbConfigService ovsdbTable = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class,
                                                                                             this);
         if (ovsdbTable == null) {
             throw new ServiceUnavailableException("UserManager " + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -570,7 +570,7 @@ public class OvsdbNorthboundV2 {
             throw new UnauthorizedException("User is not authorized to perform this operation");
         }
 
-        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class,
+        OvsdbConfigService ovsdbTable = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class,
                                                                                             this);
         if (ovsdbTable == null) {
             throw new ServiceUnavailableException("OVS Configuration Service " + RestMessages.SERVICEUNAVAILABLE.toString());
@@ -650,7 +650,7 @@ public class OvsdbNorthboundV2 {
             throw new UnauthorizedException("User is not authorized to perform this operation");
         }
 
-        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class,
+        OvsdbConfigService ovsdbTable = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class,
                 this);
         if (ovsdbTable == null) {
             throw new ServiceUnavailableException("OVS Configuration Service " + RestMessages.SERVICEUNAVAILABLE.toString());

@@ -22,7 +22,7 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
-import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
+import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -299,19 +299,19 @@ public class BaseHandler {
         this.frm = s;
     }
 
-    protected OVSDBConfigService ovsdbConfigService;
+    protected OvsdbConfigService ovsdbConfigService;
 
-    public OVSDBConfigService getOVSDBConfigService() {
+    public OvsdbConfigService getOVSDBConfigService() {
         return ovsdbConfigService;
     }
 
-    public void unsetOVSDBConfigService(OVSDBConfigService s) {
+    public void unsetOVSDBConfigService(OvsdbConfigService s) {
         if (s == this.ovsdbConfigService) {
             this.ovsdbConfigService = null;
         }
     }
 
-    public void setOVSDBConfigService(OVSDBConfigService s) {
+    public void setOVSDBConfigService(OvsdbConfigService s) {
         this.ovsdbConfigService = s;
     }
 

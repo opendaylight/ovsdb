@@ -35,7 +35,7 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.plugin.ConfigurationService;
-import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
+import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -47,7 +47,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 public class AdminConfigManagerTest {
 
     AdminConfigManager adminConfigManager;
-    private OVSDBConfigService ovsdbConfig;
+    private OvsdbConfigService ovsdbConfig;
     private Node node;
     private OpenVSwitch ovsTable;
     private ConcurrentMap<String, Row> ovsMap;
@@ -71,7 +71,7 @@ public class AdminConfigManagerTest {
         node = mock(Node.class);
         ovsdbConfig = mock(ConfigurationService.class);
         PowerMockito.mockStatic(ServiceHelper.class);
-        when(ServiceHelper.getGlobalInstance(eq(OVSDBConfigService.class), anyObject())).thenReturn(ovsdbConfig);
+        when(ServiceHelper.getGlobalInstance(eq(OvsdbConfigService.class), anyObject())).thenReturn(ovsdbConfig);
 
         ovsTable = PowerMockito.mock(OpenVSwitch.class);
         ovsMap = new ConcurrentHashMap<>();
@@ -92,12 +92,12 @@ public class AdminConfigManagerTest {
         ovsTable.setOtherConfig(localIp);
         ovsMap.put("OpenVSwitch", ovsTable.getRow());
 
-        OVSDBConfigService ovsdbConfig = mock(ConfigurationService.class);
+        OvsdbConfigService ovsdbConfig = mock(ConfigurationService.class);
         when(ovsdbConfig.getRows(any(Node.class), anyString())).thenReturn(null)
                                                                .thenReturn(ovsMap);
 
         PowerMockito.mockStatic(ServiceHelper.class);
-        when(ServiceHelper.getGlobalInstance(eq(OVSDBConfigService.class), anyObject())).thenReturn(ovsdbConfig);
+        when(ServiceHelper.getGlobalInstance(eq(OvsdbConfigService.class), anyObject())).thenReturn(ovsdbConfig);
 
         // OVSDBConfigService is null
         assertEquals(null, adminConfigManager.getTunnelEndPoint(mockNode));
@@ -129,11 +129,11 @@ public class AdminConfigManagerTest {
         ovsMap.put("1", ovsRow1.getRow());
         ovsMap.put("2", ovsRow2.getRow());
 
-        OVSDBConfigService ovsdbConfig = mock(ConfigurationService.class);
+        OvsdbConfigService ovsdbConfig = mock(ConfigurationService.class);
         when(ovsdbConfig.getRows(any(Node.class), anyString())).thenReturn(ovsMap);
 
         PowerMockito.mockStatic(ServiceHelper.class);
-        when(ServiceHelper.getGlobalInstance(eq(OVSDBConfigService.class), anyObject())).thenReturn(ovsdbConfig);
+        when(ServiceHelper.getGlobalInstance(eq(OvsdbConfigService.class), anyObject())).thenReturn(ovsdbConfig);
 
         // Success...
         assertEquals(testAddress, adminConfigManager.getTunnelEndPoint(mockNode));

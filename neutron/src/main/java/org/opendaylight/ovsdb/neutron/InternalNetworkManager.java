@@ -22,7 +22,7 @@ import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.neutron.provider.IProviderNetworkManager;
-import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
+import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
 import org.opendaylight.ovsdb.plugin.StatusWithUuid;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
@@ -53,7 +53,7 @@ public class InternalNetworkManager implements IInternalNetworkManager {
     @Override
     public String getInternalBridgeUUID (Node node, String bridgeName) {
         try {
-            OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+            OvsdbConfigService ovsdbTable = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class, this);
             Map<String, Row> bridgeTable = ovsdbTable.getRows(node, ovsdbTable.getTableName(node, Bridge.class));
             if (bridgeTable == null) return null;
             for (String key : bridgeTable.keySet()) {
@@ -68,7 +68,7 @@ public class InternalNetworkManager implements IInternalNetworkManager {
 
     public Bridge getInternalBridge (Node node, String bridgeName) {
         try {
-            OVSDBConfigService ovsdbTable = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+            OvsdbConfigService ovsdbTable = (OvsdbConfigService) ServiceHelper.getGlobalInstance(OvsdbConfigService.class, this);
             Map<String, Row> bridgeTable = ovsdbTable.getRows(node, ovsdbTable.getTableName(node, Bridge.class));
             if (bridgeTable != null) {
                 for (String key : bridgeTable.keySet()) {
@@ -107,7 +107,7 @@ public class InternalNetworkManager implements IInternalNetworkManager {
 
     @Override
     public boolean isPortOnBridge (Node node, Bridge bridge, String portName) {
-        OVSDBConfigService ovsdbTable = (OVSDBConfigService) ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+        OvsdbConfigService ovsdbTable = (OvsdbConfigService) ServiceHelper.getGlobalInstance(OvsdbConfigService.class, this);
 
         for (UUID portsUUID : bridge.getPortsColumn().getData()) {
             try {
@@ -351,7 +351,7 @@ public class InternalNetworkManager implements IInternalNetworkManager {
 
     private Status addPortToBridge (Node node, String bridgeName, String portName) throws Exception {
         logger.debug("addPortToBridge: Adding port: {} to Bridge {}, Node {}", portName, bridgeName, node);
-        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+        OvsdbConfigService ovsdbTable = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class, this);
 
         String bridgeUUID = this.getInternalBridgeUUID(node, bridgeName);
         if (bridgeUUID == null) {
@@ -409,7 +409,7 @@ public class InternalNetworkManager implements IInternalNetworkManager {
     }
 
     private Status addPatchPort (Node node, String bridgeUUID, String portName, String peerPortName) throws Exception {
-        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+        OvsdbConfigService ovsdbTable = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class, this);
 
         logger.debug("addPatchPort: node: {}, bridgeUUID: {}, port: {}, peer: {}",
                 node, bridgeUUID, portName, peerPortName);
@@ -463,7 +463,7 @@ public class InternalNetworkManager implements IInternalNetworkManager {
     }
 
     private Status addInternalBridge (Node node, String bridgeName, String localPatchName, String remotePatchName) throws Exception {
-        OVSDBConfigService ovsdbTable = (OVSDBConfigService)ServiceHelper.getGlobalInstance(OVSDBConfigService.class, this);
+        OvsdbConfigService ovsdbTable = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class, this);
 
         String bridgeUUID = this.getInternalBridgeUUID(node, bridgeName);
         Bridge bridge = ovsdbTable.createTypedRow(node, Bridge.class);

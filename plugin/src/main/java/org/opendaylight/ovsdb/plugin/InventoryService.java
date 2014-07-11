@@ -56,7 +56,7 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
     private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps = new ConcurrentHashMap<NodeConnector, Map<String, Property>>();
     private ConcurrentMap<Node, NodeDB> dbCache = Maps.newConcurrentMap();
     private ScheduledExecutorService executor;
-    private OVSDBConfigService configurationService;
+    private OvsdbConfigService configurationService;
 
     /**
      * Function called by the dependency manager when all the required
@@ -104,11 +104,11 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
             this.pluginOutInventoryServices.remove(service);
     }
 
-    public void setConfigurationService(OVSDBConfigService service) {
+    public void setConfigurationService(OvsdbConfigService service) {
         configurationService = service;
     }
 
-    public void unsetConfigurationService(OVSDBConfigService service) {
+    public void unsetConfigurationService(OvsdbConfigService service) {
         configurationService = null;
     }
 
@@ -171,7 +171,7 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
             dbCache.put(n, db);
         }
 
-        OVSDBInventoryListener inventoryListener = (OVSDBInventoryListener)ServiceHelper.getGlobalInstance(OVSDBInventoryListener.class, this);
+        OvsdbInventoryListener inventoryListener = (OvsdbInventoryListener)ServiceHelper.getGlobalInstance(OvsdbInventoryListener.class, this);
         for (String tableName : tableUpdates.getUpdates().keySet()) {
             Map<String, Row> tCache = db.getTableCache(databaseName, tableName);
             TableUpdate update = tableUpdates.getUpdates().get(tableName);
@@ -261,7 +261,7 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
 
     @Override
     public void notifyNodeAdded(Node node) {
-        OVSDBInventoryListener inventoryListener = (OVSDBInventoryListener)ServiceHelper.getGlobalInstance(OVSDBInventoryListener.class, this);
+        OvsdbInventoryListener inventoryListener = (OvsdbInventoryListener)ServiceHelper.getGlobalInstance(OvsdbInventoryListener.class, this);
         if (inventoryListener != null) {
             inventoryListener.nodeAdded(node);
         }
@@ -282,7 +282,7 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
 
     @Override
     public void removeNode(Node node) {
-        OVSDBInventoryListener inventoryListener = (OVSDBInventoryListener)ServiceHelper.getGlobalInstance(OVSDBInventoryListener.class, this);
+        OvsdbInventoryListener inventoryListener = (OvsdbInventoryListener)ServiceHelper.getGlobalInstance(OvsdbInventoryListener.class, this);
         if (inventoryListener != null) {
             inventoryListener.nodeRemoved(node);
         }

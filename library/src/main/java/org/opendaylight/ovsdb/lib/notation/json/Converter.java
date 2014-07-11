@@ -11,8 +11,8 @@ package org.opendaylight.ovsdb.lib.notation.json;
 
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.message.UpdateNotification;
-import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
-import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
+import org.opendaylight.ovsdb.lib.notation.OvsdbMap;
+import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -27,16 +27,16 @@ public class Converter {
     static SetDeser setDeser = new SetDeser();
     static UpdateNotificationDeser unDeser = new UpdateNotificationDeser();
 
-    public static class MapConverter extends StdConverter<JsonNode, OvsDBMap<Object, Object>> {
+    public static class MapConverter extends StdConverter<JsonNode, OvsdbMap<Object, Object>> {
         @Override
-        public OvsDBMap<Object, Object> convert(JsonNode value) {
+        public OvsdbMap<Object, Object> convert(JsonNode value) {
             return mapDeser.deserialize(value);
         }
     }
 
-    public static class SetConverter extends StdConverter<JsonNode, OvsDBSet<Object>> {
+    public static class SetConverter extends StdConverter<JsonNode, OvsdbSet<Object>> {
         @Override
-        public OvsDBSet<Object> convert(JsonNode value) {
+        public OvsdbSet<Object> convert(JsonNode value) {
             return setDeser.deserialize(value);
         }
     }
@@ -49,11 +49,11 @@ public class Converter {
     }
 
     static class MapDeser {
-        public OvsDBMap<Object, Object> deserialize(JsonNode node) {
+        public OvsdbMap<Object, Object> deserialize(JsonNode node) {
             if (node.isArray()) {
                 if (node.size() == 2) {
                     if (node.get(0).isTextual() && "map".equals(node.get(0).asText())) {
-                        OvsDBMap<Object, Object> map = new OvsDBMap<Object, Object>();
+                        OvsdbMap<Object, Object> map = new OvsdbMap<Object, Object>();
                         for (JsonNode pairNode : node.get(1)) {
                             if (pairNode.isArray() && node.size() == 2) {
                                 Object key = atomDeser.deserialize(pairNode.get(0));
@@ -72,8 +72,8 @@ public class Converter {
     }
 
     static class SetDeser {
-        public OvsDBSet<Object> deserialize(JsonNode node) {
-            OvsDBSet<Object> set = new OvsDBSet<Object>();
+        public OvsdbSet<Object> deserialize(JsonNode node) {
+            OvsdbSet<Object> set = new OvsdbSet<Object>();
             if (node.isArray()) {
                 if (node.size() == 2) {
                     if (node.get(0).isTextual() && "set".equals(node.get(0).asText())) {

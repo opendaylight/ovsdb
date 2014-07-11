@@ -11,16 +11,16 @@ package org.opendaylight.ovsdb.lib.notation.json;
 
 import java.io.IOException;
 import java.util.Map;
-import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
+import org.opendaylight.ovsdb.lib.notation.OvsdbMap;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
-public class OvsDBMapSerializer extends JsonSerializer<OvsDBMap<?,?>> {
+public class OvsdbMapSerializer extends JsonSerializer<OvsdbMap<?,?>> {
     @Override
-    public void serialize(OvsDBMap<?,?> map, JsonGenerator generator,
+    public void serialize(OvsdbMap<?,?> map, JsonGenerator generator,
         SerializerProvider provider) throws IOException,
             JsonProcessingException {
         generator.writeStartArray();

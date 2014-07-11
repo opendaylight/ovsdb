@@ -74,7 +74,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             // by SAL
             props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "OVS");
             c.setInterface(new String[] { IPluginInBridgeDomainConfigService.class.getName(),
-                                          OVSDBConfigService.class.getName()}, props);
+                                          OvsdbConfigService.class.getName()}, props);
 
             c.add(createServiceDependency()
                     .setService(IConnectionServiceInternal.class)
@@ -123,7 +123,7 @@ public class Activator extends ComponentActivatorAbstractBase {
                             "unsetPluginOutInventoryServices")
                     .setRequired(true));
             c.add(createServiceDependency()
-                    .setService(OVSDBConfigService.class)
+                    .setService(OvsdbConfigService.class)
                     .setCallbacks("setConfigurationService", "unsetConfigurationService")
                     .setRequired(false));
         }

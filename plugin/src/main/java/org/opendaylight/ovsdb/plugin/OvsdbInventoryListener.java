@@ -12,7 +12,7 @@ package org.opendaylight.ovsdb.plugin;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.lib.notation.Row;
 
-public interface OVSDBInventoryListener {
+public interface OvsdbInventoryListener {
     public void nodeAdded(Node node);
     public void nodeRemoved(Node node);
     public void rowAdded(Node node, String tableName, String uuid, Row row);

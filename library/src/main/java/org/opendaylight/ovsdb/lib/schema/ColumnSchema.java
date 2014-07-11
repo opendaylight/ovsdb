@@ -15,8 +15,8 @@ import java.util.Set;
 import org.opendaylight.ovsdb.lib.error.BadSchemaException;
 import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.notation.Function;
-import org.opendaylight.ovsdb.lib.notation.OvsDBMap;
-import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
+import org.opendaylight.ovsdb.lib.notation.OvsdbMap;
+import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -109,9 +109,9 @@ public class ColumnSchema<E extends TableSchema<E>, D> {
     public Object getNormalizeData(D value) {
         Object untypedValue = null;
         if (value instanceof Set) {
-            untypedValue = OvsDBSet.fromSet((Set) value);
+            untypedValue = OvsdbSet.fromSet((Set) value);
         } else if (value instanceof Map) {
-            untypedValue = OvsDBMap.fromMap((Map)value);
+            untypedValue = OvsdbMap.fromMap((Map) value);
         } else {
             untypedValue = value;
         }

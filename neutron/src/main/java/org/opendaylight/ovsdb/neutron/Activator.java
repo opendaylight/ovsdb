@@ -29,8 +29,8 @@ import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.ovsdb.neutron.provider.IProviderNetworkManager;
 import org.opendaylight.ovsdb.neutron.provider.ProviderNetworkManager;
 import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
-import org.opendaylight.ovsdb.plugin.OVSDBConfigService;
-import org.opendaylight.ovsdb.plugin.OVSDBInventoryListener;
+import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
+import org.opendaylight.ovsdb.plugin.OvsdbInventoryListener;
 
 /**
  * OSGi bundle activator for the OVSDB Neutron Interface.
@@ -122,7 +122,7 @@ public class Activator extends ComponentActivatorAbstractBase {
         }
 
         if (imp.equals(SouthboundHandler.class)) {
-            c.setInterface(new String[] {OVSDBInventoryListener.class.getName(), IInventoryListener.class.getName()}, null);
+            c.setInterface(new String[] {OvsdbInventoryListener.class.getName(), IInventoryListener.class.getName()}, null);
             c.add(createServiceDependency().setService(IAdminConfigManager.class).setRequired(true));
             c.add(createServiceDependency().setService(IInternalNetworkManager.class).setRequired(true));
             c.add(createServiceDependency().setService(ITenantNetworkManager.class).setRequired(true));
@@ -153,7 +153,7 @@ public class Activator extends ComponentActivatorAbstractBase {
         //ToDo: DT: We don't need these dependencies for every implementation...
         //ToDo: DT: Callbacks are only required when behaviour is more complex than simple set/unset operation
         c.add(createServiceDependency().
-                setService(OVSDBConfigService.class).
+                setService(OvsdbConfigService.class).
                 setCallbacks("setOVSDBConfigService", "unsetOVSDBConfigService").
                 setRequired(true));
 

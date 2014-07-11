@@ -12,16 +12,16 @@ package org.opendaylight.ovsdb.lib.notation.json;
 import java.io.IOException;
 import java.util.Set;
 
-import org.opendaylight.ovsdb.lib.notation.OvsDBSet;
+import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
-public class OvsDBSetSerializer extends JsonSerializer<OvsDBSet<?>> {
+public class OvsdbSetSerializer extends JsonSerializer<OvsdbSet<?>> {
     @Override
-    public void serialize(OvsDBSet<?> set, JsonGenerator generator,
+    public void serialize(OvsdbSet<?> set, JsonGenerator generator,
         SerializerProvider provider) throws IOException,
             JsonProcessingException {
         generator.writeStartArray();

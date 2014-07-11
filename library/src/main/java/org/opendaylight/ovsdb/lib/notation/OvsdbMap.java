@@ -12,7 +12,7 @@ package org.opendaylight.ovsdb.lib.notation;
 import java.util.Map;
 
 import org.opendaylight.ovsdb.lib.notation.json.Converter;
-import org.opendaylight.ovsdb.lib.notation.json.OvsDBMapSerializer;
+import org.opendaylight.ovsdb.lib.notation.json.OvsdbMapSerializer;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -20,16 +20,16 @@ import com.google.common.collect.ForwardingMap;
 import com.google.common.collect.Maps;
 
 @JsonDeserialize(converter = Converter.MapConverter.class)
-@JsonSerialize(using = OvsDBMapSerializer.class)
-public class OvsDBMap<K, V> extends ForwardingMap<K, V> {
+@JsonSerialize(using = OvsdbMapSerializer.class)
+public class OvsdbMap<K, V> extends ForwardingMap<K, V> {
 
     Map<K, V> target = Maps.newHashMap();
 
-    public OvsDBMap() {
+    public OvsdbMap() {
         this(Maps.<K,V>newHashMap());
     }
 
-    public OvsDBMap(Map<K, V> value) {
+    public OvsdbMap(Map<K, V> value) {
         this.target = value;
     }
 
@@ -38,7 +38,7 @@ public class OvsDBMap<K, V> extends ForwardingMap<K, V> {
         return target;
     }
 
-    public static<K,V> OvsDBMap<K,V> fromMap(Map<K, V> value) {
-        return new OvsDBMap<K,V>(value);
+    public static<K,V> OvsdbMap<K,V> fromMap(Map<K, V> value) {
+        return new OvsdbMap<K,V>(value);
     }
 }

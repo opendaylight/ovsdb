@@ -196,13 +196,19 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
         }
     }
 
-    private void handleOpenVSwitchSpecialCase(Node node, String databaseName, String tableName, UUID uuid) {
+    private void handleOpenVSwitchSpecialCase(final Node node, final String databaseName, final String tableName, final UUID uuid) {
         if (OvsVswitchdSchemaConstants.shouldConfigureController(databaseName, tableName)) {
-            try {
-                if (configurationService != null) configurationService.setOFController(node, uuid.toString());
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
+            Runnable updateControllerRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (configurationService != null) configurationService.setOFController(node, uuid.toString());
+                    } catch (InterruptedException | ExecutionException e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+            executor.execute(updateControllerRunnable);
         }
     }
 

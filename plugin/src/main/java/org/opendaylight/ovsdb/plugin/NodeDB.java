@@ -72,7 +72,7 @@ public class NodeDB {
                     Collection<Column> columns = row.getColumns();
                     System.out.print("\t\t"+uuid+ "==");
                     for (Column column : columns) {
-                        if (column.getData() != null) System.out.print(column.getSchema().getName()+" : "+ column.getData());
+                        if (column.getData() != null) System.out.print(column.getSchema().getName()+" : "+ column.getData()+" ");
                     }
                     System.out.println("");
                 }

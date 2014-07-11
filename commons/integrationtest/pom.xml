@@ -3,12 +3,12 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.ovsdb</groupId>
-    <artifactId>ovsdb_commons</artifactId>
+    <artifactId>commons</artifactId>
     <version>1.1.0-SNAPSHOT</version>
     <relativePath>../parent</relativePath>
   </parent>
-  <artifactId>ovsdb_commons_integrationtest</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <artifactId>commons.integrationtest</artifactId>
+  <version>1.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <properties>
@@ -17,8 +17,8 @@
     <ovsdb.library.version>1.0.0-SNAPSHOT</ovsdb.library.version>
     <ovsdb.plugin.version>1.0.0-SNAPSHOT</ovsdb.plugin.version>
     <ovsdb.northbound.version>0.6.0-SNAPSHOT</ovsdb.northbound.version>
-    <schema.Open_vSwitch.version>1.0.0-SNAPSHOT</schema.Open_vSwitch.version>
-    <schema.hardware_vtep.version>1.0.0-SNAPSHOT</schema.hardware_vtep.version>
+    <schema.openvswitch.version>1.0.0-SNAPSHOT</schema.openvswitch.version>
+    <schema.hardwarevtep.version>1.0.0-SNAPSHOT</schema.hardwarevtep.version>
   </properties>
 
   <dependencies>
@@ -68,28 +68,28 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>ovsdb_library</artifactId>
+      <artifactId>library</artifactId>
       <version>${ovsdb.library.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>ovsdb_plugin</artifactId>
+      <artifactId>plugin</artifactId>
       <version>${ovsdb.plugin.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>ovsdb_northbound</artifactId>
+      <artifactId>northbound</artifactId>
       <version>${ovsdb.northbound.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>ovsdb_schema.Open_vSwitch</artifactId>
-      <version>${schema.Open_vSwitch.version}</version>
+      <artifactId>schema.openvswitch</artifactId>
+      <version>${schema.openvswitch.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>ovsdb_schema.hardware_vtep</artifactId>
-      <version>${schema.hardware_vtep.version}</version>
+      <artifactId>schema.hardwarevtep</artifactId>
+      <version>${schema.hardwarevtep.version}</version>
     </dependency>
 
     <!-- Add Pax Exam -->

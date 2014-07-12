@@ -1934,7 +1934,7 @@ class OF13ProviderManager extends ProviderNetworkManager {
         ActionBuilder ab = new ActionBuilder();
 
         OutputActionBuilder output = new OutputActionBuilder();
-        output.setMaxLength(56);
+        output.setMaxLength(0xffff);
         Uri value = new Uri("CONTROLLER");
         output.setOutputNodeConnector(value);
         ab.setAction(new OutputActionCaseBuilder().setOutputAction(output.build()).build());

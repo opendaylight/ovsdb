@@ -12,6 +12,7 @@ package org.opendaylight.ovsdb.plugin;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.networkconfig.bridgedomain.ConfigConstants;

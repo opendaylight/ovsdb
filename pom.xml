@@ -8,24 +8,27 @@
     <version>1.2.0-SNAPSHOT</version>
     <relativePath>commons/parent</relativePath>
   </parent>
+
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>ovsdb</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
+
   <prerequisites>
     <maven>3.0</maven>
   </prerequisites>
+
   <modules>
     <module>library</module>
     <module>schemas/openvswitch</module>
     <module>schemas/hardwarevtep</module>
     <module>plugin</module>
     <module>commons/parent</module>
-    <module>commons/integrationtest</module>
     <module>northbound</module>
     <module>neutron</module>
     <module>distribution/opendaylight</module>
   </modules>
+
   <profiles>
     <profile>
       <id>integrationtest</id>
@@ -33,15 +36,20 @@
         <activeByDefault>false</activeByDefault>
       </activation>
       <modules>
+        <module>commons/integrationtest</module>
           <module>integrationtest</module>
       </modules>
+      <properties>
+        <skip.integrationtest>false</skip.integrationtest>
+      </properties>
     </profile>
   </profiles>
+
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</developerConnection>
     <tag>HEAD</tag>
     <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
   </scm>
-
+  
 </project>

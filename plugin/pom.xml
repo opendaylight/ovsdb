@@ -7,17 +7,11 @@
     <version>1.2.0-SNAPSHOT</version>
     <relativePath>../commons/parent</relativePath>
   </parent>
+
   <artifactId>plugin</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <properties>
-    <!-- used for filtering the integration test resource -->
-    <skip.integrationtest>true</skip.integrationtest>
-    <ovsdb.library.version>1.0.0-SNAPSHOT</ovsdb.library.version>
-    <schema.openvswitch.version>1.0.0-SNAPSHOT</schema.openvswitch.version>
-    <schema.hardwarevtep.version>1.0.0-SNAPSHOT</schema.hardwarevtep.version>
-  </properties>
   <dependencies>
     <dependency>
       <groupId>ch.qos.logback</groupId>
@@ -30,44 +24,36 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
-      <version>${jackson.version}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
-      <version>${jackson.version}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>${jackson.version}</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
-      <version>2.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>${guava.version}</version>
     </dependency>
     <dependency>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
-      <version>1.4</version>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>commons-collections</groupId>
       <artifactId>commons-collections</artifactId>
-      <version>1.0</version>
     </dependency>
     <dependency>
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
-      <version>2.3</version>
     </dependency>
     <dependency>
       <groupId>equinoxSDK381</groupId>
@@ -76,12 +62,10 @@
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-all</artifactId>
-      <version>4.0.10.Final</version>
     </dependency>
     <dependency>
       <groupId>javax.portlet</groupId>
       <artifactId>portlet-api</artifactId>
-      <version>2.0</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -90,43 +74,35 @@
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpcore-nio</artifactId>
-      <version>4.2.1</version>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>clustering.services</artifactId>
-      <version>0.5.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal</artifactId>
-      <version>0.7.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal.connection</artifactId>
-      <version>0.1.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal.networkconfiguration</artifactId>
-      <version>0.0.3-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>library</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>schema.openvswitch</artifactId>
-      <version>${schema.openvswitch.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>schema.hardwarevtep</artifactId>
-      <version>${schema.hardwarevtep.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -184,21 +160,19 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <configuration>
-          <skipITs>${skip.integrationtest}</skipITs>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.16</version>
-        <configuration>
-          <excludes>
-            <!--  Exclude integration tests -->
-            <exclude>**/*IT</exclude>
-          </excludes>
-        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
@@ -208,14 +182,4 @@
     <tag>HEAD</tag>
     <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
   </scm>
-
-  <profiles>
-    <profile>
-      <id>integrationtest</id>
-      <activation></activation>
-      <properties>
-        <skip.integrationtest>true</skip.integrationtest>
-      </properties>
-    </profile>
-  </profiles>
 </project>

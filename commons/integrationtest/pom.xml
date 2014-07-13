@@ -12,17 +12,13 @@
   <packaging>pom</packaging>
 
   <properties>
+    <!-- Overrides -->
     <exam.version>3.5.0</exam.version>
     <url.version>1.6.0</url.version>
-    <ovsdb.library.version>1.0.0-SNAPSHOT</ovsdb.library.version>
-    <ovsdb.plugin.version>1.0.0-SNAPSHOT</ovsdb.plugin.version>
-    <ovsdb.northbound.version>0.6.0-SNAPSHOT</ovsdb.northbound.version>
-    <schema.openvswitch.version>1.0.0-SNAPSHOT</schema.openvswitch.version>
-    <schema.hardwarevtep.version>1.0.0-SNAPSHOT</schema.hardwarevtep.version>
+    <!-- Controller Dependencies for Pax Exam -->
     <arphandler.version>0.5.2-SNAPSHOT</arphandler.version>
     <bundlescanner.implementation.version>0.4.2-SNAPSHOT</bundlescanner.implementation.version>
     <bundlescanner.version>0.4.2-SNAPSHOT</bundlescanner.version>
-    <clustering.services.version>0.5.1-SNAPSHOT</clustering.services.version>
     <clustering.services_implementation.version>0.4.3-SNAPSHOT</clustering.services_implementation.version>
     <commons.httpclient.version>0.1.2-SNAPSHOT</commons.httpclient.version>
     <configuration.implementation.version>0.4.3-SNAPSHOT</configuration.implementation.version>
@@ -32,25 +28,19 @@
     <flowprogrammer.northbound.version>0.4.2-SNAPSHOT</flowprogrammer.northbound.version>
     <forwarding.staticrouting>0.5.2-SNAPSHOT</forwarding.staticrouting>
     <forwarding.staticrouting.northbound.version>0.4.2-SNAPSHOT</forwarding.staticrouting.northbound.version>
-    <northbound.commons.version>0.4.2-SNAPSHOT</northbound.commons.version>
     <forwardingrulesmanager.implementation.version>0.4.2-SNAPSHOT</forwardingrulesmanager.implementation.version>
-    <forwardingrulesmanager.version>0.6.0-SNAPSHOT</forwardingrulesmanager.version>
     <hosttracker.api.version>0.5.2-SNAPSHOT</hosttracker.api.version>
     <hosttracker.implementation.version>0.5.2-SNAPSHOT</hosttracker.implementation.version>
     <hosttracker.northbound.version>0.4.2-SNAPSHOT</hosttracker.northbound.version>
     <logging.bridge.version>0.4.2-SNAPSHOT</logging.bridge.version>
     <protocol_plugins.stub.version>0.4.2-SNAPSHOT</protocol_plugins.stub.version>
     <routing.dijkstra_implementation.version>0.4.2-SNAPSHOT</routing.dijkstra_implementation.version>
-    <sal.connection.version>0.1.2-SNAPSHOT</sal.connection.version>
     <sal.implementation.version>0.4.2-SNAPSHOT</sal.implementation.version>
-    <sal.networkconfiguration.version>0.0.3-SNAPSHOT</sal.networkconfiguration.version>
-    <sal.version>0.8.1-SNAPSHOT</sal.version>
     <security.version>0.4.2-SNAPSHOT</security.version>
     <statistics.northbound.version>0.4.2-SNAPSHOT</statistics.northbound.version>
     <statisticsmanager.implementation.version>0.4.2-SNAPSHOT</statisticsmanager.implementation.version>
     <statisticsmanager.version>0.5.1-SNAPSHOT</statisticsmanager.version>
     <subnets.northbound.version>0.4.2-SNAPSHOT</subnets.northbound.version>
-    <switchmanager.api.version>0.7.1-SNAPSHOT</switchmanager.api.version>
     <switchmanager.implementation.version>0.4.2-SNAPSHOT</switchmanager.implementation.version>
     <switchmanager.northbound.version>0.4.2-SNAPSHOT</switchmanager.northbound.version>
     <topology.northbound.version>0.4.2-SNAPSHOT</topology.northbound.version>
@@ -59,7 +49,55 @@
     <usermanager.implementation.version>0.4.2-SNAPSHOT</usermanager.implementation.version>
     <usermanager.northbound.version>0.0.2-SNAPSHOT</usermanager.northbound.version>
     <usermanager.version>0.4.2-SNAPSHOT</usermanager.version>
+    <!-- 3rd Party Dependencies -->
+    <yaml.version>1.10</yaml.version>
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.yaml</groupId>
+        <artifactId>snakeyaml</artifactId>
+        <version>${yaml.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.ops4j.pax.exam</groupId>
+        <artifactId>pax-exam</artifactId>
+        <version>${exam.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.ops4j.pax.exam</groupId>
+        <artifactId>pax-exam-container-native</artifactId>
+        <version>${exam.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.ops4j.pax.exam</groupId>
+        <artifactId>pax-exam-container-forked</artifactId>
+        <version>${exam.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.ops4j.pax.exam</groupId>
+        <artifactId>pax-exam-junit4</artifactId>
+        <version>${exam.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.ops4j.pax.exam</groupId>
+        <artifactId>pax-exam-link-mvn</artifactId>
+        <version>${exam.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.ops4j.pax.url</groupId>
+        <artifactId>pax-url-aether</artifactId>
+        <version>${url.version}</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
@@ -728,30 +766,6 @@
 
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>${checkstyle.version}</version>
-        <configuration>
-          <failsOnError>true</failsOnError>
-          <configLocation>controller/checkstyle.xml</configLocation>
-        </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>checkstyle</artifactId>
-            <version>0.0.3-SNAPSHOT</version>
-          </dependency>
-        </dependencies>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>${maven.surefire.version}</version>
-        <configuration>
-          <skipTests>true</skipTests>
-        </configuration>
-      </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>properties-maven-plugin</artifactId>

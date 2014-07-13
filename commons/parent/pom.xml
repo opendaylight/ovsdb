@@ -6,7 +6,6 @@
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>odlparent</artifactId>
     <version>1.4.2-SNAPSHOT</version>
-    <relativePath></relativePath>
   </parent>
 
   <groupId>org.opendaylight.ovsdb</groupId>
@@ -17,23 +16,181 @@
     <maven>3.0</maven>
   </prerequisites>
   <properties>
-    <java.version.source>1.7</java.version.source>
-    <java.version.target>1.7</java.version.target>
-    <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <!-- Use Jacoco 6.4 for the seperate integration-test reporting -->
-    <jacoco.version>0.6.4.201312101107</jacoco.version>
+    <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
+    <ovsdb.library.version>1.0.0-SNAPSHOT</ovsdb.library.version>
+    <ovsdb.plugin.version>1.0.0-SNAPSHOT</ovsdb.plugin.version>
+    <ovsdb.neutron.version>0.7.0-SNAPSHOT</ovsdb.neutron.version>
+    <ovsdb.northbound.version>0.6.0-SNAPSHOT</ovsdb.northbound.version>
+    <schema.openvswitch.version>1.0.0-SNAPSHOT</schema.openvswitch.version>
+    <schema.hardwarevtep.version>1.0.0-SNAPSHOT</schema.hardwarevtep.version>
+    <skip.integrationtest>true</skip.integrationtest>
     <sonar.jacoco.reportPath>target/code-coverage/jacoco.exec</sonar.jacoco.reportPath>
     <sonar.jacoco.itReportPath>target/code-coverage/jacoco-it.exec</sonar.jacoco.itReportPath>
     <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+    <!-- Override -->
+    <jacoco.version>0.6.4.201312101107</jacoco.version>
+    <!-- ODL Dependency Versions -->
+    <containermanager.version>0.5.2-SNAPSHOT</containermanager.version>
+    <forwardingrulesmanager.version>0.6.0-SNAPSHOT</forwardingrulesmanager.version>
+    <networkconfig.neutron.version>0.4.2-SNAPSHOT</networkconfig.neutron.version>
+    <clustering.services.version>0.5.1-SNAPSHOT</clustering.services.version>
+    <sal.version>0.8.1-SNAPSHOT</sal.version>
+    <sal.connection.version>0.1.2-SNAPSHOT</sal.connection.version>
+    <sal.networkconfiguration.version>0.0.3-SNAPSHOT</sal.networkconfiguration.version>
+    <mdsal.version>1.1-SNAPSHOT</mdsal.version>
+    <switchmanager.api.version>0.7.1-SNAPSHOT</switchmanager.api.version>
+    <yangtools.version>0.6.2-SNAPSHOT</yangtools.version>
+    <northbound.commons.version>0.4.2-SNAPSHOT</northbound.commons.version>
+    <checkstyle.rules.version>0.0.3-SNAPSHOT</checkstyle.rules.version>
+    <!-- 3rd Pary Dependency Versions -->
+    <commons.collection.version>1.0</commons.collection.version>
+    <netty.version>4.0.10.Final</netty.version>
+    <portlet.version>2.0</portlet.version>
+    <powermock.version>1.5.2</powermock.version>
+    <httpcomponents.version>4.2.1</httpcomponents.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
       <dependency>
+        <groupId>commons-collections</groupId>
+        <artifactId>commons-collections</artifactId>
+        <version>${commons.collection.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-all</artifactId>
+        <version>${netty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>javax.portlet</groupId>
+        <artifactId>portlet-api</artifactId>
+        <version>${portlet.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpcore-nio</artifactId>
+        <version>${httpcomponents.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.powermock</groupId>
+        <artifactId>powermock-module-junit4</artifactId>
+        <version>${powermock.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.powermock</groupId>
+        <artifactId>powermock-api-mockito</artifactId>
+        <version>${powermock.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>clustering.services</artifactId>
+        <version>${clustering.services.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal</artifactId>
+        <version>${sal.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal.connection</artifactId>
+        <version>${sal.connection.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal.networkconfiguration</artifactId>
+        <version>${sal.networkconfiguration.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>containermanager</artifactId>
+        <version>${containermanager.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>forwardingrulesmanager</artifactId>
+        <version>${forwardingrulesmanager.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>networkconfig.neutron</artifactId>
+        <version>${networkconfig.neutron.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal-binding-api</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal-common-util</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>switchmanager</artifactId>
+        <version>${switchmanager.api.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller.model</groupId>
+        <artifactId>model-flow-base</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller.model</groupId>
+        <artifactId>model-flow-management</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller.model</groupId>
+        <artifactId>model-flow-service</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller.model</groupId>
+        <artifactId>model-inventory</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>yang-binding</artifactId>
+        <version>${yangtools.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>commons.northbound</artifactId>
+        <version>${northbound.commons.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.opendaylight.ovsdb</groupId>
-        <artifactId>ovsdb</artifactId>
-        <version>0.5.1-SNAPSHOT</version>
+        <artifactId>library</artifactId>
+        <version>${ovsdb.library.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.ovsdb</groupId>
+        <artifactId>plugin</artifactId>
+        <version>${ovsdb.plugin.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.ovsdb</groupId>
+        <artifactId>neutron</artifactId>
+        <version>${ovsdb.neutron.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.ovsdb</groupId>
+        <artifactId>northbound</artifactId>
+        <version>${ovsdb.northbound.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.ovsdb</groupId>
+        <artifactId>schema.hardwarevtep</artifactId>
+        <version>${schema.hardwarevtep.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.ovsdb</groupId>
+        <artifactId>schema.openvswitch</artifactId>
+        <version>${schema.openvswitch.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -51,72 +208,106 @@
             <testTarget>${java.version.target}</testTarget>
           </configuration>
         </plugin>
+        <!-- This configuration should move to ODL-Parent -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-checkstyle-plugin</artifactId>
+          <version>${checkstyle.version}</version>
+          <configuration>
+            <failsOnError>true</failsOnError>
+            <configLocation>controller/checkstyle.xml</configLocation>
+            <consoleOutput>true</consoleOutput>
+            <includeTestSourceDirectory>true</includeTestSourceDirectory>
+            <sourceDirectory>${project.basedir}</sourceDirectory>
+            <includes>**\/*.java,**\/*.xml,**\/*.ini,**\/*.sh,**\/*.bat</includes>
+            <excludes>**\/target\/,**\/bin\/,**\/target-ide\/,\/,**\/xtend-gen\/</excludes>
+          </configuration>
+          <dependencies>
+            <dependency>
+              <groupId>org.opendaylight.controller</groupId>
+              <artifactId>checkstyle</artifactId>
+              <version>0.0.3-SNAPSHOT</version>
+            </dependency>
+          </dependencies>
+          <executions>
+            <execution>
+              <id>check</id>
+              <goals>
+                <goal>check</goal>
+              </goals>
+              <phase>process-sources</phase>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>${jacoco.version}</version>
+          <executions>
+            <execution>
+              <id>pre-unit-test</id>
+              <goals>
+                <goal>prepare-agent</goal>
+              </goals>
+              <configuration>
+                <destFile>${sonar.jacoco.reportPath}</destFile>
+              </configuration>
+            </execution>
+            <execution>
+              <id>pre-integration-test</id>
+              <goals>
+                <goal>prepare-agent-integration</goal>
+              </goals>
+              <configuration>
+                <destFile>${sonar.jacoco.itReportPath}</destFile>
+                <skip>${skip.integrationtest}</skip>
+              </configuration>
+            </execution>
+            <execution>
+              <id>post-unit-test</id>
+              <goals>
+                <goal>report</goal>
+              </goals>
+              <configuration>
+                <dataFile>${sonar.jacoco.reportPath}</dataFile>
+              </configuration>
+            </execution>
+            <execution>
+              <id>post-integration-test</id>
+              <goals>
+                <goal>report-integration</goal>
+              </goals>
+              <configuration>
+                <dataFile>${sonar.jacoco.itReportPath}</dataFile>
+                <skip>${skip.integrationtest}</skip>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${maven.surefire.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <version>${failsafe.version}</version>
+          <executions>
+            <execution>
+              <id>failsafe-integration-tests</id>
+              <goals>
+                <goal>integration-test</goal>
+                <goal>verify</goal>
+              </goals>
+              <configuration>
+                <skipTests>${skip.integrationtest}</skipTests>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
       </plugins>
     </pluginManagement>
-    <plugins>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>pre-unit-test</id>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-            <configuration>
-              <destFile>${sonar.jacoco.reportPath}</destFile>
-              <propertyName>surefireArgLine</propertyName>
-            </configuration>
-          </execution>
-          <execution>
-            <id>pre-integration-test</id>
-            <goals>
-              <goal>prepare-agent-integration</goal>
-            </goals>
-            <configuration>
-              <destFile>${sonar.jacoco.itReportPath}</destFile>
-              <propertyName>failsafeArgLine</propertyName>
-            </configuration>
-          </execution>
-          <execution>
-            <id>post-unit-test</id>
-            <goals>
-              <goal>report</goal>
-            </goals>
-            <configuration>
-              <dataFile>${sonar.jacoco.reportPath}</dataFile>
-            </configuration>
-          </execution>
-          <execution>
-            <id>post-integration-test</id>
-            <goals>
-              <goal>report-integration</goal>
-            </goals>
-            <configuration>
-              <dataFile>${sonar.jacoco.itReportPath}</dataFile>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>${maven.surefire.version}</version>
-        <configuration>
-          <!-- Use the Jacoco Argline -->
-          <argLine>${surefireArgLine}</argLine>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-failsafe-plugin</artifactId>
-        <version>${failsafe.version}</version>
-        <configuration>
-          <!-- Use the Jacoco Argline -->
-          <argLine>${failsafeArgLine}</argLine>
-        </configuration>
-      </plugin>
-    </plugins>
   </build>
   <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
   <scm>
@@ -126,48 +317,16 @@
     <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
   </scm>
 
-  <repositories>
-    <!-- Opendaylight public group -->
-    <repository>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <id>opendaylight-public</id>
-      <name>opendaylight-public</name>
-      <url>${nexusproxy}/groups/public/</url>
-    </repository>
-    <!-- OpenDayLight Released artifact -->
-    <repository>
-      <id>opendaylight-release</id>
-      <name>opendaylight-release</name>
-      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.release/</url>
-    </repository>
-    <!-- OpenDayLight Snapshot artifact -->
-    <repository>
-      <id>opendaylight-snapshot</id>
-      <name>opendaylight-snapshot</name>
-      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/</url>
-    </repository>
-  </repositories>
+  <profiles>
+    <profile>
+      <id>integrationtest</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <properties>
+        <skip.integrationtest>false</skip.integrationtest>
+      </properties>
+    </profile>
+  </profiles>
 
-  <pluginRepositories>
-    <pluginRepository>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <id>opendaylight-public</id>
-      <name>opendaylight-public</name>
-      <url>http://nexus.opendaylight.org/content/groups/public/</url>
-    </pluginRepository>
-    <pluginRepository>
-      <id>opendaylight-release</id>
-      <name>central2</name>
-      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.release/</url>
-    </pluginRepository>
-    <pluginRepository>
-      <id>opendaylight-snapshot</id>
-      <name>central2</name>
-      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/</url>
-    </pluginRepository>
-  </pluginRepositories>
 </project>

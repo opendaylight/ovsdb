@@ -8,80 +8,80 @@ see https://git.opendaylight.org/gerrit/#/c/390/
   <parent>
     <groupId>org.opendaylight.ovsdb</groupId>
     <artifactId>commons</artifactId>
-    <version>1.1.0-SNAPSHOT</version>
+    <version>1.2.0-SNAPSHOT</version>
     <relativePath>../../commons/parent/</relativePath>
   </parent>
 
   <artifactId>distribution.ovsdb</artifactId>
   <packaging>pom</packaging>
   <name>distribution</name>
+
+  <properties>
+    <openflowjava.version>0.5-SNAPSHOT</openflowjava.version>
+    <openflowplugin.version>0.0.3-SNAPSHOT</openflowplugin.version>
+  </properties>
+
   <dependencies>
     <!-- openflowjava -->
     <dependency>
       <groupId>org.opendaylight.openflowjava</groupId>
       <artifactId>util</artifactId>
-      <version>0.5-SNAPSHOT</version>
+      <version>${openflowjava.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.openflowjava</groupId>
       <artifactId>openflow-protocol-api</artifactId>
-      <version>0.5-SNAPSHOT</version>
+      <version>${openflowjava.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.openflowjava</groupId>
       <artifactId>openflow-protocol-impl</artifactId>
-      <version>0.5-SNAPSHOT</version>
+      <version>${openflowjava.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.openflowjava</groupId>
       <artifactId>openflow-protocol-spi</artifactId>
-      <version>0.5-SNAPSHOT</version>
+      <version>${openflowjava.version}</version>
     </dependency>
     <!-- openflowplugin -->
     <dependency>
       <groupId>org.opendaylight.openflowplugin</groupId>
       <artifactId>openflowplugin</artifactId>
-      <version>0.0.3-SNAPSHOT</version>
+      <version>${openflowplugin.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.openflowplugin</groupId>
       <artifactId>openflowplugin-api</artifactId>
-      <version>0.0.3-SNAPSHOT</version>
+      <version>${openflowplugin.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.openflowplugin</groupId>
       <artifactId>openflowplugin-controller-config</artifactId>
-      <version>0.0.3-SNAPSHOT</version>
+      <version>${openflowplugin.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>library</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>neutron</artifactId>
-      <version>0.7.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>northbound</artifactId>
-      <version>0.6.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>plugin</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>schema.openvswitch</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>schema.hardwarevtep</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -158,7 +158,6 @@ see https://git.opendaylight.org/gerrit/#/c/390/
       </plugin>
     </plugins>
   </build>
-
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</developerConnection>

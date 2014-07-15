@@ -110,15 +110,6 @@
               <reuseForks>false</reuseForks>
               <parallel>none</parallel>
               <threadCount>1</threadCount>
-              <!--  Including just the Library integration tests till Plugin migration is done -->
-              <!--  TODO remove this includes section once the plugin migration is complete -->
-              <includes>
-                <include>**/*LibraryIT*</include>
-                <include>**/*PluginIT*</include>
-              <!-- Disabling NorthboundIT tests till the Jenkins / Tomcat issues is resolved in LF servers
-                <include>**/*NorthboundIT*</include>
-              -->
-              </includes>
             </configuration>
           </execution>
         </executions>

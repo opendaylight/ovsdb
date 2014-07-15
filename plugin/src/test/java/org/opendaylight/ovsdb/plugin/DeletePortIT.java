@@ -9,40 +9,31 @@
  */
 package org.opendaylight.ovsdb.plugin;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.networkconfig.bridgedomain.ConfigConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OvsdbTestAddVlanIT extends OvsdbTestBase {
+@Ignore("Deprecated")
+public class DeletePortIT extends PluginITBase {
     private static final Logger logger = LoggerFactory
-            .getLogger(OvsdbTestAddVlanIT.class);
+            .getLogger(AddPortIT.class);
 
     @Test
-    public void addPortVlan() throws Throwable{
+    public void deletePort() throws Throwable{
         TestObjects testObjects = getTestConnection();
         ConnectionService connectionService = testObjects.connectionService;
         Node node = testObjects.node;
 
-        int vlanid = 100;
-
         /**
-         * Create a Port with a user defined VLAN, and attach it to the specified bridge.
-         *
-         * Ex. ovs-vsctl add-port JUNIT_BRIDGE_TEST Jvlanvif0 tag=100
+         * Deletes an existing port from an existing bridge
+         * Ex. ovs-vsctl del-port ovsbr0 tap0
          * @param node Node serving this configuration service
          * @param bridgeDomainIdentifier String representation of a Bridge Domain
          * @param portIdentifier String representation of a user defined Port Name
-         * @param vlanid Integer note: only one VID is accepted with tag=x method
          */
         ConfigurationService configurationService = testObjects.configurationService;
-        Map<ConfigConstants, Object> configs = new HashMap<ConfigConstants, Object>();
-        configs.put(ConfigConstants.TYPE, "VLAN");
-        configs.put(ConfigConstants.VLAN, vlanid+"");
-        configurationService.addPort(node, BRIDGE_NAME, TAGGED_PORT_NAME, configs);
+        configurationService.deletePort(node, BRIDGE_NAME, PORT_NAME);
     }
 }

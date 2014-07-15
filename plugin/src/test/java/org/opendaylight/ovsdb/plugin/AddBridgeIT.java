@@ -9,29 +9,32 @@
  */
 package org.opendaylight.ovsdb.plugin;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.networkconfig.bridgedomain.ConfigConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OvsdbTestSetOFControllerIT extends OvsdbTestBase {
+@Ignore("Deprecated")
+public class AddBridgeIT extends PluginITBase {
     private static final Logger logger = LoggerFactory
-            .getLogger(OvsdbTestSetOFControllerIT.class);
+            .getLogger(AddBridgeIT.class);
 
     @Test
-    public void setController() throws Throwable{
+    public void addBridge() throws Throwable{
+
         TestObjects testObjects = getTestConnection();
+        ConnectionService connectionService = testObjects.connectionService;
         Node node = testObjects.node;
 
-        Map<ConfigConstants, Object> configs = new HashMap<ConfigConstants, Object>();
-        configs.put(ConfigConstants.DEST_IP, "192.168.254.1");
-        configs.put(ConfigConstants.CUSTOM, "6633");
+        /**
+         * Create a Bridge Domain
+         *
+         * @param node Node serving this configuration service
+         * @param bridgeDomainIdentifier String representation of a Bridge Domain
+         */
         ConfigurationService configurationService = testObjects.configurationService;
-        configurationService.setBridgeOFController(node, BRIDGE_NAME);
-
+        configurationService.createBridgeDomain(node, BRIDGE_NAME, null);
     }
+
 }

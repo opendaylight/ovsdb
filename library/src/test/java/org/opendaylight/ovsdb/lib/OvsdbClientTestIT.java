@@ -18,8 +18,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -154,10 +153,6 @@ public class OvsdbClientTestIT extends OvsdbTestBase {
         Assert.fail("Bridge being monitored :"+testBridgeName+" Not found");
     }
 
-    /*
-     * TODO : selectOpenVSwitchTableUuid method isn't working as expected due to the Jackson
-     * parsing challenges on the Row object returned by the Select operation.
-     */
     private UUID selectOpenVSwitchTableUuid() throws ExecutionException, InterruptedException {
         Assert.assertNotNull(dbSchema);
         GenericTableSchema ovsTable = dbSchema.table("Open_vSwitch", GenericTableSchema.class);

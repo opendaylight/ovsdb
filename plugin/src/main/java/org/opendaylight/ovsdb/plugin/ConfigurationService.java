@@ -942,19 +942,6 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         if (tags != null) port.setTag(tags);
         StatusWithUuid portStatus = this.insertRow(node, port.getSchema().getName(), bridge.getUuid().toString(), port.getRow());
 
-        if (!portStatus.isSuccess()) return portStatus;
-        // Ugly hack by adding a sleep for the Monitor Update to catch up.
-        // TODO : Remove this once the Select operation is in place.
-        // We are currently relying on the local Cache for any GET operation and that might fail if we try to
-        // fetch the last installed entry. Hence we need the Select operation to work.
-
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
         Interface interfaceRow = client.createTypedRowWrapper(Interface.class);
         ConcurrentMap<String, Row> intfRows = this.getRows(node, interfaceRow.getSchema().getName());
         if (intfRows == null || intfRows.size() == 0) {

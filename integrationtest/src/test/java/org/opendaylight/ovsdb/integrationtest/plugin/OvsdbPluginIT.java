@@ -171,8 +171,6 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
         StatusWithUuid status = insertBridge(connection, parentUuid);
         assertTrue(status.isSuccess());
 
-        Thread.sleep(2000); // TODO : Remove this Sleep once the Select operation is resolved.
-
         // 3. Assert to make sure the bridge is created with a valid Uuid.
         printCache();
         Bridge bridge = connection.getClient().getTypedRowWrapper(Bridge.class, null);
@@ -184,7 +182,6 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
         // 4. Delete the bridge & Assert to make sure the return status is success.
         Status delStatus = ovsdbConfigService.deleteRow(node, bridge.getSchema().getName(), status.getUuid().toString());
         assertTrue(delStatus.isSuccess());
-        Thread.sleep(2000); // TODO : Remove this Sleep once the Select operation is resolved.
 
         // 5. Assert to make sure the bridge is deleted
         bridgeRow = ovsdbConfigService.getRow(node, bridge.getSchema().getName(), status.getUuid().toString());

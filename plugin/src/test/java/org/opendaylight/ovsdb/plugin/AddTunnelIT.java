@@ -13,15 +13,17 @@ package org.opendaylight.ovsdb.plugin;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.networkconfig.bridgedomain.ConfigConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OvsdbTestAddTunnelIT extends OvsdbTestBase {
+@Ignore("Deprecated")
+public class AddTunnelIT extends PluginITBase {
     private static final Logger logger = LoggerFactory
-            .getLogger(OvsdbTestAddTunnelIT.class);
+            .getLogger(AddTunnelIT.class);
 
     @Test
     public void addTunnel() throws Throwable{

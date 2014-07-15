@@ -10,19 +10,19 @@
 package org.opendaylight.ovsdb.plugin;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Properties;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OvsdbTestGetBridgeDomainsIT extends OvsdbTestBase {
+@Ignore("Deprecated")
+public class AddPortIT extends PluginITBase {
     private static final Logger logger = LoggerFactory
-            .getLogger(OvsdbTestGetBridgeDomainsIT.class);
-
+            .getLogger(AddPortIT.class);
     private Properties props;
 
     @Before
@@ -31,20 +31,19 @@ public class OvsdbTestGetBridgeDomainsIT extends OvsdbTestBase {
     }
 
     @Test
-    public void getBridgeDomains() throws Throwable{
-
+    public void addPort() throws Throwable{
         TestObjects testObjects = getTestConnection();
         ConnectionService connectionService = testObjects.connectionService;
-        InventoryService inventoryService = testObjects.inventoryService;
         Node node = testObjects.node;
 
         /**
-         * List a Bridge Domain
-         *
+         * Create a Port and attach it to a Bridge
+         * Ex. ovs-vsctl add-port br0 vif0
          * @param node Node serving this configuration service
-         *
+         * @param bridgeDomainIdentifier String representation of a Bridge Domain
+         * @param portIdentifier String representation of a user defined Port Name
          */
         ConfigurationService configurationService = testObjects.configurationService;
-        List<String> ls = configurationService.getBridgeDomains(node);
+        configurationService.addPort(node, BRIDGE_NAME, PORT_NAME, null);
     }
 }

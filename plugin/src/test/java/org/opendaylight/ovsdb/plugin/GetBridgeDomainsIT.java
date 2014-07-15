@@ -9,34 +9,42 @@
  */
 package org.opendaylight.ovsdb.plugin;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
+import java.util.List;
+import java.util.Properties;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.networkconfig.bridgedomain.ConfigConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OvsdbTestBridgeConfigIT extends OvsdbTestBase {
+public class GetBridgeDomainsIT extends PluginITBase {
     private static final Logger logger = LoggerFactory
-            .getLogger(OvsdbTestSetManagerIT.class);
+            .getLogger(GetBridgeDomainsIT.class);
 
-    @Test
-    public void setBridgeConfig() throws Throwable{
-        TestObjects testObjects = getTestConnection();
-        ConnectionService connectionService = testObjects.connectionService;
-        Node node = testObjects.node;
+    private Properties props;
 
-        Map<ConfigConstants, Object> configs = new HashMap<ConfigConstants, Object>();
-
-        Map<String, String> exterIDPairs = new HashMap<String, String>();
-        exterIDPairs.put("br-foo", "br-bar");
-        //Will accept multiple array pairs. Pairs must be arrays not maps.
-        configs.put(ConfigConstants.CUSTOM, exterIDPairs);
-
-        ConfigurationService configurationService = testObjects.configurationService;
-        configurationService.addBridgeDomainConfig(node, BRIDGE_NAME, configs);
+    @Before
+    public void loadProps() throws IOException {
+        props = loadProperties();
     }
 
+    @Test
+    public void getBridgeDomains() throws Throwable{
+
+        TestObjects testObjects = getTestConnection();
+        ConnectionService connectionService = testObjects.connectionService;
+        InventoryService inventoryService = testObjects.inventoryService;
+        Node node = testObjects.node;
+
+        /**
+         * List a Bridge Domain
+         *
+         * @param node Node serving this configuration service
+         *
+         */
+        ConfigurationService configurationService = testObjects.configurationService;
+        List<String> ls = configurationService.getBridgeDomains(node);
+    }
 }

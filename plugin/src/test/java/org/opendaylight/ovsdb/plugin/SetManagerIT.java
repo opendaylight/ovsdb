@@ -9,29 +9,38 @@
  */
 package org.opendaylight.ovsdb.plugin;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OvsdbTestDeletePortIT extends OvsdbTestBase {
+@Ignore("Deprecated")
+public class SetManagerIT extends PluginITBase {
     private static final Logger logger = LoggerFactory
-            .getLogger(OvsdbTestAddPortIT.class);
+            .getLogger(SetManagerIT.class);
 
     @Test
-    public void deletePort() throws Throwable{
+    public void setManager() throws Throwable{
         TestObjects testObjects = getTestConnection();
-        ConnectionService connectionService = testObjects.connectionService;
         Node node = testObjects.node;
 
+
+        String port = "6634";
+        String host = FAKE_IP;
+        String connectionType = "ptcp";
+
+        String manager = connectionType + ":" + host + ":" + port;
+
         /**
-         * Deletes an existing port from an existing bridge
-         * Ex. ovs-vsctl del-port ovsbr0 tap0
+         * Implements the OVS Connection for Managers
+         *
          * @param node Node serving this configuration service
-         * @param bridgeDomainIdentifier String representation of a Bridge Domain
-         * @param portIdentifier String representation of a user defined Port Name
+         * @param String with IP and connection type ex. type:ip:port
+         *
          */
         ConfigurationService configurationService = testObjects.configurationService;
-        configurationService.deletePort(node, BRIDGE_NAME, PORT_NAME);
+        configurationService.setManager(node, manager);
     }
+
 }

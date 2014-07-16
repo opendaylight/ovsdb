@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -171,7 +172,11 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
             dbCache.put(n, db);
         }
 
-        OvsdbInventoryListener inventoryListener = (OvsdbInventoryListener)ServiceHelper.getGlobalInstance(OvsdbInventoryListener.class, this);
+        Object listeners[] = ServiceHelper.getGlobalInstances(OvsdbInventoryListener.class, this, null);
+        OvsdbInventoryListener inventoryListeners[] =
+            listeners != null ? Arrays.copyOf(listeners, listeners.length, OvsdbInventoryListener[].class) :
+                                new OvsdbInventoryListener[0];
+
         for (String tableName : tableUpdates.getUpdates().keySet()) {
             Map<String, Row> tCache = db.getTableCache(databaseName, tableName);
             TableUpdate update = tableUpdates.getUpdates().get(tableName);
@@ -182,13 +187,19 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
                 db.updateRow(databaseName, tableName, uuid.toString(), update.getNew(uuid));
                 if (isNewRow) {
                     this.handleOpenVSwitchSpecialCase(n, databaseName, tableName, uuid);
-                    if (inventoryListener != null) inventoryListener.rowAdded(n, tableName, uuid.toString(), update.getNew(uuid));
+                    for (OvsdbInventoryListener inventoryListener : inventoryListeners) {
+                        inventoryListener.rowAdded(n, tableName, uuid.toString(), update.getNew(uuid));
+                    }
                 } else {
-                    if (inventoryListener != null) inventoryListener.rowUpdated(n, tableName, uuid.toString(), update.getOld(uuid), update.getNew(uuid));
+                    for (OvsdbInventoryListener inventoryListener : inventoryListeners) {
+                        inventoryListener.rowUpdated(n, tableName, uuid.toString(), update.getOld(uuid), update.getNew(uuid));
+                    }
                 }
             } else if (update.getOld(uuid) != null){
                 if (tCache != null) {
-                    if (inventoryListener != null) inventoryListener.rowRemoved(n, tableName, uuid.toString(), update.getOld(uuid), update.getNew(uuid));
+                    for (OvsdbInventoryListener inventoryListener : inventoryListeners) {
+                        inventoryListener.rowRemoved(n, tableName, uuid.toString(), update.getOld(uuid), update.getNew(uuid));
+                    }
                 }
                 db.removeRow(databaseName, tableName, uuid.toString());
             }
@@ -261,8 +272,12 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
 
     @Override
     public void notifyNodeAdded(Node node) {
-        OvsdbInventoryListener inventoryListener = (OvsdbInventoryListener)ServiceHelper.getGlobalInstance(OvsdbInventoryListener.class, this);
-        if (inventoryListener != null) {
+        Object listeners[] = ServiceHelper.getGlobalInstances(OvsdbInventoryListener.class, this, null);
+        OvsdbInventoryListener inventoryListeners[] =
+            listeners != null ? Arrays.copyOf(listeners, listeners.length, OvsdbInventoryListener[].class) :
+                                new OvsdbInventoryListener[0];
+
+        for (OvsdbInventoryListener inventoryListener : inventoryListeners) {
             inventoryListener.nodeAdded(node);
         }
     }
@@ -282,8 +297,12 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
 
     @Override
     public void removeNode(Node node) {
-        OvsdbInventoryListener inventoryListener = (OvsdbInventoryListener)ServiceHelper.getGlobalInstance(OvsdbInventoryListener.class, this);
-        if (inventoryListener != null) {
+        Object listeners[] = ServiceHelper.getGlobalInstances(OvsdbInventoryListener.class, this, null);
+        OvsdbInventoryListener inventoryListeners[] =
+            listeners != null ? Arrays.copyOf(listeners, listeners.length, OvsdbInventoryListener[].class) :
+                                new OvsdbInventoryListener[0];
+
+        for (OvsdbInventoryListener inventoryListener : inventoryListeners) {
             inventoryListener.nodeRemoved(node);
         }
 

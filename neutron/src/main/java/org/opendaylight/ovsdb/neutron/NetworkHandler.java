@@ -12,6 +12,7 @@ package org.opendaylight.ovsdb.neutron;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
 import java.util.concurrent.ConcurrentMap;
 
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkAware;
@@ -139,7 +140,6 @@ public class NetworkHandler extends BaseHandler
         List <NeutronNetwork> networks = new ArrayList<NeutronNetwork>();
         if (neutronNetworkService != null) {
             networks = neutronNetworkService.getAllNetworks();
-            OvsdbInventoryListener inventoryListener = (OvsdbInventoryListener)ServiceHelper.getGlobalInstance(OvsdbInventoryListener.class, this);
             if (networks.isEmpty()) {
                 logger.trace("neutronNetworkDeleted: last tenant network, delete tunnel ports...");
                 IConnectionServiceInternal connectionService = (IConnectionServiceInternal)
@@ -157,12 +157,25 @@ public class NetworkHandler extends BaseHandler
                                 if (intfType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) || intfType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)) {
                                     /* delete tunnel ports on this node */
                                     logger.trace("Delete tunnel intf {}", intf);
-                                    inventoryListener.rowRemoved(node, intf.getSchema().getName(), intfUUID,
+                                    Object[] listeners = ServiceHelper.getGlobalInstances(OvsdbInventoryListener.class, this, null);
+                                    OvsdbInventoryListener inventoryListeners[] =
+                                        listeners != null ? Arrays.copyOf(listeners, listeners.length, OvsdbInventoryListener[].class) :
+                                                            new OvsdbInventoryListener[0];
+
+                                    for (OvsdbInventoryListener inventoryListener : inventoryListeners) {
+                                        inventoryListener.rowRemoved(node, intf.getSchema().getName(), intfUUID,
                                             intf.getRow(), null);
+                                    }
                                 } else if (!phyIfName.isEmpty() && phyIfName.contains(intf.getName())) {
                                     logger.trace("Delete physical intf {}", intf);
-                                    inventoryListener.rowRemoved(node, intf.getSchema().getName(), intfUUID,
+                                    Object[] listeners = ServiceHelper.getGlobalInstances(OvsdbInventoryListener.class, this, null);
+                                    OvsdbInventoryListener inventoryListeners[] =
+                                        listeners != null ? Arrays.copyOf(listeners, listeners.length, OvsdbInventoryListener[].class) :
+                                                            new OvsdbInventoryListener[0];
+                                    for (OvsdbInventoryListener inventoryListener : inventoryListeners) {
+                                        inventoryListener.rowRemoved(node, intf.getSchema().getName(), intfUUID,
                                             intf.getRow(), null);
+                                    }
                                 }
                             }
                         }

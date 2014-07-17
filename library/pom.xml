@@ -111,7 +111,9 @@
                 *</Import-Package>
             <Bundle-Activator>org.opendaylight.ovsdb.lib.Activator</Bundle-Activator>
             <Embed-Transitive>true</Embed-Transitive>
-            <Export-Package>org.opendaylight.ovsdb.lib,
+            <Export-Package>
+                org.opendaylight.ovsdb.lib,
+                org.opendaylight.ovsdb.lib.error,
                 org.opendaylight.ovsdb.lib.jsonrpc,
                 org.opendaylight.ovsdb.lib.notation,
                 org.opendaylight.ovsdb.lib.operations,

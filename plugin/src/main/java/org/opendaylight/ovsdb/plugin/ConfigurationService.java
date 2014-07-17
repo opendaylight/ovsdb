@@ -33,6 +33,7 @@ import org.opendaylight.controller.sal.networkconfig.bridgedomain.IPluginInBridg
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
+import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
@@ -471,34 +472,54 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             return false;
         }
 
-        OvsdbSet<String> protocols = new OvsdbSet<String>();
+        Bridge bridge = connection.getClient().createTypedRowWrapper(Bridge.class);
 
-        String ofVersion = System.getProperty("ovsdb.of.version", OPENFLOW_10);
-        switch (ofVersion) {
-            case OPENFLOW_13:
-                protocols.add("OpenFlow13");
-                break;
-            case OPENFLOW_10:
-            default:
-                protocols.add("OpenFlow10");
-                break;
+        Status updateOperationStatus = null;
+        try {
+            OvsdbSet<String> protocols = new OvsdbSet<String>();
+
+            String ofVersion = System.getProperty("ovsdb.of.version", OPENFLOW_10);
+            switch (ofVersion) {
+                case OPENFLOW_13:
+                    protocols.add("OpenFlow13");
+                    break;
+                case OPENFLOW_10:
+                    //fall through
+                default:
+                    protocols.add("OpenFlow10");
+                    break;
+            }
+            bridge.setProtocols(protocols);
+            updateOperationStatus = this.updateRow(node, bridge.getSchema().getName(),
+                                                   null, bridgeUUID, bridge.getRow());
+            logger.debug("Bridge {} updated to {} with Status {}", bridgeUUID,
+                         protocols.toArray()[0],updateOperationStatus);
+
+        } catch (SchemaVersionMismatchException e){
+            logger.debug(e.toString());
         }
 
-        Bridge bridge = connection.getClient().createTypedRowWrapper(Bridge.class);
-        bridge.setProtocols(protocols);
-        Status status = this.updateRow(node, bridge.getSchema().getName(), null, bridgeUUID, bridge.getRow());
-        logger.debug("Bridge {} updated to {} with Status {}", bridgeUUID, protocols.toArray()[0], status);
-        if (!status.isSuccess()) return status.isSuccess();
+        // If we fail to update the protocols
+        if (updateOperationStatus != null && !updateOperationStatus.isSuccess()) {
+            return updateOperationStatus.isSuccess();
+        }
 
+        Status status = null;
         List<InetAddress> ofControllerAddrs = this.getControllerIPAddresses(connection);
         short ofControllerPort = getControllerOFPort();
         for (InetAddress ofControllerAddress : ofControllerAddrs) {
             String newController = "tcp:"+ofControllerAddress.getHostAddress()+":"+ofControllerPort;
             Controller controllerRow = connection.getClient().createTypedRowWrapper(Controller.class);
             controllerRow.setTarget(ImmutableSet.of(newController));
+            //ToDo: Status gets overwritten on each iteration. If any operation other than the last fails it's ignored.
             status = this.insertRow(node, controllerRow.getSchema().getName(), bridgeUUID, controllerRow.getRow());
         }
-        return status.isSuccess();
+
+        if (status != null) {
+            return status.isSuccess();
+        }
+
+        return false;
     }
 
 

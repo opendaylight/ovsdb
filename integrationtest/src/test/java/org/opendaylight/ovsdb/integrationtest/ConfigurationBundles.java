@@ -195,4 +195,25 @@ public class ConfigurationBundles {
         );
     }
 
+    public static Option ovsdbNeutronBundles() {
+        return new DefaultCompositeOption(
+                mavenBundle("commons-net", "commons-net").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "configuration").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "configuration.implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "hosttracker").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "hosttracker.implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "switchmanager").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "switchmanager.implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "statisticsmanager").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "statisticsmanager.implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "topologymanager").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "networkconfig.neutron").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "connectionmanager").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "connectionmanager.implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "forwardingrulesmanager").versionAsInProject(),
+                mavenBundle("org.opendaylight.ovsdb", "plugin").versionAsInProject(),
+                mavenBundle("org.opendaylight.ovsdb", "neutron").versionAsInProject()
+        );
+    }
+
 }

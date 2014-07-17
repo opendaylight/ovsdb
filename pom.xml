@@ -25,7 +25,8 @@
     <module>plugin</module>
     <module>commons/parent</module>
     <module>northbound</module>
-    <module>neutron</module>
+    <module>neutron/neutron</module>
+    <module>neutron/networking-providers</module>
     <module>distribution/opendaylight</module>
   </modules>
 

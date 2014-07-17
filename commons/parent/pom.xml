@@ -23,7 +23,8 @@
     <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
     <ovsdb.library.version>1.0.0-SNAPSHOT</ovsdb.library.version>
     <ovsdb.plugin.version>1.0.0-SNAPSHOT</ovsdb.plugin.version>
-    <ovsdb.neutron.version>0.7.0-SNAPSHOT</ovsdb.neutron.version>
+    <ovsdb.neutron.version>1.0.0-SNAPSHOT</ovsdb.neutron.version>
+    <ovsdb.neutron.providers.version>1.0.0-SNAPSHOT</ovsdb.neutron.providers.version>
     <ovsdb.northbound.version>0.6.0-SNAPSHOT</ovsdb.northbound.version>
     <schema.openvswitch.version>1.0.0-SNAPSHOT</schema.openvswitch.version>
     <schema.hardwarevtep.version>1.0.0-SNAPSHOT</schema.hardwarevtep.version>
@@ -180,6 +181,11 @@
         <groupId>org.opendaylight.ovsdb</groupId>
         <artifactId>neutron</artifactId>
         <version>${ovsdb.neutron.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.ovsdb</groupId>
+        <artifactId>neutron.networking-providers</artifactId>
+        <version>${ovsdb.neutron.providers.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.ovsdb</groupId>

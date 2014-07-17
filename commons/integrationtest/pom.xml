@@ -161,6 +161,10 @@
       <artifactId>commons-codec</artifactId>
     </dependency>
     <dependency>
+      <groupId>commons-net</groupId>
+      <artifactId>commons-net</artifactId>
+    </dependency>
+    <dependency>
       <groupId>commons-collections</groupId>
       <artifactId>commons-collections</artifactId>
       <version>1.0</version>
@@ -726,6 +730,11 @@
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>plugin</artifactId>
       <version>${ovsdb.plugin.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>neutron</artifactId>
+      <version>${ovsdb.neutron.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>

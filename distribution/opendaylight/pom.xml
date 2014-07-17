@@ -49,11 +49,6 @@ see https://git.opendaylight.org/gerrit/#/c/390/
       <artifactId>org.openflow.openflowj</artifactId>
       <version>${openflowj.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller.thirdparty</groupId>
-      <artifactId>org.openflow.openflowj</artifactId>
-      <version>1.0.2</version>
-    </dependency>
     <!-- openflowplugin -->
     <dependency>
       <groupId>org.opendaylight.openflowplugin</groupId>
@@ -76,7 +71,11 @@ see https://git.opendaylight.org/gerrit/#/c/390/
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>neutron</artifactId>
+      <artifactId>openstack.net-virt</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>openstack.net-virt-providers</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>

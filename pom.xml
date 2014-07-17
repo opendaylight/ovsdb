@@ -9,7 +9,6 @@
     <relativePath>commons/parent</relativePath>
   </parent>
 
-  <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>ovsdb</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
@@ -25,7 +24,8 @@
     <module>plugin</module>
     <module>commons/parent</module>
     <module>northbound</module>
-    <module>neutron</module>
+    <module>openstack/net-virt</module>
+    <module>openstack/net-virt-providers</module>
     <module>distribution/opendaylight</module>
   </modules>
 
@@ -37,7 +37,7 @@
       </activation>
       <modules>
         <module>commons/integrationtest</module>
-          <module>integrationtest</module>
+        <module>integrationtest</module>
       </modules>
       <properties>
         <skip.integrationtest>false</skip.integrationtest>

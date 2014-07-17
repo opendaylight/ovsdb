@@ -30,7 +30,7 @@ if [ "${virt}" == "" ]; then
     usage
 else
     if [ "${virt}" == "ovsdb" ]; then
-        ODL_VIRT_FILTER="opendove|vtn"
+        ODL_VIRT_FILTER="opendove|vtn|affinity"
     elif [ "${virt}" == "opendove" ]; then
         ODL_VIRT_FILTER="ovsdb|vtn"
     elif [ "${virt}" == "vtn" ]; then

@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_84325b5d",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/NetworkHandler.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-18T17:22:08Z",
+      "side": 1,
+      "message": "Please refer to the comment in PortHandler.java and is applicable here as well.\n\nNo action needed. The fix can stay as is till we have a better alternative to fix this hack.",
+      "revId": "cb8931157dd057961b76c7645fe3dca80f287444",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_642dd7fd",
+        "filename": "neutron/src/main/java/org/opendaylight/ovsdb/neutron/PortHandler.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-18T17:22:08Z",
+      "side": 1,
+      "message": "This was added as a hack in Hydrogen timeframe to take care of a race-condition. It is not appropriate to issue a call to rowRemoved from a Neutron bundle because this is a call that is owned by the Plugin\u0027s inventory Service.\n\nSince we dont have a better alternative, I will leave this change here as you have done for now. We can revisit this at a later point.\n\nThis is just a comment to give a history to developers and reviewers.\nNo action needed for now.",
+      "revId": "cb8931157dd057961b76c7645fe3dca80f287444",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c4ece3bd",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/InventoryService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-18T17:22:08Z",
+      "side": 1,
+      "message": "I understand that it is not entirely related to your fix here. But we are planning on changing the approach of using ServiceHelper and replacing it with proper Dependancy Injection.\n\nCan you please update the fix to remove this ServiceHelper usage and use the Activator to do service injection of  OvsdbInventoryListener(s) ?",
+      "revId": "cb8931157dd057961b76c7645fe3dca80f287444",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

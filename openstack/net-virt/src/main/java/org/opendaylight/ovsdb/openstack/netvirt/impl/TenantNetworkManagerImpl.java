@@ -57,7 +57,7 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
     public void reclaimInternalVlan(Node node, String portUUID, NeutronNetwork network) {
         int vlan = vlanConfigurationCache.reclaimInternalVlan(node, network.getID());
         if (vlan <= 0) {
-            logger.error("Unable to get an internalVlan for Network {}", network);
+            logger.debug("Unable to get an internalVlan for Network {}", network);
             return;
         }
         logger.debug("Removed Vlan {} on {}", vlan, portUUID);
@@ -70,7 +70,7 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
         int vlan = vlanConfigurationCache.getInternalVlan(node, network.getID());
         logger.debug("Programming Vlan {} on {}", vlan, portUUID);
         if (vlan <= 0) {
-            logger.error("Unable to get an internalVlan for Network {}", network);
+            logger.debug("Unable to get an internalVlan for Network {}", network);
             return;
         }
 

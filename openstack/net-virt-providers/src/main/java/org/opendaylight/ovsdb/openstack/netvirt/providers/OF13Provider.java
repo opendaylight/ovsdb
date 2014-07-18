@@ -813,7 +813,7 @@ public class OF13Provider implements NetworkingProvider {
 
             Set<Long> of_ports = intf.getOpenFlowPortColumn().getData();
             if (of_ports == null || of_ports.size() <= 0) {
-                logger.error("Could NOT Identify OF value for port {} on {}", intf.getName(), node);
+                logger.debug("Could NOT Identify OF value for port {} on {}", intf.getName(), node);
                 return;
             }
             long localPort = (Long)of_ports.toArray()[0];
@@ -854,7 +854,7 @@ public class OF13Provider implements NetworkingProvider {
 
             Set<Long> of_ports = intf.getOpenFlowPortColumn().getData();
             if (of_ports == null || of_ports.size() <= 0) {
-                logger.error("Could NOT Identify OF value for port {} on {}", intf.getName(), node);
+                logger.debug("Could NOT Identify OF value for port {} on {}", intf.getName(), node);
                 return;
             }
             long localPort = (Long)of_ports.toArray()[0];
@@ -900,7 +900,7 @@ public class OF13Provider implements NetworkingProvider {
 
             Set<Long> of_ports = intf.getOpenFlowPortColumn().getData();
             if (of_ports == null || of_ports.size() <= 0) {
-                logger.error("Could NOT Identify OF value for port {} on {}", intf.getName(), node);
+                logger.debug("Could NOT Identify OF value for port {} on {}", intf.getName(), node);
                 return;
             }
             long localPort = (Long)of_ports.toArray()[0];
@@ -924,7 +924,7 @@ public class OF13Provider implements NetworkingProvider {
                     if (tunIntf.getName().equals(this.getTunnelName(tunnelType, dst))) {
                         of_ports = tunIntf.getOpenFlowPortColumn().getData();
                         if (of_ports == null || of_ports.size() <= 0) {
-                            logger.error("Could NOT Identify Tunnel port {} on {}", tunIntf.getName(), node);
+                            logger.debug("Could NOT Identify Tunnel port {} on {}", tunIntf.getName(), node);
                             continue;
                         }
                         long tunnelOFPort = (Long)of_ports.toArray()[0];

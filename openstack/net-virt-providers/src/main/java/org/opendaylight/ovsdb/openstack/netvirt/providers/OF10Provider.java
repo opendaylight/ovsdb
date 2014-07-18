@@ -352,7 +352,7 @@ public class OF10Provider implements NetworkingProvider {
                     if (patchiface.getName().equalsIgnoreCase(patchInt)) {
                         Set<Long> of_ports = patchiface.getOpenFlowPortColumn().getData();
                         if (of_ports == null || of_ports.size() <= 0) {
-                            logger.error("Could NOT Identified Patch port {} on {}", patchInt, node);
+                            logger.trace("No port for patch interface {} on node {}", patchInt, node);
                             continue;
                         }
                         patchOFPort = (long)of_ports.toArray()[0];
@@ -361,7 +361,7 @@ public class OF10Provider implements NetworkingProvider {
                     }
                 }
                 if (patchOFPort == -1) {
-                    logger.error("Cannot identify {} interface on {}", patchInt, node);
+                    logger.warn("Could not find port associated with patch interface {} on node {}. No flow rules to program", patchInt, node);
                 }
                 for (Row row : ifaces.values()) {
                     Interface tuniface = ovsdbConfigService.getTypedRow(node, Interface.class, row);
@@ -381,9 +381,13 @@ public class OF10Provider implements NetworkingProvider {
 
                         if (!local) {
                             programRemoteEgressTunnelBridgeRules(node, patchOFPort, attachedMac, internalVlan, tunnelOFPort);
+                            logger.trace("Programmed (non-local) EgressTunnelBridgeRules for attachedMac {} internalVlan {} tunnelOFPort {}",
+                                    attachedMac, internalVlan, tunnelOFPort);
                         }
                         programLocalIngressTunnelBridgeRules(node, tunnelOFPort, internalVlan, patchOFPort);
                         programFloodEgressTunnelBridgeRules(node, patchOFPort, internalVlan, tunnelOFPort);
+                        logger.trace("Programmed ingress tunnel and flood rules for node {} tunnel {} tunnelOFPort {} internalVlan {} patchOFPort {}",
+                                node, tuniface.getName(), tunnelOFPort, internalVlan, patchOFPort);
                         return;
                     }
                 }
@@ -429,7 +433,7 @@ public class OF10Provider implements NetworkingProvider {
                     if (patchiface.getName().equalsIgnoreCase(patchInt)) {
                         Set<Long> of_ports = patchiface.getOpenFlowPortColumn().getData();
                         if (of_ports == null || of_ports.size() <= 0) {
-                            logger.error("Could NOT Identified Patch port {} on {}", patchInt, node);
+                            logger.trace("Could NOT identify Patch port {} on {}", patchInt, node);
                             continue;
                         }
                         patchOFPort = (long)of_ports.toArray()[0];
@@ -438,7 +442,8 @@ public class OF10Provider implements NetworkingProvider {
                     }
                 }
                 if (patchOFPort == -1) {
-                    logger.error("Cannot identify {} interface on {}", patchInt, node);
+                    logger.debug("Could not find port associated with patch interface {} on node {}", patchInt, node);
+                    // return;  // keep going; we assume that removal of rules does not really need patchOFPort
                 }
                 for (Row row : ifaces.values()) {
                     Interface tuniface = ovsdbConfigService.getTypedRow(node, Interface.class, row);
@@ -451,7 +456,7 @@ public class OF10Provider implements NetworkingProvider {
                         long tunnelOFPort = (long)of_ports.toArray()[0];
 
                         if (tunnelOFPort == -1) {
-                            logger.error("Could NOT Identify Tunnel port {} -> OF ({}) on {}", tuniface.getName(), tunnelOFPort, node);
+                            logger.error("Could NOT Identify Tunnel port {} -> OF ({}) on {}: No flow rules to remove", tuniface.getName(), tunnelOFPort, node);
                             return;
                         }
                         logger.debug("Identified Tunnel port {} -> OF ({}) on {}", tuniface.getName(), tunnelOFPort, node);
@@ -773,13 +778,21 @@ public class OF10Provider implements NetworkingProvider {
         } else if (network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) ||
                    network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)) {
             Status status = getTunnelReadinessStatus(srcNode, network.getProviderSegmentationID());
-            if (!status.isSuccess()) return status;
+            if (!status.isSuccess()) {
+                logger.debug("Interface update of networkType: {}, segmentationId: {}, srcNode: {} is not tunnel ready",
+                        network.getProviderNetworkType(), network.getProviderSegmentationID(), srcNode);
+                return status;
+            }
 
             List<Node> nodes = connectionService.getNodes();
             nodes.remove(srcNode);
             for (Node dstNode : nodes) {
                 status = getTunnelReadinessStatus(dstNode, network.getProviderSegmentationID());
-                if (!status.isSuccess()) continue;
+                if (!status.isSuccess()) {
+                    logger.debug("Interface update of networkType: {}, segmentationId: {}, dstNode: {} is not tunnel ready",
+                            network.getProviderNetworkType(), network.getProviderSegmentationID(), dstNode);
+                    continue;
+                }
                 InetAddress src = configurationService.getTunnelEndPoint(srcNode);
                 InetAddress dst = configurationService.getTunnelEndPoint(dstNode);
                 status = addTunnelPort(srcNode, network.getProviderNetworkType(), src, dst, network.getProviderSegmentationID());

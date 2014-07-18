@@ -356,16 +356,16 @@ public class OF10Provider implements NetworkProvider {
                     if (patchIntf.getName().equalsIgnoreCase(patchInt)) {
                         Set<Long> of_ports = patchIntf.getOpenFlowPortColumn().getData();
                         if (of_ports == null || of_ports.size() <= 0) {
-                            logger.error("Could NOT Identified Patch port {} on {}", patchInt, node);
+                            logger.error("programTunnelRules: Could NOT identify Patch port {} on {}", patchInt, node);
                             continue;
                         }
                         patchOFPort = (long)of_ports.toArray()[0];
-                        logger.debug("Identified Patch port {} -> OF ({}) on {}", patchInt, patchOFPort, node);
+                        logger.debug("programTunnelRules: Identified Patch port {} -> OF ({}) on {}", patchInt, patchOFPort, node);
                         break;
                     }
                 }
                 if (patchOFPort == -1) {
-                    logger.error("Cannot identify {} interface on {}", patchInt, node);
+                    logger.error("programTunnelRules: Cannot identify {} interface on {}", patchInt, node);
                 }
                 for (Row row : intfs.values()) {
                     Interface tunIntf = ovsdbTable.getTypedRow(node, Interface.class, row);
@@ -385,9 +385,13 @@ public class OF10Provider implements NetworkProvider {
 
                         if (!local) {
                             programRemoteEgressTunnelBridgeRules(node, patchOFPort, attachedMac, internalVlan, tunnelOFPort);
+                            logger.info("Programmed (non-local) EgressTunnelBridgeRules for attachedMac {} internalVlan {} tunnelOFPort {}",
+                                    attachedMac, internalVlan, tunnelOFPort);
                         }
                         programLocalIngressTunnelBridgeRules(node, tunnelOFPort, internalVlan, patchOFPort);
                         programFloodEgressTunnelBridgeRules(node, patchOFPort, internalVlan, tunnelOFPort);
+                        logger.info("Programmed ingress tunnel and flood rules for node {} tunnel {} tunnelOFPort {} internalVlan {} patchOFPort {}",
+                                node, tunIntf.getName(), tunnelOFPort, internalVlan, patchOFPort);
                         return;
                     }
                 }
@@ -432,16 +436,16 @@ public class OF10Provider implements NetworkProvider {
                     if (patchIntf.getName().equalsIgnoreCase(patchInt)) {
                         Set<Long> of_ports = patchIntf.getOpenFlowPortColumn().getData();
                         if (of_ports == null || of_ports.size() <= 0) {
-                            logger.error("Could NOT Identified Patch port {} on {}", patchInt, node);
+                            logger.error("removeTunnelRules: Could NOT identify Patch port {} on {}", patchInt, node);
                             continue;
                         }
                         patchOFPort = (long)of_ports.toArray()[0];
-                        logger.debug("Identified Patch port {} -> OF ({}) on {}", patchInt, patchOFPort, node);
+                        logger.debug("removeTunnelRules: Identified Patch port {} -> OF ({}) on {}", patchInt, patchOFPort, node);
                         break;
                     }
                 }
                 if (patchOFPort == -1) {
-                    logger.error("Cannot identify {} interface on {}", patchInt, node);
+                    logger.error("removeTunnelRules: Cannot identify {} interface on {}", patchInt, node);
                 }
                 for (Row row : intfs.values()) {
                     Interface tunIntf = ovsdbTable.getTypedRow(node, Interface.class, row);
@@ -454,10 +458,10 @@ public class OF10Provider implements NetworkProvider {
                         long tunnelOFPort = (long)of_ports.toArray()[0];
 
                         if (tunnelOFPort == -1) {
-                            logger.error("Could NOT Identify Tunnel port {} -> OF ({}) on {}", tunIntf.getName(), tunnelOFPort, node);
+                            logger.error("removeTunnelRules: Could NOT Identify Tunnel port {} -> OF ({}) on {}", tunIntf.getName(), tunnelOFPort, node);
                             return;
                         }
-                        logger.debug("Identified Tunnel port {} -> OF ({}) on {}", tunIntf.getName(), tunnelOFPort, node);
+                        logger.debug("removeTunnelRules: Identified Tunnel port {} -> OF ({}) on {}", tunIntf.getName(), tunnelOFPort, node);
 
                         if (!local) {
                             removeRemoteEgressTunnelBridgeRules(node, patchOFPort, attachedMac, internalVlan, tunnelOFPort);
@@ -778,14 +782,22 @@ public class OF10Provider implements NetworkProvider {
         } else if (network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) ||
                    network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)) {
             Status status = getTunnelReadinessStatus(srcNode, network.getProviderSegmentationID());
-            if (!status.isSuccess()) return status;
+            if (!status.isSuccess()) {
+                logger.debug("handleInterfaceUpdate: networkType: {}, segmentationId: {}, srcNode: {} is not tunnel ready",
+                        network.getProviderNetworkType(), network.getProviderSegmentationID(), srcNode);
+                return status;
+            }
 
             IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
             List<Node> nodes = connectionService.getNodes();
             nodes.remove(srcNode);
             for (Node dstNode : nodes) {
                 status = getTunnelReadinessStatus(dstNode, network.getProviderSegmentationID());
-                if (!status.isSuccess()) continue;
+                if (!status.isSuccess()) {
+                    logger.debug("handleInterfaceUpdate: networkType: {}, segmentationId: {}, dstNode: {} is not tunnel ready",
+                            network.getProviderNetworkType(), network.getProviderSegmentationID(), dstNode);
+                    continue;
+                }
                 InetAddress src = adminConfigManager.getTunnelEndPoint(srcNode);
                 InetAddress dst = adminConfigManager.getTunnelEndPoint(dstNode);
                 status = addTunnelPort(srcNode, network.getProviderNetworkType(), src, dst, network.getProviderSegmentationID());

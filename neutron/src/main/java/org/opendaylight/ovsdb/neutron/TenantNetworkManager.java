@@ -104,7 +104,8 @@ public class TenantNetworkManager implements ITenantNetworkManager {
 
         int vlan = nodeConfiguration.reclaimInternalVlan(network.getID());
         if (vlan <= 0) {
-            logger.error("Unable to get an internalVlan for Network {}", network);
+            logger.error("Unable to get an internalVlan for Network {}. Will not reclaim vlan on node {} on {}",
+                    network, node, portUUID);
             return;
         }
         logger.debug("Removed Vlan {} on {}", vlan, portUUID);
@@ -152,6 +153,7 @@ public class TenantNetworkManager implements ITenantNetworkManager {
         }
 
         int internalVlan = nodeConfiguration.assignInternalVlan(networkId);
+        logger.debug("networkCreated for networkId {} using internalVlan {}", networkId, internalVlan);
         if (enableContainer && internalVlan != 0) {
             IContainerManager containerManager = (IContainerManager)ServiceHelper.getGlobalInstance(IContainerManager.class, this);
             if (containerManager == null) {
@@ -297,7 +299,7 @@ public class TenantNetworkManager implements ITenantNetworkManager {
 
         String nodeUuid = getNodeUUID(node);
         if (nodeUuid == null) {
-            logger.error("Unable to get UUID for Node {}", node);
+            logger.error("programTenantNetworkInternalVlan: Unable to get UUID for Node {}", node);
             return;
         }
 
@@ -306,14 +308,16 @@ public class TenantNetworkManager implements ITenantNetworkManager {
         // Cache miss
         if (nodeConfiguration == null)
         {
-            logger.error("Configuration data unavailable for Node {} ", node);
+            logger.error("programTenantNetworkInternalVlan: Configuration data unavailable for Node {} Network {}",
+                    node, network);
             return;
         }
 
         int vlan = nodeConfiguration.getInternalVlan(network.getID());
-        logger.debug("Programming Vlan {} on {}", vlan, portUUID);
+        logger.debug("programTenantNetworkInternalVlan: Programming Vlan {} on {}", vlan, portUUID);
         if (vlan <= 0) {
-            logger.error("Unable to get an internalVlan for Network {}", network);
+            logger.error("programTenantNetworkInternalVlan: Unable to get an internalVlan for Network {}. Will not program tenant network on node {}",
+                    network, node);
             return;
         }
         OvsdbConfigService ovsdbTable = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class, this);
@@ -328,7 +332,7 @@ public class TenantNetworkManager implements ITenantNetworkManager {
     private void addPortToTenantNetworkContainer(Node node, String portUUID, NeutronNetwork network) {
         IContainerManager containerManager = (IContainerManager)ServiceHelper.getGlobalInstance(IContainerManager.class, this);
         if (containerManager == null) {
-            logger.error("ContainerManager is not accessible");
+            logger.error("addPortToTenantNetworkContainer: ContainerManager is not accessible");
             return;
         }
         OvsdbConfigService ovsdbTable = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class, this);
@@ -336,21 +340,24 @@ public class TenantNetworkManager implements ITenantNetworkManager {
             Row portRow = ovsdbTable.getRow(node, ovsdbTable.getTableName(node, Port.class), portUUID);
             Port port = ovsdbTable.getTypedRow(node, Port.class, portRow);
             if (port == null) {
-                logger.trace("Unable to identify Port with UUID {}", portUUID);
+                logger.debug("addPortToTenantNetworkContainer: Unable to identify Port with UUID {}", portUUID);
                 return;
             }
             Set<UUID> interfaces = port.getInterfacesColumn().getData();
             if (interfaces == null) {
-                logger.trace("No interfaces available to fetch the OF Port");
+                logger.debug("addPortToTenantNetworkContainer: No interfaces available to fetch the OF Port");
                 return;
             }
             Bridge bridge = this.getBridgeIdForPort(node, portUUID);
             if (bridge == null) {
-                logger.debug("Unable to spot Bridge for Port {} in node {}", port, node);
+                logger.debug("addPortToTenantNetworkContainer: Unable to spot Bridge for Port {} in node {}", port, node);
                 return;
             }
             Set<String> dpids = bridge.getDatapathIdColumn().getData();
-            if (dpids == null || dpids.size() ==  0) return;
+            if (dpids == null || dpids.size() ==  0) {
+                logger.debug("addPortToTenantNetworkContainer: Port {} in node {} has no dpids", port, node);
+                return;
+            }
             Long dpidLong = Long.valueOf(HexEncode.stringToLong((String)dpids.toArray()[0]));
 
             for (UUID intfUUID : interfaces) {

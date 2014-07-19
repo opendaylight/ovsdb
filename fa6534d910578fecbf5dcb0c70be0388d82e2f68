@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_4470d3db",
+        "filename": "neutron/networking-providers/src/main/java/org/opendaylight/ovsdb/neutron/providers/Activator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-19T01:39:12Z",
+      "side": 1,
+      "message": "is there any value in having of10Properties used outside the if (imp.equals(...)) {} block below? If not, maybe nest it in?",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e47807c6",
+        "filename": "neutron/networking-providers/src/main/java/org/opendaylight/ovsdb/neutron/providers/Activator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-19T01:39:12Z",
+      "side": 1,
+      "message": "is there any value in having of13Properties used outside the if (imp.equals(...)) {} block below? If not, maybe nest it in?",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_644cf79e",
+        "filename": "neutron/networking-providers/src/main/java/org/opendaylight/ovsdb/neutron/providers/OF10Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1011,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-19T01:39:12Z",
+      "side": 1,
+      "message": "Should use camelCase: phyIfaceName ?!?",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8451fb37",
+        "filename": "neutron/networking-providers/src/main/java/org/opendaylight/ovsdb/neutron/providers/OF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-19T01:39:12Z",
+      "side": 1,
+      "message": "nice!",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_24426f68",
+        "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/NodeConfiguration.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-19T01:39:12Z",
+      "side": 1,
+      "message": "I\u0027m assuming there are few places that instantiate NodeConfiguration?\nI wonder if doing something more efficient than iterating 4k every time is a good idea here... for sake of performance.",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_44477377",
+        "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/api/NetworkingProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-19T01:39:12Z",
+      "side": 1,
+      "message": "/**  ?",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e45fa73f",
+        "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-19T01:39:12Z",
+      "side": 1,
+      "message": "Sam, is that you?!? :)",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_045deb46",
+        "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-19T01:39:12Z",
+      "side": 1,
+      "message": "Sam, is that you?!? :)",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a4551f1f",
+        "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-19T01:39:12Z",
+      "side": 1,
+      "message": "Sam, is that you?!? :)",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c452a334",
+        "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-19T01:39:12Z",
+      "side": 1,
+      "message": "Sam, is that you?!? :)",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_64339714",
+        "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/impl/TenantNetworkManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-19T01:39:12Z",
+      "side": 1,
+      "message": "Is this block really dead code?",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

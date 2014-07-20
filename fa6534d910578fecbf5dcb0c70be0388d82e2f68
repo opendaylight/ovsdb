@@ -2,6 +2,57 @@
   "comments": [
     {
       "key": {
+        "uuid": "fa82b9bf_5f4f406b",
+        "filename": "commons/parent/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-20T23:50:30Z",
+      "side": 1,
+      "message": "Yes. This is a major refactoring \u0026 brings in proper structure to the code. \u0026 I certainly love to see this code.\n\nBut it is not deprecating any of the existing functionality in a way it impacts the users nor adds any major impacting features / services.\n\nHence a major version bump doesn\u0027t reflect the reality.\n\nCode refactors with backwards-compatible changes will be on the minor version. Please refer to Semantic Versioning definitions.\n\n\u003e\u003e\u003e\u003e\u003e\nGiven a version number MAJOR.MINOR.PATCH, increment the:\n\nMAJOR version when you make incompatible API changes,\nMINOR version when you add functionality in a backwards-compatible manner, and\nPATCH version when you make backwards-compatible bug fixes.\n\u003c\u003c\u003c\u003c\u003c",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_bf2e8c8a",
+        "filename": "commons/parent/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-20T23:50:30Z",
+      "side": 1,
+      "message": "Neutron is the Networking wing of Openstack \u0026 the ODL project itself is the SDN wing of Software Defined Everything :-) Hence, I think the usage of \"networking\" here is redundant.\nShall we just call it neutron.providers ?",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7f5484fe",
+        "filename": "neutron/networking-providers/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-20T23:50:30Z",
+      "side": 1,
+      "message": "Same comment as earlier. This time this is a request to consider changing the directory name to just providers.",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_4470d3db",
         "filename": "neutron/networking-providers/src/main/java/org/opendaylight/ovsdb/neutron/providers/Activator.java",
         "patchSetId": 1
@@ -70,6 +121,91 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_ff3f34b2",
+        "filename": "neutron/neutron/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-20T23:50:30Z",
+      "side": 1,
+      "message": "neutron/neutron directory structure seems redundant.\nCan you change it to something else like neutron/core or neutron/base. etc....",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9f48685d",
+        "filename": "neutron/neutron/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-20T23:50:30Z",
+      "side": 1,
+      "message": "Same comment here as before.",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_bf452c44",
+        "filename": "neutron/neutron/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-20T23:50:30Z",
+      "side": 1,
+      "message": "With the providers split into its own bundle, do we still need this dependancy ?",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5f7660a5",
+        "filename": "neutron/neutron/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-20T23:50:30Z",
+      "side": 1,
+      "message": "Do we need this ?",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1f6c58cf",
+        "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/NetworkHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-20T23:50:30Z",
+      "side": 1,
+      "message": "As you are removing the ServiceHelper, Can you also remove the usage of ServiceHelper for the InventoryListener in this class and replace it with DI.While doing that, can you also make it a Set instead of a single reference (as we have today)",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_24426f68",
         "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/NodeConfiguration.java",
         "patchSetId": 1
@@ -81,6 +217,40 @@
       "writtenOn": "2014-07-19T01:39:12Z",
       "side": 1,
       "message": "I\u0027m assuming there are few places that instantiate NodeConfiguration?\nI wonder if doing something more efficient than iterating 4k every time is a good idea here... for sake of performance.",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3f711ca8",
+        "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/PortHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-20T23:50:30Z",
+      "side": 1,
+      "message": "As you are removing the ServiceHelper, Can you also remove the usage of ServiceHelper for the InventoryListener in this class ?",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9fb6283d",
+        "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/SouthboundHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-20T23:50:30Z",
+      "side": 1,
+      "message": "checkAndCreateNetwork does 2 operations at once. It performs certain sanity checks and creates bridges and ports based on the configurations, etc... With this change and calling it areBridgesCreated is misleading.",
       "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -166,6 +336,57 @@
       "writtenOn": "2014-07-19T01:39:12Z",
       "side": 1,
       "message": "Sam, is that you?!? :)",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ff7ad422",
+        "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/impl/ProviderNetworkManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-20T23:50:30Z",
+      "side": 1,
+      "message": "This cache is never populated ?",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_bf70cc40",
+        "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/impl/ProviderNetworkManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-20T23:50:30Z",
+      "side": 1,
+      "message": "am not against any specific programming paradigm. But the above code to iterate through the Providers doesn\u0027t seem necessary as it makes it less readable and legible.\n\nAnd this concern is explained in :\nhttps://code.google.com/p/guava-libraries/wiki/FunctionalExplained\nWhich I agree.\n\nDo you have any compelling reason ?",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9f73884d",
+        "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/impl/ProviderNetworkManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-20T23:50:30Z",
+      "side": 1,
+      "message": "This logic will break the existing functionality of using AD-SAL OF 1.0 plugin even for OVS versions \u003e 1.10 which supports OF1.3.\n\nEssentially, the current logic totally depends on the OVS version based provider selection, whereas, we should also consider the explicit southbound plugin version selection using the (-of13 | -of10) option and bring down the operational version to the lowest common denominator supported by the plugin.",
       "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

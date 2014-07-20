@@ -19,8 +19,13 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import com.google.common.base.Optional;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.core.Node;
@@ -137,7 +142,8 @@ import org.slf4j.LoggerFactory;
  */
 public class OF13Provider implements NetworkProvider {
     private static final Logger logger = LoggerFactory.getLogger(OF13Provider.class);
-    private DataBrokerService dataBrokerService;
+    private DataBrokerService dataBrokerServiceDepreacted;  // FIXME: this will be removed!
+    private DataBroker dataBroker;
     private static final short TABLE_0_DEFAULT_INGRESS = 0;
     private static final short TABLE_1_ISOLATE_TENANT = 10;
     private static final short TABLE_2_LOCAL_FORWARD = 20;
@@ -2561,17 +2567,31 @@ public class OF13Provider implements NetworkProvider {
             return null;
         }
 
-        dataBrokerService = mdsalConsumer.getDataBrokerService();
-
-        if (dataBrokerService == null) {
-            logger.error("ERROR finding reference for DataBrokerService. Please check out the MD-SAL support on the Controller.");
+        dataBroker = mdsalConsumer.getDataBroker();
+        if (dataBroker == null) {
+            logger.error("ERROR finding reference for DataBroker. Please check MD-SAL support on the Controller.");
             return null;
         }
 
         InstanceIdentifier<Group> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
                 .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Group.class,
                 new GroupKey(groupBuilder.getGroupId())).build();
-        return (Group)dataBrokerService.readConfigurationData(path1);
+        ReadOnlyTransaction readTx = dataBroker.newReadOnlyTransaction();
+        try {
+            Optional<Group> data = readTx.read(LogicalDatastoreType.CONFIGURATION, path1).get();
+            if (data.isPresent()) {
+                return data.get();
+            }
+        } catch (InterruptedException e) {
+            logger.error(e.getMessage(), e);
+        } catch (ExecutionException e) {
+            logger.error(e.getMessage(), e);
+        }
+
+        logger.error("ERROR finding data for Group.");
+        return null;
+
+        // return (Group) dataBrokerServiceDepreacted.readConfigurationData(path1);
     }
 
     private Group writeGroup(GroupBuilder groupBuilder, NodeBuilder nodeBuilder) {
@@ -2581,18 +2601,20 @@ public class OF13Provider implements NetworkProvider {
             return null;
         }
 
-        dataBrokerService = mdsalConsumer.getDataBrokerService();
-
-        if (dataBrokerService == null) {
-            logger.error("ERROR finding reference for DataBrokerService. Please check out the MD-SAL support on the Controller.");
+        dataBroker = mdsalConsumer.getDataBroker();
+        if (dataBroker == null) {
+            logger.error("ERROR finding reference for DataBroker. Please check MD-SAL support on the Controller.");
             return null;
         }
-        DataModification<InstanceIdentifier<?>, DataObject> modification = dataBrokerService.beginTransaction();
+
+        ReadWriteTransaction modification = dataBroker.newReadWriteTransaction();
         InstanceIdentifier<Group> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
                 .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Group.class,
                 new GroupKey(groupBuilder.getGroupId())).build();
-        modification.putConfigurationData(nodeBuilderToInstanceId(nodeBuilder), nodeBuilder.build());
-        modification.putConfigurationData(path1, groupBuilder.build());
+
+        modification.put(LogicalDatastoreType.CONFIGURATION, nodeBuilderToInstanceId(nodeBuilder), nodeBuilder.build());
+        modification.put(LogicalDatastoreType.CONFIGURATION, path1, groupBuilder.build());
+
         Future<RpcResult<TransactionStatus>> commitFuture = modification.commit();
 
         try {
@@ -2604,7 +2626,22 @@ public class OF13Provider implements NetworkProvider {
         } catch (ExecutionException e) {
             logger.error(e.getMessage(), e);
         }
-        return (Group)dataBrokerService.readConfigurationData(path1);
+
+        // Read current Group, after commit took place
+        // TODO: find out of transaction can be reused after commit!
+        try {
+            Optional<Group> data = modification.read(LogicalDatastoreType.CONFIGURATION, path1).get();
+            if (data.isPresent()) {
+                return data.get();  // normal code path
+            }
+        } catch (InterruptedException e) {
+            logger.error(e.getMessage(), e);
+        } catch (ExecutionException e) {
+            logger.error(e.getMessage(), e);
+        }
+        logger.error("ERROR finding data for Group, after modification transaction.");
+        return null;
+        // return (Group) dataBrokerServiceDepreacted.readConfigurationData(path1);
     }
 
     private Group removeGroup(GroupBuilder groupBuilder, NodeBuilder nodeBuilder) {
@@ -2614,17 +2651,18 @@ public class OF13Provider implements NetworkProvider {
             return null;
         }
 
-        dataBrokerService = mdsalConsumer.getDataBrokerService();
-
-        if (dataBrokerService == null) {
-            logger.error("ERROR finding reference for DataBrokerService. Please check out the MD-SAL support on the Controller.");
+        dataBroker = mdsalConsumer.getDataBroker();
+        if (dataBroker == null) {
+            logger.error("ERROR finding reference for DataBroker. Please check MD-SAL support on the Controller.");
             return null;
         }
-        DataModification<InstanceIdentifier<?>, DataObject> modification = dataBrokerService.beginTransaction();
+
+        ReadWriteTransaction modification = dataBroker.newReadWriteTransaction();
         InstanceIdentifier<Group> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
                 .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Group.class,
                 new GroupKey(groupBuilder.getGroupId())).build();
-        modification.removeConfigurationData(path1);
+
+        modification.delete(LogicalDatastoreType.CONFIGURATION, path1);
         Future<RpcResult<TransactionStatus>> commitFuture = modification.commit();
 
         try {
@@ -2636,7 +2674,22 @@ public class OF13Provider implements NetworkProvider {
         } catch (ExecutionException e) {
             logger.error(e.getMessage(), e);
         }
-        return (Group)dataBrokerService.readConfigurationData(path1);
+
+        // Read current Group, after commit took place
+        // TODO: find out of transaction can be reused after commit!
+        try {
+            Optional<Group> data = modification.read(LogicalDatastoreType.CONFIGURATION, path1).get();
+            if (data.isPresent()) {
+                return data.get();  // un-expected code path
+            }
+        } catch (InterruptedException e) {
+            logger.error(e.getMessage(), e);
+        } catch (ExecutionException e) {
+            logger.error(e.getMessage(), e);
+        }
+        logger.trace("Unable to find data for Group, after remove transaction.");
+        return null;  // expected code path
+        // return (Group) dataBrokerServiceDepreacted.readConfigurationData(path1);
     }
     private Flow getFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
         IMDSALConsumer mdsalConsumer = (IMDSALConsumer) ServiceHelper.getInstance(IMDSALConsumer.class, "default", this);
@@ -2645,9 +2698,9 @@ public class OF13Provider implements NetworkProvider {
             return null;
         }
 
-        dataBrokerService = mdsalConsumer.getDataBrokerService();
+        dataBrokerServiceDepreacted = mdsalConsumer.getDataBrokerServiceDeprecated2();
 
-        if (dataBrokerService == null) {
+        if (dataBrokerServiceDepreacted == null) {
             logger.error("ERROR finding reference for DataBrokerService. Please check out the MD-SAL support on the Controller.");
             return null;
         }
@@ -2655,7 +2708,7 @@ public class OF13Provider implements NetworkProvider {
         InstanceIdentifier<Flow> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
                 .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Table.class,
                 new TableKey(flowBuilder.getTableId())).child(Flow.class, flowBuilder.getKey()).build();
-        return (Flow)dataBrokerService.readConfigurationData(path1);
+        return (Flow) dataBrokerServiceDepreacted.readConfigurationData(path1);
     }
 
     private void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
@@ -2665,13 +2718,13 @@ public class OF13Provider implements NetworkProvider {
             return;
         }
 
-        dataBrokerService = mdsalConsumer.getDataBrokerService();
+        dataBrokerServiceDepreacted = mdsalConsumer.getDataBrokerServiceDeprecated2();
 
-        if (dataBrokerService == null) {
+        if (dataBrokerServiceDepreacted == null) {
             logger.error("ERROR finding reference for DataBrokerService. Please check out the MD-SAL support on the Controller.");
             return;
         }
-        DataModification<InstanceIdentifier<?>, DataObject> modification = dataBrokerService.beginTransaction();
+        DataModification<InstanceIdentifier<?>, DataObject> modification = dataBrokerServiceDepreacted.beginTransaction();
         InstanceIdentifier<Flow> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
                 .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Table.class,
                 new TableKey(flowBuilder.getTableId())).child(Flow.class, flowBuilder.getKey()).build();
@@ -2698,13 +2751,13 @@ public class OF13Provider implements NetworkProvider {
             return;
         }
 
-        dataBrokerService = mdsalConsumer.getDataBrokerService();
+        dataBrokerServiceDepreacted = mdsalConsumer.getDataBrokerServiceDeprecated2();
 
-        if (dataBrokerService == null) {
+        if (dataBrokerServiceDepreacted == null) {
             logger.error("ERROR finding reference for DataBrokerService. Please check out the MD-SAL support on the Controller.");
             return;
         }
-        DataModification<InstanceIdentifier<?>, DataObject> modification = dataBrokerService.beginTransaction();
+        DataModification<InstanceIdentifier<?>, DataObject> modification = dataBrokerServiceDepreacted.beginTransaction();
         InstanceIdentifier<Flow> path1 = InstanceIdentifier.builder(Nodes.class)
                 .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
                 .rev130819.nodes.Node.class, nodeBuilder.getKey())

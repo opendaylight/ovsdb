@@ -10,6 +10,7 @@
 
 package org.opendaylight.ovsdb.neutron;
 import org.apache.felix.dm.Component;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
@@ -22,7 +23,8 @@ public class MDSALConsumer implements BindingAwareConsumer, IMDSALConsumer {
     private BundleContext ctx = null;
     private BindingAwareBroker broker = null;
     private ConsumerContext consumerContext = null;
-    private DataBrokerService dataBrokerService;
+    // private DataBrokerService dataBrokerServiceDeprecated2;
+    private DataBroker dataBroker;
 
     static final Logger logger = LoggerFactory.getLogger(MDSALConsumer.class);
 
@@ -46,6 +48,7 @@ public class MDSALConsumer implements BindingAwareConsumer, IMDSALConsumer {
         // Now lets close MDSAL session
         if (this.consumerContext != null) {
             //this.consumerContext.close();
+            this.dataBroker = null;
             this.consumerContext = null;
         }
     }
@@ -59,16 +62,23 @@ public class MDSALConsumer implements BindingAwareConsumer, IMDSALConsumer {
     @Override
     public void onSessionInitialized(ConsumerContext session) {
         this.consumerContext = session;
-        dataBrokerService = session.getSALService(DataBrokerService.class);
-        logger.info("OVSDB Neutron Session Initilized with CONSUMER CONTEXT {}", session.toString());
+        // dataBrokerServiceDeprecated2 = session.getSALService(DataBrokerService.class);
+        dataBroker = session.getSALService(DataBroker.class);
+        logger.info("OVSDB Neutron Session Initialized with CONSUMER CONTEXT {}", session.toString());
     }
 
     @Override
     public ConsumerContext getConsumerContext() {
         return consumerContext;
     }
+
     @Override
-    public DataBrokerService getDataBrokerService() {
-        return dataBrokerService;
+    public DataBrokerService getDataBrokerServiceDeprecated2() {
+        return null;  // FIXME: Remove this completely!!!
+    }
+
+    @Override
+    public DataBroker getDataBroker() {
+        return dataBroker;
     }
 }

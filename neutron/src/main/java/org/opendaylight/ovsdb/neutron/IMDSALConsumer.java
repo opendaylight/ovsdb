@@ -10,10 +10,12 @@
 
 package org.opendaylight.ovsdb.neutron;
 
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 
 public interface IMDSALConsumer {
     public ConsumerContext getConsumerContext();
-    public DataBrokerService getDataBrokerService();
+    public DataBrokerService getDataBrokerServiceDeprecated2();
+    public DataBroker getDataBroker();
 }

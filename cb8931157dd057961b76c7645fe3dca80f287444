@@ -50,6 +50,24 @@
       "revId": "cb8931157dd057961b76c7645fe3dca80f287444",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_fcbbbf0c",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/InventoryService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1756
+      },
+      "writtenOn": "2014-07-21T15:51:19Z",
+      "side": 1,
+      "message": "Madhu\n\nCould you point me to an example about how you want me this to be done? Thanks man.",
+      "parentUuid": "fa82b9bf_c4ece3bd",
+      "revId": "cb8931157dd057961b76c7645fe3dca80f287444",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

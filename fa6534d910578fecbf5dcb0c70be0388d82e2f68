@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_1a58e688",
+        "filename": "commons/parent/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-21T14:12:02Z",
+      "side": 1,
+      "message": "Actually it does. We are API incompatible as the main service classes in Neutron have all be re-named. Additionally the methods within these interfaces have also been renamed so I think we are justified a MAJOR version bump",
+      "parentUuid": "fa82b9bf_5f4f406b",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_bf2e8c8a",
         "filename": "commons/parent/pom.xml",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-07-20T23:50:30Z",
       "side": 1,
       "message": "Neutron is the Networking wing of Openstack \u0026 the ODL project itself is the SDN wing of Software Defined Everything :-) Hence, I think the usage of \"networking\" here is redundant.\nShall we just call it neutron.providers ?",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_daf91e81",
+        "filename": "commons/parent/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-21T14:12:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_bf2e8c8a",
       "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_9a4636bf",
+        "filename": "neutron/networking-providers/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-21T14:12:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_7f5484fe",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_4470d3db",
         "filename": "neutron/networking-providers/src/main/java/org/opendaylight/ovsdb/neutron/providers/Activator.java",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2014-07-19T01:39:12Z",
       "side": 1,
       "message": "is there any value in having of10Properties used outside the if (imp.equals(...)) {} block below? If not, maybe nest it in?",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ff6654ec",
+        "filename": "neutron/networking-providers/src/main/java/org/opendaylight/ovsdb/neutron/providers/Activator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-21T14:12:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_4470d3db",
       "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_9f5f080f",
+        "filename": "neutron/networking-providers/src/main/java/org/opendaylight/ovsdb/neutron/providers/Activator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-21T14:12:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_e47807c6",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_644cf79e",
         "filename": "neutron/networking-providers/src/main/java/org/opendaylight/ovsdb/neutron/providers/OF10Provider.java",
         "patchSetId": 1
@@ -98,6 +188,24 @@
       "writtenOn": "2014-07-19T01:39:12Z",
       "side": 1,
       "message": "Should use camelCase: phyIfaceName ?!?",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_bf5c4c1a",
+        "filename": "neutron/networking-providers/src/main/java/org/opendaylight/ovsdb/neutron/providers/OF10Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1011,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-21T14:12:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_644cf79e",
       "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_5f9d00bb",
+        "filename": "neutron/networking-providers/src/main/java/org/opendaylight/ovsdb/neutron/providers/OF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-21T14:12:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_8451fb37",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_ff3f34b2",
         "filename": "neutron/neutron/pom.xml",
         "patchSetId": 1
@@ -132,6 +258,24 @@
       "writtenOn": "2014-07-20T23:50:30Z",
       "side": 1,
       "message": "neutron/neutron directory structure seems redundant.\nCan you change it to something else like neutron/core or neutron/base. etc....",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_faf6628e",
+        "filename": "neutron/neutron/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-21T14:12:02Z",
+      "side": 1,
+      "message": "I thought the same... but not sure what to call it!",
+      "parentUuid": "fa82b9bf_ff3f34b2",
       "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -172,6 +316,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_9aef16b1",
+        "filename": "neutron/neutron/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-21T14:12:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_bf452c44",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_5f7660a5",
         "filename": "neutron/neutron/pom.xml",
         "patchSetId": 1
@@ -183,6 +345,24 @@
       "writtenOn": "2014-07-20T23:50:30Z",
       "side": 1,
       "message": "Do we need this ?",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_baec5abc",
+        "filename": "neutron/neutron/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-21T14:12:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_5f7660a5",
       "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -206,6 +386,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_5a2d0efd",
+        "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/NetworkHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-21T14:12:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_1f6c58cf",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_24426f68",
         "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/NodeConfiguration.java",
         "patchSetId": 1
@@ -217,6 +415,24 @@
       "writtenOn": "2014-07-19T01:39:12Z",
       "side": 1,
       "message": "I\u0027m assuming there are few places that instantiate NodeConfiguration?\nI wonder if doing something more efficient than iterating 4k every time is a good idea here... for sake of performance.",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7fa244fe",
+        "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/NodeConfiguration.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-21T14:12:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_24426f68",
       "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -240,6 +456,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_7a325260",
+        "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/PortHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-21T14:12:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_3f711ca8",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_9fb6283d",
         "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/SouthboundHandler.java",
         "patchSetId": 1
@@ -251,6 +485,24 @@
       "writtenOn": "2014-07-20T23:50:30Z",
       "side": 1,
       "message": "checkAndCreateNetwork does 2 operations at once. It performs certain sanity checks and creates bridges and ports based on the configurations, etc... With this change and calling it areBridgesCreated is misleading.",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_da403ea7",
+        "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/SouthboundHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-21T14:12:02Z",
+      "side": 1,
+      "message": "Yes I think we need to discuss this one further to find the right name for that method",
+      "parentUuid": "fa82b9bf_9fb6283d",
       "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -274,6 +526,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_fa3d022c",
+        "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/api/NetworkingProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-21T14:12:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_44477377",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_e45fa73f",
         "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/impl/BridgeConfigurationManagerImpl.java",
         "patchSetId": 1
@@ -285,6 +555,24 @@
       "writtenOn": "2014-07-19T01:39:12Z",
       "side": 1,
       "message": "Sam, is that you?!? :)",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ba43faad",
+        "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-21T14:12:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_e45fa73f",
       "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -308,6 +596,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_5a142e9f",
+        "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-21T14:12:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_045deb46",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_a4551f1f",
         "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/impl/BridgeConfigurationManagerImpl.java",
         "patchSetId": 1
@@ -319,6 +625,24 @@
       "writtenOn": "2014-07-19T01:39:12Z",
       "side": 1,
       "message": "Sam, is that you?!? :)",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7a19f2d5",
+        "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-21T14:12:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_a4551f1f",
       "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -342,6 +666,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_1a0a2679",
+        "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-21T14:12:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_c452a334",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_ff7ad422",
         "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/impl/ProviderNetworkManagerImpl.java",
         "patchSetId": 1
@@ -353,6 +695,24 @@
       "writtenOn": "2014-07-20T23:50:30Z",
       "side": 1,
       "message": "This cache is never populated ?",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3a0fea89",
+        "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/impl/ProviderNetworkManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-21T14:12:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_ff7ad422",
       "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -376,6 +736,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_ba1a1ac4",
+        "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/impl/ProviderNetworkManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-21T14:12:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_bf70cc40",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_9f73884d",
         "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/impl/ProviderNetworkManagerImpl.java",
         "patchSetId": 1
@@ -393,6 +771,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_5a62ee3e",
+        "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/impl/ProviderNetworkManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-21T14:12:02Z",
+      "side": 1,
+      "message": "Lets discuss this further on IRC ;)",
+      "parentUuid": "fa82b9bf_9f73884d",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_64339714",
         "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/impl/TenantNetworkManagerImpl.java",
         "patchSetId": 1
@@ -404,6 +800,24 @@
       "writtenOn": "2014-07-19T01:39:12Z",
       "side": 1,
       "message": "Is this block really dead code?",
+      "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_df6910bf",
+        "filename": "neutron/neutron/src/main/java/org/opendaylight/ovsdb/neutron/impl/TenantNetworkManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-21T14:12:02Z",
+      "side": 1,
+      "message": "I\u0027m not 100% sure. It\u0027s definitely a candidate for being deleted though",
+      "parentUuid": "fa82b9bf_64339714",
       "revId": "fa6534d910578fecbf5dcb0c70be0388d82e2f68",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

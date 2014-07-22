@@ -17,6 +17,7 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 // Section 5.2 of ovsdb draft covers the various response structures for
@@ -27,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 // https://trello.com/c/mfTTS86k/28-generic-response-error-handling-especially-for-transact
 // As a temporary measure, adding all the expected responses under the same response.
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class OperationResult {
     //public abstract boolean isSuccess();
     private int count;

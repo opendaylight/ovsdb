@@ -16,6 +16,7 @@ import java.util.List;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Function;
@@ -27,6 +28,7 @@ public class FutureTransformUtils {
 
     public final static ListenableFuture<List<OperationResult>> transformTransactResponse
             (ListenableFuture<List<JsonNode>> transactResponseFuture, final List<Operation> operations) {
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return Futures.transform(transactResponseFuture, new Function<List<JsonNode>, List<OperationResult>>() {
             @Override
             public List<OperationResult> apply(List<JsonNode> jsonNodes) {

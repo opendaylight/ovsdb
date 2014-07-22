@@ -68,6 +68,24 @@
       "revId": "cb8931157dd057961b76c7645fe3dca80f287444",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5f017d36",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/InventoryService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-22T17:16:30Z",
+      "side": 1,
+      "message": "Hi Vishal,\n\nDave is taking up a major ovsdb Neutron code refactoring in https://git.opendaylight.org/gerrit/#/c/9170/\nand you can see that this is one of the things handled.\n\n-Madhu",
+      "parentUuid": "fa82b9bf_fcbbbf0c",
+      "revId": "cb8931157dd057961b76c7645fe3dca80f287444",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

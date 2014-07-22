@@ -188,6 +188,13 @@ public class ConfigurationBundles {
         );
     }
 
+    public static Option ovsdbPluginBundles() {
+        return new DefaultCompositeOption(
+                mavenBundle("org.opendaylight.ovsdb", "plugin").versionAsInProject(),
+                mavenBundle("org.mockito", "mockito-all").versionAsInProject()
+        );
+    }
+
     public static Option ovsdbDefaultSchemaBundles() {
         return new DefaultCompositeOption(
                 mavenBundle("org.opendaylight.ovsdb", "schema.openvswitch").versionAsInProject(),
@@ -211,7 +218,6 @@ public class ConfigurationBundles {
                 mavenBundle("org.opendaylight.controller", "connectionmanager").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "connectionmanager.implementation").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "forwardingrulesmanager").versionAsInProject(),
-                mavenBundle("org.opendaylight.ovsdb", "plugin").versionAsInProject(),
                 mavenBundle("org.opendaylight.ovsdb", "openstack.net-virt").versionAsInProject()
         );
     }

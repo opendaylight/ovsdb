@@ -148,7 +148,6 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.setInterface(INeutronPortAware.class.getName(), null);
             c.add(createServiceDependency().setService(OvsdbConfigService.class).setRequired(true));
             c.add(createServiceDependency().setService(IConnectionServiceInternal.class).setRequired(true));
-            c.add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true));
             c.add(createServiceDependency().setService(OvsdbInventoryListener.class).setRequired(true));
         }
 

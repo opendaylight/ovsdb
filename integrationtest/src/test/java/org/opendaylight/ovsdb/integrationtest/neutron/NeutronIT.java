@@ -102,6 +102,7 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
                 ConfigurationBundles.controllerBundles(),
                 ConfigurationBundles.ovsdbLibraryBundles(),
                 ConfigurationBundles.ovsdbDefaultSchemaBundles(),
+                ConfigurationBundles.ovsdbPluginBundles(),
                 ConfigurationBundles.ovsdbNeutronBundles(),
                 junitBundles()
         );

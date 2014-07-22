@@ -14,6 +14,7 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.lib.notation.Row;
+import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
@@ -21,6 +22,7 @@ import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
 import org.opendaylight.ovsdb.plugin.OvsdbInventoryListener;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
+import org.opendaylight.ovsdb.schema.openvswitch.Port;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,20 +155,35 @@ public class NetworkHandler extends AbstractHandler
                 for (Node node : nodes) {
                     List<String> phyIfName = bridgeConfigurationManager.getAllPhysicalInterfaceNames(node);
                     try {
-                        ConcurrentMap<String, Row> interfaces = this.ovsdbConfigService.getRows(node, ovsdbConfigService.getTableName(node, Interface.class));
-                        if (interfaces != null) {
-                            for (String intfUUID : interfaces.keySet()) {
-                                Interface intf = ovsdbConfigService.getTypedRow(node, Interface.class, interfaces.get(intfUUID));
-                                String intfType = intf.getTypeColumn().getData();
-                                if (intfType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) || intfType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)) {
-                                    /* delete tunnel ports on this node */
-                                    logger.trace("Delete tunnel intf {}", intf);
-                                    inventoryListener.rowRemoved(node, intf.getSchema().getName(), intfUUID,
-                                            intf.getRow(), null);
-                                } else if (!phyIfName.isEmpty() && phyIfName.contains(intf.getName())) {
-                                    logger.trace("Delete physical intf {}", intf);
-                                    inventoryListener.rowRemoved(node, intf.getSchema().getName(), intfUUID,
-                                            intf.getRow(), null);
+                        ConcurrentMap<String, Row> ports =
+                                this.ovsdbConfigService.getRows(node,
+                                                                ovsdbConfigService.getTableName(node, Port.class));
+                        if (ports != null) {
+                            for (Row portRow : ports.values()) {
+                                Port port = ovsdbConfigService.getTypedRow(node, Port.class, portRow);
+                                for (UUID interfaceUuid : port.getInterfacesColumn().getData()) {
+                                    Interface interfaceRow = (Interface) ovsdbConfigService
+                                            .getRow(node,
+                                                    ovsdbConfigService.getTableName(node, Interface.class),
+                                                    interfaceUuid.toString());
+
+                                    String interfaceType = interfaceRow.getTypeColumn().getData();
+                                    if (interfaceType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN)
+                                        || interfaceType.equalsIgnoreCase(
+                                            NetworkHandler.NETWORK_TYPE_GRE)) {
+                                        /* delete tunnel ports on this node */
+                                        logger.trace("Delete tunnel interface {}", interfaceRow);
+                                        ovsdbConfigService.deleteRow(node,
+                                                                     ovsdbConfigService.getTableName(node, Port.class),
+                                                                     port.getUuid().toString());
+                                        break;
+                                    } else if (!phyIfName.isEmpty() && phyIfName.contains(interfaceRow.getName())) {
+                                        logger.trace("Delete physical interface {}", interfaceRow);
+                                        ovsdbConfigService.deleteRow(node,
+                                                                     ovsdbConfigService.getTableName(node, Port.class),
+                                                                     port.getUuid().toString());
+                                        break;
+                                    }
                                 }
                             }
                         }

@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_bfdf690c",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/schema/typed/TyperUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 355,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-22T15:02:26Z",
+      "side": 1,
+      "message": "if (row !\u003d null) ...",
+      "revId": "1c0cbca15b8e6b53357c16832bb599b685ebe8d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_1fbf75ab",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/schema/typed/TyperUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 359,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-22T15:02:26Z",
+      "side": 1,
+      "message": "if (row !\u003d null) ....",
+      "revId": "1c0cbca15b8e6b53357c16832bb599b685ebe8d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

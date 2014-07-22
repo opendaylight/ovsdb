@@ -11,10 +11,11 @@ package org.opendaylight.ovsdb.lib.schema;
 
 import java.util.Set;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.collect.Sets;
 import org.opendaylight.ovsdb.lib.error.TyperException;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.Sets;
 
 public abstract class BaseType<E extends BaseType<E>> {
 
@@ -157,6 +158,37 @@ public abstract class BaseType<E extends BaseType<E>> {
         public String toString() {
             return "IntegerBaseType";
         }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((enums == null) ? 0 : enums.hashCode());
+            result = prime * result + (int) (max ^ (max >>> 32));
+            result = prime * result + (int) (min ^ (min >>> 32));
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            IntegerBaseType other = (IntegerBaseType) obj;
+            if (enums == null) {
+                if (other.enums != null)
+                    return false;
+            } else if (!enums.equals(other.enums))
+                return false;
+            if (max != other.max)
+                return false;
+            if (min != other.min)
+                return false;
+            return true;
+        }
     }
 
     public static class RealBaseType extends BaseType<RealBaseType> {
@@ -232,6 +264,42 @@ public abstract class BaseType<E extends BaseType<E>> {
         @Override
         public String toString() {
             return "RealBaseType";
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((enums == null) ? 0 : enums.hashCode());
+            long temp;
+            temp = Double.doubleToLongBits(max);
+            result = prime * result + (int) (temp ^ (temp >>> 32));
+            temp = Double.doubleToLongBits(min);
+            result = prime * result + (int) (temp ^ (temp >>> 32));
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            RealBaseType other = (RealBaseType) obj;
+            if (enums == null) {
+                if (other.enums != null)
+                    return false;
+            } else if (!enums.equals(other.enums))
+                return false;
+            if (Double.doubleToLongBits(max) != Double
+                    .doubleToLongBits(other.max))
+                return false;
+            if (Double.doubleToLongBits(min) != Double
+                    .doubleToLongBits(other.min))
+                return false;
+            return true;
         }
     }
 
@@ -345,6 +413,37 @@ public abstract class BaseType<E extends BaseType<E>> {
             return "StringBaseType";
         }
 
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((enums == null) ? 0 : enums.hashCode());
+            result = prime * result + maxLength;
+            result = prime * result + minLength;
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            StringBaseType other = (StringBaseType) obj;
+            if (enums == null) {
+                if (other.enums != null)
+                    return false;
+            } else if (!enums.equals(other.enums))
+                return false;
+            if (maxLength != other.maxLength)
+                return false;
+            if (minLength != other.minLength)
+                return false;
+            return true;
+        }
+
     }
 
 
@@ -407,6 +506,36 @@ public abstract class BaseType<E extends BaseType<E>> {
         @Override
         public String toString() {
             return "UuidBaseType";
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result
+                    + ((refTable == null) ? 0 : refTable.hashCode());
+            result = prime * result
+                    + ((refType == null) ? 0 : refType.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            UuidBaseType other = (UuidBaseType) obj;
+            if (refTable == null) {
+                if (other.refTable != null)
+                    return false;
+            } else if (!refTable.equals(other.refTable))
+                return false;
+            if (refType != other.refType)
+                return false;
+            return true;
         }
     }
 }

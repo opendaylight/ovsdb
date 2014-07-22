@@ -53,4 +53,35 @@ public class Column<E extends TableSchema<E>, D> {
     public String toString() {
         return "Column [schema=" + schema + ", data=" + data + "]";
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((data == null) ? 0 : data.hashCode());
+        result = prime * result + ((schema == null) ? 0 : schema.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Column other = (Column) obj;
+        if (data == null) {
+            if (other.data != null)
+                return false;
+        } else if (!data.equals(other.data))
+            return false;
+        if (schema == null) {
+            if (other.schema != null)
+                return false;
+        } else if (!schema.equals(other.schema))
+            return false;
+        return true;
+    }
 }

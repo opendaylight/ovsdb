@@ -122,6 +122,38 @@ public abstract class ColumnType {
                 '}';
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result
+                + ((baseType == null) ? 0 : baseType.hashCode());
+        result = prime * result + (int) (max ^ (max >>> 32));
+        result = prime * result + (int) (min ^ (min >>> 32));
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ColumnType other = (ColumnType) obj;
+        if (baseType == null) {
+            if (other.baseType != null)
+                return false;
+        } else if (!baseType.equals(other.baseType))
+            return false;
+        if (max != other.max)
+            return false;
+        if (min != other.min)
+            return false;
+        return true;
+    }
+
     public static class AtomicColumnType extends ColumnType {
         static final org.slf4j.Logger logger = LoggerFactory.getLogger(AtomicColumnType.class);
         public AtomicColumnType() {
@@ -255,6 +287,37 @@ public abstract class ColumnType {
         @Override
         public void validate(Object value) {
             this.baseType.validate(value);
+        }
+
+        @Override
+        public String toString() {
+            return "KeyValuedColumnType [keyType=" + keyType + " "+ super.toString() +"]";
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = super.hashCode();
+            result = prime * result
+                    + ((keyType == null) ? 0 : keyType.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (!super.equals(obj))
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            KeyValuedColumnType other = (KeyValuedColumnType) obj;
+            if (keyType == null) {
+                if (other.keyType != null)
+                    return false;
+            } else if (!keyType.equals(other.keyType))
+                return false;
+            return true;
         }
     }
 }

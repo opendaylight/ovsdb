@@ -71,4 +71,41 @@ public class Row<E extends TableSchema<E>> {
     public String toString() {
         return "Row [columns=" + columns + "]";
     }
+
+    /**
+     * The hashCode method for Row object should be used with caution.
+     * This method will use all the columns in the row to calculate the hashKey.
+     * Hence using this method on a partial Row will return a different hashKey
+     * and will not work in most of the use-cases this method might be used.
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((columns == null) ? 0 : columns.hashCode());
+        return result;
+    }
+
+    /**
+     * The equals method for Row object should be used with caution.
+     * This method will compare all the columns in the row being compared.
+     * Hence using this method to compare a partial Row will return false
+     * and will not work in most of the use-cases this method might be used.
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Row other = (Row) obj;
+        if (columns == null) {
+            if (other.columns != null)
+                return false;
+        } else if (!columns.equals(other.columns))
+            return false;
+        return true;
+    }
 }

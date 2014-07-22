@@ -17,12 +17,14 @@ import org.opendaylight.ovsdb.lib.error.ColumnSchemaNotFoundException;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.error.TableSchemaNotFoundException;
 import org.opendaylight.ovsdb.lib.error.TyperException;
+import org.opendaylight.ovsdb.lib.error.UnsupportedMethodException;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
+import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
 import com.google.common.reflect.Reflection;
 
@@ -307,6 +309,18 @@ public class TyperUtils {
                 return getTableSchema(dbSchema, klazz);
             }
 
+            private Boolean isHashCodeMethod(Method method, Object[] args) {
+                return (args == null || args.length == 0) && method.getName().equals("hashCode");
+            }
+            private Boolean isEqualsMethod(Method method, Object[] args) {
+                return (args != null
+                        && args.length == 1
+                        && method.getName().equals("equals")
+                        && method.getParameterTypes()[0] == Object.class);
+            }
+            private Boolean isToStringMethod(Method method, Object[] args) {
+                return (args == null || args.length == 0) && method.getName().equals("toString");
+            }
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                 if (isGetTableSchema(method)) {
@@ -319,14 +333,40 @@ public class TyperUtils {
                     return processGetData(method);
                 } else if(isGetColumn(method)) {
                     return processGetColumn(method);
-                } else {
-                    /*
-                     *  TODO : Handle the methods provided by Object class (such as toString, hashCode, equals, etc.).
-                     *  Reintroduce throwing RuntimeException("Unsupported method : "+method.getName()); after these methods
-                     *  are handled
-                     */
-                    return null;
+                } else if (isHashCodeMethod(method, args)) {
+                    return hashCode();
+                } else if (isEqualsMethod(method, args)) {
+                    return proxy.getClass().isInstance(args[0]) && this.equals(args[0]);
+                } else if (isToStringMethod(method, args)) {
+                    return this.toString();
                 }
+                throw new UnsupportedMethodException("Method not supported "+method.toString());
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj == null) return false;
+                TypedBaseTable<?> typedRowObj = (TypedBaseTable<?>)obj;
+                if (row == null && typedRowObj.getRow() == null) return true;
+                if (row.equals(typedRowObj.getRow())) return true;
+                return false;
+            }
+
+            @Override public int hashCode() {
+                if (row == null) return 0;
+                return row.hashCode();
+            }
+
+            @Override public String toString() {
+                String tableName = null;
+                try {
+                    TableSchema<?> schema = (TableSchema<?>)processGetTableSchema();
+                    tableName = schema.getName();
+                } catch (Throwable e) {
+                    tableName = "";
+                }
+                if (row == null) return tableName;
+                return tableName+" : "+row.toString();
             }
         }
         );

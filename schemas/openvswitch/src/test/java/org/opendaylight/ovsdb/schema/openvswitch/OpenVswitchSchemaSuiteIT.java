@@ -35,6 +35,7 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
         QueueTestCases.class,
         ManagerTestCases.class,
         MirrorTestCases.class,
+        TyperUtilsSpecialMethodsTestCases.class,
         TearDown.class
 })
 public class OpenVswitchSchemaSuiteIT {

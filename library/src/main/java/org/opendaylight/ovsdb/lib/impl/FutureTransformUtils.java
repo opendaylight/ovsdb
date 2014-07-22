@@ -10,16 +10,17 @@
 
 package org.opendaylight.ovsdb.lib.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.opendaylight.ovsdb.lib.operations.Operation;
+import org.opendaylight.ovsdb.lib.operations.OperationResult;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Function;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import org.opendaylight.ovsdb.lib.operations.Operation;
-import org.opendaylight.ovsdb.lib.operations.OperationResult;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class FutureTransformUtils {
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -33,24 +34,39 @@ public class FutureTransformUtils {
                 for (int i = 0; i < jsonNodes.size(); i++) {
                     JsonNode jsonNode = jsonNodes.get(i);
                     OperationResult or;
-                    if (jsonNode.size() > 0) {
-                        Operation op = operations.get(i);
-                        switch (op.getOp()) {
+                    if (jsonNode != null && jsonNode.size() > 0) {
+                        /*
+                         * As per RFC 7047, section 4.1.3 :
+                         * "In general, "result" contains some number of successful results,
+                         * possibly followed by an error, in turn followed by enough JSON null
+                         * values to match the number of elements in "params".  There is one
+                         * exception: if all of the operations succeed, but the results cannot
+                         * be committed, then "result" will have one more element than "params",
+                         * with the additional element being an <error>."
+                         *
+                         * Hence, it is possible for a transaction response to contain more
+                         * json elements than the transaction operation request.
+                         * Also handle that case by checking for i < operations.size().
+                         */
+                        if (i < operations.size()) {
+                            Operation op = operations.get(i);
+                            switch (op.getOp()) {
                             case "select":
                                 or = new OperationResult();
                                 or.setRows(op.getTableSchema().createRows(jsonNode));
-
                                 break;
 
                             default:
                                 or = objectMapper.convertValue(jsonNode, OperationResult.class);
 
                                 break;
+                            }
+                        } else {
+                            or = objectMapper.convertValue(jsonNode, OperationResult.class);
                         }
                     } else {
                         or = new OperationResult();
                     }
-
                     operationResults.add(or);
                 }
 

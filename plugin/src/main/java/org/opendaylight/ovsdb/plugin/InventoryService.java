@@ -37,6 +37,9 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
+
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +60,8 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
     private ConcurrentMap<Node, NodeDB> dbCache = Maps.newConcurrentMap();
     private ScheduledExecutorService executor;
     private OvsdbConfigService configurationService;
+
+    private Set<OvsdbInventoryListener> ovsdbInventoryListeners = Sets.newCopyOnWriteArraySet();
 
     /**
      * Function called by the dependency manager when all the required
@@ -171,7 +176,6 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
             dbCache.put(n, db);
         }
 
-        OvsdbInventoryListener inventoryListener = (OvsdbInventoryListener)ServiceHelper.getGlobalInstance(OvsdbInventoryListener.class, this);
         for (String tableName : tableUpdates.getUpdates().keySet()) {
             Map<String, Row> tCache = db.getTableCache(databaseName, tableName);
             TableUpdate update = tableUpdates.getUpdates().get(tableName);
@@ -182,13 +186,25 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
                 db.updateRow(databaseName, tableName, uuid.toString(), update.getNew(uuid));
                 if (isNewRow) {
                     this.handleOpenVSwitchSpecialCase(n, databaseName, tableName, uuid);
-                    if (inventoryListener != null) inventoryListener.rowAdded(n, tableName, uuid.toString(), update.getNew(uuid));
+                    if (!ovsdbInventoryListeners.isEmpty()) {
+                        for (OvsdbInventoryListener listener : ovsdbInventoryListeners) {
+                            listener.rowAdded(n, tableName, uuid.toString(), update.getNew(uuid));
+                        }
+                    }
                 } else {
-                    if (inventoryListener != null) inventoryListener.rowUpdated(n, tableName, uuid.toString(), update.getOld(uuid), update.getNew(uuid));
+                    if (!ovsdbInventoryListeners.isEmpty()) {
+                        for (OvsdbInventoryListener listener : ovsdbInventoryListeners) {
+                            listener.rowUpdated(n, tableName, uuid.toString(), update.getOld(uuid), update.getNew(uuid));
+                        }
+                    }
                 }
             } else if (update.getOld(uuid) != null){
                 if (tCache != null) {
-                    if (inventoryListener != null) inventoryListener.rowRemoved(n, tableName, uuid.toString(), update.getOld(uuid), update.getNew(uuid));
+                    if (!ovsdbInventoryListeners.isEmpty()) {
+                        for (OvsdbInventoryListener listener : ovsdbInventoryListeners) {
+                            listener.rowRemoved(n, tableName, uuid.toString(), update.getOld(uuid), update.getNew(uuid));
+                        }
+                    }
                 }
                 db.removeRow(databaseName, tableName, uuid.toString());
             }
@@ -261,9 +277,10 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
 
     @Override
     public void notifyNodeAdded(Node node) {
-        OvsdbInventoryListener inventoryListener = (OvsdbInventoryListener)ServiceHelper.getGlobalInstance(OvsdbInventoryListener.class, this);
-        if (inventoryListener != null) {
-            inventoryListener.nodeAdded(node);
+        if (!ovsdbInventoryListeners.isEmpty()) {
+            for (OvsdbInventoryListener listener : ovsdbInventoryListeners) {
+                listener.nodeAdded(node);
+            }
         }
     }
 
@@ -282,9 +299,10 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
 
     @Override
     public void removeNode(Node node) {
-        OvsdbInventoryListener inventoryListener = (OvsdbInventoryListener)ServiceHelper.getGlobalInstance(OvsdbInventoryListener.class, this);
-        if (inventoryListener != null) {
-            inventoryListener.nodeRemoved(node);
+        if (!ovsdbInventoryListeners.isEmpty()) {
+            for (OvsdbInventoryListener listener : ovsdbInventoryListeners) {
+                listener.nodeRemoved(node);
+            }
         }
 
         for (IPluginOutInventoryService service : pluginOutInventoryServices) {
@@ -297,5 +315,13 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
     @Override
     public Set<Node> getConfiguredNotConnectedNodes() {
         return Collections.emptySet();
+    }
+
+    private void listenerAdded(OvsdbInventoryListener listener) {
+        this.ovsdbInventoryListeners.add(listener);
+    }
+
+    private void listenerRemoved(OvsdbInventoryListener listener) {
+        this.ovsdbInventoryListeners.remove(listener);
     }
 }

@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_65dcee73",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF10Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 355,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-23T20:16:37Z",
+      "side": 1,
+      "message": "Error is an user visible message. Hence adding a method name here make good use of it.\nMaking it user-friendly is prefered.",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_c5d29a5b",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF10Provider.java",
         "patchSetId": 1
@@ -30,6 +47,40 @@
       "writtenOn": "2014-07-23T20:12:16Z",
       "side": 1,
       "message": "as above... this \"error\" is ignored and execution continues",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_05e5e236",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF10Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 364,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-23T20:16:37Z",
+      "side": 1,
+      "message": "Same here",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e5d79e49",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF10Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 384,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-23T20:16:37Z",
+      "side": 1,
+      "message": "Info should be a very low volume message and please refer to http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/Level.html for the recommendations on when to use these levels.\n\nI wouldnt recommend using info for dynamic programming cases.",
       "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -70,6 +121,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_85c812a9",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF10Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-23T20:16:37Z",
+      "side": 1,
+      "message": "Same here.",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_25b90615",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF10Provider.java",
         "patchSetId": 1
@@ -104,6 +172,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_853fb286",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF10Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 445,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-23T20:16:37Z",
+      "side": 1,
+      "message": "Same here.",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_c5393aa5",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF10Provider.java",
         "patchSetId": 1
@@ -115,6 +200,57 @@
       "writtenOn": "2014-07-23T20:12:16Z",
       "side": 1,
       "message": "this is an error.... but can we drop the method name?\ndoesn\u0027t mean much to a user and ideally we should be able to get the failure reason from a lower logging level",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_654aae27",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF10Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 458,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-23T20:16:37Z",
+      "side": 1,
+      "message": "and here.",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a55bd6f4",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-23T20:16:37Z",
+      "side": 1,
+      "message": "Personally, dont like to call out the method names on the messages. Rather if you can change it to more readable, it will work out better.",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e53ebe8b",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-23T20:16:37Z",
+      "side": 1,
+      "message": "Not a useful message. you can remove this.",
       "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -138,6 +274,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_c5605aa7",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-23T20:16:37Z",
+      "side": 1,
+      "message": "and here.",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_454d2a3d",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
         "patchSetId": 1
@@ -149,6 +302,23 @@
       "writtenOn": "2014-07-23T20:12:16Z",
       "side": 1,
       "message": "and here",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8556d2cc",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-23T20:16:37Z",
+      "side": 1,
+      "message": "and here.",
       "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

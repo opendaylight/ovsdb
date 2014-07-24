@@ -352,7 +352,7 @@ public class OF10Provider implements NetworkingProvider {
                     if (patchiface.getName().equalsIgnoreCase(patchInt)) {
                         Set<Long> of_ports = patchiface.getOpenFlowPortColumn().getData();
                         if (of_ports == null || of_ports.size() <= 0) {
-                            logger.error("programTunnelRules: Could NOT identify Patch port {} on {}", patchInt, node);
+                            logger.trace("programTunnelRules: No port for patch interface {} on node {}", patchInt, node);
                             continue;
                         }
                         patchOFPort = (long)of_ports.toArray()[0];
@@ -361,7 +361,7 @@ public class OF10Provider implements NetworkingProvider {
                     }
                 }
                 if (patchOFPort == -1) {
-                    logger.error("programTunnelRules: Cannot identify {} interface on {}", patchInt, node);
+                    logger.warn("Could not find port associated with patch interface {} on node {}. No flow rules to program", patchInt, node);
                 }
                 for (Row row : ifaces.values()) {
                     Interface tuniface = ovsdbConfigService.getTypedRow(node, Interface.class, row);
@@ -381,12 +381,12 @@ public class OF10Provider implements NetworkingProvider {
 
                         if (!local) {
                             programRemoteEgressTunnelBridgeRules(node, patchOFPort, attachedMac, internalVlan, tunnelOFPort);
-                            logger.info("Programmed (non-local) EgressTunnelBridgeRules for attachedMac {} internalVlan {} tunnelOFPort {}",
+                            logger.trace("Programmed (non-local) EgressTunnelBridgeRules for attachedMac {} internalVlan {} tunnelOFPort {}",
                                     attachedMac, internalVlan, tunnelOFPort);
                         }
                         programLocalIngressTunnelBridgeRules(node, tunnelOFPort, internalVlan, patchOFPort);
                         programFloodEgressTunnelBridgeRules(node, patchOFPort, internalVlan, tunnelOFPort);
-                        logger.info("Programmed ingress tunnel and flood rules for node {} tunnel {} tunnelOFPort {} internalVlan {} patchOFPort {}",
+                        logger.trace("Programmed ingress tunnel and flood rules for node {} tunnel {} tunnelOFPort {} internalVlan {} patchOFPort {}",
                                 node, tuniface.getName(), tunnelOFPort, internalVlan, patchOFPort);
                         return;
                     }
@@ -433,7 +433,7 @@ public class OF10Provider implements NetworkingProvider {
                     if (patchiface.getName().equalsIgnoreCase(patchInt)) {
                         Set<Long> of_ports = patchiface.getOpenFlowPortColumn().getData();
                         if (of_ports == null || of_ports.size() <= 0) {
-                            logger.error("removeTunnelRules: Could NOT identify Patch port {} on {}", patchInt, node);
+                            logger.trace("removeTunnelRules: Could NOT identify Patch port {} on {}", patchInt, node);
                             continue;
                         }
                         patchOFPort = (long)of_ports.toArray()[0];
@@ -442,7 +442,8 @@ public class OF10Provider implements NetworkingProvider {
                     }
                 }
                 if (patchOFPort == -1) {
-                    logger.error("removeTunnelRules: Cannot identify {} interface on {}", patchInt, node);
+                    logger.debug("Could not find port associated with patch interface {} on node {}", patchInt, node);
+                    // return;  // keep going; we assume that removal of rules does not really need patchOFPort
                 }
                 for (Row row : ifaces.values()) {
                     Interface tuniface = ovsdbConfigService.getTypedRow(node, Interface.class, row);
@@ -455,7 +456,7 @@ public class OF10Provider implements NetworkingProvider {
                         long tunnelOFPort = (long)of_ports.toArray()[0];
 
                         if (tunnelOFPort == -1) {
-                            logger.error("removeTunnelRules: Could NOT Identify Tunnel port {} -> OF ({}) on {}", tuniface.getName(), tunnelOFPort, node);
+                            logger.error("Could NOT Identify Tunnel port {} -> OF ({}) on {}: No flow rules to remove", tuniface.getName(), tunnelOFPort, node);
                             return;
                         }
                         logger.debug("removeTunnelRules: Identified Tunnel port {} -> OF ({}) on {}", tuniface.getName(), tunnelOFPort, node);

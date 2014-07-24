@@ -36,6 +36,42 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_85249260",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF10Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 355,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-24T05:33:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_25e2662f",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a5299638",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF10Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 355,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-24T05:33:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_65dcee73",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_c5d29a5b",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF10Provider.java",
         "patchSetId": 1
@@ -70,6 +106,42 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_e5da3e4b",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF10Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 364,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-24T05:33:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_05e5e236",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c5d5ba1c",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF10Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 364,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-24T05:33:52Z",
+      "side": 1,
+      "message": "Done.\n\nIt makes no sense to attempt any of the OF programming when patchOFPort is -1, agree? Being so, I simply added a return call after that log.",
+      "parentUuid": "fa82b9bf_c5d29a5b",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_e5d79e49",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF10Provider.java",
         "patchSetId": 1
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_c5a37ab0",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF10Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 384,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-24T05:33:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_e5d79e49",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_a5cd16b9",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF10Provider.java",
         "patchSetId": 1
@@ -98,6 +188,24 @@
       "writtenOn": "2014-07-23T20:12:16Z",
       "side": 1,
       "message": "This level of detail should be trace or debug",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e5a8fe8e",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF10Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-24T05:33:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_a5cd16b9",
       "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -138,6 +246,42 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_a5ae7696",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF10Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-24T05:33:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_85c812a9",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_85a9f291",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF10Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-24T05:33:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_45c68a9b",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_25b90615",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF10Provider.java",
         "patchSetId": 1
@@ -149,6 +293,24 @@
       "writtenOn": "2014-07-23T20:12:16Z",
       "side": 1,
       "message": "warn?",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c58a9a1a",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF10Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 436,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-24T05:33:52Z",
+      "side": 1,
+      "message": "trace",
+      "parentUuid": "fa82b9bf_25b90615",
       "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -189,6 +351,42 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_e58f9e28",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF10Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 445,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-24T05:33:52Z",
+      "side": 1,
+      "message": "debug",
+      "parentUuid": "fa82b9bf_65c38e89",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_858012f8",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF10Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 445,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-24T05:33:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_853fb286",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_c5393aa5",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF10Provider.java",
         "patchSetId": 1
@@ -223,6 +421,42 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_457e8a1a",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF10Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 458,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-24T05:33:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_c5393aa5",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_657b8e28",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF10Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 458,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-24T05:33:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_654aae27",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_a55bd6f4",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
         "patchSetId": 1
@@ -240,6 +474,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_c5913a48",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-24T05:33:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_a55bd6f4",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_e53ebe8b",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
         "patchSetId": 1
@@ -251,6 +503,24 @@
       "writtenOn": "2014-07-23T20:16:37Z",
       "side": 1,
       "message": "Not a useful message. you can remove this.",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_05740234",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-24T05:33:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_e53ebe8b",
       "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -291,6 +561,42 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_8597b239",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-24T05:33:52Z",
+      "side": 1,
+      "message": "Done. This is actually stupid, because .createLocalNetwork() already has error logs.",
+      "parentUuid": "fa82b9bf_c5605aa7",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e596be3e",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-24T05:33:52Z",
+      "side": 1,
+      "message": "Done. This is actually stupid, because .createLocalNetwork() already has error logs.",
+      "parentUuid": "fa82b9bf_a544361b",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_454d2a3d",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
         "patchSetId": 1
@@ -319,6 +625,42 @@
       "writtenOn": "2014-07-23T20:16:37Z",
       "side": 1,
       "message": "and here.",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a59c365e",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-24T05:33:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_454d2a3d",
+      "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_45a52aa0",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-24T05:33:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_8556d2cc",
       "revId": "56cbaff780abed00f8fc36a1521f2266f42de28e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

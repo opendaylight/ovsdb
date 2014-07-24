@@ -362,6 +362,7 @@ public class OF10Provider implements NetworkingProvider {
                 }
                 if (patchOFPort == -1) {
                     logger.error("Cannot identify {} interface on {}", patchInt, node);
+                    return;  // we are done, because we can assume that adding of rules needs patchOFPort
                 }
                 for (Row row : ifaces.values()) {
                     Interface tuniface = ovsdbConfigService.getTypedRow(node, Interface.class, row);
@@ -438,7 +439,8 @@ public class OF10Provider implements NetworkingProvider {
                     }
                 }
                 if (patchOFPort == -1) {
-                    logger.error("Cannot identify {} interface on {}", patchInt, node);
+                    logger.debug("Could not find port associated with patch interface {} on node {}", patchInt, node);
+                    // return;  // keep going; we assume that removal of rules does not really need patchOFPort
                 }
                 for (Row row : ifaces.values()) {
                     Interface tuniface = ovsdbConfigService.getTypedRow(node, Interface.class, row);

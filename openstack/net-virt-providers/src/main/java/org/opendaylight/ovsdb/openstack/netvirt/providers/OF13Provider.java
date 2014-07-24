@@ -12,6 +12,8 @@ package org.opendaylight.ovsdb.openstack.netvirt.providers;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
+import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
+import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.HexEncode;
@@ -44,6 +46,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PopVlanActionCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PopVlanActionCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PushVlanActionCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetDlDstActionCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetFieldCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwDstActionCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwSrcActionCaseBuilder;
@@ -56,6 +59,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.output.action._case.OutputActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.pop.vlan.action._case.PopVlanActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.push.vlan.action._case.PushVlanActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.dl.dst.action._case.SetDlDstActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.field._case.SetFieldBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.nw.dst.action._case.SetNwDstActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.nw.src.action._case.SetNwSrcActionBuilder;
@@ -122,6 +126,7 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -150,6 +155,7 @@ public class OF13Provider implements NetworkingProvider {
     private volatile OvsdbConfigService ovsdbConfigService;
     private volatile IConnectionServiceInternal connectionService;
     private volatile MdsalConsumer mdsalConsumer;
+    private volatile INeutronPortCRUD neutronPortCache;
 
     public OF13Provider(){
 
@@ -211,6 +217,27 @@ public class OF13Provider implements NetworkingProvider {
             }
         }
         return null;
+    }
+
+    private boolean isRouterIntf(Interface intf) {
+        if (intf == null) return false;
+
+            Map<String, String> externalIds = intf.getExternalIdsColumn().getData();
+            logger.trace("externalIds {}", externalIds);
+            if (externalIds == null) return false;
+
+            /* Get neutron port ID from externalId field */
+            String neutronPortId = externalIds.get("iface-id");
+            if (neutronPortId == null) return false;
+
+            /* get neutron port */
+            NeutronPort neutronPort = neutronPortCache.getPort(neutronPortId);
+            logger.trace("neutronPort {}", neutronPort);
+
+            if (neutronPort.getDeviceOwner().equalsIgnoreCase("network:router_interface")) {
+                return true;
+            }
+        return false;
     }
 
     private Status addTunnelPort (Node node, String tunnelType, InetAddress src, InetAddress dst) {
@@ -757,6 +784,43 @@ public class OF13Provider implements NetworkingProvider {
          handleVlanMiss(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD,
                         segmentationId, ethPort, false);
    }
+
+   /*
+    * Program L3 related rules.
+    */
+   private void programL3Rules(Long dpid, String routerIntfMac) {
+       /*
+        * Table(0) Rule #0
+        * ----------------
+        * Match:  ARP op = 1, ether_type = ARP
+        * Action: set dst_mac, Go to table 1
+        * -------------------------------------------
+        * Example: table=0, ether_type =0x0806, arp_op =1, actions=set_dst_mac, goto_table:1
+        */
+       handleArpRequest(dpid, TABLE_0_DEFAULT_INGRESS,
+       TABLE_1_ISOLATE_TENANT, routerIntfMac, true);
+
+       // TODO: Add L3 related flows here
+   }
+
+    /*
+     * Remove L3 related rules
+     */
+    private void removeL3Rules(Long dpid, String routerIntfMac) {
+        /*
+         * Table(0) Rule #0
+         * ----------------
+         * Match:  ARP op = 1, ether_type = ARP
+         * Action: set dst_mac, Go to table 1
+         * -------------------------------------------
+         * Example: table=0, ether_type =0x0806, arp_op =1, actions=set_dst_mac, goto_table:1
+         */
+        handleArpRequest(dpid, TABLE_0_DEFAULT_INGRESS,
+        TABLE_1_ISOLATE_TENANT, routerIntfMac, false);
+
+        //TODO: remove L3 related flows here
+    }
+
     private Long getDpid (Node node, String bridgeUuid) {
         Preconditions.checkNotNull(ovsdbConfigService);
         try {
@@ -830,6 +894,11 @@ public class OF13Provider implements NetworkingProvider {
                 return;
             }
 
+            /* program ARP request flow if router intf */
+            if (isRouterIntf(intf)) {
+                programL3Rules(dpid, attachedMac);
+            }
+
             /* Program local rules based on network type */
             if (networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
                 logger.debug("Program local vlan rules for interface {}", intf.getName());
@@ -869,6 +938,11 @@ public class OF13Provider implements NetworkingProvider {
             if (attachedMac == null) {
                 logger.error("No AttachedMac seen in {}", intf);
                 return;
+            }
+
+            /* Remove ARP request flow if router intf */
+            if (isRouterIntf(intf)) {
+                removeL3Rules(dpid, attachedMac);
             }
 
             /* Program local rules based on network type */
@@ -2550,6 +2624,68 @@ public class OF13Provider implements NetworkingProvider {
         }
     }
 
+    /*
+     * (Table:0) Arp request
+     * Match: arp ethery type with arp op code =1 (request)
+     * Action: set Dst Mac address
+     * table=0,ether_type = 0x0806,arp_opcode =1 actions= set Dst Mac, goto table:1
+     */
+    private void handleArpRequest(Long dpidLong, Short writeTable,
+                                  Short goToTableId, String routerIntfMac , boolean write) {
+
+        String nodeName = "openflow:" + dpidLong;
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        // Create Match(es) and Set them in the FlowBuilder Object
+        flowBuilder.setMatch(createArpOpMatch(matchBuilder, Integer.valueOf(1)).build());
+
+        if (write) {
+            // Create the OF Actions and Instructions
+            InstructionBuilder ib = new InstructionBuilder();
+            InstructionsBuilder isb = new InstructionsBuilder();
+
+            // Instructions List Stores Individual Instructions
+            List<Instruction> instructions = Lists.newArrayList();
+
+            // GOTO Instuctions Need to be added first to the List
+            createGotoTableInstructions(ib, goToTableId);
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            instructions.add(ib.build());
+            // Call the InstructionBuilder Methods Containing Actions
+            createDstMacInstructions(ib, new MacAddress(routerIntfMac));
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(1));
+            instructions.add(ib.build());
+
+            // Add InstructionBuilder to the Instruction(s)Builder List
+            isb.setInstruction(instructions);
+
+            // Add InstructionsBuilder to FlowBuilder
+            flowBuilder.setInstructions(isb.build());
+        }
+
+        String flowId = "ArpRequest_"+routerIntfMac;
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setStrict(true);
+        flowBuilder.setBarrier(false);
+        flowBuilder.setTableId(writeTable);
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+        if (write) {
+            writeFlow(flowBuilder, nodeBuilder);
+        } else {
+            removeFlow(flowBuilder, nodeBuilder);
+        }
+    }
+
     private Group getGroup(GroupBuilder groupBuilder, NodeBuilder nodeBuilder) {
         Preconditions.checkNotNull(mdsalConsumer);
         if (mdsalConsumer == null) {
@@ -2951,6 +3087,28 @@ public class OF13Provider implements NetworkingProvider {
 
         tcpmatch.setTcpDestinationPort(tcpport);
         matchBuilder.setLayer4Match(tcpmatch.build());
+
+        return matchBuilder;
+    }
+
+    /** Create ARP op code Match
+     *
+     * @param matchBuilder MatchBuilder Object without a match yet
+     * @param opcode       Integer representing the arp op code
+     * @return             matchBuilder Map MatchBuilder Object with a match
+     */
+    protected static MatchBuilder createArpOpMatch(MatchBuilder matchBuilder, Integer opcode) {
+        /* Match ARP ethertype*/
+        EthernetMatchBuilder ethType = new EthernetMatchBuilder();
+        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
+        ethTypeBuilder.setType(new EtherType(0x0806L));
+        ethType.setEthernetType(ethTypeBuilder.build());
+        matchBuilder.setEthernetMatch(ethType.build());
+
+        ArpMatchBuilder arpMatch = new ArpMatchBuilder();
+        arpMatch.setArpOp(opcode);
+        //TODO: Need to add arpMatch under Match data structure and enable related methods in match Builder
+        //matchBuilder.setArpMatch(arpMatch);
 
         return matchBuilder;
     }
@@ -3992,6 +4150,31 @@ public class OF13Provider implements NetworkingProvider {
 
         ApplyActionsBuilder aab = new ApplyActionsBuilder();
         aab.setAction(actionList);
+
+        return ib;
+    }
+
+    /*
+     * Set dst MAC address
+     */
+    private static InstructionBuilder createDstMacInstructions(InstructionBuilder ib, MacAddress dstMacAddr) {
+
+        List<Action> actionList = Lists.newArrayList();
+        ActionBuilder ab = new ActionBuilder();
+
+        /* Then we set vlan id value as vlanId */
+        SetDlDstActionBuilder dl = new SetDlDstActionBuilder();
+        dl.setAddress(dstMacAddr);
+        ab = new ActionBuilder();
+        ab.setAction(new SetDlDstActionCaseBuilder().setSetDlDstAction(dl.build()).build());
+        ab.setOrder(0);
+        actionList.add(ab.build());
+        // Create an Apply Action
+        ApplyActionsBuilder aab = new ApplyActionsBuilder();
+        aab.setAction(actionList);
+
+        // Wrap our Apply Action in an Instruction
+        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
 
         return ib;
     }

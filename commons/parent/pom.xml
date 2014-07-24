@@ -49,7 +49,6 @@
     <checkstyle.rules.version>0.0.3-SNAPSHOT</checkstyle.rules.version>
     <!-- 3rd Pary Dependency Versions -->
     <commons.collection.version>1.0</commons.collection.version>
-    <netty.version>4.0.10.Final</netty.version>
     <portlet.version>2.0</portlet.version>
     <powermock.version>1.5.2</powermock.version>
     <httpcomponents.version>4.2.1</httpcomponents.version>

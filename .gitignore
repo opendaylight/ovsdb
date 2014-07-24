@@ -26,3 +26,4 @@ report.html
 target-ide/
 .vagrant
 .DS_Store
+.checkstyle

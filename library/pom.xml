@@ -10,6 +10,7 @@
 
   <artifactId>library</artifactId>
   <version>1.0.0-SNAPSHOT</version>
+  <name>OVSDB Library</name>
   <packaging>bundle</packaging>
 
   <dependencies>
@@ -52,10 +53,6 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-    <groupId>commons-collections</groupId>
-    <artifactId>commons-collections</artifactId>
-  </dependency>
-    <dependency>
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
     </dependency>
@@ -74,11 +71,6 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpcore-nio</artifactId>
-      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

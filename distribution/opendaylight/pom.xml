@@ -14,7 +14,7 @@ see https://git.opendaylight.org/gerrit/#/c/390/
 
   <artifactId>distribution.ovsdb</artifactId>
   <packaging>pom</packaging>
-  <name>distribution</name>
+  <name>OpenDaylight OVSDB Distribution</name>
 
   <properties>
     <openflowjava.version>0.5-SNAPSHOT</openflowjava.version>

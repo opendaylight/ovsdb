@@ -10,6 +10,7 @@
 
   <artifactId>openstack.net-virt</artifactId>
   <version>1.0.0-SNAPSHOT</version>
+  <name>Opendaylight OVS Network Virtualization</name>
   <packaging>bundle</packaging>
 
   <dependencies>

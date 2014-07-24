@@ -9,6 +9,7 @@
   </parent>
   <artifactId>schema.hardwarevtep</artifactId>
   <version>1.0.0-SNAPSHOT</version>
+  <name>OVSDB Hardware-vtep Schema</name>
   <packaging>bundle</packaging>
 
   <dependencies>

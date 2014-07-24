@@ -11,6 +11,7 @@
 
   <artifactId>integrationtest</artifactId>
   <version>1.2.0-SNAPSHOT</version>
+  <name>Opendaylight OVSDB Integration Tests</name>
   <packaging>jar</packaging>
 
   <dependencies>

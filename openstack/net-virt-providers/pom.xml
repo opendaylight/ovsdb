@@ -12,6 +12,7 @@
 
     <artifactId>openstack.net-virt-providers</artifactId>
     <version>1.0.0-SNAPSHOT</version>
+    <name>Opendaylight OVS Network Virtualization Providers</name>
     <packaging>bundle</packaging>
 
     <dependencies>

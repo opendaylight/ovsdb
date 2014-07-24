@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features name="ovsdb-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+    <feature name="odl-ovsdb-all" description="OpenDaylight :: OVSDB :: all" version='${project.version}'>
+        <feature version="${ovsdb.library.version}">odl-ovsdb-library</feature>
+        <feature version="${ovsdb.plugin.version}">odl-ovsdb-plugin</feature>
+        <!--
+            TODO : Enable the northbound & netvirt features once AD-SAL NSF & northbound feature works in Controller project.
+        <feature version="${ovsdb.northbound.version}">odl-ovsdb-northbound</feature>
+        <feature version="${ovsdb.northbound.version}">odl-ovsdb-netvirt</feature>
+        -->
+    </feature>
+
+    <feature name="odl-ovsdb-library" description="OVSDB :: Library" version='${ovsdb.library.version}'>
+        <feature>base-all</feature>
+        <bundle>mvn:com.google.code.gson/gson/${gson.version}</bundle>
+        <bundle>mvn:org.opendaylight.ovsdb/library/${ovsdb.library.version}</bundle>
+        <bundle>mvn:org.opendaylight.ovsdb/schema.openvswitch/${schema.openvswitch.version}</bundle>
+        <bundle>mvn:org.opendaylight.ovsdb/schema.hardwarevtep/${schema.hardwarevtep.version}</bundle>
+    </feature>
+
+    <feature name="odl-ovsdb-plugin" description="OpenDaylight :: OVSDB :: Plugin" version='${ovsdb.plugin.version}'>
+        <feature version="${sal.version}">odl-adsal-all</feature>
+        <feature version="${ovsdb.library.version}">odl-ovsdb-library</feature>
+        <bundle>mvn:org.opendaylight.ovsdb/plugin/${ovsdb.plugin.version}</bundle>
+    </feature>
+<!--
+    ADSAL Northbound and NSFs are not broken into Karaf Features yet.
+    Also, the ADSAL Northbound is not modular enough to easily isolate it into bit-sized feature.
+    It has a chain of AD-SAL NSF dependencies and hence the Controller project has not completed the AD-SAL karaf version.
+
+    TODO : Enable the northbound & netvirt features once AD-SAL northbound feature is working in Controller project.
+
+    <feature name="odl-ovsdb-northbound" description="OpenDaylight :: OVSDB :: Northbound" version='${ovsdb.northbound.version}'>
+        <feature version="${ovsdb.plugin.version}">odl-ovsdb-plugin</feature>
+        <bundle>mvn:org.opendaylight.ovsdb/northbound/${ovsdb.northbound.version}</bundle>
+    </feature>
+
+
+    <feature name="odl-ovsdb-netvirt" description="OpenDaylight :: OVSDB :: Network Virtualization" version='${ovsdb.netvirt.version}'>
+        <feature version="${ovsdb.plugin.version}">odl-ovsdb-plugin</feature>
+        <bundle>mvn:org.opendaylight.ovsdb/net-virt/${ovsdb.netvirt.version}</bundle>
+        <bundle>mvn:org.opendaylight.ovsdb/net-virt-providers/${ovsdb.netvirt.providers.version}</bundle>
+    </feature>
+
+-->
+</features>

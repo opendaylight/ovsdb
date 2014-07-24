@@ -10,6 +10,7 @@
 
   <artifactId>library</artifactId>
   <version>1.0.0-SNAPSHOT</version>
+  <name>OVSDB Library</name>
   <packaging>bundle</packaging>
 
   <dependencies>

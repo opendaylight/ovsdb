@@ -9,6 +9,7 @@
   </parent>
   <artifactId>schema.openvswitch</artifactId>
   <version>1.0.0-SNAPSHOT</version>
+  <name>OVSDB Openvswitch Schema</name>
   <packaging>bundle</packaging>
 
   <dependencies>

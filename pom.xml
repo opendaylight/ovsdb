@@ -27,6 +27,8 @@
     <module>openstack/net-virt</module>
     <module>openstack/net-virt-providers</module>
     <module>distribution/opendaylight</module>
+    <!-- Karaf Distribution -->
+    <module>features</module>
   </modules>
 
   <profiles>

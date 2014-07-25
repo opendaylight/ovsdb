@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_16675ab8",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/NetworkHandler.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1018
+      },
+      "writtenOn": "2014-07-25T18:24:46Z",
+      "side": 1,
+      "message": "Here we have two layer of for-loops to first get ports and then go over all interfaces under this port. Is this due to recent ovsdb library change? Couldn\u0027t we just use one loop to go over all interfaces, as the original code did? Just try to understand the reason for this change.",
+      "revId": "57ff02cf0ae72b3a2069b65f4736dc2dc89a4451",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

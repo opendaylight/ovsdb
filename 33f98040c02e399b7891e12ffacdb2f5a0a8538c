@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_d63ed28b",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/Activator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1018
+      },
+      "writtenOn": "2014-07-25T18:24:46Z",
+      "side": 0,
+      "message": "Dave, Could you keep the INeutronNetworkCRUD service here?\nThe  arp request patch need this line here.  Removing this line at this commit and adding it back again in the commit of arp request is OK for me, but this doesn\u0027t make much sense.",
+      "revId": "33f98040c02e399b7891e12ffacdb2f5a0a8538c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

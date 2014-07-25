@@ -9,10 +9,15 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.providers;
 
-import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
-import org.opendaylight.controller.md.sal.common.api.data.DataModification;
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
-import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.Status;
@@ -115,9 +120,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.TcpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.UdpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanIdBuilder;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.common.RpcResult;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -131,14 +134,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 /**
  * Open vSwitch OpenFlow 1.3 Networking Provider for OpenStack Neutron
  */
 public class OF13Provider implements NetworkingProvider {
     private static final Logger logger = LoggerFactory.getLogger(OF13Provider.class);
-    private DataBrokerService dataBrokerService;
+    private DataBroker dataBroker;
     private static final short TABLE_0_DEFAULT_INGRESS = 0;
     private static final short TABLE_1_ISOLATE_TENANT = 10;
     private static final short TABLE_2_LOCAL_FORWARD = 20;
@@ -2557,78 +2559,100 @@ public class OF13Provider implements NetworkingProvider {
             return null;
         }
 
-        dataBrokerService = mdsalConsumer.getDataBrokerService();
-
-        if (dataBrokerService == null) {
-            logger.error("ERROR finding reference for DataBrokerService. Please check out the MD-SAL support on the Controller.");
+        dataBroker = mdsalConsumer.getDataBroker();
+        if (dataBroker == null) {
+            logger.error("ERROR finding reference for DataBroker. Please check MD-SAL support on the Controller.");
             return null;
         }
 
         InstanceIdentifier<Group> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
                 .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Group.class,
                 new GroupKey(groupBuilder.getGroupId())).build();
-        return (Group)dataBrokerService.readConfigurationData(path1);
+        ReadOnlyTransaction readTx = dataBroker.newReadOnlyTransaction();
+        try {
+            Optional<Group> data = readTx.read(LogicalDatastoreType.CONFIGURATION, path1).get();
+            if (data.isPresent()) {
+                return data.get();
+            }
+        } catch (InterruptedException e) {
+            logger.error(e.getMessage(), e);
+        } catch (ExecutionException e) {
+            logger.error(e.getMessage(), e);
+        }
+
+        logger.debug("Cannot find data for Group " + groupBuilder.getGroupName());
+        return null;
     }
 
-    private Group writeGroup(GroupBuilder groupBuilder, NodeBuilder nodeBuilder) {
+    private void writeGroup(GroupBuilder groupBuilder, NodeBuilder nodeBuilder) {
         Preconditions.checkNotNull(mdsalConsumer);
         if (mdsalConsumer == null) {
             logger.error("ERROR finding MDSAL Service. Its possible that writeFlow is called too soon ?");
-            return null;
+            return;
         }
 
-        dataBrokerService = mdsalConsumer.getDataBrokerService();
-
-        if (dataBrokerService == null) {
-            logger.error("ERROR finding reference for DataBrokerService. Please check out the MD-SAL support on the Controller.");
-            return null;
+        dataBroker = mdsalConsumer.getDataBroker();
+        if (dataBroker == null) {
+            logger.error("ERROR finding reference for DataBroker. Please check MD-SAL support on the Controller.");
+            return;
         }
-        DataModification<InstanceIdentifier<?>, DataObject> modification = dataBrokerService.beginTransaction();
+
+        ReadWriteTransaction modification = dataBroker.newReadWriteTransaction();
+
+        // Sanity check: do not create parent's tree deeper than we should
+        InstanceIdentifier<?> requiredPath = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
+                .rev130819.nodes.Node.class, nodeBuilder.getKey()).build();
+        try {
+            if (!modification.read(LogicalDatastoreType.CONFIGURATION, requiredPath).get().isPresent()) {
+                logger.error("Unable to get configuration resource to store group "+groupBuilder.getGroupName()
+                        +" ("+requiredPath.toString()+")");
+                return;
+            }
+        } catch (InterruptedException|ExecutionException e) {
+            logger.error(e.getMessage(), e);
+            return;
+        }
+
         InstanceIdentifier<Group> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
                 .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Group.class,
                 new GroupKey(groupBuilder.getGroupId())).build();
-        modification.putConfigurationData(nodeBuilderToInstanceId(nodeBuilder), nodeBuilder.build());
-        modification.putConfigurationData(path1, groupBuilder.build());
-        Future<RpcResult<TransactionStatus>> commitFuture = modification.commit();
+        modification.put(LogicalDatastoreType.CONFIGURATION, path1, groupBuilder.build(), true /*createMissingParents*/);
 
+        CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
         try {
-            RpcResult<TransactionStatus> result = commitFuture.get();
-            TransactionStatus status = result.getResult();
-            logger.debug("Transaction Status "+status.toString()+" for Group "+groupBuilder.getGroupName());
+            commitFuture.get();  // TODO: Make it async (See bug 1362)
+            logger.debug("Transaction success for write of Group "+groupBuilder.getGroupName());
         } catch (InterruptedException|ExecutionException e) {
             logger.error(e.getMessage(), e);
         }
-        return (Group)dataBrokerService.readConfigurationData(path1);
     }
 
-    private Group removeGroup(GroupBuilder groupBuilder, NodeBuilder nodeBuilder) {
+    private void removeGroup(GroupBuilder groupBuilder, NodeBuilder nodeBuilder) {
         Preconditions.checkNotNull(mdsalConsumer);
         if (mdsalConsumer == null) {
             logger.error("ERROR finding MDSAL Service. Its possible that writeFlow is called too soon ?");
-            return null;
+            return;
         }
 
-        dataBrokerService = mdsalConsumer.getDataBrokerService();
-
-        if (dataBrokerService == null) {
-            logger.error("ERROR finding reference for DataBrokerService. Please check out the MD-SAL support on the Controller.");
-            return null;
+        dataBroker = mdsalConsumer.getDataBroker();
+        if (dataBroker == null) {
+            logger.error("ERROR finding reference for DataBroker. Please check MD-SAL support on the Controller.");
+            return;
         }
-        DataModification<InstanceIdentifier<?>, DataObject> modification = dataBrokerService.beginTransaction();
+
+        WriteTransaction modification = dataBroker.newWriteOnlyTransaction();
         InstanceIdentifier<Group> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
                 .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Group.class,
                 new GroupKey(groupBuilder.getGroupId())).build();
-        modification.removeConfigurationData(path1);
-        Future<RpcResult<TransactionStatus>> commitFuture = modification.commit();
+        modification.delete(LogicalDatastoreType.CONFIGURATION, path1);
+        CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
 
         try {
-            RpcResult<TransactionStatus> result = commitFuture.get();
-            TransactionStatus status = result.getResult();
-            logger.debug("Transaction Status "+status.toString()+" for Group "+groupBuilder.getGroupName());
+            commitFuture.get();  // TODO: Make it async (See bug 1362)
+            logger.debug("Transaction success for deletion of Group "+groupBuilder.getGroupName());
         } catch (InterruptedException|ExecutionException e) {
             logger.error(e.getMessage(), e);
         }
-        return (Group)dataBrokerService.readConfigurationData(path1);
     }
     private Flow getFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
         Preconditions.checkNotNull(mdsalConsumer);
@@ -2637,17 +2661,30 @@ public class OF13Provider implements NetworkingProvider {
             return null;
         }
 
-        dataBrokerService = mdsalConsumer.getDataBrokerService();
-
-        if (dataBrokerService == null) {
-            logger.error("ERROR finding reference for DataBrokerService. Please check out the MD-SAL support on the Controller.");
+        dataBroker = mdsalConsumer.getDataBroker();
+        if (dataBroker == null) {
+            logger.error("ERROR finding reference for DataBroker. Please check MD-SAL support on the Controller.");
             return null;
         }
 
         InstanceIdentifier<Flow> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
                 .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Table.class,
                 new TableKey(flowBuilder.getTableId())).child(Flow.class, flowBuilder.getKey()).build();
-        return (Flow)dataBrokerService.readConfigurationData(path1);
+
+        ReadOnlyTransaction readTx = dataBroker.newReadOnlyTransaction();
+        try {
+            Optional<Flow> data = readTx.read(LogicalDatastoreType.CONFIGURATION, path1).get();
+            if (data.isPresent()) {
+                return data.get();
+            }
+        } catch (InterruptedException e) {
+            logger.error(e.getMessage(), e);
+        } catch (ExecutionException e) {
+            logger.error(e.getMessage(), e);
+        }
+
+        logger.debug("Cannot find data for Flow " + flowBuilder.getFlowName());
+        return null;
     }
 
     private void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
@@ -2657,26 +2694,40 @@ public class OF13Provider implements NetworkingProvider {
             return;
         }
 
-        dataBrokerService = mdsalConsumer.getDataBrokerService();
-
-        if (dataBrokerService == null) {
-            logger.error("ERROR finding reference for DataBrokerService. Please check out the MD-SAL support on the Controller.");
+        dataBroker = mdsalConsumer.getDataBroker();
+        if (dataBroker == null) {
+            logger.error("ERROR finding reference for DataBroker. Please check MD-SAL support on the Controller.");
             return;
         }
-        DataModification<InstanceIdentifier<?>, DataObject> modification = dataBrokerService.beginTransaction();
-        InstanceIdentifier<Flow> path1 = InstanceIdentifier.builder(Nodes.class).child(
-                org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
-                        .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Table.class,
-                new TableKey(flowBuilder.getTableId())).child(Flow.class, flowBuilder.getKey()).build();
-        //modification.putOperationalData(nodeBuilderToInstanceId(nodeBuilder), nodeBuilder.build());
-        //modification.putOperationalData(path1, flowBuilder.build());
-        modification.putConfigurationData(nodeBuilderToInstanceId(nodeBuilder), nodeBuilder.build());
-        modification.putConfigurationData(path1, flowBuilder.build());
-        Future<RpcResult<TransactionStatus>> commitFuture = modification.commit();
+
+        ReadWriteTransaction modification = dataBroker.newReadWriteTransaction();
+
+        // Sanity check: do not create parent's tree deeper than we should
+        InstanceIdentifier<?> requiredPath = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
+                .rev130819.nodes.Node.class, nodeBuilder.getKey()).build();
         try {
-            RpcResult<TransactionStatus> result = commitFuture.get();
-            TransactionStatus status = result.getResult();
-            logger.debug("Transaction Status "+status.toString()+" for Flow "+flowBuilder.getFlowName());
+            if (!modification.read(LogicalDatastoreType.CONFIGURATION, requiredPath).get().isPresent()) {
+                logger.error("Unable to get configuration resource to store flow "+flowBuilder.getFlowName()
+                        +" ("+requiredPath.toString()+")");
+                return;
+            }
+        } catch (InterruptedException|ExecutionException e) {
+            logger.error(e.getMessage(), e);
+            return;
+        }
+
+        InstanceIdentifier<Flow> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
+                .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Table.class,
+                new TableKey(flowBuilder.getTableId())).child(Flow.class, flowBuilder.getKey()).build();
+
+        //modification.put(LogicalDatastoreType.OPERATIONAL, path1, flowBuilder.build());
+        modification.put(LogicalDatastoreType.CONFIGURATION, path1, flowBuilder.build(), true /*createMissingParents*/);
+
+
+        CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
+        try {
+            commitFuture.get();  // TODO: Make it async (See bug 1362)
+            logger.debug("Transaction success for write of Flow "+flowBuilder.getFlowName());
         } catch (InterruptedException|ExecutionException e) {
             logger.error(e.getMessage(), e);
         }
@@ -2689,27 +2740,27 @@ public class OF13Provider implements NetworkingProvider {
             return;
         }
 
-        dataBrokerService = mdsalConsumer.getDataBrokerService();
-
-        if (dataBrokerService == null) {
-            logger.error("ERROR finding reference for DataBrokerService. Please check out the MD-SAL support on the Controller.");
+        dataBroker = mdsalConsumer.getDataBroker();
+        if (dataBroker == null) {
+            logger.error("ERROR finding reference for DataBroker. Please check MD-SAL support on the Controller.");
             return;
         }
-        DataModification<InstanceIdentifier<?>, DataObject> modification = dataBrokerService.beginTransaction();
+
+        WriteTransaction modification = dataBroker.newWriteOnlyTransaction();
         InstanceIdentifier<Flow> path1 = InstanceIdentifier.builder(Nodes.class)
                 .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
                 .rev130819.nodes.Node.class, nodeBuilder.getKey())
                 .augmentation(FlowCapableNode.class).child(Table.class,
                 new TableKey(flowBuilder.getTableId())).child(Flow.class, flowBuilder.getKey()).build();
-        //modification.removeOperationalData(nodeBuilderToInstanceId(nodeBuilder));
-        //modification.removeOperationalData(path1);
-        //modification.removeConfigurationData(nodeBuilderToInstanceId(nodeBuilder));
-        modification.removeConfigurationData(path1);
-        Future<RpcResult<TransactionStatus>> commitFuture = modification.commit();
+        //modification.delete(LogicalDatastoreType.OPERATIONAL, nodeBuilderToInstanceId(nodeBuilder));
+        //modification.delete(LogicalDatastoreType.OPERATIONAL, path1);
+        //modification.delete(LogicalDatastoreType.CONFIGURATION, nodeBuilderToInstanceId(nodeBuilder));
+        modification.delete(LogicalDatastoreType.CONFIGURATION, path1);
+
+        CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
         try {
-            RpcResult<TransactionStatus> result = commitFuture.get();
-            TransactionStatus status = result.getResult();
-            logger.debug("Transaction Status "+status.toString()+" for Flow "+flowBuilder.getFlowName());
+            commitFuture.get();  // TODO: Make it async (See bug 1362)
+            logger.debug("Transaction success for deletion of Flow "+flowBuilder.getFlowName());
         } catch (InterruptedException|ExecutionException e) {
             logger.error(e.getMessage(), e);
         }

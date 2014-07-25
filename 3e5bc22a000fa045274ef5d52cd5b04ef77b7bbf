@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_eb1a0f6e",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-25T04:46:20Z",
+      "side": 1,
+      "message": "indent looks off here.",
+      "revId": "3e5bc22a000fa045274ef5d52cd5b04ef77b7bbf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ab288786",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2629,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-25T04:46:20Z",
+      "side": 1,
+      "message": "...ether type...",
+      "revId": "3e5bc22a000fa045274ef5d52cd5b04ef77b7bbf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

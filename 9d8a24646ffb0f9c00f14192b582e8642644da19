@@ -70,6 +70,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_96236aa6",
+        "filename": "features/src/main/resources/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-07-25T17:47:30Z",
+      "side": 1,
+      "message": "If that is the case I would recommend splitting this feature in 2.",
+      "parentUuid": "fa82b9bf_2b6f972c",
+      "revId": "9d8a24646ffb0f9c00f14192b582e8642644da19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_4b53fb6a",
         "filename": "features/src/main/resources/features.xml",
         "patchSetId": 2
@@ -104,6 +122,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_363cdec7",
+        "filename": "features/src/main/resources/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-07-25T17:47:30Z",
+      "side": 1,
+      "message": "Yes it is an AD-SAL dependency (AD-SAL is hard-linked to clustering services)",
+      "parentUuid": "fa82b9bf_4b6c5b35",
+      "revId": "9d8a24646ffb0f9c00f14192b582e8642644da19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_2bdd57e0",
         "filename": "features/src/main/resources/features.xml",
         "patchSetId": 2
@@ -121,6 +157,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_563962d5",
+        "filename": "features/src/main/resources/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-07-25T17:47:30Z",
+      "side": 1,
+      "message": "I will provide another patch that would remove the dependency on Northbound.commons..",
+      "parentUuid": "fa82b9bf_2bdd57e0",
+      "revId": "9d8a24646ffb0f9c00f14192b582e8642644da19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_6b583f8a",
         "filename": "features/src/main/resources/features.xml",
         "patchSetId": 2
@@ -132,6 +186,24 @@
       "writtenOn": "2014-07-25T13:51:31Z",
       "side": 1,
       "message": "s/Network Virtualization/OpenStack Network Virtualization/g",
+      "revId": "9d8a24646ffb0f9c00f14192b582e8642644da19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_162f5a89",
+        "filename": "features/src/main/resources/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2014-07-25T17:47:30Z",
+      "side": 1,
+      "message": "Is it openstack specific?",
+      "parentUuid": "fa82b9bf_6b583f8a",
       "revId": "9d8a24646ffb0f9c00f14192b582e8642644da19",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

@@ -10,10 +10,10 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.providers;
 
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
-import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 
 import org.apache.felix.dm.Component;
 import org.osgi.framework.BundleContext;
@@ -24,7 +24,7 @@ public class MdsalConsumerImpl implements BindingAwareConsumer, MdsalConsumer {
     private BundleContext ctx = null;
     private volatile BindingAwareBroker broker;
     private ConsumerContext consumerContext = null;
-    private DataBrokerService dataBrokerService;
+    private DataBroker dataBroker;
 
     static final Logger logger = LoggerFactory.getLogger(MdsalConsumerImpl.class);
 
@@ -38,6 +38,7 @@ public class MdsalConsumerImpl implements BindingAwareConsumer, MdsalConsumer {
         // Now lets close MDSAL session
         if (this.consumerContext != null) {
             //this.consumerContext.close();
+            this.dataBroker = null;
             this.consumerContext = null;
         }
     }
@@ -51,8 +52,8 @@ public class MdsalConsumerImpl implements BindingAwareConsumer, MdsalConsumer {
     @Override
     public void onSessionInitialized(ConsumerContext session) {
         this.consumerContext = session;
-        dataBrokerService = session.getSALService(DataBrokerService.class);
-        logger.info("OVSDB Neutron Session Initilized with CONSUMER CONTEXT {}", session.toString());
+        dataBroker = session.getSALService(DataBroker.class);
+        logger.info("OVSDB Neutron Session Initialized with CONSUMER CONTEXT {}", session.toString());
     }
 
     @Override
@@ -60,7 +61,7 @@ public class MdsalConsumerImpl implements BindingAwareConsumer, MdsalConsumer {
         return consumerContext;
     }
     @Override
-    public DataBrokerService getDataBrokerService() {
-        return dataBrokerService;
+    public DataBroker getDataBroker() {
+        return dataBroker;
     }
 }

@@ -10,10 +10,10 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.providers;
 
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
-import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 
 public interface MdsalConsumer {
     public ConsumerContext getConsumerContext();
-    public DataBrokerService getDataBrokerService();
+    public DataBroker getDataBroker();
 }

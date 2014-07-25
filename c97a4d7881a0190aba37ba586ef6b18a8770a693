@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_cb062b1d",
+        "filename": "README",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-25T04:24:18Z",
+      "side": 1,
+      "message": "distribution/opendaylight/target/distribution.ovsdb-?.?.?-SNAPSHOT-osgipackage",
+      "revId": "c97a4d7881a0190aba37ba586ef6b18a8770a693",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ab016706",
+        "filename": "README",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-25T04:24:18Z",
+      "side": 1,
+      "message": "cd distribution/opendaylight/target/distribution.ovsdb-?.?.?-SNAPSHOT-osgipackage/opendaylight",
+      "revId": "c97a4d7881a0190aba37ba586ef6b18a8770a693",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

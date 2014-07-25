@@ -46,6 +46,7 @@ public class PortAndInterfaceTestCases extends OpenVswitchSchemaTestBase {
     public void testCreateTypedPortandInterface() throws InterruptedException, ExecutionException {
         String portUuidStr = "testPort";
         String intfUuidStr = "testIntf";
+        String tunnelEncap = "vxlan";
         Port port = ovs.createTypedRowWrapper(Port.class);
         port.setName("testPort");
         port.setTag(ImmutableSet.of(1L));
@@ -54,7 +55,14 @@ public class PortAndInterfaceTestCases extends OpenVswitchSchemaTestBase {
 
         Interface intf = ovs.createTypedRowWrapper(Interface.class);
         intf.setName(port.getNameColumn().getData());
+        intf.setType(tunnelEncap);
         intf.setExternalIds(ImmutableMap.of("vm-id", "12345abcedf78910"));
+        // For per Flow TEPs use remote_ip=flow
+        // For per Port TEPs use remote_ip=x.x.x.x (ipv4)
+        intf.setOptions(ImmutableMap.of("local_ip", "172.16.24.145",
+                                        "remote_ip", "flow",
+                                        "key", "flow",
+                                        "dst_port", "8472"));
 
         Bridge bridge = ovs.getTypedRowWrapper(Bridge.class, null);
         TransactionBuilder transactionBuilder = ovs.transactBuilder(OpenVswitchSchemaSuiteIT.dbSchema)
@@ -72,7 +80,9 @@ public class PortAndInterfaceTestCases extends OpenVswitchSchemaTestBase {
                         .where(port.getNameColumn().getSchema().opEqual(port.getName()))
                         .build())
                 .add(op.update(intf.getSchema())
+                        .set(intf.getTypeColumn())
                         .set(intf.getExternalIdsColumn())
+                        .set(intf.getOptionsColumn())
                         .where(intf.getNameColumn().getSchema().opEqual(intf.getName()))
                         .build())
                 .add(op.mutate(bridge.getSchema())

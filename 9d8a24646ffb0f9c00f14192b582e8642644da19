@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_96e04afb",
+        "filename": "distribution/opendaylight/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-25T18:38:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_cb806bc2",
+      "revId": "9d8a24646ffb0f9c00f14192b582e8642644da19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_6b811fc2",
         "filename": "features/pom.xml",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_56e64216",
+        "filename": "features/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-25T18:38:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_6b811fc2",
+      "revId": "9d8a24646ffb0f9c00f14192b582e8642644da19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_8b86e3d9",
         "filename": "features/src/main/resources/features.xml",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2014-07-25T13:51:31Z",
       "side": 1,
       "message": "didn\u0027t we decide on \"openstack\" over \"netvirt\"?",
+      "revId": "9d8a24646ffb0f9c00f14192b582e8642644da19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b68a2e19",
+        "filename": "features/src/main/resources/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-25T18:38:06Z",
+      "side": 1,
+      "message": "We didnt decide on the feature name. and we compromised with openstack.netvirt :) in the bundle names.\n\nSo, I find it hard to justify one way or other.",
+      "parentUuid": "fa82b9bf_8b86e3d9",
       "revId": "9d8a24646ffb0f9c00f14192b582e8642644da19",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -88,6 +142,42 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_760d86e7",
+        "filename": "features/src/main/resources/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-25T18:38:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_2b6f972c",
+      "revId": "9d8a24646ffb0f9c00f14192b582e8642644da19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d60c92ef",
+        "filename": "features/src/main/resources/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-25T18:38:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_96236aa6",
+      "revId": "9d8a24646ffb0f9c00f14192b582e8642644da19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_4b53fb6a",
         "filename": "features/src/main/resources/features.xml",
         "patchSetId": 2
@@ -99,6 +189,24 @@
       "writtenOn": "2014-07-25T13:51:31Z",
       "side": 1,
       "message": "Aren\u0027t we missing some dependencies here?\nNetty?\nJackson?\nApache Commons?\nPortlet?\nHttpCoreNio?\nGuava?",
+      "revId": "9d8a24646ffb0f9c00f14192b582e8642644da19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b6078ec9",
+        "filename": "features/src/main/resources/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-25T18:38:06Z",
+      "side": 1,
+      "message": "base-all contains all of them.",
+      "parentUuid": "fa82b9bf_4b53fb6a",
       "revId": "9d8a24646ffb0f9c00f14192b582e8642644da19",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -140,6 +248,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_36fb7ec2",
+        "filename": "features/src/main/resources/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-25T18:38:06Z",
+      "side": 1,
+      "message": "Yes. odl-adsal-all contains them.",
+      "parentUuid": "fa82b9bf_363cdec7",
+      "revId": "9d8a24646ffb0f9c00f14192b582e8642644da19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_2bdd57e0",
         "filename": "features/src/main/resources/features.xml",
         "patchSetId": 2
@@ -168,6 +294,24 @@
       "writtenOn": "2014-07-25T17:47:30Z",
       "side": 1,
       "message": "I will provide another patch that would remove the dependency on Northbound.commons..",
+      "parentUuid": "fa82b9bf_2bdd57e0",
+      "revId": "9d8a24646ffb0f9c00f14192b582e8642644da19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_561f2208",
+        "filename": "features/src/main/resources/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-25T18:38:06Z",
+      "side": 1,
+      "message": "odl-ovsdb-plugin brought in all the jackson and other dependencies. Hence didnt add here.\n\nAlso, our northbound today is dependent on AD-SAL Northbound commons. \n\nUntil we redesign that, this dependency have to be managed and mlemay is looking at that.",
       "parentUuid": "fa82b9bf_2bdd57e0",
       "revId": "9d8a24646ffb0f9c00f14192b582e8642644da19",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
@@ -210,6 +354,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_768026f7",
+        "filename": "features/src/main/resources/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-25T18:38:06Z",
+      "side": 1,
+      "message": "Not completely. But slowly it is becoming openstack specific yes.",
+      "parentUuid": "fa82b9bf_162f5a89",
+      "revId": "9d8a24646ffb0f9c00f14192b582e8642644da19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_4bda1be9",
         "filename": "integrationtest/pom.xml",
         "patchSetId": 2
@@ -221,6 +383,24 @@
       "writtenOn": "2014-07-25T13:51:31Z",
       "side": 1,
       "message": "OpenDaylight",
+      "revId": "9d8a24646ffb0f9c00f14192b582e8642644da19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_16ec3af2",
+        "filename": "integrationtest/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-25T18:38:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_4bda1be9",
       "revId": "9d8a24646ffb0f9c00f14192b582e8642644da19",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -244,6 +424,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_96b7eaf4",
+        "filename": "northbound/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-25T18:38:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_ebe20f9f",
+      "revId": "9d8a24646ffb0f9c00f14192b582e8642644da19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_0be09394",
         "filename": "openstack/net-virt-providers/pom.xml",
         "patchSetId": 2
@@ -255,6 +453,24 @@
       "writtenOn": "2014-07-25T13:51:31Z",
       "side": 1,
       "message": "OpenDaylight - maybe we should mention OpenStack here too",
+      "revId": "9d8a24646ffb0f9c00f14192b582e8642644da19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_36d05e1e",
+        "filename": "openstack/net-virt-providers/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-25T18:38:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_0be09394",
       "revId": "9d8a24646ffb0f9c00f14192b582e8642644da19",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -278,6 +494,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_f6c5165c",
+        "filename": "openstack/net-virt/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-25T18:38:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_abf08767",
+      "revId": "9d8a24646ffb0f9c00f14192b582e8642644da19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_cbf5cb57",
         "filename": "plugin/pom.xml",
         "patchSetId": 2
@@ -289,6 +523,24 @@
       "writtenOn": "2014-07-25T13:51:31Z",
       "side": 1,
       "message": "OpenDaylight",
+      "revId": "9d8a24646ffb0f9c00f14192b582e8642644da19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_16c3da57",
+        "filename": "plugin/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-25T18:38:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_cbf5cb57",
       "revId": "9d8a24646ffb0f9c00f14192b582e8642644da19",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -312,6 +564,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_b6a30eb1",
+        "filename": "schemas/hardwarevtep/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-25T18:38:06Z",
+      "side": 1,
+      "message": "Lets use schema names. easy to lookup. I will udpate it.",
+      "parentUuid": "fa82b9bf_6be6ffb1",
+      "revId": "9d8a24646ffb0f9c00f14192b582e8642644da19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_8beb4377",
         "filename": "schemas/openvswitch/pom.xml",
         "patchSetId": 2
@@ -323,6 +593,24 @@
       "writtenOn": "2014-07-25T13:51:31Z",
       "side": 1,
       "message": "As per previous commment\n\nOpen vSwitch *OR* Open_vSwitch",
+      "revId": "9d8a24646ffb0f9c00f14192b582e8642644da19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d6a8128f",
+        "filename": "schemas/openvswitch/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-25T18:38:06Z",
+      "side": 1,
+      "message": "Will update to schema name.",
+      "parentUuid": "fa82b9bf_8beb4377",
       "revId": "9d8a24646ffb0f9c00f14192b582e8642644da19",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

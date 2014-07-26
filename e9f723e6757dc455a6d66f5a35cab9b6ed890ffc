@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_31b2a894",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2604,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-26T12:38:49Z",
+      "side": 1,
+      "message": "Being a Flow Installation on a given Openflow Node, I would assume the parent here means the Node itself. and why would it be okay to create a missing parent ?\n\nJust trying to understand the need / use-case for creating the parent during a flow installation.",
+      "revId": "e9f723e6757dc455a6d66f5a35cab9b6ed890ffc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

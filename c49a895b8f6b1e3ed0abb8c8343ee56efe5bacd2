@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_4a6beb84",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-29T17:57:59Z",
+      "side": 1,
+      "message": "Can you please change the commit message to indicate that we are migrating from the deprecated DataBrokerService to DataBroker ? That is more clear than this message :)\n\nAlso please include the test-results : \nscript for creating coke tenants in devstack: https://gist.github.com/1ba897e7cde8dbd87fe8\n\nstarting odl command and setting log level: ./run.sh -Xmx2048m -XX:MaxPermSize\u003d512m -virt ovsdb\n\nsetLogLevel org.opendaylight.ovsdb.openstack.netvirt.providers.OF13Provider TRACE\n\nlog running devstack: https://gist.github.com/1dff9f3d594b11b50c62\n\nto the message so that it shows up on the git log too.",
+      "revId": "c49a895b8f6b1e3ed0abb8c8343ee56efe5bacd2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

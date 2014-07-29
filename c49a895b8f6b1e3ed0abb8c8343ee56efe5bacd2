@@ -16,6 +16,24 @@
       "revId": "c49a895b8f6b1e3ed0abb8c8343ee56efe5bacd2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ea119f04",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-29T18:09:37Z",
+      "side": 1,
+      "message": "done.\n\nChanged as you asked, but commit complained that subject is longer than 65 characters.\n\n$ git push  ssh://ffernandes@git.opendaylight.org:29418/ovsdb.git HEAD:refs/for/master\nCounting objects: 1, done.\nWriting objects: 100% (1/1), 492 bytes | 0 bytes/s, done.\nTotal 1 (delta 0), reused 0 (delta 0)\nremote: Processing changes: updated: 1, refs: 1, done    \nremote: (W) e169228: commit subject \u003e65 characters; use shorter first paragraph\nremote: (W) e169228: commit message lines \u003e70 characters; manually wrap lines\nremote: (W) e169228: no files changed, message updated\nTo ssh://ffernandes@git.opendaylight.org:29418/ovsdb.git\n * [new branch]      HEAD -\u003e refs/for/master",
+      "parentUuid": "fa82b9bf_4a6beb84",
+      "revId": "c49a895b8f6b1e3ed0abb8c8343ee56efe5bacd2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

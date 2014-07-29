@@ -16,7 +16,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperty;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
@@ -26,6 +25,8 @@ import java.util.concurrent.ConcurrentMap;
 
 import javax.inject.Inject;
 
+import org.apache.felix.dm.Component;
+import org.apache.felix.dm.DependencyManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,10 +40,14 @@ import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.plugin.Connection;
 import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
+import org.opendaylight.ovsdb.plugin.InventoryServiceInternal;
 import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
+import org.opendaylight.ovsdb.plugin.OvsdbInventoryListener;
 import org.opendaylight.ovsdb.plugin.StatusWithUuid;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
+
+import org.mockito.Mockito;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -61,6 +66,10 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
     @Inject
     private BundleContext bc;
     private OvsdbConfigService ovsdbConfigService = null;
+
+    @Inject
+    private InventoryServiceInternal inventoryService;
+
     private Node node = null;
     private OvsdbClient client = null;
 
@@ -82,7 +91,7 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
             ConfigurationBundles.controllerBundles(),
             ConfigurationBundles.ovsdbLibraryBundles(),
             ConfigurationBundles.ovsdbDefaultSchemaBundles(),
-            mavenBundle("org.opendaylight.ovsdb", "plugin").versionAsInProject(),
+            ConfigurationBundles.ovsdbPluginBundles(),
             junitBundles()
         );
     }
@@ -163,6 +172,36 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
         this.endToEndApiTest(connection, null);
     }
 
+    @Test
+    public void testInventoryListeners(){
+        DependencyManager dm = new DependencyManager(bc);
+
+        OvsdbInventoryListener listenerA = Mockito.mock(FakeListener.class);
+        OvsdbInventoryListener listenerB = Mockito.mock(FakeListener.class);
+
+        Component componentA = dm.createComponent();
+        componentA.setInterface(OvsdbInventoryListener.class.getName(), null);
+        componentA.setImplementation(listenerA);
+        dm.add(componentA);
+
+        Component componentB = dm.createComponent();
+        componentB.setInterface(OvsdbInventoryListener.class.getName(), null);
+        componentB.setImplementation(listenerB);
+        dm.add(componentB);
+
+        Node newNode = Node.fromString("OVS:10.10.10.10:65342");
+
+        // Trigger event
+        inventoryService.notifyNodeAdded(newNode);
+
+        Mockito.verify(listenerA, Mockito.times(1)).nodeAdded(newNode);
+        Mockito.verify(listenerB, Mockito.times(1)).nodeAdded(newNode);
+
+        dm.remove(componentA);
+        dm.remove(componentB);
+
+    }
+
     public void endToEndApiTest(Connection connection, String parentUuid) throws Exception {
         // 1. Print Cache and Assert to make sure the bridge is not created yet.
         printCache();
@@ -214,6 +253,34 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
             System.out.println("Table "+table);
             ConcurrentMap<String,Row> row = ovsdbConfigService.getRows(node, table);
             System.out.println(row);
+        }
+    }
+
+    public class FakeListener implements OvsdbInventoryListener{
+
+        @Override
+        public void nodeAdded(Node node) {
+
+        }
+
+        @Override
+        public void nodeRemoved(Node node) {
+
+        }
+
+        @Override
+        public void rowAdded(Node node, String tableName, String uuid, Row row) {
+
+        }
+
+        @Override
+        public void rowUpdated(Node node, String tableName, String uuid, Row old, Row row) {
+
+        }
+
+        @Override
+        public void rowRemoved(Node node, String tableName, String uuid, Row row, Object context) {
+
         }
     }
 

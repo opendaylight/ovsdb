@@ -123,6 +123,9 @@ public class Activator extends ComponentActivatorAbstractBase {
                             "unsetPluginOutInventoryServices")
                     .setRequired(true));
             c.add(createServiceDependency()
+                    .setService(OvsdbInventoryListener.class)
+                    .setCallbacks("listenerAdded", "listenerRemoved"));
+            c.add(createServiceDependency()
                     .setService(OvsdbConfigService.class)
                     .setCallbacks("setConfigurationService", "unsetConfigurationService")
                     .setRequired(false));

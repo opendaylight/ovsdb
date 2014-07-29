@@ -9,17 +9,17 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt;
 
-import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortAware;
-import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.lib.notation.Row;
+import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
 import org.opendaylight.ovsdb.plugin.OvsdbInventoryListener;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
+import org.opendaylight.ovsdb.schema.openvswitch.Port;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +42,6 @@ public class PortHandler extends AbstractHandler
 
     private volatile OvsdbConfigService ovsdbConfigService;
     private volatile IConnectionServiceInternal connectionService;
-    private volatile INeutronNetworkCRUD neutronNetworkCache;
     private volatile OvsdbInventoryListener ovsdbInventoryListener;
 
     /**
@@ -125,40 +124,52 @@ public class PortHandler extends AbstractHandler
     /**
      * Invoked to take action after a port has been deleted.
      *
-     * @param port  An instance of deleted Neutron Port object.
+     * @param neutronPort  An instance of deleted Neutron Port object.
      */
     @Override
-    public void neutronPortDeleted(NeutronPort port) {
+    public void neutronPortDeleted(NeutronPort neutronPort) {
 
-        int result = canDeletePort(port);
+        int result = canDeletePort(neutronPort);
         if  (result != HttpURLConnection.HTTP_OK) {
             logger.error(" deletePort validation failed - result {} ", result);
             return;
         }
 
-        NeutronNetwork neutronNetwork = neutronNetworkCache.getNetwork(port.getNetworkUUID());
         List<Node> nodes = connectionService.getNodes();
         for (Node node : nodes) {
             try {
-                ConcurrentMap<String, Row> interfaces = this.ovsdbConfigService.getRows(node, ovsdbConfigService.getTableName(node, Interface.class));
-                if (interfaces != null) {
-                    for (String intfUUID : interfaces.keySet()) {
-                        Interface intf = ovsdbConfigService.getTypedRow(node, Interface.class, interfaces.get(intfUUID));
-                        Map<String, String> externalIds = intf.getExternalIdsColumn().getData();
-                        if (externalIds == null) {
-                            logger.trace("No external_ids seen in {}", intf);
-                            continue;
-                        }
-                        /* Compare Neutron port uuid */
-                        String neutronPortId = externalIds.get(Constants.EXTERNAL_ID_INTERFACE_ID);
-                        if (neutronPortId == null) {
-                            continue;
-                        }
-                        if (neutronPortId.equalsIgnoreCase(port.getPortUUID())) {
-                            logger.trace("neutronPortDeleted: Delete interface {}", intf.getName());
-                            ovsdbInventoryListener.rowRemoved(node, intf.getSchema().getName(), intfUUID,
-                                                              intf.getRow(), neutronNetwork);
-                            break;
+                ConcurrentMap<String, Row> portRows =
+                        this.ovsdbConfigService.getRows(node,
+                                                        ovsdbConfigService.getTableName(node, Port.class));
+                if (portRows != null) {
+                    for (Row portRow : portRows.values()) {
+                        Port port = ovsdbConfigService.getTypedRow(node, Port.class, portRow);
+                        for (UUID interfaceUuid : port.getInterfacesColumn().getData()) {
+                            Interface interfaceRow = (Interface) ovsdbConfigService
+                                    .getRow(node,
+                                            ovsdbConfigService.getTableName(node, Interface.class),
+                                            interfaceUuid.toString());
+
+                            Map<String, String> externalIds = interfaceRow.getExternalIdsColumn().getData();
+
+                            if (externalIds == null) {
+                                logger.trace("No external_ids seen in {}", interfaceRow);
+                                continue;
+                            }
+
+                            /* Compare Neutron port uuid */
+                            String neutronPortId = externalIds.get(Constants.EXTERNAL_ID_INTERFACE_ID);
+                            if (neutronPortId == null) {
+                                continue;
+                            }
+
+                            if (neutronPortId.equalsIgnoreCase(neutronPort.getPortUUID())) {
+                                logger.trace("neutronPortDeleted: Delete interface {}", interfaceRow.getName());
+                                ovsdbConfigService.deleteRow(node,
+                                                             ovsdbConfigService.getTableName(node, Port.class),
+                                                             port.getUuid().toString());
+                                break;
+                            }
                         }
                     }
                 }
@@ -168,8 +179,8 @@ public class PortHandler extends AbstractHandler
         }
         logger.debug(" PORT delete successful for tenant-id - {}, " +
                      " network-id - {}, port-id - {}",
-                     port.getTenantID(), port.getNetworkUUID(),
-                     port.getID());
+                     neutronPort.getTenantID(), neutronPort.getNetworkUUID(),
+                     neutronPort.getID());
 
     }
 }

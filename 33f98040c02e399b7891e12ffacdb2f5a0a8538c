@@ -16,6 +16,24 @@
       "revId": "33f98040c02e399b7891e12ffacdb2f5a0a8538c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_48a9b68e",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/Activator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-29T13:42:08Z",
+      "side": 0,
+      "message": "Well it\u0027s just dead code in this patch (hence it being removed)... If it\u0027s needed by ARP responder I have no issues with it being added back in your patch",
+      "parentUuid": "fa82b9bf_d63ed28b",
+      "revId": "33f98040c02e399b7891e12ffacdb2f5a0a8538c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

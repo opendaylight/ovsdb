@@ -16,6 +16,24 @@
       "revId": "57ff02cf0ae72b3a2069b65f4736dc2dc89a4451",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_c89ce66c",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/NetworkHandler.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-07-29T13:42:08Z",
+      "side": 1,
+      "message": "The code previously used the OVSDBInventoryListener interface which is not supposed to be consumed (it\u0027s supposed to be implemented). \n\nThis caused issues with events being dispatched to only one listener if multiple are registered.... \n\nHaving discussed this with Madhu we feel that best way to handle this here is just to delete the ports, but to do that, we first need to check the Interface type, hence requiring the nested loop",
+      "parentUuid": "fa82b9bf_16675ab8",
+      "revId": "57ff02cf0ae72b3a2069b65f4736dc2dc89a4451",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

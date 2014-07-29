@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_0d43c042",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF13Provider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 2697,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-07-29T06:13:45Z",
+      "side": 1,
+      "message": "As we discussed today, am convinced about the following  call to modification where we are inserting the flow into the path specified by path1. And having a true there make sense.\n\nBut still am not too convinced on the above call.\nGiven the tree structure, am even thinking if we need the above call at all. I am in the camp that the inventory datastore should be populated only by the respective plugin . Since OF is handled by the OFPlugin, I am not too sure if we should be even doing the above call.\n\nCan you remove the above call and try out the tests ?",
+      "revId": "b008a5dff9c4578d45569f7125fe013cd5f229ed",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -16,6 +16,24 @@
       "revId": "b008a5dff9c4578d45569f7125fe013cd5f229ed",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_68ea7aad",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/OF13Provider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 2697,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-07-29T14:20:13Z",
+      "side": 1,
+      "message": "Right you are, master Madhu! I removed the modification.put() for nodeBuilder and the test worked fine still. I agree OF should be the one doing it.\n\nWill submit a new patch with this change.",
+      "parentUuid": "fa82b9bf_0d43c042",
+      "revId": "b008a5dff9c4578d45569f7125fe013cd5f229ed",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

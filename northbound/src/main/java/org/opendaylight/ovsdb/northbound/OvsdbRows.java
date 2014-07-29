@@ -13,6 +13,7 @@ import java.util.Map;
 
 import org.opendaylight.ovsdb.lib.notation.Row;
 
+@Deprecated
 public class OvsdbRows {
     Map<String, Row> rows;
 

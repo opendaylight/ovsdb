@@ -14,31 +14,25 @@ import org.opendaylight.controller.sal.core.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OvsdbTestSetManagerIT extends OvsdbTestBase {
+public class TearDown extends OvsdbTestBase {
     private static final Logger logger = LoggerFactory
-            .getLogger(OvsdbTestSetManagerIT.class);
+            .getLogger(TearDown.class);
 
     @Test
-    public void setManager() throws Throwable{
+    public void deleteBridge() throws Throwable{
+
         TestObjects testObjects = getTestConnection();
+        ConnectionService connectionService = testObjects.connectionService;
         Node node = testObjects.node;
 
-
-        String port = "6634";
-        String host = FAKE_IP;
-        String connectionType = "ptcp";
-
-        String manager = connectionType + ":" + host + ":" + port;
-
         /**
-         * Implements the OVS Connection for Managers
+         * Delete a Bridge Domain
          *
          * @param node Node serving this configuration service
-         * @param String with IP and connection type ex. type:ip:port
-         *
+         * @param bridgeDomainIdentifier String representation of a Bridge Domain
          */
         ConfigurationService configurationService = testObjects.configurationService;
-        configurationService.setManager(node, manager);
+        configurationService.deleteBridgeDomain(node, BRIDGE_NAME);
     }
 
 }

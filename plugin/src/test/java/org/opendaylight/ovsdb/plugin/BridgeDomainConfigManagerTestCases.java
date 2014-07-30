@@ -14,9 +14,9 @@ import org.opendaylight.controller.sal.core.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OvsdbTestSetManagerIT extends OvsdbTestBase {
+public class BridgeDomainConfigManagerTestCases extends OvsdbPluginTestBase {
     private static final Logger logger = LoggerFactory
-            .getLogger(OvsdbTestSetManagerIT.class);
+            .getLogger(BridgeDomainConfigManagerTestCases.class);
 
     @Test
     public void setManager() throws Throwable{

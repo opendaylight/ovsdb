@@ -18,34 +18,24 @@
   </prerequisites>
 
   <modules>
+    <!-- Parent POM files -->
+    <module>commons/parent</module>
+    <module>commons/integrationtest</module>
+    <!-- OVSDB Components -->
     <module>library</module>
     <module>schemas/openvswitch</module>
     <module>schemas/hardwarevtep</module>
     <module>plugin</module>
-    <module>commons/parent</module>
     <module>northbound</module>
     <module>openstack/net-virt</module>
     <module>openstack/net-virt-providers</module>
-    <module>distribution/opendaylight</module>
+    <!-- Integration Tests -->
+    <module>integrationtest</module>
     <!-- Karaf Distribution -->
     <module>features</module>
+    <!-- OVSDB Distribution -->
+    <module>distribution/opendaylight</module>
   </modules>
-
-  <profiles>
-    <profile>
-      <id>integrationtest</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-      <modules>
-        <module>commons/integrationtest</module>
-        <module>integrationtest</module>
-      </modules>
-      <properties>
-        <skip.integrationtest>false</skip.integrationtest>
-      </properties>
-    </profile>
-  </profiles>
 
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</connection>

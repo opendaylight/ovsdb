@@ -11,6 +11,7 @@
 
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>commons</artifactId>
+  <name>OVSDB Parent POM</name>
   <version>1.2.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <prerequisites>
@@ -20,7 +21,9 @@
   <properties>
     <!-- ODL repository / plugin repository -->
     <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
+    <!-- Surefire/Failsafe Arguments -->
     <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
+    <!-- OVSB Component Versions -->
     <ovsdb.library.version>1.0.0-SNAPSHOT</ovsdb.library.version>
     <ovsdb.plugin.version>1.0.0-SNAPSHOT</ovsdb.plugin.version>
     <openstack.netvirt.version>1.0.0-SNAPSHOT</openstack.netvirt.version>
@@ -28,11 +31,17 @@
     <ovsdb.northbound.version>0.6.0-SNAPSHOT</ovsdb.northbound.version>
     <schema.openvswitch.version>1.0.0-SNAPSHOT</schema.openvswitch.version>
     <schema.hardwarevtep.version>1.0.0-SNAPSHOT</schema.hardwarevtep.version>
+    <!-- Skip Coverage and IT by default -->
+    <skip.coverage>true</skip.coverage>
     <skip.integrationtest>true</skip.integrationtest>
+    <!-- The directory where maven was executed -->
+    <root.directory>${env.PWD}</root.directory>
+    <!-- UT reports are per-module -->
     <sonar.jacoco.reportPath>target/code-coverage/jacoco.exec</sonar.jacoco.reportPath>
-    <sonar.jacoco.itReportPath>target/code-coverage/jacoco-it.exec</sonar.jacoco.itReportPath>
+    <!-- IT report is aggregated to enable PAX Exam coverage to be logged -->
+    <sonar.jacoco.itReportPath>${root.directory}/target/code-coverage/jacoco-it.exec</sonar.jacoco.itReportPath>
     <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-    <!-- Override -->
+    <!-- Override the JaCoCo version in ODL Parent -->
     <jacoco.version>0.6.4.201312101107</jacoco.version>
     <!-- ODL Dependency Versions -->
     <containermanager.version>0.5.2-SNAPSHOT</containermanager.version>
@@ -252,6 +261,9 @@
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
           <version>${jacoco.version}</version>
+          <configuration>
+            <skip>${skip.coverage}</skip>
+          </configuration>
           <executions>
             <execution>
               <id>pre-unit-test</id>
@@ -269,6 +281,7 @@
               </goals>
               <configuration>
                 <destFile>${sonar.jacoco.itReportPath}</destFile>
+                <append>true</append>
                 <skip>${skip.integrationtest}</skip>
               </configuration>
             </execution>
@@ -310,6 +323,7 @@
                 <goal>verify</goal>
               </goals>
               <configuration>
+                <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
                 <skipTests>${skip.integrationtest}</skipTests>
               </configuration>
             </execution>
@@ -416,6 +430,23 @@
         <skip.integrationtest>false</skip.integrationtest>
       </properties>
     </profile>
+    <profile>
+      <id>coverage</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <properties>
+        <skip.coverage>false</skip.coverage>
+      </properties>
+    </profile>
+    <profile>
+      <id>jenkins</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <properties>
+        <root.directory>${env.WORKSPACE}</root.directory>
+      </properties>
+    </profile>
   </profiles>
-
 </project>

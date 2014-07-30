@@ -15,6 +15,8 @@ import java.util.Map;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.networkconfig.bridgedomain.ConfigConstants;
+import org.opendaylight.ovsdb.plugin.impl.ConfigurationServiceImpl;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +32,7 @@ public class OvsdbTestSetOFControllerIT extends OvsdbTestBase {
         Map<ConfigConstants, Object> configs = new HashMap<ConfigConstants, Object>();
         configs.put(ConfigConstants.DEST_IP, "192.168.254.1");
         configs.put(ConfigConstants.CUSTOM, "6633");
-        ConfigurationService configurationService = testObjects.configurationService;
+        ConfigurationServiceImpl configurationService = testObjects.configurationService;
         configurationService.setBridgeOFController(node, BRIDGE_NAME);
 
     }

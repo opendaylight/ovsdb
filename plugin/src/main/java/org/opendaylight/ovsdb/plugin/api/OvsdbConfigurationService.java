@@ -7,7 +7,7 @@
  *
  * Authors : Madhu Venugopal, Brent Salisbury
  */
-package org.opendaylight.ovsdb.plugin;
+package org.opendaylight.ovsdb.plugin.api;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
@@ -18,8 +18,9 @@ import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
+import org.opendaylight.ovsdb.plugin.StatusWithUuid;
 
-public interface OvsdbConfigService {
+public interface OvsdbConfigurationService {
 
     /**
      * This version of insertRow is a short-term replacement for the older & now deprecated method of the same name.

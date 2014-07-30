@@ -11,6 +11,9 @@ package org.opendaylight.ovsdb.plugin;
 
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.ovsdb.plugin.impl.ConfigurationServiceImpl;
+import org.opendaylight.ovsdb.plugin.impl.ConnectionServiceImpl;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +24,7 @@ public class OvsdbTestDeletePortIT extends OvsdbTestBase {
     @Test
     public void deletePort() throws Throwable{
         TestObjects testObjects = getTestConnection();
-        ConnectionService connectionService = testObjects.connectionService;
+        ConnectionServiceImpl connectionService = testObjects.connectionService;
         Node node = testObjects.node;
 
         /**
@@ -31,7 +34,7 @@ public class OvsdbTestDeletePortIT extends OvsdbTestBase {
          * @param bridgeDomainIdentifier String representation of a Bridge Domain
          * @param portIdentifier String representation of a user defined Port Name
          */
-        ConfigurationService configurationService = testObjects.configurationService;
+        ConfigurationServiceImpl configurationService = testObjects.configurationService;
         configurationService.deletePort(node, BRIDGE_NAME, PORT_NAME);
     }
 }

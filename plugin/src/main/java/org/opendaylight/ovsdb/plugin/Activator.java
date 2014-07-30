@@ -25,6 +25,14 @@ import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.INodeConnectorFactory;
 import org.opendaylight.controller.sal.utils.INodeFactory;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
+import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryService;
+import org.opendaylight.ovsdb.plugin.impl.ConfigurationServiceImpl;
+import org.opendaylight.ovsdb.plugin.impl.ConnectionServiceImpl;
+import org.opendaylight.ovsdb.plugin.impl.InventoryServiceImpl;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,27 +69,27 @@ public class Activator extends ComponentActivatorAbstractBase {
     }
     @Override
     public Object[] getGlobalImplementations() {
-        Object[] res = { ConnectionService.class, ConfigurationService.class, NodeFactory.class, NodeConnectorFactory.class, InventoryService.class };
+        Object[] res = { ConnectionServiceImpl.class, ConfigurationServiceImpl.class, NodeFactory.class, NodeConnectorFactory.class, InventoryServiceImpl.class };
         return res;
     }
 
     @Override
     public void configureGlobalInstance(Component c, Object imp){
-        if (imp.equals(ConfigurationService.class)) {
+        if (imp.equals(ConfigurationServiceImpl.class)) {
             // export the service to be used by SAL
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             // Set the protocolPluginType property which will be used
             // by SAL
             props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "OVS");
             c.setInterface(new String[] { IPluginInBridgeDomainConfigService.class.getName(),
-                                          OvsdbConfigService.class.getName()}, props);
+                                          OvsdbConfigurationService.class.getName()}, props);
 
             c.add(createServiceDependency()
-                    .setService(IConnectionServiceInternal.class)
+                    .setService(OvsdbConnectionService.class)
                     .setCallbacks("setConnectionServiceInternal", "unsetConnectionServiceInternal")
                     .setRequired(true));
             c.add(createServiceDependency()
-                    .setService(InventoryServiceInternal.class)
+                    .setService(OvsdbInventoryService.class)
                     .setCallbacks("setInventoryServiceInternal", "unsetInventoryServiceInternal")
                     .setRequired(true));
             c.add(createServiceDependency()
@@ -90,7 +98,7 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setRequired(false));
         }
 
-        if (imp.equals(ConnectionService.class)) {
+        if (imp.equals(ConnectionServiceImpl.class)) {
             // export the service to be used by SAL
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             // Set the protocolPluginType property which will be used
@@ -98,10 +106,10 @@ public class Activator extends ComponentActivatorAbstractBase {
             props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "OVS");
             c.setInterface(
                     new String[] {IPluginInConnectionService.class.getName(),
-                                  IConnectionServiceInternal.class.getName()}, props);
+                                  OvsdbConnectionService.class.getName()}, props);
 
             c.add(createServiceDependency()
-                    .setService(InventoryServiceInternal.class)
+                    .setService(OvsdbInventoryService.class)
                     .setCallbacks("setInventoryServiceInternal", "unsetInventoryServiceInternal")
                     .setRequired(true));
             c.add(createServiceDependency()
@@ -110,13 +118,13 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setRequired(true));
         }
 
-        if (imp.equals(InventoryService.class)) {
+        if (imp.equals(InventoryServiceImpl.class)) {
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "OVS");
             props.put("scope", "Global");
             c.setInterface(
                     new String[] {IPluginInInventoryService.class.getName(),
-                            InventoryServiceInternal.class.getName()}, props);
+                            OvsdbInventoryService.class.getName()}, props);
             c.add(createServiceDependency()
                     .setService(IPluginOutInventoryService.class, "(scope=Global)")
                     .setCallbacks("setPluginOutInventoryServices",
@@ -126,7 +134,7 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setService(OvsdbInventoryListener.class)
                     .setCallbacks("listenerAdded", "listenerRemoved"));
             c.add(createServiceDependency()
-                    .setService(OvsdbConfigService.class)
+                    .setService(OvsdbConfigurationService.class)
                     .setCallbacks("setConfigurationService", "unsetConfigurationService")
                     .setRequired(false));
         }

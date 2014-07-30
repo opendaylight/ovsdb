@@ -44,10 +44,11 @@ import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.plugin.Connection;
-import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
-import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.plugin.OvsVswitchdSchemaConstants;
 import org.opendaylight.ovsdb.plugin.StatusWithUuid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -324,14 +325,16 @@ public class OvsdbNorthboundV2 {
             throw new UnauthorizedException("User is not authorized to perform this operation");
         }
 
-        OvsdbConfigService ovsdbTable = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class,
+        OvsdbConfigurationService
+                ovsdbTable = (OvsdbConfigurationService)ServiceHelper.getGlobalInstance(OvsdbConfigurationService.class,
                                                                                             this);
         if (ovsdbTable == null) {
             throw new ServiceUnavailableException("OVS Configuration Service " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
         Node node = Node.fromString(nodeType, nodeId);
-        IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+        OvsdbConnectionService
+                connectionService = (OvsdbConnectionService)ServiceHelper.getGlobalInstance(OvsdbConnectionService.class, this);
         Connection connection = connectionService.getConnection(node);
         OvsdbClient client = connection.getClient();
         OvsdbRow localRow = OvsdbRow.fromJsonNode(client, OvsVswitchdSchemaConstants.DATABASE_NAME, rowJson);
@@ -414,14 +417,16 @@ public class OvsdbNorthboundV2 {
             throw new UnauthorizedException("User is not authorized to perform this operation");
         }
 
-        OvsdbConfigService ovsdbTable = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class,
+        OvsdbConfigurationService
+                ovsdbTable = (OvsdbConfigurationService)ServiceHelper.getGlobalInstance(OvsdbConfigurationService.class,
                                                                                             this);
         if (ovsdbTable == null) {
             throw new ServiceUnavailableException("UserManager " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
         Node node = Node.fromString(nodeType, nodeId);
-        IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+        OvsdbConnectionService
+                connectionService = (OvsdbConnectionService)ServiceHelper.getGlobalInstance(OvsdbConnectionService.class, this);
         Connection connection = connectionService.getConnection(node);
         OvsdbClient client = connection.getClient();
         String bckCompatibleTableName = this.getBackwardCompatibleTableName(client, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName);
@@ -496,14 +501,16 @@ public class OvsdbNorthboundV2 {
             throw new UnauthorizedException("User is not authorized to perform this operation");
         }
 
-        OvsdbConfigService ovsdbTable = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class,
+        OvsdbConfigurationService
+                ovsdbTable = (OvsdbConfigurationService)ServiceHelper.getGlobalInstance(OvsdbConfigurationService.class,
                                                                                             this);
         if (ovsdbTable == null) {
             throw new ServiceUnavailableException("UserManager " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
         Node node = Node.fromString(nodeType, nodeId);
-        IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+        OvsdbConnectionService
+                connectionService = (OvsdbConnectionService)ServiceHelper.getGlobalInstance(OvsdbConnectionService.class, this);
         Connection connection = connectionService.getConnection(node);
         OvsdbClient client = connection.getClient();
         String bckCompatibleTableName = this.getBackwardCompatibleTableName(client, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName);
@@ -570,14 +577,16 @@ public class OvsdbNorthboundV2 {
             throw new UnauthorizedException("User is not authorized to perform this operation");
         }
 
-        OvsdbConfigService ovsdbTable = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class,
+        OvsdbConfigurationService
+                ovsdbTable = (OvsdbConfigurationService)ServiceHelper.getGlobalInstance(OvsdbConfigurationService.class,
                                                                                             this);
         if (ovsdbTable == null) {
             throw new ServiceUnavailableException("OVS Configuration Service " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
         Node node = Node.fromString(nodeType, nodeId);
-        IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+        OvsdbConnectionService
+                connectionService = (OvsdbConnectionService)ServiceHelper.getGlobalInstance(OvsdbConnectionService.class, this);
         Connection connection = connectionService.getConnection(node);
         OvsdbClient client = connection.getClient();
         String bckCompatibleTableName = this.getBackwardCompatibleTableName(client, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName);
@@ -650,14 +659,16 @@ public class OvsdbNorthboundV2 {
             throw new UnauthorizedException("User is not authorized to perform this operation");
         }
 
-        OvsdbConfigService ovsdbTable = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class,
+        OvsdbConfigurationService
+                ovsdbTable = (OvsdbConfigurationService)ServiceHelper.getGlobalInstance(OvsdbConfigurationService.class,
                 this);
         if (ovsdbTable == null) {
             throw new ServiceUnavailableException("OVS Configuration Service " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
         Node node = Node.fromString(nodeType, nodeId);
-        IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+        OvsdbConnectionService
+                connectionService = (OvsdbConnectionService)ServiceHelper.getGlobalInstance(OvsdbConnectionService.class, this);
         Connection connection = connectionService.getConnection(node);
         OvsdbClient client = connection.getClient();
         String bckCompatibleTableName = this.getBackwardCompatibleTableName(client, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName);

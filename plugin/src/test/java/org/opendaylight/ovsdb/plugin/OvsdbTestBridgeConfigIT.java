@@ -15,6 +15,9 @@ import java.util.Map;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.networkconfig.bridgedomain.ConfigConstants;
+import org.opendaylight.ovsdb.plugin.impl.ConfigurationServiceImpl;
+import org.opendaylight.ovsdb.plugin.impl.ConnectionServiceImpl;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +28,7 @@ public class OvsdbTestBridgeConfigIT extends OvsdbTestBase {
     @Test
     public void setBridgeConfig() throws Throwable{
         TestObjects testObjects = getTestConnection();
-        ConnectionService connectionService = testObjects.connectionService;
+        ConnectionServiceImpl connectionService = testObjects.connectionService;
         Node node = testObjects.node;
 
         Map<ConfigConstants, Object> configs = new HashMap<ConfigConstants, Object>();
@@ -35,7 +38,7 @@ public class OvsdbTestBridgeConfigIT extends OvsdbTestBase {
         //Will accept multiple array pairs. Pairs must be arrays not maps.
         configs.put(ConfigConstants.CUSTOM, exterIDPairs);
 
-        ConfigurationService configurationService = testObjects.configurationService;
+        ConfigurationServiceImpl configurationService = testObjects.configurationService;
         configurationService.addBridgeDomainConfig(node, BRIDGE_NAME, configs);
     }
 

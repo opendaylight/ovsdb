@@ -18,12 +18,11 @@ import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
-import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
-import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
-import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
-import org.opendaylight.ovsdb.plugin.OvsdbInventoryListener;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
@@ -49,12 +48,12 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
     List<Node> nodeCache;
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
-    private volatile ConfigurationService configurationService;
+    private volatile org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService configurationService;
     private volatile BridgeConfigurationManager bridgeConfigurationManager;
     private volatile TenantNetworkManager tenantNetworkManager;
     private volatile NetworkingProviderManager networkingProviderManager;
-    private volatile OvsdbConfigService ovsdbConfigService;
-    private volatile IConnectionServiceInternal connectionService;
+    private volatile OvsdbConfigurationService ovsdbConfigurationService;
+    private volatile OvsdbConnectionService connectionService;
 
     void init() {
         eventHandler = Executors.newSingleThreadExecutor();
@@ -132,25 +131,25 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
 
     private boolean isUpdateOfInterest(Node node, Row oldRow, Row newRow) {
         if (oldRow == null) return true;
-        if (newRow.getTableSchema().getName().equals(ovsdbConfigService.getTableName(node, Interface.class))) {
+        if (newRow.getTableSchema().getName().equals(ovsdbConfigurationService.getTableName(node, Interface.class))) {
             // We are NOT interested in Stats only updates
-            Interface oldIntf = ovsdbConfigService.getTypedRow(node, Interface.class, oldRow);
+            Interface oldIntf = ovsdbConfigurationService.getTypedRow(node, Interface.class, oldRow);
             if (oldIntf.getName() == null && oldIntf.getExternalIdsColumn() == null && oldIntf.getMacColumn() == null &&
                 oldIntf.getOpenFlowPortColumn() == null && oldIntf.getOptionsColumn() == null && oldIntf.getOtherConfigColumn() == null &&
                 oldIntf.getTypeColumn() == null) {
                 logger.trace("IGNORING Interface Update: node {}, row: {}", node, newRow);
                 return false;
             }
-        } else if (newRow.getTableSchema().getName().equals(ovsdbConfigService.getTableName(node, Port.class))) {
+        } else if (newRow.getTableSchema().getName().equals(ovsdbConfigurationService.getTableName(node, Port.class))) {
             // We are NOT interested in Stats only updates
-            Port oldPort = ovsdbConfigService.getTypedRow(node, Port.class, oldRow);
+            Port oldPort = ovsdbConfigurationService.getTypedRow(node, Port.class, oldRow);
             if (oldPort.getName() == null && oldPort.getExternalIdsColumn() == null && oldPort.getMacColumn() == null &&
                 oldPort.getInterfacesColumn() == null && oldPort.getTagColumn() == null && oldPort.getTrunksColumn() == null) {
                 logger.trace("IGNORING Port Update: node {}, row: {}", node, newRow);
                 return false;
             }
-        } else if (newRow.getTableSchema().getName().equals(ovsdbConfigService.getTableName(node, OpenVSwitch.class))) {
-            OpenVSwitch oldOpenvSwitch = ovsdbConfigService.getTypedRow(node, OpenVSwitch.class, oldRow);
+        } else if (newRow.getTableSchema().getName().equals(ovsdbConfigurationService.getTableName(node, OpenVSwitch.class))) {
+            OpenVSwitch oldOpenvSwitch = ovsdbConfigurationService.getTypedRow(node, OpenVSwitch.class, oldRow);
             if (oldOpenvSwitch.getOtherConfigColumn()== null) {
                 /* we are only interested in other_config field change */
                 return false;
@@ -181,9 +180,9 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
     private void processRowUpdate(Node node, String tableName, String uuid, Row row,
                                   Object context, SouthboundEvent.Action action) {
         if (action == SouthboundEvent.Action.DELETE) {
-            if (tableName.equalsIgnoreCase(ovsdbConfigService.getTableName(node, Interface.class))) {
+            if (tableName.equalsIgnoreCase(ovsdbConfigurationService.getTableName(node, Interface.class))) {
                 logger.debug("processRowUpdate: {} Deleted node: {}, uuid: {}, row: {}", tableName, node, uuid, row);
-                Interface deletedIntf = ovsdbConfigService.getTypedRow(node, Interface.class, row);
+                Interface deletedIntf = ovsdbConfigurationService.getTypedRow(node, Interface.class, row);
                 NeutronNetwork network = null;
                 if (context == null) {
                     network = tenantNetworkManager.getTenantNetwork(deletedIntf);
@@ -200,12 +199,13 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
                     this.handleInterfaceDelete(node, uuid, deletedIntf, false, null);
                 } else if (network != null && !network.getRouterExternal()) {
                     try {
-                        ConcurrentMap<String, Row> interfaces = this.ovsdbConfigService.getRows(node, ovsdbConfigService.getTableName(node, Interface.class));
+                        ConcurrentMap<String, Row> interfaces = this.ovsdbConfigurationService
+                                .getRows(node, ovsdbConfigurationService.getTableName(node, Interface.class));
                         if (interfaces != null) {
                             boolean isLastInstanceOnNode = true;
                             for (String intfUUID : interfaces.keySet()) {
                                 if (intfUUID.equals(uuid)) continue;
-                                Interface intf = this.ovsdbConfigService.getTypedRow(node, Interface.class, interfaces.get(intfUUID));
+                                Interface intf = this.ovsdbConfigurationService.getTypedRow(node, Interface.class, interfaces.get(intfUUID));
                                 NeutronNetwork neutronNetwork = tenantNetworkManager.getTenantNetwork(intf);
                                 if (neutronNetwork != null && neutronNetwork.equals(network)) isLastInstanceOnNode = false;
                             }
@@ -217,9 +217,9 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
                 }
             }
         }
-        else if (tableName.equalsIgnoreCase(ovsdbConfigService.getTableName(node, Interface.class))) {
+        else if (tableName.equalsIgnoreCase(ovsdbConfigurationService.getTableName(node, Interface.class))) {
             logger.debug("processRowUpdate: {} Added / Updated node: {}, uuid: {}, row: {}", tableName, node, uuid, row);
-            Interface intf = this.ovsdbConfigService.getTypedRow(node, Interface.class, row);
+            Interface intf = this.ovsdbConfigurationService.getTypedRow(node, Interface.class, row);
             NeutronNetwork network = tenantNetworkManager.getTenantNetwork(intf);
             if (network != null && !network.getRouterExternal()) {
                 if (networkingProviderManager.getProvider(node).hasPerTenantTunneling()) {
@@ -233,15 +233,16 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
                 }
                 this.handleInterfaceUpdate(node, uuid, intf);
             }
-        } else if (tableName.equalsIgnoreCase(ovsdbConfigService.getTableName(node, Port.class))) {
+        } else if (tableName.equalsIgnoreCase(ovsdbConfigurationService.getTableName(node, Port.class))) {
             logger.debug("processRowUpdate: {} Added / Updated node: {}, uuid: {}, row: {}", tableName, node, uuid, row);
-            Port port = this.ovsdbConfigService.getTypedRow(node, Port.class, row);
+            Port port = this.ovsdbConfigurationService.getTypedRow(node, Port.class, row);
             Set<UUID> interfaceUUIDs = port.getInterfacesColumn().getData();
             for (UUID intfUUID : interfaceUUIDs) {
                 logger.trace("Scanning interface "+intfUUID);
                 try {
-                    Row intfRow = this.ovsdbConfigService.getRow(node, ovsdbConfigService.getTableName(node, Interface.class), intfUUID.toString());
-                    Interface intf = this.ovsdbConfigService.getTypedRow(node, Interface.class, intfRow);
+                    Row intfRow = this.ovsdbConfigurationService
+                            .getRow(node, ovsdbConfigurationService.getTableName(node, Interface.class), intfUUID.toString());
+                    Interface intf = this.ovsdbConfigurationService.getTypedRow(node, Interface.class, intfRow);
                     NeutronNetwork network = tenantNetworkManager.getTenantNetwork(intf);
                     if (network != null && !network.getRouterExternal()) {
                         tenantNetworkManager.programInternalVlan(node, uuid, network);
@@ -253,13 +254,14 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
                     logger.error("Failed to process row update", e);
                 }
             }
-        } else if (tableName.equalsIgnoreCase(ovsdbConfigService.getTableName(node, OpenVSwitch.class))) {
+        } else if (tableName.equalsIgnoreCase(ovsdbConfigurationService.getTableName(node, OpenVSwitch.class))) {
             logger.debug("processRowUpdate: {} Added / Updated node: {}, uuid: {}, row: {}", tableName, node, uuid, row);
             try {
-                ConcurrentMap<String, Row> interfaces = this.ovsdbConfigService.getRows(node, ovsdbConfigService.getTableName(node, Interface.class));
+                ConcurrentMap<String, Row> interfaces = this.ovsdbConfigurationService
+                        .getRows(node, ovsdbConfigurationService.getTableName(node, Interface.class));
                 if (interfaces != null) {
                     for (String intfUUID : interfaces.keySet()) {
-                        Interface intf = ovsdbConfigService.getTypedRow(node, Interface.class, interfaces.get(intfUUID));
+                        Interface intf = ovsdbConfigurationService.getTypedRow(node, Interface.class, interfaces.get(intfUUID));
                         this.handleInterfaceUpdate(node, intfUUID, intf);
                     }
                 }
@@ -306,10 +308,10 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
 
     private String getPortIdForInterface (Node node, String uuid, Interface intf) {
         try {
-            Map<String, Row> ports = this.ovsdbConfigService.getRows(node, ovsdbConfigService.getTableName(node, Port.class));
+            Map<String, Row> ports = this.ovsdbConfigurationService.getRows(node, ovsdbConfigurationService.getTableName(node, Port.class));
             if (ports == null) return null;
             for (String portUUID : ports.keySet()) {
-                Port port = ovsdbConfigService.getTypedRow(node, Port.class, ports.get(portUUID));
+                Port port = ovsdbConfigurationService.getTypedRow(node, Port.class, ports.get(portUUID));
                 Set<UUID> interfaceUUIDs = port.getInterfacesColumn().getData();
                 logger.trace("Scanning Port {} to identify interface : {} ",port, uuid);
                 for (UUID intfUUID : interfaceUUIDs) {
@@ -348,10 +350,10 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
         if (nodes == null) return;
         for (Node node : nodes) {
             try {
-                List<String> tableNames = ovsdbConfigService.getTables(node);
+                List<String> tableNames = ovsdbConfigurationService.getTables(node);
                 if (tableNames == null) continue;
                 for (String tableName : tableNames) {
-                    Map<String, Row> rows = ovsdbConfigService.getRows(node, tableName);
+                    Map<String, Row> rows = ovsdbConfigurationService.getRows(node, tableName);
                     if (rows == null) continue;
                     for (String uuid : rows.keySet()) {
                         Row row = rows.get(uuid);

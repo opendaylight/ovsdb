@@ -155,7 +155,7 @@
             <Embed-Dependency>httpclient,commons-codec,httpcore-nio,javax.servlet-api,portlet-api,commons-collections;type=!pom;inline=false</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Bundle-Activator>org.opendaylight.ovsdb.plugin.Activator</Bundle-Activator>
-            <Export-Package>org.opendaylight.ovsdb.plugin</Export-Package>
+            <Export-Package>org.opendaylight.ovsdb.plugin.api</Export-Package>
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>

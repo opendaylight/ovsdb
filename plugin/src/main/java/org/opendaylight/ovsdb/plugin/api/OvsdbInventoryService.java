@@ -7,7 +7,7 @@
  *
  * Authors : Madhu Venugopal, Brent Salisbury
  */
-package org.opendaylight.ovsdb.plugin;
+package org.opendaylight.ovsdb.plugin.api;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
@@ -19,7 +19,7 @@ import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Row;
 
-public interface InventoryServiceInternal extends IPluginInInventoryService {
+public interface OvsdbInventoryService extends IPluginInInventoryService {
     public ConcurrentMap<String, ConcurrentMap<String, Row>> getCache(Node n, String databaseName);
     public ConcurrentMap<String, Row> getTableCache(Node n, String databaseName, String tableName);
     public Row getRow (Node n, String databaseName, String tableName, String uuid);

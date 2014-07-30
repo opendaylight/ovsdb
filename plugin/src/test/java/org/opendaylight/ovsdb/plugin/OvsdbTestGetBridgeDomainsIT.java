@@ -16,6 +16,10 @@ import java.util.Properties;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.ovsdb.plugin.impl.ConfigurationServiceImpl;
+import org.opendaylight.ovsdb.plugin.impl.ConnectionServiceImpl;
+import org.opendaylight.ovsdb.plugin.impl.InventoryServiceImpl;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,8 +38,8 @@ public class OvsdbTestGetBridgeDomainsIT extends OvsdbTestBase {
     public void getBridgeDomains() throws Throwable{
 
         TestObjects testObjects = getTestConnection();
-        ConnectionService connectionService = testObjects.connectionService;
-        InventoryService inventoryService = testObjects.inventoryService;
+        ConnectionServiceImpl connectionService = testObjects.connectionService;
+        InventoryServiceImpl inventoryService = testObjects.inventoryService;
         Node node = testObjects.node;
 
         /**
@@ -44,7 +48,7 @@ public class OvsdbTestGetBridgeDomainsIT extends OvsdbTestBase {
          * @param node Node serving this configuration service
          *
          */
-        ConfigurationService configurationService = testObjects.configurationService;
+        ConfigurationServiceImpl configurationService = testObjects.configurationService;
         List<String> ls = configurationService.getBridgeDomains(node);
     }
 }

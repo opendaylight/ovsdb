@@ -19,7 +19,7 @@ import org.opendaylight.ovsdb.lib.notation.Row;
 
 import com.google.common.collect.Maps;
 
-public class NodeDB {
+public class NodeDatabase {
     ConcurrentMap<String, TableDB> dbCache = Maps.newConcurrentMap();
 
     public ConcurrentMap<String, ConcurrentMap<String, Row>> getDatabase(String dbName) {

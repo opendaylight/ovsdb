@@ -39,10 +39,10 @@ import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.plugin.Connection;
-import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
-import org.opendaylight.ovsdb.plugin.InventoryServiceInternal;
-import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
-import org.opendaylight.ovsdb.plugin.OvsdbInventoryListener;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
+import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryService;
 import org.opendaylight.ovsdb.plugin.StatusWithUuid;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
@@ -65,10 +65,10 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
     private Logger log = LoggerFactory.getLogger(OvsdbPluginIT.class);
     @Inject
     private BundleContext bc;
-    private OvsdbConfigService ovsdbConfigService = null;
+    private OvsdbConfigurationService ovsdbConfigurationService = null;
 
     @Inject
-    private InventoryServiceInternal inventoryService;
+    private OvsdbInventoryService ovsdbInventoryService;
 
     private Node node = null;
     private OvsdbClient client = null;
@@ -134,13 +134,14 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
         } catch (Exception e) {
             fail("Exception : "+e.getMessage());
         }
-        this.ovsdbConfigService = (OvsdbConfigService)ServiceHelper.getGlobalInstance(OvsdbConfigService.class, this);
+        this.ovsdbConfigurationService = (OvsdbConfigurationService)ServiceHelper.getGlobalInstance(OvsdbConfigurationService.class, this);
     }
 
     @Test
     public void apiTests() throws Exception {
         Thread.sleep(5000);
-        IConnectionServiceInternal connectionService = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+        OvsdbConnectionService
+                connectionService = (OvsdbConnectionService)ServiceHelper.getGlobalInstance(OvsdbConnectionService.class, this);
 
         // Check for the ovsdb Connection as seen by the Plugin layer
         assertNotNull(connectionService.getNodes());
@@ -192,7 +193,7 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
         Node newNode = Node.fromString("OVS:10.10.10.10:65342");
 
         // Trigger event
-        inventoryService.notifyNodeAdded(newNode);
+        ovsdbInventoryService.notifyNodeAdded(newNode);
 
         Mockito.verify(listenerA, Mockito.times(1)).nodeAdded(newNode);
         Mockito.verify(listenerB, Mockito.times(1)).nodeAdded(newNode);
@@ -215,18 +216,18 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
         // 3. Assert to make sure the bridge is created with a valid Uuid.
         printCache();
         Bridge bridge = connection.getClient().getTypedRowWrapper(Bridge.class, null);
-        Row bridgeRow = ovsdbConfigService.getRow(node, bridge.getSchema().getName(), status.getUuid().toString());
+        Row bridgeRow = ovsdbConfigurationService.getRow(node, bridge.getSchema().getName(), status.getUuid().toString());
         assertNotNull(bridgeRow);
         bridge = connection.getClient().getTypedRowWrapper(Bridge.class, bridgeRow);
         assertEquals(bridge.getUuid(), status.getUuid());
 
         // 4. Delete the bridge & Assert to make sure the return status is success.
-        Status delStatus = ovsdbConfigService.deleteRow(node, bridge.getSchema().getName(), status.getUuid().toString());
+        Status delStatus = ovsdbConfigurationService.deleteRow(node, bridge.getSchema().getName(), status.getUuid().toString());
         assertTrue(delStatus.isSuccess());
         Thread.sleep(2000); // TODO : Remove this Sleep once the Select operation is resolved.
 
         // 5. Assert to make sure the bridge is deleted
-        bridgeRow = ovsdbConfigService.getRow(node, bridge.getSchema().getName(), status.getUuid().toString());
+        bridgeRow = ovsdbConfigurationService.getRow(node, bridge.getSchema().getName(), status.getUuid().toString());
         assertNull(bridgeRow);
     }
 
@@ -235,28 +236,28 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
         bridge.setName("br_test1");
         bridge.setStatus(ImmutableMap.of("key", "value"));
         bridge.setFloodVlans(Sets.newHashSet(34L));
-        return ovsdbConfigService.insertRow(node, bridge.getSchema().getName(), parentUuid, bridge.getRow());
+        return ovsdbConfigurationService.insertRow(node, bridge.getSchema().getName(), parentUuid, bridge.getRow());
     }
 
     public String getOpenVSwitchTableUUID(Connection connection) throws Exception {
         OpenVSwitch openVSwitch = connection.getClient().getTypedRowWrapper(OpenVSwitch.class, null);
-        ConcurrentMap<String, Row> row = ovsdbConfigService.getRows(node, openVSwitch.getSchema().getName());
+        ConcurrentMap<String, Row> row = ovsdbConfigurationService.getRows(node, openVSwitch.getSchema().getName());
         if (row == null || row.size() == 0) return null;
         return (String)row.keySet().toArray()[0];
     }
 
     public void printCache() throws Exception {
-        List<String> tables = ovsdbConfigService.getTables(node);
+        List<String> tables = ovsdbConfigurationService.getTables(node);
         System.out.println("Tables = "+tables);
         assertNotNull(tables);
         for (String table : tables) {
             System.out.println("Table "+table);
-            ConcurrentMap<String,Row> row = ovsdbConfigService.getRows(node, table);
+            ConcurrentMap<String,Row> row = ovsdbConfigurationService.getRows(node, table);
             System.out.println(row);
         }
     }
 
-    public class FakeListener implements OvsdbInventoryListener{
+    public class FakeListener implements OvsdbInventoryListener {
 
         @Override
         public void nodeAdded(Node node) {

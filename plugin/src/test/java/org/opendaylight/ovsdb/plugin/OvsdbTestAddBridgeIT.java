@@ -11,6 +11,9 @@ package org.opendaylight.ovsdb.plugin;
 
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.ovsdb.plugin.impl.ConfigurationServiceImpl;
+import org.opendaylight.ovsdb.plugin.impl.ConnectionServiceImpl;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +25,7 @@ public class OvsdbTestAddBridgeIT extends OvsdbTestBase {
     public void addBridge() throws Throwable{
 
         TestObjects testObjects = getTestConnection();
-        ConnectionService connectionService = testObjects.connectionService;
+        ConnectionServiceImpl connectionService = testObjects.connectionService;
         Node node = testObjects.node;
 
         /**
@@ -31,7 +34,7 @@ public class OvsdbTestAddBridgeIT extends OvsdbTestBase {
          * @param node Node serving this configuration service
          * @param bridgeDomainIdentifier String representation of a Bridge Domain
          */
-        ConfigurationService configurationService = testObjects.configurationService;
+        ConfigurationServiceImpl configurationService = testObjects.configurationService;
         configurationService.createBridgeDomain(node, BRIDGE_NAME, null);
     }
 

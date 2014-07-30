@@ -18,10 +18,9 @@ import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
-import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
-import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.StatusWithUuid;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
@@ -44,22 +43,22 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     static final Logger logger = LoggerFactory.getLogger(BridgeConfigurationManagerImpl.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
-    private volatile ConfigurationService configurationService;
+    private volatile org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService configurationService;
     private volatile NetworkingProviderManager networkingProviderManager;
-    private volatile OvsdbConfigService ovsdbConfigService;
+    private volatile OvsdbConfigurationService ovsdbConfigurationService;
 
     public BridgeConfigurationManagerImpl() {
     }
 
     @Override
     public String getBridgeUuid(Node node, String bridgeName) {
-        Preconditions.checkNotNull(ovsdbConfigService);
+        Preconditions.checkNotNull(ovsdbConfigurationService);
         try {
              Map<String, Row> bridgeTable =
-                     ovsdbConfigService.getRows(node, ovsdbConfigService.getTableName(node, Bridge.class));
+                     ovsdbConfigurationService.getRows(node, ovsdbConfigurationService.getTableName(node, Bridge.class));
             if (bridgeTable == null) return null;
             for (String key : bridgeTable.keySet()) {
-                Bridge bridge = ovsdbConfigService.getTypedRow(node, Bridge.class, bridgeTable.get(key));
+                Bridge bridge = ovsdbConfigurationService.getTypedRow(node, Bridge.class, bridgeTable.get(key));
                 if (bridge.getName().equals(bridgeName)) return key;
             }
         } catch (Exception e) {
@@ -76,21 +75,21 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
 
     @Override
     public boolean isNodeOverlayReady(Node node) {
-        Preconditions.checkNotNull(configurationService);
+        Preconditions.checkNotNull(ovsdbConfigurationService);
         return this.isNodeNeutronReady(node)
                && this.getBridgeUuid(node, configurationService.getNetworkBridgeName()) != null;
     }
 
     @Override
     public boolean isPortOnBridge (Node node, Bridge bridge, String portName) {
-        Preconditions.checkNotNull(ovsdbConfigService);
+        Preconditions.checkNotNull(ovsdbConfigurationService);
         for (UUID portsUUID : bridge.getPortsColumn().getData()) {
             try {
-                Row portRow = ovsdbConfigService.getRow(node,
-                                                        ovsdbConfigService.getTableName(node, Port.class),
+                Row portRow = ovsdbConfigurationService.getRow(node,
+                                                        ovsdbConfigurationService.getTableName(node, Port.class),
                                                         portsUUID.toString());
 
-                Port port = ovsdbConfigService.getTypedRow(node, Port.class, portRow);
+                Port port = ovsdbConfigurationService.getTypedRow(node, Port.class, portRow);
                 if ((port != null) && port.getName().equalsIgnoreCase(portName)) {
                     return true;
                 }
@@ -133,7 +132,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
 
     @Override
     public boolean isNodeVlanReady(Node node, NeutronNetwork network) {
-        Preconditions.checkNotNull(configurationService);
+        Preconditions.checkNotNull(ovsdbConfigurationService);
         Preconditions.checkNotNull(networkingProviderManager);
 
         /* is br-int created */
@@ -231,7 +230,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
         String phyIf = null;
         try {
             Map<String, Row> ovsTable =
-                    ovsdbConfigService.getRows(node, ovsdbConfigService.getTableName(node, OpenVSwitch.class));
+                    ovsdbConfigurationService.getRows(node, ovsdbConfigurationService.getTableName(node, OpenVSwitch.class));
 
             if (ovsTable == null) {
                 logger.error("OpenVSwitch table is null for Node {} ", node);
@@ -242,7 +241,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
             // The specification does not restrict the number of rows so we choose the first we find.
             for (Row row : ovsTable.values()) {
                 String providerMaps;
-                OpenVSwitch ovsRow = ovsdbConfigService.getTypedRow(node, OpenVSwitch.class, row);
+                OpenVSwitch ovsRow = ovsdbConfigurationService.getTypedRow(node, OpenVSwitch.class, row);
                 Map<String, String> configs = ovsRow.getOtherConfigColumn().getData();
 
                 if (configs == null) {
@@ -288,7 +287,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
 
         try {
             Map<String, Row> ovsTable =
-                    ovsdbConfigService.getRows(node,ovsdbConfigService.getTableName(node, OpenVSwitch.class));
+                    ovsdbConfigurationService.getRows(node, ovsdbConfigurationService.getTableName(node, OpenVSwitch.class));
 
             if (ovsTable == null) {
                 logger.error("OpenVSwitch table is null for Node {} ", node);
@@ -298,7 +297,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
             // While there is only one entry in the HashMap, we can't access it by index...
             for (Row row : ovsTable.values()) {
                 String bridgeMaps;
-                OpenVSwitch ovsRow = ovsdbConfigService.getTypedRow(node, OpenVSwitch.class, row);
+                OpenVSwitch ovsRow = ovsdbConfigurationService.getTypedRow(node, OpenVSwitch.class, row);
                 Map<String, String> configs = ovsRow.getOtherConfigColumn().getData();
 
                 if (configs == null) {
@@ -333,13 +332,13 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
      * Returns the Bridge for a given node and bridgeName
      */
     public Bridge getBridge (Node node, String bridgeName) {
-        Preconditions.checkNotNull(ovsdbConfigService);
+        Preconditions.checkNotNull(ovsdbConfigurationService);
         try {
             Map<String, Row> bridgeTable =
-                    ovsdbConfigService.getRows(node, ovsdbConfigService.getTableName(node, Bridge.class));
+                    ovsdbConfigurationService.getRows(node, ovsdbConfigurationService.getTableName(node, Bridge.class));
             if (bridgeTable != null) {
                 for (String key : bridgeTable.keySet()) {
-                    Bridge bridge = ovsdbConfigService.getTypedRow(node, Bridge.class, bridgeTable.get(key));
+                    Bridge bridge = ovsdbConfigurationService.getTypedRow(node, Bridge.class, bridgeTable.get(key));
                     if (bridge.getName().equals(bridgeName)) {
                         return bridge;
                     }
@@ -355,7 +354,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
      * Returns true if a patch port exists between the Integration Bridge and Network Bridge
      */
     private boolean isNetworkPatchCreated (Node node, Bridge intBridge, Bridge netBridge) {
-        Preconditions.checkNotNull(configurationService);
+        Preconditions.checkNotNull(ovsdbConfigurationService);
 
         boolean isPatchCreated = false;
 
@@ -374,7 +373,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
      * Creates the Integration Bridge
      */
     private void createIntegrationBridge (Node node) throws Exception {
-        Preconditions.checkNotNull(configurationService);
+        Preconditions.checkNotNull(ovsdbConfigurationService);
 
         String brInt = configurationService.getIntegrationBridgeName();
 
@@ -440,7 +439,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
                     type: internal
      */
     private boolean createBridges(Node node, NeutronNetwork network) throws Exception {
-        Preconditions.checkNotNull(configurationService);
+        Preconditions.checkNotNull(ovsdbConfigurationService);
         Preconditions.checkNotNull(networkingProviderManager);
         Status status;
 
@@ -503,7 +502,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
      * Add a Port to a Bridge
      */
     private Status addPortToBridge (Node node, String bridgeName, String portName) throws Exception {
-        Preconditions.checkNotNull(ovsdbConfigService);
+        Preconditions.checkNotNull(ovsdbConfigurationService);
 
         logger.debug("addPortToBridge: Adding port: {} to Bridge {}, Node {}", portName, bridgeName, node);
 
@@ -514,8 +513,9 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
         }
 
         /* Check if the port already exists. */
-        Row row = ovsdbConfigService.getRow(node, ovsdbConfigService.getTableName(node, Bridge.class), bridgeUUID);
-        Bridge bridge = ovsdbConfigService.getTypedRow(node, Bridge.class, row);
+        Row row = ovsdbConfigurationService
+                .getRow(node, ovsdbConfigurationService.getTableName(node, Bridge.class), bridgeUUID);
+        Bridge bridge = ovsdbConfigurationService.getTypedRow(node, Bridge.class, row);
         if (bridge != null) {
             if (isPortOnBridge(node, bridge, portName)) {
                 logger.debug("addPortToBridge: Port {} already in Bridge {}, Node {}", portName, bridgeName, node);
@@ -526,10 +526,10 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
             return new Status(StatusCode.NOTFOUND, "Could not find "+portName+" in "+bridgeName);
         }
 
-        Port port = ovsdbConfigService.createTypedRow(node, Port.class);
+        Port port = ovsdbConfigurationService.createTypedRow(node, Port.class);
         port.setName(portName);
         StatusWithUuid statusWithUuid =
-                ovsdbConfigService.insertRow(node, port.getSchema().getName(), bridgeUUID, port.getRow());
+                ovsdbConfigurationService.insertRow(node, port.getSchema().getName(), bridgeUUID, port.getRow());
         if (!statusWithUuid.isSuccess()) {
             logger.error("addPortToBridge: Failed to add Port {} in Bridge {}, Node {}", portName, bridgeName, node);
             return statusWithUuid;
@@ -539,8 +539,8 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
         String interfaceUUID = null;
         int timeout = 6;
         while ((interfaceUUID == null) && (timeout > 0)) {
-            Row portRow = ovsdbConfigService.getRow(node, port.getSchema().getName(), portUUID);
-            port = ovsdbConfigService.getTypedRow(node, Port.class, portRow);
+            Row portRow = ovsdbConfigurationService.getRow(node, port.getSchema().getName(), portUUID);
+            port = ovsdbConfigurationService.getTypedRow(node, Port.class, portRow);
             Set<UUID> interfaces = port.getInterfacesColumn().getData();
             if (interfaces == null || interfaces.size() == 0) {
                 // Wait for the OVSDB update to sync up the Local cache.
@@ -549,8 +549,8 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
                 continue;
             }
             interfaceUUID = interfaces.toArray()[0].toString();
-            Row intf =ovsdbConfigService.getRow(node,
-                                                ovsdbConfigService.getTableName(node, Interface.class), interfaceUUID);
+            Row intf = ovsdbConfigurationService.getRow(node,
+                                                ovsdbConfigurationService.getTableName(node, Interface.class), interfaceUUID);
             if (intf == null) {
                 interfaceUUID = null;
             }
@@ -568,15 +568,15 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
      * Add a Patch Port to a Bridge
      */
     private Status addPatchPort (Node node, String bridgeUUID, String portName, String peerPortName) throws Exception {
-        Preconditions.checkNotNull(ovsdbConfigService);
+        Preconditions.checkNotNull(ovsdbConfigurationService);
 
         logger.debug("addPatchPort: node: {}, bridgeUUID: {}, port: {}, peer: {}",
                      node, bridgeUUID, portName, peerPortName);
 
         /* Check if the port already exists. */
-        Row bridgeRow = ovsdbConfigService.getRow(node,
-                                                  ovsdbConfigService.getTableName(node, Bridge.class), bridgeUUID);
-        Bridge bridge = ovsdbConfigService.getTypedRow(node, Bridge.class, bridgeRow);
+        Row bridgeRow = ovsdbConfigurationService.getRow(node,
+                                                  ovsdbConfigurationService.getTableName(node, Bridge.class), bridgeUUID);
+        Bridge bridge = ovsdbConfigurationService.getTypedRow(node, Bridge.class, bridgeRow);
         if (bridge != null) {
             if (isPortOnBridge(node, bridge, portName)) {
                 logger.debug("addPatchPort: Port {} already in Bridge, Node {}", portName, node);
@@ -587,11 +587,11 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
             return new Status(StatusCode.NOTFOUND, "Could not find "+portName+" in Bridge");
         }
 
-        Port patchPort = ovsdbConfigService.createTypedRow(node, Port.class);
+        Port patchPort = ovsdbConfigurationService.createTypedRow(node, Port.class);
         patchPort.setName(portName);
         // Create patch port and interface
         StatusWithUuid statusWithUuid =
-                ovsdbConfigService.insertRow(node, patchPort.getSchema().getName(), bridgeUUID, patchPort.getRow());
+                ovsdbConfigurationService.insertRow(node, patchPort.getSchema().getName(), bridgeUUID, patchPort.getRow());
         if (!statusWithUuid.isSuccess()) return statusWithUuid;
 
         String patchPortUUID = statusWithUuid.getUuid().toString();
@@ -599,8 +599,8 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
         String interfaceUUID = null;
         int timeout = 6;
         while ((interfaceUUID == null) && (timeout > 0)) {
-            Row portRow = ovsdbConfigService.getRow(node, patchPort.getSchema().getName(), patchPortUUID);
-            patchPort = ovsdbConfigService.getTypedRow(node, Port.class, portRow);
+            Row portRow = ovsdbConfigurationService.getRow(node, patchPort.getSchema().getName(), patchPortUUID);
+            patchPort = ovsdbConfigurationService.getTypedRow(node, Port.class, portRow);
             Set<UUID> interfaces = patchPort.getInterfacesColumn().getData();
             if (interfaces == null || interfaces.size() == 0) {
                 // Wait for the OVSDB update to sync up the Local cache.
@@ -615,12 +615,12 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
             return new Status(StatusCode.INTERNALERROR);
         }
 
-        Interface intf = ovsdbConfigService.createTypedRow(node, Interface.class);
+        Interface intf = ovsdbConfigurationService.createTypedRow(node, Interface.class);
         intf.setType("patch");
         Map<String, String> options = Maps.newHashMap();
         options.put("peer", peerPortName);
         intf.setOptions(options);
-        return ovsdbConfigService.updateRow(node,
+        return ovsdbConfigurationService.updateRow(node,
                                             intf.getSchema().getName(),
                                             patchPortUUID,
                                             interfaceUUID,
@@ -632,10 +632,10 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
      */
     private Status addBridge(Node node, String bridgeName,
                              String localPatchName, String remotePatchName) throws Exception {
-        Preconditions.checkNotNull(ovsdbConfigService);
+        Preconditions.checkNotNull(ovsdbConfigurationService);
 
         String bridgeUUID = this.getBridgeUuid(node, bridgeName);
-        Bridge bridge = ovsdbConfigService.createTypedRow(node, Bridge.class);
+        Bridge bridge = ovsdbConfigurationService.createTypedRow(node, Bridge.class);
         Set<String> failMode = new HashSet<>();
         failMode.add("secure");
         bridge.setFailMode(failMode);
@@ -664,19 +664,19 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
         if (bridgeUUID == null) {
             bridge.setName(bridgeName);
 
-            StatusWithUuid statusWithUuid = ovsdbConfigService.insertRow(node,
+            StatusWithUuid statusWithUuid = ovsdbConfigurationService.insertRow(node,
                                                                          bridge.getSchema().getName(),
                                                                          null,
                                                                          bridge.getRow());
             if (!statusWithUuid.isSuccess()) return statusWithUuid;
             bridgeUUID = statusWithUuid.getUuid().toString();
-            Port port = ovsdbConfigService.createTypedRow(node, Port.class);
+            Port port = ovsdbConfigurationService.createTypedRow(node, Port.class);
             port.setName(bridgeName);
-            Status status = ovsdbConfigService.insertRow(node, port.getSchema().getName(), bridgeUUID, port.getRow());
+            Status status = ovsdbConfigurationService.insertRow(node, port.getSchema().getName(), bridgeUUID, port.getRow());
             logger.debug("addBridge: Inserting Bridge {} {} with protocols {} and status {}",
                          bridgeName, bridgeUUID, protocols, status);
         } else {
-            Status status = ovsdbConfigService.updateRow(node,
+            Status status = ovsdbConfigurationService.updateRow(node,
                                                          bridge.getSchema().getName(),
                                                          null,
                                                          bridgeUUID,
@@ -685,7 +685,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
                          bridgeName, bridgeUUID, protocols, status);
         }
 
-        ovsdbConfigService.setOFController(node, bridgeUUID);
+        ovsdbConfigurationService.setOFController(node, bridgeUUID);
 
         if (localPatchName != null &&
             remotePatchName != null &&

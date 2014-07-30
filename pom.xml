@@ -41,9 +41,6 @@
         <module>commons/integrationtest</module>
         <module>integrationtest</module>
       </modules>
-      <properties>
-        <skip.integrationtest>false</skip.integrationtest>
-      </properties>
     </profile>
   </profiles>
 

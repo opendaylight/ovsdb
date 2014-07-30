@@ -30,7 +30,7 @@
     <schema.hardwarevtep.version>1.0.0-SNAPSHOT</schema.hardwarevtep.version>
     <skip.integrationtest>true</skip.integrationtest>
     <sonar.jacoco.reportPath>target/code-coverage/jacoco.exec</sonar.jacoco.reportPath>
-    <sonar.jacoco.itReportPath>target/code-coverage/jacoco-it.exec</sonar.jacoco.itReportPath>
+    <sonar.jacoco.itReportPath>${jacoco.outputDir}/target/code-coverage/jacoco-it.exec</sonar.jacoco.itReportPath>
     <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
     <!-- Override -->
     <jacoco.version>0.6.4.201312101107</jacoco.version>
@@ -269,6 +269,7 @@
               </goals>
               <configuration>
                 <destFile>${sonar.jacoco.itReportPath}</destFile>
+                <append>true</append>
                 <skip>${skip.integrationtest}</skip>
               </configuration>
             </execution>
@@ -310,6 +311,7 @@
                 <goal>verify</goal>
               </goals>
               <configuration>
+                <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
                 <skipTests>${skip.integrationtest}</skipTests>
               </configuration>
             </execution>
@@ -417,5 +419,4 @@
       </properties>
     </profile>
   </profiles>
-
 </project>

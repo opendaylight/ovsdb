@@ -52,6 +52,9 @@ public abstract class OvsdbTestBase {
     }
 
     public TestObjects getTestConnection() throws IOException {
+        if (OvsdbPluginTestSuiteIT.getTestObjects() != null) {
+            return OvsdbPluginTestSuiteIT.getTestObjects();
+        }
         Properties props = loadProperties();
         String address = props.getProperty(SERVER_IPADDRESS);
         String port = props.getProperty(SERVER_PORT, DEFAULT_SERVER_PORT);
@@ -86,13 +89,16 @@ public abstract class OvsdbTestBase {
         if (node == null) {
             throw new IOException("Failed to connect to the ovsdb server");
         }
+
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } // TODO : Remove this once Select is operational
-        return new TestObjects(connectionService, node, inventory, configurationService);
+        }
+        TestObjects testObject = new TestObjects(connectionService, node, inventory, configurationService);
+        OvsdbPluginTestSuiteIT.setTestObjects(testObject);
+        return testObject;
     }
 
 }

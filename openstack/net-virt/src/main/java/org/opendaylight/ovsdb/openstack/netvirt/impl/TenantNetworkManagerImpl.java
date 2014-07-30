@@ -20,8 +20,8 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
-import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
-import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 
@@ -37,8 +37,8 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile NetworkingProviderManager networkingProviderManager;
-    private volatile OvsdbConfigService ovsdbConfigService;
-    private volatile IConnectionServiceInternal connectionService;
+    private volatile OvsdbConfigurationService ovsdbConfigurationService;
+    private volatile OvsdbConnectionService connectionService;
     private volatile INeutronNetworkCRUD neutronNetworkCache;
     private volatile INeutronPortCRUD neutronPortCache;
     private volatile VlanConfigurationCache vlanConfigurationCache;
@@ -65,7 +65,7 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
 
     @Override
     public void programInternalVlan(Node node, String portUUID, NeutronNetwork network) {
-        Preconditions.checkNotNull(ovsdbConfigService);
+        Preconditions.checkNotNull(ovsdbConfigurationService);
 
         int vlan = vlanConfigurationCache.getInternalVlan(node, network.getID());
         logger.debug("Programming Vlan {} on {}", vlan, portUUID);
@@ -74,16 +74,16 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
             return;
         }
 
-        Port port = ovsdbConfigService.createTypedRow(node, Port.class);
+        Port port = ovsdbConfigurationService.createTypedRow(node, Port.class);
         OvsdbSet<Long> tags = new OvsdbSet<>();
         tags.add((long) vlan);
         port.setTag(tags);
-        ovsdbConfigService.updateRow(node, port.getSchema().getName(), null, portUUID, port.getRow());
+        ovsdbConfigurationService.updateRow(node, port.getSchema().getName(), null, portUUID, port.getRow());
     }
 
     @Override
     public boolean isTenantNetworkPresentInNode(Node node, String segmentationId) {
-        Preconditions.checkNotNull(ovsdbConfigService);
+        Preconditions.checkNotNull(ovsdbConfigurationService);
 
         String networkId = this.getNetworkId(segmentationId);
         if (networkId == null) {
@@ -118,14 +118,14 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
             }
              */
             // External-id based more accurate VM Location identification
-            Map<String, Row> ifTable = ovsdbConfigService.getRows(node, ovsdbConfigService.getTableName(node, Interface.class));
+            Map<String, Row> ifTable = ovsdbConfigurationService.getRows(node, ovsdbConfigurationService.getTableName(node, Interface.class));
             if (ifTable == null) {
                 logger.debug("Interface table is null for Node {} ", node);
                 return false;
             }
 
             for (Row row : ifTable.values()) {
-                Interface intf = ovsdbConfigService.getTypedRow(node, Interface.class, row);
+                Interface intf = ovsdbConfigurationService.getTypedRow(node, Interface.class, row);
                 Map<String, String> externalIds = intf.getExternalIdsColumn().getData();
                 if (externalIds != null && externalIds.get(Constants.EXTERNAL_ID_INTERFACE_ID) != null) {
                     if (this.isInterfacePresentInTenantNetwork(externalIds.get(Constants.EXTERNAL_ID_INTERFACE_ID), networkId)) {

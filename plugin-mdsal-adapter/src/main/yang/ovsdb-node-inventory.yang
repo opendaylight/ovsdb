@@ -1,0 +1,74 @@
+module ovsdb-node-inventory {
+    namespace "urn:opendaylight:ovsdb-node-inventory";
+    prefix "ovsdbinv";
+
+    import opendaylight-inventory {
+        prefix inv;
+        revision-date "2013-08-19";
+    }
+
+    import yang-ext {
+        prefix ext;
+        revision-date "2013-07-09";
+    }
+
+    import ietf-inet-types {
+        prefix inet;
+        revision-date "2010-09-24";
+    }
+
+    revision "2014-07-31" {
+        description "Initial revision of the OVSDB Inventory model";
+    }
+
+    grouping ovsdb-bridge {
+        container ovsdb-bridge {
+            leaf bridge-uuid {
+                description "The unique identifier of the bridge";
+                type string;
+            }
+
+            leaf bridge-name {
+                description "The name of the bridge";
+                type string;
+            }
+
+            leaf managed-by {
+                description "The OVSDB which this bridge belongs to";
+                type inv:node-id;
+            }
+        }
+    }
+
+    grouping ovsdb-node {
+        container ovsdb-node {
+            leaf connected {
+                description "Indicates if an OVSDB node is connected";
+                type boolean;
+            }
+
+            leaf ip-address {
+                description "The IP Address of an OVSDB node";
+                type inet:ip-address;
+            }
+
+            list managed-nodes {
+                description "A list of nodes managed by this node";
+                leaf node-id {
+                    type inv:node-id;
+                }
+            }
+        }
+    }
+
+    augment /inv:nodes/inv:node {
+        ext:augment-identifier "ovsdb-managed-node";
+        when "/inv:nodes/inv:node/openflowcapable:manufacturer = '*'";
+        uses ovsdb-bridge;
+    }
+
+    augment /inv:nodes/inv:node {
+        ext:augment-identifier "ovsdb-node-data";
+        uses ovsdb-node;
+    }
+}

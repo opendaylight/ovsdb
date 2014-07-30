@@ -7,19 +7,19 @@
  *
  * Authors : Madhu Venugopal, Brent Salisbury
  */
-package org.opendaylight.ovsdb.plugin;
-
-import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.core.Property;
-import org.opendaylight.controller.sal.core.UpdateType;
-import org.opendaylight.ovsdb.lib.message.TableUpdates;
-import org.opendaylight.ovsdb.lib.notation.Row;
+package org.opendaylight.ovsdb.plugin.api;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
-@Deprecated
-public interface InventoryServiceInternal {
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.Property;
+import org.opendaylight.controller.sal.core.UpdateType;
+import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
+import org.opendaylight.ovsdb.lib.message.TableUpdates;
+import org.opendaylight.ovsdb.lib.notation.Row;
+
+public interface OvsdbInventoryService extends IPluginInInventoryService {
     public ConcurrentMap<String, ConcurrentMap<String, Row>> getCache(Node n, String databaseName);
     public ConcurrentMap<String, Row> getTableCache(Node n, String databaseName, String tableName);
     public Row getRow (Node n, String databaseName, String tableName, String uuid);

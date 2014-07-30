@@ -7,17 +7,15 @@
  *
  * Authors : Madhu Venugopal, Brent Salisbury
  */
-package org.opendaylight.ovsdb.plugin;
-
-import org.opendaylight.controller.sal.connection.ConnectionConstants;
-import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.ovsdb.plugin.api.Connection;
+package org.opendaylight.ovsdb.plugin.api;
 
 import java.util.List;
 import java.util.Map;
 
-@Deprecated
-public interface IConnectionServiceInternal {
+import org.opendaylight.controller.sal.connection.ConnectionConstants;
+import org.opendaylight.controller.sal.core.Node;
+
+public interface OvsdbConnectionService {
     public Connection getConnection(Node node);
     public List<Node> getNodes();
     public Node connect(String identifier, Map<ConnectionConstants, String> params);

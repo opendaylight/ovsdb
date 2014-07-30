@@ -26,6 +26,7 @@
     <module>schemas/openvswitch</module>
     <module>schemas/hardwarevtep</module>
     <module>plugin</module>
+    <module>plugin-mdsal-adapter</module>
     <module>northbound</module>
     <module>openstack/net-virt</module>
     <module>openstack/net-virt-providers</module>

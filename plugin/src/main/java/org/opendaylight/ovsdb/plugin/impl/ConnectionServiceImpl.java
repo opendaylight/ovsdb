@@ -7,7 +7,7 @@
  *
  * Authors : Madhu Venugopal, Brent Salisbury, Evan Zeller
  */
-package org.opendaylight.ovsdb.plugin;
+package org.opendaylight.ovsdb.plugin.impl;
 
 import io.netty.channel.ChannelHandler;
 
@@ -41,6 +41,13 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
+import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
+import org.opendaylight.ovsdb.plugin.api.Connection;
+import org.opendaylight.ovsdb.plugin.internal.IPAddressProperty;
+import org.opendaylight.ovsdb.plugin.internal.L4PortProperty;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,41 +58,28 @@ import com.google.common.collect.Lists;
  * Represents the openflow plugin component in charge of programming the flows
  * the flow programming and relay them to functional modules above SAL.
  */
-public class ConnectionService implements IPluginInConnectionService, IConnectionServiceInternal, OvsdbConnectionListener {
-    protected static final Logger logger = LoggerFactory.getLogger(ConnectionService.class);
+public class ConnectionServiceImpl implements IPluginInConnectionService,
+                                              OvsdbConnectionService,
+                                              IConnectionServiceInternal,
+                                              OvsdbConnectionListener {
+    protected static final Logger logger = LoggerFactory.getLogger(ConnectionServiceImpl.class);
 
     // Properties that can be set in config.ini
     private static final Integer defaultOvsdbPort = 6640;
 
-    private OvsdbConnection connectionLib;
+
     private ConcurrentMap<String, Connection> ovsdbConnections = new ConcurrentHashMap<String, Connection>();
     private List<ChannelHandler> handlers = null;
-    private InventoryServiceInternal inventoryServiceInternal;
 
-    public InventoryServiceInternal getInventoryServiceInternal() {
-        return inventoryServiceInternal;
+    private volatile OvsdbInventoryService ovsdbInventoryService;
+    private volatile OvsdbConnection connectionLib;
+
+    public void setOvsdbInventoryService(OvsdbInventoryService inventoryService) {
+        this.ovsdbInventoryService = inventoryService;
     }
 
-    public void setInventoryServiceInternal(InventoryServiceInternal inventoryServiceInternal) {
-        this.inventoryServiceInternal = inventoryServiceInternal;
-    }
-
-    public void unsetInventoryServiceInternal(InventoryServiceInternal inventoryServiceInternal) {
-        if (this.inventoryServiceInternal == inventoryServiceInternal) {
-            this.inventoryServiceInternal = null;
-        }
-    }
-
-    public void setOvsdbConnection(OvsdbConnection connectionService) {
-        connectionLib = connectionService;
-        // It is not correct to register the service here. Rather, we should depend on the
-        // Service created by createServiceDependency() and hook to it via Apache DM.
-        // Using this temporarily till the Service Dependency is resolved.
-        connectionLib.registerForPassiveConnection(this);
-    }
-
-    public void unsetOvsdbConnection(OvsdbConnection connectionService) {
-        connectionLib = null;
+    public void setOvsdbConnection(OvsdbConnection ovsdbConnection) {
+        this.connectionLib = ovsdbConnection;
     }
 
     public void init() {
@@ -128,7 +122,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         if (connection != null) {
             ovsdbConnections.remove(identifier);
             connection.disconnect();
-            inventoryServiceInternal.removeNode(node);
+            ovsdbInventoryService.removeNode(node);
             return new Status(StatusCode.SUCCESS);
         } else {
             return new Status(StatusCode.NOTFOUND);
@@ -230,7 +224,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
     public void channelClosed(Node node) throws Exception {
         logger.info("Connection to Node : {} closed", node);
         disconnect(node);
-        inventoryServiceInternal.removeNode(node);
+        ovsdbInventoryService.removeNode(node);
     }
 
     private void initializeInventoryForNewNode (Connection connection) throws InterruptedException, ExecutionException, IOException {
@@ -242,7 +236,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         Set<Property> props = new HashSet<Property>();
         props.add(addressProp);
         props.add(l4Port);
-        inventoryServiceInternal.addNode(connection.getNode(), props);
+        ovsdbInventoryService.addNode(connection.getNode(), props);
 
         List<String> databases = client.getDatabases().get();
         if (databases == null) {
@@ -252,9 +246,9 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
         for (String database : databases) {
             DatabaseSchema dbSchema = client.getSchema(database).get();
             TableUpdates updates = this.monitorTables(connection.getNode(), dbSchema);
-            inventoryServiceInternal.processTableUpdates(connection.getNode(), dbSchema.getName(), updates);
+            ovsdbInventoryService.processTableUpdates(connection.getNode(), dbSchema.getName(), updates);
         }
-        inventoryServiceInternal.notifyNodeAdded(connection.getNode());
+        ovsdbInventoryService.notifyNodeAdded(connection.getNode());
     }
 
     public TableUpdates monitorTables(Node node, DatabaseSchema dbSchema) throws ExecutionException, InterruptedException, IOException {
@@ -307,7 +301,7 @@ public class ConnectionService implements IPluginInConnectionService, IConnectio
 
         @Override
         public void update(TableUpdates result, DatabaseSchema dbSchema) {
-            inventoryServiceInternal.processTableUpdates(node, dbSchema.getName(), result);
+            ovsdbInventoryService.processTableUpdates(node, dbSchema.getName(), result);
         }
 
         @Override

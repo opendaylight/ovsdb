@@ -17,7 +17,7 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.NodeConfiguration;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
-import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
@@ -36,7 +36,7 @@ public class VlanConfigurationCacheImpl implements VlanConfigurationCache {
     private Map<String, NodeConfiguration> configurationCache = Maps.newConcurrentMap();
 
     private volatile TenantNetworkManager tenantNetworkManager;
-    private volatile OvsdbConfigService ovsdbConfigService;
+    private volatile OvsdbConfigurationService ovsdbConfigurationService;
 
     private NodeConfiguration getNodeConfiguration(Node node){
         String nodeUuid = getNodeUUID(node);
@@ -51,10 +51,10 @@ public class VlanConfigurationCacheImpl implements VlanConfigurationCache {
     }
 
     private String getNodeUUID(Node node) {
-        Preconditions.checkNotNull(ovsdbConfigService);
+        Preconditions.checkNotNull(ovsdbConfigurationService);
         String nodeUuid = new String();
         try {
-            Map<String, Row> ovsTable = ovsdbConfigService.getRows(node, ovsdbConfigService.getTableName(node, OpenVSwitch.class));
+            Map<String, Row> ovsTable = ovsdbConfigurationService.getRows(node, ovsdbConfigurationService.getTableName(node, OpenVSwitch.class));
             nodeUuid = (String)ovsTable.keySet().toArray()[0];
         }
         catch (Exception e) {
@@ -71,7 +71,7 @@ public class VlanConfigurationCacheImpl implements VlanConfigurationCache {
         String networkId = null;
 
         try {
-            Map<String, Row> portRows = ovsdbConfigService.getRows(node, ovsdbConfigService.getTableName(node, Port.class));
+            Map<String, Row> portRows = ovsdbConfigurationService.getRows(node, ovsdbConfigurationService.getTableName(node, Port.class));
 
             if (portRows == null){
                 logger.debug("Port table is null for Node {}", node);
@@ -79,7 +79,7 @@ public class VlanConfigurationCacheImpl implements VlanConfigurationCache {
             }
 
             for (Row row : portRows.values()) {
-                Port port = ovsdbConfigService.getTypedRow(node, Port.class, row);
+                Port port = ovsdbConfigurationService.getTypedRow(node, Port.class, row);
 
                 if (port.getTagColumn() == null) continue;
                 Set<Long> tags = port.getTagColumn().getData();
@@ -94,8 +94,10 @@ public class VlanConfigurationCacheImpl implements VlanConfigurationCache {
                 }
 
                 for (UUID ifaceId : port.getInterfacesColumn().getData()) {
-                    Row ifaceRow = ovsdbConfigService.getRow(node, ovsdbConfigService.getTableName(node, Interface.class), ifaceId.toString());
-                    Interface iface = ovsdbConfigService.getTypedRow(node, Interface.class, ifaceRow);
+                    Row ifaceRow = ovsdbConfigurationService
+                            .getRow(node, ovsdbConfigurationService.getTableName(node, Interface.class),
+                                    ifaceId.toString());
+                    Interface iface = ovsdbConfigurationService.getTypedRow(node, Interface.class, ifaceRow);
 
                     if (iface == null) {
                         logger.debug("Interface table is null");

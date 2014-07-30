@@ -14,25 +14,25 @@ import org.opendaylight.controller.sal.core.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OvsdbTestAddBridgeIT extends OvsdbTestBase {
+public class TearDown extends OvsdbTestBase {
     private static final Logger logger = LoggerFactory
-            .getLogger(OvsdbTestAddBridgeIT.class);
+            .getLogger(TearDown.class);
 
     @Test
-    public void addBridge() throws Throwable{
+    public void deleteBridge() throws Throwable{
 
         TestObjects testObjects = getTestConnection();
         ConnectionService connectionService = testObjects.connectionService;
         Node node = testObjects.node;
 
         /**
-         * Create a Bridge Domain
+         * Delete a Bridge Domain
          *
          * @param node Node serving this configuration service
          * @param bridgeDomainIdentifier String representation of a Bridge Domain
          */
         ConfigurationService configurationService = testObjects.configurationService;
-        configurationService.createBridgeDomain(node, BRIDGE_NAME, null);
+        configurationService.deleteBridgeDomain(node, BRIDGE_NAME);
     }
 
 }

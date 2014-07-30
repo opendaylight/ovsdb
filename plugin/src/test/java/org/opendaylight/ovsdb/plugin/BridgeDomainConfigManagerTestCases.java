@@ -9,42 +9,36 @@
  */
 package org.opendaylight.ovsdb.plugin;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Properties;
-
-import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OvsdbTestGetBridgeDomainsIT extends OvsdbTestBase {
+public class BridgeDomainConfigManagerTestCases extends PluginTestBase {
     private static final Logger logger = LoggerFactory
-            .getLogger(OvsdbTestGetBridgeDomainsIT.class);
-
-    private Properties props;
-
-    @Before
-    public void loadProps() throws IOException {
-        props = loadProperties();
-    }
+            .getLogger(BridgeDomainConfigManagerTestCases.class);
 
     @Test
-    public void getBridgeDomains() throws Throwable{
-
+    public void setManager() throws Throwable{
         TestObjects testObjects = getTestConnection();
-        ConnectionService connectionService = testObjects.connectionService;
-        InventoryService inventoryService = testObjects.inventoryService;
         Node node = testObjects.node;
 
+
+        String port = "6634";
+        String host = FAKE_IP;
+        String connectionType = "ptcp";
+
+        String manager = connectionType + ":" + host + ":" + port;
+
         /**
-         * List a Bridge Domain
+         * Implements the OVS Connection for Managers
          *
          * @param node Node serving this configuration service
+         * @param String with IP and connection type ex. type:ip:port
          *
          */
         ConfigurationService configurationService = testObjects.configurationService;
-        List<String> ls = configurationService.getBridgeDomains(node);
+        configurationService.setManager(node, manager);
     }
+
 }

@@ -21,11 +21,11 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
 
-public abstract class OvsdbTestBase {
+public abstract class PluginTestBase {
     private final static String identifier = "TEST";
     protected final static String BRIDGE_NAME = "JUNIT_TEST_BRIDGE";
-    protected final static String PORT_NAME = "eth0";
-    protected final static String TAGGED_PORT_NAME = "eth1";
+    protected final static String PORT_NAME = "test0";
+    protected final static String TAGGED_PORT_NAME = "test1";
     protected final static String TUNNEL_PORT_NAME = "vxlan0";
     protected final static String FAKE_IP = "192.168.254.254";
     private final static String SERVER_IPADDRESS = "ovsdbserver.ipaddress";
@@ -52,6 +52,9 @@ public abstract class OvsdbTestBase {
     }
 
     public TestObjects getTestConnection() throws IOException {
+        if (OvsdbPluginTestSuiteIT.getTestObjects() != null) {
+            return OvsdbPluginTestSuiteIT.getTestObjects();
+        }
         Properties props = loadProperties();
         String address = props.getProperty(SERVER_IPADDRESS);
         String port = props.getProperty(SERVER_PORT, DEFAULT_SERVER_PORT);
@@ -86,13 +89,16 @@ public abstract class OvsdbTestBase {
         if (node == null) {
             throw new IOException("Failed to connect to the ovsdb server");
         }
+
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } // TODO : Remove this once Select is operational
-        return new TestObjects(connectionService, node, inventory, configurationService);
+        }
+        TestObjects testObject = new TestObjects(connectionService, node, inventory, configurationService);
+        OvsdbPluginTestSuiteIT.setTestObjects(testObject);
+        return testObject;
     }
 
 }

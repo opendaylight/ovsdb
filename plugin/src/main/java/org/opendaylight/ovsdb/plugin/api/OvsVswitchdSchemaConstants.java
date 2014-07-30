@@ -1,11 +1,8 @@
-package org.opendaylight.ovsdb.plugin;
-
-import com.google.common.collect.Maps;
-
+package org.opendaylight.ovsdb.plugin.api;
 import java.util.Map;
 
-@Deprecated
-public class OvsVswitchdSchemaConstants {
+import com.google.common.collect.Maps;
+public final class OvsVswitchdSchemaConstants {
     public static String DATABASE_NAME = "Open_vSwitch";
 
     private static final String OVSDB_AUTOCONFIGURECONTROLLER = "ovsdb.autoconfigurecontroller";

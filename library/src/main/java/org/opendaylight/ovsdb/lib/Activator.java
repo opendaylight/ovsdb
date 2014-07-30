@@ -31,7 +31,7 @@ public class Activator extends DependencyActivatorBase {
         );
         manager.createServiceDependency()
                .setService(OvsdbConnectionListener.class)
-               .setCallbacks("registerForPassiveConnection", "unregisterFromPassiveConnection")
+               .setCallbacks("registerForPassiveConnection", "unregisterForPassiveConnection")
                .setRequired(false);
     }
 

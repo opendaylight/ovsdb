@@ -8,7 +8,7 @@
  * Authors : Madhu Venugopal, Brent Salisbury
  */
 
-package org.opendaylight.ovsdb.plugin;
+package org.opendaylight.ovsdb.plugin.internal;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;

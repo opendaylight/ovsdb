@@ -7,7 +7,7 @@
  *
  * Authors : Madhu Venugopal, Brent Salisbury
  */
-package org.opendaylight.ovsdb.plugin;
+package org.opendaylight.ovsdb.plugin.internal;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -25,6 +25,19 @@ import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.INodeConnectorFactory;
 import org.opendaylight.controller.sal.utils.INodeFactory;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
+import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
+import org.opendaylight.ovsdb.plugin.InventoryServiceInternal;
+import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
+import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryService;
+import org.opendaylight.ovsdb.plugin.impl.ConfigurationServiceImpl;
+import org.opendaylight.ovsdb.plugin.impl.ConnectionServiceImpl;
+import org.opendaylight.ovsdb.plugin.impl.InventoryServiceImpl;
+import org.opendaylight.ovsdb.plugin.impl.NodeConnectorFactory;
+import org.opendaylight.ovsdb.plugin.impl.NodeFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,28 +74,27 @@ public class Activator extends ComponentActivatorAbstractBase {
     }
     @Override
     public Object[] getGlobalImplementations() {
-        Object[] res = { ConnectionService.class, ConfigurationService.class, NodeFactory.class, NodeConnectorFactory.class, InventoryService.class };
+        Object[] res = { ConnectionServiceImpl.class, ConfigurationServiceImpl.class, NodeFactory.class, NodeConnectorFactory.class, InventoryServiceImpl.class };
         return res;
     }
 
     @Override
     public void configureGlobalInstance(Component c, Object imp){
-        if (imp.equals(ConfigurationService.class)) {
+        if (imp.equals(ConfigurationServiceImpl.class)) {
             // export the service to be used by SAL
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             // Set the protocolPluginType property which will be used
             // by SAL
             props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "OVS");
             c.setInterface(new String[] { IPluginInBridgeDomainConfigService.class.getName(),
+                                          OvsdbConfigurationService.class.getName(),
                                           OvsdbConfigService.class.getName()}, props);
 
             c.add(createServiceDependency()
-                    .setService(IConnectionServiceInternal.class)
-                    .setCallbacks("setConnectionServiceInternal", "unsetConnectionServiceInternal")
+                    .setService(OvsdbConnectionService.class)
                     .setRequired(true));
             c.add(createServiceDependency()
-                    .setService(InventoryServiceInternal.class)
-                    .setCallbacks("setInventoryServiceInternal", "unsetInventoryServiceInternal")
+                    .setService(OvsdbInventoryService.class)
                     .setRequired(true));
             c.add(createServiceDependency()
                     .setService(IClusterGlobalServices.class)
@@ -90,7 +102,7 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setRequired(false));
         }
 
-        if (imp.equals(ConnectionService.class)) {
+        if (imp.equals(ConnectionServiceImpl.class)) {
             // export the service to be used by SAL
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             // Set the protocolPluginType property which will be used
@@ -98,36 +110,35 @@ public class Activator extends ComponentActivatorAbstractBase {
             props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "OVS");
             c.setInterface(
                     new String[] {IPluginInConnectionService.class.getName(),
+                                  OvsdbConnectionService.class.getName(),
                                   IConnectionServiceInternal.class.getName()}, props);
 
             c.add(createServiceDependency()
-                    .setService(InventoryServiceInternal.class)
-                    .setCallbacks("setInventoryServiceInternal", "unsetInventoryServiceInternal")
+                    .setService(OvsdbInventoryService.class)
                     .setRequired(true));
             c.add(createServiceDependency()
                     .setService(OvsdbConnection.class)
-                    .setCallbacks("setOvsdbConnection", "unsetOvsdbConnection")
                     .setRequired(true));
         }
 
-        if (imp.equals(InventoryService.class)) {
-            Dictionary<String, Object> props = new Hashtable<String, Object>();
+        if (imp.equals(InventoryServiceImpl.class)) {
+            Dictionary<String, Object> props = new Hashtable<>();
             props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "OVS");
             props.put("scope", "Global");
             c.setInterface(
-                    new String[] {IPluginInInventoryService.class.getName(),
-                            InventoryServiceInternal.class.getName()}, props);
+                    new String[]{IPluginInInventoryService.class.getName(),
+                                 OvsdbInventoryService.class.getName(),
+                                 InventoryServiceInternal.class.getName()}, props);
             c.add(createServiceDependency()
-                    .setService(IPluginOutInventoryService.class, "(scope=Global)")
-                    .setCallbacks("setPluginOutInventoryServices",
-                            "unsetPluginOutInventoryServices")
-                    .setRequired(true));
+                          .setService(IPluginOutInventoryService.class, "(scope=Global)")
+                          .setCallbacks("setPluginOutInventoryServices",
+                                        "unsetPluginOutInventoryServices")
+                          .setRequired(true));
             c.add(createServiceDependency()
                     .setService(OvsdbInventoryListener.class)
                     .setCallbacks("listenerAdded", "listenerRemoved"));
             c.add(createServiceDependency()
-                    .setService(OvsdbConfigService.class)
-                    .setCallbacks("setConfigurationService", "unsetConfigurationService")
+                    .setService(OvsdbConfigurationService.class)
                     .setRequired(false));
         }
 

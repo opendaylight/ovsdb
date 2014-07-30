@@ -16,6 +16,9 @@ import java.util.Map;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.networkconfig.bridgedomain.ConfigConstants;
+import org.opendaylight.ovsdb.plugin.impl.ConfigurationServiceImpl;
+import org.opendaylight.ovsdb.plugin.internal.Encapsulation;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +57,7 @@ public class OvsdbTestAddTunnelIT extends OvsdbTestBase {
          * @param tunencap is the tunnel encapsulation options being CAPWAP, GRE or VXLAN
          * The Bridge must already be defined before calling addTunnel.
          */
-        ConfigurationService configurationService = testObjects.configurationService;
+        ConfigurationServiceImpl configurationService = testObjects.configurationService;
         Map<ConfigConstants, Object> configs = new HashMap<ConfigConstants, Object>();
         configs.put(ConfigConstants.TYPE, "TUNNEL");
         configs.put(ConfigConstants.TUNNEL_TYPE, tunencap);

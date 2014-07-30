@@ -131,6 +131,11 @@ public class OvsdbConnectionService implements OvsdbConnection {
         connectionListeners.add(listener);
     }
 
+    @Override
+    public void unregisterForPassiveConnection(OvsdbConnectionListener listener) {
+        connectionListeners.remove(listener);
+    }
+
     private static OvsdbClient getChannelClient(Channel channel, ConnectionType type,
                                                 ExecutorService executorService) {
         ObjectMapper objectMapper = new ObjectMapper();

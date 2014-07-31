@@ -26,7 +26,7 @@
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam-container-native</artifactId>
+      <artifactId>pax-exam-container-forked</artifactId>
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.exam</groupId>
@@ -116,10 +116,6 @@
               <reuseForks>false</reuseForks>
               <parallel>none</parallel>
               <threadCount>1</threadCount>
-              <excludes>
-              <!-- Disabling NorthboundIT tests till the issues are resolved in Jenkins -->
-                <exclude>**/*NorthboundIT*</exclude>
-              </excludes>
             </configuration>
           </execution>
         </executions>

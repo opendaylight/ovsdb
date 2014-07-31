@@ -116,10 +116,6 @@
               <reuseForks>false</reuseForks>
               <parallel>none</parallel>
               <threadCount>1</threadCount>
-              <excludes>
-              <!-- Disabling NorthboundIT tests till the issues are resolved in Jenkins -->
-                <exclude>**/*NorthboundIT*</exclude>
-              </excludes>
             </configuration>
           </execution>
         </executions>

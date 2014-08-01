@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_94ecb1bc",
+        "filename": "ovs-sfc/src/main/java/org/opendaylight/ovsdb/ovssfc/Activator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-01T23:54:58Z",
+      "side": 1,
+      "message": "Since this is a new bundle being added, I would suggest to start using the api/impl/internal package naming conventions so that we can export the right package.\n\nWe can even go to the extent of api bundle and implementation bundle if you prefer.",
+      "revId": "93a521f8cd7c10e7a82382ade0cf61055223be18",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -251,7 +251,7 @@ public class ConnectionServiceImpl implements IPluginInConnectionService,
             ovsdbInventoryService.processTableUpdates(connection.getNode(), dbSchema.getName(), updates);
         }
         logger.info("Notifying Inventory Listeners for Node Added: {}", connection.getNode().toString());
-        ovsdbInventoryService.notifyNodeAdded(connection.getNode());
+        ovsdbInventoryService.notifyNodeAdded(connection.getNode(), address, port);
     }
 
     public TableUpdates monitorTables(Node node, DatabaseSchema dbSchema) throws ExecutionException, InterruptedException, IOException {

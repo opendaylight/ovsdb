@@ -20,16 +20,6 @@ import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperty;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
-import java.util.List;
-import java.util.concurrent.ConcurrentMap;
-
-import javax.inject.Inject;
-
-import org.apache.felix.dm.Component;
-import org.apache.felix.dm.DependencyManager;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.controller.sal.utils.Status;
@@ -47,6 +37,13 @@ import org.opendaylight.ovsdb.plugin.api.StatusWithUuid;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
+import org.apache.felix.dm.Component;
+import org.apache.felix.dm.DependencyManager;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -57,8 +54,12 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.List;
+import java.util.concurrent.ConcurrentMap;
+
+import javax.inject.Inject;
 
 @RunWith(PaxExam.class)
 public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
@@ -174,7 +175,7 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
     }
 
     @Test
-    public void testInventoryListeners(){
+    public void testInventoryListeners() throws UnknownHostException {
         DependencyManager dm = new DependencyManager(bc);
 
         OvsdbInventoryListener listenerA = Mockito.mock(FakeListener.class);
@@ -191,12 +192,14 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
         dm.add(componentB);
 
         Node newNode = Node.fromString("OVS:10.10.10.10:65342");
+        InetAddress address = InetAddress.getByName("10.10.10.10");
+        int port = 65342;
 
         // Trigger event
-        ovsdbInventoryService.notifyNodeAdded(newNode);
+        ovsdbInventoryService.notifyNodeAdded(newNode, address, port);
 
-        Mockito.verify(listenerA, Mockito.times(1)).nodeAdded(newNode);
-        Mockito.verify(listenerB, Mockito.times(1)).nodeAdded(newNode);
+        Mockito.verify(listenerA, Mockito.times(1)).nodeAdded(newNode, address, port);
+        Mockito.verify(listenerB, Mockito.times(1)).nodeAdded(newNode, address, port);
 
         dm.remove(componentA);
         dm.remove(componentB);
@@ -260,7 +263,7 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
     public class FakeListener implements OvsdbInventoryListener {
 
         @Override
-        public void nodeAdded(Node node) {
+        public void nodeAdded(Node node, InetAddress address, int port) {
 
         }
 

@@ -87,6 +87,10 @@ see https://git.opendaylight.org/gerrit/#/c/390/
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>plugin-mdsal-adapter</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>schema.openvswitch</artifactId>
     </dependency>
     <dependency>

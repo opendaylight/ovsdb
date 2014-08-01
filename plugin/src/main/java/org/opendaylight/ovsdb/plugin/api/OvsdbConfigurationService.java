@@ -7,21 +7,19 @@
  *
  * Authors : Madhu Venugopal, Brent Salisbury
  */
-package org.opendaylight.ovsdb.plugin;
+package org.opendaylight.ovsdb.plugin.api;
+
+import java.util.List;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
-import org.opendaylight.ovsdb.plugin.api.StatusWithUuid;
 
-import java.util.List;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutionException;
-
-@Deprecated
-public interface OvsdbConfigService {
+public interface OvsdbConfigurationService {
 
     /**
      * This version of insertRow is a short-term replacement for the older & now deprecated method of the same name.
@@ -45,7 +43,7 @@ public interface OvsdbConfigService {
      * @param rowUuid UUID of the row that is being updated
      * @param row Row of table Content to be Updated. Include just those columns that needs to be updated.
      */
-    public Status updateRow(Node node, String tableName, String parentUuid, String rowUuid, Row row);
+    public Status updateRow (Node node, String tableName, String parentUuid, String rowUuid, Row row);
 
     /**
      * This version of deleteRow is a short-term replacement for the older & now deprecated method of the same name.
@@ -56,7 +54,7 @@ public interface OvsdbConfigService {
      * @param rowUuid UUID of the row that is being deleted
      */
 
-    public Status deleteRow(Node node, String tableName, String rowUUID);
+    public Status deleteRow (Node node, String tableName, String rowUUID);
 
     /**
      * This version of getRow is a short-term replacement for the older & now deprecated method of the same name.
@@ -100,7 +98,7 @@ public interface OvsdbConfigService {
      * @return Boolean representing success or failure of the operation.
      *
      * @throws InterruptedException
-     * @throws java.util.concurrent.ExecutionException
+     * @throws ExecutionException
      */
     public Boolean setOFController(Node node, String bridgeUUID) throws InterruptedException, ExecutionException;
 

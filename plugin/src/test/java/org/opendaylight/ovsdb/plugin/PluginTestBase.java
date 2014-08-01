@@ -20,6 +20,9 @@ import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
+import org.opendaylight.ovsdb.plugin.impl.ConfigurationServiceImpl;
+import org.opendaylight.ovsdb.plugin.impl.ConnectionServiceImpl;
+import org.opendaylight.ovsdb.plugin.impl.InventoryServiceImpl;
 
 public abstract class PluginTestBase {
     private final static String identifier = "TEST";
@@ -38,12 +41,12 @@ public abstract class PluginTestBase {
     }
 
     public class TestObjects {
-        public final ConnectionService connectionService;
-        public final InventoryService inventoryService;
-        public final ConfigurationService configurationService;
+        public final ConnectionServiceImpl connectionService;
+        public final InventoryServiceImpl inventoryService;
+        public final ConfigurationServiceImpl configurationService;
         public final Node node;
 
-        public TestObjects(ConnectionService connectionService, Node node, InventoryService inventoryService, ConfigurationService configurationService) {
+        public TestObjects(ConnectionServiceImpl connectionService, Node node, InventoryServiceImpl inventoryService, ConfigurationServiceImpl configurationService) {
             this.connectionService = connectionService;
             this.inventoryService = inventoryService;
             this.configurationService = configurationService;
@@ -66,19 +69,19 @@ public abstract class PluginTestBase {
         Node.NodeIDType.registerIDType("OVS", String.class);
         NodeConnector.NodeConnectorIDType.registerIDType("OVS", String.class,
                 "OVS");
-        InventoryService inventoryService = new InventoryService();
+        InventoryServiceImpl inventoryService = new InventoryServiceImpl();
         inventoryService.init();
 
-        ConnectionService connectionService = new ConnectionService();
+        ConnectionServiceImpl connectionService = new ConnectionServiceImpl();
         connectionService.init();
-        InventoryService inventory = new InventoryService();
+        InventoryServiceImpl inventory = new InventoryServiceImpl();
         inventory.init();
-        connectionService.setInventoryServiceInternal(inventory);
+        connectionService.setOvsdbInventoryService(inventory);
         connectionService.setOvsdbConnection(OvsdbConnectionService.getService());
-        ConfigurationService configurationService = new ConfigurationService();
+        ConfigurationServiceImpl configurationService = new ConfigurationServiceImpl();
         configurationService.setConnectionServiceInternal(connectionService);
-        configurationService.setInventoryServiceInternal(inventory);
-        inventory.setConfigurationService(configurationService);
+        configurationService.setOvsdbInventoryService(inventory);
+        inventory.setOvsdbConfigurationService(configurationService);
 
         Map<ConnectionConstants, String> params = new HashMap<ConnectionConstants, String>();
 

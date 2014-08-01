@@ -11,6 +11,9 @@ package org.opendaylight.ovsdb.plugin;
 
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.ovsdb.plugin.impl.ConfigurationServiceImpl;
+import org.opendaylight.ovsdb.plugin.impl.ConnectionServiceImpl;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,9 +29,9 @@ public class TearDown extends PluginTestBase {
     public void deleteBridge() throws Throwable{
 
         TestObjects testObjects = getTestConnection();
-        ConnectionService connectionService = testObjects.connectionService;
+        ConnectionServiceImpl connectionService = testObjects.connectionService;
         Node node = testObjects.node;
-        ConfigurationService configurationService = testObjects.configurationService;
+        ConfigurationServiceImpl configurationService = testObjects.configurationService;
         configurationService.deleteBridgeDomain(node, BRIDGE_NAME);
     }
 

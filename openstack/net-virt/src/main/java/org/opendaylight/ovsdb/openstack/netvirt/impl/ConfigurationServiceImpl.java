@@ -12,9 +12,8 @@ package org.opendaylight.ovsdb.openstack.netvirt.impl;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.Version;
-import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 
 import com.google.common.collect.Maps;
@@ -27,10 +26,10 @@ import java.net.InetAddress;
 import java.util.Map;
 import java.util.Set;
 
-public class ConfigurationServiceImpl implements ConfigurationService {
+public class ConfigurationServiceImpl implements org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService {
     static final Logger logger = LoggerFactory.getLogger(ConfigurationServiceImpl.class);
 
-    private volatile OvsdbConfigService ovsdbConfigService;
+    private volatile OvsdbConfigurationService ovsdbConfigurationService;
 
     private String integrationBridgeName;
     private String networkBridgeName;
@@ -132,8 +131,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     public InetAddress getTunnelEndPoint(Node node) {
         InetAddress address = null;
         try {
-            Map<String, Row> ovsTable = ovsdbConfigService.getRows(node,
-                    ovsdbConfigService.getTableName(node, OpenVSwitch.class));
+            Map<String, Row> ovsTable = ovsdbConfigurationService.getRows(node,
+                    ovsdbConfigurationService.getTableName(node, OpenVSwitch.class));
 
             if (ovsTable == null) {
                 logger.error("OpenVSwitch table is null for Node {} ", node);
@@ -142,7 +141,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
             // While there is only one entry in the HashMap, we can't access it by index...
             for (Row row : ovsTable.values()) {
-                OpenVSwitch ovsRow = ovsdbConfigService.getTypedRow(node, OpenVSwitch.class, row);
+                OpenVSwitch ovsRow = ovsdbConfigurationService.getTypedRow(node, OpenVSwitch.class, row);
                 Map<String, String> configs = ovsRow.getOtherConfigColumn().getData();
 
                 if (configs == null) {
@@ -184,8 +183,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             }
         }
 
-        Map<String, Row> ovsRows = ovsdbConfigService.getRows(node,
-                ovsdbConfigService.getTableName(node, OpenVSwitch.class));
+        Map<String, Row> ovsRows = ovsdbConfigurationService.getRows(node,
+                ovsdbConfigurationService.getTableName(node, OpenVSwitch.class));
 
         if (ovsRows == null) {
             logger.info("The OVS node {} has no Open_vSwitch rows", node.toString());
@@ -195,7 +194,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         Version ovsVersion = null;
         // While there is only one entry in the HashMap, we can't access it by index...
         for (Row row : ovsRows.values()) {
-            OpenVSwitch ovsRow = ovsdbConfigService.getTypedRow(node, OpenVSwitch.class, row);
+            OpenVSwitch ovsRow = ovsdbConfigurationService.getTypedRow(node, OpenVSwitch.class, row);
             Set<String> versionSet = ovsRow.getOvsVersionColumn().getData();
             if (versionSet != null && versionSet.iterator().hasNext()) {
                 ovsVersion = Version.fromString(versionSet.iterator().next());

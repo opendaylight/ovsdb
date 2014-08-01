@@ -34,7 +34,7 @@ import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
-import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 
 public abstract class OvsdbIntegrationTestBase {
     protected final static String IDENTIFIER = "TEST";
@@ -64,7 +64,8 @@ public abstract class OvsdbIntegrationTestBase {
         String portStr = props.getProperty(SERVER_PORT, DEFAULT_SERVER_PORT);
         String connectionType = props.getProperty(CONNECTION_TYPE, "active");
 
-        IConnectionServiceInternal connection = (IConnectionServiceInternal)ServiceHelper.getGlobalInstance(IConnectionServiceInternal.class, this);
+        OvsdbConnectionService
+                connection = (OvsdbConnectionService)ServiceHelper.getGlobalInstance(OvsdbConnectionService.class, this);
         // If the connection type is active, controller connects to the ovsdb-server
         if (connectionType.equalsIgnoreCase(CONNECTION_TYPE_ACTIVE)) {
             if (addressStr == null) {

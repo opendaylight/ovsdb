@@ -15,9 +15,9 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
-import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
-import org.opendaylight.ovsdb.plugin.OvsdbInventoryListener;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 
@@ -40,8 +40,8 @@ public class PortHandler extends AbstractHandler
      */
     static final Logger logger = LoggerFactory.getLogger(PortHandler.class);
 
-    private volatile OvsdbConfigService ovsdbConfigService;
-    private volatile IConnectionServiceInternal connectionService;
+    private volatile OvsdbConfigurationService ovsdbConfigurationService;
+    private volatile OvsdbConnectionService connectionService;
     private volatile OvsdbInventoryListener ovsdbInventoryListener;
 
     /**
@@ -139,15 +139,15 @@ public class PortHandler extends AbstractHandler
         for (Node node : nodes) {
             try {
                 ConcurrentMap<String, Row> portRows =
-                        this.ovsdbConfigService.getRows(node,
-                                                        ovsdbConfigService.getTableName(node, Port.class));
+                        this.ovsdbConfigurationService.getRows(node,
+                                                        ovsdbConfigurationService.getTableName(node, Port.class));
                 if (portRows != null) {
                     for (Row portRow : portRows.values()) {
-                        Port port = ovsdbConfigService.getTypedRow(node, Port.class, portRow);
+                        Port port = ovsdbConfigurationService.getTypedRow(node, Port.class, portRow);
                         for (UUID interfaceUuid : port.getInterfacesColumn().getData()) {
-                            Interface interfaceRow = (Interface) ovsdbConfigService
+                            Interface interfaceRow = (Interface) ovsdbConfigurationService
                                     .getRow(node,
-                                            ovsdbConfigService.getTableName(node, Interface.class),
+                                            ovsdbConfigurationService.getTableName(node, Interface.class),
                                             interfaceUuid.toString());
 
                             Map<String, String> externalIds = interfaceRow.getExternalIdsColumn().getData();
@@ -165,8 +165,8 @@ public class PortHandler extends AbstractHandler
 
                             if (neutronPortId.equalsIgnoreCase(neutronPort.getPortUUID())) {
                                 logger.trace("neutronPortDeleted: Delete interface {}", interfaceRow.getName());
-                                ovsdbConfigService.deleteRow(node,
-                                                             ovsdbConfigService.getTableName(node, Port.class),
+                                ovsdbConfigurationService.deleteRow(node,
+                                                             ovsdbConfigurationService.getTableName(node, Port.class),
                                                              port.getUuid().toString());
                                 break;
                             }

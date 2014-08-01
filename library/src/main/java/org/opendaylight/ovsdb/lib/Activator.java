@@ -28,11 +28,12 @@ public class Activator extends DependencyActivatorBase {
         manager.add(createComponent()
             .setInterface(OvsdbConnection.class.getName(), null)
             .setImplementation(OvsdbConnectionService.class)
-        );
-        manager.createServiceDependency()
+            .add(createServiceDependency()
                .setService(OvsdbConnectionListener.class)
-               .setCallbacks("registerForPassiveConnection", "unregisterFromPassiveConnection")
-               .setRequired(false);
+               .setCallbacks("registerForPassiveConnection", "unregisterForPassiveConnection")
+               .setRequired(false)
+            )
+        );
     }
 
     @Override

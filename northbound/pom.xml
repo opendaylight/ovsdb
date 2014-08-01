@@ -73,7 +73,7 @@
               com.sun.jersey.spi.container.servlet,
               org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.authorization,
-              org.opendaylight.ovsdb.plugin,
+              org.opendaylight.ovsdb.plugin.api,
               org.opendaylight.ovsdb.lib,
               org.opendaylight.ovsdb.lib.jsonrpc,
               org.opendaylight.ovsdb.lib.notation,

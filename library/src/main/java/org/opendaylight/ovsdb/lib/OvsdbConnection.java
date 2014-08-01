@@ -49,6 +49,12 @@ public interface OvsdbConnection {
     public void registerForPassiveConnection(OvsdbConnectionListener listener);
 
     /**
+     * Method to unregister a Passive Connection Listener with the ConnectionService.
+     * @param listener
+     */
+    public void unregisterForPassiveConnection(OvsdbConnectionListener listener);
+
+    /**
      * Returns a Collection of all the active OVSDB Connections.
      *
      * @return Collection of all the active OVSDB Connections

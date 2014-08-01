@@ -7,7 +7,7 @@
  *
  * Authors : Hugo Trippaers
  */
-package org.opendaylight.ovsdb.plugin;
+package org.opendaylight.ovsdb.plugin.api;
 
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
@@ -16,7 +16,6 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 /**
  * Extends the Status class to allow functions to return a uuid
  */
-@Deprecated
 public class StatusWithUuid extends Status {
     private static final long serialVersionUID = -5413085099514964003L;
     private UUID uuid;

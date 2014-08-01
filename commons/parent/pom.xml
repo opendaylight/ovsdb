@@ -210,6 +210,11 @@
         <artifactId>schema.openvswitch</artifactId>
         <version>${schema.openvswitch.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.opendaylight.ovsdb</groupId>
+        <artifactId>plugin-mdsal-adapter</artifactId>
+        <version>${ovsdb.plugin.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 

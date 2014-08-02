@@ -70,6 +70,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 */
 
 @Path("/v2/")
+@Deprecated
 public class OvsdbNorthboundV2 {
     protected static final Logger logger = LoggerFactory.getLogger(OvsdbNorthboundV2.class);
 

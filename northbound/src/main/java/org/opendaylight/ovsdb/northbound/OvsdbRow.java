@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+@Deprecated
 public class OvsdbRow {
     private static final String PARENTUUID = "parent_uuid";
     private static final String ROW = "row";

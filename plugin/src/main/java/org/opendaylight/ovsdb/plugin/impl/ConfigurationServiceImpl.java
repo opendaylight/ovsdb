@@ -444,6 +444,23 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
         return openFlowPort;
     }
 
+    private Set<String> getCurrentControllerTargets(Node node, final String controllerTableName) {
+        Set<String> currentControllerTargets = new HashSet<>();
+        ConcurrentMap<String, Row> rows = this.getRows(node, controllerTableName);
+
+        if (rows != null) {
+            for (Map.Entry<String, Row> entry : rows.entrySet()) {
+                Controller currController = this.getTypedRow(node, Controller.class, entry.getValue());
+                Column<GenericTableSchema, String> column = currController.getTargetColumn();
+                String currTarget = column.getData();
+                if (currTarget == null) continue;
+                currentControllerTargets.add(currTarget);
+            }
+        }
+
+        return currentControllerTargets;
+    }
+
     @Override
     public Boolean setOFController(Node node, String bridgeUUID) throws InterruptedException, ExecutionException {
         Connection connection = this.getConnection(node);
@@ -484,14 +501,28 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
         }
 
         Status status = null;
+        Set<String> currControllerTargets = null;
         List<InetAddress> ofControllerAddrs = this.getControllerIPAddresses(connection);
         short ofControllerPort = getControllerOFPort();
         for (InetAddress ofControllerAddress : ofControllerAddrs) {
-            String newController = "tcp:"+ofControllerAddress.getHostAddress()+":"+ofControllerPort;
-            Controller controllerRow = connection.getClient().createTypedRowWrapper(Controller.class);
-            controllerRow.setTarget(newController);
-            //ToDo: Status gets overwritten on each iteration. If any operation other than the last fails it's ignored.
-            status = this.insertRow(node, controllerRow.getSchema().getName(), bridgeUUID, controllerRow.getRow());
+            String newControllerTarget = "tcp:"+ofControllerAddress.getHostAddress()+":"+ofControllerPort;
+            Controller newController = connection.getClient().createTypedRowWrapper(Controller.class);
+            newController.setTarget(newControllerTarget);
+            final String controllerTableName = newController.getSchema().getName();
+
+            // get current controller targets, iff this is the first iteration
+            if (currControllerTargets == null) {
+                currControllerTargets = getCurrentControllerTargets(node, controllerTableName);
+            }
+
+            if (currControllerTargets.contains(newControllerTarget)) {
+                //ToDo: Status gets overwritten on each iteration. If any operation other than the last fails it's ignored.
+                status = this.updateRow(node, controllerTableName, null, bridgeUUID, newController.getRow());
+            } else {
+                //ToDo: Status gets overwritten on each iteration. If any operation other than the last fails it's ignored.
+                status = this.insertRow(node, controllerTableName, bridgeUUID, newController.getRow());
+                if (status.isSuccess()) currControllerTargets.add(newControllerTarget);
+            }
         }
 
         if (status != null) {

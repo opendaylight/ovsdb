@@ -34,6 +34,24 @@
       "revId": "93a521f8cd7c10e7a82382ade0cf61055223be18",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_07e071f8",
+        "filename": "ovs-sfc/src/main/java/org/opendaylight/ovsdb/ovssfc/Activator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-02T20:38:39Z",
+      "side": 1,
+      "message": "Right. I would suggest please take a look @ the new refactor for plugin (yet to be merged...) that Dave is pushing.\nSince Activator is something internal to the bundle and not neccessarily an implementation or api, we are following the convention of an \"internal\" bundle. \n\nIs it okay to move this under the internal bundle ?",
+      "parentUuid": "fa82b9bf_d48799b3",
+      "revId": "93a521f8cd7c10e7a82382ade0cf61055223be18",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

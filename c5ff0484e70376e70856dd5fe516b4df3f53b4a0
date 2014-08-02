@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_5432a95f",
+        "filename": "commons/parent/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 338,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-02T02:14:31Z",
+      "side": 1,
+      "message": "I guess this yang tools plugin should appear as added in this gerrit ? :) and not on the plugin refactor",
+      "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f4341d4b",
+        "filename": "plugin-mdsal-adapter/src/main/java/org/opendaylight/ovsdb/plugin/md/OvsdbBindingAwareProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-02T02:14:31Z",
+      "side": 1,
+      "message": ":) Better copyright header prefered.",
+      "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_944351ae",
+        "filename": "plugin-mdsal-adapter/src/main/java/org/opendaylight/ovsdb/plugin/md/OvsdbInventoryManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-02T02:14:31Z",
+      "side": 1,
+      "message": "Better copyright header and javadoc please.",
+      "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_548069bf",
+        "filename": "plugin-mdsal-adapter/src/main/java/org/opendaylight/ovsdb/plugin/md/OvsdbInventoryManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-02T02:14:31Z",
+      "side": 1,
+      "message": "hmm... this is not pretty :-)\nPlease refer to initializeInventoryForNewNode in ConnectionService of Plugin. Long ago :-) I populated the IP-Address and Port of the OVSDB connection which can be properly obtained if we query the inventoryService via getNodeProps(), we get the ip-address and port properly.",
+      "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f482ddc6",
+        "filename": "plugin-mdsal-adapter/src/main/java/org/opendaylight/ovsdb/plugin/md/OvsdbInventoryManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-02T02:14:31Z",
+      "side": 1,
+      "message": "Awesome. we are officially a MD-SAL node. Love it ;)",
+      "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_148661db",
+        "filename": "plugin-mdsal-adapter/src/main/java/org/opendaylight/ovsdb/plugin/md/Utils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-02T02:14:31Z",
+      "side": 1,
+      "message": "Please refer to my previous comment...\nLets not get into this ;)",
+      "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b470d50b",
+        "filename": "plugin-mdsal-adapter/src/main/yang/ovsdb-node-inventory.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-02T02:14:31Z",
+      "side": 1,
+      "message": "Shall we also add the port ?",
+      "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d46b191c",
+        "filename": "plugin-mdsal-adapter/src/main/yang/ovsdb-node-inventory.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-02T02:14:31Z",
+      "side": 1,
+      "message": "Love it. way to go.",
+      "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7476cd07",
+        "filename": "plugin-mdsal-adapter/src/main/yang/ovsdb-node-inventory.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-02T02:14:31Z",
+      "side": 1,
+      "message": "same here. love it.",
+      "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9471110e",
+        "filename": "plugin-mdsal-adapter/src/test/java/org/opendaylight/ovsdb/plugin/md/UtilsTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-02T02:14:31Z",
+      "side": 1,
+      "message": "Good UT. But lets not do this ;)",
+      "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

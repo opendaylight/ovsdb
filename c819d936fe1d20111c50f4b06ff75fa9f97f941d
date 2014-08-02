@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_276255ae",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 494,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-02T17:26:09Z",
+      "side": 1,
+      "message": "Yes. Its a bug !!!\nI fixed it and pushed the changes : https://git.opendaylight.org/gerrit/9613\n\nCan you try the fix and make sure if that addresses this issue ?\n\nThanks for catching the issue.",
+      "revId": "c819d936fe1d20111c50f4b06ff75fa9f97f941d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

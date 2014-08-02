@@ -15,10 +15,24 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperty;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
+
+import javax.inject.Inject;
+
+import org.apache.felix.dm.Component;
+import org.apache.felix.dm.DependencyManager;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
@@ -39,11 +53,6 @@ import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
-import org.apache.felix.dm.Component;
-import org.apache.felix.dm.DependencyManager;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -56,10 +65,6 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.List;
-import java.util.concurrent.ConcurrentMap;
-
-import javax.inject.Inject;
 
 @RunWith(PaxExam.class)
 public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
@@ -204,6 +209,85 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
         dm.remove(componentA);
         dm.remove(componentB);
 
+    }
+
+    @Test
+    public void testSetOFControllers() throws Exception {
+        Thread.sleep(5000);
+        OvsdbConnectionService
+                connectionService = (OvsdbConnectionService)ServiceHelper.getGlobalInstance(OvsdbConnectionService.class, this);
+
+        // 1. Check for the ovsdb Connection as seen by the Plugin layer
+        assertNotNull(connectionService.getNodes());
+        assertTrue(connectionService.getNodes().size() > 0);
+        Node node = connectionService.getNodes().get(0);
+        Connection connection = connectionService.getConnection(node);
+        assertNotNull(connection);
+
+        // 2. Create a bridge with a valid parent_uuid & Assert to make sure the return status is success.
+        final StatusWithUuid status = insertBridge(connection, getOpenVSwitchTableUUID(connection));
+        assertTrue(status.isSuccess());
+
+        // Thread.sleep(3000);  // wait for _real_ controller to be added to bridge... or not (see below **)
+
+        // 3. Test against bug 960: Add same controller multiple times and make sure we do not end up with duplicates.
+        ovsdbConfigurationService.setOFController(node, status.getUuid().toString());
+        ovsdbConfigurationService.setOFController(node, status.getUuid().toString());
+        ovsdbConfigurationService.setOFController(node, status.getUuid().toString());
+        ovsdbConfigurationService.setOFController(node, status.getUuid().toString());
+
+        Row bridgeRow = ovsdbConfigurationService.getRow(node,
+                                                  ovsdbConfigurationService.getTableName(node, Bridge.class),
+                                                  status.getUuid().toString());
+        assertNotNull(bridgeRow);
+        Bridge bridge = ovsdbConfigurationService.getTypedRow(node, Bridge.class, bridgeRow);
+        assertTrue(bridge.getUuid().equals(status.getUuid()));
+
+        final int currControllersSize = bridge.getControllerColumn().getData().size();
+
+        log.debug("Bridge has " + bridge.getControllerColumn().getData().size() + " controllers");
+
+        // ** Note: we assert against 2 or less -- instead of 1 -- to account for the _real_ controller's connection
+        assertTrue( "Too few controllers added to bridge object. Is this bug 960?", currControllersSize >= 1 );
+        assertTrue( "Too many controllers added to bridge object. Is this bug 960?", currControllersSize <= 2 );
+
+        // Removal of bridge created in this test is done via tearDown(). It is done that way, so cleanup is ran
+        // even if test fails.
+    }
+
+    @After
+    public void tearDown() throws InterruptedException {
+        Thread.sleep(5000);
+        OvsdbConnectionService
+                connectionService = (OvsdbConnectionService)ServiceHelper.getGlobalInstance(OvsdbConnectionService.class, this);
+
+        if (connectionService.getNodes() == null) {
+            return;  // no nodes: noop
+        }
+
+        int bridgesRemoved = 0;
+        List<Node> nodes = connectionService.getNodes();
+        for (Node node : nodes) {
+            Map<String, Row> bridgeRows =
+                    ovsdbConfigurationService.getRows(node, ovsdbConfigurationService.getTableName(node, Bridge.class));
+            if (bridgeRows == null) {
+                continue;
+            }
+            for (Row bridgeRow : bridgeRows.values()) {
+                Bridge bridge = ovsdbConfigurationService.getTypedRow(node, Bridge.class, bridgeRow);
+                log.trace("Test clean up removing Bridge " + bridge.getUuid());
+                Status delStatus = ovsdbConfigurationService.deleteRow(node,
+                                                                bridge.getSchema().getName(),
+                                                                bridge.getUuid().toString());
+                assertTrue(delStatus.isSuccess());
+                bridgesRemoved++;
+            }
+        }
+
+        if (bridgesRemoved > 0) {
+            log.debug("Test clean up removed " + bridgesRemoved + " bridges");
+            Thread.sleep(2000); // TODO : Remove this Sleep once the Select operation is resolved.
+        }
     }
 
     public void endToEndApiTest(Connection connection, String parentUuid) throws Exception {

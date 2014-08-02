@@ -16,6 +16,24 @@
       "revId": "93a521f8cd7c10e7a82382ade0cf61055223be18",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_d48799b3",
+        "filename": "ovs-sfc/src/main/java/org/opendaylight/ovsdb/ovssfc/Activator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-08-02T03:23:23Z",
+      "side": 1,
+      "message": "I followed what I see for the netvirt bundle. There I see Activator in the root. There is an api and impl directory with other files. But this commit only has the Activator file for ovssfc, so this comment doesn\u0027t apply to this commit.\n\nI agree that on the next commits might end up needing the api and impl.",
+      "parentUuid": "fa82b9bf_94ecb1bc",
+      "revId": "93a521f8cd7c10e7a82382ade0cf61055223be18",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

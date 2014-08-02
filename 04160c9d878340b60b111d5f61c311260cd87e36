@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_d4523966",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-02T02:20:11Z",
+      "side": 1,
+      "message": "Though I would like to merge this.. I couldnt muster the confidence looking at this insane log :-).\n\nShall we atleast get a confirmation from the MD experts and get a confirmation that it is normal to see such nasty error messages and tracebacks ?\n\nWe really need to address this before it is too late ....",
+      "revId": "04160c9d878340b60b111d5f61c311260cd87e36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

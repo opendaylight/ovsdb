@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_54f5c954",
+        "filename": "northbound/src/main/java/org/opendaylight/ovsdb/northbound/OvsdbNorthboundV2.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-02T02:50:52Z",
+      "side": 1,
+      "message": "Can you please add a proper JavaDoc to point to appropriate new supported NB APIs ?",
+      "revId": "608dfbe08d09ad1f074019d45d8e0717acbf7071",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_f4e73daa",
+        "filename": "northbound/src/main/java/org/opendaylight/ovsdb/northbound/OvsdbRow.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-02T02:50:52Z",
+      "side": 1,
+      "message": "Please add javadoc",
+      "revId": "608dfbe08d09ad1f074019d45d8e0717acbf7071",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_14ebc178",
+        "filename": "northbound/src/main/java/org/opendaylight/ovsdb/northbound/OvsdbRows.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-02T02:50:52Z",
+      "side": 1,
+      "message": "Javadoc",
+      "revId": "608dfbe08d09ad1f074019d45d8e0717acbf7071",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

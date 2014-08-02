@@ -13,6 +13,7 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+// import java.util.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -465,6 +466,45 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         return openFlowPort;
     }
 
+    private Set<String> getCurrentControllerTargets(Node node, final String controllerTableName) {
+        Set<String> currentControllerTargets = new HashSet<>();
+        ConcurrentMap<String, Row> rows = this.getRows(node, controllerTableName);
+
+        if (rows != null) {
+            for (Map.Entry<String, Row> entry : rows.entrySet()) {
+                Controller currController = this.getTypedRow(node, Controller.class, entry.getValue());
+
+                Column<GenericTableSchema, ?> column = currController.getTargetColumn();
+                logger.error("FLAVIO ISSUE current entry {} -> {}", entry.getKey(), column.getData().toString()); // FIXME
+                currentControllerTargets.add( column.getData().toString() );  // FIXME!!!
+
+                // Column<GenericTableSchema, Set<String>> column = currController.getTargetColumn();
+                // Set<String> currTargets = column.getData();
+
+                // if (currTargets == null) continue;
+                // for (String currTarget : currTargets) {
+                //     logger.error("FLAVIO FOO current entry {} : {} data {}", entry.getKey(), currTarget);  // FIXME
+                //     currentControllerTargets.add(currTarget);
+                // }
+
+                // FLAVIO needs help here. From first looks, Column is of type: Column<GenericTableSchema, Set<String>>
+                // However, it is clear that column.getData() is returning a String object. Because of that, the
+                // iteration above blows up like this:
+                //
+                // plugin.OvsdbPluginIT
+                // testSetOFControllers(org.opendaylight.ovsdb.integrationtest.plugin.OvsdbPluginIT)  Time elapsed: 18.394 sec  <<< ERROR!
+                //        java.lang.ClassCastException: java.lang.String cannot be cast to java.util.Set
+                // at org.opendaylight.ovsdb.plugin.ConfigurationService.getCurrentControllerTargets(ConfigurationService.java:482)
+                // at org.opendaylight.ovsdb.plugin.ConfigurationService.setOFController(ConfigurationService.java:554)
+                // at org.opendaylight.ovsdb.integrationtest.plugin.OvsdbPluginIT.testSetOFControllers(OvsdbPluginIT.java:231)
+                //
+
+            }
+        }
+
+        return currentControllerTargets;
+    }
+
     @Override
     public Boolean setOFController(Node node, String bridgeUUID) throws InterruptedException, ExecutionException {
         Connection connection = this.getConnection(node);
@@ -505,14 +545,31 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         }
 
         Status status = null;
+        Set<String> currControllerTargets = null;
         List<InetAddress> ofControllerAddrs = this.getControllerIPAddresses(connection);
         short ofControllerPort = getControllerOFPort();
         for (InetAddress ofControllerAddress : ofControllerAddrs) {
-            String newController = "tcp:"+ofControllerAddress.getHostAddress()+":"+ofControllerPort;
-            Controller controllerRow = connection.getClient().createTypedRowWrapper(Controller.class);
-            controllerRow.setTarget(ImmutableSet.of(newController));
-            //ToDo: Status gets overwritten on each iteration. If any operation other than the last fails it's ignored.
-            status = this.insertRow(node, controllerRow.getSchema().getName(), bridgeUUID, controllerRow.getRow());
+            String newControllerTarget = "tcp:"+ofControllerAddress.getHostAddress()+":"+ofControllerPort;
+            Controller newController = connection.getClient().createTypedRowWrapper(Controller.class);
+            newController.setTarget(ImmutableSet.of(newControllerTarget));  // FIXME: REALLY?!?
+            final String controllerTableName = newController.getSchema().getName();
+
+            // get current controller targets, iff this is the first iteration
+            if (currControllerTargets == null) {
+                currControllerTargets = getCurrentControllerTargets(node, controllerTableName);
+            }
+
+            logger.error("FLAVIO these are the controller targets for the bridge {}:  {} so I will update {} ? {}",  // FIXME
+                    bridgeUUID, currControllerTargets, newControllerTarget, currControllerTargets.contains(newControllerTarget));  // FIXME
+
+            if (currControllerTargets.contains(newControllerTarget)) {
+                //ToDo: Status gets overwritten on each iteration. If any operation other than the last fails it's ignored.
+                status = this.updateRow(node, controllerTableName, null, bridgeUUID, newController.getRow());
+            } else {
+                //ToDo: Status gets overwritten on each iteration. If any operation other than the last fails it's ignored.
+                status = this.insertRow(node, controllerTableName, bridgeUUID, newController.getRow());
+                if (status.isSuccess()) currControllerTargets.add(newControllerTarget);
+            }
         }
 
         if (status != null) {

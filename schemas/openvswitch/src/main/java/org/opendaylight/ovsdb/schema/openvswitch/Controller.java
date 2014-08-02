@@ -27,10 +27,10 @@ import java.util.Set;
 public interface Controller extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn (name = "target", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
-    public Column<GenericTableSchema, Set <String>> getTargetColumn();
+    public Column<GenericTableSchema, String> getTargetColumn();
 
     @TypedColumn (name = "target", method = MethodType.SETDATA, fromVersion = "1.0.0")
-    public void setTarget(Set <String> target);
+    public void setTarget(String target);
 
     @TypedColumn (name = "controller_burst_limit", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
     public Column<GenericTableSchema, Long> getBurstLimitColumn();

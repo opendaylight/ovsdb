@@ -510,7 +510,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         for (InetAddress ofControllerAddress : ofControllerAddrs) {
             String newController = "tcp:"+ofControllerAddress.getHostAddress()+":"+ofControllerPort;
             Controller controllerRow = connection.getClient().createTypedRowWrapper(Controller.class);
-            controllerRow.setTarget(ImmutableSet.of(newController));
+            controllerRow.setTarget(newController);
             //ToDo: Status gets overwritten on each iteration. If any operation other than the last fails it's ignored.
             status = this.insertRow(node, controllerRow.getSchema().getName(), bridgeUUID, controllerRow.getRow());
         }

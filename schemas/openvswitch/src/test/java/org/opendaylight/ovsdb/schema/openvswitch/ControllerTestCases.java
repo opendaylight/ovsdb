@@ -10,6 +10,9 @@
 
 package org.opendaylight.ovsdb.schema.openvswitch;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.io.IOException;
@@ -17,9 +20,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
-import com.google.common.collect.ImmutableSet;
-
-import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -47,9 +47,9 @@ public class ControllerTestCases extends OpenVswitchSchemaTestBase {
     @Test
     public void createTypedController() throws IOException, InterruptedException, ExecutionException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         Controller controller1 = ovs.createTypedRowWrapper(Controller.class);
-        controller1.setTarget(ImmutableSet.of("tcp:1.1.1.1:6640"));
+        controller1.setTarget("tcp:1.1.1.1:6640");
         Controller controller2 = ovs.createTypedRowWrapper(Controller.class);
-        controller2.setTarget(ImmutableSet.of("tcp:2.2.2.2:6640"));
+        controller2.setTarget("tcp:2.2.2.2:6640");
 
         Bridge bridge = ovs.getTypedRowWrapper(Bridge.class, null);
 
@@ -66,19 +66,25 @@ public class ControllerTestCases extends OpenVswitchSchemaTestBase {
 
         ListenableFuture<List<OperationResult>> results = transactionBuilder.execute();
         List<OperationResult> operationResults = results.get();
-        Assert.assertFalse(operationResults.isEmpty());
+        assertFalse(operationResults.isEmpty());
         // Check if Results matches the number of operations in transaction
-        Assert.assertEquals(transactionBuilder.getOperations().size(), operationResults.size());
+        assertEquals(transactionBuilder.getOperations().size(), operationResults.size());
         logger.info("Insert & Mutate operation results for controller1 = " + operationResults);
         // Check for any errors
         for (OperationResult result : operationResults) {
-            Assert.assertNull(result.getError());
+            assertNull(result.getError());
         }
 
+        UUID controllerUUID = operationResults.get(0).getUuid();
         Thread.sleep(3000); // Wait for cache to catchup
+
+        Row controllerRow = OpenVswitchSchemaSuiteIT.getTableCache().get(controller1.getSchema().getName()).get(controllerUUID);
+        Controller monitoredController = ovs.getTypedRowWrapper(Controller.class, controllerRow);
+        assertEquals(controller1.getTargetColumn().getData(), monitoredController.getTargetColumn().getData());
+
         Row bridgeRow = OpenVswitchSchemaSuiteIT.getTableCache().get(bridge.getSchema().getName()).get(OpenVswitchSchemaSuiteIT.getTestBridgeUuid());
         Bridge monitoredBridge = ovs.getTypedRowWrapper(Bridge.class, bridgeRow);
-        Assert.assertEquals(1, monitoredBridge.getControllerColumn().getData().size());
+        assertEquals(1, monitoredBridge.getControllerColumn().getData().size());
 
         transactionBuilder = ovs.transactBuilder(OpenVswitchSchemaSuiteIT.dbSchema)
                 .add(op.insert(controller2.getSchema())
@@ -92,18 +98,18 @@ public class ControllerTestCases extends OpenVswitchSchemaTestBase {
 
         results = transactionBuilder.execute();
         operationResults = results.get();
-        Assert.assertFalse(operationResults.isEmpty());
+        assertFalse(operationResults.isEmpty());
         // Check if Results matches the number of operations in transaction
-        Assert.assertEquals(transactionBuilder.getOperations().size(), operationResults.size());
+        assertEquals(transactionBuilder.getOperations().size(), operationResults.size());
         logger.info("Insert & Mutate operation results for controller2 = " + operationResults);
         // Check for any errors
         for (OperationResult result : operationResults) {
-            Assert.assertNull(result.getError());
+            assertNull(result.getError());
         }
         Thread.sleep(3000); // Wait for cache to catchup
         bridgeRow = OpenVswitchSchemaSuiteIT.getTableCache().get(bridge.getSchema().getName()).get(OpenVswitchSchemaSuiteIT.getTestBridgeUuid());
         monitoredBridge = ovs.getTypedRowWrapper(Bridge.class, bridgeRow);
-        Assert.assertEquals(2, monitoredBridge.getControllerColumn().getData().size());
+        assertEquals(2, monitoredBridge.getControllerColumn().getData().size());
     }
 
     @Override

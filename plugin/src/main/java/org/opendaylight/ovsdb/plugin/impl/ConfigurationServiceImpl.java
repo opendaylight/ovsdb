@@ -51,10 +51,10 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
 import org.opendaylight.ovsdb.plugin.api.Connection;
 import org.opendaylight.ovsdb.plugin.api.OvsVswitchdSchemaConstants;
-import org.opendaylight.ovsdb.plugin.api.StatusWithUuid;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryService;
+import org.opendaylight.ovsdb.plugin.api.StatusWithUuid;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
@@ -67,6 +67,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
 
 public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigService,
@@ -243,6 +244,7 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
      * An ideal insertRow must be able to take in multiple Rows, which includes the
      * Row being inserted in one Table and other Rows that needs mutate in other Tables.
      */
+    @Deprecated
     @Override
     public StatusWithUuid insertRow(Node node, String tableName, String parentUuid, Row<GenericTableSchema> row) {
         String[] parentColumn = OvsVswitchdSchemaConstants.getParentColumnToMutate(tableName);
@@ -250,12 +252,12 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
             parentColumn = new String[]{null, null};
         }
 
-        Connection connection = connectionService.getConnection(node);
-        OvsdbClient client = connection.getClient();
-
         if (parentUuid == null) {
             parentUuid = this.getSpecialCaseParentUUID(node, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName);
         }
+
+        Connection connection = connectionService.getConnection(node);
+        OvsdbClient client = connection.getClient();
         logger.debug("insertRow Connection : {} Table : {} ParentTable : {} Parent Column: {} Parent UUID : {} Row : {}",
                      client.getConnectionInfo(), tableName, parentColumn[0], parentColumn[1], parentUuid, row);
 
@@ -285,24 +287,66 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
             // TODO Auto-generated catch block
             return new StatusWithUuid(StatusCode.INTERNALERROR, e.getLocalizedMessage());
         }
+    }
 
+    @Deprecated
+    @Override
+    public Status updateRow (Node node, String tableName, String parentUUID, String rowUuid, Row row) {
+        return this.updateRow(node, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName, new UUID(rowUuid), row, false);
+    }
+
+    @Deprecated
+    @Override
+    public Status deleteRow(Node node, String tableName, String uuid) {
+        return this.deleteRow(node, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName, new UUID(uuid));
+    }
+
+    @Deprecated
+    @Override
+    public ConcurrentMap<String, Row> getRows(Node node, String tableName) {
+        return ovsdbInventoryService.getTableCache(node, OvsVswitchdSchemaConstants.DATABASE_NAME,  tableName);
+    }
+
+    @Deprecated
+    @Override
+    public Row getRow(Node node, String tableName, String uuid) {
+        return this.getRow(node, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName, new UUID(uuid));
+    }
+
+    @Deprecated
+    @Override
+    public List<String> getTables(Node node) {
+        return this.getTables(node, OvsVswitchdSchemaConstants.DATABASE_NAME);
     }
 
     @Override
-    public Status updateRow (Node node, String tableName, String parentUUID, String rowUUID, Row row) {
-        String databaseName = OvsVswitchdSchemaConstants.DATABASE_NAME;
+    public StatusWithUuid insertRow(Node node, String databaseName, String tableName, UUID parentUuid,
+                                    Row<GenericTableSchema> row) {
+        return this.insertRow(node, databaseName, tableName, parentUuid, row, null);
+    }
+
+    @Override
+    public StatusWithUuid insertRow(Node node, String databaseName, String tableName, UUID parentUuid,
+                                    Row<GenericTableSchema> row, Map<UUID, Row<GenericTableSchema>> childReferences) {
+        // TODO : Need a schema independent way to obtain the Parent Table and Parent Column to mutate a row in
+        // parent table.
+        return new StatusWithUuid(StatusCode.NOTIMPLEMENTED);
+    }
+
+    @Override
+    public Status updateRow(Node node, String databaseName, String tableName, UUID rowUuid, Row<GenericTableSchema> row, boolean mutate) {
         Connection connection = connectionService.getConnection(node);
         OvsdbClient client = connection.getClient();
 
         logger.debug("updateRow : Connection : {} databaseName : {} tableName : {} rowUUID : {} row : {}",
-                      client.getConnectionInfo(), databaseName, tableName, rowUUID, row.toString());
+                      client.getConnectionInfo(), databaseName, tableName, rowUuid.toString(), row.toString());
         try{
             DatabaseSchema dbSchema = client.getDatabaseSchema(databaseName);
             TransactionBuilder transactionBuilder = client.transactBuilder(dbSchema);
             TableSchema<GenericTableSchema> tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
             ColumnSchema<GenericTableSchema, UUID> _uuid = tableSchema.column("_uuid", UUID.class);
             transactionBuilder.add(op.update(tableSchema, row)
-                                     .where(_uuid.opEqual(new UUID(rowUUID)))
+                                     .where(_uuid.opEqual(rowUuid))
                                      .build());
 
             ListenableFuture<List<OperationResult>> results = transactionBuilder.execute();
@@ -344,8 +388,7 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
     }
 
     @Override
-    public Status deleteRow(Node node, String tableName, String uuid) {
-        String databaseName = OvsVswitchdSchemaConstants.DATABASE_NAME;
+    public Status deleteRow(Node node, String databaseName, String tableName, UUID rowUuid) {
         Connection connection = connectionService.getConnection(node);
         OvsdbClient client = connection.getClient();
 
@@ -355,12 +398,12 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
         }
 
         logger.debug("deleteRow : Connection : {} databaseName : {} tableName : {} Uuid : {} ParentTable : {} ParentColumn : {}",
-                client.getConnectionInfo(), databaseName, tableName, uuid, parentColumn[0], parentColumn[1]);
+                client.getConnectionInfo(), databaseName, tableName, rowUuid.toString(), parentColumn[0], parentColumn[1]);
 
         DatabaseSchema dbSchema = client.getDatabaseSchema(databaseName);
         TransactionBuilder transactionBuilder = client.transactBuilder(dbSchema);
         this.processDeleteTransaction(client, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName,
-                                      parentColumn[0], parentColumn[1], uuid, transactionBuilder);
+                                      parentColumn[0], parentColumn[1], rowUuid.toString(), transactionBuilder);
 
         ListenableFuture<List<OperationResult>> results = transactionBuilder.execute();
         List<OperationResult> operationResults;
@@ -380,24 +423,36 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
         }
 
         return new Status(StatusCode.SUCCESS);
+
     }
 
     @Override
-    public ConcurrentMap<String, Row> getRows(Node node, String tableName) {
-        ConcurrentMap<String, Row> ovsTable = ovsdbInventoryService.getTableCache(node, OvsVswitchdSchemaConstants.DATABASE_NAME,  tableName);
+    public Row getRow(Node node, String databaseName, String tableName, UUID uuid) {
+        Map<String, Row> ovsTable = ovsdbInventoryService.getTableCache(node, databaseName, tableName);
+        if (ovsTable == null) return null;
+        return ovsTable.get(uuid.toString());
+    }
+
+    @Override
+    public ConcurrentMap<UUID, Row> getRows(Node node, String databaseName, String tableName) {
+        ConcurrentMap<String, Row> ovsTable = ovsdbInventoryService.getTableCache(node, databaseName,  tableName);
+        ConcurrentMap<UUID, Row> rows = Maps.newConcurrentMap();
+        for (String key : ovsTable.keySet()) {
+            rows.put(new UUID(key), ovsTable.get(key));
+        }
+        return rows;
+    }
+
+    @Override
+    public ConcurrentMap<UUID, Row> getRows(Node node, String databaseName, String tableName, String fiqlQuery) {
+        ConcurrentMap<UUID, Row> ovsTable = this.getRows(node, databaseName,  tableName);
+        // Apply fiqlQuery filter on ovsTable
         return ovsTable;
     }
 
     @Override
-    public Row getRow(Node node, String tableName, String uuid) {
-        Map<String, Row> ovsTable = ovsdbInventoryService.getTableCache(node, OvsVswitchdSchemaConstants.DATABASE_NAME,  tableName);
-        if (ovsTable == null) return null;
-        return ovsTable.get(uuid);
-    }
-
-    @Override
-    public List<String> getTables(Node node) {
-        ConcurrentMap<String, ConcurrentMap<String, Row>> cache  = ovsdbInventoryService.getCache(node, OvsVswitchdSchemaConstants.DATABASE_NAME);
+    public List<String> getTables(Node node, String databaseName) {
+        ConcurrentMap<String, ConcurrentMap<String, Row>> cache  = ovsdbInventoryService.getCache(node, databaseName);
         if (cache == null) return null;
         return new ArrayList<String>(cache.keySet());
     }

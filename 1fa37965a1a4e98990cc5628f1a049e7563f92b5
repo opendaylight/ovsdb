@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_ca75b0cb",
+        "filename": "commons/parent/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 335,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-08-04T12:34:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_f4b3bd07",
+      "revId": "1fa37965a1a4e98990cc5628f1a049e7563f92b5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_d4cc798b",
         "filename": "integrationtest/src/test/java/org/opendaylight/ovsdb/integrationtest/neutron/NeutronIT.java",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2014-08-01T23:52:37Z",
       "side": 1,
       "message": "Can you rename the variable to netvirtConfigurationService ?",
+      "revId": "1fa37965a1a4e98990cc5628f1a049e7563f92b5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6a80248b",
+        "filename": "integrationtest/src/test/java/org/opendaylight/ovsdb/integrationtest/neutron/NeutronIT.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-08-04T12:34:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_d4cc798b",
       "revId": "1fa37965a1a4e98990cc5628f1a049e7563f92b5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_4a51a034",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/Activator.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-08-04T12:34:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_54a8698c",
+      "revId": "1fa37965a1a4e98990cc5628f1a049e7563f92b5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_94a7d1a6",
         "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/OvsdbConnection.java",
         "patchSetId": 4
@@ -64,6 +118,24 @@
       "writtenOn": "2014-08-01T23:52:37Z",
       "side": 1,
       "message": "Same here :)",
+      "revId": "1fa37965a1a4e98990cc5628f1a049e7563f92b5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8a29e89c",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/OvsdbConnection.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-08-04T12:34:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_94a7d1a6",
       "revId": "1fa37965a1a4e98990cc5628f1a049e7563f92b5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_2a1c5c77",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-08-04T12:34:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_34ba85c1",
+      "revId": "1fa37965a1a4e98990cc5628f1a049e7563f92b5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_d4cf9954",
         "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/Connection.java",
         "patchSetId": 4
@@ -98,6 +188,24 @@
       "writtenOn": "2014-08-01T23:52:37Z",
       "side": 1,
       "message": "Please add comments and point the user to the replacement APIs (some good pointers : http://javax0.wordpress.com/2014/02/05/use-java-annotation-deprecated-the-right-way/)",
+      "revId": "1fa37965a1a4e98990cc5628f1a049e7563f92b5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ca5cd04d",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/Connection.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-08-04T12:34:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_d4cf9954",
       "revId": "1fa37965a1a4e98990cc5628f1a049e7563f92b5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_6a57c426",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/IConnectionServiceInternal.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-08-04T12:34:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_74da4d18",
+      "revId": "1fa37965a1a4e98990cc5628f1a049e7563f92b5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_94d591e6",
         "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/InventoryServiceInternal.java",
         "patchSetId": 4
@@ -132,6 +258,24 @@
       "writtenOn": "2014-08-01T23:52:37Z",
       "side": 1,
       "message": "Same here \u0026 why was the parent Inerface removed ?",
+      "revId": "1fa37965a1a4e98990cc5628f1a049e7563f92b5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4a38c0ee",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/InventoryServiceInternal.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-08-04T12:34:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_94d591e6",
       "revId": "1fa37965a1a4e98990cc5628f1a049e7563f92b5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_ea3af4e5",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/OvsVswitchdSchemaConstants.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-08-04T12:34:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_34084591",
+      "revId": "1fa37965a1a4e98990cc5628f1a049e7563f92b5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_540b898d",
         "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/OvsdbConfigService.java",
         "patchSetId": 4
@@ -166,6 +328,24 @@
       "writtenOn": "2014-08-01T23:52:37Z",
       "side": 1,
       "message": "same here",
+      "revId": "1fa37965a1a4e98990cc5628f1a049e7563f92b5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0a3e38da",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/OvsdbConfigService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-08-04T12:34:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_540b898d",
       "revId": "1fa37965a1a4e98990cc5628f1a049e7563f92b5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_aa286c9a",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/OvsdbInventoryListener.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-08-04T12:34:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_f4fdfd6e",
+      "revId": "1fa37965a1a4e98990cc5628f1a049e7563f92b5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_14018169",
         "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/StatusWithUuid.java",
         "patchSetId": 4
@@ -206,6 +404,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_ca2370bb",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/StatusWithUuid.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-08-04T12:34:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_14018169",
+      "revId": "1fa37965a1a4e98990cc5628f1a049e7563f92b5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_b4fbf577",
         "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/api/OvsVswitchdSchemaConstants.java",
         "patchSetId": 4
@@ -217,6 +433,24 @@
       "writtenOn": "2014-08-01T23:52:37Z",
       "side": 1,
       "message": "Copyright missing.",
+      "revId": "1fa37965a1a4e98990cc5628f1a049e7563f92b5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4a1f606c",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/api/OvsVswitchdSchemaConstants.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-08-04T12:34:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_b4fbf577",
       "revId": "1fa37965a1a4e98990cc5628f1a049e7563f92b5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

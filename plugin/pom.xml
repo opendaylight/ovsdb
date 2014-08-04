@@ -164,7 +164,8 @@
             <Export-Package>
               <!-- ToDo: Remove this line after the deprecated APIs have been removed -->
               org.opendaylight.ovsdb.plugin,
-              org.opendaylight.ovsdb.plugin.api
+              org.opendaylight.ovsdb.plugin.api,
+              org.opendaylight.ovsdb.plugin.error
             </Export-Package>
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>

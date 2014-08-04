@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_e511c552",
+        "filename": "plugin-mdsal-adapter/src/main/java/org/opendaylight/ovsdb/plugin/md/Activator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-08-04T12:14:44Z",
+      "side": 1,
+      "message": "Should all these copyrights using 2014 now?",
+      "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_f4341d4b",
         "filename": "plugin-mdsal-adapter/src/main/java/org/opendaylight/ovsdb/plugin/md/OvsdbBindingAwareProvider.java",
         "patchSetId": 1
@@ -115,6 +132,23 @@
       "writtenOn": "2014-08-04T12:11:06Z",
       "side": 1,
       "message": "I would suggest suffixing all groupings with -attributes (so this becomes ovsdb-bridge-attributes)... this convention radically reduces the risk of duplicate classes, since each grouping generates an interface... and you may want to reuse the name ovsd-bridge in a more concrete context.",
+      "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6a058412",
+        "filename": "plugin-mdsal-adapter/src/main/yang/ovsdb-node-inventory.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-08-04T12:14:44Z",
+      "side": 1,
+      "message": "Should models have a top ovsdb container and then the next groups just bridge? Seems redundant having ovsdb-??? for everything. Or is this what Ed is saying not to do?",
       "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

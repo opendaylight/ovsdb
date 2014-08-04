@@ -57,6 +57,7 @@ public class MonitorTestCases extends OpenVswitchSchemaTestBase {
         List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
         monitorRequests.add(this.getAllColumnsMonitorRequest(Bridge.class));
         monitorRequests.add(this.getAllColumnsMonitorRequest(OpenVSwitch.class));
+        monitorRequests.add(this.getAllColumnsMonitorRequest(Controller.class));
 
         TableUpdates updates = ovs.monitor(OpenVswitchSchemaSuiteIT.dbSchema, monitorRequests, new UpdateMonitor());
         Assert.assertNotNull(updates);
@@ -77,8 +78,8 @@ public class MonitorTestCases extends OpenVswitchSchemaTestBase {
      */
     public <T extends TypedBaseTable<GenericTableSchema>> MonitorRequest<GenericTableSchema> getAllColumnsMonitorRequest (Class <T> klazz) {
         TypedBaseTable<GenericTableSchema> table = ovs.createTypedRowWrapper(klazz);
-        GenericTableSchema bridgeSchema = table.getSchema();
-        Set<String> columns = bridgeSchema.getColumns();
+        GenericTableSchema tableSchema = table.getSchema();
+        Set<String> columns = tableSchema.getColumns();
         MonitorRequestBuilder<GenericTableSchema> bridgeBuilder = MonitorRequestBuilder.builder(table.getSchema());
         for (String column : columns) {
             bridgeBuilder.addColumn(column);

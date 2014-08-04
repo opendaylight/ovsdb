@@ -8,17 +8,13 @@
  * Authors : Madhu Venugopal
  */
 
-package org.opendaylight.ovsdb.plugin;
-
-import com.google.common.collect.Maps;
+package org.opendaylight.ovsdb.plugin.api;
 
 import java.util.Map;
 
-/**
- * Open vSwitch Schema Constants
- * @deprecated as of release 1.0.0, replaced by {@link org.opendaylight.ovsdb.plugin.api.OvsVswitchdSchemaConstants }
- */
-@Deprecated public class OvsVswitchdSchemaConstants {
+import com.google.common.collect.Maps;
+
+public final class OvsVswitchdSchemaConstants {
     public static String DATABASE_NAME = "Open_vSwitch";
 
     private static final String OVSDB_AUTOCONFIGURECONTROLLER = "ovsdb.autoconfigurecontroller";

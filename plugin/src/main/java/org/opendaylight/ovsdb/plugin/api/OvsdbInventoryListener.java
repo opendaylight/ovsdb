@@ -7,16 +7,12 @@
  *
  * Authors : Madhu Venugopal, Brent Salisbury
  */
-package org.opendaylight.ovsdb.plugin;
+package org.opendaylight.ovsdb.plugin.api;
 
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.lib.notation.Row;
 
-/**
- * OVSDB Plugin Inventory Listener
- * @deprecated as of release 1.0.0, replaced by {@link org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener }
- */
-@Deprecated public interface OvsdbInventoryListener {
+public interface OvsdbInventoryListener {
     public void nodeAdded(Node node);
     public void nodeRemoved(Node node);
     public void rowAdded(Node node, String tableName, String uuid, Row row);

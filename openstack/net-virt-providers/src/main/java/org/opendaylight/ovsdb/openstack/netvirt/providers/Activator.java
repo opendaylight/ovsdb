@@ -15,12 +15,11 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
-import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
-import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
-import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 
 import org.apache.felix.dm.Component;
 
@@ -93,7 +92,7 @@ public class Activator extends ComponentActivatorAbstractBase {
 
             c.setInterface(NetworkingProvider.class.getName(), of10Properties);
             c.add(createServiceDependency()
-                          .setService(ConfigurationService.class)
+                          .setService(org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService.class)
                           .setRequired(true));
             c.add(createServiceDependency()
                           .setService(BridgeConfigurationManager.class)
@@ -101,8 +100,8 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency()
                           .setService(TenantNetworkManager.class)
                           .setRequired(true));
-            c.add(createServiceDependency().setService(OvsdbConfigService.class).setRequired(true));
-            c.add(createServiceDependency().setService(IConnectionServiceInternal.class).setRequired(true));
+            c.add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true));
+            c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
             c.add(createServiceDependency().
                     setService(IForwardingRulesManager.class).
                     setRequired(true));
@@ -118,7 +117,7 @@ public class Activator extends ComponentActivatorAbstractBase {
 
             c.setInterface(NetworkingProvider.class.getName(), of13Properties);
             c.add(createServiceDependency()
-                          .setService(ConfigurationService.class)
+                          .setService(org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService.class)
                           .setRequired(true));
             c.add(createServiceDependency()
                           .setService(BridgeConfigurationManager.class)
@@ -126,8 +125,8 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency()
                           .setService(TenantNetworkManager.class)
                           .setRequired(true));
-            c.add(createServiceDependency().setService(OvsdbConfigService.class).setRequired(true));
-            c.add(createServiceDependency().setService(IConnectionServiceInternal.class).setRequired(true));
+            c.add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true));
+            c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
             c.add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true));
         }
     }

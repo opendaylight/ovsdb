@@ -20,7 +20,6 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetAware;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
-import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
@@ -30,9 +29,9 @@ import org.opendaylight.ovsdb.openstack.netvirt.impl.ConfigurationServiceImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.ProviderNetworkManagerImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.TenantNetworkManagerImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.VlanConfigurationCacheImpl;
-import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
-import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
-import org.opendaylight.ovsdb.plugin.OvsdbInventoryListener;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
 
 import org.apache.felix.dm.Component;
 
@@ -98,22 +97,23 @@ public class Activator extends ComponentActivatorAbstractBase {
     public void configureInstance(Component c, Object imp,
                                   String containerName) {
         if (imp.equals(ConfigurationServiceImpl.class)) {
-            c.setInterface(ConfigurationService.class.getName(), null);
-            c.add(createServiceDependency().setService(OvsdbConfigService.class));
+            c.setInterface(org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService.class.getName(), null);
+            c.add(createServiceDependency().setService(OvsdbConfigurationService.class));
         }
 
         if (imp.equals(BridgeConfigurationManagerImpl.class)) {
             c.setInterface(BridgeConfigurationManager.class.getName(), null);
-            c.add(createServiceDependency().setService(ConfigurationService.class).setRequired(true));
+            c.add(createServiceDependency().setService(
+                    org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService.class).setRequired(true));
             c.add(createServiceDependency().setService(NetworkingProviderManager.class));
-            c.add(createServiceDependency().setService(OvsdbConfigService.class));
+            c.add(createServiceDependency().setService(OvsdbConfigurationService.class));
         }
 
         if (imp.equals(TenantNetworkManagerImpl.class)) {
             c.setInterface(TenantNetworkManager.class.getName(), null);
             c.add(createServiceDependency().setService(NetworkingProviderManager.class));
-            c.add(createServiceDependency().setService(OvsdbConfigService.class));
-            c.add(createServiceDependency().setService(IConnectionServiceInternal.class));
+            c.add(createServiceDependency().setService(OvsdbConfigurationService.class));
+            c.add(createServiceDependency().setService(OvsdbConnectionService.class));
             c.add(createServiceDependency().
                     setService(INeutronNetworkCRUD.class).
                     setRequired(true));
@@ -125,7 +125,7 @@ public class Activator extends ComponentActivatorAbstractBase {
 
         if (imp.equals(VlanConfigurationCacheImpl.class)) {
             c.setInterface(VlanConfigurationCache.class.getName(), null);
-            c.add(createServiceDependency().setService(OvsdbConfigService.class));
+            c.add(createServiceDependency().setService(OvsdbConfigurationService.class));
             c.add(createServiceDependency().setService(TenantNetworkManager.class));
         }
 
@@ -133,9 +133,10 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.setInterface(INeutronNetworkAware.class.getName(), null);
             c.add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true));
             c.add(createServiceDependency().setService(BridgeConfigurationManager.class).setRequired(true));
-            c.add(createServiceDependency().setService(ConfigurationService.class).setRequired(true));
-            c.add(createServiceDependency().setService(OvsdbConfigService.class).setRequired(true));
-            c.add(createServiceDependency().setService(IConnectionServiceInternal.class).setRequired(true));
+            c.add(createServiceDependency().setService(
+                    org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService.class).setRequired(true));
+            c.add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true));
+            c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
             c.add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true));
             c.add(createServiceDependency().setService(OvsdbInventoryListener.class).setRequired(true));
         }
@@ -146,20 +147,21 @@ public class Activator extends ComponentActivatorAbstractBase {
 
         if (imp.equals(PortHandler.class)) {
             c.setInterface(INeutronPortAware.class.getName(), null);
-            c.add(createServiceDependency().setService(OvsdbConfigService.class).setRequired(true));
-            c.add(createServiceDependency().setService(IConnectionServiceInternal.class).setRequired(true));
+            c.add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true));
+            c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
             c.add(createServiceDependency().setService(OvsdbInventoryListener.class).setRequired(true));
         }
 
         if (imp.equals(SouthboundHandler.class)) {
             c.setInterface(new String[] {OvsdbInventoryListener.class.getName(),
                                          IInventoryListener.class.getName()}, null);
-            c.add(createServiceDependency().setService(ConfigurationService.class).setRequired(true));
+            c.add(createServiceDependency().setService(
+                    org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService.class).setRequired(true));
             c.add(createServiceDependency().setService(BridgeConfigurationManager.class).setRequired(true));
             c.add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true));
             c.add(createServiceDependency().setService(NetworkingProviderManager.class).setRequired(true));
-            c.add(createServiceDependency().setService(OvsdbConfigService.class).setRequired(true));
-            c.add(createServiceDependency().setService(IConnectionServiceInternal.class).setRequired(true));
+            c.add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true));
+            c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
         }
 
         if (imp.equals(PortSecurityHandler.class)) {
@@ -170,7 +172,7 @@ public class Activator extends ComponentActivatorAbstractBase {
         if (imp.equals(ProviderNetworkManagerImpl.class)) {
             c.setInterface(NetworkingProviderManager.class.getName(), null);
             c.add(createServiceDependency()
-                    .setService(ConfigurationService.class)
+                    .setService(org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService.class)
                     .setRequired(true));
             c.add(createServiceDependency()
                     .setService(NetworkingProvider.class)

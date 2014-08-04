@@ -18,6 +18,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.networkconfig.bridgedomain.ConfigConstants;
+import org.opendaylight.ovsdb.plugin.impl.ConfigurationServiceImpl;
+import org.opendaylight.ovsdb.plugin.impl.ConnectionServiceImpl;
+import org.opendaylight.ovsdb.plugin.internal.Encapsulation;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,9 +44,9 @@ public class BridgeDomainConfigPortTestCases extends PluginTestBase {
     @Test
     public void addPort() throws Throwable{
         TestObjects testObjects = getTestConnection();
-        ConnectionService connectionService = testObjects.connectionService;
+        ConnectionServiceImpl connectionService = testObjects.connectionService;
         Node node = testObjects.node;
-        ConfigurationService configurationService = testObjects.configurationService;
+        ConfigurationServiceImpl configurationService = testObjects.configurationService;
         configurationService.addPort(node, BRIDGE_NAME, PORT_NAME, null);
     }
 
@@ -54,12 +58,12 @@ public class BridgeDomainConfigPortTestCases extends PluginTestBase {
     @Test
     public void addPortVlan() throws Throwable{
         TestObjects testObjects = getTestConnection();
-        ConnectionService connectionService = testObjects.connectionService;
+        ConnectionServiceImpl connectionService = testObjects.connectionService;
         Node node = testObjects.node;
 
         int vlanid = 100;
 
-        ConfigurationService configurationService = testObjects.configurationService;
+        ConfigurationServiceImpl configurationService = testObjects.configurationService;
         Map<ConfigConstants, Object> configs = new HashMap<ConfigConstants, Object>();
         configs.put(ConfigConstants.TYPE, "VLAN");
         configs.put(ConfigConstants.VLAN, vlanid+"");
@@ -84,7 +88,7 @@ public class BridgeDomainConfigPortTestCases extends PluginTestBase {
         String tunencap = encap.toString();
         String tunnelendpoint = FAKE_IP;
 
-        ConfigurationService configurationService = testObjects.configurationService;
+        ConfigurationServiceImpl configurationService = testObjects.configurationService;
         Map<ConfigConstants, Object> configs = new HashMap<ConfigConstants, Object>();
         configs.put(ConfigConstants.TYPE, "TUNNEL");
         configs.put(ConfigConstants.TUNNEL_TYPE, tunencap);
@@ -100,10 +104,10 @@ public class BridgeDomainConfigPortTestCases extends PluginTestBase {
     @Test
     public void deletePort() throws Throwable{
         TestObjects testObjects = getTestConnection();
-        ConnectionService connectionService = testObjects.connectionService;
+        ConnectionServiceImpl connectionService = testObjects.connectionService;
         Node node = testObjects.node;
 
-        ConfigurationService configurationService = testObjects.configurationService;
+        ConfigurationServiceImpl configurationService = testObjects.configurationService;
         configurationService.deletePort(node, BRIDGE_NAME, PORT_NAME);
     }
 

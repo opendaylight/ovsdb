@@ -22,7 +22,7 @@ import java.util.Collection;
  * the controller.
  *
  * Applications that use OvsDBConnectionService can use the connect APIs to initiate Active
- * connections and can listen to the asynchronous Passive connections via registerForPassiveConnection
+ * connections and can listen to the asynchronous Passive connections via registerConnectionListener
  * listener API.
  */
 
@@ -46,7 +46,13 @@ public interface OvsdbConnection {
      * Method to register a Passive Connection Listener with the ConnectionService.
      * @param listener Passive Connection listener interested in Passive OVSDB connection requests.
      */
-    public void registerForPassiveConnection(OvsdbConnectionListener listener);
+    public void registerConnectionListener(OvsdbConnectionListener listener);
+
+    /**
+     * Method to unregister a Passive Connection Listener with the ConnectionService.
+     * @param listener
+     */
+    public void unregisterConnectionListener(OvsdbConnectionListener listener);
 
     /**
      * Returns a Collection of all the active OVSDB Connections.

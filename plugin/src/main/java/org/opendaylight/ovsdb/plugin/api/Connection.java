@@ -7,20 +7,15 @@
  *
  * Authors : Madhu Venugopal, Brent Salisbury
  */
-package org.opendaylight.ovsdb.plugin;
+package org.opendaylight.ovsdb.plugin.api;
 
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * OVSDB Plugin Connection
- * @deprecated as of release 1.0.0, replaced by {@link org.opendaylight.ovsdb.plugin.api.Connection}
- */
-@Deprecated public class Connection {
+public class Connection {
     private Node node;
     private String identifier;
     private OvsdbClient client;

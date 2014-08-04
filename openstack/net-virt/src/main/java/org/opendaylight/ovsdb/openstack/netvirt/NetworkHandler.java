@@ -16,11 +16,10 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
-import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
-import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
-import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
-import org.opendaylight.ovsdb.plugin.OvsdbInventoryListener;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 
@@ -49,11 +48,11 @@ public class NetworkHandler extends AbstractHandler
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile TenantNetworkManager tenantNetworkManager;
     private volatile BridgeConfigurationManager bridgeConfigurationManager;
-    private volatile ConfigurationService configurationService;
-    private volatile OvsdbConfigService ovsdbConfigService;
-    private volatile IConnectionServiceInternal connectionService;
+    private volatile org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService configurationService;
+    private volatile OvsdbConfigurationService ovsdbConfigurationService;
+    private volatile OvsdbConnectionService connectionService;
     private volatile INeutronNetworkCRUD neutronNetworkCache;
-    private volatile OvsdbInventoryListener inventoryListener;
+    private volatile OvsdbInventoryListener ovsdbInventoryListener;
 
     /**
      * Invoked when a network creation is requested
@@ -156,15 +155,15 @@ public class NetworkHandler extends AbstractHandler
                     List<String> phyIfName = bridgeConfigurationManager.getAllPhysicalInterfaceNames(node);
                     try {
                         ConcurrentMap<String, Row> ports =
-                                this.ovsdbConfigService.getRows(node,
-                                                                ovsdbConfigService.getTableName(node, Port.class));
+                                this.ovsdbConfigurationService.getRows(node,
+                                                                ovsdbConfigurationService.getTableName(node, Port.class));
                         if (ports != null) {
                             for (Row portRow : ports.values()) {
-                                Port port = ovsdbConfigService.getTypedRow(node, Port.class, portRow);
+                                Port port = ovsdbConfigurationService.getTypedRow(node, Port.class, portRow);
                                 for (UUID interfaceUuid : port.getInterfacesColumn().getData()) {
-                                    Interface interfaceRow = (Interface) ovsdbConfigService
+                                    Interface interfaceRow = (Interface) ovsdbConfigurationService
                                             .getRow(node,
-                                                    ovsdbConfigService.getTableName(node, Interface.class),
+                                                    ovsdbConfigurationService.getTableName(node, Interface.class),
                                                     interfaceUuid.toString());
 
                                     String interfaceType = interfaceRow.getTypeColumn().getData();
@@ -173,14 +172,14 @@ public class NetworkHandler extends AbstractHandler
                                             NetworkHandler.NETWORK_TYPE_GRE)) {
                                         /* delete tunnel ports on this node */
                                         logger.trace("Delete tunnel interface {}", interfaceRow);
-                                        ovsdbConfigService.deleteRow(node,
-                                                                     ovsdbConfigService.getTableName(node, Port.class),
+                                        ovsdbConfigurationService.deleteRow(node,
+                                                                     ovsdbConfigurationService.getTableName(node, Port.class),
                                                                      port.getUuid().toString());
                                         break;
                                     } else if (!phyIfName.isEmpty() && phyIfName.contains(interfaceRow.getName())) {
                                         logger.trace("Delete physical interface {}", interfaceRow);
-                                        ovsdbConfigService.deleteRow(node,
-                                                                     ovsdbConfigService.getTableName(node, Port.class),
+                                        ovsdbConfigurationService.deleteRow(node,
+                                                                     ovsdbConfigurationService.getTableName(node, Port.class),
                                                                      port.getUuid().toString());
                                         break;
                                     }

@@ -62,7 +62,7 @@ import com.google.common.collect.Sets;
  *
  * Applications that use OvsDBConnectionService can use the OvsDBConnection class' connect APIs
  * to initiate Active connections and can listen to the asynchronous Passive connections via
- * registerForPassiveConnection listener API.
+ * registerConnectionListener listener API.
  *
  * The library is designed as Java modular component that can work in both OSGi and non-OSGi
  * environment. Hence a single instance of the service will be active (via Service Registry in OSGi)
@@ -127,8 +127,13 @@ public class OvsdbConnectionService implements OvsdbConnection {
     }
 
     @Override
-    public void registerForPassiveConnection(OvsdbConnectionListener listener) {
+    public void registerConnectionListener(OvsdbConnectionListener listener) {
         connectionListeners.add(listener);
+    }
+
+    @Override
+    public void unregisterConnectionListener(OvsdbConnectionListener listener) {
+        connectionListeners.remove(listener);
     }
 
     private static OvsdbClient getChannelClient(Channel channel, ConnectionType type,

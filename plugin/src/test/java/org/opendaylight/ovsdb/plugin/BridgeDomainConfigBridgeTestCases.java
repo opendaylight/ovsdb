@@ -16,6 +16,10 @@ import java.util.Map;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.networkconfig.bridgedomain.ConfigConstants;
+import org.opendaylight.ovsdb.plugin.impl.ConfigurationServiceImpl;
+import org.opendaylight.ovsdb.plugin.impl.ConnectionServiceImpl;
+import org.opendaylight.ovsdb.plugin.impl.InventoryServiceImpl;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +31,7 @@ public class BridgeDomainConfigBridgeTestCases extends PluginTestBase {
     public void addBridge() throws Throwable{
 
         TestObjects testObjects = getTestConnection();
-        ConnectionService connectionService = testObjects.connectionService;
+        ConnectionServiceImpl connectionService = testObjects.connectionService;
         Node node = testObjects.node;
 
         /**
@@ -36,7 +40,7 @@ public class BridgeDomainConfigBridgeTestCases extends PluginTestBase {
          * @param node Node serving this configuration service
          * @param bridgeDomainIdentifier String representation of a Bridge Domain
          */
-        ConfigurationService configurationService = testObjects.configurationService;
+        ConfigurationServiceImpl configurationService = testObjects.configurationService;
         configurationService.createBridgeDomain(node, BRIDGE_NAME, null);
     }
 
@@ -44,8 +48,8 @@ public class BridgeDomainConfigBridgeTestCases extends PluginTestBase {
     public void getBridgeDomains() throws Throwable{
 
         TestObjects testObjects = getTestConnection();
-        ConnectionService connectionService = testObjects.connectionService;
-        InventoryService inventoryService = testObjects.inventoryService;
+        ConnectionServiceImpl connectionService = testObjects.connectionService;
+        InventoryServiceImpl inventoryService = testObjects.inventoryService;
         Node node = testObjects.node;
 
         /**
@@ -54,7 +58,7 @@ public class BridgeDomainConfigBridgeTestCases extends PluginTestBase {
          * @param node Node serving this configuration service
          *
          */
-        ConfigurationService configurationService = testObjects.configurationService;
+        ConfigurationServiceImpl configurationService = testObjects.configurationService;
         List<String> ls = configurationService.getBridgeDomains(node);
     }
 
@@ -63,7 +67,7 @@ public class BridgeDomainConfigBridgeTestCases extends PluginTestBase {
         TestObjects testObjects = getTestConnection();
         Node node = testObjects.node;
 
-        ConfigurationService configurationService = testObjects.configurationService;
+        ConfigurationServiceImpl configurationService = testObjects.configurationService;
         configurationService.setBridgeOFController(node, BRIDGE_NAME);
 
     }
@@ -71,7 +75,7 @@ public class BridgeDomainConfigBridgeTestCases extends PluginTestBase {
     @Test
     public void setBridgeConfig() throws Throwable{
         TestObjects testObjects = getTestConnection();
-        ConnectionService connectionService = testObjects.connectionService;
+        ConnectionServiceImpl connectionService = testObjects.connectionService;
         Node node = testObjects.node;
 
         Map<ConfigConstants, Object> configs = new HashMap<ConfigConstants, Object>();
@@ -81,7 +85,7 @@ public class BridgeDomainConfigBridgeTestCases extends PluginTestBase {
         //Will accept multiple array pairs. Pairs must be arrays not maps.
         configs.put(ConfigConstants.CUSTOM, exterIDPairs);
 
-        ConfigurationService configurationService = testObjects.configurationService;
+        ConfigurationServiceImpl configurationService = testObjects.configurationService;
         configurationService.addBridgeDomainConfig(node, BRIDGE_NAME, configs);
     }
 

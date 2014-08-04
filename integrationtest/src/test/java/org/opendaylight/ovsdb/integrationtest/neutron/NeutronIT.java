@@ -27,9 +27,8 @@ import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
-import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
-import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
@@ -71,7 +70,7 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
     private BundleContext bc;
 
     @Inject
-    private OvsdbConfigService ovsdbConfigService;
+    private OvsdbConfigurationService ovsdbConfigurationService;
     private Node node = null;
 
     Component of10Provider;
@@ -80,7 +79,7 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
     @Inject
     BridgeConfigurationManager bridgeConfigurationManager;
     @Inject
-    ConfigurationService configurationService;
+    org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService netVirtConfigurationService;
 
     Boolean tearDownBridge = false;
 
@@ -180,13 +179,13 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
 
         Map<String, Row>
                 bridgeRows =
-                ovsdbConfigService.getRows(node, ovsdbConfigService.getTableName(node, Bridge.class));
+                ovsdbConfigurationService.getRows(node, ovsdbConfigurationService.getTableName(node, Bridge.class));
         Assert.assertEquals(1, bridgeRows.size());
 
-        Bridge bridgeRow = ovsdbConfigService.getTypedRow(node, Bridge.class, bridgeRows.values().iterator().next());
-        Assert.assertEquals(configurationService.getIntegrationBridgeName(), bridgeRow.getName());
+        Bridge bridgeRow = ovsdbConfigurationService.getTypedRow(node, Bridge.class, bridgeRows.values().iterator().next());
+        Assert.assertEquals(netVirtConfigurationService.getIntegrationBridgeName(), bridgeRow.getName());
 
-        String uuid = bridgeConfigurationManager.getBridgeUuid(node, configurationService.getIntegrationBridgeName());
+        String uuid = bridgeConfigurationManager.getBridgeUuid(node, netVirtConfigurationService.getIntegrationBridgeName());
         Assert.assertEquals(uuid, bridgeRow.getUuid().toString());
 
         tearDownBridge = true;
@@ -198,22 +197,22 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
 
         final String endpointAddress = "10.10.10.10";
 
-        Map<String, Row> ovsRows = ovsdbConfigService.getRows(node,
-                                                              ovsdbConfigService.getTableName(node, OpenVSwitch.class));
-        OpenVSwitch ovsRow = ovsdbConfigService.getTypedRow(node,
+        Map<String, Row> ovsRows = ovsdbConfigurationService.getRows(node,
+                                                              ovsdbConfigurationService.getTableName(node, OpenVSwitch.class));
+        OpenVSwitch ovsRow = ovsdbConfigurationService.getTypedRow(node,
                                                             OpenVSwitch.class,
                                                             ovsRows.values().iterator().next());
 
-        Assert.assertEquals(null, configurationService.getTunnelEndPoint(node));
+        Assert.assertEquals(null, netVirtConfigurationService.getTunnelEndPoint(node));
 
-        ovsRow.setOtherConfig(ImmutableMap.of(configurationService.getTunnelEndpointKey(), endpointAddress));
-        ovsdbConfigService.updateRow(node,
-                                     ovsdbConfigService.getTableName(node, OpenVSwitch.class),
-                                     null,
-                                     ovsRow.getUuid().toString(),
-                                     ovsRow.getRow());
+        ovsRow.setOtherConfig(ImmutableMap.of(netVirtConfigurationService.getTunnelEndpointKey(), endpointAddress));
+        ovsdbConfigurationService.updateRow(node,
+                                            ovsdbConfigurationService.getTableName(node, OpenVSwitch.class),
+                                            null,
+                                            ovsRow.getUuid().toString(),
+                                            ovsRow.getRow());
 
-        Assert.assertEquals(InetAddress.getByName(endpointAddress), configurationService.getTunnelEndPoint(node));
+        Assert.assertEquals(InetAddress.getByName(endpointAddress), netVirtConfigurationService.getTunnelEndPoint(node));
     }
 
     @Test
@@ -223,9 +222,9 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
         Version ovsVersion = this.getOvsVersion();
 
         if (ovsVersion.compareTo(Constants.OPENFLOW13_SUPPORTED) < 0) {
-            Assert.assertEquals(Constants.OPENFLOW10, configurationService.getOpenflowVersion(node));
+            Assert.assertEquals(Constants.OPENFLOW10, netVirtConfigurationService.getOpenflowVersion(node));
         } else {
-            Assert.assertEquals(Constants.OPENFLOW13, configurationService.getOpenflowVersion(node));
+            Assert.assertEquals(Constants.OPENFLOW13, netVirtConfigurationService.getOpenflowVersion(node));
         }
     }
 
@@ -235,8 +234,8 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
 
         if (tearDownBridge) {
             String uuid = bridgeConfigurationManager.getBridgeUuid(node,
-                                                                   configurationService.getIntegrationBridgeName());
-            ovsdbConfigService.deleteRow(node, ovsdbConfigService.getTableName(node, Bridge.class), uuid);
+                                                                   netVirtConfigurationService.getIntegrationBridgeName());
+            ovsdbConfigurationService.deleteRow(node, ovsdbConfigurationService.getTableName(node, Bridge.class), uuid);
             tearDownBridge = false;
         }
 
@@ -246,9 +245,9 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
     }
 
     private Version getOvsVersion(){
-        Map<String, Row> ovsRows = ovsdbConfigService.getRows(node,
-                                                              ovsdbConfigService.getTableName(node, OpenVSwitch.class));
-        OpenVSwitch ovsRow = ovsdbConfigService.getTypedRow(node,
+        Map<String, Row> ovsRows = ovsdbConfigurationService.getRows(node,
+                                                              ovsdbConfigurationService.getTableName(node, OpenVSwitch.class));
+        OpenVSwitch ovsRow = ovsdbConfigurationService.getTypedRow(node,
                                                             OpenVSwitch.class,
                                                             ovsRows.values().iterator().next());
         return Version.fromString(ovsRow.getOvsVersionColumn().getData().iterator().next());

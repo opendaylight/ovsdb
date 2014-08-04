@@ -81,7 +81,7 @@
                             org.opendaylight.controller.sal.core,
                             org.opendaylight.controller.sal.utils,
                             org.opendaylight.controller.sal.action,
-                            org.opendaylight.ovsdb.plugin,
+                            org.opendaylight.ovsdb.plugin.api,
                             org.opendaylight.ovsdb.lib.notation,
                             org.opendaylight.controller.sal.binding.api,
                             org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819,

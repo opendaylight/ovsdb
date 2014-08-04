@@ -7,7 +7,7 @@
  *
  * Authors : Madhu Venugopal, Brent Salisbury, Keith Burns
  */
-package org.opendaylight.ovsdb.plugin;
+package org.opendaylight.ovsdb.plugin.impl;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
@@ -48,6 +48,13 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
+import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
+import org.opendaylight.ovsdb.plugin.api.Connection;
+import org.opendaylight.ovsdb.plugin.api.OvsVswitchdSchemaConstants;
+import org.opendaylight.ovsdb.plugin.api.StatusWithUuid;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryService;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
@@ -62,14 +69,16 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListenableFuture;
 
-public class ConfigurationService implements IPluginInBridgeDomainConfigService, OvsdbConfigService,
-                                             CommandProvider
+public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigService,
+                                                 OvsdbConfigurationService,
+                                                 OvsdbConfigService,
+                                                 CommandProvider
 {
     private static final Logger logger = LoggerFactory
-            .getLogger(ConfigurationService.class);
+            .getLogger(ConfigurationServiceImpl.class);
 
-    IConnectionServiceInternal connectionService;
-    InventoryServiceInternal inventoryServiceInternal;
+    OvsdbConnectionService connectionService;
+    OvsdbInventoryService ovsdbInventoryService;
     boolean forceConnect = false;
     protected static final String OPENFLOW_10 = "1.0";
     protected static final String OPENFLOW_13 = "1.3";
@@ -111,23 +120,23 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     void stop() {
     }
 
-    public void setConnectionServiceInternal(IConnectionServiceInternal connectionService) {
+    public void setConnectionServiceInternal(OvsdbConnectionService connectionService) {
         this.connectionService = connectionService;
     }
 
-    public void unsetConnectionServiceInternal(IConnectionServiceInternal connectionService) {
+    public void unsetConnectionServiceInternal(OvsdbConnectionService connectionService) {
         if (this.connectionService == connectionService) {
             this.connectionService = null;
         }
     }
 
-    public void setInventoryServiceInternal(InventoryServiceInternal inventoryServiceInternal) {
-        this.inventoryServiceInternal = inventoryServiceInternal;
+    public void setOvsdbInventoryService(OvsdbInventoryService ovsdbInventoryService) {
+        this.ovsdbInventoryService = ovsdbInventoryService;
     }
 
-    public void unsetInventoryServiceInternal(InventoryServiceInternal inventoryServiceInternal) {
-        if (this.inventoryServiceInternal == inventoryServiceInternal) {
-            this.inventoryServiceInternal = null;
+    public void unsetInventoryServiceInternal(OvsdbInventoryService ovsdbInventoryService) {
+        if (this.ovsdbInventoryService == ovsdbInventoryService) {
+            this.ovsdbInventoryService = null;
         }
     }
 
@@ -375,20 +384,20 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
 
     @Override
     public ConcurrentMap<String, Row> getRows(Node node, String tableName) {
-        ConcurrentMap<String, Row> ovsTable = inventoryServiceInternal.getTableCache(node, OvsVswitchdSchemaConstants.DATABASE_NAME,  tableName);
+        ConcurrentMap<String, Row> ovsTable = ovsdbInventoryService.getTableCache(node, OvsVswitchdSchemaConstants.DATABASE_NAME,  tableName);
         return ovsTable;
     }
 
     @Override
     public Row getRow(Node node, String tableName, String uuid) {
-        Map<String, Row> ovsTable = inventoryServiceInternal.getTableCache(node, OvsVswitchdSchemaConstants.DATABASE_NAME,  tableName);
+        Map<String, Row> ovsTable = ovsdbInventoryService.getTableCache(node, OvsVswitchdSchemaConstants.DATABASE_NAME,  tableName);
         if (ovsTable == null) return null;
         return ovsTable.get(uuid);
     }
 
     @Override
     public List<String> getTables(Node node) {
-        ConcurrentMap<String, ConcurrentMap<String, Row>> cache  = inventoryServiceInternal.getCache(node, OvsVswitchdSchemaConstants.DATABASE_NAME);
+        ConcurrentMap<String, ConcurrentMap<String, Row>> cache  = ovsdbInventoryService.getCache(node, OvsVswitchdSchemaConstants.DATABASE_NAME);
         if (cache == null) return null;
         return new ArrayList<String>(cache.keySet());
     }
@@ -523,7 +532,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
     }
 
 
-    Boolean setBridgeOFController(Node node, String bridgeIdentifier) {
+    public Boolean setBridgeOFController(Node node, String bridgeIdentifier) {
         if (connectionService == null) {
             logger.error("Couldn't refer to the ConnectionService");
             return false;
@@ -533,7 +542,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             Connection connection = connectionService.getConnection(node);
             Bridge bridge = connection.getClient().getTypedRowWrapper(Bridge.class, null);
 
-            Map<String, Row> brTableCache = inventoryServiceInternal.getTableCache(node, OvsVswitchdSchemaConstants.DATABASE_NAME, bridge.getSchema().getName());
+            Map<String, Row> brTableCache = ovsdbInventoryService.getTableCache(node, OvsVswitchdSchemaConstants.DATABASE_NAME, bridge.getSchema().getName());
             for (String uuid : brTableCache.keySet()) {
                 bridge = connection.getClient().getTypedRowWrapper(Bridge.class, brTableCache.get(uuid));
                 if (bridge.getName().contains(bridgeIdentifier)) {
@@ -856,7 +865,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
             ci.println("Invalid Node");
             return;
         }
-        inventoryServiceInternal.printCache(node);
+        ovsdbInventoryService.printCache(node);
     }
 
     public void _forceConnect (CommandInterpreter ci) {
@@ -1104,7 +1113,7 @@ public class ConfigurationService implements IPluginInBridgeDomainConfigService,
         Connection connection = connectionService.getConnection(node);
         Bridge bridge = connection.getClient().getTypedRowWrapper(Bridge.class, null);
         List<String> brlist = new ArrayList<String>();
-        Map<String, Row> brTableCache = inventoryServiceInternal.getTableCache(node, OvsVswitchdSchemaConstants.DATABASE_NAME, bridge.getSchema().getName());
+        Map<String, Row> brTableCache = ovsdbInventoryService.getTableCache(node, OvsVswitchdSchemaConstants.DATABASE_NAME, bridge.getSchema().getName());
         if(brTableCache != null){
             for (String uuid : brTableCache.keySet()) {
                 bridge = connection.getClient().getTypedRowWrapper(Bridge.class, brTableCache.get(uuid));

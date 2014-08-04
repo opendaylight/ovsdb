@@ -96,7 +96,7 @@ public abstract class OvsdbTestBase implements OvsdbRPC.Callback{
         @Override
         public OvsdbClient call() throws Exception {
             OvsdbConnection connection = OvsdbConnectionService.getService();
-            connection.registerForPassiveConnection(this);
+            connection.registerConnectionListener(this);
             while (client == null) {
                 Thread.sleep(500);
             }

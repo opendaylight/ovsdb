@@ -7,7 +7,7 @@
  *
  * Authors : Brent Salisbury, Evan Zeller
  */
-package org.opendaylight.ovsdb.plugin;
+package org.opendaylight.ovsdb.plugin.internal;
 
 public enum Encapsulation {
 

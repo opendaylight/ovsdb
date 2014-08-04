@@ -11,6 +11,8 @@ package org.opendaylight.ovsdb.plugin;
 
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.ovsdb.plugin.impl.ConfigurationServiceImpl;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +39,7 @@ public class BridgeDomainConfigManagerTestCases extends PluginTestBase {
          * @param String with IP and connection type ex. type:ip:port
          *
          */
-        ConfigurationService configurationService = testObjects.configurationService;
+        ConfigurationServiceImpl configurationService = testObjects.configurationService;
         configurationService.setManager(node, manager);
     }
 

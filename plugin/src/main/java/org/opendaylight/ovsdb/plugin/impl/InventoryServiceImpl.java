@@ -7,7 +7,7 @@
  *
  * Authors : Madhu Venugopal, Brent Salisbury
  */
-package org.opendaylight.ovsdb.plugin;
+package org.opendaylight.ovsdb.plugin.impl;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,11 +31,16 @@ import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
 import org.opendaylight.controller.sal.inventory.IPluginOutInventoryService;
 import org.opendaylight.controller.sal.utils.HexEncode;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.ovsdb.lib.message.TableUpdate;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.plugin.InventoryServiceInternal;
+import org.opendaylight.ovsdb.plugin.internal.NodeDatabase;
+import org.opendaylight.ovsdb.plugin.api.OvsVswitchdSchemaConstants;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
+import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryService;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 
 import com.google.common.collect.Sets;
@@ -49,16 +54,20 @@ import com.google.common.collect.Maps;
  *
  *
  */
-public class InventoryService implements IPluginInInventoryService, InventoryServiceInternal {
+public class InventoryServiceImpl implements IPluginInInventoryService,
+                                             OvsdbInventoryService,
+                                             InventoryServiceInternal {
     private static final Logger logger = LoggerFactory
-            .getLogger(InventoryService.class);
+            .getLogger(InventoryServiceImpl.class);
     private final Set<IPluginOutInventoryService> pluginOutInventoryServices =
             new CopyOnWriteArraySet<IPluginOutInventoryService>();
     private ConcurrentMap<Node, Map<String, Property>> nodeProps = new ConcurrentHashMap<Node, Map<String, Property>>();
     private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps = new ConcurrentHashMap<NodeConnector, Map<String, Property>>();
-    private ConcurrentMap<Node, NodeDB> dbCache = Maps.newConcurrentMap();
+    private ConcurrentMap<Node, NodeDatabase> dbCache = Maps.newConcurrentMap();
     private ScheduledExecutorService executor;
-    private OvsdbConfigService configurationService;
+    private OvsdbConfigurationService ovsdbConfigurationService;
+
+    private volatile IPluginOutInventoryService salInventoryService;
 
     private Set<OvsdbInventoryListener> ovsdbInventoryListeners = Sets.newCopyOnWriteArraySet();
 
@@ -108,12 +117,12 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
             this.pluginOutInventoryServices.remove(service);
     }
 
-    public void setConfigurationService(OvsdbConfigService service) {
-        configurationService = service;
+    public void setOvsdbConfigurationService(OvsdbConfigurationService service) {
+        ovsdbConfigurationService = service;
     }
 
-    public void unsetConfigurationService(OvsdbConfigService service) {
-        configurationService = null;
+    public void unsetConfigurationService(OvsdbConfigurationService service) {
+        ovsdbConfigurationService = null;
     }
 
     @Override
@@ -130,7 +139,7 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
 
     @Override
     public ConcurrentMap<String, ConcurrentMap<String, Row>> getCache(Node n, String databaseName) {
-        NodeDB db = dbCache.get(n);
+        NodeDatabase db = dbCache.get(n);
         if (db == null) return null;
         return db.getDatabase(databaseName);
     }
@@ -138,7 +147,7 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
 
     @Override
     public ConcurrentMap<String, Row> getTableCache(Node n, String databaseName, String tableName) {
-        NodeDB db = dbCache.get(n);
+        NodeDatabase db = dbCache.get(n);
         if (db == null) return null;
         return db.getTableCache(databaseName, tableName);
     }
@@ -146,16 +155,16 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
 
     @Override
     public Row getRow(Node n, String databaseName, String tableName, String uuid) {
-        NodeDB db = dbCache.get(n);
+        NodeDatabase db = dbCache.get(n);
         if (db == null) return null;
         return db.getRow(databaseName, tableName, uuid);
     }
 
     @Override
     public void updateRow(Node n, String databaseName, String tableName, String uuid, Row row) {
-        NodeDB db = dbCache.get(n);
+        NodeDatabase db = dbCache.get(n);
         if (db == null) {
-            db = new NodeDB();
+            db = new NodeDatabase();
             dbCache.put(n, db);
         }
         db.updateRow(databaseName, tableName, uuid, row);
@@ -163,15 +172,15 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
 
     @Override
     public void removeRow(Node n, String databaseName, String tableName, String uuid) {
-        NodeDB db = dbCache.get(n);
+        NodeDatabase db = dbCache.get(n);
         if (db != null) db.removeRow(databaseName, tableName, uuid);
     }
 
     @Override
     public void processTableUpdates(Node n, String databaseName, TableUpdates tableUpdates) {
-        NodeDB db = dbCache.get(n);
+        NodeDatabase db = dbCache.get(n);
         if (db == null) {
-            db = new NodeDB();
+            db = new NodeDatabase();
             dbCache.put(n, db);
         }
 
@@ -217,7 +226,7 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
                 @Override
                 public void run() {
                     try {
-                        if (configurationService != null) configurationService.setOFController(node, uuid.toString());
+                        if (ovsdbConfigurationService != null) ovsdbConfigurationService.setOFController(node, uuid.toString());
                     } catch (InterruptedException | ExecutionException e) {
                         e.printStackTrace();
                     }
@@ -242,8 +251,6 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
                         Set<Property> props = new HashSet<Property>();
                         props.add(descProp);
 
-                        IPluginOutInventoryService salInventoryService = (IPluginOutInventoryService) ServiceHelper.getInstance(
-                                IPluginOutInventoryService.class, "default", this);
                         if (salInventoryService != null) {
                             logger.debug("Updating Bridge Name {} on OF node {}", bridgeName, ofNode);
                             salInventoryService.updateNode(ofNode, UpdateType.CHANGED, props);
@@ -265,7 +272,7 @@ public class InventoryService implements IPluginInInventoryService, InventorySer
 
     @Override
     public void printCache(Node n) {
-        NodeDB db = dbCache.get(n);
+        NodeDatabase db = dbCache.get(n);
         if (db != null) db.printTableCache();
     }
 

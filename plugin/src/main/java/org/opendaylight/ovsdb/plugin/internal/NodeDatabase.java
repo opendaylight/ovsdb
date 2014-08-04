@@ -7,7 +7,7 @@
  *
  * Authors : Madhu Venugopal, Brent Salisbury
  */
-package org.opendaylight.ovsdb.plugin;
+package org.opendaylight.ovsdb.plugin.internal;
 
 import java.util.Collection;
 import java.util.Map;
@@ -19,7 +19,7 @@ import org.opendaylight.ovsdb.lib.notation.Row;
 
 import com.google.common.collect.Maps;
 
-public class NodeDB {
+public class NodeDatabase {
     ConcurrentMap<String, TableDB> dbCache = Maps.newConcurrentMap();
 
     public ConcurrentMap<String, ConcurrentMap<String, Row>> getDatabase(String dbName) {

@@ -16,6 +16,24 @@
       "revId": "c819d936fe1d20111c50f4b06ff75fa9f97f941d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0582a9ff",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/ConfigurationService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 494,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-08-04T15:24:18Z",
+      "side": 1,
+      "message": "Thanks Madhu. It makes a lot more sense now. :) I\u0027ve re-submitted the changes. Please review.",
+      "parentUuid": "fa82b9bf_276255ae",
+      "revId": "c819d936fe1d20111c50f4b06ff75fa9f97f941d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

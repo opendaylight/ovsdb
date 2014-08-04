@@ -51,10 +51,11 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
 import org.opendaylight.ovsdb.plugin.api.Connection;
 import org.opendaylight.ovsdb.plugin.api.OvsVswitchdSchemaConstants;
-import org.opendaylight.ovsdb.plugin.api.StatusWithUuid;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryService;
+import org.opendaylight.ovsdb.plugin.api.StatusWithUuid;
+import org.opendaylight.ovsdb.plugin.error.OvsdbPluginException;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
@@ -1172,6 +1173,58 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
     public Map<ConfigConstants, Object> getBridgeDomainConfigs(Node node, String bridgeIdentifier) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public UUID insertRow(Node node, String databaseName, String tableName,
+            UUID parentUuid, Row<GenericTableSchema> row)
+            throws OvsdbPluginException {
+        throw new OvsdbPluginException("Not implemented Yet");
+    }
+
+    @Override
+    public Row<GenericTableSchema> insertTree(Node node, String databaseName,
+            String tableName, UUID parentUuid, Row<GenericTableSchema> row)
+            throws OvsdbPluginException {
+        throw new OvsdbPluginException("Not implemented Yet");
+    }
+
+    @Override
+    public Row<GenericTableSchema> updateRow(Node node, String databaseName,
+            String tableName, UUID rowUuid, Row<GenericTableSchema> row,
+            boolean overwrite) throws OvsdbPluginException {
+        throw new OvsdbPluginException("Not implemented Yet");
+    }
+
+    @Override
+    public void deleteRow(Node node, String databaseName, String tableName,
+            UUID rowUuid) throws OvsdbPluginException {
+        throw new OvsdbPluginException("Not implemented Yet");
+
+    }
+
+    @Override
+    public Row<GenericTableSchema> getRow(Node node, String databaseName,
+            String tableName, UUID uuid) throws OvsdbPluginException {
+        throw new OvsdbPluginException("Not implemented Yet");
+    }
+
+    @Override
+    public ConcurrentMap<UUID, Row<GenericTableSchema>> getRows(Node node,
+            String databaseName, String tableName) throws OvsdbPluginException {
+        throw new OvsdbPluginException("Not implemented Yet");
+    }
+
+    @Override
+    public ConcurrentMap<UUID, Row<GenericTableSchema>> getRows(Node node,
+            String databaseName, String tableName, String fiqlQuery)
+            throws OvsdbPluginException {
+        throw new OvsdbPluginException("Not implemented Yet");
+    }
+
+    @Override
+    public List<String> getTables(Node node, String databaseName) throws OvsdbPluginException {
+        throw new OvsdbPluginException("Not implemented Yet");
     }
 }
 

@@ -104,6 +104,40 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_6a2ee4a6",
+        "filename": "plugin-mdsal-adapter/src/main/yang/ovsdb-node-inventory.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-08-04T12:11:06Z",
+      "side": 1,
+      "message": "I would suggest suffixing all groupings with -attributes (so this becomes ovsdb-bridge-attributes)... this convention radically reduces the risk of duplicate classes, since each grouping generates an interface... and you may want to reuse the name ovsd-bridge in a more concrete context.",
+      "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ca0a9025",
+        "filename": "plugin-mdsal-adapter/src/main/yang/ovsdb-node-inventory.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-08-04T12:11:06Z",
+      "side": 1,
+      "message": "I would recommend against having a grouping with only a single container at top level.  It often leads to reboxing (the container in your grouping becomes a class that contains your leaves... then you wrap it in a container where its used and suddenly you are double boxed :(  Better to wrap a container around it where you uses it.",
+      "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_b470d50b",
         "filename": "plugin-mdsal-adapter/src/main/yang/ovsdb-node-inventory.yang",
         "patchSetId": 1
@@ -115,6 +149,24 @@
       "writtenOn": "2014-08-02T02:14:31Z",
       "side": 1,
       "message": "Shall we also add the port ?",
+      "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ea6c340a",
+        "filename": "plugin-mdsal-adapter/src/main/yang/ovsdb-node-inventory.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2014-08-04T12:11:06Z",
+      "side": 1,
+      "message": "Madhu... are you suggesting we also augment additional info onto ovsdb managed node-connectors?",
+      "parentUuid": "fa82b9bf_b470d50b",
       "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

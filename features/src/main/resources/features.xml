@@ -39,7 +39,7 @@
         <bundle>mvn:org.opendaylight.ovsdb/northbound/${ovsdb.northbound.version}</bundle>
     </feature>
 
-<!-- 
+<!--
     <feature name="odl-ovsdb-openstack" description="OpenDaylight :: OVSDB :: OpenStack Network Virtualization" version='${ovsdb.openstack.netvirt.version}'>
         <feature version="${ovsdb.plugin.version}">odl-ovsdb-plugin</feature>
         <bundle>mvn:org.opendaylight.ovsdb/net-virt/${ovsdb.openstack.netvirt.version}</bundle>

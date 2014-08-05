@@ -1,7 +1,7 @@
 package org.opendaylight.ovsdb.plugin.md;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.sal.utils.HexEncode;
@@ -52,17 +52,22 @@ public class OvsdbInventoryManager implements OvsdbInventoryListener {
     /**
      * Called by the framework when the bundle is started
      */
-    public void start(){
+    public void start() {
         //ToDo: Add existing nodes from inventory
         //This case is required for surviving controller reboot
     }
 
     /**
      * When an AD-SAL node is added by the OVSDB Inventory Service, Add an MD-SAL node
+     *
+     * @param node    The AD-SAL node
+     * @param address The {@link java.net.InetAddress} of the Node
+     * @param port    The ephemeral port number used by this connection
      */
     @Override
-    public synchronized void nodeAdded(org.opendaylight.controller.sal.core.Node node, InetAddress address, int port) {
-        logger.debug("OVSDB MD-SAL Inventory Adapter: Got node added for node {}", node.toString());
+    public synchronized void nodeAdded(org.opendaylight.controller.sal.core.Node node,
+                                       InetAddress address,
+                                       int port) {
         DataBroker dataBroker = provider.getDataBroker();
         Preconditions.checkNotNull(dataBroker);
 
@@ -89,13 +94,16 @@ public class OvsdbInventoryManager implements OvsdbInventoryListener {
         tx.put(LogicalDatastoreType.CONFIGURATION, path, newNode, true);
         try {
             tx.submit().get();
+            logger.debug("Removed Node {}", path.toString());
         } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
     }
 
     /**
      * When an AD-SAL node is removed by the OVSDB Inventory Service, Remove the MD-SAL node
+     *
+     * @param node The AD-SAL node
      */
     @Override
     public synchronized void nodeRemoved(org.opendaylight.controller.sal.core.Node node) {
@@ -114,20 +122,31 @@ public class OvsdbInventoryManager implements OvsdbInventoryListener {
         tx.delete(LogicalDatastoreType.CONFIGURATION, path);
         try {
             tx.submit().get();
+            logger.debug("Removed Node {}", path.toString());
         } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
     }
 
     /**
-     * When a Bridge Row is removed, delete the node
+     * Handle OVSDB row removed When a Bridge row is removed, the OpenFlow Node is deleted The parent OVSDB node is
+     * updated and the OpenFlow node removed from it's managed-nodes list
+     *
+     * @param node      The AD-SAL node
+     * @param tableName The name of modified table
+     * @param uuid      The UUID of the deleted row
+     * @param row       The deleted Row
      */
     @Override
-    public synchronized void rowRemoved(org.opendaylight.controller.sal.core.Node node, String tableName, String uuid, Row row,
-                           Object context) {
+    public synchronized void rowRemoved(org.opendaylight.controller.sal.core.Node node,
+                                        String tableName,
+                                        String uuid,
+                                        Row row,
+                                        Object context) {
         if (tableName.equalsIgnoreCase(ovsdbConfigurationService.getTableName(node, Bridge.class))) {
             logger.debug("OVSDB Bridge Row removed on node {}", node.toString());
             DataBroker dataBroker = provider.getDataBroker();
+            Preconditions.checkNotNull(dataBroker);
 
             Bridge bridge = ovsdbConfigurationService.getTypedRow(node, Bridge.class, row);
             Set<String> dpidString = bridge.getDatapathIdColumn().getData();
@@ -136,9 +155,8 @@ public class OvsdbInventoryManager implements OvsdbInventoryListener {
             NodeId openflowNodeId = new NodeId(OPENFLOW_NODE_PREFIX + dpid.toString());
             NodeKey openflowNodeKey = new NodeKey(openflowNodeId);
 
-            InstanceIdentifier<OvsdbManagedNode> openflowNodepath = InstanceIdentifier.builder(Nodes.class)
+            InstanceIdentifier<Node> openflowNodePath = InstanceIdentifier.builder(Nodes.class)
                     .child(Node.class, openflowNodeKey)
-                    .augmentation(OvsdbManagedNode.class)
                     .toInstance();
 
             NodeId ovsdbNodeId = new NodeId(OVS_NODE_PREFIX + node.getNodeIDString());
@@ -150,13 +168,14 @@ public class OvsdbInventoryManager implements OvsdbInventoryListener {
                     .toInstance();
 
             // Read the current OVSDB Node from the DataStore
-            ReadOnlyTransaction readTx = dataBroker.newReadOnlyTransaction();
+            ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
             OvsdbCapableNode ovsdbNode;
             try {
-                Optional<OvsdbCapableNode> data = readTx.read(LogicalDatastoreType.CONFIGURATION, ovsdbNodePath).get();
+                Optional<OvsdbCapableNode> data = tx.read(LogicalDatastoreType.CONFIGURATION, ovsdbNodePath).get();
                 ovsdbNode = data.get();
             } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException("Node does not exist");
+                logger.error("OVSDB node not updated. Parent node for {} does not exist", ovsdbNodePath.toString());
+                return;
             }
 
             // Update the list of Nodes
@@ -167,19 +186,36 @@ public class OvsdbInventoryManager implements OvsdbInventoryListener {
             OvsdbCapableNode updatedNode = new OvsdbCapableNodeBuilder(ovsdbNode)
                     .setManagedNodes(managedNodesList)
                     .build();
-            WriteTransaction writeTx = dataBroker.newWriteOnlyTransaction();
-            writeTx.delete(LogicalDatastoreType.CONFIGURATION, openflowNodepath);
-            writeTx.put(LogicalDatastoreType.CONFIGURATION, ovsdbNodePath, updatedNode);
-            writeTx.submit();
+            tx.delete(LogicalDatastoreType.CONFIGURATION, openflowNodePath);
+            tx.put(LogicalDatastoreType.CONFIGURATION, ovsdbNodePath, updatedNode);
+
+            try {
+                tx.submit().get();
+                logger.debug("Transaction success for delete of {} and update of {}",
+                             openflowNodePath.toString(),
+                             ovsdbNodePath.toString());
+            } catch (InterruptedException | ExecutionException e) {
+                logger.error(e.getMessage(), e);
+            }
         }
     }
 
     /**
-     * Handle OVSDB row updates
+     * Handle OVSDB row updates When a Bridge row is updated and it contains a DPID then add a new OpenFlow node to the
+     * inventory A relationship is created between the OpenFlow and OVSDB nodes
+     *
+     * @param node      The AD-SAL node
+     * @param tableName The name of the updated table
+     * @param uuid      The UUID of the updated row
+     * @param old       The old contents of the row
+     * @param row       The updated Row
      */
     @Override
-    public synchronized void rowUpdated(org.opendaylight.controller.sal.core.Node node, String tableName, String uuid, Row old,
-                           Row row) {
+    public synchronized void rowUpdated(org.opendaylight.controller.sal.core.Node node,
+                                        String tableName,
+                                        String uuid,
+                                        Row old,
+                                        Row row) {
         logger.debug("OVSDB Bridge Row updated on node {}", node.toString());
         if (tableName.equalsIgnoreCase(ovsdbConfigurationService.getTableName(node, Bridge.class))) {
             DataBroker dataBroker = provider.getDataBroker();
@@ -188,7 +224,7 @@ public class OvsdbInventoryManager implements OvsdbInventoryListener {
             Set<String> dpidString = bridge.getDatapathIdColumn().getData();
             Long dpid;
             try {
-               dpid = HexEncode.stringToLong((String) dpidString.toArray()[0]);
+                dpid = HexEncode.stringToLong((String) dpidString.toArray()[0]);
             } catch (ArrayIndexOutOfBoundsException e) {
                 return;
             }
@@ -222,12 +258,11 @@ public class OvsdbInventoryManager implements OvsdbInventoryListener {
                     .build();
 
             // Read the current OVSDB Node from the DataStore
-            ReadOnlyTransaction readTx = dataBroker.newReadOnlyTransaction();
-            OvsdbCapableNode ovsdbNode = null;
+            ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
+            OvsdbCapableNode ovsdbNode;
             try {
                 Optional<OvsdbCapableNode>
-                        data =
-                        readTx.read(LogicalDatastoreType.CONFIGURATION, ovsdbNodePath).get();
+                        data = tx.read(LogicalDatastoreType.CONFIGURATION, ovsdbNodePath).get();
                 ovsdbNode = data.get();
             } catch (InterruptedException | ExecutionException e) {
                 throw new RuntimeException("Node does not exist");
@@ -235,7 +270,6 @@ public class OvsdbInventoryManager implements OvsdbInventoryListener {
 
             // Update the list of Nodes
             List<NodeId> managedNodesList = ovsdbNode.getManagedNodes();
-            Boolean updated = false;
             managedNodesList.add(openflowNodeId);
 
             // Create a delta object
@@ -243,17 +277,24 @@ public class OvsdbInventoryManager implements OvsdbInventoryListener {
                     .setManagedNodes(managedNodesList)
                     .build();
 
-            // Write changes to DataStore
-            WriteTransaction writeTx = dataBroker.newWriteOnlyTransaction();
             // Create parent if we get to this node before openflowplugin
-            writeTx.put(LogicalDatastoreType.CONFIGURATION, openflowNodepath, ovsdbManagedNode, true);
-            writeTx.put(LogicalDatastoreType.CONFIGURATION, ovsdbNodePath, updatedNode);
-            writeTx.submit();
+            tx.put(LogicalDatastoreType.CONFIGURATION, openflowNodepath, ovsdbManagedNode, true);
+            tx.put(LogicalDatastoreType.CONFIGURATION, ovsdbNodePath, updatedNode);
+
+            try {
+                tx.submit().get();
+                logger.debug("Transaction success for addition of {} and update of {}",
+                             openflowNodepath.toString(),
+                             ovsdbNodePath.toString());
+            } catch (InterruptedException | ExecutionException e) {
+                logger.error(e.getMessage(), e);
+            }
         }
     }
 
     @Override
-    public synchronized void rowAdded(org.opendaylight.controller.sal.core.Node node, String tableName, String uuid, Row row) {
+    public synchronized void rowAdded(org.opendaylight.controller.sal.core.Node node, String tableName, String uuid,
+                                      Row row) {
         // noop
     }
 }

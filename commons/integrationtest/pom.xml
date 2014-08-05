@@ -725,37 +725,30 @@
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>library</artifactId>
-      <version>${ovsdb.library.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>plugin</artifactId>
-      <version>${ovsdb.plugin.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>openstack.net-virt</artifactId>
-      <version>${openstack.netvirt.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>openstack.net-virt</artifactId>
-      <version>${openstack.netvirt.providers.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>northbound</artifactId>
-      <version>${ovsdb.northbound.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>schema.openvswitch</artifactId>
-      <version>${schema.openvswitch.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>schema.hardwarevtep</artifactId>
-      <version>${schema.hardwarevtep.version}</version>
     </dependency>
 
     <!-- Add Pax Exam -->

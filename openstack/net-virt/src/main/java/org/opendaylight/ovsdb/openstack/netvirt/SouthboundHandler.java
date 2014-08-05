@@ -40,6 +40,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class SouthboundHandler extends AbstractHandler implements OvsdbInventoryListener, IInventoryListener {
     static final Logger logger = LoggerFactory.getLogger(SouthboundHandler.class);
@@ -100,7 +101,22 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
     }
 
     void stop() {
-        eventHandler.shutdownNow();
+        // stop accepting new tasks
+        eventHandler.shutdown();
+        try {
+            // Wait a while for existing tasks to terminate
+            if (!eventHandler.awaitTermination(10, TimeUnit.SECONDS)) {
+                eventHandler.shutdownNow();
+                // Wait a while for tasks to respond to being cancelled
+                if (!eventHandler.awaitTermination(10, TimeUnit.SECONDS))
+                    logger.error("Southbound Event Handler did not terminate");
+            }
+        } catch (InterruptedException e) {
+            // (Re-)Cancel if current thread also interrupted
+            eventHandler.shutdownNow();
+            // Preserve interrupt status
+            Thread.currentThread().interrupt();
+        }
     }
 
     @Override

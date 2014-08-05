@@ -31,6 +31,7 @@ import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -103,7 +104,7 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
     }
 
     @Override
-    public void nodeAdded(Node node) {
+    public void nodeAdded(Node node, InetAddress address, int port) {
         this.enqueueEvent(new SouthboundEvent(node, SouthboundEvent.Action.ADD));
     }
 

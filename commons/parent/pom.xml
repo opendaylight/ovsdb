@@ -210,6 +210,11 @@
         <artifactId>schema.openvswitch</artifactId>
         <version>${schema.openvswitch.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.opendaylight.ovsdb</groupId>
+        <artifactId>plugin-mdsal-adapter</artifactId>
+        <version>${ovsdb.plugin.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -238,7 +243,7 @@
             <includeTestSourceDirectory>true</includeTestSourceDirectory>
             <sourceDirectory>${project.basedir}</sourceDirectory>
             <includes>**\/*.java,**\/*.xml,**\/*.ini,**\/*.sh,**\/*.bat</includes>
-            <excludes>**\/target\/,**\/bin\/,**\/target-ide\/,\/,**\/xtend-gen\/</excludes>
+            <excludes>**\/target\/,**\/bin\/,**\/target-ide\/,\/</excludes>
           </configuration>
           <dependencies>
             <dependency>
@@ -325,6 +330,60 @@
               <configuration>
                 <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
                 <skipTests>${skip.integrationtest}</skipTests>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>yang-maven-plugin</artifactId>
+          <version>${yangtools.version}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>generate-sources</goal>
+              </goals>
+              <configuration>
+                <!-- directory containing yang files to parse and generate code -->
+                <yangFilesRootDir>src/main/yang</yangFilesRootDir>
+                <codeGenerators>
+                  <generator>
+                    <codeGeneratorClass>
+                      org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl
+                    </codeGeneratorClass>
+                    <!-- directory into which generated files will be placed -->
+                    <outputBaseDir>
+                      target/generated-sources/sal
+                    </outputBaseDir>
+                  </generator>
+                </codeGenerators>
+                <inspectDependencies>true</inspectDependencies>
+              </configuration>
+            </execution>
+          </executions>
+          <dependencies>
+            <dependency>
+              <groupId>org.opendaylight.yangtools</groupId>
+              <artifactId>maven-sal-api-gen-plugin</artifactId>
+              <version>0.6.2-SNAPSHOT</version>
+              <type>jar</type>
+            </dependency>
+          </dependencies>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>1.7</version>
+          <executions>
+            <execution>
+              <phase>generate-sources</phase>
+              <goals>
+                <goal>add-source</goal>
+              </goals>
+              <configuration>
+                <sources>
+                  <source>target/generated-sources/sal</source>
+                </sources>
               </configuration>
             </execution>
           </executions>

@@ -9,6 +9,7 @@
  */
 package org.opendaylight.ovsdb.plugin.impl;
 
+import java.net.InetAddress;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -282,10 +283,16 @@ public class InventoryServiceImpl implements IPluginInInventoryService,
     }
 
     @Override
-    public void notifyNodeAdded(Node node) {
+    @Deprecated public void notifyNodeAdded(Node node) {
+        //noop
+    }
+
+
+    @Override
+    public void notifyNodeAdded(Node node, InetAddress address, int port) {
         if (!ovsdbInventoryListeners.isEmpty()) {
             for (OvsdbInventoryListener listener : ovsdbInventoryListeners) {
-                listener.nodeAdded(node);
+                listener.nodeAdded(node, address, port);
             }
         }
     }

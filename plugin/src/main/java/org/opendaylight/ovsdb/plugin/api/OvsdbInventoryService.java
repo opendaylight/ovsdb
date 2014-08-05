@@ -9,6 +9,7 @@
  */
 package org.opendaylight.ovsdb.plugin.api;
 
+import java.net.InetAddress;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
@@ -27,9 +28,8 @@ public interface OvsdbInventoryService extends IPluginInInventoryService {
     public void removeRow(Node n, String databaseName, String tableName, String uuid);
     public void processTableUpdates(Node n, String databaseName,TableUpdates tableUpdates);
     public void printCache(Node n);
-
     public void addNode(Node n, Set<Property> props);
-    public void notifyNodeAdded(Node n);
+    public void notifyNodeAdded(Node n, InetAddress address, int port);
     public void removeNode(Node n);
     public void addNodeProperty(Node node, UpdateType type, Set<Property> props);
 }

@@ -12,8 +12,10 @@ package org.opendaylight.ovsdb.plugin.api;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.lib.notation.Row;
 
+import java.net.InetAddress;
+
 public interface OvsdbInventoryListener {
-    public void nodeAdded(Node node);
+    public void nodeAdded(Node node, InetAddress address, int port );
     public void nodeRemoved(Node node);
     public void rowAdded(Node node, String tableName, String uuid, Row row);
     public void rowUpdated(Node node, String tableName, String uuid, Row old, Row row);

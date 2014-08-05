@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_a55c1d1a",
+        "filename": "commons/parent/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 338,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-08-05T00:08:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_5432a95f",
+      "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_e511c552",
         "filename": "plugin-mdsal-adapter/src/main/java/org/opendaylight/ovsdb/plugin/md/Activator.java",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_a5fdfdb2",
+        "filename": "plugin-mdsal-adapter/src/main/java/org/opendaylight/ovsdb/plugin/md/Activator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-08-05T00:08:32Z",
+      "side": 1,
+      "message": "Yes!",
+      "parentUuid": "fa82b9bf_e511c552",
+      "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_f4341d4b",
         "filename": "plugin-mdsal-adapter/src/main/java/org/opendaylight/ovsdb/plugin/md/OvsdbBindingAwareProvider.java",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2014-08-02T02:14:31Z",
       "side": 1,
       "message": ":) Better copyright header prefered.",
+      "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_459f51b5",
+        "filename": "plugin-mdsal-adapter/src/main/java/org/opendaylight/ovsdb/plugin/md/OvsdbBindingAwareProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-08-05T00:08:32Z",
+      "side": 1,
+      "message": "Well this is a public draft so I think I can be forgiven :D",
+      "parentUuid": "fa82b9bf_f4341d4b",
       "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +141,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_65a295fe",
+        "filename": "plugin-mdsal-adapter/src/main/java/org/opendaylight/ovsdb/plugin/md/OvsdbInventoryManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-08-05T00:08:32Z",
+      "side": 1,
+      "message": "Maybe I\u0027ll change the API to give the NodeProperties along with the update. This would be much better than forcing a call in to the InventoryService IMO",
+      "parentUuid": "fa82b9bf_548069bf",
+      "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_f482ddc6",
         "filename": "plugin-mdsal-adapter/src/main/java/org/opendaylight/ovsdb/plugin/md/OvsdbInventoryManager.java",
         "patchSetId": 1
@@ -104,6 +176,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_05a5c902",
+        "filename": "plugin-mdsal-adapter/src/main/java/org/opendaylight/ovsdb/plugin/md/OvsdbInventoryManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-08-05T00:08:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_f482ddc6",
+      "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_148661db",
         "filename": "plugin-mdsal-adapter/src/main/java/org/opendaylight/ovsdb/plugin/md/Utils.java",
         "patchSetId": 1
@@ -115,6 +205,24 @@
       "writtenOn": "2014-08-02T02:14:31Z",
       "side": 1,
       "message": "Please refer to my previous comment...\nLets not get into this ;)",
+      "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_25a80dda",
+        "filename": "plugin-mdsal-adapter/src/main/java/org/opendaylight/ovsdb/plugin/md/Utils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-08-05T00:08:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_148661db",
       "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -207,6 +315,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_c5b2814b",
+        "filename": "plugin-mdsal-adapter/src/main/yang/ovsdb-node-inventory.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-08-05T00:08:32Z",
+      "side": 1,
+      "message": "Yes. But not in this commit!",
+      "parentUuid": "fa82b9bf_ea6c340a",
+      "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_d46b191c",
         "filename": "plugin-mdsal-adapter/src/main/yang/ovsdb-node-inventory.yang",
         "patchSetId": 1
@@ -218,6 +344,24 @@
       "writtenOn": "2014-08-02T02:14:31Z",
       "side": 1,
       "message": "Love it. way to go.",
+      "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e5ad45ea",
+        "filename": "plugin-mdsal-adapter/src/main/yang/ovsdb-node-inventory.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-08-05T00:08:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_d46b191c",
       "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -241,6 +385,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_85b8f92a",
+        "filename": "plugin-mdsal-adapter/src/main/yang/ovsdb-node-inventory.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-08-05T00:08:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_7476cd07",
+      "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_9471110e",
         "filename": "plugin-mdsal-adapter/src/test/java/org/opendaylight/ovsdb/plugin/md/UtilsTest.java",
         "patchSetId": 1
@@ -252,6 +414,24 @@
       "writtenOn": "2014-08-02T02:14:31Z",
       "side": 1,
       "message": "Good UT. But lets not do this ;)",
+      "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3b2a707f",
+        "filename": "plugin-mdsal-adapter/src/test/java/org/opendaylight/ovsdb/plugin/md/UtilsTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-08-05T00:08:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_9471110e",
       "revId": "c5ff0484e70376e70856dd5fe516b4df3f53b4a0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

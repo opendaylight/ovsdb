@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_f8d96b57",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/impl/ConfigurationServiceImpl.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 551,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-05T19:36:36Z",
+      "side": 1,
+      "message": "Why do we need to update the Row if the target is already set ?",
+      "revId": "99bcb974488ec3368ae9567af7e11d23659062cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_58ead7db",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/impl/ConfigurationServiceImpl.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 554,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-05T19:36:36Z",
+      "side": 1,
+      "message": "I cant completely wrap my brain around this. But what if a controller has 2 NICs with 1.1.1.1 and 2.2.2.2 addresses. And if an OVSDB connection is established on 1.1.1.1 first, then we will set the OF connection to tcp:1.1.1.1:6633. Later if this OVSDB connection is terminated and connects again to the controller in 2.2.2.2, we will set the OF-controller connection to tcp:2.2.2.2:6633.\n\nIn this case we will have 2 OF connections setup between the controller and the same bridge.\n\nWe have to find a way to filter that out.\n\nI think it is better if we remove all the existing controller ip-addresses on the bridge if that matches any of the controller\u0027s own ip-address and then program the one and only connection to self.",
+      "revId": "99bcb974488ec3368ae9567af7e11d23659062cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_bb143d4d",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/impl/ConfigurationServiceImpl.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 551,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-06T10:32:15Z",
+      "side": 1,
+      "message": "Yes. I was thinking not to do any harm that we dont own/manage.\nIf the controller is not our own, then I would prefer not to clean that up.",
+      "parentUuid": "fa82b9bf_d87ca7ee",
+      "revId": "99bcb974488ec3368ae9567af7e11d23659062cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_58ead7db",
         "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/impl/ConfigurationServiceImpl.java",
         "patchSetId": 7
@@ -66,6 +84,24 @@
       "side": 1,
       "message": "Let\u0027s talk more about this, please. I do not understand the relationship between bridge, controller and multilpe ip addresses to the same controller. Is that related to the set\u003cString\u003e change in the schema?\nIn other wrds, should the target attribute of controller be a set\u003cString\u003e instead of a single string?",
       "parentUuid": "fa82b9bf_58ead7db",
+      "revId": "99bcb974488ec3368ae9567af7e11d23659062cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5b0f3137",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/impl/ConfigurationServiceImpl.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 554,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-06T10:32:15Z",
+      "side": 1,
+      "message": "Sure. Lets talk about this.",
+      "parentUuid": "fa82b9bf_582977e4",
       "revId": "99bcb974488ec3368ae9567af7e11d23659062cb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

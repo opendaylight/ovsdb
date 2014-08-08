@@ -62,6 +62,11 @@ see https://git.opendaylight.org/gerrit/#/c/390/
     </dependency>
     <dependency>
       <groupId>org.opendaylight.openflowplugin</groupId>
+      <artifactId>openflowplugin-extension-api</artifactId>
+      <version>${openflowplugin.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.openflowplugin</groupId>
       <artifactId>openflowplugin-controller-config</artifactId>
       <version>${openflowplugin.version}</version>
     </dependency>

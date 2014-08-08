@@ -2606,12 +2606,13 @@ public class OF13Provider implements NetworkingProvider {
 
         ReadWriteTransaction modification = dataBroker.newReadWriteTransaction();
 
-        // Sanity check: do not create parent's tree deeper than we should
+        // Sanity check: do not create parent's tree deeper than we should. Note that due to async nature of events,
+        // this is actually expected to happen and it is benign.
         InstanceIdentifier<?> requiredPath = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
                 .rev130819.nodes.Node.class, nodeBuilder.getKey()).build();
         try {
             if (!modification.read(LogicalDatastoreType.CONFIGURATION, requiredPath).get().isPresent()) {
-                logger.error("Unable to get configuration resource to store group "+groupBuilder.getGroupName()
+                logger.debug("Unable to get configuration resource to store group "+groupBuilder.getGroupName()
                         +" ("+requiredPath.toString()+")");
                 return;
             }
@@ -2707,12 +2708,13 @@ public class OF13Provider implements NetworkingProvider {
 
         ReadWriteTransaction modification = dataBroker.newReadWriteTransaction();
 
-        // Sanity check: do not create parent's tree deeper than we should
+        // Sanity check: do not create parent's tree deeper than we should. Note that due to async nature of events,
+        // this is actually expected to happen and it is benign.
         InstanceIdentifier<?> requiredPath = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
                 .rev130819.nodes.Node.class, nodeBuilder.getKey()).build();
         try {
             if (!modification.read(LogicalDatastoreType.CONFIGURATION, requiredPath).get().isPresent()) {
-                logger.error("Unable to get configuration resource to store flow "+flowBuilder.getFlowName()
+                logger.debug("Unable to get configuration resource to store flow "+flowBuilder.getFlowName()
                         +" ("+requiredPath.toString()+")");
                 return;
             }

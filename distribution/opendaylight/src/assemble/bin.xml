@@ -18,6 +18,14 @@
       </excludes>
     </fileSet>
     <fileSet>
+      <directory>
+        src/main/resources/
+      </directory>
+      <outputDirectory>
+        opendaylight/
+      </outputDirectory>
+    </fileSet>
+    <fileSet>
       <directory>${project.build.directory}/provided-configs/initial</directory>
       <outputDirectory>/opendaylight/configuration/initial.available</outputDirectory>
       <excludes>

@@ -87,6 +87,16 @@ see https://git.opendaylight.org/gerrit/#/c/390/
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>of-extension.nx-ofjava</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>of-extension.nx-sal</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>library</artifactId>
     </dependency>
     <dependency>
@@ -139,23 +149,6 @@ see https://git.opendaylight.org/gerrit/#/c/390/
     </resources>
     <plugins>
       <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>distro-assembly</id>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <phase>package</phase>
-            <configuration>
-              <descriptors>
-                <descriptor>src/assemble/bin.xml</descriptor>
-              </descriptors>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
         <version>2.8</version>
@@ -181,11 +174,31 @@ see https://git.opendaylight.org/gerrit/#/c/390/
             </goals>
             <phase>generate-resources</phase>
             <configuration>
-              <outputDirectory>${project.build.directory}/provided-configs</outputDirectory>
-              <includeArtifactIds>openflowplugin-controller-config</includeArtifactIds>
+              <outputDirectory>${project.build.directory}/generated-resources/opendaylight/configuration</outputDirectory>
+              <includeArtifactIds>
+                openflowplugin-controller-config, test-extension, openflowjava-extension-nicira, openflowjava-extension-nicira-api, openflowplugin-extension-nicira,
+                of-extension.nx-ofjava, of-extension.nx-sal
+             </includeArtifactIds>
               <includes>**\/*.xml</includes>
               <excludeTransitive>true</excludeTransitive>
               <ignorePermissions>false</ignorePermissions>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+            <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>distro-assembly</id>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <descriptors>
+                <descriptor>src/assemble/bin.xml</descriptor>
+              </descriptors>
             </configuration>
           </execution>
         </executions>

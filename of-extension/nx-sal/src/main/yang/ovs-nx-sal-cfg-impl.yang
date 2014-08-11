@@ -1,0 +1,38 @@
+module ovs-nx-sal-cfg-impl {
+	yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:ovs:nx:sal:config:impl";
+    prefix "ovs-nx-sal-cfg-impl";
+
+    import config {prefix config; revision-date 2013-04-05;}
+    import openflow-provider {prefix openflow-provider; revision-date 2014-03-26;}
+    import ovs-nx-sal-cfg {prefix ovs-nx-sal-cfg;}
+
+    description
+        "openflow extension for nicira - config-impl";
+
+    revision "2014-07-11" {
+        description
+            "Initial revision";
+    }
+
+    identity ovs-nx-sal-provider-impl {
+        base config:module-type;
+        config:provided-service ovs-nx-sal-cfg:ovs-nx-sal-provider;
+        config:java-name-prefix ConfigurableNiciraExtensionProvider;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case ovs-nx-sal-provider-impl {
+            when "/config:modules/config:module/config:type = 'ovs-nx-sal-provider-impl'";
+
+            container openflow-plugin-provider {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity openflow-provider:openflow-provider;
+                    }
+                }
+            }
+        }
+    }
+}

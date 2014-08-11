@@ -35,7 +35,15 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ListenableFuture;
 ;
-
+/**
+ * BridgeTestCases covers all the Integration Test Cases required for OVS Bridge.
+ *
+ * Since OVSDB library is schema independent, these Open_vSwitch schema specific
+ * test cases covers the testing needs for both the Schema wrapper layer : schema.openvswitch
+ * and the underlying library which performs the schema independent way to access the network
+ * entity that talks OVSDB protocol.
+ *
+ */
 public class BridgeTestCases extends OpenVswitchSchemaTestBase {
     Logger logger = LoggerFactory.getLogger(BridgeTestCases.class);
 
@@ -45,6 +53,19 @@ public class BridgeTestCases extends OpenVswitchSchemaTestBase {
         super.setUp();
      }
 
+    /**
+     * Creates a Open_vSwitch Bridge using the schema.openvswitch wrapper Bridge class.
+     * This test case performs the following tests and asserts on failures :
+     * 1. Creates and asserts on a wrapper software-only Bridge object using the Schema-independent library.
+     * 2. Populates Bridge Columns such as Name, Status, Vlans using the wrapper layer.
+     * 3. Tests OVSDB libraries transact functionality by inserting the bridge, Mutating the parent Open_vSwitch
+     *    table and Updating the bridge all in a single Transaction.
+     * 4. Validates the Transaction success condition by
+     *    1. Comparing the number of requests with the number or response objects,
+     *    2. Checking for any error in any of the response objects.
+     * 5. Confirm the Creation of the Bridge by validating against the Table cache that gets populated by the
+     *    Monitor operation.
+     */
     @Test
     public void createTypedBridge() throws IOException, InterruptedException, ExecutionException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         Bridge bridge = this.ovs.createTypedRowWrapper(Bridge.class);

@@ -1,0 +1,13 @@
+module ovs-nx-sal-match {
+    yang-version 1;
+
+    namespace "urn:opendaylight:ovs:nx:sal:match";
+    prefix "ovs-nx-sal-match";
+
+    description
+        "Nicira openflow match extensions.";
+
+    revision "2014-07-14" {
+        description "Initial revision";
+    }
+}

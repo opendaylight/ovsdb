@@ -1,0 +1,36 @@
+module ovs-nx-config {
+	yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:ovs:nx:config";
+    prefix "ovs-nx";
+
+    import config {prefix config; revision-date 2013-04-05;}
+    import ovs-nx-api-config {prefix ovs-nx-api-config;revision-date 2014-07-11;}
+
+    description
+        "Nicira extensions in openflow library.";
+
+    revision "2014-07-11" {
+        description
+            "Initial revision";
+    }
+
+    identity ovs-nx {
+        base config:module-type;
+        config:java-name-prefix NiciraExtensionProvider;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case ovs-nx {
+            when "/config:modules/config:module/config:type = 'ovs-nx'";
+
+            container nx-codec-registrator {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity ovs-nx-api-config:nx-codec-registrator;
+                    }
+                }
+            }
+        }
+    }
+}

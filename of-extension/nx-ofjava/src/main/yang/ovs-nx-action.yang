@@ -1,0 +1,42 @@
+module ovs-nx-action {
+    yang-version 1;
+
+    namespace "urn:opendaylight:ovs:nx:action";
+    prefix "nx-action";
+
+    import openflow-action {prefix ofaction;}
+    import openflow-types {prefix oft;}
+    import yang-ext {prefix ext; revision-date "2013-07-09";}
+
+    description
+        "Nicira openflow action extensions";
+
+    revision "2014-04-21" {
+        description "Initial revision";
+    }
+
+    identity nxm-nx-resubmit {
+        base ofaction:experimenter-action-sub-type;
+    }
+
+    grouping ofj-nx-action-resubmit-grouping {
+        container action-resubmit {
+            leaf in-port {
+                type uint16;
+                default 0xfff8; // OFPP_INPORT
+            }
+            leaf table {
+                type uint8 {
+                    range "0 .. 255";
+                }
+                default 255; // Current Table
+            }
+        }
+    }
+
+    augment "/ofaction:actions-container/ofaction:action" {
+        ext:augment-identifier "ofj-aug-nx-action";
+        uses ofj-nx-action-resubmit-grouping;
+    }
+
+}

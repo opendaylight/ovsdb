@@ -30,6 +30,8 @@
     <module>northbound</module>
     <module>openstack/net-virt</module>
     <module>openstack/net-virt-providers</module>
+    <module>of-extension/nx-ofjava</module>
+    <module>of-extension/nx-sal</module>
     <module>ovs-sfc</module>
     <!-- Integration Tests -->
     <module>integrationtest</module>

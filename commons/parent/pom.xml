@@ -31,6 +31,7 @@
     <ovsdb.northbound.version>0.6.0-SNAPSHOT</ovsdb.northbound.version>
     <schema.openvswitch.version>1.0.0-SNAPSHOT</schema.openvswitch.version>
     <schema.hardwarevtep.version>1.0.0-SNAPSHOT</schema.hardwarevtep.version>
+    <ovsdb.ofextension.version>1.0.0-SNAPSHOT</ovsdb.ofextension.version>
     <!-- Skip Coverage and IT by default -->
     <skip.coverage>true</skip.coverage>
     <skip.integrationtest>true</skip.integrationtest>
@@ -52,6 +53,13 @@
     <sal.connection.version>0.1.2-SNAPSHOT</sal.connection.version>
     <sal.networkconfiguration.version>0.0.3-SNAPSHOT</sal.networkconfiguration.version>
     <mdsal.version>1.1-SNAPSHOT</mdsal.version>
+    <openflowplugin.version>0.0.3-SNAPSHOT</openflowplugin.version>
+    <openflowplugin-nicira.version>0.0.3-SNAPSHOT</openflowplugin-nicira.version>
+    <openflowplugin-extension.version>0.0.3-SNAPSHOT</openflowplugin-extension.version>
+    <openflowjava-nicira.version>0.0.3-SNAPSHOT</openflowjava-nicira.version>
+    <openflowjava-extension.version>0.0.3-SNAPSHOT</openflowjava-extension.version>
+    <openflowjava.version>0.5-SNAPSHOT</openflowjava.version>
+    <controller.config.version>0.2.5-SNAPSHOT</controller.config.version>
     <switchmanager.api.version>0.7.1-SNAPSHOT</switchmanager.api.version>
     <yangtools.version>0.6.2-SNAPSHOT</yangtools.version>
     <northbound.commons.version>0.4.2-SNAPSHOT</northbound.commons.version>
@@ -152,6 +160,11 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller.model</groupId>
+        <artifactId>model-flow-statistics</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller.model</groupId>
         <artifactId>model-flow-service</artifactId>
         <version>${mdsal.version}</version>
       </dependency>
@@ -169,6 +182,56 @@
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>commons.northbound</artifactId>
         <version>${northbound.commons.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>config-api</artifactId>
+          <version>${controller.config.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.opendaylight.openflowjava</groupId>
+          <artifactId>openflow-protocol-api</artifactId>
+          <version>${openflowjava.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.opendaylight.openflowjava</groupId>
+          <artifactId>openflow-protocol-spi</artifactId>
+          <version>${openflowjava.version}</version>
+      </dependency>
+        <dependency>
+            <groupId>org.opendaylight.openflowjava</groupId>
+            <artifactId>openflow-protocol-impl</artifactId>
+            <version>${openflowjava.version}</version>
+        </dependency>
+      <dependency>
+          <groupId>org.opendaylight.openflowjava</groupId>
+          <artifactId>util</artifactId>
+          <version>${openflowjava.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.opendaylight.openflowplugin</groupId>
+          <artifactId>openflowjava-extension-nicira-api</artifactId>
+          <version>${openflowjava-nicira.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.opendaylight.openflowplugin</groupId>
+          <artifactId>openflowjava-extension-nicira</artifactId>
+          <version>${openflowjava-nicira.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.opendaylight.openflowplugin</groupId>
+          <artifactId>openflowplugin-extension-api</artifactId>
+          <version>${openflowplugin-extension.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.opendaylight.openflowplugin</groupId>
+          <artifactId>openflowplugin-extension-nicira</artifactId>
+          <version>${openflowplugin-nicira.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.opendaylight.openflowplugin</groupId>
+          <artifactId>openflowplugin</artifactId>
+          <version>${openflowplugin.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.ovsdb</groupId>
@@ -209,6 +272,16 @@
         <groupId>org.opendaylight.ovsdb</groupId>
         <artifactId>plugin-mdsal-adapter</artifactId>
         <version>${ovsdb.plugin.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.ovsdb</groupId>
+        <artifactId>of-extension.nx-ofjava</artifactId>
+        <version>${ovsdb.ofextension.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.ovsdb</groupId>
+        <artifactId>of-extension.nx-sal</artifactId>
+        <version>${ovsdb.ofextension.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

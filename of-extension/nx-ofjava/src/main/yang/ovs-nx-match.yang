@@ -1,0 +1,18 @@
+module ovs-nx-match {
+    yang-version 1;
+
+    namespace "urn:opendaylight:ovs:nx:match";
+    prefix "nx-match";
+
+    import openflow-extensible-match {prefix ofoxm;}
+    import openflow-types {prefix oft;}
+    import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
+    import yang-ext {prefix ext; revision-date "2013-07-09";}
+
+    description
+        "Nicira openflow match extensions";
+
+    revision "2014-04-21" {
+        description "Initial revision";
+    }
+}

@@ -23,7 +23,9 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
+import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
+import org.opendaylight.ovsdb.schema.openvswitch.Manager;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 
@@ -142,7 +144,7 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
     }
 
     /*
-     * Ignore unneccesary updates to be even considered for processing.
+     * Ignore unnecessary updates to be even considered for processing.
      * (Especially stats update are fast and furious).
      */
 
@@ -171,6 +173,12 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
                 /* we are only interested in other_config field change */
                 return false;
             }
+        } else if (newRow.getTableSchema().getName().equals(ovsdbConfigurationService.getTableName(node, Controller.class))) {
+            logger.trace("IGNORING Controller Update: node {}, row: {}", node, newRow);
+            return false;
+        } else if (newRow.getTableSchema().getName().equals(ovsdbConfigurationService.getTableName(node, Manager.class))) {
+            logger.trace("IGNORING Manager Update: node {}, row: {}", node, newRow);
+            return false;
         }
         return true;
     }

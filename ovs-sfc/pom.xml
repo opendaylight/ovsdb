@@ -2,6 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.opendaylight.ovsdb</groupId>
@@ -9,25 +10,25 @@
         <version>1.2.0-SNAPSHOT</version>
         <relativePath>../commons/parent</relativePath>
     </parent>
-
-    <artifactId>ovs-sfc</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-    <name>Opendaylight OVS SFC Plugin</name>
+    <artifactId>ovssfc</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
     <packaging>bundle</packaging>
+
+    <properties>
+        <sfc-model.version>0.0.1-SNAPSHOT</sfc-model.version>
+        <jmxGeneratorPath>target/generated-sources/config</jmxGeneratorPath>
+    </properties>
 
     <dependencies>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>sal</artifactId>
+            <artifactId>sal-binding-config</artifactId>
+            <version>${mdsal.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
+            <groupId>org.opendaylight.sfc</groupId>
+            <artifactId>sfc-model</artifactId>
+            <version>${sfc-model.version}</version>
         </dependency>
     </dependencies>
 
@@ -36,40 +37,60 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>2.3.6</version>
+                <version>${bundle.plugin.version}</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <instructions>
-                        <Import-Package>
-                            org.opendaylight.controller.sal.core,
-                            org.slf4j
-                        </Import-Package>
-                        <Export-Package>
-                            org.opendaylight.ovsdb.ovssfc
-                        </Export-Package>
-                        <Bundle-Activator>org.opendaylight.ovsdb.ovssfc.internal.Activator</Bundle-Activator>
-                    </instructions>
                     <manifestLocation>${project.basedir}/META-INF</manifestLocation>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.opendaylight.yangtools</groupId>
+                <artifactId>yang-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>config</id>
+                        <goals>
+                            <goal>generate-sources</goal>
+                        </goals>
+                        <configuration>
+                            <codeGenerators>
+                                <generator>
+                                    <codeGeneratorClass>
+                                        org.opendaylight.controller.config.yangjmxgenerator.plugin.JMXGenerator
+                                    </codeGeneratorClass>
+                                    <outputBaseDir>${jmxGeneratorPath}</outputBaseDir>
+                                    <additionalConfiguration>
+                                        <namespaceToPackage1>
+                                            urn:opendaylight:params:xml:ns:yang:controller==org.opendaylight.controller.config.yang
+                                        </namespaceToPackage1>
+                                    </additionalConfiguration>
+                                </generator>
+                            </codeGenerators>
+                            <inspectDependencies>true</inspectDependencies>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.opendaylight.controller</groupId>
+                        <artifactId>yang-jmx-generator-plugin</artifactId>
+                        <version>${controller.config.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.opendaylight.yangtools</groupId>
+                        <artifactId>maven-sal-api-gen-plugin</artifactId>
+                        <version>${yangtools.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
             </plugin>
-            <!--
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-            </plugin>
-            -->
         </plugins>
     </build>
 

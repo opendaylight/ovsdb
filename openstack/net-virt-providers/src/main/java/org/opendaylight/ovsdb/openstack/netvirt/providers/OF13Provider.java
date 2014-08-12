@@ -2691,11 +2691,11 @@ public class OF13Provider implements NetworkingProvider {
             if (!modification.read(LogicalDatastoreType.CONFIGURATION, requiredPath).get().isPresent()) {
                 logger.error("Unable to get configuration resource to store flow "+flowBuilder.getFlowName()
                         +" ("+requiredPath.toString()+")");
-                return;
+                // return;
             }
         } catch (InterruptedException|ExecutionException e) {
             logger.error(e.getMessage(), e);
-            return;
+            // return;
         }
 
         InstanceIdentifier<Flow> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory

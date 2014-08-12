@@ -9,7 +9,12 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.providers.mdsalopenflow13;
 
-import com.google.common.collect.Lists;
+import static org.opendaylight.ovsdb.openstack.netvirt.providers.mdsalopenflow13.OF13MdSalAction.dropAction;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
@@ -39,6 +44,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv4Builder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Instructions;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.GoToTableCaseBuilder;
@@ -59,9 +66,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
+import com.google.common.collect.Lists;
 
 public class OF13MdSalInstruction {
     private static final Logger logger = LoggerFactory.getLogger(OF13MdSalInstruction.class);
@@ -842,4 +847,47 @@ public class OF13MdSalInstruction {
 
         return ib;
     }
+
+    public static ArrayList<org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action>
+                  actionList (org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action... actions) {
+
+        ArrayList<org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action> alist
+            = new ArrayList<>();
+        int count = 0;
+        for (org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action action : actions) {
+            alist.add(new ActionBuilder()
+            .setOrder(Integer.valueOf(count++))
+            .setAction(action)
+            .build());
+        }
+        return alist;
+    }
+
+    public static org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.Instruction
+        applyActionIns(org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action... actions) {
+
+        return new ApplyActionsCaseBuilder()
+            .setApplyActions(new ApplyActionsBuilder()
+                .setAction(actionList(actions))
+                .build())
+            .build();
+    }
+
+    public static Instructions getInstructions(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.Instruction... instructions) {
+        ArrayList<org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction> ins
+            = new ArrayList<>();
+        int order = 0;
+        for (org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.Instruction i : instructions) {
+            ins.add(new InstructionBuilder()
+                .setOrder(order++)
+                .setInstruction(i)
+                .build());
+        }
+        return new InstructionsBuilder().setInstruction(ins).build();
+    }
+
+    public static Instructions dropInstructions() {
+        return getInstructions(applyActionIns(dropAction()));
+    }
+
 }

@@ -9,6 +9,9 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.providers.mdsalopenflow13;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+
 import org.opendaylight.ovsdb.openstack.netvirt.providers.OF13Provider;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
@@ -20,6 +23,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.ethernet.match.fields.EthernetDestinationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.ethernet.match.fields.EthernetSourceBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.ethernet.match.fields.EthernetTypeBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.EthernetMatch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.EthernetMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Icmpv4MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.IpMatchBuilder;
@@ -29,10 +33,37 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.TcpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanIdBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg0;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg1;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg2;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg3;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg4;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg5;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg6;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.general.rev140714.ExtensionKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.general.rev140714.GeneralAugMatchNodesNodeTableFlow;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.general.rev140714.GeneralAugMatchNodesNodeTableFlowBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.general.rev140714.general.extension.grouping.ExtensionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.general.rev140714.general.extension.list.grouping.ExtensionList;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.general.rev140714.general.extension.list.grouping.ExtensionListBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxAugMatchNodesNodeTableFlow;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxAugMatchNodesNodeTableFlowBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxReg0Key;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxReg1Key;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxReg2Key;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxReg3Key;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxReg4Key;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxReg5Key;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxReg6Key;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxReg7Key;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxTunIdKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.nx.reg.grouping.NxmNxRegBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.nx.tun.id.grouping.NxmNxTunIdBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigInteger;
+import com.google.common.collect.ImmutableList;
 
 public class OF13MdSalMatch extends OF13Provider {
     private static final Logger logger = LoggerFactory.getLogger(OF13MdSalMatch.class);
@@ -306,5 +337,101 @@ public class OF13MdSalMatch extends OF13Provider {
         tcpFlagMatch.setTcpFlag(0x002);
         matchBuilder.setTcpFlagMatch(tcpFlagMatch.build());
         return matchBuilder;
+    }
+
+
+    public static class RegMatch {
+        final Class<? extends NxmNxReg> reg;
+        final Long value;
+        public RegMatch(Class<? extends NxmNxReg> reg, Long value) {
+            super();
+            this.reg = reg;
+            this.value = value;
+        }
+        public static RegMatch of(Class<? extends NxmNxReg> reg, Long value) {
+            return new RegMatch(reg, value);
+        }
+    }
+
+    public static void addNxRegMatch(MatchBuilder match,
+                                     RegMatch... matches) {
+        ArrayList<ExtensionList> extensions = new ArrayList<>();
+        for (RegMatch rm : matches) {
+            Class<? extends ExtensionKey> key;
+            if (NxmNxReg0.class.equals(rm.reg)) {
+                key = NxmNxReg0Key.class;
+            } else if (NxmNxReg1.class.equals(rm.reg)) {
+                key = NxmNxReg1Key.class;
+            } else if (NxmNxReg2.class.equals(rm.reg)) {
+                key = NxmNxReg2Key.class;
+            } else if (NxmNxReg3.class.equals(rm.reg)) {
+                key = NxmNxReg3Key.class;
+            } else if (NxmNxReg4.class.equals(rm.reg)) {
+                key = NxmNxReg4Key.class;
+            } else if (NxmNxReg5.class.equals(rm.reg)) {
+                key = NxmNxReg5Key.class;
+            } else if (NxmNxReg6.class.equals(rm.reg)) {
+                key = NxmNxReg6Key.class;
+            } else {
+                key = NxmNxReg7Key.class;
+            }
+            NxAugMatchNodesNodeTableFlow am =
+                    new NxAugMatchNodesNodeTableFlowBuilder()
+                .setNxmNxReg(new NxmNxRegBuilder()
+                    .setReg(rm.reg)
+                    .setValue(rm.value)
+                    .build())
+                .build();
+            extensions.add(new ExtensionListBuilder()
+                .setExtensionKey(key)
+                .setExtension(new ExtensionBuilder()
+                     .addAugmentation(NxAugMatchNodesNodeTableFlow.class, am)
+                     .build())
+                .build());
+        }
+        GeneralAugMatchNodesNodeTableFlow m =
+                new GeneralAugMatchNodesNodeTableFlowBuilder()
+            .setExtensionList(extensions)
+            .build();
+        match.addAugmentation(GeneralAugMatchNodesNodeTableFlow.class, m);
+    }
+
+    public static void addNxTunIdMatch(MatchBuilder match,
+                                       int tunId) {
+        NxAugMatchNodesNodeTableFlow am =
+               new NxAugMatchNodesNodeTableFlowBuilder()
+                   .setNxmNxTunId(new NxmNxTunIdBuilder()
+                       .setValue(BigInteger.valueOf(tunId))
+                       .build())
+                   .build();
+        GeneralAugMatchNodesNodeTableFlow m =
+                new GeneralAugMatchNodesNodeTableFlowBuilder()
+            .setExtensionList(ImmutableList.of(new ExtensionListBuilder()
+                .setExtensionKey(NxmNxTunIdKey.class)
+                .setExtension(new ExtensionBuilder()
+                    .addAugmentation(NxAugMatchNodesNodeTableFlow.class, am)
+                    .build())
+                .build()))
+            .build();
+        match.addAugmentation(GeneralAugMatchNodesNodeTableFlow.class, m);
+    }
+
+    public static EthernetMatch ethernetMatch(MacAddress srcMac,
+                                              MacAddress dstMac,
+                                              Long etherType) {
+        EthernetMatchBuilder emb = new  EthernetMatchBuilder();
+        if (srcMac != null)
+            emb.setEthernetSource(new EthernetSourceBuilder()
+                .setAddress(srcMac)
+                .build());
+        if (dstMac != null)
+            emb.setEthernetDestination(new EthernetDestinationBuilder()
+                .setAddress(dstMac)
+                .build());
+        if (etherType != null)
+            emb.setEthernetType(new EthernetTypeBuilder()
+                .setType(new EtherType(etherType))
+                .build());
+        return emb.build();
     }
 }

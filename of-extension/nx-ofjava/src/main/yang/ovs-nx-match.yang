@@ -20,6 +20,10 @@ module ovs-nx-match {
         base ofoxm:match-field;
     }
 
+    identity nxm-nx-nsi {
+        base ofoxm:match-field;
+    }
+
     grouping ofj-nxm-nx-match-nsp-grouping {
         container nsp-values {
             leaf nsp {
@@ -28,8 +32,17 @@ module ovs-nx-match {
         }
     }
 
+    grouping ofj-nxm-nx-match-nsi-grouping {
+        container nsi-values {
+            leaf nsi {
+                type uint8;
+            }
+        }
+    }
+
     augment "/ofoxm:oxm-container/ofoxm:match-entries" {
         ext:augment-identifier "ofj-aug_nx_match";
         uses ofj-nxm-nx-match-nsp-grouping;
+        uses ofj-nxm-nx-match-nsi-grouping;
     }
 }

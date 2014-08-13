@@ -26,6 +26,10 @@ module ovs-nx-sal-match {
         base ext-gen:extension-key;
     }
 
+    identity nxm-nx-nsi-key {
+        base ext-gen:extension-key;
+    }
+
     grouping nxm-nx-nsp-grouping {
         container nxm-nx-nsp {
             leaf value {
@@ -34,8 +38,17 @@ module ovs-nx-sal-match {
         }
     }
 
+    grouping nxm-nx-nsi-grouping {
+        container nxm-nx-nsi {
+            leaf nsi {
+                type uint8;
+            }
+        }
+    }
+
     grouping all-matches-grouping {
         uses nxm-nx-nsp-grouping;
+        uses nxm-nx-nsi-grouping;
     }
 
     // MATCH augmentations

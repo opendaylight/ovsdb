@@ -10,4 +10,5 @@
 package org.opendaylight.ovs.nx.ofjava.codec.match;
 public class NiciraMatchCodecs {
     public static final NspCodec NSP_CODEC = new NspCodec();
+    public static final NsiCodec NSI_CODEC = new NsiCodec();
 }

@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_eecaf619",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/RouterHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-13T05:38:59Z",
+      "side": 1,
+      "message": "Please add Copyright header.",
+      "revId": "934b22ff634be4dc2a08a580b1f30453b41ea307",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_0ece3a2e",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/RouterHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-13T05:38:59Z",
+      "side": 1,
+      "message": "Can you please make it readable by giving the return statement its own line :-)",
+      "revId": "934b22ff634be4dc2a08a580b1f30453b41ea307",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_aed06ec9",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/RouterHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-13T05:38:59Z",
+      "side": 1,
+      "message": "Same here.",
+      "revId": "934b22ff634be4dc2a08a580b1f30453b41ea307",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_ced372d3",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/RouterHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-13T05:38:59Z",
+      "side": 1,
+      "message": "Same here",
+      "revId": "934b22ff634be4dc2a08a580b1f30453b41ea307",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

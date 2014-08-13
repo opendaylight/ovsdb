@@ -2,7 +2,7 @@ module ovs-nx-match {
     yang-version 1;
 
     namespace "urn:opendaylight:ovs:nx:match";
-    prefix "nx-match";
+    prefix "ovs-nx-match";
 
     import openflow-extensible-match {prefix ofoxm;}
     import openflow-types {prefix oft;}
@@ -10,9 +10,26 @@ module ovs-nx-match {
     import yang-ext {prefix ext; revision-date "2013-07-09";}
 
     description
-        "Nicira openflow match extensions";
+        "OVS Openflow NX match extensions";
 
     revision "2014-04-21" {
         description "Initial revision";
+    }
+
+    identity nxm-nx-nsp {
+        base ofoxm:match-field;
+    }
+
+    grouping ofj-nxm-nx-match-nsp-grouping {
+        container nsp-values {
+            leaf nsp {
+                type uint32;
+            }
+        }
+    }
+
+    augment "/ofoxm:oxm-container/ofoxm:match-entries" {
+        ext:augment-identifier "ofj-aug_nx_match";
+        uses ofj-nxm-nx-match-nsp-grouping;
     }
 }

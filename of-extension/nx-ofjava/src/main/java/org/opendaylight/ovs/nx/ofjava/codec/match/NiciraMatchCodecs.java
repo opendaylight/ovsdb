@@ -7,6 +7,7 @@
  *
  * Authors : Madhu Venugopal
  */
-package org.opendaylight.ovs.nx.ofjava;
+package org.opendaylight.ovs.nx.ofjava.codec.match;
 public class NiciraMatchCodecs {
+    public static final NspCodec NSP_CODEC = new NspCodec();
 }

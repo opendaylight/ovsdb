@@ -51,6 +51,14 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nx.action.resubmit.grouping.NxResubmit;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nx.action.resubmit.grouping.NxResubmitBuilder;
 
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nodes.node.table.flow.instructions.instruction.instruction.apply.actions._case.apply.actions.action.action.NxActionSetNspNodesNodeTableFlowApplyActionsCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nx.action.set.nsp.grouping.NxSetNsp;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nx.action.set.nsp.grouping.NxSetNspBuilder;
+
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nodes.node.table.flow.instructions.instruction.instruction.apply.actions._case.apply.actions.action.action.NxActionSetNsiNodesNodeTableFlowApplyActionsCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nx.action.set.nsi.grouping.NxSetNsi;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nx.action.set.nsi.grouping.NxSetNsiBuilder;
+
 import com.google.common.net.InetAddresses;
 
 public final class OF13MdSalAction {
@@ -254,5 +262,24 @@ public final class OF13MdSalAction {
         NxResubmit r = builder.build();
         return new NxActionResubmitNodesNodeTableFlowApplyActionsCaseBuilder().setNxResubmit(r).build();
     }
+
+    public static Action nxSetNspAction(Long nsp) {
+        NxSetNspBuilder builder = new NxSetNspBuilder();
+        if (nsp != null) {
+            builder.setNsp(nsp);
+        }
+        NxSetNsp r = builder.build();
+        return new NxActionSetNspNodesNodeTableFlowApplyActionsCaseBuilder().setNxSetNsp(r).build();
+    }
+
+    public static Action nxSetNsiAction(Short nsp) {
+        NxSetNsiBuilder builder = new NxSetNsiBuilder();
+        if (nsp != null) {
+            builder.setNsi(nsp);
+        }
+        NxSetNsi r = builder.build();
+        return new NxActionSetNsiNodesNodeTableFlowApplyActionsCaseBuilder().setNxSetNsi(r).build();
+    }
+
 }
 

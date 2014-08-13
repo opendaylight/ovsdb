@@ -13,6 +13,8 @@ import org.opendaylight.ovs.nx.ofjava.codec.action.NiciraActionCodecs;
 import org.opendaylight.ovs.nx.ofjava.codec.action.ResubmitCodec;
 import org.opendaylight.ovs.nx.ofjava.codec.action.SetNsiCodec;
 import org.opendaylight.ovs.nx.ofjava.codec.action.SetNspCodec;
+import org.opendaylight.ovs.nx.ofjava.codec.match.NiciraMatchCodecs;
+import org.opendaylight.ovs.nx.ofjava.codec.match.NspCodec;
 
 import com.google.common.base.Preconditions;
 
@@ -34,6 +36,9 @@ public class NiciraExtensionsRegistrator implements AutoCloseable {
 
         registrator.registerActionDeserializer(SetNsiCodec.DESERIALIZER_KEY, NiciraActionCodecs.SET_NSI_CODEC);
         registrator.registerActionSerializer(SetNsiCodec.SERIALIZER_KEY, NiciraActionCodecs.SET_NSI_CODEC);
+
+        registrator.registerMatchEntrySerializer(NspCodec.SERIALIZER_KEY, NiciraMatchCodecs.NSP_CODEC);
+        registrator.registerMatchEntryDeserializer(NspCodec.DESERIALIZER_KEY, NiciraMatchCodecs.NSP_CODEC);
     }
 
     public void unregisterExtensions() {
@@ -44,6 +49,9 @@ public class NiciraExtensionsRegistrator implements AutoCloseable {
         registrator.unregisterActionSerializer(SetNsiCodec.SERIALIZER_KEY);
         registrator.unregisterActionDeserializer(SetNspCodec.DESERIALIZER_KEY);
         registrator.unregisterActionSerializer(SetNspCodec.SERIALIZER_KEY);
+
+        registrator.unregisterMatchEntrySerializer(NspCodec.SERIALIZER_KEY);
+        registrator.unregisterMatchEntryDeserializer(NspCodec.DESERIALIZER_KEY);
     }
 
     @Override

@@ -16,10 +16,13 @@ import org.opendaylight.openflowjava.nx.api.NiciraUtil;
 import org.opendaylight.ovs.nx.sal.convertor.action.ResubmitConvertor;
 import org.opendaylight.ovs.nx.sal.convertor.action.SetNsiConvertor;
 import org.opendaylight.ovs.nx.sal.convertor.action.SetNspConvertor;
+import org.opendaylight.ovs.nx.sal.convertor.match.NspConvertor;
 import org.opendaylight.ovs.nx.ofjava.codec.action.ResubmitCodec;
 import org.opendaylight.ovs.nx.ofjava.codec.action.SetNsiCodec;
 import org.opendaylight.ovs.nx.ofjava.codec.action.SetNspCodec;
+import org.opendaylight.ovs.nx.ofjava.codec.match.NspCodec;
 import org.opendaylight.openflowjava.protocol.api.util.EncodeConstants;
+import org.opendaylight.openflowplugin.extension.api.ConverterExtensionKey;
 import org.opendaylight.openflowplugin.extension.api.ConvertorActionToOFJava;
 import org.opendaylight.openflowplugin.extension.api.ExtensionConverterRegistrator;
 import org.opendaylight.openflowplugin.extension.api.TypeVersionKey;
@@ -51,7 +54,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.remove.group.input.buckets.bucket.action.action.NxActionSetNsiRpcRemoveGroupCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.update.group.input.original.group.buckets.bucket.action.action.NxActionSetNsiRpcUpdateGroupOriginalCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.update.group.input.updated.group.buckets.bucket.action.action.NxActionSetNsiRpcUpdateGroupUpdatedCase;
-
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.NxmNxNspKey;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,6 +72,7 @@ public class NiciraExtensionProvider implements AutoCloseable {
     private final static ResubmitConvertor RESUBMIT_CONVERTOR = new ResubmitConvertor();
     private final static SetNspConvertor SET_NSP_CONVERTOR = new SetNspConvertor();
     private final static SetNsiConvertor SET_NSI_CONVERTOR = new SetNsiConvertor();
+    private final static NspConvertor NSP_CONVERTOR = new NspConvertor();
 
     @Override
     public void close() {
@@ -130,6 +134,9 @@ public class NiciraExtensionProvider implements AutoCloseable {
         registrations.add(extensionConverterRegistrator.registerActionConvertor(NiciraUtil.createOfJavaKeyFrom(ResubmitCodec.SERIALIZER_KEY), RESUBMIT_CONVERTOR));
         registrations.add(extensionConverterRegistrator.registerActionConvertor(NiciraUtil.createOfJavaKeyFrom(SetNspCodec.SERIALIZER_KEY), SET_NSP_CONVERTOR));
         registrations.add(extensionConverterRegistrator.registerActionConvertor(NiciraUtil.createOfJavaKeyFrom(SetNsiCodec.SERIALIZER_KEY), SET_NSI_CONVERTOR));
+
+        registrations.add(extensionConverterRegistrator.registerMatchConvertor(new ConverterExtensionKey<>(NxmNxNspKey.class, EncodeConstants.OF13_VERSION_ID), NSP_CONVERTOR));
+        registrations.add(extensionConverterRegistrator.registerMatchConvertor(NspCodec.SERIALIZER_KEY, NSP_CONVERTOR));
     }
 
     private void registerAction13(

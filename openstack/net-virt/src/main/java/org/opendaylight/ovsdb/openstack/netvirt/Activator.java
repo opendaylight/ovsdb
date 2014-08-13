@@ -10,6 +10,7 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt;
 
+import org.opendaylight.controller.networkconfig.neutron.INeutronFloatingIPAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortAware;
@@ -72,6 +73,7 @@ public class Activator extends ComponentActivatorAbstractBase {
                         BridgeConfigurationManagerImpl.class,
                         TenantNetworkManagerImpl.class,
                         VlanConfigurationCacheImpl.class,
+                        FloatingIPHandler.class,
                         NetworkHandler.class,
                         SubnetHandler.class,
                         PortHandler.class,
@@ -129,6 +131,13 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.setInterface(VlanConfigurationCache.class.getName(), null);
             c.add(createServiceDependency().setService(OvsdbConfigurationService.class));
             c.add(createServiceDependency().setService(TenantNetworkManager.class));
+        }
+
+        if (imp.equals(FloatingIPHandler.class)) {
+            c.setInterface(INeutronFloatingIPAware.class.getName(), null);
+            c.add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true));
+            c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
+            c.add(createServiceDependency().setService(OvsdbInventoryListener.class).setRequired(true));
         }
 
         if (imp.equals(NetworkHandler.class)) {

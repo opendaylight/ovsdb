@@ -14,6 +14,7 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronRouterAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityGroupAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityRuleAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetAware;
@@ -74,6 +75,7 @@ public class Activator extends ComponentActivatorAbstractBase {
                         NetworkHandler.class,
                         SubnetHandler.class,
                         PortHandler.class,
+                        RouterHandler.class,
                         SouthboundHandler.class,
                         PortSecurityHandler.class,
                         ProviderNetworkManagerImpl.class};
@@ -147,6 +149,13 @@ public class Activator extends ComponentActivatorAbstractBase {
 
         if (imp.equals(PortHandler.class)) {
             c.setInterface(INeutronPortAware.class.getName(), null);
+            c.add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true));
+            c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
+            c.add(createServiceDependency().setService(OvsdbInventoryListener.class).setRequired(true));
+        }
+
+        if (imp.equals(RouterHandler.class)) {
+            c.setInterface(INeutronRouterAware.class.getName(), null);
             c.add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true));
             c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
             c.add(createServiceDependency().setService(OvsdbInventoryListener.class).setRequired(true));

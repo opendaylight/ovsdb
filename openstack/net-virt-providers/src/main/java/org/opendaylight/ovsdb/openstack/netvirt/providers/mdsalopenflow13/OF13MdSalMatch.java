@@ -60,6 +60,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.ni
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxTunIdKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.nx.reg.grouping.NxmNxRegBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.nx.tun.id.grouping.NxmNxTunIdBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.NxmNxNspKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.nxm.nx.nsp.grouping.NxmNxNspBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -413,6 +415,26 @@ public class OF13MdSalMatch extends OF13Provider {
                     .build())
                 .build()))
             .build();
+        match.addAugmentation(GeneralAugMatchNodesNodeTableFlow.class, m);
+    }
+
+    public static void addNxNsp(MatchBuilder match, long nsp) {
+        org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.NxAugMatchNodesNodeTableFlow am =
+                new org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.NxAugMatchNodesNodeTableFlowBuilder()
+                .setNxmNxNsp(new NxmNxNspBuilder()
+                .setValue(nsp)
+                .build())
+                .build();
+
+        GeneralAugMatchNodesNodeTableFlow m =
+                new GeneralAugMatchNodesNodeTableFlowBuilder()
+                .setExtensionList(ImmutableList.of(new ExtensionListBuilder()
+                .setExtensionKey(NxmNxNspKey.class)
+                .setExtension(new ExtensionBuilder()
+                .addAugmentation(org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.NxAugMatchNodesNodeTableFlow.class, am)
+                .build())
+                .build()))
+                .build();
         match.addAugmentation(GeneralAugMatchNodesNodeTableFlow.class, m);
     }
 

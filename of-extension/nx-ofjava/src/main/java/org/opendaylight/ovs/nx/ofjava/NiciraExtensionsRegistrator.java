@@ -11,6 +11,8 @@ package org.opendaylight.ovs.nx.ofjava;
 import org.opendaylight.openflowjava.nx.api.NiciraExtensionCodecRegistrator;
 import org.opendaylight.ovs.nx.ofjava.codec.action.NiciraActionCodecs;
 import org.opendaylight.ovs.nx.ofjava.codec.action.ResubmitCodec;
+import org.opendaylight.ovs.nx.ofjava.codec.action.SetNsiCodec;
+import org.opendaylight.ovs.nx.ofjava.codec.action.SetNspCodec;
 
 import com.google.common.base.Preconditions;
 
@@ -26,12 +28,22 @@ public class NiciraExtensionsRegistrator implements AutoCloseable {
         registrator.registerActionDeserializer(ResubmitCodec.RESUBMIT_DESERIALIZER_KEY, NiciraActionCodecs.RESUBMIT_CODEC);
         registrator.registerActionDeserializer(ResubmitCodec.RESUBMIT_TABLE_DESERIALIZER_KEY, NiciraActionCodecs.RESUBMIT_CODEC);
         registrator.registerActionSerializer(ResubmitCodec.SERIALIZER_KEY, NiciraActionCodecs.RESUBMIT_CODEC);
+
+        registrator.registerActionDeserializer(SetNspCodec.DESERIALIZER_KEY, NiciraActionCodecs.SET_NSP_CODEC);
+        registrator.registerActionSerializer(SetNspCodec.SERIALIZER_KEY, NiciraActionCodecs.SET_NSP_CODEC);
+
+        registrator.registerActionDeserializer(SetNsiCodec.DESERIALIZER_KEY, NiciraActionCodecs.SET_NSI_CODEC);
+        registrator.registerActionSerializer(SetNsiCodec.SERIALIZER_KEY, NiciraActionCodecs.SET_NSI_CODEC);
     }
 
     public void unregisterExtensions() {
         registrator.unregisterActionDeserializer(ResubmitCodec.RESUBMIT_DESERIALIZER_KEY);
         registrator.unregisterActionDeserializer(ResubmitCodec.RESUBMIT_TABLE_DESERIALIZER_KEY);
         registrator.unregisterActionSerializer(ResubmitCodec.SERIALIZER_KEY);
+        registrator.unregisterActionDeserializer(SetNsiCodec.DESERIALIZER_KEY);
+        registrator.unregisterActionSerializer(SetNsiCodec.SERIALIZER_KEY);
+        registrator.unregisterActionDeserializer(SetNspCodec.DESERIALIZER_KEY);
+        registrator.unregisterActionSerializer(SetNspCodec.SERIALIZER_KEY);
     }
 
     @Override

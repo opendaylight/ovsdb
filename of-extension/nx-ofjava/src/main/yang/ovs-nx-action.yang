@@ -19,6 +19,14 @@ module ovs-nx-action {
         base ofaction:experimenter-action-sub-type;
     }
 
+    identity nxm-nx-set-nsp {
+        base ofaction:experimenter-action-sub-type;
+    }
+
+    identity nxm-nx-set-nsi {
+        base ofaction:experimenter-action-sub-type;
+    }
+
     grouping ofj-nx-action-resubmit-grouping {
         container action-resubmit {
             leaf in-port {
@@ -34,9 +42,26 @@ module ovs-nx-action {
         }
     }
 
+    grouping ofj-nx-action-set-nsp-grouping {
+        container action-set-nsp {
+            leaf nsp {
+                type uint32;
+            }
+        }
+    }
+
+    grouping ofj-nx-action-set-nsi-grouping {
+        container action-set-nsi {
+            leaf nsi {
+                type uint8;
+            }
+        }
+    }
+
     augment "/ofaction:actions-container/ofaction:action" {
         ext:augment-identifier "ofj-aug-nx-action";
         uses ofj-nx-action-resubmit-grouping;
+        uses ofj-nx-action-set-nsp-grouping;
+        uses ofj-nx-action-set-nsi-grouping;
     }
-
 }

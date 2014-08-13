@@ -76,13 +76,19 @@
 			"description": "",
 			"order": [
 				"a209e7b3-9d00-bd9a-b920-39fd577b52c6",
+				"5542be98-775d-3a61-2709-59b0d692e453",
 				"828984bd-db02-aec4-d154-cd8e7f2b559b",
 				"ec4ca40c-be6e-d76b-81a3-8fd328180132",
 				"9e7c7b50-1580-c7e2-70a0-445b42e218b1",
 				"84b71139-7a9a-2f27-d0f6-745b8dbe876f",
 				"41940ad7-cec0-99c5-204a-eceab3aa7b78",
 				"e6b74bbb-cf2f-9eec-e530-537f1c065f8e",
-				"7370da7f-234e-3f7a-ed12-e384131d886d"
+				"7370da7f-234e-3f7a-ed12-e384131d886d",
+				"7b61cef4-38da-3a4e-c968-38a98f31e85d",
+				"ba73a129-a385-0554-7e6c-dc687ea78bbb",
+				"62417324-b809-5a83-d3f3-cd4fef07bbe5",
+				"70ae1c0d-5b58-0c2a-5b62-d186a74059ab",
+				"846c29b1-07fd-3d7d-f997-845ba91232b9"
 			],
 			"collection_name": "Neutron-v2.0-API-Examples",
 			"collection_id": "bd9b142f-e3ad-452d-f088-eed1b741b937"
@@ -298,6 +304,24 @@
 			"synced": false
 		},
 		{
+			"id": "5542be98-775d-3a61-2709-59b0d692e453",
+			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
+			"url": "http://127.0.0.1:8080/controller/nb/v2/neutron/subnets/",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "POST",
+			"data": "{\n  \"subnet\": {\n    \"name\": \"\",\n    \"enable_dhcp\": true,\n    \"network_id\":\"e9330b1f-a2ef-4160-a991-169e56ab17f6\",\n    \"tenant_id\": \"4fd44f30292945e481c7b8a0c8908869\",\n    \"dns_nameservers\": [\n    ],\n    \"allocation_pools\": [\n      {\n        \"start\": \"192.168.200.2\",\n        \"end\": \"192.168.200.254\"\n      }\n    ],\n    \"host_routes\": [\n    ],\n    \"ip_version\": 4,\n    \"gateway_ip\": \"192.168.200.1\",\n    \"cidr\": \"192.168.200.0/24\",\n    \"id\": \"3b80198d-4f7b-4f77-9ef5-774d54e17127\"\n  }\n}\n",
+			"dataMode": "raw",
+			"version": 2,
+			"tests": "",
+			"time": 1407944320612,
+			"name": "Post Add Neutron Subnets to external Network",
+			"description": "Post a list of Neutron v2.0 Subnets",
+			"collectionId": "bd9b142f-e3ad-452d-f088-eed1b741b937",
+			"responses": [],
+			"synced": false
+		},
+		{
 			"id": "55aab7d7-6159-c4fb-5b3f-42cbb55c4e7b",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
 			"url": "http://127.0.0.1:8080/controller/nb/v2/neutron/networks/",
@@ -370,6 +394,40 @@
 			"synced": false
 		},
 		{
+			"id": "62417324-b809-5a83-d3f3-cd4fef07bbe5",
+			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
+			"url": "http://127.0.0.1:8080/controller/nb/v2/neutron/floatingips/2f245a7b-796b-4f26-9cf9-9e82d248fda7",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "GET",
+			"data": [],
+			"dataMode": "params",
+			"version": 2,
+			"tests": "",
+			"time": 1407945038085,
+			"name": "Get Neutron Floating IP",
+			"description": "",
+			"collectionId": "bd9b142f-e3ad-452d-f088-eed1b741b937",
+			"synced": false
+		},
+		{
+			"id": "70ae1c0d-5b58-0c2a-5b62-d186a74059ab",
+			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
+			"url": "http://127.0.0.1:8080/controller/nb/v2/neutron/floatingips/2f245a7b-796b-4f26-9cf9-9e82d248fda7",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "PUT",
+			"data": "{\n  \"floatingip\": {\n      \"router_id\": \"8604a0de-7f6b-409a-a47c-a1cc7bc77b2e\",\n      \"tenant_id\": \"60cd4f6dbc5f499982a284e7b83b5be3\",\n      \"floating_network_id\":\"e9330b1f-a2ef-4160-a991-169e56ab17f6\",\n      \"fixed_ip_address\": null,\n      \"port_id\": null,\n      \"id\": \"2f245a7b-796b-4f26-9cf9-9e82d248fda7\"\n  }\n}",
+			"dataMode": "raw",
+			"version": 2,
+			"tests": "",
+			"time": 1407947274681,
+			"name": "Update Neutron Floating IP -- disassociate port",
+			"description": "",
+			"collectionId": "bd9b142f-e3ad-452d-f088-eed1b741b937",
+			"synced": false
+		},
+		{
 			"id": "7370da7f-234e-3f7a-ed12-e384131d886d",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
 			"url": "http://127.0.0.1:8080/controller/nb/v2/neutron/routers/8604a0de-7f6b-409a-a47c-a1cc7bc77b2e/remove_router_interface",
@@ -422,6 +480,23 @@
 			"synced": false
 		},
 		{
+			"id": "7b61cef4-38da-3a4e-c968-38a98f31e85d",
+			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
+			"url": "http://127.0.0.1:8080/controller/nb/v2/neutron/floatingips",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "POST",
+			"data": "{\n  \"floatingip\": {\n      \"router_id\": \"8604a0de-7f6b-409a-a47c-a1cc7bc77b2e\",\n      \"tenant_id\": \"60cd4f6dbc5f499982a284e7b83b5be3\",\n      \"floating_network_id\":\"e9330b1f-a2ef-4160-a991-169e56ab17f6\",\n      \"fixed_ip_address\": \"192.168.199.1\",\n      \"floating_ip_address\": \"192.168.200.2\",\n      \"port_id\": \"65c0ee9f-d634-4522-8954-51021b570b0d\",\n      \"id\": \"2f245a7b-796b-4f26-9cf9-9e82d248fda7\"\n  }\n}",
+			"dataMode": "raw",
+			"version": 2,
+			"tests": "",
+			"time": 1407944603189,
+			"name": "Post Add Neutron Floating IP",
+			"description": "Example posting of a Neutron v2.0 Floating IP.",
+			"collectionId": "bd9b142f-e3ad-452d-f088-eed1b741b937",
+			"synced": false
+		},
+		{
 			"id": "7ef5413c-7f22-ac12-5444-f9be6a7c029e",
 			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
 			"url": "http://127.0.0.1:8080/controller/nb/v2/neutron/fw/firewalls",
@@ -471,6 +546,23 @@
 			"description": "Post a list of Neutron v2.0 Subnets",
 			"collectionId": "bd9b142f-e3ad-452d-f088-eed1b741b937",
 			"responses": [],
+			"synced": false
+		},
+		{
+			"id": "846c29b1-07fd-3d7d-f997-845ba91232b9",
+			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
+			"url": "http://127.0.0.1:8080/controller/nb/v2/neutron/floatingips/2f245a7b-796b-4f26-9cf9-9e82d248fda7",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "DELETE",
+			"data": [],
+			"dataMode": "params",
+			"version": 2,
+			"tests": "",
+			"time": 1407947338774,
+			"name": "Delete Neutron Floating IP",
+			"description": "",
+			"collectionId": "bd9b142f-e3ad-452d-f088-eed1b741b937",
 			"synced": false
 		},
 		{
@@ -734,6 +826,23 @@
 			"description": "Return a list of Neutron v2.0 API Subnets.",
 			"collectionId": "bd9b142f-e3ad-452d-f088-eed1b741b937",
 			"responses": [],
+			"synced": false
+		},
+		{
+			"id": "ba73a129-a385-0554-7e6c-dc687ea78bbb",
+			"headers": "Authorization: Basic YWRtaW46YWRtaW4=\nAccept: application/json\nContent-Type: application/json\n",
+			"url": "http://127.0.0.1:8080/controller/nb/v2/neutron/floatingips",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "GET",
+			"data": [],
+			"dataMode": "params",
+			"version": 2,
+			"tests": "",
+			"time": 1407944696947,
+			"name": "Get Neutron Floating IPs",
+			"description": "",
+			"collectionId": "bd9b142f-e3ad-452d-f088-eed1b741b937",
 			"synced": false
 		},
 		{

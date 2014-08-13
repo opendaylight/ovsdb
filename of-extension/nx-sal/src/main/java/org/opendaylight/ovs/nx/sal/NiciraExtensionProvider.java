@@ -14,7 +14,11 @@ import java.util.Set;
 
 import org.opendaylight.openflowjava.nx.api.NiciraUtil;
 import org.opendaylight.ovs.nx.sal.convertor.action.ResubmitConvertor;
+import org.opendaylight.ovs.nx.sal.convertor.action.SetNsiConvertor;
+import org.opendaylight.ovs.nx.sal.convertor.action.SetNspConvertor;
 import org.opendaylight.ovs.nx.ofjava.codec.action.ResubmitCodec;
+import org.opendaylight.ovs.nx.ofjava.codec.action.SetNsiCodec;
+import org.opendaylight.ovs.nx.ofjava.codec.action.SetNspCodec;
 import org.opendaylight.openflowjava.protocol.api.util.EncodeConstants;
 import org.opendaylight.openflowplugin.extension.api.ConvertorActionToOFJava;
 import org.opendaylight.openflowplugin.extension.api.ExtensionConverterRegistrator;
@@ -29,6 +33,25 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.remove.group.input.buckets.bucket.action.action.NxActionResubmitRpcRemoveGroupCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.update.group.input.original.group.buckets.bucket.action.action.NxActionResubmitRpcUpdateGroupOriginalCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.update.group.input.updated.group.buckets.bucket.action.action.NxActionResubmitRpcUpdateGroupUpdatedCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.add.flow.input.instructions.instruction.instruction.apply.actions._case.apply.actions.action.action.NxActionSetNspRpcAddFlowApplyActionsCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.add.flow.input.instructions.instruction.instruction.write.actions._case.write.actions.action.action.NxActionSetNspRpcAddFlowWriteActionsCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.add.group.input.buckets.bucket.action.action.NxActionSetNspRpcAddGroupCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nodes.node.group.buckets.bucket.action.action.NxActionSetNspNodesNodeGroupBucketsBucketActionsCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nodes.node.table.flow.instructions.instruction.instruction.apply.actions._case.apply.actions.action.action.NxActionSetNspNodesNodeTableFlowApplyActionsCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nodes.node.table.flow.instructions.instruction.instruction.write.actions._case.write.actions.action.action.NxActionSetNspNodesNodeTableFlowWriteActionsCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.remove.group.input.buckets.bucket.action.action.NxActionSetNspRpcRemoveGroupCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.update.group.input.original.group.buckets.bucket.action.action.NxActionSetNspRpcUpdateGroupOriginalCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.update.group.input.updated.group.buckets.bucket.action.action.NxActionSetNspRpcUpdateGroupUpdatedCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.add.flow.input.instructions.instruction.instruction.apply.actions._case.apply.actions.action.action.NxActionSetNsiRpcAddFlowApplyActionsCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.add.flow.input.instructions.instruction.instruction.write.actions._case.write.actions.action.action.NxActionSetNsiRpcAddFlowWriteActionsCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.add.group.input.buckets.bucket.action.action.NxActionSetNsiRpcAddGroupCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nodes.node.group.buckets.bucket.action.action.NxActionSetNsiNodesNodeGroupBucketsBucketActionsCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nodes.node.table.flow.instructions.instruction.instruction.apply.actions._case.apply.actions.action.action.NxActionSetNsiNodesNodeTableFlowApplyActionsCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nodes.node.table.flow.instructions.instruction.instruction.write.actions._case.write.actions.action.action.NxActionSetNsiNodesNodeTableFlowWriteActionsCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.remove.group.input.buckets.bucket.action.action.NxActionSetNsiRpcRemoveGroupCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.update.group.input.original.group.buckets.bucket.action.action.NxActionSetNsiRpcUpdateGroupOriginalCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.update.group.input.updated.group.buckets.bucket.action.action.NxActionSetNsiRpcUpdateGroupUpdatedCase;
+
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +67,8 @@ public class NiciraExtensionProvider implements AutoCloseable {
     private Set<ObjectRegistration<?>> registrations;
 
     private final static ResubmitConvertor RESUBMIT_CONVERTOR = new ResubmitConvertor();
+    private final static SetNspConvertor SET_NSP_CONVERTOR = new SetNspConvertor();
+    private final static SetNsiConvertor SET_NSI_CONVERTOR = new SetNsiConvertor();
 
     @Override
     public void close() {
@@ -78,7 +103,33 @@ public class NiciraExtensionProvider implements AutoCloseable {
         registerAction13(NxActionResubmitRpcUpdateGroupOriginalCase.class, RESUBMIT_CONVERTOR);
         registerAction13(NxActionResubmitRpcUpdateGroupUpdatedCase.class, RESUBMIT_CONVERTOR);
 
+        registerAction13(NxActionSetNspNodesNodeTableFlowApplyActionsCase.class, SET_NSP_CONVERTOR);
+        registerAction13(NxActionSetNspNodesNodeTableFlowWriteActionsCase.class, SET_NSP_CONVERTOR);
+        registerAction13(NxActionSetNspNodesNodeGroupBucketsBucketActionsCase.class, SET_NSP_CONVERTOR);
+
+
+        registerAction13(NxActionSetNspRpcAddFlowApplyActionsCase.class, SET_NSP_CONVERTOR);
+        registerAction13(NxActionSetNspRpcAddFlowWriteActionsCase.class, SET_NSP_CONVERTOR);
+        registerAction13(NxActionSetNspRpcAddGroupCase.class, SET_NSP_CONVERTOR);
+        registerAction13(NxActionSetNspRpcRemoveGroupCase.class, SET_NSP_CONVERTOR);
+        registerAction13(NxActionSetNspRpcUpdateGroupOriginalCase.class, SET_NSP_CONVERTOR);
+        registerAction13(NxActionSetNspRpcUpdateGroupUpdatedCase.class, SET_NSP_CONVERTOR);
+
+        registerAction13(NxActionSetNsiNodesNodeTableFlowApplyActionsCase.class, SET_NSI_CONVERTOR);
+        registerAction13(NxActionSetNsiNodesNodeTableFlowWriteActionsCase.class, SET_NSI_CONVERTOR);
+        registerAction13(NxActionSetNsiNodesNodeGroupBucketsBucketActionsCase.class, SET_NSI_CONVERTOR);
+
+
+        registerAction13(NxActionSetNsiRpcAddFlowApplyActionsCase.class, SET_NSI_CONVERTOR);
+        registerAction13(NxActionSetNsiRpcAddFlowWriteActionsCase.class, SET_NSI_CONVERTOR);
+        registerAction13(NxActionSetNsiRpcAddGroupCase.class, SET_NSI_CONVERTOR);
+        registerAction13(NxActionSetNsiRpcRemoveGroupCase.class, SET_NSI_CONVERTOR);
+        registerAction13(NxActionSetNsiRpcUpdateGroupOriginalCase.class, SET_NSI_CONVERTOR);
+        registerAction13(NxActionSetNsiRpcUpdateGroupUpdatedCase.class, SET_NSI_CONVERTOR);
+
         registrations.add(extensionConverterRegistrator.registerActionConvertor(NiciraUtil.createOfJavaKeyFrom(ResubmitCodec.SERIALIZER_KEY), RESUBMIT_CONVERTOR));
+        registrations.add(extensionConverterRegistrator.registerActionConvertor(NiciraUtil.createOfJavaKeyFrom(SetNspCodec.SERIALIZER_KEY), SET_NSP_CONVERTOR));
+        registrations.add(extensionConverterRegistrator.registerActionConvertor(NiciraUtil.createOfJavaKeyFrom(SetNsiCodec.SERIALIZER_KEY), SET_NSI_CONVERTOR));
     }
 
     private void registerAction13(

@@ -7,13 +7,12 @@
  *
  */
 
-package org.opendaylight.ovsdb.openstack.netvirt.providers.mdsalopenflow13;
+package org.opendaylight.ovsdb.utils.mdsal.openflow;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendaylight.ovsdb.openstack.netvirt.providers.OF13Provider;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
@@ -71,8 +70,8 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
-public class OF13MdSalMatch extends OF13Provider {
-    private static final Logger logger = LoggerFactory.getLogger(OF13MdSalMatch.class);
+public class MatchUtils {
+    private static final Logger logger = LoggerFactory.getLogger(MatchUtils.class);
 
     /**
      * Create Ingress Port Match dpidLong, inPort

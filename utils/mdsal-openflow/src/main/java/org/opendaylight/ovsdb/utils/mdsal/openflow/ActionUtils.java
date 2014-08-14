@@ -1,4 +1,4 @@
-package org.opendaylight.ovsdb.openstack.netvirt.providers.mdsalopenflow13;
+package org.opendaylight.ovsdb.utils.mdsal.openflow;
 
 import java.math.BigInteger;
 
@@ -61,7 +61,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714
 
 import com.google.common.net.InetAddresses;
 
-public final class OF13MdSalAction {
+public final class ActionUtils {
     public static Action dropAction() {
         return new DropActionCaseBuilder()
             .setDropAction(new DropActionBuilder()

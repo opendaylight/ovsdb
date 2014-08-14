@@ -7,9 +7,9 @@
  *
  */
 
-package org.opendaylight.ovsdb.openstack.netvirt.providers.mdsalopenflow13;
+package org.opendaylight.ovsdb.utils.mdsal.openflow;
 
-import static org.opendaylight.ovsdb.openstack.netvirt.providers.mdsalopenflow13.OF13MdSalAction.dropAction;
+import static org.opendaylight.ovsdb.utils.mdsal.openflow.ActionUtils.dropAction;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -68,8 +68,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
-public class OF13MdSalInstruction {
-    private static final Logger logger = LoggerFactory.getLogger(OF13MdSalInstruction.class);
+public class InstructionUtils {
+    private static final Logger logger = LoggerFactory.getLogger(InstructionUtils.class);
     private static final int IPV4 = 0x8100;
     private static final int MAX_LENGTH = 0xffff;
 

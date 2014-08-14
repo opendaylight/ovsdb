@@ -11,6 +11,7 @@ package org.opendaylight.ovsdb.openstack.netvirt.providers.mdsalopenflow13;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.opendaylight.ovsdb.openstack.netvirt.providers.OF13Provider;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
@@ -62,10 +63,13 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.ni
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.nx.tun.id.grouping.NxmNxTunIdBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.NxmNxNspKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.nxm.nx.nsp.grouping.NxmNxNspBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.NxmNxNsiKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.nxm.nx.nsi.grouping.NxmNxNsiBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 
 public class OF13MdSalMatch extends OF13Provider {
     private static final Logger logger = LoggerFactory.getLogger(OF13MdSalMatch.class);
@@ -425,16 +429,39 @@ public class OF13MdSalMatch extends OF13Provider {
                 .setValue(nsp)
                 .build())
                 .build();
+        addExtension(match, NxmNxNspKey.class, am);
+    }
 
-        GeneralAugMatchNodesNodeTableFlow m =
-                new GeneralAugMatchNodesNodeTableFlowBuilder()
-                .setExtensionList(ImmutableList.of(new ExtensionListBuilder()
-                .setExtensionKey(NxmNxNspKey.class)
-                .setExtension(new ExtensionBuilder()
-                .addAugmentation(org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.NxAugMatchNodesNodeTableFlow.class, am)
+    public static void addNxNsi(MatchBuilder match, short nsi) {
+        org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.NxAugMatchNodesNodeTableFlow am =
+                new org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.NxAugMatchNodesNodeTableFlowBuilder()
+                .setNxmNxNsi(new NxmNxNsiBuilder()
+                .setNsi(nsi)
                 .build())
-                .build()))
                 .build();
+        addExtension(match, NxmNxNsiKey.class, am);
+    }
+
+    private static void addExtension (MatchBuilder match, Class<? extends ExtensionKey> extensionKey, org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.NxAugMatchNodesNodeTableFlow am) {
+        GeneralAugMatchNodesNodeTableFlow existingAugmentations = match.getAugmentation(GeneralAugMatchNodesNodeTableFlow.class);
+        List<ExtensionList> extensions = null;
+        if (existingAugmentations != null ) {
+            extensions = existingAugmentations.getExtensionList();
+        }
+        if (extensions == null) {
+            extensions = Lists.newArrayList();
+        }
+
+        extensions.add(new ExtensionListBuilder()
+                           .setExtensionKey(extensionKey)
+                           .setExtension(new ExtensionBuilder()
+                           .addAugmentation(org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.NxAugMatchNodesNodeTableFlow.class, am)
+                           .build())
+                           .build());
+
+        GeneralAugMatchNodesNodeTableFlow m = new GeneralAugMatchNodesNodeTableFlowBuilder()
+        .setExtensionList(extensions)
+        .build();
         match.addAugmentation(GeneralAugMatchNodesNodeTableFlow.class, m);
     }
 

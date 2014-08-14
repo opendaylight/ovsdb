@@ -31,8 +31,8 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
-import org.opendaylight.ovsdb.openstack.netvirt.providers.mdsalopenflow13.OF13MdSalInstruction;
-import org.opendaylight.ovsdb.openstack.netvirt.providers.mdsalopenflow13.OF13MdSalMatch;
+import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
+import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.ovsdb.plugin.api.StatusWithUuid;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
@@ -1285,7 +1285,7 @@ public class OF13Provider implements NetworkingProvider {
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Create Match(es) and Set them in the FlowBuilder Object
-        flowBuilder.setMatch(OF13MdSalMatch.createEtherTypeMatch(matchBuilder, etherType).build());
+        flowBuilder.setMatch(MatchUtils.createEtherTypeMatch(matchBuilder, etherType).build());
 
         // Create the OF Actions and Instructions
         InstructionBuilder ib = new InstructionBuilder();
@@ -1295,7 +1295,7 @@ public class OF13Provider implements NetworkingProvider {
         List<Instruction> instructions = Lists.newArrayList();
 
         // Call the InstructionBuilder Methods Containing Actions
-        OF13MdSalInstruction.createSendToControllerInstructions(ib);
+        InstructionUtils.createSendToControllerInstructions(ib);
         ib.setOrder(0);
         ib.setKey(new InstructionKey(0));
         instructions.add(ib.build());
@@ -1340,7 +1340,7 @@ public class OF13Provider implements NetworkingProvider {
         List<Instruction> instructions = Lists.newArrayList();
 
         // Call the InstructionBuilder Methods Containing Actions
-        OF13MdSalInstruction.createNormalInstructions(ib);
+        InstructionUtils.createNormalInstructions(ib);
         ib.setOrder(0);
         ib.setKey(new InstructionKey(0));
         instructions.add(ib.build());
@@ -1384,8 +1384,8 @@ public class OF13Provider implements NetworkingProvider {
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Create Match(es) and Set them in the FlowBuilder Object
-        flowBuilder.setMatch(OF13MdSalMatch.createTunnelIDMatch(matchBuilder, tunnelId).build());
-        flowBuilder.setMatch(OF13MdSalMatch.createInPortMatch(matchBuilder, dpidLong, ofPort).build());
+        flowBuilder.setMatch(MatchUtils.createTunnelIDMatch(matchBuilder, tunnelId).build());
+        flowBuilder.setMatch(MatchUtils.createInPortMatch(matchBuilder, dpidLong, ofPort).build());
 
         if (write) {
             // Create the OF Actions and Instructions
@@ -1396,7 +1396,7 @@ public class OF13Provider implements NetworkingProvider {
             List<Instruction> instructions = Lists.newArrayList();
 
             // Call the InstructionBuilder Methods Containing Actions
-            OF13MdSalInstruction.createGotoTableInstructions(ib, goToTableId);
+            InstructionUtils.createGotoTableInstructions(ib, goToTableId);
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructions.add(ib.build());
@@ -1445,9 +1445,9 @@ public class OF13Provider implements NetworkingProvider {
 
         // Create Match(es) and Set them in the FlowBuilder Object
         flowBuilder.setMatch(
-                OF13MdSalMatch.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId)))
+                MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId)))
                         .build())
-                .setMatch(OF13MdSalMatch.createInPortMatch(matchBuilder, dpidLong, ethPort)
+                .setMatch(MatchUtils.createInPortMatch(matchBuilder, dpidLong, ethPort)
                         .build());
 
         if (write) {
@@ -1459,7 +1459,7 @@ public class OF13Provider implements NetworkingProvider {
             List<Instruction> instructions = Lists.newArrayList();
 
             // Call the InstructionBuilder Methods Containing Actions
-            OF13MdSalInstruction.createGotoTableInstructions(ib, goToTableId);
+            InstructionUtils.createGotoTableInstructions(ib, goToTableId);
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructions.add(ib.build());
@@ -1508,9 +1508,9 @@ public class OF13Provider implements NetworkingProvider {
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Create the OF Match using MatchBuilder
-        flowBuilder.setMatch(OF13MdSalMatch.createEthSrcMatch(matchBuilder, new MacAddress(attachedMac)).build());
+        flowBuilder.setMatch(MatchUtils.createEthSrcMatch(matchBuilder, new MacAddress(attachedMac)).build());
         // TODO Broken In_Port Match
-        flowBuilder.setMatch(OF13MdSalMatch.createInPortMatch(matchBuilder, dpidLong, inPort).build());
+        flowBuilder.setMatch(MatchUtils.createInPortMatch(matchBuilder, dpidLong, inPort).build());
 
         String flowId = "LocalMac_"+segmentationId+"_"+inPort+"_"+attachedMac;
         // Add Flow Attributes
@@ -1533,12 +1533,12 @@ public class OF13Provider implements NetworkingProvider {
             List<Instruction> instructions = Lists.newArrayList();
 
             // GOTO Instructions Need to be added first to the List
-            OF13MdSalInstruction.createGotoTableInstructions(ib, goToTableId);
+            InstructionUtils.createGotoTableInstructions(ib, goToTableId);
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructions.add(ib.build());
             // TODO Broken SetTunID
-            OF13MdSalInstruction.createSetTunnelIdInstructions(ib, new BigInteger(segmentationId));
+            InstructionUtils.createSetTunnelIdInstructions(ib, new BigInteger(segmentationId));
             ib.setOrder(1);
             ib.setKey(new InstructionKey(1));
             instructions.add(ib.build());
@@ -1575,8 +1575,8 @@ public class OF13Provider implements NetworkingProvider {
          FlowBuilder flowBuilder = new FlowBuilder();
 
          // Create the OF Match using MatchBuilder
-         flowBuilder.setMatch(OF13MdSalMatch.createEthSrcMatch(matchBuilder, new MacAddress(attachedMac)).build());
-         flowBuilder.setMatch(OF13MdSalMatch.createInPortMatch(matchBuilder, dpidLong, inPort).build());
+         flowBuilder.setMatch(MatchUtils.createEthSrcMatch(matchBuilder, new MacAddress(attachedMac)).build());
+         flowBuilder.setMatch(MatchUtils.createInPortMatch(matchBuilder, dpidLong, inPort).build());
 
          String flowId = "LocalMac_"+segmentationId+"_"+inPort+"_"+attachedMac;
          // Add Flow Attributes
@@ -1599,12 +1599,12 @@ public class OF13Provider implements NetworkingProvider {
              List<Instruction> instructions = Lists.newArrayList();
 
              // GOTO Instructions Need to be added first to the List
-             OF13MdSalInstruction.createGotoTableInstructions(ib, goToTableId);
+             InstructionUtils.createGotoTableInstructions(ib, goToTableId);
              ib.setOrder(0);
              ib.setKey(new InstructionKey(0));
              instructions.add(ib.build());
              // Set VLAN ID Instruction
-             OF13MdSalInstruction.createSetVlanInstructions(ib, new VlanId(Integer.valueOf(segmentationId)));
+             InstructionUtils.createSetVlanInstructions(ib, new VlanId(Integer.valueOf(segmentationId)));
              ib.setOrder(1);
              ib.setKey(new InstructionKey(1));
              instructions.add(ib.build());
@@ -1638,7 +1638,7 @@ public class OF13Provider implements NetworkingProvider {
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Create the OF Match using MatchBuilder
-        flowBuilder.setMatch(OF13MdSalMatch.createInPortMatch(matchBuilder, dpidLong, inPort).build());
+        flowBuilder.setMatch(MatchUtils.createInPortMatch(matchBuilder, dpidLong, inPort).build());
 
         if (write) {
             // Instantiate the Builders for the OF Actions and Instructions
@@ -1649,7 +1649,7 @@ public class OF13Provider implements NetworkingProvider {
             List<Instruction> instructions = Lists.newArrayList();
 
             // Call the InstructionBuilder Methods Containing Actions
-            OF13MdSalInstruction.createDropInstructions(ib);
+            InstructionUtils.createDropInstructions(ib);
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructions.add(ib.build());
@@ -1699,8 +1699,8 @@ public class OF13Provider implements NetworkingProvider {
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Create the OF Match using MatchBuilder
-        flowBuilder.setMatch(OF13MdSalMatch.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
-        flowBuilder.setMatch(OF13MdSalMatch.createDestEthMatch(matchBuilder, new MacAddress(attachedMac), null).build());
+        flowBuilder.setMatch(MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
+        flowBuilder.setMatch(MatchUtils.createDestEthMatch(matchBuilder, new MacAddress(attachedMac), null).build());
 
         String flowId = "TunnelOut_"+segmentationId+"_"+OFPortOut+"_"+attachedMac;
         // Add Flow Attributes
@@ -1723,12 +1723,12 @@ public class OF13Provider implements NetworkingProvider {
             List<Instruction> instructions = Lists.newArrayList();
 
             // GOTO Instructions
-            OF13MdSalInstruction.createGotoTableInstructions(ib, goToTableId);
+            InstructionUtils.createGotoTableInstructions(ib, goToTableId);
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructions.add(ib.build());
             // Set the Output Port/Iface
-            OF13MdSalInstruction.createOutputPortInstructions(ib, dpidLong, OFPortOut);
+            InstructionUtils.createOutputPortInstructions(ib, dpidLong, OFPortOut);
             ib.setOrder(1);
             ib.setKey(new InstructionKey(1));
             instructions.add(ib.build());
@@ -1765,8 +1765,8 @@ public class OF13Provider implements NetworkingProvider {
 
          // Create the OF Match using MatchBuilder
          flowBuilder.setMatch(
-                 OF13MdSalMatch.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId))).build());
-         flowBuilder.setMatch(OF13MdSalMatch.createDestEthMatch(matchBuilder, new MacAddress(attachedMac), null).build());
+                 MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId))).build());
+         flowBuilder.setMatch(MatchUtils.createDestEthMatch(matchBuilder, new MacAddress(attachedMac), null).build());
 
          String flowId = "VlanOut_"+segmentationId+"_"+ethPort+"_"+attachedMac;
          // Add Flow Attributes
@@ -1789,7 +1789,7 @@ public class OF13Provider implements NetworkingProvider {
              List<Instruction> instructions = Lists.newArrayList();
 
              // GOTO Instructions
-             OF13MdSalInstruction.createGotoTableInstructions(ib, goToTableId);
+             InstructionUtils.createGotoTableInstructions(ib, goToTableId);
              ib.setOrder(0);
              ib.setKey(new InstructionKey(0));
              instructions.add(ib.build());
@@ -1826,10 +1826,10 @@ public class OF13Provider implements NetworkingProvider {
 
         // Create the OF Match using MatchBuilder
         // Match TunnelID
-        flowBuilder.setMatch(OF13MdSalMatch.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
+        flowBuilder.setMatch(MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
         // Match DMAC
 
-        flowBuilder.setMatch(OF13MdSalMatch.createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"),
+        flowBuilder.setMatch(MatchUtils.createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"),
                 new MacAddress("01:00:00:00:00:00")).build());
 
         String flowId = "TunnelFloodOut_"+segmentationId;
@@ -1859,7 +1859,7 @@ public class OF13Provider implements NetworkingProvider {
 
         if (write) {
             // GOTO Instruction
-            OF13MdSalInstruction.createGotoTableInstructions(ib, localTable);
+            InstructionUtils.createGotoTableInstructions(ib, localTable);
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructions.add(ib.build());
@@ -1879,7 +1879,7 @@ public class OF13Provider implements NetworkingProvider {
             writeFlow(flowBuilder, nodeBuilder);
         } else {
             /* remove port from action list */
-            boolean flowRemove = OF13MdSalInstruction.removeOutputPortFromInstructions(ib, dpidLong,
+            boolean flowRemove = InstructionUtils.removeOutputPortFromInstructions(ib, dpidLong,
                     OFPortOut, existingInstructions);
             if (flowRemove) {
                 /* if all port are removed, remove the flow too. */
@@ -1920,9 +1920,9 @@ public class OF13Provider implements NetworkingProvider {
          // Create the OF Match using MatchBuilder
          // Match Vlan ID
          flowBuilder.setMatch(
-                 OF13MdSalMatch.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId))).build());
+                 MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId))).build());
          // Match DMAC
-         flowBuilder.setMatch(OF13MdSalMatch.createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"),
+         flowBuilder.setMatch(MatchUtils.createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"),
                  new MacAddress("01:00:00:00:00:00")).build());
 
          String flowId = "VlanFloodOut_"+segmentationId;
@@ -1947,12 +1947,12 @@ public class OF13Provider implements NetworkingProvider {
 
          if (write) {
              // GOTO Instruction
-             OF13MdSalInstruction.createGotoTableInstructions(ib, localTable);
+             InstructionUtils.createGotoTableInstructions(ib, localTable);
              ib.setOrder(0);
              ib.setKey(new InstructionKey(0));
              instructions.add(ib.build());
              // Set the Output Port/Iface
-             OF13MdSalInstruction.createOutputPortInstructions(ib, dpidLong, ethPort);
+             InstructionUtils.createOutputPortInstructions(ib, dpidLong, ethPort);
              ib.setOrder(1);
              ib.setKey(new InstructionKey(1));
              instructions.add(ib.build());
@@ -1987,7 +1987,7 @@ public class OF13Provider implements NetworkingProvider {
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Create Match(es) and Set them in the FlowBuilder Object
-        flowBuilder.setMatch(OF13MdSalMatch.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
+        flowBuilder.setMatch(MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
 
         if (write) {
             // Create the OF Actions and Instructions
@@ -1998,7 +1998,7 @@ public class OF13Provider implements NetworkingProvider {
             List<Instruction> instructions = Lists.newArrayList();
 
             // Call the InstructionBuilder Methods Containing Actions
-            OF13MdSalInstruction.createGotoTableInstructions(ib, goToTableId);
+            InstructionUtils.createGotoTableInstructions(ib, goToTableId);
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructions.add(ib.build());
@@ -2049,7 +2049,7 @@ public class OF13Provider implements NetworkingProvider {
 
          // Create Match(es) and Set them in the FlowBuilder Object
          flowBuilder.setMatch(
-                 OF13MdSalMatch.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId))).build());
+                 MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId))).build());
 
          if (write) {
              // Create the OF Actions and Instructions
@@ -2065,7 +2065,7 @@ public class OF13Provider implements NetworkingProvider {
              //ib.setKey(new InstructionKey(0));
              //instructions.add(ib.build());
              // Set the Output Port/Iface
-             OF13MdSalInstruction.createOutputPortInstructions(ib, dpidLong, ethPort);
+             InstructionUtils.createOutputPortInstructions(ib, dpidLong, ethPort);
              ib.setOrder(0);
              ib.setKey(new InstructionKey(1));
              instructions.add(ib.build());
@@ -2114,8 +2114,8 @@ public class OF13Provider implements NetworkingProvider {
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Create the OF Match using MatchBuilder
-        flowBuilder.setMatch(OF13MdSalMatch.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
-        flowBuilder.setMatch(OF13MdSalMatch.createDestEthMatch(matchBuilder, new MacAddress(attachedMac), null).build());
+        flowBuilder.setMatch(MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
+        flowBuilder.setMatch(MatchUtils.createDestEthMatch(matchBuilder, new MacAddress(attachedMac), null).build());
 
         String flowId = "UcastOut_"+segmentationId+"_"+localPort+"_"+attachedMac;
         // Add Flow Attributes
@@ -2138,7 +2138,7 @@ public class OF13Provider implements NetworkingProvider {
             List<Instruction> instructions = Lists.newArrayList();
 
             // Set the Output Port/Iface
-            OF13MdSalInstruction.createOutputPortInstructions(ib, dpidLong, localPort);
+            InstructionUtils.createOutputPortInstructions(ib, dpidLong, localPort);
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructions.add(ib.build());
@@ -2173,8 +2173,8 @@ public class OF13Provider implements NetworkingProvider {
 
         // Create the OF Match using MatchBuilder
         flowBuilder.setMatch(
-                OF13MdSalMatch.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId))).build());
-        flowBuilder.setMatch(OF13MdSalMatch.createDestEthMatch(matchBuilder, new MacAddress(attachedMac), null).build());
+                MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId))).build());
+        flowBuilder.setMatch(MatchUtils.createDestEthMatch(matchBuilder, new MacAddress(attachedMac), null).build());
 
         String flowId = "VlanUcastOut_"+segmentationId+"_"+localPort+"_"+attachedMac;
         // Add Flow Attributes
@@ -2198,14 +2198,14 @@ public class OF13Provider implements NetworkingProvider {
             List<Instruction> instructions_tmp = Lists.newArrayList();
 
             /* Strip vlan and store to tmp instruction space*/
-            OF13MdSalInstruction.createPopVlanInstructions(ib);
+            InstructionUtils.createPopVlanInstructions(ib);
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructions_tmp.add(ib.build());
 
             // Set the Output Port/Iface
             ib = new InstructionBuilder();
-            OF13MdSalInstruction.addOutputPortInstructions(ib, dpidLong, localPort, instructions_tmp);
+            InstructionUtils.addOutputPortInstructions(ib, dpidLong, localPort, instructions_tmp);
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructions.add(ib.build());
@@ -2239,8 +2239,8 @@ public class OF13Provider implements NetworkingProvider {
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Create the OF Match using MatchBuilder
-        flowBuilder.setMatch(OF13MdSalMatch.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
-        flowBuilder.setMatch(OF13MdSalMatch.createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"),
+        flowBuilder.setMatch(MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
+        flowBuilder.setMatch(MatchUtils.createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"),
                 new MacAddress("01:00:00:00:00:00")).build());
 
         String flowId = "BcastOut_"+segmentationId;
@@ -2283,7 +2283,7 @@ public class OF13Provider implements NetworkingProvider {
 
             writeFlow(flowBuilder, nodeBuilder);
         } else {
-            boolean flowRemove = OF13MdSalInstruction.removeOutputPortFromInstructions(ib, dpidLong, localPort,
+            boolean flowRemove = InstructionUtils.removeOutputPortFromInstructions(ib, dpidLong, localPort,
                     existingInstructions);
             if (flowRemove) {
                 /* if all ports are removed, remove flow */
@@ -2324,8 +2324,8 @@ public class OF13Provider implements NetworkingProvider {
 
         // Create the OF Match using MatchBuilder
         flowBuilder.setMatch(
-                OF13MdSalMatch.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId))).build());
-        flowBuilder.setMatch(OF13MdSalMatch.createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"),
+                MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId))).build());
+        flowBuilder.setMatch(MatchUtils.createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"),
                 new MacAddress("01:00:00:00:00:00")).build());
 
         String flowId = "VlanBcastOut_"+segmentationId;
@@ -2374,7 +2374,7 @@ public class OF13Provider implements NetworkingProvider {
 
             if (add_pop_vlan) {
                 /* pop vlan */
-                OF13MdSalInstruction.createPopVlanInstructions(ib);
+                InstructionUtils.createPopVlanInstructions(ib);
                 ib.setOrder(0);
                 ib.setKey(new InstructionKey(0));
                 existingInstructions.add(ib.build());
@@ -2398,7 +2398,7 @@ public class OF13Provider implements NetworkingProvider {
         } else {
             //boolean flowRemove = removeOutputPortFromGroup(nodeBuilder, ib, dpidLong,
             //                     localPort, existingInstructions);
-            boolean flowRemove = OF13MdSalInstruction.removeOutputPortFromInstructions(ib, dpidLong,
+            boolean flowRemove = InstructionUtils.removeOutputPortFromInstructions(ib, dpidLong,
                     localPort, existingInstructions);
             if (flowRemove) {
                 /* if all ports are removed, remove flow */
@@ -2436,7 +2436,7 @@ public class OF13Provider implements NetworkingProvider {
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Create Match(es) and Set them in the FlowBuilder Object
-        flowBuilder.setMatch(OF13MdSalMatch.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
+        flowBuilder.setMatch(MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
 
         if (write) {
             // Create the OF Actions and Instructions
@@ -2447,7 +2447,7 @@ public class OF13Provider implements NetworkingProvider {
             List<Instruction> instructions = Lists.newArrayList();
 
             // Call the InstructionBuilder Methods Containing Actions
-            OF13MdSalInstruction.createDropInstructions(ib);
+            InstructionUtils.createDropInstructions(ib);
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructions.add(ib.build());
@@ -2496,7 +2496,7 @@ public class OF13Provider implements NetworkingProvider {
 
         // Create Match(es) and Set them in the FlowBuilder Object
         flowBuilder.setMatch(
-                OF13MdSalMatch.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId))).build());
+                MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId))).build());
 
         if (write) {
             // Create the OF Actions and Instructions
@@ -2507,7 +2507,7 @@ public class OF13Provider implements NetworkingProvider {
             List<Instruction> instructions = Lists.newArrayList();
 
             // Call the InstructionBuilder Methods Containing Actions
-            OF13MdSalInstruction.createDropInstructions(ib);
+            InstructionUtils.createDropInstructions(ib);
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructions.add(ib.build());

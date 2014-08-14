@@ -28,6 +28,7 @@
     <module>plugin</module>
     <module>plugin-mdsal-adapter</module>
     <module>northbound</module>
+    <module>utils/mdsal-openflow</module>
     <module>openstack/net-virt</module>
     <module>openstack/net-virt-providers</module>
     <module>of-extension/nx-ofjava</module>

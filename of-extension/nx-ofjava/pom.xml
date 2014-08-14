@@ -13,7 +13,7 @@
     <artifactId>of-extension.nx-ofjava</artifactId>
     <version>${ovsdb.ofextension.version}</version>
     <packaging>bundle</packaging>
-    <name>Opendaylight OVS NX Extensions for OpenflowJava Flow Models</name>
+    <name>Opendaylight OVS NX for OpenflowJava Models</name>
 
     <dependencies>
         <dependency>

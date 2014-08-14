@@ -48,6 +48,10 @@ public final class OvsVswitchdSchemaConstants {
             autoConfigureController = Boolean.getBoolean(OVSDB_AUTOCONFIGURECONTROLLER);
     }
 
+    public static void setAutoConfigureController(boolean autoConfigure) {
+        autoConfigureController = autoConfigure;
+    }
+
     public static boolean shouldConfigureController (String databaseName, String tableName) {
         if (autoConfigureController && databaseName.equals(DATABASE_NAME) && tableName.equals("Bridge")) return true;
         return false;

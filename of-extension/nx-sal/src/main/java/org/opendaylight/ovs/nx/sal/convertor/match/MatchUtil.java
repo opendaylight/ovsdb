@@ -32,6 +32,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.NxAugMatchRpcUpdateFlowOriginal;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.NxAugMatchRpcUpdateFlowUpdated;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.NxmNxNspGrouping;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.NxmNxNsiGrouping;
 import org.opendaylight.yangtools.yang.binding.Augmentation;
 
 public class MatchUtil {
@@ -39,6 +40,8 @@ public class MatchUtil {
     private final static Set<Class<? extends Augmentation<Extension>>> augmentationsOfExtension = new HashSet<>();
     public final static GroupingResolver<NxmNxNspGrouping, Extension> nspResolver = new GroupingResolver<>(
             NxmNxNspGrouping.class);
+    public final static GroupingResolver<NxmNxNsiGrouping, Extension> nsiResolver = new GroupingResolver<>(
+            NxmNxNsiGrouping.class);
     public final static ExperimenterIdMatchEntry EXPERIMENTER_ID_MATCH_ENTRY;
 
     static {
@@ -51,6 +54,7 @@ public class MatchUtil {
         augmentationsOfExtension.add(NxAugMatchNotifPacketIn.class);
         augmentationsOfExtension.add(NxAugMatchNotifUpdateFlowStats.class);
         nspResolver.setAugmentations(augmentationsOfExtension);
+        nsiResolver.setAugmentations(augmentationsOfExtension);
         ExperimenterIdMatchEntryBuilder experimenterIdMatchEntryBuilder = new ExperimenterIdMatchEntryBuilder();
         experimenterIdMatchEntryBuilder.setExperimenter(new ExperimenterId(NiciraConstants.NX_VENDOR_ID));
         EXPERIMENTER_ID_MATCH_ENTRY = experimenterIdMatchEntryBuilder.build();

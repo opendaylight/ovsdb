@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "fa82b9bf_e660dad0",
+        "filename": "ovs-sfc/src/main/java/org/opendaylight/ovsdb/ovssfc/SfcDataListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-14T13:18:11Z",
+      "side": 1,
+      "message": "Please remove such traces in the long run.",
+      "revId": "55584b29dba5bfb09f3a3ac2073738552abec3d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_065cde17",
         "filename": "ovs-sfc/src/main/java/org/opendaylight/ovsdb/ovssfc/SfcDataListener.java",
         "patchSetId": 2
@@ -13,6 +30,23 @@
       "writtenOn": "2014-08-14T13:18:11Z",
       "side": 1,
       "message": "Same here.",
+      "revId": "55584b29dba5bfb09f3a3ac2073738552abec3d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_466666ee",
+        "filename": "ovs-sfc/src/main/resources/initial/05-ovssfc-provider.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-14T13:18:11Z",
+      "side": 1,
+      "message": "Remember to plumb in this config file into the running configuration/initial during the final deliverable. For now, I think you should do the manual copy of this file into the configuration/initial of the final distribution.",
       "revId": "55584b29dba5bfb09f3a3ac2073738552abec3d6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

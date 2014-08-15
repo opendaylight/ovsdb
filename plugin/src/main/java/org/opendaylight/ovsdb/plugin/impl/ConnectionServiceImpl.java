@@ -83,6 +83,7 @@ public class ConnectionServiceImpl implements IPluginInConnectionService,
     }
 
     public void init() {
+        connectionLib.registerConnectionListener(this);
     }
 
     /**

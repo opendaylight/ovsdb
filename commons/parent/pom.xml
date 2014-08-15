@@ -26,6 +26,7 @@
     <!-- OVSB Component Versions -->
     <ovsdb.library.version>1.0.0-SNAPSHOT</ovsdb.library.version>
     <ovsdb.plugin.version>1.0.0-SNAPSHOT</ovsdb.plugin.version>
+    <plugin.shell.version>1.0.0-SNAPSHOT</plugin.shell.version>
     <openstack.netvirt.version>1.0.0-SNAPSHOT</openstack.netvirt.version>
     <openstack.netvirt.providers.version>1.0.0-SNAPSHOT</openstack.netvirt.providers.version>
     <ovsdb.northbound.version>0.6.0-SNAPSHOT</ovsdb.northbound.version>
@@ -69,6 +70,7 @@
     <portlet.version>2.0</portlet.version>
     <powermock.version>1.5.2</powermock.version>
     <httpcomponents.version>4.2.1</httpcomponents.version>
+    <karaf.shell.version>3.0.0</karaf.shell.version>
   </properties>
 
   <dependencyManagement>

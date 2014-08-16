@@ -1,0 +1,10 @@
+Code-Review+2: Brent Salisbury <brent.salisbury@gmail.com>
+Verified+1: Brent Salisbury <brent.salisbury@gmail.com>
+Verified+1: jenkins-ovsdb <jenkins-ovsdb@opendaylight.org>
+Code-Review+1: Flavio Fernandes <ffernand@redhat.com>
+Code-Review+2: Dave Tucker <djt@redhat.com>
+Submitted-by: Dave Tucker <djt@redhat.com>
+Submitted-at: Fri, 15 Aug 2014 17:58:58 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/9950
+Project: ovsdb
+Branch: refs/heads/master

@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_da056911",
+        "filename": "Vagrantfile",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-08-16T23:25:50Z",
+      "side": 1,
+      "message": "so other 2 vms remain as 13.10, right? Sounds reasonable!",
+      "revId": "344f4692e82ae96a64abb774f3a362b7cb0ed3c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7a08dd27",
+        "filename": "resources/mininet/topo.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-08-16T23:25:50Z",
+      "side": 1,
+      "message": "hmm... maybe we should rename this file to something like l3_test_topo.py? I gotta imagine we will have a bunch of topologies files in this directory overtime...",
+      "revId": "344f4692e82ae96a64abb774f3a362b7cb0ed3c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_9a0b6123",
+        "filename": "resources/puppet/manifests/mininet.pp",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-08-16T23:25:50Z",
+      "side": 1,
+      "message": "cool beans! :)",
+      "revId": "344f4692e82ae96a64abb774f3a362b7cb0ed3c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_3a16d54c",
+        "filename": "resources/puppet/manifests/mininet.pp",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-08-16T23:25:50Z",
+      "side": 1,
+      "message": "Maybe: Put a comment on how/why you think this symlink is nasty... just so we can remember to fix it when ubuntu pulls the good ovs in.",
+      "revId": "344f4692e82ae96a64abb774f3a362b7cb0ed3c4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

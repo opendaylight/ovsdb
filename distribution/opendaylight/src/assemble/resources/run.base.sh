@@ -5,6 +5,7 @@ RUNSH_DIR=$(dirname $0)
 CONTROLLER_RUNSH=${RUNSH_DIR}/run.internal.sh
 
 OF_FILTER=
+OF_PLUGIN_RUNTIME=
 
 # Be extra careful to pass on usage from run.internal.sh, but add our
 # usage as well in the standard way
@@ -30,8 +31,10 @@ done
 find configuration/initial -type l -exec rm {} \;
 
 # OF Filter selection
-OF_FILTER="org.opendaylight.(openflowplugin|openflowjava)"
+OF_FILTER="org.opendaylight.(openflowplugin|openflowjava|controller.sal-compatibility|ovsdb.of-extension)"
+OF_PLUGIN_RUNTIME="1.0"
 if (( $OF13 != 0 )); then
+    OF_PLUGIN_RUNTIME="1.3"
     OF_FILTER="org.opendaylight.controller.(thirdparty.org.openflow|protocol_plugins.openflow)"
     while read ofConfig; do
         ln -s ../initial.available/$(basename ${ofConfig}) configuration/initial/
@@ -49,4 +52,4 @@ FILTERENDING=').*'
 FILTER=${FILTERBEGINING}${OF_FILTER}${BUNDLEFILTER}${FILTERENDING}
 
 # Run the command
-$CONTROLLER_RUNSH -Dfelix.fileinstall.filter="$FILTER" $NEWARGS
+$CONTROLLER_RUNSH -Dfelix.fileinstall.filter="$FILTER" -Dovsdb.of.version="$OF_PLUGIN_RUNTIME" $NEWARGS

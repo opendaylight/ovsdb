@@ -39,6 +39,27 @@ module ovs-nx-sal-action {
         }
     }
 
+<<<<<<< HEAD
+=======
+    grouping nx-action-set-nsp-grouping {
+        container nx-set-nsp {
+            description "Sets NSP header";
+            leaf nsp {
+                type uint32;
+            }
+        }
+    }
+
+    grouping nx-action-set-nsi-grouping {
+        container nx-set-nsi {
+            description "Sets NSI header";
+            leaf nsi {
+                type uint8;
+            }
+        }
+    }
+
+>>>>>>> 5e88e21... Added Postman collection to test against the loadbalancer at org.opendaylight.controller.samples.loadbalancer
     // ACTION augmentations
 
     augment "/sal-flow:add-flow/sal-flow:input/sal-flow:instructions/sal-flow:instruction/sal-flow:instruction/sal-flow:write-actions-case/sal-flow:write-actions/sal-flow:action/sal-flow:action" {
@@ -139,4 +160,209 @@ module ovs-nx-sal-action {
             uses nx-action-resubmit-grouping;
         }
     }
+<<<<<<< HEAD
+=======
+
+// NSP
+
+    augment "/sal-flow:add-flow/sal-flow:input/sal-flow:instructions/sal-flow:instruction/sal-flow:instruction/sal-flow:write-actions-case/sal-flow:write-actions/sal-flow:action/sal-flow:action" {
+        case nx-action-set-nsp-rpc-add-flow-write-actions-case {
+            uses nx-action-set-nsp-grouping;
+        }
+    }
+
+    augment "/sal-flow:add-flow/sal-flow:input/sal-flow:instructions/sal-flow:instruction/sal-flow:instruction/sal-flow:apply-actions-case/sal-flow:apply-actions/sal-flow:action/sal-flow:action" {
+        case nx-action-set-nsp-rpc-add-flow-apply-actions-case {
+            uses nx-action-set-nsp-grouping;
+        }
+    }
+    augment "/sal-flow:remove-flow/sal-flow:input/sal-flow:instructions/sal-flow:instruction/sal-flow:instruction/sal-flow:write-actions-case/sal-flow:write-actions/sal-flow:action/sal-flow:action" {
+        case "nx-action-set-nsp-rpc-remove-flow-write-actions-case" {
+            uses nx-action-set-nsp-grouping;
+        }
+    }
+    augment "/sal-flow:remove-flow/sal-flow:input/sal-flow:instructions/sal-flow:instruction/sal-flow:instruction/sal-flow:apply-actions-case/sal-flow:apply-actions/sal-flow:action/sal-flow:action" {
+        case "nx-action-set-nsp-rpc-remove-flow-apply-actions-case" {
+            uses nx-action-set-nsp-grouping;
+        }
+    }
+    augment "/sal-flow:update-flow/sal-flow:input/sal-flow:original-flow/sal-flow:instructions/sal-flow:instruction/sal-flow:instruction/sal-flow:write-actions-case/sal-flow:write-actions/sal-flow:action/sal-flow:action" {
+        case "nx-action-set-nsp-rpc-update-flow-original-write-actions-case" {
+            uses nx-action-set-nsp-grouping;
+        }
+    }
+
+    augment "/sal-flow:update-flow/sal-flow:input/sal-flow:original-flow/sal-flow:instructions/sal-flow:instruction/sal-flow:instruction/sal-flow:apply-actions-case/sal-flow:apply-actions/sal-flow:action/sal-flow:action" {
+        case "nx-action-set-nsp-rpc-update-flow-original-apply-actions-case" {
+            uses nx-action-set-nsp-grouping;
+        }
+    }
+
+    augment "/sal-flow:update-flow/sal-flow:input/sal-flow:updated-flow/sal-flow:instructions/sal-flow:instruction/sal-flow:instruction/sal-flow:write-actions-case/sal-flow:write-actions/sal-flow:action/sal-flow:action" {
+        case "nx-action-set-nsp-rpc-update-flow-updated-write-actions-case" {
+            uses nx-action-set-nsp-grouping;
+        }
+    }
+    augment "/sal-flow:update-flow/sal-flow:input/sal-flow:updated-flow/sal-flow:instructions/sal-flow:instruction/sal-flow:instruction/sal-flow:apply-actions-case/sal-flow:apply-actions/sal-flow:action/sal-flow:action" {
+        case "nx-action-set-nsp-rpc-update-flow-updated-apply-actions-case" {
+            uses nx-action-set-nsp-grouping;
+        }
+    }
+    augment "/sal-group:add-group/sal-group:input/sal-group:buckets/sal-group:bucket/sal-group:action/sal-group:action" {
+        case "nx-action-set-nsp-rpc-add-group-case" {
+            uses nx-action-set-nsp-grouping;
+        }
+    }
+    augment "/sal-group:remove-group/sal-group:input/sal-group:buckets/sal-group:bucket/sal-group:action/sal-group:action" {
+        case "nx-action-set-nsp-rpc-remove-group-case" {
+            uses nx-action-set-nsp-grouping;
+        }
+    }
+    augment "/sal-group:update-group/sal-group:input/sal-group:original-group/sal-group:buckets/sal-group:bucket/sal-group:action/sal-group:action" {
+        case "nx-action-set-nsp-rpc-update-group-original-case" {
+            uses nx-action-set-nsp-grouping;
+        }
+    }
+    augment "/sal-group:update-group/sal-group:input/sal-group:updated-group/sal-group:buckets/sal-group:bucket/sal-group:action/sal-group:action" {
+        case "nx-action-set-nsp-rpc-update-group-updated-case" {
+            uses nx-action-set-nsp-grouping;
+        }
+    }
+    augment "/sal-packet:transmit-packet/sal-packet:input/sal-packet:action/sal-packet:action" {
+        case "nx-action-set-nsp-rpc-transmit-packet-case" {
+            uses nx-action-set-nsp-grouping;
+        }
+    }
+    augment "/inv:nodes/inv:node/fni:table/fni:flow/fni:instructions/fni:instruction/fni:instruction/fni:write-actions-case/fni:write-actions/fni:action/fni:action" {
+        case "nx-action-set-nsp-nodes-node-table-flow-write-actions-case" {
+            uses nx-action-set-nsp-grouping;
+        }
+    }
+    augment "/inv:nodes/inv:node/fni:table/fni:flow/fni:instructions/fni:instruction/fni:instruction/fni:apply-actions-case/fni:apply-actions/fni:action/fni:action" {
+        case "nx-action-set-nsp-nodes-node-table-flow-apply-actions-case" {
+            uses nx-action-set-nsp-grouping;
+        }
+    }
+    augment "/inv:nodes/inv:node/fni:group/fni:buckets/fni:bucket/fni:action/fni:action" {
+        case "nx-action-set-nsp-nodes-node-group-buckets-bucket-actions-case" {
+            uses nx-action-set-nsp-grouping;
+        }
+    }
+    augment "/odl-flow-stats:flows-statistics-update/odl-flow-stats:flow-and-statistics-map-list/odl-flow-stats:instructions/odl-flow-stats:instruction/odl-flow-stats:instruction/odl-flow-stats:write-actions-case/odl-flow-stats:write-actions/odl-flow-stats:action/odl-flow-stats:action" {
+        case "nx-action-set-nsp-notif-flows-statistics-update-write-actions-case" {
+            uses nx-action-set-nsp-grouping;
+        }
+    }
+    augment "/odl-flow-stats:flows-statistics-update/odl-flow-stats:flow-and-statistics-map-list/odl-flow-stats:instructions/odl-flow-stats:instruction/odl-flow-stats:instruction/odl-flow-stats:apply-actions-case/odl-flow-stats:apply-actions/odl-flow-stats:action/odl-flow-stats:action" {
+        case "nx-action-set-nsp-notif-flows-statistics-update-apply-actions-case" {
+            uses nx-action-set-nsp-grouping;
+        }
+    }
+    augment "/odl-group-stats:group-desc-stats-updated/odl-group-stats:group-desc-stats/odl-group-stats:buckets/odl-group-stats:bucket/odl-group-stats:action/odl-group-stats:action" {
+        case "nx-action-set-nsp-notif-group-desc-stats-updated-case" {
+            uses nx-action-set-nsp-grouping;
+        }
+    }
+
+// NSI
+
+    augment "/sal-flow:add-flow/sal-flow:input/sal-flow:instructions/sal-flow:instruction/sal-flow:instruction/sal-flow:write-actions-case/sal-flow:write-actions/sal-flow:action/sal-flow:action" {
+        case nx-action-set-nsi-rpc-add-flow-write-actions-case {
+            uses nx-action-set-nsi-grouping;
+        }
+    }
+
+    augment "/sal-flow:add-flow/sal-flow:input/sal-flow:instructions/sal-flow:instruction/sal-flow:instruction/sal-flow:apply-actions-case/sal-flow:apply-actions/sal-flow:action/sal-flow:action" {
+        case nx-action-set-nsi-rpc-add-flow-apply-actions-case {
+            uses nx-action-set-nsi-grouping;
+        }
+    }
+    augment "/sal-flow:remove-flow/sal-flow:input/sal-flow:instructions/sal-flow:instruction/sal-flow:instruction/sal-flow:write-actions-case/sal-flow:write-actions/sal-flow:action/sal-flow:action" {
+        case "nx-action-set-nsi-rpc-remove-flow-write-actions-case" {
+            uses nx-action-set-nsi-grouping;
+        }
+    }
+    augment "/sal-flow:remove-flow/sal-flow:input/sal-flow:instructions/sal-flow:instruction/sal-flow:instruction/sal-flow:apply-actions-case/sal-flow:apply-actions/sal-flow:action/sal-flow:action" {
+        case "nx-action-set-nsi-rpc-remove-flow-apply-actions-case" {
+            uses nx-action-set-nsi-grouping;
+        }
+    }
+    augment "/sal-flow:update-flow/sal-flow:input/sal-flow:original-flow/sal-flow:instructions/sal-flow:instruction/sal-flow:instruction/sal-flow:write-actions-case/sal-flow:write-actions/sal-flow:action/sal-flow:action" {
+        case "nx-action-set-nsi-rpc-update-flow-original-write-actions-case" {
+            uses nx-action-set-nsi-grouping;
+        }
+    }
+
+    augment "/sal-flow:update-flow/sal-flow:input/sal-flow:original-flow/sal-flow:instructions/sal-flow:instruction/sal-flow:instruction/sal-flow:apply-actions-case/sal-flow:apply-actions/sal-flow:action/sal-flow:action" {
+        case "nx-action-set-nsi-rpc-update-flow-original-apply-actions-case" {
+            uses nx-action-set-nsi-grouping;
+        }
+    }
+
+    augment "/sal-flow:update-flow/sal-flow:input/sal-flow:updated-flow/sal-flow:instructions/sal-flow:instruction/sal-flow:instruction/sal-flow:write-actions-case/sal-flow:write-actions/sal-flow:action/sal-flow:action" {
+        case "nx-action-set-nsi-rpc-update-flow-updated-write-actions-case" {
+            uses nx-action-set-nsi-grouping;
+        }
+    }
+    augment "/sal-flow:update-flow/sal-flow:input/sal-flow:updated-flow/sal-flow:instructions/sal-flow:instruction/sal-flow:instruction/sal-flow:apply-actions-case/sal-flow:apply-actions/sal-flow:action/sal-flow:action" {
+        case "nx-action-set-nsi-rpc-update-flow-updated-apply-actions-case" {
+            uses nx-action-set-nsi-grouping;
+        }
+    }
+    augment "/sal-group:add-group/sal-group:input/sal-group:buckets/sal-group:bucket/sal-group:action/sal-group:action" {
+        case "nx-action-set-nsi-rpc-add-group-case" {
+            uses nx-action-set-nsi-grouping;
+        }
+    }
+    augment "/sal-group:remove-group/sal-group:input/sal-group:buckets/sal-group:bucket/sal-group:action/sal-group:action" {
+        case "nx-action-set-nsi-rpc-remove-group-case" {
+            uses nx-action-set-nsi-grouping;
+        }
+    }
+    augment "/sal-group:update-group/sal-group:input/sal-group:original-group/sal-group:buckets/sal-group:bucket/sal-group:action/sal-group:action" {
+        case "nx-action-set-nsi-rpc-update-group-original-case" {
+            uses nx-action-set-nsi-grouping;
+        }
+    }
+    augment "/sal-group:update-group/sal-group:input/sal-group:updated-group/sal-group:buckets/sal-group:bucket/sal-group:action/sal-group:action" {
+        case "nx-action-set-nsi-rpc-update-group-updated-case" {
+            uses nx-action-set-nsi-grouping;
+        }
+    }
+    augment "/sal-packet:transmit-packet/sal-packet:input/sal-packet:action/sal-packet:action" {
+        case "nx-action-set-nsi-rpc-transmit-packet-case" {
+            uses nx-action-set-nsi-grouping;
+        }
+    }
+    augment "/inv:nodes/inv:node/fni:table/fni:flow/fni:instructions/fni:instruction/fni:instruction/fni:write-actions-case/fni:write-actions/fni:action/fni:action" {
+        case "nx-action-set-nsi-nodes-node-table-flow-write-actions-case" {
+            uses nx-action-set-nsi-grouping;
+        }
+    }
+    augment "/inv:nodes/inv:node/fni:table/fni:flow/fni:instructions/fni:instruction/fni:instruction/fni:apply-actions-case/fni:apply-actions/fni:action/fni:action" {
+        case "nx-action-set-nsi-nodes-node-table-flow-apply-actions-case" {
+            uses nx-action-set-nsi-grouping;
+        }
+    }
+    augment "/inv:nodes/inv:node/fni:group/fni:buckets/fni:bucket/fni:action/fni:action" {
+        case "nx-action-set-nsi-nodes-node-group-buckets-bucket-actions-case" {
+            uses nx-action-set-nsi-grouping;
+        }
+    }
+    augment "/odl-flow-stats:flows-statistics-update/odl-flow-stats:flow-and-statistics-map-list/odl-flow-stats:instructions/odl-flow-stats:instruction/odl-flow-stats:instruction/odl-flow-stats:write-actions-case/odl-flow-stats:write-actions/odl-flow-stats:action/odl-flow-stats:action" {
+        case "nx-action-set-nsi-notif-flows-statistics-update-write-actions-case" {
+            uses nx-action-set-nsi-grouping;
+        }
+    }
+    augment "/odl-flow-stats:flows-statistics-update/odl-flow-stats:flow-and-statistics-map-list/odl-flow-stats:instructions/odl-flow-stats:instruction/odl-flow-stats:instruction/odl-flow-stats:apply-actions-case/odl-flow-stats:apply-actions/odl-flow-stats:action/odl-flow-stats:action" {
+        case "nx-action-set-nsi-notif-flows-statistics-update-apply-actions-case" {
+            uses nx-action-set-nsi-grouping;
+        }
+    }
+    augment "/odl-group-stats:group-desc-stats-updated/odl-group-stats:group-desc-stats/odl-group-stats:buckets/odl-group-stats:bucket/odl-group-stats:action/odl-group-stats:action" {
+        case "nx-action-set-nsi-notif-group-desc-stats-updated-case" {
+            uses nx-action-set-nsi-grouping;
+        }
+    }
+>>>>>>> 5e88e21... Added Postman collection to test against the loadbalancer at org.opendaylight.controller.samples.loadbalancer
 }

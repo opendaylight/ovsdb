@@ -60,6 +60,7 @@
             <groupId>org.opendaylight.ovsdb</groupId>
             <artifactId>openstack.net-virt</artifactId>
         </dependency>
+<<<<<<< HEAD
     <dependency>
       <groupId>org.opendaylight.openflowplugin</groupId>
       <artifactId>openflowplugin-extension-nicira</artifactId>
@@ -71,6 +72,13 @@
       <version>1.0.0-SNAPSHOT</version>
     </dependency>
 
+=======
+        <dependency>
+          <groupId>org.opendaylight.ovsdb</groupId>
+          <artifactId>utils.mdsal-openflow</artifactId>
+          <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+>>>>>>> 5e88e21... Added Postman collection to test against the loadbalancer at org.opendaylight.controller.samples.loadbalancer
     </dependencies>
 
     <build>
@@ -99,6 +107,11 @@
                             org.osgi.framework,
                             *
                         </Import-Package>
+<<<<<<< HEAD
+=======
+                        <Embed-Dependency>utils.mdsal-openflow;type=!pom;inline=false</Embed-Dependency>
+                        <Embed-Transitive>true</Embed-Transitive>
+>>>>>>> 5e88e21... Added Postman collection to test against the loadbalancer at org.opendaylight.controller.samples.loadbalancer
                         <Bundle-Activator>org.opendaylight.ovsdb.openstack.netvirt.providers.Activator</Bundle-Activator>
                     </instructions>
                 </configuration>

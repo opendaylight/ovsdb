@@ -2,7 +2,11 @@ module ovs-nx-match {
     yang-version 1;
 
     namespace "urn:opendaylight:ovs:nx:match";
+<<<<<<< HEAD
     prefix "nx-match";
+=======
+    prefix "ovs-nx-match";
+>>>>>>> 5e88e21... Added Postman collection to test against the loadbalancer at org.opendaylight.controller.samples.loadbalancer
 
     import openflow-extensible-match {prefix ofoxm;}
     import openflow-types {prefix oft;}
@@ -10,9 +14,47 @@ module ovs-nx-match {
     import yang-ext {prefix ext; revision-date "2013-07-09";}
 
     description
+<<<<<<< HEAD
         "Nicira openflow match extensions";
+=======
+        "OVS Openflow NX match extensions";
+>>>>>>> 5e88e21... Added Postman collection to test against the loadbalancer at org.opendaylight.controller.samples.loadbalancer
 
     revision "2014-04-21" {
         description "Initial revision";
     }
+<<<<<<< HEAD
 }
+=======
+
+    identity nxm-nx-nsp {
+        base ofoxm:match-field;
+    }
+
+    identity nxm-nx-nsi {
+        base ofoxm:match-field;
+    }
+
+    grouping ofj-nxm-nx-match-nsp-grouping {
+        container nsp-values {
+            leaf nsp {
+                type uint32;
+            }
+        }
+    }
+
+    grouping ofj-nxm-nx-match-nsi-grouping {
+        container nsi-values {
+            leaf nsi {
+                type uint8;
+            }
+        }
+    }
+
+    augment "/ofoxm:oxm-container/ofoxm:match-entries" {
+        ext:augment-identifier "ofj-aug_nx_match";
+        uses ofj-nxm-nx-match-nsp-grouping;
+        uses ofj-nxm-nx-match-nsi-grouping;
+    }
+}
+>>>>>>> 5e88e21... Added Postman collection to test against the loadbalancer at org.opendaylight.controller.samples.loadbalancer

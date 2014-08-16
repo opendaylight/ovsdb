@@ -10,10 +10,18 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt;
 
+<<<<<<< HEAD
+=======
+import org.opendaylight.controller.networkconfig.neutron.INeutronFloatingIPAware;
+>>>>>>> 5e88e21... Added Postman collection to test against the loadbalancer at org.opendaylight.controller.samples.loadbalancer
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
+<<<<<<< HEAD
+=======
+import org.opendaylight.controller.networkconfig.neutron.INeutronRouterAware;
+>>>>>>> 5e88e21... Added Postman collection to test against the loadbalancer at org.opendaylight.controller.samples.loadbalancer
 import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityGroupAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityRuleAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetAware;
@@ -71,9 +79,17 @@ public class Activator extends ComponentActivatorAbstractBase {
                         BridgeConfigurationManagerImpl.class,
                         TenantNetworkManagerImpl.class,
                         VlanConfigurationCacheImpl.class,
+<<<<<<< HEAD
                         NetworkHandler.class,
                         SubnetHandler.class,
                         PortHandler.class,
+=======
+                        FloatingIPHandler.class,
+                        NetworkHandler.class,
+                        SubnetHandler.class,
+                        PortHandler.class,
+                        RouterHandler.class,
+>>>>>>> 5e88e21... Added Postman collection to test against the loadbalancer at org.opendaylight.controller.samples.loadbalancer
                         SouthboundHandler.class,
                         PortSecurityHandler.class,
                         ProviderNetworkManagerImpl.class};
@@ -129,6 +145,16 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency().setService(TenantNetworkManager.class));
         }
 
+<<<<<<< HEAD
+=======
+        if (imp.equals(FloatingIPHandler.class)) {
+            c.setInterface(INeutronFloatingIPAware.class.getName(), null);
+            c.add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true));
+            c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
+            c.add(createServiceDependency().setService(OvsdbInventoryListener.class).setRequired(true));
+        }
+
+>>>>>>> 5e88e21... Added Postman collection to test against the loadbalancer at org.opendaylight.controller.samples.loadbalancer
         if (imp.equals(NetworkHandler.class)) {
             c.setInterface(INeutronNetworkAware.class.getName(), null);
             c.add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true));
@@ -152,6 +178,16 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency().setService(OvsdbInventoryListener.class).setRequired(true));
         }
 
+<<<<<<< HEAD
+=======
+        if (imp.equals(RouterHandler.class)) {
+            c.setInterface(INeutronRouterAware.class.getName(), null);
+            c.add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true));
+            c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
+            c.add(createServiceDependency().setService(OvsdbInventoryListener.class).setRequired(true));
+        }
+
+>>>>>>> 5e88e21... Added Postman collection to test against the loadbalancer at org.opendaylight.controller.samples.loadbalancer
         if (imp.equals(SouthboundHandler.class)) {
             c.setInterface(new String[] {OvsdbInventoryListener.class.getName(),
                                          IInventoryListener.class.getName()}, null);

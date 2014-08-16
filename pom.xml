@@ -26,6 +26,7 @@
     <module>schemas/openvswitch</module>
     <module>schemas/hardwarevtep</module>
     <module>plugin</module>
+    <module>plugin-shell</module>
     <module>plugin-mdsal-adapter</module>
     <module>northbound</module>
     <module>utils/mdsal-openflow</module>

@@ -23,7 +23,8 @@ import java.util.Map;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
         MonitorTestCases.class,
-        ManagerTestCases.class
+        ManagerTestCases.class,
+        TearDown.class
 })
 
 public class HardwareVtepSchemaSuiteIT {

@@ -10,6 +10,9 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt;
 
+import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallPolicyAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallRuleAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronFloatingIPAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
@@ -86,7 +89,8 @@ public class Activator extends ComponentActivatorAbstractBase {
                         SouthboundHandler.class,
                         PortSecurityHandler.class,
                         ProviderNetworkManagerImpl.class,
-                        EventDispatcherImpl.class};
+                        EventDispatcherImpl.class,
+                        FWaasHandler.class};
         return res;
     }
 
@@ -229,6 +233,12 @@ public class Activator extends ComponentActivatorAbstractBase {
                                          AbstractHandler.class.getName()},
                            portSecurityHandlerProperties);
             c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
+        }
+
+        if (imp.equals(FWaasHandler.class)) {
+            c.setInterface(new String[] {INeutronFirewallAware.class.getName(),
+                                         INeutronFirewallRuleAware.class.getName(),
+                                         INeutronFirewallPolicyAware.class.getName()}, null);
         }
 
         if (imp.equals(ProviderNetworkManagerImpl.class)) {

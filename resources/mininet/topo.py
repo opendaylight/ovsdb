@@ -17,9 +17,9 @@ topology enables one to pass in '--topo=mytopo' from the command line.
 
 from mininet.topo import Topo
 
-class MyTopo( Topo ):
+class L3TestTopo( Topo ):
 
-    """L3 topology."""
+    """L3 test topology."""
 
     def __init__( self ):
         """Create custom topo."""
@@ -56,5 +56,5 @@ class MyTopo( Topo ):
         self.addLink( s1, h3 )
         self.addLink( s1, h4 )
 
-topos = {'l3': ( lambda: MyTopo() )}
+topos = {'l3': ( lambda: L3TestTopo() )}
 

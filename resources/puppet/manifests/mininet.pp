@@ -8,7 +8,8 @@ $deps = [ 'build-essential',
           'python-qt4',
           'python-zopeinterface',
           'python-twisted-conch',
-          'python-twisted-web'
+          'python-twisted-web',
+          'xauth'
 ]
 
 package { $deps:

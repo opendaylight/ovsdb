@@ -56,6 +56,12 @@ public class OvsdbClientTestIT extends OvsdbTestBase {
     DatabaseSchema dbSchema = null;
     static String testBridgeName = "br-test";
     static UUID testBridgeUuid = null;
+
+    /**
+     * Test general OVSDB transactions (viz., insert, select, update,
+     * mutate, comment, delete, where, commit) as well as the special
+     * transactions (viz., abort and assert)
+     */
     @Test
     public void testTransact() throws IOException, InterruptedException, ExecutionException {
         Assert.assertNotNull(dbSchema);
@@ -67,6 +73,11 @@ public class OvsdbClientTestIT extends OvsdbTestBase {
         assertTransaction();
     }
 
+    /**
+     * Test OVS monitor request and reply, with and without specific column filters,
+     * for the Bridge table in the OVSDB. The setup involves creating a test bridge with 5
+     * flood_vlans and 2 key-value pairs, and monitoring the DB update.
+     */
     @Test
     public void testMonitorRequest() throws ExecutionException, InterruptedException, IOException {
         Assert.assertNotNull(dbSchema);

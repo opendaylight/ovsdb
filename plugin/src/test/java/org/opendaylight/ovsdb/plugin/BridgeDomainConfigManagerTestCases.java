@@ -12,7 +12,6 @@ package org.opendaylight.ovsdb.plugin;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.plugin.impl.ConfigurationServiceImpl;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +19,12 @@ public class BridgeDomainConfigManagerTestCases extends PluginTestBase {
     private static final Logger logger = LoggerFactory
             .getLogger(BridgeDomainConfigManagerTestCases.class);
 
+    /**
+     * Set manager for the OVS node
+     * Ex. ovs-vsctl set-manager tcp:192.168.254.254:6634
+     *
+     * @throws Throwable
+     */
     @Test
     public void setManager() throws Throwable{
         TestObjects testObjects = getTestConnection();

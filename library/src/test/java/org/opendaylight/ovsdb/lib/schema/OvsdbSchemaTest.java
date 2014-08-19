@@ -22,6 +22,13 @@ import java.io.InputStream;
 
 public class OvsdbSchemaTest {
 
+     /**
+      * Test OVSDB schema construction from JSON text in
+      * test_schema.json. Following tables are used: "Port", "Manager",
+      * "Bridge", "Interface", "SSL", "Open_vSwitch", "Queue",
+      * "NetFlow", "Mirror", "QoS", "Controller", "Flow_Table", "sFlow"
+      * tables.
+      */
     @Test
     public void testSchema() throws IOException {
         InputStream resourceAsStream = OvsdbSchemaTest.class.getResourceAsStream("test_schema.json");

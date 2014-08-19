@@ -2582,21 +2582,6 @@ public class OF13Provider implements NetworkingProvider {
         }
 
         ReadWriteTransaction modification = dataBroker.newReadWriteTransaction();
-
-        // Sanity check: do not create parent's tree deeper than we should
-        InstanceIdentifier<?> requiredPath = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
-                .rev130819.nodes.Node.class, nodeBuilder.getKey()).build();
-        try {
-            if (!modification.read(LogicalDatastoreType.CONFIGURATION, requiredPath).get().isPresent()) {
-                logger.error("Unable to get configuration resource to store group "+groupBuilder.getGroupName()
-                        +" ("+requiredPath.toString()+")");
-                return;
-            }
-        } catch (InterruptedException|ExecutionException e) {
-            logger.error(e.getMessage(), e);
-            return;
-        }
-
         InstanceIdentifier<Group> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
                 .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Group.class,
                 new GroupKey(groupBuilder.getGroupId())).build();
@@ -2683,21 +2668,6 @@ public class OF13Provider implements NetworkingProvider {
         }
 
         ReadWriteTransaction modification = dataBroker.newReadWriteTransaction();
-
-        // Sanity check: do not create parent's tree deeper than we should
-        InstanceIdentifier<?> requiredPath = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
-                .rev130819.nodes.Node.class, nodeBuilder.getKey()).build();
-        try {
-            if (!modification.read(LogicalDatastoreType.CONFIGURATION, requiredPath).get().isPresent()) {
-                logger.error("Unable to get configuration resource to store flow "+flowBuilder.getFlowName()
-                        +" ("+requiredPath.toString()+")");
-                return;
-            }
-        } catch (InterruptedException|ExecutionException e) {
-            logger.error(e.getMessage(), e);
-            return;
-        }
-
         InstanceIdentifier<Flow> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
                 .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Table.class,
                 new TableKey(flowBuilder.getTableId())).child(Flow.class, flowBuilder.getKey()).build();

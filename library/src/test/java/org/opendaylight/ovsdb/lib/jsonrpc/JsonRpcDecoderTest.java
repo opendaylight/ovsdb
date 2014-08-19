@@ -45,6 +45,11 @@ public class JsonRpcDecoderTest {
         prettyTestJson = Resources.toString(prettyTestJsoUrl, Charsets.UTF_8);
     }
 
+    /**
+     * Test decoding the Stringified Json text in test.json to
+     * individual Json node objects.
+     * @throws Exception
+     */
     @Test
     public void testDecode() throws Exception {
         for (int i = 0; i < 10; i++) {
@@ -55,6 +60,11 @@ public class JsonRpcDecoderTest {
         ch.finish();
     }
 
+    /**
+     * Test decoding the Stringified Json text in pretty-test.json to
+     * individual Json node objects.
+     * @throws Exception
+     */
     @Test
     public void testDecodePrettyJson() throws Exception {
         ch.writeInbound(copiedBuffer(prettyTestJson, CharsetUtil.UTF_8));
@@ -63,6 +73,11 @@ public class JsonRpcDecoderTest {
         ch.finish();
     }
 
+    /**
+     * Test decoding the Stringified Json text with large spaces to
+     * individual Json node objects.
+     * @throws Exception
+     */
     @Test
     public void testDecodeSkipSpaces() throws Exception {
         ch.writeInbound(copiedBuffer(PREAMBLE + testJson + PREAMBLE + testJson, CharsetUtil.UTF_8));
@@ -71,6 +86,12 @@ public class JsonRpcDecoderTest {
         ch.finish();
     }
 
+    /**
+     * Test whether phased decoding is allowed with JsonRpcDecoder by
+     * writing Json string over two separate iterations, and checking if
+     * the decoder collates the record appropriately.
+     * @throws Exception
+     */
     @Test
     public void testDecodePartial() throws Exception {
         ch.writeInbound(copiedBuffer(PARTIAL_START, CharsetUtil.UTF_8));
@@ -82,12 +103,24 @@ public class JsonRpcDecoderTest {
         ch.finish();
     }
 
+    /**
+     * Test whether decoder throws appropriate DecoderException when
+     * passing a Json string using an unsupported (i.e., UTF-16)
+     * character set.
+     * @throws Exception
+     */
     @Test(expected= DecoderException.class)
     public void testDecodeInvalidEncoding() throws Exception {
         ch.writeInbound(copiedBuffer(testJson, CharsetUtil.UTF_16));
         ch.finish();
     }
 
+    /**
+     * Test whether decoder throws appropriate TooLongFrameException
+     * when passing a Json string longer than the decoder's maximum
+     * frame length.
+     * @throws Exception
+     */
     @Test(expected=TooLongFrameException.class)
     public void testDecodeFrameLengthExceed() {
         decoder = new JsonRpcDecoder(testJson_BYTES -1);

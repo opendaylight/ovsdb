@@ -22,7 +22,7 @@ public class TearDown extends PluginTestBase {
             .getLogger(TearDown.class);
 
     /**
-     * Final Cleanup. Delete the test Bridge.
+     * Final Cleanup. Delete the test Bridge "JUNIT_TEST_BRIDGE".
      */
 
     @Test

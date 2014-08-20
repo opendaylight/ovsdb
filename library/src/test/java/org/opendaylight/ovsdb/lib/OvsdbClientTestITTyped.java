@@ -49,6 +49,12 @@ public class OvsdbClientTestITTyped extends OvsdbTestBase {
     static String testBridgeName = "br_test";
     static UUID testBridgeUuid = null;
 
+    /**
+     * Test creation of statically typed bridge table as defined in
+     * ovs-vswitchd.conf.db with get/set for all relevant columns. The
+     * SETDATA methods for "name", "status" and "flood_vlans" columns
+     * are verified.
+     */
     @Test
     public void testTypedBridgeCreate() throws IOException, InterruptedException, ExecutionException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         TestBridge rBridge = ovs.createTypedRowWrapper(TestBridge.class);

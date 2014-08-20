@@ -17,12 +17,23 @@ import static org.junit.Assert.assertTrue;
 
 public class VersionTest {
 
+    /**
+     * Test to verify if Version object can be constructed from a string
+     * and to verify if Version.toString() yields original string used
+     * during construction of the object.
+     * @throws Exception
+     */
     @Test
     public void testToString() throws Exception {
         Version a = Version.fromString("1.2.3");
         assertEquals("1.2.3", a.toString());
     }
 
+    /**
+     * Test to verify if equals() and hashCode() methods work
+     * for the Version object.
+     * @throws Exception
+     */
     @Test
     public void testEquals() throws Exception {
         Version a = Version.fromString("1.2.3");
@@ -33,6 +44,11 @@ public class VersionTest {
         assertTrue(b.hashCode() == Version.fromString("0.0.0").hashCode());
     }
 
+    /**
+     * Test to verify compareTo() function works for the
+     * X.Y.Z semantics of the version number.
+     * @throws Exception
+     */
     @Test
     public void testCompareTo() throws Exception {
         Version a = Version.fromString("1.2.27");
@@ -49,6 +65,8 @@ public class VersionTest {
 
     }
 
+    /* TODO: Incomplete compare test
+     */
     @Test
     public void testCompare() throws Exception {
         Version a = Version.fromString("6.9.3");

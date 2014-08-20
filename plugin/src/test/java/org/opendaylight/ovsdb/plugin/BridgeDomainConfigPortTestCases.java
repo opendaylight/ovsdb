@@ -35,12 +35,12 @@ public class BridgeDomainConfigPortTestCases extends PluginTestBase {
         props = loadProperties();
     }
 
-
     /**
      * Create a Port and attach it to a Bridge
      * Ex. ovs-vsctl add-port br0 vif0
+     *
+     * @throws Throwable
      */
-
     @Test
     public void addPort() throws Throwable{
         TestObjects testObjects = getTestConnection();
@@ -52,8 +52,9 @@ public class BridgeDomainConfigPortTestCases extends PluginTestBase {
 
     /**
      * Create a Port with a user defined VLAN, and attach it to the specified bridge.
-     *
      * Ex. ovs-vsctl add-port JUNIT_BRIDGE_TEST Jvlanvif0 tag=100
+     *
+     * @throws Throwable
      */
     @Test
     public void addPortVlan() throws Throwable{
@@ -77,6 +78,8 @@ public class BridgeDomainConfigPortTestCases extends PluginTestBase {
      *
      * Ex. ovs-vsctl add-port br0 vxlan1 (cont)
      * -- set interface vxlan1 type=vxlan options:remote_ip=192.168.1.11
+     *
+     * @throws Throwable
      */
 
     @Test
@@ -100,6 +103,8 @@ public class BridgeDomainConfigPortTestCases extends PluginTestBase {
     /**
      * Deletes an existing port from an existing bridge
      * Ex. ovs-vsctl del-port ovsbr0 tap0
+     *
+     * @throws Throwable
      */
     @Test
     public void deletePort() throws Throwable{

@@ -36,11 +36,17 @@ public class TestClient extends TestCase {
             bootstrapper.stopServer();
         }
 
+        /**
+         * Testing appropriate ChannelHandler integration for
+         * JsonRpcDecoder, so that Json strings written using an
+         * OutputStream connected to a ServerSocket of a Netty
+         * ServerBootstrap can be decoder properly.
+         */
+
         @Test
         public void testBasicFlow() throws Exception {
             setupServer();
-            Socket socket = socket = new Socket(serverurl, serverport);
-
+            Socket socket = new Socket(serverurl, serverport);
             OutputStream outputStream = socket.getOutputStream();
 
             int records = 20;
@@ -61,7 +67,7 @@ public class TestClient extends TestCase {
     static int counter = 0;
 
     /*
-       create and a json of specified size
+       create and write a json string for specified number of times
      */
     private void writeJson(OutputStream outputStream, int times) throws IOException {
         outputStream.write("{".getBytes("UTF-8"));

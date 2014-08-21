@@ -20,11 +20,8 @@ import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @Deprecated
@@ -73,11 +70,7 @@ public class OvsdbRow {
     public static Row<GenericTableSchema> getRow(OvsdbClient client, String dbName, String tableName, JsonNode rowJson) throws InterruptedException, ExecutionException, JsonParseException, IOException {
         DatabaseSchema dbSchema = client.getSchema(dbName).get();
         GenericTableSchema schema = dbSchema.table(tableName, GenericTableSchema.class);
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        objectMapper.setSerializationInclusion(Include.NON_NULL);
-        Row<GenericTableSchema> row = schema.createRow((ObjectNode)rowJson);
-        return row;
+        return schema.createRow((ObjectNode)rowJson);
     }
 
     public String getParentUuid() {

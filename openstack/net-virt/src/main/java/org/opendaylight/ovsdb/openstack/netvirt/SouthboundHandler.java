@@ -18,6 +18,8 @@ import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
+import org.opendaylight.ovsdb.openstack.netvirt.api.EventHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
@@ -35,18 +37,13 @@ import java.net.InetAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
-public class SouthboundHandler extends AbstractHandler implements OvsdbInventoryListener, IInventoryListener {
+public class SouthboundHandler extends AbstractHandler implements OvsdbInventoryListener,
+                                                                  IInventoryListener,
+                                                                  EventHandler {
     static final Logger logger = LoggerFactory.getLogger(SouthboundHandler.class);
     //private Thread eventThread;
-    private ExecutorService eventHandler;
-    private BlockingQueue<SouthboundEvent> events;
     List<Node> nodeCache;
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
@@ -56,67 +53,19 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
     private volatile NetworkingProviderManager networkingProviderManager;
     private volatile OvsdbConfigurationService ovsdbConfigurationService;
     private volatile OvsdbConnectionService connectionService;
+    private volatile EventDispatcher eventDispatcher;
 
     void init() {
-        eventHandler = Executors.newSingleThreadExecutor();
-        this.events = new LinkedBlockingQueue<>();
         nodeCache = Lists.newArrayList();
     }
 
     void start() {
-        eventHandler.submit(new Runnable()  {
-            @Override
-            public void run() {
-                while (true) {
-                    SouthboundEvent ev;
-                    try {
-                        ev = events.take();
-                    } catch (InterruptedException e) {
-                        logger.info("The event handler thread was interrupted, shutting down", e);
-                        return;
-                    }
-                    switch (ev.getType()) {
-                    case NODE:
-                        try {
-                            processNodeUpdate(ev.getNode(), ev.getAction());
-                        } catch (Exception e) {
-                            logger.error("Exception caught in ProcessNodeUpdate for node " + ev.getNode(), e);
-                        }
-                        break;
-                    case ROW:
-                        try {
-                            processRowUpdate(ev.getNode(), ev.getTableName(), ev.getUuid(), ev.getRow(),
-                                             ev.getContext(),ev.getAction());
-                        } catch (Exception e) {
-                            logger.error("Exception caught in ProcessRowUpdate for node " + ev.getNode(), e);
-                        }
-                        break;
-                    default:
-                        logger.warn("Unable to process action " + ev.getAction() + " for node " + ev.getNode());
-                    }
-                }
-            }
-        });
+        eventDispatcher.registerEventHandler(AbstractEvent.HandlerType.SOUTHBOUND, this);
         this.triggerUpdates();
     }
 
     void stop() {
-        // stop accepting new tasks
-        eventHandler.shutdown();
-        try {
-            // Wait a while for existing tasks to terminate
-            if (!eventHandler.awaitTermination(10, TimeUnit.SECONDS)) {
-                eventHandler.shutdownNow();
-                // Wait a while for tasks to respond to being cancelled
-                if (!eventHandler.awaitTermination(10, TimeUnit.SECONDS))
-                    logger.error("Southbound Event Handler did not terminate");
-            }
-        } catch (InterruptedException e) {
-            // (Re-)Cancel if current thread also interrupted
-            eventHandler.shutdownNow();
-            // Preserve interrupt status
-            Thread.currentThread().interrupt();
-        }
+        eventDispatcher.unregisterEventHandler(AbstractEvent.HandlerType.SOUTHBOUND, this);
     }
 
     @Override
@@ -181,11 +130,7 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
     }
 
     private void enqueueEvent (SouthboundEvent event) {
-        try {
-            events.put(event);
-        } catch (InterruptedException e) {
-            logger.error("Thread was interrupted while trying to enqueue event ", e);
-        }
+        eventDispatcher.enqueueEvent(event);
     }
 
     public void processNodeUpdate(Node node, SouthboundEvent.Action action) {
@@ -392,6 +337,41 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
             } catch (Exception e) {
                 logger.error("Exception during OVSDB Southbound update trigger", e);
             }
+        }
+    }
+
+    /**
+     * Process the event.
+     *
+     * @param event the {@link org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent} event to be handled.
+     * @see EventDispatcher
+     */
+    @Override
+    public void processEvent(AbstractEvent abstractEvent) {
+        if (!(abstractEvent instanceof SouthboundEvent)) {
+            logger.error("Unable to process abstract event " + abstractEvent);
+            return;
+        }
+        SouthboundEvent ev = (SouthboundEvent) abstractEvent;
+        switch (ev.getType()) {
+            case NODE:
+                try {
+                    processNodeUpdate(ev.getNode(), ev.getAction());
+                } catch (Exception e) {
+                    logger.error("Exception caught in ProcessNodeUpdate for node " + ev.getNode(), e);
+                }
+                break;
+            case ROW:
+                try {
+                    processRowUpdate(ev.getNode(), ev.getTableName(), ev.getUuid(), ev.getRow(),
+                                     ev.getContext(),ev.getAction());
+                } catch (Exception e) {
+                    logger.error("Exception caught in ProcessRowUpdate for node " + ev.getNode(), e);
+                }
+                break;
+            default:
+                logger.warn("Unable to process action " + ev.getAction() + " for node " + ev.getNode());
+                break;
         }
     }
 }

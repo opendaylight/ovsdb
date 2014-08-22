@@ -15,6 +15,7 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
@@ -43,6 +44,15 @@ public class PortHandler extends AbstractHandler
     private volatile OvsdbConfigurationService ovsdbConfigurationService;
     private volatile OvsdbConnectionService connectionService;
     private volatile OvsdbInventoryListener ovsdbInventoryListener;
+    private volatile EventDispatcher eventDispatcher;
+
+    void start() {
+        eventDispatcher.registerEventHandler(AbstractEvent.HandlerType.NEUTRON_PORT, this);
+    }
+
+    void stop() {
+        eventDispatcher.unregisterEventHandler(AbstractEvent.HandlerType.NEUTRON_PORT, this);
+    }
 
     /**
      * Invoked when a port creation is requested
@@ -69,10 +79,13 @@ public class PortHandler extends AbstractHandler
             return;
         }
 
+        enqueueEvent(new NorthboundEvent(port, NorthboundEvent.Action.ADD));
+    }
+    private void doNeutronPortCreated(NeutronPort port) {
         logger.debug(" Port-ADD successful for tenant-id - {}," +
-                     " network-id - {}, port-id - {}, result - {} ",
+                     " network-id - {}, port-id - {}",
                      port.getTenantID(), port.getNetworkUUID(),
-                     port.getID(), result);
+                     port.getID());
     }
 
     /**
@@ -135,6 +148,11 @@ public class PortHandler extends AbstractHandler
             return;
         }
 
+        enqueueEvent(new NorthboundEvent(neutronPort, NorthboundEvent.Action.DELETE));
+    }
+    private void doNeutronPortDeleted(NeutronPort neutronPort) {
+        logger.debug("Handling neutron delete port " + neutronPort);
+
         List<Node> nodes = connectionService.getNodes();
         for (Node node : nodes) {
             try {
@@ -182,5 +200,35 @@ public class PortHandler extends AbstractHandler
                      neutronPort.getTenantID(), neutronPort.getNetworkUUID(),
                      neutronPort.getID());
 
+    }
+
+    private void enqueueEvent(NorthboundEvent event) {
+        eventDispatcher.enqueueEvent(event);
+    }
+
+    /**
+     * Process the event.
+     *
+     * @param abstractEvent the {@link org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent} event to be handled.
+     * @see EventDispatcher
+     */
+    @Override
+    public void processEvent(AbstractEvent abstractEvent) {
+        if (!(abstractEvent instanceof NorthboundEvent)) {
+            logger.error("Unable to process abstract event " + abstractEvent);
+            return;
+        }
+        NorthboundEvent ev = (NorthboundEvent) abstractEvent;
+        switch (ev.getAction()) {
+            case ADD:
+                doNeutronPortCreated(ev.getPort());
+                break;
+            case DELETE:
+                doNeutronPortDeleted(ev.getPort());
+                break;
+            default:
+                logger.warn("Unable to process event action " + ev.getAction());
+                break;
+        }
     }
 }

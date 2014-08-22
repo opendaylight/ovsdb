@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_5c6dceca",
+        "filename": "utils/mdsal-openflow/src/main/java/org/opendaylight/ovsdb/utils/mdsal/openflow/MatchUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 325,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-08-22T20:42:35Z",
+      "side": 1,
+      "message": "any users of the old API (w/out tcpPort)? If so, these will need a tweak to not break build.",
+      "revId": "026fbb8313bead841e9f52fcccacd0b8fcf41a85",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

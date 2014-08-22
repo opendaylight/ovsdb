@@ -12,35 +12,30 @@ package org.opendaylight.ovsdb.openstack.netvirt;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.lib.notation.Row;
 
-public class SouthboundEvent {
+public class SouthboundEvent extends AbstractEvent {
     public enum Type { NODE, ROW };
-    public enum Action { ADD, UPDATE, DELETE };
     private Type type;
-    private Action action;
     private Node node;
     private String tableName;
     private String uuid;
     private Row row;
     private Object context;
     public SouthboundEvent(Node node, Action action) {
-        super();
+        super(HandlerType.SOUTHBOUND, action);
         this.type = Type.NODE;
-        this.action = action;
         this.node = node;
     }
     public SouthboundEvent(Node node, String tableName, String uuid, Row row, Action action) {
-        super();
+        super(HandlerType.SOUTHBOUND, action);
         this.type = Type.ROW;
-        this.action = action;
         this.node = node;
         this.tableName = tableName;
         this.uuid = uuid;
         this.row = row;
     }
     public SouthboundEvent(Node node, String tableName, String uuid, Row row, Object context, Action action) {
-        super();
+        super(HandlerType.SOUTHBOUND, action);
         this.type = Type.ROW;
-        this.action = action;
         this.node = node;
         this.tableName = tableName;
         this.uuid = uuid;
@@ -49,9 +44,6 @@ public class SouthboundEvent {
     }
     public Type getType() {
         return type;
-    }
-    public Action getAction() {
-        return action;
     }
     public Node getNode() {
         return node;
@@ -70,14 +62,13 @@ public class SouthboundEvent {
     }
     @Override
     public String toString() {
-        return "SouthboundEvent [type=" + type + ", action=" + action + ", node=" + node + ", tableName=" + tableName
+        return "SouthboundEvent [type=" + type + ", action=" + super.getAction() + ", node=" + node + ", tableName=" + tableName
                 + ", uuid=" + uuid + ", row=" + row + ", context=" + context.toString() + "]";
     }
     @Override
     public int hashCode() {
         final int prime = 31;
-        int result = 1;
-        result = prime * result + ((action == null) ? 0 : action.hashCode());
+        int result = super.hashCode();
         result = prime * result + ((node == null) ? 0 : node.hashCode());
         result = prime * result + ((tableName == null) ? 0 : tableName.hashCode());
         result = prime * result + ((type == null) ? 0 : type.hashCode());
@@ -92,9 +83,9 @@ public class SouthboundEvent {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        SouthboundEvent other = (SouthboundEvent) obj;
-        if (action != other.action)
+        if (!super.equals(obj))
             return false;
+        SouthboundEvent other = (SouthboundEvent) obj;
         if (node == null) {
             if (other.node != null)
                 return false;
@@ -105,7 +96,10 @@ public class SouthboundEvent {
                 return false;
         } else if (!tableName.equals(other.tableName))
             return false;
-        if (type != other.type)
+        if (type == null) {
+            if (other.type != null)
+                return false;
+        } else if (!type.equals(other.type))
             return false;
         if (uuid == null) {
             if (other.uuid != null)

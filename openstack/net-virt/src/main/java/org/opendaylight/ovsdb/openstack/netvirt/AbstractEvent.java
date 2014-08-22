@@ -1,0 +1,64 @@
+package org.opendaylight.ovsdb.openstack.netvirt;
+
+/**
+ * Abstract class for events used by neutron northbound and southbound events.
+ */
+public class AbstractEvent {
+    public enum HandlerType { SOUTHBOUND, NORTHBOUND }
+    public enum Action { ADD, UPDATE, DELETE }
+    private HandlerType handlerType;
+    private Action action;
+
+    private AbstractEvent() {
+        // this is private to force proper construction
+    }
+
+    protected AbstractEvent(HandlerType handlerType, Action action) {
+        this.handlerType = handlerType;
+        this.action = action;
+    }
+
+    public HandlerType getHandlerType() {
+        return handlerType;
+    }
+
+    public Action getAction() {
+        return action;
+    }
+
+    @Override
+    public String toString() {
+        return "AbstractEvent [handlerType=" + handlerType + " action=" + action + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((handlerType == null) ? 0 : handlerType.hashCode());
+        result = prime * result + ((action == null) ? 0 : action.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        AbstractEvent other = (AbstractEvent) obj;
+        if (handlerType == null) {
+            if (other.handlerType != null)
+                return false;
+        } else if (!handlerType.equals(other.handlerType))
+            return false;
+        if (action == null) {
+            if (other.action != null)
+                return false;
+        } else if (!action.equals(other.action))
+            return false;
+        return true;
+    }
+}

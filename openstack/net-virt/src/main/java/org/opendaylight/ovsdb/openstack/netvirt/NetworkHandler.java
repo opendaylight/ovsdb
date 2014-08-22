@@ -194,4 +194,29 @@ public class NetworkHandler extends AbstractHandler
         }
         tenantNetworkManager.networkDeleted(network.getID());
     }
+
+    /**
+     * Process the event.
+     *
+     * @param abstractEvent the {@link org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent} event to be handled.
+     * @see org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher
+     */
+    @Override
+    public void processEvent(AbstractEvent abstractEvent) {
+        if (!(abstractEvent instanceof NorthboundEvent)) {
+            logger.error("Unable to process abstract event " + abstractEvent);
+            return;
+        }
+        NorthboundEvent ev = (NorthboundEvent) abstractEvent;
+        switch (ev.getAction()) {
+            case ADD:
+                // TODO  break;
+            case DELETE:
+                // TODO  break;
+            default:
+                logger.warn("Unable to process event action " + ev.getAction());
+                break;
+        }
+    }
+
 }

@@ -59,4 +59,5 @@ public final class Constants {
     public static final String SOUTHBOUND_PROTOCOL_PROPERTY = "southboundProtocol";
     public static final String PROVIDER_TYPE_PROPERTY = "providerType";
     public static final String OPENFLOW_VERSION_PROPERTY = "openflowVersion";
+    public static final String EVENT_HANDLER_PROPERTY = "eventHandlerType";
 }

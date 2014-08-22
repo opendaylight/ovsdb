@@ -32,6 +32,7 @@ public class RouterHandler extends AbstractHandler
      */
     static final Logger logger = LoggerFactory.getLogger(RouterHandler.class);
 
+    // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile OvsdbConfigurationService ovsdbConfigurationService;
     private volatile OvsdbConnectionService connectionService;
     private volatile OvsdbInventoryListener ovsdbInventoryListener;
@@ -188,5 +189,29 @@ public class RouterHandler extends AbstractHandler
     public void neutronRouterInterfaceDetached(NeutronRouter router, NeutronRouter_Interface routerInterface) {
         logger.debug(" Router {} interface {} detached. Subnet {}", router.getName(), routerInterface.getPortUUID(),
                      routerInterface.getSubnetUUID());
+    }
+
+    /**
+     * Process the event.
+     *
+     * @param abstractEvent the {@link org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent} event to be handled.
+     * @see org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher
+     */
+    @Override
+    public void processEvent(AbstractEvent abstractEvent) {
+        if (!(abstractEvent instanceof NorthboundEvent)) {
+            logger.error("Unable to process abstract event " + abstractEvent);
+            return;
+        }
+        NorthboundEvent ev = (NorthboundEvent) abstractEvent;
+        switch (ev.getAction()) {
+            case ADD:
+                // TODO  break;
+            case DELETE:
+                // TODO  break;
+            default:
+                logger.warn("Unable to process event action " + ev.getAction());
+                break;
+        }
     }
 }

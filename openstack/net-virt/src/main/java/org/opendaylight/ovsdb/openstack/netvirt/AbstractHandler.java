@@ -18,7 +18,9 @@ import org.slf4j.LoggerFactory;
 import java.net.HttpURLConnection;
 
 /**
- * Abstract class for utility functions used by neutron handlers.
+ * OpenStack related events originate from multiple north callbacks as well as south.
+ * This interface provides a layer of abstraction between the event dispatcher and the
+ * handlers.
  */
 public abstract class AbstractHandler {
 
@@ -56,5 +58,14 @@ public abstract class AbstractHandler {
         }
 
         return result;
+    }
+
+    /**
+     * Process the event.
+     *
+     * @param event the {@link org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent} event to be handled.
+     * @see org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher
+     */
+    public void processEvent(AbstractEvent abstractEvent) {
     }
 }

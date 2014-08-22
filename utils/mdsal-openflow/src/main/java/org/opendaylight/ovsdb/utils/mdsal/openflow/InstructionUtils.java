@@ -49,8 +49,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.I
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.GoToTableCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.WriteMetadataCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.apply.actions._case.ApplyActionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.go.to.table._case.GoToTableBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.write.metadata._case.WriteMetadataBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
@@ -716,6 +718,8 @@ public class InstructionUtils {
 
         ApplyActionsBuilder aab = new ApplyActionsBuilder();
         aab.setAction(actionList);
+        // Wrap our Apply Action in an Instruction
+        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
 
         return ib;
     }
@@ -742,6 +746,8 @@ public class InstructionUtils {
 
         ApplyActionsBuilder aab = new ApplyActionsBuilder();
         aab.setAction(actionList);
+        // Wrap our Apply Action in an Instruction
+        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
 
         return ib;
     }
@@ -767,6 +773,8 @@ public class InstructionUtils {
 
         ApplyActionsBuilder aab = new ApplyActionsBuilder();
         aab.setAction(actionList);
+        // Wrap our Apply Action in an Instruction
+        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
 
         return ib;
     }
@@ -792,10 +800,18 @@ public class InstructionUtils {
 
         ApplyActionsBuilder aab = new ApplyActionsBuilder();
         aab.setAction(actionList);
+        // Wrap our Apply Action in an Instruction
+        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
 
         return ib;
     }
 
+    /**
+     * Set the Tunnel EndpointIPv4 Source Address
+     * @param ib Map InstructionBuilder
+     * @param srcIp Ipv4Prefix source IP for the tunnel endpoint (TEP)
+     * @return instructionbuilder with new attributes
+     */
     public static InstructionBuilder createTunnelIpv4SrcInstructions(InstructionBuilder ib, Ipv4Prefix srcIp) {
 
         List<Action> actionList = new ArrayList<Action>();
@@ -818,11 +834,19 @@ public class InstructionUtils {
         // Resulting action is a per/flow src TEP (set_field:172.16.100.100->tun_src)
         ApplyActionsBuilder aab = new ApplyActionsBuilder();
         aab.setAction(actionList);
+        // Wrap our Apply Action in an Instruction
+        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
 
         return ib;
     }
 
-    public static InstructionBuilder createTunnelIpv4DstInstructions(InstructionBuilder ib, Ipv4Prefix srcIp) {
+    /**
+     * Set the Tunnel EndpointIPv4 Destination Address
+     * @param ib Map InstructionBuilder
+     * @param dstIp Ipv4Prefix destination IP for the tunnel endpoint (TEP)
+     * @return instructionbuilder with new attributes
+     */
+    public static InstructionBuilder createTunnelIpv4DstInstructions(InstructionBuilder ib, Ipv4Prefix dstIp) {
 
         List<Action> actionList = new ArrayList<Action>();
         ActionBuilder ab = new ActionBuilder();
@@ -832,7 +856,7 @@ public class InstructionUtils {
 
         // Add the new IPv4 object as the tunnel destination
         TunnelIpv4MatchBuilder tunnelIpv4MatchBuilder = new TunnelIpv4MatchBuilder();
-        tunnelIpv4MatchBuilder.setTunnelIpv4Destination(srcIp);
+        tunnelIpv4MatchBuilder.setTunnelIpv4Destination(dstIp);
         setFieldBuilder.setLayer3Match(tunnelIpv4MatchBuilder.build());
 
         // Add the IPv4 tunnel src to the set_field value
@@ -844,6 +868,37 @@ public class InstructionUtils {
         // Resulting action is a per/flow src TEP (set_field:172.16.100.100->tun_src)
         ApplyActionsBuilder aab = new ApplyActionsBuilder();
         aab.setAction(actionList);
+        // Wrap our Apply Action in an Instruction
+        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+
+        return ib;
+    }
+
+    /**
+     * Set IPv4 Source Address Instructions
+     * @param ib Map InstructionBuilder
+     * @param metaData BigInteger representing the OpenFlow metadata
+     * @param metaDataMask  BigInteger representing the OpenFlow metadata mask
+     * @return instructionbuilder with new attributes
+     */
+    public static InstructionBuilder createMetadataInstructions(InstructionBuilder ib, BigInteger metaData, BigInteger metaDataMask) {
+
+        WriteMetadataBuilder aab = new WriteMetadataBuilder();
+        aab.setMetadata(metaData);
+        aab.setMetadataMask(metaDataMask);
+        ib.setInstruction(new WriteMetadataCaseBuilder().setWriteMetadata(aab.build()).build());
+
+        /**
+        *
+        * TODO Determine why the following fails serialization
+        * with a null value. Per the spec it is optional.
+        * The metadata match, the Flowmod works w/o an accompanying mask.
+        *
+        * if (metaDataMask != null) {
+        *    aab.setMetadataMask(metaDataMask);
+        * }
+        *
+        */
 
         return ib;
     }

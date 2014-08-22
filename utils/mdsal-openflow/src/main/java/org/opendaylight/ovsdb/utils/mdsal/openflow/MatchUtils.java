@@ -27,6 +27,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.EthernetMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Icmpv4MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.IpMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.MetadataBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.TcpFlagMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.TunnelBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.VlanMatchBuilder;
@@ -344,6 +345,22 @@ public class MatchUtils {
         return matchBuilder;
     }
 
+    /**
+     * @return MatchBuilder containing the metadata match values
+     */
+    public static MatchBuilder createMetadataMatch(MatchBuilder matchBuilder, BigInteger metaData,  BigInteger metaDataMask) {
+
+        // metadata matchbuilder
+        MetadataBuilder metadata = new MetadataBuilder();
+        metadata.setMetadata(metaData);
+        // Optional metadata mask
+        if (metaDataMask != null) {
+            metadata.setMetadataMask(metaDataMask);
+        }
+        matchBuilder.setMetadata(metadata.build());
+
+        return matchBuilder;
+    }
 
     public static class RegMatch {
         final Class<? extends NxmNxReg> reg;

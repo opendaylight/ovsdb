@@ -31,6 +31,7 @@ public class FloatingIPHandler extends AbstractHandler
      */
     static final Logger logger = LoggerFactory.getLogger(FloatingIPHandler.class);
 
+    // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile OvsdbConfigurationService ovsdbConfigurationService;
     private volatile OvsdbConnectionService connectionService;
     private volatile OvsdbInventoryListener ovsdbInventoryListener;
@@ -121,5 +122,27 @@ public class FloatingIPHandler extends AbstractHandler
         logger.debug(" Floating IP deleted {}, uuid {}",
                      floatingIP.getFixedIPAddress(),
                      floatingIP.getFloatingIPUUID());
+    }
+
+    /**
+     * Process the event.
+     *
+     * @param abstractEvent the {@link org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent} event to be handled.
+     * @see EventDispatcher
+     */
+    @Override
+    public void processEvent(AbstractEvent abstractEvent) {
+        if (!(abstractEvent instanceof NorthboundEvent)) {
+            logger.error("Unable to process abstract event " + abstractEvent);
+            return;
+        }
+        NorthboundEvent ev = (NorthboundEvent) abstractEvent;
+        switch (ev.getAction()) {
+            // TODO: add handling of events here, once callbacks do something
+            //       other than logging.
+            default:
+                logger.warn("Unable to process event action " + ev.getAction());
+                break;
+        }
     }
 }

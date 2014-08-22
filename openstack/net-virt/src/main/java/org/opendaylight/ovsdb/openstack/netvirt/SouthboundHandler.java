@@ -35,18 +35,12 @@ import java.net.InetAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
-public class SouthboundHandler extends AbstractHandler implements OvsdbInventoryListener, IInventoryListener {
+public class SouthboundHandler extends AbstractHandler implements OvsdbInventoryListener,
+                                                                  IInventoryListener {
     static final Logger logger = LoggerFactory.getLogger(SouthboundHandler.class);
     //private Thread eventThread;
-    private ExecutorService eventHandler;
-    private BlockingQueue<SouthboundEvent> events;
     List<Node> nodeCache;
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
@@ -58,65 +52,11 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
     private volatile OvsdbConnectionService connectionService;
 
     void init() {
-        eventHandler = Executors.newSingleThreadExecutor();
-        this.events = new LinkedBlockingQueue<>();
         nodeCache = Lists.newArrayList();
     }
 
     void start() {
-        eventHandler.submit(new Runnable()  {
-            @Override
-            public void run() {
-                while (true) {
-                    SouthboundEvent ev;
-                    try {
-                        ev = events.take();
-                    } catch (InterruptedException e) {
-                        logger.info("The event handler thread was interrupted, shutting down", e);
-                        return;
-                    }
-                    switch (ev.getType()) {
-                    case NODE:
-                        try {
-                            processNodeUpdate(ev.getNode(), ev.getAction());
-                        } catch (Exception e) {
-                            logger.error("Exception caught in ProcessNodeUpdate for node " + ev.getNode(), e);
-                        }
-                        break;
-                    case ROW:
-                        try {
-                            processRowUpdate(ev.getNode(), ev.getTableName(), ev.getUuid(), ev.getRow(),
-                                             ev.getContext(),ev.getAction());
-                        } catch (Exception e) {
-                            logger.error("Exception caught in ProcessRowUpdate for node " + ev.getNode(), e);
-                        }
-                        break;
-                    default:
-                        logger.warn("Unable to process action " + ev.getAction() + " for node " + ev.getNode());
-                    }
-                }
-            }
-        });
         this.triggerUpdates();
-    }
-
-    void stop() {
-        // stop accepting new tasks
-        eventHandler.shutdown();
-        try {
-            // Wait a while for existing tasks to terminate
-            if (!eventHandler.awaitTermination(10, TimeUnit.SECONDS)) {
-                eventHandler.shutdownNow();
-                // Wait a while for tasks to respond to being cancelled
-                if (!eventHandler.awaitTermination(10, TimeUnit.SECONDS))
-                    logger.error("Southbound Event Handler did not terminate");
-            }
-        } catch (InterruptedException e) {
-            // (Re-)Cancel if current thread also interrupted
-            eventHandler.shutdownNow();
-            // Preserve interrupt status
-            Thread.currentThread().interrupt();
-        }
     }
 
     @Override
@@ -142,7 +82,7 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
     }
 
     /*
-     * Ignore unneccesary updates to be even considered for processing.
+     * Ignore unnecessary updates to be even considered for processing.
      * (Especially stats update are fast and furious).
      */
 
@@ -178,14 +118,6 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
     @Override
     public void rowRemoved(Node node, String tableName, String uuid, Row row, Object context) {
         this.enqueueEvent(new SouthboundEvent(node, tableName, uuid, row, context, SouthboundEvent.Action.DELETE));
-    }
-
-    private void enqueueEvent (SouthboundEvent event) {
-        try {
-            events.put(event);
-        } catch (InterruptedException e) {
-            logger.error("Thread was interrupted while trying to enqueue event ", e);
-        }
     }
 
     public void processNodeUpdate(Node node, SouthboundEvent.Action action) {
@@ -392,6 +324,42 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
             } catch (Exception e) {
                 logger.error("Exception during OVSDB Southbound update trigger", e);
             }
+        }
+    }
+
+    /**
+     * Process the event.
+     *
+     * @param abstractEvent the {@link org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent} event to be handled.
+     * @see EventDispatcher
+     */
+    @Override
+    public void processEvent(AbstractEvent abstractEvent) {
+        if (!(abstractEvent instanceof SouthboundEvent)) {
+            logger.error("Unable to process abstract event " + abstractEvent);
+            return;
+        }
+        SouthboundEvent ev = (SouthboundEvent) abstractEvent;
+        switch (ev.getType()) {
+            case NODE:
+                try {
+                    processNodeUpdate(ev.getNode(), ev.getAction());
+                } catch (Exception e) {
+                    logger.error("Exception caught in ProcessNodeUpdate for node " + ev.getNode(), e);
+                }
+                break;
+            case ROW:
+                try {
+                    processRowUpdate(ev.getNode(), ev.getTableName(), ev.getUuid(), ev.getRow(),
+                                     ev.getContext(),ev.getAction());
+                } catch (Exception e) {
+                    logger.error("Exception caught in ProcessRowUpdate for node " + ev.getNode(), e);
+                }
+                break;
+            default:
+                logger.warn("Unable to process type " + ev.getType() +
+                            " action " + ev.getAction() + " for node " + ev.getNode());
+                break;
         }
     }
 }

@@ -22,12 +22,15 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetAware;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
+import org.opendaylight.ovsdb.openstack.netvirt.api.EventHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.BridgeConfigurationManagerImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.ConfigurationServiceImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.EventDispatcherImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.ProviderNetworkManagerImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.TenantNetworkManagerImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.VlanConfigurationCacheImpl;
@@ -80,7 +83,8 @@ public class Activator extends ComponentActivatorAbstractBase {
                         RouterHandler.class,
                         SouthboundHandler.class,
                         PortSecurityHandler.class,
-                        ProviderNetworkManagerImpl.class};
+                        ProviderNetworkManagerImpl.class,
+                        EventDispatcherImpl.class};
         return res;
     }
 
@@ -172,7 +176,8 @@ public class Activator extends ComponentActivatorAbstractBase {
 
         if (imp.equals(SouthboundHandler.class)) {
             c.setInterface(new String[] {OvsdbInventoryListener.class.getName(),
-                                         IInventoryListener.class.getName()}, null);
+                                         IInventoryListener.class.getName(),
+                                         EventHandler.class.getName()}, null);
             c.add(createServiceDependency().setService(
                     org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService.class).setRequired(true));
             c.add(createServiceDependency().setService(BridgeConfigurationManager.class).setRequired(true));
@@ -180,6 +185,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency().setService(NetworkingProviderManager.class).setRequired(true));
             c.add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true));
             c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
+            c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
         }
 
         if (imp.equals(PortSecurityHandler.class)) {
@@ -195,6 +201,10 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency()
                     .setService(NetworkingProvider.class)
                     .setCallbacks("providerAdded", "providerRemoved"));
+        }
+
+        if (imp.equals(EventDispatcherImpl.class)) {
+            c.setInterface(EventDispatcher.class.getName(), null);
         }
     }
 }

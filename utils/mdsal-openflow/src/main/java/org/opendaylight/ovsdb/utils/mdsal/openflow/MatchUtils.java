@@ -340,7 +340,7 @@ public class MatchUtils {
         matchBuilder.setLayer4Match(tcpMatch.build());
 
         TcpFlagMatchBuilder tcpFlagMatch = new TcpFlagMatchBuilder();
-        tcpFlagMatch.setTcpFlag(0x002);
+        tcpFlagMatch.setTcpFlag(tcpFlag);
         matchBuilder.setTcpFlagMatch(tcpFlagMatch.build());
         return matchBuilder;
     }

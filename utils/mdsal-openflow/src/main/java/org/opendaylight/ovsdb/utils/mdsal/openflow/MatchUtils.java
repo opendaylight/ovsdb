@@ -312,6 +312,9 @@ public class MatchUtils {
     /**
      * Test match for TCP_Flags
      *
+     * @param matchBuilder MatchBuilder Object without a match yet
+     * @param tcpPort  PortNumber representing a destination TCP port
+     * @param tcpFlag  int representing a tcp_flag
      * @return match containing TCP_Flag (), IP Protocol (TCP), TCP_Flag (SYN)
      * <p/>
      * Defined TCP Flag values in OVS v2.1+
@@ -319,7 +322,7 @@ public class MatchUtils {
      * TCP_PSH 0x008 / TCP_ACK 0x010 / TCP_URG 0x020
      * TCP_ECE 0x040 / TCP_CWR 0x080 / TCP_NS  0x100
      */
-    public static MatchBuilder createTcpFlagMatch(MatchBuilder matchBuilder, int tcpFlag) {
+    public static MatchBuilder createTcpFlagMatch(MatchBuilder matchBuilder, PortNumber tcpPort, int tcpFlag) {
 
         // Ethertype match
         EthernetMatchBuilder ethernetType = new EthernetMatchBuilder();
@@ -334,13 +337,13 @@ public class MatchUtils {
         matchBuilder.setIpMatch(ipMatch.build());
 
         // TCP Port Match
-        PortNumber dstPort = new PortNumber(80);
+        PortNumber dstPort = new PortNumber(tcpPort);
         TcpMatchBuilder tcpMatch = new TcpMatchBuilder();
         tcpMatch.setTcpDestinationPort(dstPort);
         matchBuilder.setLayer4Match(tcpMatch.build());
 
         TcpFlagMatchBuilder tcpFlagMatch = new TcpFlagMatchBuilder();
-        tcpFlagMatch.setTcpFlag(0x002);
+        tcpFlagMatch.setTcpFlag(tcpFlag);
         matchBuilder.setTcpFlagMatch(tcpFlagMatch.build());
         return matchBuilder;
     }

@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_f7987b76",
+        "filename": "utils/mdsal-openflow/src/main/java/org/opendaylight/ovsdb/utils/mdsal/openflow/InstructionUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 893,
+      "author": {
+        "id": 207
+      },
+      "writtenOn": "2014-08-24T10:04:35Z",
+      "side": 1,
+      "message": "The spec explicitly states the mask for a metadata Match is optional. It is fairly ambiguous wrt to the Instruction. I re-read it and I reckon it is required unless you guys see something otherwise Im going to set it as required. Will need to see how this affects matching. \n\nOVS allows for the metadata only to be sent as an instruction like so:\nactions\u003dset_field:0x5a-\u003emetadata\n\nFrom the spec:\n\nOptional Instruction: Write-Metadata metadata / mask: Writes the masked metadata value into the metadata field. The mask specifies which bits of the metadata register should be modified (i.e. new metadata \u003d old metadata \u0026  ?mask | value \u0026 mask).\n\n\nMatch Field: a field against which a packet is matched, including packet headers, the ingress port, and the metadata value. A match field may be wildcarded (match any value) and in some cases bit masked.\n\nGoing to leave it as a todo unless you guys know definitively since OVS does accepts setting the metadata w/o mask.\n\nThanks for the review.\n-B",
+      "parentUuid": "fa82b9bf_210f8138",
+      "revId": "e9b29ede8a09d5b80b2042e65d2ad74830bf74ca",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_01003d00",
         "filename": "utils/mdsal-openflow/src/main/java/org/opendaylight/ovsdb/utils/mdsal/openflow/MatchUtils.java",
         "patchSetId": 1

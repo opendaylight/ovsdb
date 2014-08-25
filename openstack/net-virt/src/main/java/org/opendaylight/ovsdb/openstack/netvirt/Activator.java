@@ -11,6 +11,9 @@
 package org.opendaylight.ovsdb.openstack.netvirt;
 
 import org.opendaylight.controller.networkconfig.neutron.INeutronFloatingIPAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolMemberAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortAware;
@@ -34,7 +37,6 @@ import org.opendaylight.ovsdb.openstack.netvirt.impl.VlanConfigurationCacheImpl;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
-
 import org.apache.felix.dm.Component;
 
 /**
@@ -80,6 +82,7 @@ public class Activator extends ComponentActivatorAbstractBase {
                         RouterHandler.class,
                         SouthboundHandler.class,
                         PortSecurityHandler.class,
+                        LBaaSHandler.class,
                         ProviderNetworkManagerImpl.class};
         return res;
     }
@@ -180,6 +183,12 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency().setService(NetworkingProviderManager.class).setRequired(true));
             c.add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true));
             c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
+        }
+
+        if (imp.equals(LBaaSHandler.class)) {
+            c.setInterface(new String[] {INeutronLoadBalancerAware.class.getName(),
+                                         INeutronLoadBalancerPoolAware.class.getName(),
+                                         INeutronLoadBalancerPoolMemberAware.class.getName()}, null);
         }
 
         if (imp.equals(PortSecurityHandler.class)) {

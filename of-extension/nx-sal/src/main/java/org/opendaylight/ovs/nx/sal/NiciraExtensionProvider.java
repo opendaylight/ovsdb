@@ -16,11 +16,13 @@ import org.opendaylight.openflowjava.nx.api.NiciraUtil;
 import org.opendaylight.ovs.nx.sal.convertor.action.ResubmitConvertor;
 import org.opendaylight.ovs.nx.sal.convertor.action.SetNsiConvertor;
 import org.opendaylight.ovs.nx.sal.convertor.action.SetNspConvertor;
+import org.opendaylight.ovs.nx.sal.convertor.action.MultipathConvertor;
 import org.opendaylight.ovs.nx.sal.convertor.match.NspConvertor;
 import org.opendaylight.ovs.nx.sal.convertor.match.NsiConvertor;
 import org.opendaylight.ovs.nx.ofjava.codec.action.ResubmitCodec;
 import org.opendaylight.ovs.nx.ofjava.codec.action.SetNsiCodec;
 import org.opendaylight.ovs.nx.ofjava.codec.action.SetNspCodec;
+import org.opendaylight.ovs.nx.ofjava.codec.action.MultipathCodec;
 import org.opendaylight.ovs.nx.ofjava.codec.match.NspCodec;
 import org.opendaylight.ovs.nx.ofjava.codec.match.NsiCodec;
 import org.opendaylight.openflowjava.protocol.api.util.EncodeConstants;
@@ -56,6 +58,15 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.remove.group.input.buckets.bucket.action.action.NxActionSetNsiRpcRemoveGroupCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.update.group.input.original.group.buckets.bucket.action.action.NxActionSetNsiRpcUpdateGroupOriginalCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.update.group.input.updated.group.buckets.bucket.action.action.NxActionSetNsiRpcUpdateGroupUpdatedCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.add.flow.input.instructions.instruction.instruction.apply.actions._case.apply.actions.action.action.NxActionMultipathRpcAddFlowApplyActionsCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.add.flow.input.instructions.instruction.instruction.write.actions._case.write.actions.action.action.NxActionMultipathRpcAddFlowWriteActionsCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.add.group.input.buckets.bucket.action.action.NxActionMultipathRpcAddGroupCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nodes.node.group.buckets.bucket.action.action.NxActionMultipathNodesNodeGroupBucketsBucketActionsCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nodes.node.table.flow.instructions.instruction.instruction.apply.actions._case.apply.actions.action.action.NxActionMultipathNodesNodeTableFlowApplyActionsCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nodes.node.table.flow.instructions.instruction.instruction.write.actions._case.write.actions.action.action.NxActionMultipathNodesNodeTableFlowWriteActionsCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.remove.group.input.buckets.bucket.action.action.NxActionMultipathRpcRemoveGroupCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.update.group.input.original.group.buckets.bucket.action.action.NxActionMultipathRpcUpdateGroupOriginalCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.update.group.input.updated.group.buckets.bucket.action.action.NxActionMultipathRpcUpdateGroupUpdatedCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.NxmNxNspKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.NxmNxNsiKey;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
@@ -75,6 +86,7 @@ public class NiciraExtensionProvider implements AutoCloseable {
     private final static ResubmitConvertor RESUBMIT_CONVERTOR = new ResubmitConvertor();
     private final static SetNspConvertor SET_NSP_CONVERTOR = new SetNspConvertor();
     private final static SetNsiConvertor SET_NSI_CONVERTOR = new SetNsiConvertor();
+    private final static MultipathConvertor MULTIPATH_CONVERTOR = new MultipathConvertor();
     private final static NspConvertor NSP_CONVERTOR = new NspConvertor();
     private final static NsiConvertor NSI_CONVERTOR = new NsiConvertor();
 
@@ -123,6 +135,19 @@ public class NiciraExtensionProvider implements AutoCloseable {
         registerAction13(NxActionSetNspRpcUpdateGroupOriginalCase.class, SET_NSP_CONVERTOR);
         registerAction13(NxActionSetNspRpcUpdateGroupUpdatedCase.class, SET_NSP_CONVERTOR);
 
+
+        registerAction13(NxActionMultipathNodesNodeTableFlowApplyActionsCase.class, MULTIPATH_CONVERTOR);
+        registerAction13(NxActionMultipathNodesNodeTableFlowWriteActionsCase.class, MULTIPATH_CONVERTOR);
+        registerAction13(NxActionMultipathNodesNodeGroupBucketsBucketActionsCase.class, MULTIPATH_CONVERTOR);
+
+
+        registerAction13(NxActionMultipathRpcAddFlowApplyActionsCase.class, MULTIPATH_CONVERTOR);
+        registerAction13(NxActionMultipathRpcAddFlowWriteActionsCase.class, MULTIPATH_CONVERTOR);
+        registerAction13(NxActionMultipathRpcAddGroupCase.class, MULTIPATH_CONVERTOR);
+        registerAction13(NxActionMultipathRpcRemoveGroupCase.class, MULTIPATH_CONVERTOR);
+        registerAction13(NxActionMultipathRpcUpdateGroupOriginalCase.class, MULTIPATH_CONVERTOR);
+        registerAction13(NxActionMultipathRpcUpdateGroupUpdatedCase.class, MULTIPATH_CONVERTOR);
+
         registerAction13(NxActionSetNsiNodesNodeTableFlowApplyActionsCase.class, SET_NSI_CONVERTOR);
         registerAction13(NxActionSetNsiNodesNodeTableFlowWriteActionsCase.class, SET_NSI_CONVERTOR);
         registerAction13(NxActionSetNsiNodesNodeGroupBucketsBucketActionsCase.class, SET_NSI_CONVERTOR);
@@ -138,6 +163,7 @@ public class NiciraExtensionProvider implements AutoCloseable {
         registrations.add(extensionConverterRegistrator.registerActionConvertor(NiciraUtil.createOfJavaKeyFrom(ResubmitCodec.SERIALIZER_KEY), RESUBMIT_CONVERTOR));
         registrations.add(extensionConverterRegistrator.registerActionConvertor(NiciraUtil.createOfJavaKeyFrom(SetNspCodec.SERIALIZER_KEY), SET_NSP_CONVERTOR));
         registrations.add(extensionConverterRegistrator.registerActionConvertor(NiciraUtil.createOfJavaKeyFrom(SetNsiCodec.SERIALIZER_KEY), SET_NSI_CONVERTOR));
+        registrations.add(extensionConverterRegistrator.registerActionConvertor(NiciraUtil.createOfJavaKeyFrom(MultipathCodec.SERIALIZER_KEY), MULTIPATH_CONVERTOR));
 
         registrations.add(extensionConverterRegistrator.registerMatchConvertor(new ConverterExtensionKey<>(NxmNxNspKey.class, EncodeConstants.OF13_VERSION_ID), NSP_CONVERTOR));
         registrations.add(extensionConverterRegistrator.registerMatchConvertor(NspCodec.SERIALIZER_KEY, NSP_CONVERTOR));

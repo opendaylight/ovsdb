@@ -47,14 +47,17 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.ni
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.src.choice.grouping.src.choice.SrcNxRegCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.src.choice.grouping.src.choice.SrcOfArpSpaCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.src.choice.grouping.src.choice.SrcOfEthSrcCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.action.rev140421.OfjNxHashFields;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.action.rev140421.OfjNxMpAlgorithm;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nodes.node.table.flow.instructions.instruction.instruction.apply.actions._case.apply.actions.action.action.NxActionMultipathNodesNodeTableFlowApplyActionsCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nodes.node.table.flow.instructions.instruction.instruction.apply.actions._case.apply.actions.action.action.NxActionResubmitNodesNodeTableFlowApplyActionsCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nx.action.multipath.grouping.NxMultipath;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nx.action.multipath.grouping.NxMultipathBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nx.action.resubmit.grouping.NxResubmit;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nx.action.resubmit.grouping.NxResubmitBuilder;
-
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nodes.node.table.flow.instructions.instruction.instruction.apply.actions._case.apply.actions.action.action.NxActionSetNspNodesNodeTableFlowApplyActionsCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nx.action.set.nsp.grouping.NxSetNsp;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nx.action.set.nsp.grouping.NxSetNspBuilder;
-
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nodes.node.table.flow.instructions.instruction.instruction.apply.actions._case.apply.actions.action.action.NxActionSetNsiNodesNodeTableFlowApplyActionsCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nx.action.set.nsi.grouping.NxSetNsi;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nx.action.set.nsi.grouping.NxSetNsiBuilder;
@@ -281,5 +284,26 @@ public final class ActionUtils {
         return new NxActionSetNsiNodesNodeTableFlowApplyActionsCaseBuilder().setNxSetNsi(r).build();
     }
 
+    public static Action nxMultipathAction(OfjNxHashFields fields, Integer basis,
+            OfjNxMpAlgorithm algorithm, Integer maxLink, Long arg) {
+        NxMultipathBuilder builder = new NxMultipathBuilder();
+        if (fields != null) {
+            builder.setFields(fields);
+        }
+        if (basis != null) {
+            builder.setBasis(basis);
+        }
+        if (algorithm != null) {
+            builder.setAlgorithm(algorithm);
+        }
+        if (maxLink != null) {
+            builder.setMaxLink(maxLink);
+        }
+        if (arg != null) {
+            builder.setArg(arg);
+        }
+        NxMultipath r = builder.build();
+        return new NxActionMultipathNodesNodeTableFlowApplyActionsCaseBuilder().setNxMultipath(r).build();
+    }
 }
 

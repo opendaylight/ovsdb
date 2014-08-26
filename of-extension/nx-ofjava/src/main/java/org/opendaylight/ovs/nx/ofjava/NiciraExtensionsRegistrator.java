@@ -13,6 +13,7 @@ import org.opendaylight.ovs.nx.ofjava.codec.action.NiciraActionCodecs;
 import org.opendaylight.ovs.nx.ofjava.codec.action.ResubmitCodec;
 import org.opendaylight.ovs.nx.ofjava.codec.action.SetNsiCodec;
 import org.opendaylight.ovs.nx.ofjava.codec.action.SetNspCodec;
+import org.opendaylight.ovs.nx.ofjava.codec.action.MultipathCodec;
 import org.opendaylight.ovs.nx.ofjava.codec.match.NiciraMatchCodecs;
 import org.opendaylight.ovs.nx.ofjava.codec.match.NspCodec;
 import org.opendaylight.ovs.nx.ofjava.codec.match.NsiCodec;
@@ -38,6 +39,9 @@ public class NiciraExtensionsRegistrator implements AutoCloseable {
         registrator.registerActionDeserializer(SetNsiCodec.DESERIALIZER_KEY, NiciraActionCodecs.SET_NSI_CODEC);
         registrator.registerActionSerializer(SetNsiCodec.SERIALIZER_KEY, NiciraActionCodecs.SET_NSI_CODEC);
 
+        registrator.registerActionDeserializer(MultipathCodec.DESERIALIZER_KEY, NiciraActionCodecs.MULTIPATH_CODEC);
+        registrator.registerActionSerializer(MultipathCodec.SERIALIZER_KEY, NiciraActionCodecs.MULTIPATH_CODEC);
+
         registrator.registerMatchEntrySerializer(NspCodec.SERIALIZER_KEY, NiciraMatchCodecs.NSP_CODEC);
         registrator.registerMatchEntryDeserializer(NspCodec.DESERIALIZER_KEY, NiciraMatchCodecs.NSP_CODEC);
 
@@ -54,6 +58,8 @@ public class NiciraExtensionsRegistrator implements AutoCloseable {
         registrator.unregisterActionSerializer(SetNsiCodec.SERIALIZER_KEY);
         registrator.unregisterActionDeserializer(SetNspCodec.DESERIALIZER_KEY);
         registrator.unregisterActionSerializer(SetNspCodec.SERIALIZER_KEY);
+        registrator.unregisterActionDeserializer(MultipathCodec.DESERIALIZER_KEY);
+        registrator.unregisterActionSerializer(MultipathCodec.SERIALIZER_KEY);
 
         registrator.unregisterMatchEntrySerializer(NspCodec.SERIALIZER_KEY);
         registrator.unregisterMatchEntryDeserializer(NspCodec.DESERIALIZER_KEY);

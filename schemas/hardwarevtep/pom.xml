@@ -119,6 +119,7 @@
                 *</Import-Package>
             <Embed-Transitive>true</Embed-Transitive>
             <Export-Package>org.opendaylight.ovsdb.schema.hardwarevtep</Export-Package>
+            <Bundle-Activator>org.opendaylight.ovsdb.schema.hardwarevtep.internal.Activator</Bundle-Activator>
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>

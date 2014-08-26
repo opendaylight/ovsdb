@@ -47,7 +47,9 @@ import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
+import org.opendaylight.ovsdb.lib.schema.typed.SchemaService;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
+import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
 import org.opendaylight.ovsdb.plugin.api.Connection;
 import org.opendaylight.ovsdb.plugin.api.OvsVswitchdSchemaConstants;
@@ -68,6 +70,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
 
 public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigService,
@@ -150,6 +153,34 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
     public void unsetClusterServices(IClusterGlobalServices i) {
         if (this.clusterServices == i) {
             this.clusterServices = null;
+        }
+    }
+
+    private ConcurrentMap<String, SchemaService> schemaServices = Maps.newConcurrentMap();
+    void setSchemaService (Map props, SchemaService s) {
+        logger.info("REGISTERING SCHEMA "+props.toString()+" : "+s.toString());
+        String type = null;
+        Object value = props.get(TyperUtils.DATABASE_NAME.toString());
+        if (value instanceof String) {
+            type = (String) value;
+        }
+        if (type == null) {
+            logger.error("Received a SchemaService without any "+ "DATABASE_NAME provided");
+        } else {
+            this.schemaServices.put(type, s);
+        }
+    }
+
+    void unsetSchemaService (Map props, SchemaService s) {
+        String type = null;
+        Object value = props.get(TyperUtils.DATABASE_NAME.toString());
+        if (value instanceof String) {
+            type = (String) value;
+        }
+        if (type == null) {
+            logger.error("Received a SchemaService without any "+ "DATABASE_NAME provided");
+        } else if (this.schemaServices.get(type).equals(s)) {
+            this.schemaServices.remove(type);
         }
     }
 

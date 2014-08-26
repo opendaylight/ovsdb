@@ -29,6 +29,7 @@ import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import com.google.common.reflect.Reflection;
 
 public class TyperUtils {
+    public static String DATABASE_NAME = "DATABASE_NAME";
     private static final String GET_STARTS_WITH="get";
     private static final String SET_STARTS_WITH="set";
     private static final String GETCOLUMN_ENDS_WITH="Column";

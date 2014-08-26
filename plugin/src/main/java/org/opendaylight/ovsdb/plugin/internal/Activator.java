@@ -26,6 +26,7 @@ import org.opendaylight.controller.sal.utils.INodeConnectorFactory;
 import org.opendaylight.controller.sal.utils.INodeFactory;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
+import org.opendaylight.ovsdb.lib.schema.typed.SchemaService;
 import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 import org.opendaylight.ovsdb.plugin.InventoryServiceInternal;
 import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
@@ -38,7 +39,6 @@ import org.opendaylight.ovsdb.plugin.impl.ConnectionServiceImpl;
 import org.opendaylight.ovsdb.plugin.impl.InventoryServiceImpl;
 import org.opendaylight.ovsdb.plugin.impl.NodeConnectorFactory;
 import org.opendaylight.ovsdb.plugin.impl.NodeFactory;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,6 +97,10 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency()
                     .setService(OvsdbInventoryService.class)
                     .setRequired(true));
+            c.add(createServiceDependency()
+                    .setService(SchemaService.class)
+                    .setCallbacks("setSchemaService", "unsetSchemaService")
+                    .setRequired(false));
             c.add(createServiceDependency()
                     .setService(IClusterGlobalServices.class)
                     .setCallbacks("setClusterServices", "unsetClusterServices")

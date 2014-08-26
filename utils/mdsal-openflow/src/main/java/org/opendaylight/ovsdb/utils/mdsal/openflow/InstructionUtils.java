@@ -945,4 +945,24 @@ public class InstructionUtils {
         return getInstructions(applyActionIns(dropAction()));
     }
 
+    /**
+     * Get a list of Instructions containing Nicira extensions that can have
+     * additional OF/OXM instructions added to the returned Instruction list
+     *
+     * @param instructions org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instructions
+     * @return instruction list that additional
+     */
+    public static List<Instruction> getInstructionList(
+            org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.Instruction... instructions) {
+        ArrayList<org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction> ins
+                = new ArrayList<>();
+        int order = 0;
+        for (org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.Instruction i : instructions) {
+            ins.add(new InstructionBuilder()
+                    .setOrder(order++)
+                    .setInstruction(i)
+                    .build());
+        }
+        return ins;
+    }
 }

@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_1d389dd1",
+        "filename": "of-extension/nx-ofjava/src/main/java/org/opendaylight/ovs/nx/ofjava/codec/action/MultipathCodec.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-26T12:10:48Z",
+      "side": 1,
+      "message": "You may want to change this :-)",
+      "revId": "b8500ac45d4cbda12c097b96fe3a4af7af93ab27",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_7d50c90a",
+        "filename": "of-extension/nx-sal/src/main/java/org/opendaylight/ovs/nx/sal/convertor/action/MultipathConvertor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-26T12:10:48Z",
+      "side": 1,
+      "message": "Same here",
+      "revId": "b8500ac45d4cbda12c097b96fe3a4af7af93ab27",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

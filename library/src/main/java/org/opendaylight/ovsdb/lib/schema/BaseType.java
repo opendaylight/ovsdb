@@ -12,6 +12,7 @@ package org.opendaylight.ovsdb.lib.schema;
 import java.util.Set;
 
 import org.opendaylight.ovsdb.lib.error.TyperException;
+import org.opendaylight.ovsdb.lib.notation.ReferencedRow;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -478,6 +479,14 @@ public abstract class BaseType<E extends BaseType<E>> {
                         return new UUID(value.get(1).asText());
                     }
                 }
+            } else {
+                /*
+                 * UUIDBaseType used by RefTable from SouthBound will always be an Array of ["uuid", <uuid>].
+                 * But there are some cases from northbound where the RefTable type can be expanded to a Row
+                 * with contents. In those scenarios, just retain the content and return a ReferencedRow for
+                 * the upper layer functions to process it.
+                 */
+                return new ReferencedRow(refTable, value);
             }
             return null;
         }

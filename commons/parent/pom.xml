@@ -262,6 +262,11 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.ovsdb</groupId>
+        <artifactId>plugin-shell</artifactId>
+        <version>${plugin.shell.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.ovsdb</groupId>
         <artifactId>openstack.net-virt</artifactId>
         <version>${openstack.netvirt.version}</version>
       </dependency>

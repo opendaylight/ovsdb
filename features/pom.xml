@@ -59,6 +59,10 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>plugin-shell</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>schema.openvswitch</artifactId>
     </dependency>
     <dependency>

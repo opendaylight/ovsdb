@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_4ef509eb",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/AbstractEvent.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-08-27T11:54:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_ae6055cf",
+      "revId": "f33127cdd5eced7b93e383e28d89fce531e90d31",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_ee6addb1",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/AbstractHandler.java",
         "patchSetId": 7
@@ -30,6 +48,24 @@
       "writtenOn": "2014-08-27T11:23:05Z",
       "side": 1,
       "message": "This should be volatile as it needs to be synchronised across threads",
+      "revId": "f33127cdd5eced7b93e383e28d89fce531e90d31",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_aee5b538",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/AbstractHandler.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-08-27T11:54:12Z",
+      "side": 1,
+      "message": "YES! thanks for catching that.",
+      "parentUuid": "fa82b9bf_ee6addb1",
       "revId": "f33127cdd5eced7b93e383e28d89fce531e90d31",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_cee03928",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/FloatingIPHandler.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-08-27T11:54:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_eeb17d47",
+      "revId": "f33127cdd5eced7b93e383e28d89fce531e90d31",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_8e88f171",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/NetworkHandler.java",
         "patchSetId": 7
@@ -64,6 +118,24 @@
       "writtenOn": "2014-08-27T11:23:05Z",
       "side": 1,
       "message": "Same here",
+      "revId": "f33127cdd5eced7b93e383e28d89fce531e90d31",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_aebcd506",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/NetworkHandler.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-08-27T11:54:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_8e88f171",
       "revId": "f33127cdd5eced7b93e383e28d89fce531e90d31",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_ceb7d91f",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SubnetHandler.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-08-27T11:54:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_ae8e1577",
+      "revId": "f33127cdd5eced7b93e383e28d89fce531e90d31",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_ce891970",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/Constants.java",
         "patchSetId": 7
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_ce4ef937",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/Constants.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-08-27T11:54:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_ce891970",
+      "revId": "f33127cdd5eced7b93e383e28d89fce531e90d31",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_8eef911d",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/EventDispatcherImpl.java",
         "patchSetId": 7
@@ -115,6 +223,24 @@
       "writtenOn": "2014-08-27T11:23:05Z",
       "side": 1,
       "message": "Not sure this needs to be volatile as the events are added here by the callbacks...",
+      "revId": "f33127cdd5eced7b93e383e28d89fce531e90d31",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6e61eda7",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/EventDispatcherImpl.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-08-27T11:54:12Z",
+      "side": 1,
+      "message": "that is true. the volatile was added before the whiteboard changes.\ndone.",
+      "parentUuid": "fa82b9bf_8eef911d",
       "revId": "f33127cdd5eced7b93e383e28d89fce531e90d31",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

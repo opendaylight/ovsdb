@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_03ccba87",
+        "filename": "of-extension/nx-ofjava/src/main/java/org/opendaylight/ovs/nx/ofjava/codec/action/MultipathCodec.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-27T02:19:00Z",
+      "side": 1,
+      "message": "Please fix the Copyright appropriately :)",
+      "revId": "508e84932579334de5048fe3356dbc6655c6a4ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_a3c62e66",
+        "filename": "of-extension/nx-sal/src/main/java/org/opendaylight/ovs/nx/sal/convertor/action/MultipathConvertor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-27T02:19:00Z",
+      "side": 1,
+      "message": "Same here.",
+      "revId": "508e84932579334de5048fe3356dbc6655c6a4ac",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

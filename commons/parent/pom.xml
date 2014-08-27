@@ -36,6 +36,7 @@
     <!-- Skip Coverage and IT by default -->
     <skip.coverage>true</skip.coverage>
     <skip.integrationtest>true</skip.integrationtest>
+    <skip.karaf>true</skip.karaf>
     <skip.distribution>false</skip.distribution>
     <!-- The directory where maven was executed -->
     <root.directory>${env.PWD}</root.directory>
@@ -591,6 +592,15 @@
       <properties>
         <skip.distribution>true</skip.distribution>
         <root.directory>${env.WORKSPACE}</root.directory>
+      </properties>
+    </profile>
+    <profile>
+      <id>karaf</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <properties>
+        <skip.karaf>false</skip.karaf>
       </properties>
     </profile>
   </profiles>

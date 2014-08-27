@@ -33,6 +33,7 @@
     <schema.openvswitch.version>1.0.0-SNAPSHOT</schema.openvswitch.version>
     <schema.hardwarevtep.version>1.0.0-SNAPSHOT</schema.hardwarevtep.version>
     <ovsdb.ofextension.version>1.0.0-SNAPSHOT</ovsdb.ofextension.version>
+    <ovsdb.ovssfc.version>0.0.1-SNAPSHOT</ovsdb.ovssfc.version>
     <!-- Skip Coverage and IT by default -->
     <skip.coverage>true</skip.coverage>
     <skip.integrationtest>true</skip.integrationtest>
@@ -74,6 +75,7 @@
     <karaf.shell.version>3.0.0</karaf.shell.version>
     <odl.karaf.base.version>1.4.2-SNAPSHOT</odl.karaf.base.version>
     <nsf.version>0.4.2-SNAPSHOT</nsf.version>
+    <sfc-model.version>0.0.1-SNAPSHOT</sfc-model.version>
   </properties>
 
   <dependencyManagement>
@@ -262,6 +264,11 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.ovsdb</groupId>
+        <artifactId>ovssfc</artifactId>
+        <version>${ovsdb.ovssfc.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.ovsdb</groupId>
         <artifactId>openstack.net-virt</artifactId>
         <version>${openstack.netvirt.version}</version>
       </dependency>
@@ -299,6 +306,11 @@
         <groupId>org.opendaylight.ovsdb</groupId>
         <artifactId>of-extension.nx-sal</artifactId>
         <version>${ovsdb.ofextension.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.sfc</groupId>
+        <artifactId>sfc-model</artifactId>
+        <version>${sfc-model.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -450,7 +462,7 @@
             <dependency>
               <groupId>org.opendaylight.yangtools</groupId>
               <artifactId>maven-sal-api-gen-plugin</artifactId>
-              <version>0.6.2-SNAPSHOT</version>
+              <version>${yangtools.version}</version>
               <type>jar</type>
             </dependency>
           </dependencies>

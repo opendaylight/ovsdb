@@ -25,12 +25,12 @@ public class SffDataListener extends AbstractDataListener {
 
     public SffDataListener (DataBroker dataBroker) {
         setDataBroker(dataBroker);
-        setIID(InstanceIdentifier.builder(ServiceFunctionForwarders.class).build());
+        setIID(InstanceIdentifierUtils.createServiceFunctionForwardersPath());
         registerAsDataChangeListener();
     }
 
     @Override
-    public void onDataChanged(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change ) {
+    public void onDataChanged (final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change ) {
         logger.trace("\nOVSSFC Enter: {}", Thread.currentThread().getStackTrace()[1]);
 
         Map<InstanceIdentifier<?>, DataObject> dataCreatedObject = change.getCreatedData();

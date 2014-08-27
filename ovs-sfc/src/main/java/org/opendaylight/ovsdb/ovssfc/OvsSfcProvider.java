@@ -15,27 +15,43 @@ import org.slf4j.LoggerFactory;
 
 public class OvsSfcProvider implements AutoCloseable {
     private static final Logger logger = LoggerFactory.getLogger(OvsSfcProvider.class);
+    private static OvsSfcProvider ovsSfcProvider;
     private DataBroker dataBroker;
     private SfcDataListener sfcDataListener;
     private SffDataListener sffDataListener;
     private SfpDataListener sfpDataListener;
+    protected SfpHandler sfp;
+    protected EventHandler eventHandler;
 
-    public OvsSfcProvider(DataBroker dataBroker) {
+    public OvsSfcProvider (DataBroker dataBroker) {
+        ovsSfcProvider = this;
         setDataBroker(dataBroker);
 
         sfcDataListener = new SfcDataListener(dataBroker);
         sffDataListener = new SffDataListener(dataBroker);
         sfpDataListener = new SfpDataListener(dataBroker);
+        sfp = new SfpHandler();
+        eventHandler = new EventHandler();
+        eventHandler.init();
+        eventHandler.start();
 
         logger.info("Initialized");
     }
 
-    public void setDataBroker(DataBroker dataBroker) {
+    public void setDataBroker (DataBroker dataBroker) {
         this.dataBroker = dataBroker;
     }
 
+    public DataBroker getDataBroker () {
+        return this.dataBroker;
+    }
+
+    public static OvsSfcProvider getOvsSfcProvider () {
+        return OvsSfcProvider.ovsSfcProvider;
+    }
+
     @Override
-    public void close() throws Exception {
+    public void close () throws Exception {
         sfcDataListener.closeDataChangeListener();
         sffDataListener.closeDataChangeListener();
         sfpDataListener.closeDataChangeListener();

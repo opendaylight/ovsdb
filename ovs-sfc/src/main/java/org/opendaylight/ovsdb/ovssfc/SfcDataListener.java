@@ -21,14 +21,14 @@ import java.util.Map;
 public class SfcDataListener extends AbstractDataListener {
     private static final Logger logger = LoggerFactory.getLogger(SfcDataListener.class);
 
-    public SfcDataListener(DataBroker dataBroker) {
+    public SfcDataListener (DataBroker dataBroker) {
         setDataBroker(dataBroker);
-        setIID(InstanceIdentifier.builder(ServiceFunctionChains.class).build());
+        setIID(InstanceIdentifierUtils.createServiceFunctionChainsPath());
         registerAsDataChangeListener();
     }
 
     @Override
-    public void onDataChanged(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change ) {
+    public void onDataChanged (final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change ) {
         logger.trace("\nOVSSFC Enter: {}", Thread.currentThread().getStackTrace()[1]);
 
         Map<InstanceIdentifier<?>, DataObject> dataCreatedObject = change.getCreatedData();
@@ -37,7 +37,7 @@ public class SfcDataListener extends AbstractDataListener {
         for (Map.Entry<InstanceIdentifier<?>, DataObject> entry : dataUpdatedConfigurationObject.entrySet()) {
             if (entry.getValue() instanceof ServiceFunctionChains) {
                 ServiceFunctionChains updatedServiceFunctionChains = (ServiceFunctionChains) entry.getValue();
-                logger.trace("\nOVSSFC sfp:\n   {}", updatedServiceFunctionChains.toString());
+                logger.trace("\nOVSSFC sfc:\n   {}", updatedServiceFunctionChains.toString());
             }
         }
 

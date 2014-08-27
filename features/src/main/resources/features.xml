@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <features name="ovsdb-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+    <repository>mvn:org.opendaylight.controller/features-base/${odl.karaf.base.version}/xml/features</repository>
+    <repository>mvn:org.opendaylight.controller/features-adsal/${sal.version}/xml/features</repository>
+    <repository>mvn:org.opendaylight.controller/features-nsf/${nsf.version}/xml/features</repository>
+
     <feature name="odl-ovsdb-all" description="OpenDaylight :: OVSDB :: all" version='${project.version}'>
         <feature version="${ovsdb.library.version}">odl-ovsdb-library</feature>
         <feature version="${ovsdb.plugin.version}">odl-ovsdb-plugin</feature>
         <feature version="${ovsdb.northbound.version}">odl-ovsdb-northbound</feature>
-        <!--
-        <feature version="${ovsdb.openstack.netvirt.version}">odl-ovsdb-openstack</feature>
-        -->
     </feature>
 
     <feature name="odl-ovsdb-library" description="OVSDB :: Library" version='${ovsdb.library.version}'>
-        <feature>base-all</feature>
+        <feature version="${odl.karaf.base.version}">odl-base-all</feature>
         <bundle>mvn:com.google.code.gson/gson/${gson.version}</bundle>
         <bundle>mvn:org.opendaylight.ovsdb/library/${ovsdb.library.version}</bundle>
     </feature>
@@ -36,15 +37,7 @@
 
     <feature name="odl-ovsdb-northbound" description="OpenDaylight :: OVSDB :: Northbound" version='${ovsdb.northbound.version}'>
         <feature version="${ovsdb.plugin.version}">odl-ovsdb-plugin</feature>
-        <feature>odl-adsal-northbound</feature>
+        <feature version="${nsf.version}">odl-adsal-northbound</feature>
         <bundle>mvn:org.opendaylight.ovsdb/northbound/${ovsdb.northbound.version}</bundle>
     </feature>
-
-<!--
-    <feature name="odl-ovsdb-openstack" description="OpenDaylight :: OVSDB :: OpenStack Network Virtualization" version='${ovsdb.openstack.netvirt.version}'>
-        <feature version="${ovsdb.plugin.version}">odl-ovsdb-plugin</feature>
-        <bundle>mvn:org.opendaylight.ovsdb/net-virt/${ovsdb.openstack.netvirt.version}</bundle>
-        <bundle>mvn:org.opendaylight.ovsdb/net-virt-providers/${ovsdb.openstack.netvirt.providers.version}</bundle>
-    </feature>
--->
 </features>

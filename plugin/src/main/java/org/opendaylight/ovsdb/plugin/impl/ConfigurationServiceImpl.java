@@ -1176,15 +1176,27 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
     }
 
     @Override
+    public UUID insertRow(Node node, String databaseName, String tableName, String parentTable, UUID parentUuid,
+                          String parentColumn, Row<GenericTableSchema> row) throws OvsdbPluginException {
+        throw new OvsdbPluginException("Not implemented Yet");
+    }
+
+    @Override
     public UUID insertRow(Node node, String databaseName, String tableName,
-            UUID parentUuid, Row<GenericTableSchema> row)
+            UUID parentRowUuid, Row<GenericTableSchema> row)
             throws OvsdbPluginException {
         throw new OvsdbPluginException("Not implemented Yet");
     }
 
     @Override
+    public Row<GenericTableSchema> insertTree(Node node, String databaseName, String tableName, String parentTable, UUID parentRowUuid,
+                                              String parentColumn, Row<GenericTableSchema> row) throws OvsdbPluginException {
+        throw new OvsdbPluginException("Not implemented Yet");
+    }
+
+    @Override
     public Row<GenericTableSchema> insertTree(Node node, String databaseName,
-            String tableName, UUID parentUuid, Row<GenericTableSchema> row)
+            String tableName, UUID parentRowUuid, Row<GenericTableSchema> row)
             throws OvsdbPluginException {
         throw new OvsdbPluginException("Not implemented Yet");
     }
@@ -1197,10 +1209,15 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
     }
 
     @Override
+    public void deleteRow(Node node, String databaseName, String tableName, String parentTable, UUID parentRowUuid,
+            String parentColumn, UUID rowUuid) throws OvsdbPluginException {
+        throw new OvsdbPluginException("Not implemented Yet");
+    }
+
+    @Override
     public void deleteRow(Node node, String databaseName, String tableName,
             UUID rowUuid) throws OvsdbPluginException {
         throw new OvsdbPluginException("Not implemented Yet");
-
     }
 
     @Override

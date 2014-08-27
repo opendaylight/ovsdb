@@ -20,6 +20,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -47,7 +48,6 @@ import org.opendaylight.ovsdb.plugin.api.OvsVswitchdSchemaConstants;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.plugin.api.StatusWithUuid;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -408,7 +408,7 @@ public class OvsdbNorthboundV2 {
     @StatusCodes({ @ResponseCode(code = 200, condition = "Row Updated successfully"),
         @ResponseCode(code = 400, condition = "Invalid data passed"),
         @ResponseCode(code = 401, condition = "User not authorized to perform this operation")})
-    @Consumes({ MediaType.APPLICATION_JSON})
+    @Produces({ MediaType.APPLICATION_JSON})
     @TypeHint(Row.class)
     public Row getRow(@PathParam("nodeType") String nodeType, @PathParam("nodeId") String nodeId,
                            @PathParam("tableName") String tableName, @PathParam("rowUuid") String rowUuid) {
@@ -492,7 +492,7 @@ public class OvsdbNorthboundV2 {
     @StatusCodes({ @ResponseCode(code = 200, condition = "Row Updated successfully"),
         @ResponseCode(code = 400, condition = "Invalid data passed"),
         @ResponseCode(code = 401, condition = "User not authorized to perform this operation")})
-    @Consumes({ MediaType.APPLICATION_JSON})
+    @Produces({ MediaType.APPLICATION_JSON})
     @TypeHint(OvsdbRows.class)
     public OvsdbRows getAllRows(@PathParam("nodeType") String nodeType, @PathParam("nodeId") String nodeId,
                                @PathParam("tableName") String tableName) {

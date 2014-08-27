@@ -72,6 +72,8 @@
     <powermock.version>1.5.2</powermock.version>
     <httpcomponents.version>4.2.1</httpcomponents.version>
     <karaf.shell.version>3.0.0</karaf.shell.version>
+    <odl.karaf.base.version>1.4.2-SNAPSHOT</odl.karaf.base.version>
+    <nsf.version>0.4.2-SNAPSHOT</nsf.version>
   </properties>
 
   <dependencyManagement>
@@ -180,6 +182,18 @@
         <groupId>org.opendaylight.yangtools</groupId>
         <artifactId>yang-binding</artifactId>
         <version>${yangtools.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>features-test</artifactId>
+        <version>${yangtools.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>opendaylight-karaf-empty</artifactId>
+        <version>1.4.2-SNAPSHOT</version>
+        <type>zip</type>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>

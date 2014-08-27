@@ -27,6 +27,10 @@ module ovs-nx-action {
         base ofaction:experimenter-action-sub-type;
     }
 
+    identity nxm-nx-multipath {
+        base ofaction:experimenter-action-sub-type;
+    }
+
     grouping ofj-nx-action-resubmit-grouping {
         container action-resubmit {
             leaf in-port {
@@ -58,10 +62,68 @@ module ovs-nx-action {
         }
     }
 
+    typedef ofj-nx-hash-fields {
+        type enumeration {
+            enum NX_HASH_FIELDS_ETH_SRC {
+                value 0;
+                description "eth src address only";
+            }
+            enum NX_HASH_FIELDS_SYMMETRIC_L4 {
+                value 1;
+                description "L2 through L4 fields";
+            }
+        }
+    }
+
+    typedef ofj-nx-mp-algorithm {
+        type enumeration {
+            enum NX_MP_ALG_MODULO_N {
+                value 0;
+            }
+            enum NX_MP_ALG_HASH_THRESHOLD {
+                value 1;
+            }
+            enum NX_MP_ALG_HRW {
+                value 2;
+            }
+            enum NX_MP_ALG_ITER_HASH {
+                value 3;
+            }
+        }
+    }
+
+    grouping ofj-nx-action-multipath-grouping {
+        container action-multipath {
+            leaf fields {
+                type ofj-nx-hash-fields;
+            }
+            leaf basis {
+                type uint16;
+                default 0x400;
+            }
+            leaf algorithm {
+                type ofj-nx-mp-algorithm;
+            }
+            leaf max-link {
+                type uint16;
+            }
+            leaf arg {
+                type uint32;
+            }
+            leaf ofs-nbits {
+                type uint16;
+            }
+            leaf dst {
+                type uint32;
+            }
+        }
+    }
+
     augment "/ofaction:actions-container/ofaction:action" {
         ext:augment-identifier "ofj-aug-nx-action";
         uses ofj-nx-action-resubmit-grouping;
         uses ofj-nx-action-set-nsp-grouping;
         uses ofj-nx-action-set-nsi-grouping;
+        uses ofj-nx-action-multipath-grouping;
     }
 }

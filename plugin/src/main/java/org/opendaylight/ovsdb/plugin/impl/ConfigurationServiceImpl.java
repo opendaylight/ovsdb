@@ -13,7 +13,9 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,6 +39,7 @@ import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
+import org.opendaylight.ovsdb.lib.notation.ReferencedRow;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.Insert;
@@ -67,7 +70,9 @@ import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
 
 public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigService,
@@ -183,7 +188,7 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
             List<Column<GenericTableSchema, ?>> columns = new ArrayList<Column<GenericTableSchema, ?>>();
             columns.add(nameColumn);
             Row<GenericTableSchema> intfRow = new Row<GenericTableSchema>(tableSchema, columns);
-            this.processInsertTransaction(client, databaseName, "Interface", null, null, null, namedUuid, intfRow, transactionBuilder);
+            this.processTypedInsertTransaction(client, databaseName, "Interface", null, null, null, namedUuid, intfRow, transactionBuilder);
         }
     }
 
@@ -192,25 +197,11 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
      * the parent table for the newly inserted Child.
      * Due to some additional special case(s), the Transaction is further amended by handleSpecialInsertCase
      */
-    private void processInsertTransaction(OvsdbClient client, String databaseName, String childTable,
+    private void processTypedInsertTransaction(OvsdbClient client, String databaseName, String childTable,
                                     String parentTable, String parentUuid, String parentColumn, String namedUuid,
                                     Row<GenericTableSchema> row, TransactionBuilder transactionBuilder) {
-        DatabaseSchema dbSchema = client.getDatabaseSchema(databaseName);
-        TableSchema<GenericTableSchema> childTableSchema = dbSchema.table(childTable, GenericTableSchema.class);
-        transactionBuilder.add(op.insert(childTableSchema, row)
-                        .withId(namedUuid));
-
-        if (parentColumn != null) {
-            TableSchema<GenericTableSchema> parentTableSchema = dbSchema.table(parentTable, GenericTableSchema.class);
-            ColumnSchema<GenericTableSchema, UUID> parentColumnSchema = parentTableSchema.column(parentColumn, UUID.class);
-            ColumnSchema<GenericTableSchema, UUID> _uuid = parentTableSchema.column("_uuid", UUID.class);
-
-            transactionBuilder
-                .add(op.mutate(parentTableSchema)
-                        .addMutation(parentColumnSchema, Mutator.INSERT, new UUID(namedUuid))
-                        .where(_uuid.opEqual(new UUID(parentUuid)))
-                        .build());
-        }
+        this.processInsertTransaction(client, databaseName, childTable, parentTable, new UUID(parentUuid), parentColumn,
+                                      namedUuid, row, transactionBuilder);
         /*
          * There are a few Open_vSwitch schema specific special case handling to be done for
          * the older API (such as by inserting a mandatory Interface row automatically upon inserting
@@ -245,6 +236,7 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
      * Row being inserted in one Table and other Rows that needs mutate in other Tables.
      */
     @Override
+    @Deprecated
     public StatusWithUuid insertRow(Node node, String tableName, String parentUuid, Row<GenericTableSchema> row) {
         String[] parentColumn = OvsVswitchdSchemaConstants.getParentColumnToMutate(tableName);
         if (parentColumn == null) {
@@ -264,7 +256,7 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
         TransactionBuilder transactionBuilder = client.transactBuilder(dbSchema);
 
         String namedUuid = "Transaction_"+ tableName;
-        this.processInsertTransaction(client, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName,
+        this.processTypedInsertTransaction(client, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName,
                                 parentColumn[0], parentUuid, parentColumn[1], namedUuid,
                                 row, transactionBuilder);
 
@@ -290,6 +282,7 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
     }
 
     @Override
+    @Deprecated
     public Status updateRow (Node node, String tableName, String parentUUID, String rowUUID, Row row) {
         String databaseName = OvsVswitchdSchemaConstants.DATABASE_NAME;
         Connection connection = connectionService.getConnection(node);
@@ -345,6 +338,7 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
     }
 
     @Override
+    @Deprecated
     public Status deleteRow(Node node, String tableName, String uuid) {
         String databaseName = OvsVswitchdSchemaConstants.DATABASE_NAME;
         Connection connection = connectionService.getConnection(node);
@@ -384,12 +378,14 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
     }
 
     @Override
+    @Deprecated
     public ConcurrentMap<String, Row> getRows(Node node, String tableName) {
         ConcurrentMap<String, Row> ovsTable = ovsdbInventoryService.getTableCache(node, OvsVswitchdSchemaConstants.DATABASE_NAME,  tableName);
         return ovsTable;
     }
 
     @Override
+    @Deprecated
     public Row getRow(Node node, String tableName, String uuid) {
         Map<String, Row> ovsTable = ovsdbInventoryService.getTableCache(node, OvsVswitchdSchemaConstants.DATABASE_NAME,  tableName);
         if (ovsTable == null) return null;
@@ -397,6 +393,7 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
     }
 
     @Override
+    @Deprecated
     public List<String> getTables(Node node) {
         ConcurrentMap<String, ConcurrentMap<String, Row>> cache  = ovsdbInventoryService.getCache(node, OvsVswitchdSchemaConstants.DATABASE_NAME);
         if (cache == null) return null;
@@ -1175,30 +1172,285 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
         return null;
     }
 
+
+    // SCHEMA-INDEPENDENT Configuration Service APIs
+
+    /*
+     * A common Insert Transaction convenience method that populates the TransactionBuilder with insert operation
+     * for a Child Row and also mutates the parent row with the UUID of the inserted Child.
+     */
+    private void processInsertTransaction(OvsdbClient client, String databaseName, String childTable,
+                                    String parentTable, UUID parentUuid, String parentColumn, String namedUuid,
+                                    Row<GenericTableSchema> row,
+                                    TransactionBuilder transactionBuilder) {
+        // Insert the row as the first transaction entry
+        DatabaseSchema dbSchema = client.getDatabaseSchema(databaseName);
+        TableSchema<GenericTableSchema> childTableSchema = dbSchema.table(childTable, GenericTableSchema.class);
+        transactionBuilder.add(op.insert(childTableSchema, row)
+                        .withId(namedUuid));
+
+        // Followed by the Mutation
+        if (parentColumn != null) {
+            TableSchema<GenericTableSchema> parentTableSchema = dbSchema.table(parentTable, GenericTableSchema.class);
+            ColumnSchema<GenericTableSchema, UUID> parentColumnSchema = parentTableSchema.column(parentColumn, UUID.class);
+            ColumnSchema<GenericTableSchema, UUID> _uuid = parentTableSchema.column("_uuid", UUID.class);
+
+            transactionBuilder
+                .add(op.mutate(parentTableSchema)
+                        .addMutation(parentColumnSchema, Mutator.INSERT, new UUID(namedUuid))
+                        .where(_uuid.opEqual(parentUuid))
+                        .build());
+        }
+    }
+
+    /**
+     * insert a Row in a Table of a specified Database Schema.
+     *
+     * This method can insert just a single Row specified in the row parameter.
+     * But {@link #insertTree(Node, String, String, UUID, Row<GenericTableSchema>) insertTree}
+     * can insert a hierarchy of rows with parent-child relationship.
+     *
+     * @param node OVSDB Node
+     * @param databaseName Database Name that represents the Schema supported by the node.
+     * @param tableName Table on which the row is inserted
+     * @param parentTable Name of the Parent Table to which this operation will result in attaching/mutating.
+     * @param parentUuid UUID of a Row in parent table to which this operation will result in attaching/mutating.
+     * @param parentColumn Name of the Column in the Parent Table to be mutated with the UUID that results from the insert operation.
+     * @param row Row of table Content to be inserted
+     * @throws OvsdbPluginException Any failure during the insert transaction will result in a specific exception.
+     * @return UUID of the inserted Row
+     */
     @Override
     public UUID insertRow(Node node, String databaseName, String tableName, String parentTable, UUID parentUuid,
                           String parentColumn, Row<GenericTableSchema> row) throws OvsdbPluginException {
-        throw new OvsdbPluginException("Not implemented Yet");
+        Connection connection = connectionService.getConnection(node);
+        OvsdbClient client = connection.getClient();
+        DatabaseSchema dbSchema = client.getDatabaseSchema(databaseName);
+        TableSchema<GenericTableSchema> tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
+
+        Row<GenericTableSchema> processedRow = this.insertTree(node, databaseName, tableName, parentTable, parentUuid, parentColumn, row);
+
+        ColumnSchema<GenericTableSchema, UUID> _uuid = tableSchema.column("_uuid", UUID.class);
+        Column<GenericTableSchema, UUID> uuid = processedRow.getColumn(_uuid);
+        return uuid.getData();
     }
 
+    /**
+     * insert a Row in a Table of a specified Database Schema. This is a convenience method on top of
+     * {@link insertRow(Node, String, String, String, UUID, String, Row<GenericTableSchema>) insertRow}
+     * which assumes that OVSDB schema implementation that corresponds to the databaseName will provide
+     * the necessary service to populate the Parent Table Name and Parent Column Name.
+     *
+     * This method can insert just a single Row specified in the row parameter.
+     * But {@link #insertTree(Node, String, String, UUID, Row<GenericTableSchema>) insertTree}
+     * can insert a hierarchy of rows with parent-child relationship.
+     *
+     * @param node OVSDB Node
+     * @param databaseName Database Name that represents the Schema supported by the node.
+     * @param tableName Table on which the row is inserted
+     * @param parentUuid UUID of the parent table to which this operation will result in attaching/mutating.
+     * @param row Row of table Content to be inserted
+     * @throws OvsdbPluginException Any failure during the insert transaction will result in a specific exception.
+     * @return UUID of the inserted Row
+     */
     @Override
     public UUID insertRow(Node node, String databaseName, String tableName,
             UUID parentRowUuid, Row<GenericTableSchema> row)
             throws OvsdbPluginException {
-        throw new OvsdbPluginException("Not implemented Yet");
+        return this.insertRow(node, databaseName, tableName, null, parentRowUuid, null, row);
     }
 
+    /**
+     * inserts a Tree of Rows in multiple Tables that has parent-child relationships referenced through the OVSDB schema's refTable construct
+     *
+     * @param node OVSDB Node
+     * @param databaseName Database Name that represents the Schema supported by the node.
+     * @param tableName Table on which the row is inserted
+     * @param parentTable Name of the Parent Table to which this operation will result in attaching/mutating.
+     * @param parentUuid UUID of a Row in parent table to which this operation will result in attaching/mutating.
+     * @param parentColumn Name of the Column in the Parent Table to be mutated with the UUID that results from the insert operation.
+     * @param row Row Tree with parent-child relationships via column of type refTable.
+     * @throws OvsdbPluginException Any failure during the insert transaction will result in a specific exception.
+     * @return Returns the row tree with the UUID of every inserted Row populated in the _uuid column of every row in the tree
+     */
     @Override
-    public Row<GenericTableSchema> insertTree(Node node, String databaseName, String tableName, String parentTable, UUID parentRowUuid,
+    public Row<GenericTableSchema> insertTree(Node node, String databaseName, String tableName, String parentTable, UUID parentUuid,
                                               String parentColumn, Row<GenericTableSchema> row) throws OvsdbPluginException {
-        throw new OvsdbPluginException("Not implemented Yet");
+        Connection connection = connectionService.getConnection(node);
+        OvsdbClient client = connection.getClient();
+
+        if (databaseName == null || tableName == null) {
+            throw new OvsdbPluginException("databaseName, tableName and parentUuid are Mandatory Parameters");
+        }
+        logger.debug("insertTree Connection : {} Table : {} ParentTable : {} Parent Column: {} Parent UUID : {} Row : {}",
+                     client.getConnectionInfo(), tableName, parentTable, parentColumn, parentUuid, row);
+
+        Map<UUID, Map.Entry<String, Row<GenericTableSchema>>> referencedRows = Maps.newConcurrentMap();
+        extractReferencedRows(node, databaseName, row, referencedRows, 0);
+        DatabaseSchema dbSchema = client.getDatabaseSchema(OvsVswitchdSchemaConstants.DATABASE_NAME);
+        TransactionBuilder transactionBuilder = client.transactBuilder(dbSchema);
+
+        String namedUuid = "Transaction_"+ tableName;
+        this.processInsertTransaction(client, databaseName, tableName, parentTable, parentUuid,
+                                      parentColumn, namedUuid, row, transactionBuilder);
+
+        int referencedRowsInsertIndex = transactionBuilder.getOperations().size();
+        // Insert Referenced Rows
+        if (referencedRows != null) {
+            for (UUID refUuid : referencedRows.keySet()) {
+                Map.Entry<String, Row<GenericTableSchema>> referencedRow = referencedRows.get(refUuid);
+                TableSchema<GenericTableSchema> refTableSchema = dbSchema.table(referencedRow.getKey(), GenericTableSchema.class);
+                transactionBuilder.add(op.insert(refTableSchema, referencedRow.getValue())
+                                .withId(refUuid.toString()));
+            }
+        }
+
+        ListenableFuture<List<OperationResult>> results = transactionBuilder.execute();
+        List<OperationResult> operationResults;
+        try {
+            operationResults = results.get();
+            if (operationResults.isEmpty() || (transactionBuilder.getOperations().size() != operationResults.size())) {
+                throw new OvsdbPluginException("Insert Operation Failed");
+            }
+            for (OperationResult result : operationResults) {
+                if (result.getError() != null) {
+                    throw new OvsdbPluginException("Insert Operation Failed with Error : "+result.getError().toString());
+                }
+            }
+            return getNormalizedRow(dbSchema, tableName, row, referencedRows, operationResults, referencedRowsInsertIndex);
+        } catch (InterruptedException | ExecutionException e) {
+            throw new OvsdbPluginException("Exception : "+e.getLocalizedMessage());
+        }
     }
 
+    /**
+     * inserts a Tree of Rows in multiple Tables that has parent-child relationships referenced through the OVSDB schema's refTable construct.
+     * This is a convenience method on top of {@link #insertTree(Node, String, String, String, UUID, String, Row<GenericTableSchema>) insertTree}
+     *
+     * @param node OVSDB Node
+     * @param databaseName Database Name that represents the Schema supported by the node.
+     * @param tableName Table on which the row is inserted
+     * @param parentUuid UUID of a Row in parent table to which this operation will result in attaching/mutating.
+     * @param row Row Tree with parent-child relationships via column of type refTable.
+     * @throws OvsdbPluginException Any failure during the insert transaction will result in a specific exception.
+     * @return Returns the row tree with the UUID of every inserted Row populated in the _uuid column of every row in the tree
+     */
     @Override
     public Row<GenericTableSchema> insertTree(Node node, String databaseName,
             String tableName, UUID parentRowUuid, Row<GenericTableSchema> row)
             throws OvsdbPluginException {
-        throw new OvsdbPluginException("Not implemented Yet");
+        return this.insertTree(node, databaseName, tableName, null, parentRowUuid, null, row);
+    }
+
+    /**
+     * Convenience method that helps insertTree to extract Rows that are referenced directly from within a primary row
+     * to be inserted. These referenced rows are *NOT* defined in the OVSDB specification. But, we felt that from a northbound
+     * application standpoint, having such an option is useful and our implementation supports it for applications to make use of.
+     * In short, whichever ColumnSchema is based on an UUID (refered by RefTable in schema), applications can directly insert an
+     * entire row and this method will help navigate it through and identify such cases.
+     * After identifying these Referenced Rows, it will modify the primary row with Named UUIDs and fill out the referencedRows
+     * Map structure so that insertTree can insert all the Rows defined in this Tree of rows in a single transaction with automatic
+     * Mutation on the parent rows.
+     *
+     * @param node OVSDB Node
+     * @param dbName Database Name that represents the Schema supported by the node.
+     * @param row Row Tree with parent-child relationships via column of type refTable.
+     * @param referencedRows Map of Named-UUID to the actual referenced row (with RefTable)
+     * @param namedUuidSuffix Named UUID must be unique for every new Row insert within a given transaction.
+     *        This index will help to retain the uniqueness.
+     */
+    private void extractReferencedRows(Node node, String dbName, Row<GenericTableSchema> row,
+                                       Map<UUID, Map.Entry<String, Row<GenericTableSchema>>> referencedRows,
+                                       int namedUuidSuffix) {
+        OvsdbClient client = connectionService.getConnection(node).getClient();
+        Collection<Column<GenericTableSchema, ?>> columns = row.getColumns();
+        for (Column column : columns) {
+            if (column.getData() != null) {
+                if (column.getData() instanceof ReferencedRow) {
+                    ReferencedRow refRowObject = (ReferencedRow)column.getData();
+                    UUID refUuid = new UUID("NamedUuid"+namedUuidSuffix++);
+                    column.setData(refUuid);
+                    try {
+                        DatabaseSchema dbSchema = client.getSchema(dbName).get();
+                        GenericTableSchema schema = dbSchema.table(refRowObject.getRefTable(), GenericTableSchema.class);
+                        Row<GenericTableSchema> refRow = schema.createRow((ObjectNode)refRowObject.getJsonNode());
+                        referencedRows.put(refUuid, new AbstractMap.SimpleEntry<String, Row<GenericTableSchema>>(refRowObject.getRefTable(), refRow));
+                        extractReferencedRows(node, dbName, refRow, referencedRows, namedUuidSuffix);
+                    } catch (InterruptedException | ExecutionException e) {
+                        logger.error("Exception while extracting multi-level Row references " + e.getLocalizedMessage());
+                    }
+                } else if (column.getData() instanceof OvsdbSet) {
+                    OvsdbSet<Object> setObject = (OvsdbSet<Object>)column.getData();
+                    OvsdbSet<Object> modifiedSet = new OvsdbSet<Object>();
+                    for (Object obj : setObject) {
+                        if (obj instanceof ReferencedRow) {
+                            ReferencedRow refRowObject = (ReferencedRow)obj;
+                            UUID refUuid = new UUID("NamedUuid"+namedUuidSuffix++);
+                            modifiedSet.add(refUuid);
+                            try {
+                                DatabaseSchema dbSchema = client.getSchema(dbName).get();
+                                GenericTableSchema schema = dbSchema.table(refRowObject.getRefTable(), GenericTableSchema.class);
+                                Row<GenericTableSchema> refRow = schema.createRow((ObjectNode)refRowObject.getJsonNode());
+                                referencedRows.put(refUuid, new AbstractMap.SimpleEntry<String, Row<GenericTableSchema>>(refRowObject.getRefTable(), refRow));
+                                extractReferencedRows(node, dbName, refRow, referencedRows, namedUuidSuffix);
+                            } catch (InterruptedException | ExecutionException e) {
+                                logger.error("Exception while extracting multi-level Row references " + e.getLocalizedMessage());
+                            }
+                        } else {
+                            modifiedSet.add(obj);
+                        }
+                    }
+                    column.setData(modifiedSet);
+                }
+            }
+        }
+    }
+
+    /**
+     * getNormalizedRow normalizes the Row from a namedUuid Space as defined in extractReferencedRows to the actual Uuid as created
+     * by the Ovsdb-server. In order to perform this normalization, it processes the operation results for a corresponding Transaction
+     * where the referenced rows are inserted along with the Primary row. It changes the named-Uuid to the actual Uuid before returning
+     * the Row to the application.
+     *
+     * @param dbSchema Database Schema supported by the node.
+     * @param row Row Tree with parent-child relationships via column of type refTable.
+     * @param tableName Table on which the row is inserted
+     * @param referencedRows Map of Named-UUID to the actual referenced row (with RefTable)
+     * @param operationResults Operation Results returned by ovsdb-server for the insertTree transaction
+     * @param referencedRowsInsertIndex Starting index in OperationResults from which the ReferencedRow insert results begin.
+     * @return
+     */
+    private Row<GenericTableSchema> getNormalizedRow(DatabaseSchema dbSchema, String tableName, Row<GenericTableSchema> row,
+                                                     Map<UUID, Map.Entry<String, Row<GenericTableSchema>>> referencedRows,
+                                                     List<OperationResult> operationResults, int referencedRowsInsertIndex) {
+        UUID primaryRowUuid = operationResults.get(0).getUuid();
+        TableSchema<GenericTableSchema> primaryRowTableSchema = dbSchema.table(tableName, GenericTableSchema.class);
+        ColumnSchema<GenericTableSchema, UUID> _uuid = primaryRowTableSchema.column("_uuid", UUID.class);
+        if (_uuid != null) {
+            Column<GenericTableSchema, UUID> _uuidColumn = new Column<GenericTableSchema, UUID>(_uuid, primaryRowUuid);
+            row.addColumn("_uuid", _uuidColumn);
+        }
+
+        if (referencedRows != null) {
+            Collection<Column<GenericTableSchema, ?>> columns = row.getColumns();
+            if (referencedRows != null) {
+                for (int idx=0; idx < referencedRows.keySet().size(); idx++) {
+                    UUID refUuid = (UUID) referencedRows.keySet().toArray()[idx];
+                    for (Column column : columns) {
+                        if (column.getData() != null) {
+                            if ((column.getData() instanceof UUID) && column.getData().equals(refUuid)) {
+                                column.setData(operationResults.get(referencedRowsInsertIndex + idx).getUuid());
+                            } else if ((column.getData() instanceof OvsdbSet) && ((OvsdbSet)column.getData()).contains(refUuid)) {
+                                OvsdbSet<UUID> refSet = (OvsdbSet<UUID>)column.getData();
+                                refSet.remove(refUuid);
+                                refSet.add(operationResults.get(referencedRowsInsertIndex + idx).getUuid());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return row;
     }
 
     @Override

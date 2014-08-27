@@ -165,6 +165,7 @@ see https://git.opendaylight.org/gerrit/#/c/390/
               <includeGroupIds>org.opendaylight.controller</includeGroupIds>
               <excludeTransitive>true</excludeTransitive>
               <ignorePermissions>false</ignorePermissions>
+              <skip>${skip.distribution}</skip>
             </configuration>
           </execution>
           <execution>
@@ -182,11 +183,12 @@ see https://git.opendaylight.org/gerrit/#/c/390/
               <includes>**\/*.xml</includes>
               <excludeTransitive>true</excludeTransitive>
               <ignorePermissions>false</ignorePermissions>
+              <skip>${skip.distribution}</skip>
             </configuration>
           </execution>
         </executions>
       </plugin>
-            <plugin>
+      <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <executions>
           <execution>
@@ -199,6 +201,7 @@ see https://git.opendaylight.org/gerrit/#/c/390/
               <descriptors>
                 <descriptor>src/assemble/bin.xml</descriptor>
               </descriptors>
+              <skipAssembly>${skip.distribution}</skipAssembly>
             </configuration>
           </execution>
         </executions>

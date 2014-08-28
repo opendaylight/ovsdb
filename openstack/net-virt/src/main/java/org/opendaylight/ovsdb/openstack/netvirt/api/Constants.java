@@ -60,4 +60,38 @@ public final class Constants {
     public static final String PROVIDER_TYPE_PROPERTY = "providerType";
     public static final String OPENFLOW_VERSION_PROPERTY = "openflowVersion";
     public static final String EVENT_HANDLER_TYPE_PROPERTY = "eventHandlerType";
+
+    /*
+    * int representation TCP Flag constant values as interpreted by Open vSwitch
+    */
+    public static final int TCP_FIN = 0x0001;
+    public static final int TCP_SYN = 0x002;
+    public static final int TCP_RST = 0x004;
+    public static final int TCP_PSH = 0x008;
+    public static final int TCP_ACK = 0x010;
+    public static final int TCP_URG = 0x020;
+    public static final int TCP_ECE = 0x040;
+    public static final int TCP_CWR = 0x080;
+    public static final int TCP_NS = 0x100;
+
+    /*
+    * Short representations of IANA Assigned Protocol Numbers
+    */
+    public static final short ICMP_SHORT = 1;
+    public static final short TCP_SHORT = 6;
+    public static final short UDP_SHORT = 17;
+
+    /*
+    * String representations of Protocol
+    */
+    public static final String ICMP = "icmp";
+    public static final String TCP = "tcp";
+    public static final String UDP = "udp";
+
+    /*
+    * Long representations of commonly used EtherTypes
+    */
+    public static final long LLDP_ETHERTYPE = 0x88CCL;
+    public static final long IPV4_ETHERTYPE = 0x8000L;
+
 }

@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_dee9c8e6",
+        "filename": "ovs-sfc/src/main/java/org/opendaylight/ovsdb/ovssfc/EventHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-08-28T03:25:40Z",
+      "side": 1,
+      "message": "Please remove these System.out.println soon :)",
+      "revId": "26e300014e6524548f87af4939c49d061f99ac77",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

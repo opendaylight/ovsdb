@@ -16,6 +16,24 @@
       "revId": "572c303b7c9f20d8e59779a06cfcf27ae58d28a2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_749bfb17",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/Constants.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 207
+      },
+      "writtenOn": "2014-08-28T20:06:25Z",
+      "side": 1,
+      "message": "I was using Integer for simpler null checks and toStrings but I don\u0027t need them anymore for that so swapped it for yous.",
+      "parentUuid": "fa82b9bf_f4514b62",
+      "revId": "572c303b7c9f20d8e59779a06cfcf27ae58d28a2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -33,6 +33,7 @@
     <schema.openvswitch.version>1.0.0-SNAPSHOT</schema.openvswitch.version>
     <schema.hardwarevtep.version>1.0.0-SNAPSHOT</schema.hardwarevtep.version>
     <ovsdb.ofextension.version>1.0.0-SNAPSHOT</ovsdb.ofextension.version>
+    <utils.mdsal.openflow>1.0.0-SNAPSHOT</utils.mdsal.openflow>
     <!-- Skip Coverage and IT by default -->
     <skip.coverage>true</skip.coverage>
     <skip.integrationtest>true</skip.integrationtest>

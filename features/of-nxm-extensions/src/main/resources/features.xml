@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features name="ovsdb-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+    <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin/${openflowplugin.version}/xml/features</repository>
+
+    <feature name="odl-openflow-nxm-extensions" description="OpenDaylight :: Openflow :: Nicira Extensions" version='${openflowplugin.version}'>
+        <feature version="${openflowplugin.version}">odl-openflowplugin-southbound</feature>
+        <bundle>mvn:org.opendaylight.openflowplugin/openflowplugin-extension-nicira/${openflowplugin.version}</bundle>
+        <bundle>mvn:org.opendaylight.openflowplugin/openflowjava-extension-nicira-api/${openflowplugin.version}</bundle>
+        <bundle>mvn:org.opendaylight.openflowplugin/openflowjava-extension-nicira/${openflowplugin.version}</bundle>
+        <bundle>mvn:org.opendaylight.ovsdb/of-extension.nx-ofjava/${ovsdb.nx.version}</bundle>
+        <bundle>mvn:org.opendaylight.ovsdb/of-extension.nx-sal/${ovsdb.nx.version}</bundle>
+<!--
+        <configfile finalname="etc/opendaylight/karaf/42-openflowplugin.xml">mvn:org.opendaylight.openflowplugin/openflowplugin-controller-config/${project.version}/xml/config</configfile>
+-->
+    </feature>
+</features>

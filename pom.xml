@@ -39,6 +39,7 @@
     <module>integrationtest</module>
     <!-- Karaf Distribution -->
     <module>features/ovsdb</module>
+    <module>features/of-nxm-extensions</module>
     <!-- OVSDB Distribution -->
     <module>distribution/opendaylight</module>
   </modules>

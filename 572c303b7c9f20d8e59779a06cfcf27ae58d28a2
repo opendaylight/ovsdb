@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_f4514b62",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/Constants.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-08-28T19:46:31Z",
+      "side": 1,
+      "message": "question: was it intentional the use of Integer vs [primitive] int  ?",
+      "revId": "572c303b7c9f20d8e59779a06cfcf27ae58d28a2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

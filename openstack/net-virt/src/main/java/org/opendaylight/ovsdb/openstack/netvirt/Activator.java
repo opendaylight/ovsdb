@@ -10,6 +10,9 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt;
 
+import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallPolicyAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallRuleAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronFloatingIPAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
@@ -86,7 +89,8 @@ public class Activator extends ComponentActivatorAbstractBase {
                         SouthboundHandler.class,
                         PortSecurityHandler.class,
                         ProviderNetworkManagerImpl.class,
-                        EventDispatcherImpl.class};
+                        EventDispatcherImpl.class,
+                        FWaasHandler.class};
         return res;
     }
 
@@ -228,6 +232,17 @@ public class Activator extends ComponentActivatorAbstractBase {
                                          INeutronSecurityGroupAware.class.getName(),
                                          AbstractHandler.class.getName()},
                            portSecurityHandlerProperties);
+            c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
+        }
+
+        if (imp.equals(FWaasHandler.class)) {
+            Properties fWaasHandlerProperties = new Properties();
+            fWaasHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.NEUTRON_FWAAS);
+            c.setInterface(new String[] {INeutronFirewallAware.class.getName(),
+                                         INeutronFirewallRuleAware.class.getName(),
+                                         INeutronFirewallPolicyAware.class.getName(),
+                                         AbstractHandler.class.getName()},
+                           fWaasHandlerProperties);
             c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
         }
 

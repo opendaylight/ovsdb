@@ -14,6 +14,9 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallPolicyAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallRuleAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronFloatingIPAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolMemberAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortAware;
@@ -40,7 +43,6 @@ import org.opendaylight.ovsdb.openstack.netvirt.impl.VlanConfigurationCacheImpl;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
-
 import org.apache.felix.dm.Component;
 
 import java.util.Properties;
@@ -90,7 +92,8 @@ public class Activator extends ComponentActivatorAbstractBase {
                         PortSecurityHandler.class,
                         ProviderNetworkManagerImpl.class,
                         EventDispatcherImpl.class,
-                        FWaasHandler.class};
+                        FWaasHandler.class,
+                        LBaaSHandler.class};
         return res;
     }
 
@@ -221,6 +224,16 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency().setService(NetworkingProviderManager.class).setRequired(true));
             c.add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true));
             c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
+            c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
+        }
+
+        if (imp.equals(LBaaSHandler.class)) {
+            Properties lbaasHandlerProperties = new Properties();
+            lbaasHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.NEUTRON_LBAAS);
+            c.setInterface(new String[] {INeutronLoadBalancerAware.class.getName(),
+                                         INeutronLoadBalancerPoolAware.class.getName(),
+                                         INeutronLoadBalancerPoolMemberAware.class.getName()},
+                                         lbaasHandlerProperties);
             c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
         }
 

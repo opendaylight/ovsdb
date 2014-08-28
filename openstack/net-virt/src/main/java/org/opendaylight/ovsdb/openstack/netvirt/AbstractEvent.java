@@ -22,7 +22,8 @@ public abstract class AbstractEvent {
         NEUTRON_PORT_SECURITY,
         NEUTRON_ROUTER,
         NEUTRON_SUBNET,
-        NEUTRON_FWAAS;
+        NEUTRON_FWAAS,
+        NEUTRON_LBAAS;
 
         public static final int size = HandlerType.values().length;
     }

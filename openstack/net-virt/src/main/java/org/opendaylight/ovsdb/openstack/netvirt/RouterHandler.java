@@ -12,9 +12,7 @@ package org.opendaylight.ovsdb.openstack.netvirt;
 import org.opendaylight.controller.networkconfig.neutron.INeutronRouterAware;
 import org.opendaylight.controller.networkconfig.neutron.NeutronRouter;
 import org.opendaylight.controller.networkconfig.neutron.NeutronRouter_Interface;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
-import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,9 +31,7 @@ public class RouterHandler extends AbstractHandler
     static final Logger logger = LoggerFactory.getLogger(RouterHandler.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
-    private volatile OvsdbConfigurationService ovsdbConfigurationService;
-    private volatile OvsdbConnectionService connectionService;
-    private volatile OvsdbInventoryListener ovsdbInventoryListener;
+    private volatile NeutronL3Adapter neutronL3Adapter;
 
     /**
      * Services provide this interface method to indicate if the specified router can be created
@@ -60,7 +56,7 @@ public class RouterHandler extends AbstractHandler
      */
     @Override
     public void neutronRouterCreated(NeutronRouter router) {
-        logger.debug(" Router created {}, uuid {}", router.getName(), router.getRouterUUID());
+        enqueueEvent(new NorthboundEvent(router, AbstractEvent.Action.ADD));
     }
 
     /**
@@ -89,7 +85,7 @@ public class RouterHandler extends AbstractHandler
      */
     @Override
     public void neutronRouterUpdated(NeutronRouter router) {
-        logger.debug(" Router updated {}", router.getName());
+        enqueueEvent(new NorthboundEvent(router, AbstractEvent.Action.UPDATE));
     }
 
     /**
@@ -115,7 +111,7 @@ public class RouterHandler extends AbstractHandler
      */
     @Override
     public void neutronRouterDeleted(NeutronRouter router) {
-        logger.debug(" Router deleted {}, uuid {}", router.getName(), router.getRouterUUID());
+        enqueueEvent(new NorthboundEvent(router, AbstractEvent.Action.DELETE));
     }
 
     /**
@@ -150,8 +146,7 @@ public class RouterHandler extends AbstractHandler
      */
     @Override
     public void neutronRouterInterfaceAttached(NeutronRouter router, NeutronRouter_Interface routerInterface) {
-        logger.debug(" Router {} interface {} attached. Subnet {}", router.getName(), routerInterface.getPortUUID(),
-                     routerInterface.getSubnetUUID());
+        enqueueEvent(new NorthboundEvent(router, routerInterface, AbstractEvent.Action.ADD));
     }
 
     /**
@@ -187,8 +182,7 @@ public class RouterHandler extends AbstractHandler
      */
     @Override
     public void neutronRouterInterfaceDetached(NeutronRouter router, NeutronRouter_Interface routerInterface) {
-        logger.debug(" Router {} interface {} detached. Subnet {}", router.getName(), routerInterface.getPortUUID(),
-                     routerInterface.getSubnetUUID());
+        enqueueEvent(new NorthboundEvent(router, routerInterface, AbstractEvent.Action.DELETE));
     }
 
     /**
@@ -205,8 +199,19 @@ public class RouterHandler extends AbstractHandler
         }
         NorthboundEvent ev = (NorthboundEvent) abstractEvent;
         switch (ev.getAction()) {
-            // TODO: add handling of events here, once callbacks do something
-            //       other than logging.
+            case ADD:
+                // fall through
+            case DELETE:
+                // fall through
+            case UPDATE:
+                if (ev.getRouterInterface() == null) {
+                    neutronL3Adapter.handleNeutronRouterEvent(ev.getRouter(), ev.getAction());
+                } else {
+                    neutronL3Adapter.handleNeutronRouterInterfaceEvent(ev.getRouter(),
+                                                                      ev.getRouterInterface(),
+                                                                      ev.getAction());
+                }
+                break;
             default:
                 logger.warn("Unable to process event action " + ev.getAction());
                 break;

@@ -12,7 +12,9 @@ package org.opendaylight.ovsdb.openstack.netvirt;
 
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetAware;
 import org.opendaylight.controller.networkconfig.neutron.NeutronSubnet;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 
+import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +24,9 @@ public class SubnetHandler extends AbstractHandler implements INeutronSubnetAwar
 
     static final Logger logger = LoggerFactory.getLogger(SubnetHandler.class);
 
+    // The implementation for each of these services is resolved by the OSGi Service Manager
+    private volatile NeutronL3Adapter neutronL3Adapter;
+
     @Override
     public int canCreateSubnet(NeutronSubnet subnet) {
         return HttpURLConnection.HTTP_CREATED;
@@ -29,7 +34,7 @@ public class SubnetHandler extends AbstractHandler implements INeutronSubnetAwar
 
     @Override
     public void neutronSubnetCreated(NeutronSubnet subnet) {
-        logger.debug("Neutron Subnet Creation : {}", subnet.toString());
+        enqueueEvent(new NorthboundEvent(subnet, NorthboundEvent.Action.ADD));
     }
 
     @Override
@@ -39,8 +44,7 @@ public class SubnetHandler extends AbstractHandler implements INeutronSubnetAwar
 
     @Override
     public void neutronSubnetUpdated(NeutronSubnet subnet) {
-        // TODO Auto-generated method stub
-
+        enqueueEvent(new NorthboundEvent(subnet, NorthboundEvent.Action.UPDATE));
     }
 
     @Override
@@ -51,8 +55,7 @@ public class SubnetHandler extends AbstractHandler implements INeutronSubnetAwar
 
     @Override
     public void neutronSubnetDeleted(NeutronSubnet subnet) {
-        // TODO Auto-generated method stub
-
+        enqueueEvent(new NorthboundEvent(subnet, NorthboundEvent.Action.DELETE));
     }
 
     /**
@@ -69,8 +72,14 @@ public class SubnetHandler extends AbstractHandler implements INeutronSubnetAwar
         }
         NorthboundEvent ev = (NorthboundEvent) abstractEvent;
         switch (ev.getAction()) {
-            // TODO: add handling of events here, once callbacks do something
-            //       other than logging.
+            case ADD:
+                // fall through
+            case DELETE:
+                // fall through
+            case UPDATE:
+                Preconditions.checkNotNull(neutronL3Adapter);
+                neutronL3Adapter.handleNeutronSubnetEvent(ev.getSubnet(), ev.getAction());
+                break;
             default:
                 logger.warn("Unable to process event action " + ev.getAction());
                 break;

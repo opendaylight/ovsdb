@@ -11,9 +11,7 @@ package org.opendaylight.ovsdb.openstack.netvirt;
 
 import org.opendaylight.controller.networkconfig.neutron.INeutronFloatingIPAware;
 import org.opendaylight.controller.networkconfig.neutron.NeutronFloatingIP;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
-import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,9 +30,7 @@ public class FloatingIPHandler extends AbstractHandler
     static final Logger logger = LoggerFactory.getLogger(FloatingIPHandler.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
-    private volatile OvsdbConfigurationService ovsdbConfigurationService;
-    private volatile OvsdbConnectionService connectionService;
-    private volatile OvsdbInventoryListener ovsdbInventoryListener;
+    private volatile NeutronL3Adapter neutronL3Adapter;
 
     /**
      * Services provide this interface method to indicate if the specified floatingIP can be created
@@ -60,9 +56,7 @@ public class FloatingIPHandler extends AbstractHandler
      */
     @Override
     public void neutronFloatingIPCreated(NeutronFloatingIP floatingIP) {
-        logger.debug(" Floating IP created {}, uuid {}",
-                     floatingIP.getFixedIPAddress(),
-                     floatingIP.getFloatingIPUUID());
+        enqueueEvent(new NorthboundEvent(floatingIP, AbstractEvent.Action.ADD));
     }
 
     /**
@@ -91,9 +85,7 @@ public class FloatingIPHandler extends AbstractHandler
      */
     @Override
     public void neutronFloatingIPUpdated(NeutronFloatingIP floatingIP) {
-        logger.debug(" Floating IP updated {}, uuid {}",
-                     floatingIP.getFixedIPAddress(),
-                     floatingIP.getFloatingIPUUID());
+        enqueueEvent(new NorthboundEvent(floatingIP, AbstractEvent.Action.UPDATE));
     }
 
     /**
@@ -119,9 +111,7 @@ public class FloatingIPHandler extends AbstractHandler
      */
     @Override
     public void neutronFloatingIPDeleted(NeutronFloatingIP floatingIP) {
-        logger.debug(" Floating IP deleted {}, uuid {}",
-                     floatingIP.getFixedIPAddress(),
-                     floatingIP.getFloatingIPUUID());
+        enqueueEvent(new NorthboundEvent(floatingIP, AbstractEvent.Action.DELETE));
     }
 
     /**
@@ -138,8 +128,13 @@ public class FloatingIPHandler extends AbstractHandler
         }
         NorthboundEvent ev = (NorthboundEvent) abstractEvent;
         switch (ev.getAction()) {
-            // TODO: add handling of events here, once callbacks do something
-            //       other than logging.
+            case ADD:
+                // fall through
+            case DELETE:
+                // fall through
+            case UPDATE:
+                neutronL3Adapter.handleNeutronFloatingIPEvent(ev.getNeutronFloatingIP(), ev.getAction());
+                break;
             default:
                 logger.warn("Unable to process event action " + ev.getAction());
                 break;

@@ -18,64 +18,64 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * OpenStack router implements the MultiTenantAwareRouter interfaces
- * It provides routing functionality for multiple tenants in an OpenStack cloud
+ * OpenStack router implements the MultiTenantAwareRouter interfaces It provides routing functionality for multiple
+ * tenants in an OpenStack cloud
  */
 public class OpenstackRouter implements MultiTenantAwareRouter {
 
+    @Override
+    public void addInterface(UUID tenantId, String interfaceName, Set<InterfaceAddress> addresses) {
 
-  @Override
-  public void addInterface(UUID tenantId, String interfaceName, Set<InterfaceAddress> addresses) {
+    }
 
-  }
+    @Override
+    public void addInterface(UUID tenantId, String interfaceName, String macAddress, Set<InterfaceAddress> addresses) {
 
-  @Override
-  public void addInterface(UUID tenantId, String interfaceName, String macAddress, Set<InterfaceAddress> addresses) {
+    }
 
-  }
+    @Override
+    public void updateInterface(UUID tenantId, String interfaceName, Set<InterfaceAddress> addresses) {
 
-  @Override
-  public void updateInterface(UUID tenantId, String interfaceName, Set<InterfaceAddress> addresses) {
+    }
 
-  }
+    @Override
+    public void updateInterface(UUID tenantId, String interfaceName, String macAddress,
+                                Set<InterfaceAddress> addresses) {
 
-  @Override
-  public void updateInterface(UUID tenantId, String interfaceName, String macAddress, Set<InterfaceAddress> addresses) {
+    }
 
-  }
+    @Override
+    public void removeInterface(UUID tenantId, String interfaceName) {
 
-  @Override
-  public void removeInterface(UUID tenantId, String interfaceName) {
+    }
 
-  }
+    @Override
+    public void addRoute(UUID tenantId, InterfaceAddress destination, InetAddress nextHop) {
 
-  @Override
-  public void addRoute(UUID tenantId, InterfaceAddress destination, InetAddress nextHop) {
+    }
 
-  }
+    @Override
+    public void addRoute(UUID tenantId, InterfaceAddress destination, InetAddress nextHop, Integer priority) {
 
-  @Override
-  public void addRoute(UUID tenantId, InterfaceAddress destination, InetAddress nextHop, Integer priority) {
+    }
 
-  }
+    @Override
+    public void removeRoute(UUID tenantId, InterfaceAddress destination, InetAddress nextHop) {
 
-  @Override
-  public void removeRoute(UUID tenantId, InterfaceAddress destination, InetAddress nextHop) {
+    }
 
-  }
+    @Override
+    public void removeRoute(UUID tenantId, InterfaceAddress destination, InetAddress nextHop, Integer priority) {
 
-  @Override
-  public void removeRoute(UUID tenantId, InterfaceAddress destination, InetAddress nextHop, Integer priority) {
+    }
 
-  }
+    @Override
+    public void addDefaultRoute(UUID tenantId, InetAddress nextHop) {
 
-  @Override
-  public void addDefaultRoute(UUID tenantId, InetAddress nextHop) {
+    }
 
-  }
+    @Override
+    public void addDefaultRoute(UUID tenantId, InetAddress nextHop, Integer priority) {
 
-  @Override
-  public void addDefaultRoute(UUID tenantId, InetAddress nextHop, Integer priority) {
-
-  }
+    }
 }

@@ -82,12 +82,12 @@ public final class Constants {
     public static final short UDP_SHORT = 17;
 
     /*
-    * Short representations of IANA Assigned Protocol Numbers
+    * String representations of Protocol
     */
-
     public static final String ICMP = "icmp";
     public static final String TCP = "tcp";
     public static final String UDP = "udp";
+
     /*
     * Long representations of commonly used EtherTypes
     */

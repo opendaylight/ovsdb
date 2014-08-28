@@ -3,6 +3,7 @@
     <repository>mvn:org.opendaylight.controller/features-base/${odl.karaf.base.version}/xml/features</repository>
     <repository>mvn:org.opendaylight.controller/features-adsal/${sal.version}/xml/features</repository>
     <repository>mvn:org.opendaylight.controller/features-nsf/${nsf.version}/xml/features</repository>
+    <repository>mvn:org.opendaylight.ovsdb/features-openflow-nxm/${openflowplugin.version}/xml/features</repository>
 
     <feature name="odl-ovsdb-all" description="OpenDaylight :: OVSDB :: all" version='${project.version}'>
         <feature version="${ovsdb.library.version}">odl-ovsdb-library</feature>
@@ -39,5 +40,13 @@
         <feature version="${ovsdb.plugin.version}">odl-ovsdb-plugin</feature>
         <feature version="${nsf.version}">odl-adsal-northbound</feature>
         <bundle>mvn:org.opendaylight.ovsdb/northbound/${ovsdb.northbound.version}</bundle>
+    </feature>
+
+    <feature name="odl-ovsdb-openstack" description="OpenDaylight :: OVSDB :: OpenStack Network Virtualization" version='${openstack.netvirt.version}'>
+        <feature version="${ovsdb.plugin.version}">odl-ovsdb-plugin</feature>
+        <feature version="${openflowplugin.version}">odl-openflow-nxm-extensions</feature>
+        <feature version="${nsf.version}">odl-nsf-all</feature>
+        <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt/${openstack.netvirt.version}</bundle>
+        <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt-providers/${openstack.netvirt.providers.version}</bundle>
     </feature>
 </features>

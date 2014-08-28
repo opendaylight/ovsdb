@@ -10,24 +10,35 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent;
+
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * A MultiTenantForwardingProvider provides Multi-Tenant L3 Forwarding
  */
 public interface MultiTenantRouterForwardingProvider {
 
-  void addStaticArpEntry(UUID tenantId, String macAddress, InetAddress ipAddress);
+    Status programStaticArpEntry(Node node, Long dpid, String segmentationId,
+                                 String macAddress, InetAddress ipAddress, AbstractEvent.Action action);
 
-  void addIpRewriteRule(UUID tenantId, InetAddress matchAddress, InetAddress rewriteAddress);
+    Status programIpRewriteRule(Node node, Long dpid, String segmentationId, InetAddress matchAddress,
+                                InetAddress rewriteAddress, AbstractEvent.Action action);
 
-  void addRouterInterface(UUID tenantId, String macAddress, Set<InterfaceAddress> addresses);
+    Status programIpRewriteExclusion(Node node, Long dpid, String segmentationId,
+                                     InterfaceAddress excludedAddress, AbstractEvent.Action action);
 
-  void addForwardingTableEntry(UUID tenantId, InetAddress ipAddress, String macAddress);
+    Status programRouterInterface(Node node, Long dpid, String segmentationId, String macAddress,
+                                  Set<InterfaceAddress> addresses, AbstractEvent.Action action);
 
-  void addDefaultRouteEntry(UUID tenantId, String macAddress, InetAddress nextHop);
+    Status programForwardingTableEntry(Node node, Long dpid, String segmentationId, InetAddress ipAddress,
+                                       String macAddress, AbstractEvent.Action action);
+
+    Status programDefaultRouteEntry(Node node, Long dpid, String segmentationId, String macAddress,
+                                    InetAddress nextHop, AbstractEvent.Action action);
 
 }

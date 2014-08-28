@@ -38,7 +38,7 @@
     <!-- Integration Tests -->
     <module>integrationtest</module>
     <!-- Karaf Distribution -->
-    <module>features</module>
+    <module>features/ovsdb</module>
     <!-- OVSDB Distribution -->
     <module>distribution/opendaylight</module>
   </modules>

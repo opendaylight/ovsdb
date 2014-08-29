@@ -20,6 +20,7 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
@@ -50,6 +51,7 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
     private volatile NetworkingProviderManager networkingProviderManager;
     private volatile OvsdbConfigurationService ovsdbConfigurationService;
     private volatile OvsdbConnectionService connectionService;
+    private volatile NeutronL3Adapter neutronL3Adapter;
 
     void init() {
         nodeCache = Lists.newArrayList();
@@ -235,6 +237,7 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
         logger.trace("Interface update of node: {}, uuid: {}", node, uuid);
         NeutronNetwork network = tenantNetworkManager.getTenantNetwork(intf);
         if (network != null) {
+            neutronL3Adapter.handleInterfaceEvent(node, intf, network, AbstractEvent.Action.UPDATE);
             if (bridgeConfigurationManager.createLocalNetwork(node, network))
                 networkingProviderManager.getProvider(node).handleInterfaceUpdate(network, node, intf);
         } else {
@@ -247,6 +250,7 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
         logger.debug("handleInterfaceDelete: node: {}, uuid: {}, isLastInstanceOnNode: {}, interface: {}",
                 node, uuid, isLastInstanceOnNode, intf);
 
+        neutronL3Adapter.handleInterfaceEvent(node, intf, network, AbstractEvent.Action.DELETE);
         List<String> phyIfName = bridgeConfigurationManager.getAllPhysicalInterfaceNames(node);
         if (intf.getTypeColumn().getData().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) ||
             intf.getTypeColumn().getData().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE) ||

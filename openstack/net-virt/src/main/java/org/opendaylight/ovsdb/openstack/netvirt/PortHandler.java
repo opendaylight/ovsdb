@@ -15,6 +15,7 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
@@ -44,6 +45,7 @@ public class PortHandler extends AbstractHandler
     private volatile OvsdbConfigurationService ovsdbConfigurationService;
     private volatile OvsdbConnectionService connectionService;
     private volatile OvsdbInventoryListener ovsdbInventoryListener;
+    private volatile NeutronL3Adapter neutronL3Adapter;
 
     /**
      * Invoked when a port creation is requested
@@ -63,20 +65,21 @@ public class PortHandler extends AbstractHandler
      * @param port An instance of new Neutron Port object.
      */
     @Override
-    public void neutronPortCreated(NeutronPort port) {
-        int result = canCreatePort(port);
+    public void neutronPortCreated(NeutronPort neutronPort) {
+        int result = canCreatePort(neutronPort);
         if (result != HttpURLConnection.HTTP_CREATED) {
             logger.error(" Port create validation failed result - {} ", result);
             return;
         }
 
-        enqueueEvent(new NorthboundEvent(port, NorthboundEvent.Action.ADD));
+        enqueueEvent(new NorthboundEvent(neutronPort, NorthboundEvent.Action.ADD));
     }
-    private void doNeutronPortCreated(NeutronPort port) {
+    private void doNeutronPortCreated(NeutronPort neutronPort) {
         logger.debug(" Port-ADD successful for tenant-id - {}," +
                      " network-id - {}, port-id - {}",
-                     port.getTenantID(), port.getNetworkUUID(),
-                     port.getID());
+                     neutronPort.getTenantID(), neutronPort.getNetworkUUID(),
+                     neutronPort.getID());
+        neutronL3Adapter.handleNeutronPortEvent(neutronPort, NorthboundEvent.Action.ADD);
     }
 
     /**
@@ -110,7 +113,12 @@ public class PortHandler extends AbstractHandler
      * @param port An instance of modified Neutron Port object.
      */
     @Override
-    public void neutronPortUpdated(NeutronPort port) {
+    public void neutronPortUpdated(NeutronPort neutronPort) {
+        enqueueEvent(new NorthboundEvent(neutronPort, NorthboundEvent.Action.UPDATE));
+    }
+    private void doNeutronPortUpdated(NeutronPort neutronPort) {
+        logger.debug("Handling neutron update port " + neutronPort);
+        neutronL3Adapter.handleNeutronPortEvent(neutronPort, NorthboundEvent.Action.UPDATE);
     }
 
     /**
@@ -143,6 +151,7 @@ public class PortHandler extends AbstractHandler
     }
     private void doNeutronPortDeleted(NeutronPort neutronPort) {
         logger.debug("Handling neutron delete port " + neutronPort);
+        neutronL3Adapter.handleNeutronPortEvent(neutronPort, NorthboundEvent.Action.DELETE);
 
         List<Node> nodes = connectionService.getNodes();
         for (Node node : nodes) {
@@ -212,6 +221,9 @@ public class PortHandler extends AbstractHandler
                 break;
             case DELETE:
                 doNeutronPortDeleted(ev.getPort());
+                break;
+            case UPDATE:
+                doNeutronPortUpdated(ev.getPort());
                 break;
             default:
                 logger.warn("Unable to process event action " + ev.getAction());

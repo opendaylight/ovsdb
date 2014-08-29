@@ -30,6 +30,7 @@ import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
+import org.opendaylight.ovsdb.openstack.netvirt.api.MultiTenantAwareRouter;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
@@ -37,6 +38,8 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.BridgeConfigurationManagerImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.ConfigurationServiceImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.EventDispatcherImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.OpenstackRouter;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.ProviderNetworkManagerImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.TenantNetworkManagerImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.VlanConfigurationCacheImpl;
@@ -93,7 +96,9 @@ public class Activator extends ComponentActivatorAbstractBase {
                         ProviderNetworkManagerImpl.class,
                         EventDispatcherImpl.class,
                         FWaasHandler.class,
-                        LBaaSHandler.class};
+                        LBaaSHandler.class,
+                        NeutronL3Adapter.class,
+                        OpenstackRouter.class};
         return res;
     }
 
@@ -150,21 +155,19 @@ public class Activator extends ComponentActivatorAbstractBase {
             Properties floatingIPHandlerPorperties = new Properties();
             floatingIPHandlerPorperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY,
                                             AbstractEvent.HandlerType.NEUTRON_FLOATING_IP);
-            c.setInterface(new String[] {INeutronFloatingIPAware.class.getName(),
-                                         AbstractHandler.class.getName()},
+            c.setInterface(new String[]{INeutronFloatingIPAware.class.getName(),
+                                        AbstractHandler.class.getName()},
                            floatingIPHandlerPorperties);
-            c.add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true));
-            c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
-            c.add(createServiceDependency().setService(OvsdbInventoryListener.class).setRequired(true));
             c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
+            c.add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true));
         }
 
         if (imp.equals(NetworkHandler.class)) {
             Properties networkHandlerProperties = new Properties();
             networkHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY,
                                          AbstractEvent.HandlerType.NEUTRON_NETWORK);
-            c.setInterface(new String[] {INeutronNetworkAware.class.getName(),
-                                         AbstractHandler.class.getName()},
+            c.setInterface(new String[]{INeutronNetworkAware.class.getName(),
+                                        AbstractHandler.class.getName()},
                            networkHandlerProperties);
             c.add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true));
             c.add(createServiceDependency().setService(BridgeConfigurationManager.class).setRequired(true));
@@ -175,47 +178,48 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true));
             c.add(createServiceDependency().setService(OvsdbInventoryListener.class).setRequired(true));
             c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
+            c.add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true));
         }
 
         if (imp.equals(SubnetHandler.class)) {
             Properties subnetHandlerProperties = new Properties();
             subnetHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.NEUTRON_SUBNET);
-            c.setInterface(new String[] {INeutronSubnetAware.class.getName(),
-                                         AbstractHandler.class.getName()},
+            c.setInterface(new String[]{INeutronSubnetAware.class.getName(),
+                                        AbstractHandler.class.getName()},
                            subnetHandlerProperties);
             c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
+            c.add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true));
         }
 
         if (imp.equals(PortHandler.class)) {
             Properties portHandlerProperties = new Properties();
             portHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.NEUTRON_PORT);
-            c.setInterface(new String[] {INeutronPortAware.class.getName(),
-                                         AbstractHandler.class.getName()},
+            c.setInterface(new String[]{INeutronPortAware.class.getName(),
+                                        AbstractHandler.class.getName()},
                            portHandlerProperties);
             c.add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true));
             c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
             c.add(createServiceDependency().setService(OvsdbInventoryListener.class).setRequired(true));
             c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
+            c.add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true));
         }
 
         if (imp.equals(RouterHandler.class)) {
             Properties routerHandlerProperties = new Properties();
             routerHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.NEUTRON_ROUTER);
-            c.setInterface(new String[] {INeutronRouterAware.class.getName(),
-                                         AbstractHandler.class.getName()},
+            c.setInterface(new String[]{INeutronRouterAware.class.getName(),
+                                        AbstractHandler.class.getName()},
                            routerHandlerProperties);
-            c.add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true));
-            c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
-            c.add(createServiceDependency().setService(OvsdbInventoryListener.class).setRequired(true));
             c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
+            c.add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true));
         }
 
         if (imp.equals(SouthboundHandler.class)) {
             Properties southboundHandlerProperties = new Properties();
             southboundHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.SOUTHBOUND);
-            c.setInterface(new String[] {OvsdbInventoryListener.class.getName(),
-                                         IInventoryListener.class.getName(),
-                                         AbstractHandler.class.getName()},
+            c.setInterface(new String[]{OvsdbInventoryListener.class.getName(),
+                                        IInventoryListener.class.getName(),
+                                        AbstractHandler.class.getName()},
                            southboundHandlerProperties);
             c.add(createServiceDependency().setService(
                     org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService.class).setRequired(true));
@@ -225,6 +229,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true));
             c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
             c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
+            c.add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true));
         }
 
         if (imp.equals(LBaaSHandler.class)) {
@@ -274,6 +279,18 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency()
                           .setService(AbstractHandler.class)
                           .setCallbacks("eventHandlerAdded", "eventHandlerRemoved"));
+        }
+
+        if (imp.equals(NeutronL3Adapter.class)) {
+            c.setInterface(NeutronL3Adapter.class.getName(), null);
+
+            c.add(createServiceDependency().setService(MultiTenantAwareRouter.class).setRequired(true));
+            // TODO: it will require MultiTenantRouterForwardingProvider
+            // c.add(createServiceDependency().setService(MultiTenantRouterForwardingProvider.class).setRequired(true));
+        }
+
+        if (imp.equals(OpenstackRouter.class)) {
+            c.setInterface(MultiTenantAwareRouter.class.getName(), null);
         }
     }
 }

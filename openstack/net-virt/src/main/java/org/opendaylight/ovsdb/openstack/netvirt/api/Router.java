@@ -11,36 +11,34 @@
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
 import java.net.InetAddress;
-import java.net.InterfaceAddress;
-import java.util.Set;
 
 /**
  * A Router
  */
 public interface Router {
 
-  void addInterface(String interfaceName, Set<InterfaceAddress> addresses);
+    void addInterface(String interfaceName, InetAddress address, int mask);
 
-  void addInterface(String interfaceName, String macAddress, Set<InterfaceAddress> addresses);
+    void addInterface(String interfaceName, String macAddress, InetAddress address, int mask);
 
-  void updateInterface(String interfaceName, Set<InterfaceAddress> addresses);
+    void updateInterface(String interfaceName, InetAddress address, int mask);
 
-  void updateInterface(String interfaceName, String macAddress, Set<InterfaceAddress> addresses);
+    void updateInterface(String interfaceName, String macAddress, InetAddress address, int mask);
 
-  void removeInterface(String interfaceName);
+    void removeInterface(String interfaceName);
 
-  void addRoute(InterfaceAddress destination, InetAddress nextHop);
+    void addRoute(String destinationCidr, InetAddress nextHop);
 
-  void addRoute(InterfaceAddress destination, InetAddress nextHop, Integer priority);
+    void addRoute(String destinationCidr, InetAddress nextHop, Integer priority);
 
-  void removeRoute(InterfaceAddress destination, InetAddress nextHop);
+    void removeRoute(String destinationCidr, InetAddress nextHop);
 
-  void removeRoute(InterfaceAddress destination, InetAddress nextHop, Integer priority);
+    void removeRoute(String destinationCidr, InetAddress nextHop, Integer priority);
 
-  void addDefaultRoute(InetAddress nextHop);
+    void addDefaultRoute(InetAddress nextHop);
 
-  void addDefaultRoute(InetAddress nextHop, Integer priority);
+    void addDefaultRoute(InetAddress nextHop, Integer priority);
 
-  void addNatRule(InetAddress matchAddress, InetAddress rewriteAddress);
+    void addNatRule(InetAddress matchAddress, InetAddress rewriteAddress);
 
 }

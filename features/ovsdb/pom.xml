@@ -62,6 +62,14 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>openstack.net-virt</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>openstack.net-virt-providers</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>plugin</artifactId>
     </dependency>
     <dependency>

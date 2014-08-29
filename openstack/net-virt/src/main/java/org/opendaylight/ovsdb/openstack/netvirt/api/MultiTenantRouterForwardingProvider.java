@@ -15,8 +15,6 @@ import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent;
 
 import java.net.InetAddress;
-import java.net.InterfaceAddress;
-import java.util.Set;
 
 /**
  * A MultiTenantForwardingProvider provides Multi-Tenant L3 Forwarding
@@ -30,10 +28,10 @@ public interface MultiTenantRouterForwardingProvider {
                                 InetAddress rewriteAddress, AbstractEvent.Action action);
 
     Status programIpRewriteExclusion(Node node, Long dpid, String segmentationId,
-                                     InterfaceAddress excludedAddress, AbstractEvent.Action action);
+                                     String excludedCidr, AbstractEvent.Action action);
 
     Status programRouterInterface(Node node, Long dpid, String segmentationId, String macAddress,
-                                  Set<InterfaceAddress> addresses, AbstractEvent.Action action);
+                                  InetAddress address, int mask, AbstractEvent.Action action);
 
     Status programForwardingTableEntry(Node node, Long dpid, String segmentationId, InetAddress ipAddress,
                                        String macAddress, AbstractEvent.Action action);

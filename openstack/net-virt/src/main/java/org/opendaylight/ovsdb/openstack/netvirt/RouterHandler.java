@@ -65,7 +65,7 @@ public class RouterHandler extends AbstractHandler
      *
      * @param delta
      *            updates to the router object using patch semantics
-     * @param router
+     * @param original
      *            instance of the Neutron Router object to be updated
      * @return integer
      *            the return value is understood to be a HTTP status code.  A return value outside of 200 through 299

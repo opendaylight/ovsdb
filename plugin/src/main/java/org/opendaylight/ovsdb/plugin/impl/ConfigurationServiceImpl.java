@@ -989,7 +989,7 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
             return new Status(StatusCode.NOTFOUND);
         }
         for (String intfUuid : intfRows.keySet()) {
-            Row intfRow = rows.get(intfUuid);
+            Row intfRow = intfRows.get(intfUuid);
             interfaceRow = client.getTypedRowWrapper(Interface.class, intfRow);
             if (interfaceRow == null || interfaceRow.getName() == null) continue;
             if (interfaceRow.getName().equals(portIdentifier)) break;
@@ -997,7 +997,7 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
         if (interfaceRow.getName() == null || !interfaceRow.getName().equals(portIdentifier)) {
             return new Status(StatusCode.NOTFOUND);
         }
-
+        interfaceRow = client.createTypedRowWrapper(Interface.class);
         if (type != null) {
             logger.debug("Interface type : " + type);
             if (type.equalsIgnoreCase(OvsVswitchdSchemaConstants.PortType.TUNNEL.name())) {
@@ -1069,8 +1069,8 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
             return new Status(StatusCode.NOTFOUND);
         }
         for (String portUuid : rows.keySet()) {
-            Row bridgeRow = rows.get(portUuid);
-            port = client.getTypedRowWrapper(Port.class, bridgeRow);
+            Row portRow = rows.get(portUuid);
+            port = client.getTypedRowWrapper(Port.class, portRow);
             if (port.getName().equals(portIdentifier)) break;
         }
         if (port.getName() == null || !port.getName().equals(portIdentifier)) {

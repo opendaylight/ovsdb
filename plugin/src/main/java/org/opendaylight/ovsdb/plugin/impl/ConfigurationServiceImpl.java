@@ -989,7 +989,7 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
             return new Status(StatusCode.NOTFOUND);
         }
         for (String intfUuid : intfRows.keySet()) {
-            Row intfRow = rows.get(intfUuid);
+            Row intfRow = intfRows.get(intfUuid);
             interfaceRow = client.getTypedRowWrapper(Interface.class, intfRow);
             if (interfaceRow == null || interfaceRow.getName() == null) continue;
             if (interfaceRow.getName().equals(portIdentifier)) break;
@@ -997,25 +997,25 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
         if (interfaceRow.getName() == null || !interfaceRow.getName().equals(portIdentifier)) {
             return new Status(StatusCode.NOTFOUND);
         }
-
+        Interface updateInterface = client.createTypedRowWrapper(Interface.class);
         if (type != null) {
             logger.debug("Interface type : " + type);
             if (type.equalsIgnoreCase(OvsVswitchdSchemaConstants.PortType.TUNNEL.name())) {
-                interfaceRow.setType((String)configs.get(ConfigConstants.TUNNEL_TYPE));
+                updateInterface.setType((String)configs.get(ConfigConstants.TUNNEL_TYPE));
                 if (options == null) options = new HashMap<String, String>();
                 options.put("remote_ip", (String)configs.get(ConfigConstants.DEST_IP));
             } else if (type.equalsIgnoreCase(OvsVswitchdSchemaConstants.PortType.PATCH.name()) ||
                        type.equalsIgnoreCase(OvsVswitchdSchemaConstants.PortType.INTERNAL.name())) {
-                interfaceRow.setType(type.toLowerCase());
+                updateInterface.setType(type.toLowerCase());
             }
         }
         if (options != null) {
-            interfaceRow.setOptions(options);
+            updateInterface.setOptions(options);
         }
 
         Status intfStatus = null;
         intfStatus = this.updateRow(node, interfaceRow.getSchema().getName(), portStatus.getUuid().toString(),
-                                    interfaceRow.getUuid().toString(), interfaceRow.getRow());
+                                    interfaceRow.getUuid().toString(), updateInterface.getRow());
 
         if (intfStatus.isSuccess()) return portStatus;
         return intfStatus;
@@ -1069,8 +1069,8 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
             return new Status(StatusCode.NOTFOUND);
         }
         for (String portUuid : rows.keySet()) {
-            Row bridgeRow = rows.get(portUuid);
-            port = client.getTypedRowWrapper(Port.class, bridgeRow);
+            Row portRow = rows.get(portUuid);
+            port = client.getTypedRowWrapper(Port.class, portRow);
             if (port.getName().equals(portIdentifier)) break;
         }
         if (port.getName() == null || !port.getName().equals(portIdentifier)) {

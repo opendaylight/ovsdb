@@ -29,7 +29,16 @@ import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.OF13Provide
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestrator;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestratorImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.ArpResponderService;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.ClassifierService;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.EgressAclService;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.InboundNatService;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.IngressAclService;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.L2ForwardingService;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.L2RewriteService;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.LoadBalancerService;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.OutboundNatService;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.RoutingService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 
@@ -69,7 +78,16 @@ public class Activator extends ComponentActivatorAbstractBase {
                         OF10Provider.class,
                         OF13Provider.class,
                         PipelineOrchestratorImpl.class,
-                        L2RewriteService.class};
+                        ClassifierService.class,
+                        ArpResponderService.class,
+                        InboundNatService.class,
+                        IngressAclService.class,
+                        LoadBalancerService.class,
+                        RoutingService.class,
+                        L2RewriteService.class,
+                        L2ForwardingService.class,
+                        EgressAclService.class,
+                        OutboundNatService.class};
         return res;
     }
 
@@ -140,17 +158,6 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true));
         }
 
-        if (imp.equals(L2RewriteService.class)) {
-            Properties properties = new Properties();
-            properties.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.L2_REWRITE);
-            c.setInterface(AbstractServiceInstance.class.getName(), properties);
-
-            c.add(createServiceDependency()
-                          .setService(PipelineOrchestrator.class)
-                          .setRequired(true));
-            c.add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true));
-        }
-
         if (imp.equals(PipelineOrchestratorImpl.class)) {
             c.setInterface(PipelineOrchestrator.class.getName(), null);
             c.add(createServiceDependency()
@@ -158,5 +165,71 @@ public class Activator extends ComponentActivatorAbstractBase {
                            .setCallbacks("registerService", "unregisterService"));
         }
 
+        if (AbstractServiceInstance.class.isAssignableFrom((Class)imp)) {
+            c.add(createServiceDependency()
+                    .setService(PipelineOrchestrator.class)
+                    .setRequired(true));
+            c.add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true));
+        }
+
+        if (imp.equals(ClassifierService.class)) {
+            Properties properties = new Properties();
+            properties.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.CLASSIFIER);
+            c.setInterface(AbstractServiceInstance.class.getName(), properties);
+        }
+
+        if (imp.equals(ArpResponderService.class)) {
+            Properties properties = new Properties();
+            properties.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.ARP_RESPONDER);
+            c.setInterface(AbstractServiceInstance.class.getName(), properties);
+        }
+
+        if (imp.equals(InboundNatService.class)) {
+            Properties properties = new Properties();
+            properties.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.INBOUND_NAT);
+            c.setInterface(AbstractServiceInstance.class.getName(), properties);
+        }
+
+        if (imp.equals(IngressAclService.class)) {
+            Properties properties = new Properties();
+            properties.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.INGRESS_ACL);
+            c.setInterface(AbstractServiceInstance.class.getName(), properties);
+        }
+
+        if (imp.equals(LoadBalancerService.class)) {
+            Properties properties = new Properties();
+            properties.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.LOAD_BALANCER);
+            c.setInterface(AbstractServiceInstance.class.getName(), properties);
+        }
+
+        if (imp.equals(RoutingService.class)) {
+            Properties properties = new Properties();
+            properties.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.ROUTING);
+            c.setInterface(AbstractServiceInstance.class.getName(), properties);
+        }
+
+        if (imp.equals(L2RewriteService.class)) {
+            Properties properties = new Properties();
+            properties.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.L2_REWRITE);
+            c.setInterface(AbstractServiceInstance.class.getName(), properties);
+        }
+
+        if (imp.equals(L2ForwardingService.class)) {
+            Properties properties = new Properties();
+            properties.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.L2_FORWARDING);
+            c.setInterface(AbstractServiceInstance.class.getName(), properties);
+        }
+
+        if (imp.equals(IngressAclService.class)) {
+            Properties properties = new Properties();
+            properties.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.INGRESS_ACL);
+            c.setInterface(AbstractServiceInstance.class.getName(), properties);
+        }
+
+        if (imp.equals(OutboundNatService.class)) {
+            Properties properties = new Properties();
+            properties.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.OUTBOUND_NAT);
+            c.setInterface(AbstractServiceInstance.class.getName(), properties);
+        }
     }
 }

@@ -13,6 +13,8 @@ package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
 import java.util.List;
 import java.util.Map;
 
+import org.osgi.framework.ServiceReference;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -20,7 +22,6 @@ public class PipelineOrchestratorImpl implements PipelineOrchestrator {
 
     private List<Service> staticPipeline = Lists.newArrayList(
                                                                 Service.CLASSIFIER,
-                                                                Service.DIRECTOR,
                                                                 Service.ARP_RESPONDER,
                                                                 Service.INBOUND_NAT,
                                                                 Service.INGRESS_ACL,
@@ -35,17 +36,15 @@ public class PipelineOrchestratorImpl implements PipelineOrchestrator {
 
     public PipelineOrchestratorImpl() {
     }
-    @Override
-    public void registerService(Service service,
-            AbstractServiceInstance serviceInstance) {
+
+    public void registerService(final ServiceReference ref, AbstractServiceInstance serviceInstance){
+        Service service = (Service)ref.getProperty(AbstractServiceInstance.SERVICE_PROPERTY);
         serviceRegistry.put(service, serviceInstance);
     }
 
-    @Override
-    public void unregisterService(Service service) {
-        serviceRegistry.remove(service);
+    public void unregisterService(final ServiceReference ref) {
+        serviceRegistry.remove(ref.getProperty(AbstractServiceInstance.SERVICE_PROPERTY));
     }
-
     @Override
     public Service getNextServiceInPipeline(Service service) {
         int index = staticPipeline.indexOf(service);

@@ -15,8 +15,11 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallPolicyA
 import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallRuleAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronFloatingIPAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolMemberAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolMemberCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortAware;
@@ -240,6 +243,10 @@ public class Activator extends ComponentActivatorAbstractBase {
                                          INeutronLoadBalancerPoolMemberAware.class.getName()},
                                          lbaasHandlerProperties);
             c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
+            c.add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true));
+            c.add(createServiceDependency().setService(INeutronLoadBalancerCRUD.class).setRequired(true));
+            c.add(createServiceDependency().setService(INeutronLoadBalancerPoolCRUD.class).setRequired(true));
+            c.add(createServiceDependency().setService(INeutronLoadBalancerPoolMemberCRUD.class).setRequired(true));
         }
 
         if (imp.equals(PortSecurityHandler.class)) {

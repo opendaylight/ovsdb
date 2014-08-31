@@ -15,8 +15,6 @@ package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
  * to share a common OpenFlow 1.3 based multi-table pipeline.
  */
 public interface PipelineOrchestrator {
-    void registerService(Service service, AbstractServiceInstance serviceInstance);
-    void unregisterService(Service service);
     public Service getNextServiceInPipeline(Service service);
     AbstractServiceInstance getServiceInstance(Service service);
 }

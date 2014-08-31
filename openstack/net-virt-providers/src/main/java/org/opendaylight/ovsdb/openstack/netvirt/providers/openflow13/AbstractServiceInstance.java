@@ -9,8 +9,51 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
 
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.TableKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.CheckedFuture;
+
+/**
+ * Any ServiceInstance class that extends AbstractServiceInstance to be a part of the pipeline
+ * have 2 basic requirements : <br>
+ * 1. Program a default pipeline flow to take any unmatched traffic to the next table in the pipeline. <br>
+ * 2. Get Pipeline Instructions from AbstractServiceInstance (using getMutablePipelineInstructionBuilder) and
+ *    use it in any matching flows that needs to be further processed by next service in the pipeline.
+ *
+ */
 public abstract class AbstractServiceInstance {
-    Service service;
+    public static final String SERVICE_PROPERTY ="serviceProperty";
+    private Service service;
+    private volatile PipelineOrchestrator orchestrator;
+
     public AbstractServiceInstance (Service service) {
         this.service = service;
     }
@@ -18,4 +61,113 @@ public abstract class AbstractServiceInstance {
     public int getTable() {
         return service.getTable();
     }
+
+    public Service getService() {
+        return service;
+    }
+
+    public void setService(Service service) {
+        this.service = service;
+    }
+
+    private NodeBuilder createNodeBuilder(String nodeId) {
+        NodeBuilder builder = new NodeBuilder();
+        builder.setId(new NodeId(nodeId));
+        builder.setKey(new NodeKey(builder.getId()));
+        return builder;
+    }
+
+    /**
+     * This method returns the required Pipeline Instructions to by used by any matching flows that needs
+     * to be further processed by next service in the pipeline.
+     *
+     * Important to note that this is a convenience method which returns a mutable instructionBuilder which
+     * needs to be further adjusted by the concrete ServiceInstance class such as setting the Instruction Order, etc.
+     * @return Newly created InstructionBuilder to be used along with other instructions on the main flow
+     */
+    protected final InstructionBuilder getMutablePipelineInstructionBuilder() {
+        Service nextService = orchestrator.getNextServiceInPipeline(service);
+        if (nextService != null) {
+            return InstructionUtils.createGotoTableInstructions(new InstructionBuilder(), nextService.getTable());
+        } else {
+            return InstructionUtils.createDropInstructions(new InstructionBuilder());
+        }
+    }
+
+    private static final Logger logger = LoggerFactory.getLogger(AbstractServiceInstance.class);
+    private volatile MdsalConsumer mdsalConsumer;
+
+    public void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
+        Preconditions.checkNotNull(mdsalConsumer);
+        if (mdsalConsumer == null) {
+            logger.error("ERROR finding MDSAL Service. Its possible that writeFlow is called too soon ?");
+            return;
+        }
+
+        DataBroker dataBroker = mdsalConsumer.getDataBroker();
+        if (dataBroker == null) {
+            logger.error("ERROR finding reference for DataBroker. Please check MD-SAL support on the Controller.");
+            return;
+        }
+
+        ReadWriteTransaction modification = dataBroker.newReadWriteTransaction();
+        InstanceIdentifier<Flow> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
+                .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Table.class,
+                new TableKey(flowBuilder.getTableId())).child(Flow.class, flowBuilder.getKey()).build();
+
+        //modification.put(LogicalDatastoreType.OPERATIONAL, path1, flowBuilder.build());
+        modification.put(LogicalDatastoreType.CONFIGURATION, path1, flowBuilder.build(), true /*createMissingParents*/);
+
+
+        CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
+        try {
+            commitFuture.get();  // TODO: Make it async (See bug 1362)
+            logger.debug("Transaction success for write of Flow "+flowBuilder.getFlowName());
+        } catch (InterruptedException|ExecutionException e) {
+            logger.error(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Program Default Pipeline Flow.
+     *
+     * @param nodeId Node on which the default pipeline flow is programmed.
+     */
+    protected void programDefaultPipelineRule(String nodeId) {
+        MatchBuilder matchBuilder = new MatchBuilder();
+        FlowBuilder flowBuilder = new FlowBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeId);
+
+        // Create the OF Actions and Instructions
+        InstructionsBuilder isb = new InstructionsBuilder();
+
+        // Instructions List Stores Individual Instructions
+        List<Instruction> instructions = Lists.newArrayList();
+
+        // Call the InstructionBuilder Methods Containing Actions
+        InstructionBuilder ib = this.getMutablePipelineInstructionBuilder();
+        ib.setOrder(0);
+        ib.setKey(new InstructionKey(0));
+        instructions.add(ib.build());
+
+        // Add InstructionBuilder to the Instruction(s)Builder List
+        isb.setInstruction(instructions);
+
+        // Add InstructionsBuilder to FlowBuilder
+        flowBuilder.setInstructions(isb.build());
+
+        String flowId = "DEFAULT_PIPELINE_FLOW";
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setMatch(matchBuilder.build());
+        flowBuilder.setPriority(0);
+        flowBuilder.setBarrier(true);
+        flowBuilder.setTableId(service.getTable());
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+        writeFlow(flowBuilder, nodeBuilder);
+    }
+
 }

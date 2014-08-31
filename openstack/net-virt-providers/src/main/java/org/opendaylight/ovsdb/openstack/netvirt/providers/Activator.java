@@ -10,6 +10,9 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.providers;
 
+import java.util.Properties;
+
+import org.apache.felix.dm.Component;
 import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManager;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
@@ -19,14 +22,16 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow10.OF10Provider;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.MdsalConsumer;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.MdsalConsumerImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.OF13Provider;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestrator;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestratorImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.L2RewriteService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
-import org.apache.felix.dm.Component;
-
-import java.util.Properties;
 
 /**
  * OSGi Bundle Activator for the Neutron providers
@@ -62,7 +67,9 @@ public class Activator extends ComponentActivatorAbstractBase {
     public Object[] getImplementations() {
         Object[] res = {MdsalConsumerImpl.class,
                         OF10Provider.class,
-                        OF13Provider.class};
+                        OF13Provider.class,
+                        PipelineOrchestratorImpl.class,
+                        L2RewriteService.class};
         return res;
     }
 
@@ -132,5 +139,24 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
             c.add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true));
         }
+
+        if (imp.equals(L2RewriteService.class)) {
+            Properties properties = new Properties();
+            properties.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.L2_REWRITE);
+            c.setInterface(AbstractServiceInstance.class.getName(), properties);
+
+            c.add(createServiceDependency()
+                          .setService(PipelineOrchestrator.class)
+                          .setRequired(true));
+            c.add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true));
+        }
+
+        if (imp.equals(PipelineOrchestratorImpl.class)) {
+            c.setInterface(PipelineOrchestrator.class.getName(), null);
+            c.add(createServiceDependency()
+                           .setService(AbstractServiceInstance.class)
+                           .setCallbacks("registerService", "unregisterService"));
+        }
+
     }
 }

@@ -18,9 +18,12 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow10.OF10Provider;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.MdsalConsumer;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.MdsalConsumerImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.OF13Provider;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
-
 import org.apache.felix.dm.Component;
 
 import java.util.Properties;

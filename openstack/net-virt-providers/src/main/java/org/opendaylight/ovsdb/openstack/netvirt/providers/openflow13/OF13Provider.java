@@ -7,7 +7,7 @@
  *
  * Authors : Madhu Venugopal, Brent Salisbury, Dave Tucker
  */
-package org.opendaylight.ovsdb.openstack.netvirt.providers;
+package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;

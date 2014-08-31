@@ -7,7 +7,7 @@
  *
  * Authors : Madhu Venugopal, Brent Salisbury, Sam Hague, Dave Tucker
  */
-package org.opendaylight.ovsdb.openstack.netvirt.providers;
+package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow10;
 
 import org.opendaylight.controller.forwardingrulesmanager.FlowConfig;
 import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManager;

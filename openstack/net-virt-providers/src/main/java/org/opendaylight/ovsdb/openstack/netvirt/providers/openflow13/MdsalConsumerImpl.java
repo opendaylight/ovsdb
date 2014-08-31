@@ -8,7 +8,7 @@
  * Authors : Madhu Venugopal
  */
 
-package org.opendaylight.ovsdb.openstack.netvirt.providers;
+package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;

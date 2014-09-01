@@ -21,6 +21,16 @@ import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 public interface NetworkingProvider {
 
     /**
+     * Returns the name of the NetworkingProvider
+     */
+    public String getName();
+
+    /**
+     * Return true if the provider supports Network Service Instances
+     */
+    public boolean supportsServices();
+
+    /**
      * Return true if the provider supports per-tenant or "static" tunneling
      */
     public boolean hasPerTenantTunneling();

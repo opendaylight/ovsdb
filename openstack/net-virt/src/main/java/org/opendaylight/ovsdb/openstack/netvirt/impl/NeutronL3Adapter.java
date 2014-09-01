@@ -17,10 +17,13 @@ import org.opendaylight.controller.networkconfig.neutron.NeutronRouter;
 import org.opendaylight.controller.networkconfig.neutron.NeutronRouter_Interface;
 import org.opendaylight.controller.networkconfig.neutron.NeutronSubnet;
 import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent;
-import org.opendaylight.ovsdb.openstack.netvirt.NorthboundEvent;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.InboundNatProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.MultiTenantAwareRouter;
-import org.opendaylight.ovsdb.openstack.netvirt.api.MultiTenantRouterForwardingProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OutboundNatProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 
 import org.slf4j.Logger;
@@ -40,26 +43,30 @@ public class NeutronL3Adapter {
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile MultiTenantAwareRouter multiTenantAwareRouter;
-    private volatile MultiTenantRouterForwardingProvider multiTenantRouterForwardingProvider;
+    private volatile L3ForwardingProvider l3ForwardingProvider;
+    private volatile InboundNatProvider inboundNatProvider;
+    private volatile OutboundNatProvider outboundNatProvider;
+    private volatile ArpProvider arpProvider;
+    private volatile RoutingProvider routingProvider;
 
     //
     // Callbacks from OVSDB's northbound handlers
     //
 
-    public void handleNeutronSubnetEvent(final NeutronSubnet subnet, NorthboundEvent.Action action) {
+    public void handleNeutronSubnetEvent(final NeutronSubnet subnet, Action action) {
         logger.debug("Neutron subnet {} event : {}", action, subnet.toString());
 
         // TODO
     }
 
-    public void handleNeutronPortEvent(final NeutronPort neutronPort, NorthboundEvent.Action action) {
+    public void handleNeutronPortEvent(final NeutronPort neutronPort, Action action) {
         logger.debug("Neutron port {} event : {}", action, neutronPort.toString());
 
         // TODO
 
     }
 
-    public void handleNeutronRouterEvent(final NeutronRouter neutronRouter, NorthboundEvent.Action action) {
+    public void handleNeutronRouterEvent(final NeutronRouter neutronRouter, Action action) {
         logger.debug("Neutron router {} event : {}", action, neutronRouter.toString());
 
         // TODO
@@ -68,7 +75,7 @@ public class NeutronL3Adapter {
 
     public void handleNeutronRouterInterfaceEvent(final NeutronRouter neutronRouter,
                                                   final NeutronRouter_Interface neutronRouterInterface,
-                                                  NorthboundEvent.Action action) {
+                                                  Action action) {
         logger.debug(" Router {} interface {} attached. Subnet {}", neutronRouter.getName(),
                      neutronRouterInterface.getPortUUID(),
                      neutronRouterInterface.getSubnetUUID());
@@ -78,7 +85,7 @@ public class NeutronL3Adapter {
     }
 
     public void handleNeutronFloatingIPEvent(final NeutronFloatingIP neutronFloatingIP,
-                                             NorthboundEvent.Action action) {
+                                             Action action) {
         logger.debug(" Floating IP {} {}, uuid {}", action,
                      neutronFloatingIP.getFixedIPAddress(),
                      neutronFloatingIP.getFloatingIPUUID());
@@ -86,7 +93,7 @@ public class NeutronL3Adapter {
         // TODO
     }
 
-    public void handleNeutronNetworkEvent(final NeutronNetwork neutronNetwork, NorthboundEvent.Action action) {
+    public void handleNeutronNetworkEvent(final NeutronNetwork neutronNetwork, Action action) {
         logger.debug("neutronNetwork {}: network: {}", action, neutronNetwork);
 
         // TODO
@@ -97,7 +104,7 @@ public class NeutronL3Adapter {
     //
 
     public void handleInterfaceEvent(final Node node, final Interface intf, NeutronNetwork neutronNetwork,
-                                     AbstractEvent.Action action) {
+                                     Action action) {
         logger.debug("southbound interface {} node:{} interface:{}, neutronNetwork:{}",
                      action, node, intf, neutronNetwork);
 

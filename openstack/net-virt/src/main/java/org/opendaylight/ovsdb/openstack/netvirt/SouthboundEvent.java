@@ -11,6 +11,7 @@ package org.opendaylight.ovsdb.openstack.netvirt;
 
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.lib.notation.Row;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 
 public class SouthboundEvent extends AbstractEvent {
     public enum Type { NODE, ROW };

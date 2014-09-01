@@ -12,6 +12,7 @@ package org.opendaylight.ovsdb.openstack.netvirt;
 
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetAware;
 import org.opendaylight.controller.networkconfig.neutron.NeutronSubnet;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 
 import com.google.common.base.Preconditions;
@@ -34,7 +35,7 @@ public class SubnetHandler extends AbstractHandler implements INeutronSubnetAwar
 
     @Override
     public void neutronSubnetCreated(NeutronSubnet subnet) {
-        enqueueEvent(new NorthboundEvent(subnet, NorthboundEvent.Action.ADD));
+        enqueueEvent(new NorthboundEvent(subnet, Action.ADD));
     }
 
     @Override
@@ -44,7 +45,7 @@ public class SubnetHandler extends AbstractHandler implements INeutronSubnetAwar
 
     @Override
     public void neutronSubnetUpdated(NeutronSubnet subnet) {
-        enqueueEvent(new NorthboundEvent(subnet, NorthboundEvent.Action.UPDATE));
+        enqueueEvent(new NorthboundEvent(subnet, Action.UPDATE));
     }
 
     @Override
@@ -55,7 +56,7 @@ public class SubnetHandler extends AbstractHandler implements INeutronSubnetAwar
 
     @Override
     public void neutronSubnetDeleted(NeutronSubnet subnet) {
-        enqueueEvent(new NorthboundEvent(subnet, NorthboundEvent.Action.DELETE));
+        enqueueEvent(new NorthboundEvent(subnet, Action.DELETE));
     }
 
     /**

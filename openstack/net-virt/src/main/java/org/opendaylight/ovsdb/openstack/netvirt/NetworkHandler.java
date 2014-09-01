@@ -15,6 +15,7 @@ import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
@@ -88,10 +89,10 @@ public class NetworkHandler extends AbstractHandler
             return;
         }
 
-        enqueueEvent(new NorthboundEvent(network, AbstractEvent.Action.ADD));
+        enqueueEvent(new NorthboundEvent(network, Action.ADD));
     }
     private void doNeutronNetworkCreated(NeutronNetwork network) {
-        neutronL3Adapter.handleNeutronNetworkEvent(network, AbstractEvent.Action.ADD);
+        neutronL3Adapter.handleNeutronNetworkEvent(network, Action.ADD);
     }
 
     /**
@@ -118,10 +119,10 @@ public class NetworkHandler extends AbstractHandler
      */
     @Override
     public void neutronNetworkUpdated(NeutronNetwork network) {
-        enqueueEvent(new NorthboundEvent(network, AbstractEvent.Action.UPDATE));
+        enqueueEvent(new NorthboundEvent(network, Action.UPDATE));
     }
     private void doNeutronNetworkUpdated(NeutronNetwork network) {
-        neutronL3Adapter.handleNeutronNetworkEvent(network, AbstractEvent.Action.UPDATE);
+        neutronL3Adapter.handleNeutronNetworkEvent(network, Action.UPDATE);
     }
 
     /**
@@ -143,10 +144,10 @@ public class NetworkHandler extends AbstractHandler
      */
     @Override
     public void neutronNetworkDeleted(NeutronNetwork network) {
-        enqueueEvent(new NorthboundEvent(network, AbstractEvent.Action.DELETE));
+        enqueueEvent(new NorthboundEvent(network, Action.DELETE));
     }
     private void doNeutronNetworkDeleted(NeutronNetwork network) {
-        neutronL3Adapter.handleNeutronNetworkEvent(network, AbstractEvent.Action.DELETE);
+        neutronL3Adapter.handleNeutronNetworkEvent(network, Action.DELETE);
 
         int result = canDeleteNetwork(network);
         logger.trace("canDeleteNetwork: network: {}", network);

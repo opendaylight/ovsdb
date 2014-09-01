@@ -11,12 +11,17 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.OutputActionCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetDlDstActionCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetDlSrcActionCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwDstActionCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwSrcActionCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.dec.nw.ttl._case.DecNwTtlBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.drop.action._case.DropActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.group.action._case.GroupActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.output.action._case.OutputActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.dl.dst.action._case.SetDlDstActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.dl.src.action._case.SetDlSrcActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.nw.dst.action._case.SetNwDstActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.nw.src.action._case.SetNwSrcActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.Address;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.dst.choice.grouping.DstChoice;
@@ -100,6 +105,22 @@ public final class ActionUtils {
         return new SetDlDstActionCaseBuilder()
             .setSetDlDstAction(new SetDlDstActionBuilder()
                 .setAddress(mac)
+                .build())
+            .build();
+    }
+
+    public static Action setNwSrcAction(Address ip) {
+        return new SetNwSrcActionCaseBuilder()
+            .setSetNwSrcAction(new SetNwSrcActionBuilder()
+                .setAddress(ip)
+                .build())
+            .build();
+    }
+
+    public static Action setNwDstAction(Address ip) {
+        return new SetNwDstActionCaseBuilder()
+            .setSetNwDstAction(new SetNwDstActionBuilder()
+                .setAddress(ip)
                 .build())
             .build();
     }
@@ -285,25 +306,21 @@ public final class ActionUtils {
     }
 
     public static Action nxMultipathAction(OfjNxHashFields fields, Integer basis,
-            OfjNxMpAlgorithm algorithm, Integer maxLink, Long arg) {
-        NxMultipathBuilder builder = new NxMultipathBuilder();
-        if (fields != null) {
-            builder.setFields(fields);
-        }
-        if (basis != null) {
-            builder.setBasis(basis);
-        }
-        if (algorithm != null) {
-            builder.setAlgorithm(algorithm);
-        }
-        if (maxLink != null) {
-            builder.setMaxLink(maxLink);
-        }
-        if (arg != null) {
-            builder.setArg(arg);
-        }
-        NxMultipath r = builder.build();
+            OfjNxMpAlgorithm algorithm, Integer maxLink, Long arg, Integer ofsNbits,
+            DstChoice dstChoice) {
+        NxMultipath r = new NxMultipathBuilder()
+            .setFields(fields)
+            .setBasis(basis)
+            .setAlgorithm(algorithm)
+            .setMaxLink(maxLink)
+            .setArg(arg)
+            .setOfsNbits(ofsNbits)
+            .setDst(new org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nx.action.multipath.grouping.nx.multipath.DstBuilder()
+                .setDstChoice(dstChoice)
+                .setStart(Integer.valueOf(0))
+                .setEnd(Integer.valueOf(31))
+                .build())
+            .build();
         return new NxActionMultipathNodesNodeTableFlowApplyActionsCaseBuilder().setNxMultipath(r).build();
     }
 }
-

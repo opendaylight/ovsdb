@@ -16,6 +16,7 @@ module ovs-nx-sal-action {
     import openflowplugin-extension-general {prefix ext-gen;revision-date "2014-07-14";}
     import openflow-action {prefix ofaction;revision-date "2013-07-31";}
     import ovs-nx-action {prefix ovsnx-action;revision-date "2014-04-21";}
+    import openflowplugin-extension-nicira-action {prefix ofp-nx-action;revision-date "2014-07-14";}
 
     description
         "Nicira openflow action extensions.";
@@ -78,6 +79,11 @@ module ovs-nx-sal-action {
             }
             leaf ofs-nbits {
                 type uint16;
+            }
+            container dst {
+                description "Writes value to bits start through end, inclusive, in field dst.";
+                uses ofp-nx-action:dst-choice-grouping;
+                uses ofp-nx-action:range-grouping;
             }
         }
     }

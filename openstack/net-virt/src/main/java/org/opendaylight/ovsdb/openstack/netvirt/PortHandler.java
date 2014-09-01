@@ -14,6 +14,7 @@ import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
@@ -72,14 +73,14 @@ public class PortHandler extends AbstractHandler
             return;
         }
 
-        enqueueEvent(new NorthboundEvent(neutronPort, NorthboundEvent.Action.ADD));
+        enqueueEvent(new NorthboundEvent(neutronPort, Action.ADD));
     }
     private void doNeutronPortCreated(NeutronPort neutronPort) {
         logger.debug(" Port-ADD successful for tenant-id - {}," +
                      " network-id - {}, port-id - {}",
                      neutronPort.getTenantID(), neutronPort.getNetworkUUID(),
                      neutronPort.getID());
-        neutronL3Adapter.handleNeutronPortEvent(neutronPort, NorthboundEvent.Action.ADD);
+        neutronL3Adapter.handleNeutronPortEvent(neutronPort, Action.ADD);
     }
 
     /**
@@ -114,11 +115,11 @@ public class PortHandler extends AbstractHandler
      */
     @Override
     public void neutronPortUpdated(NeutronPort neutronPort) {
-        enqueueEvent(new NorthboundEvent(neutronPort, NorthboundEvent.Action.UPDATE));
+        enqueueEvent(new NorthboundEvent(neutronPort, Action.UPDATE));
     }
     private void doNeutronPortUpdated(NeutronPort neutronPort) {
         logger.debug("Handling neutron update port " + neutronPort);
-        neutronL3Adapter.handleNeutronPortEvent(neutronPort, NorthboundEvent.Action.UPDATE);
+        neutronL3Adapter.handleNeutronPortEvent(neutronPort, Action.UPDATE);
     }
 
     /**
@@ -147,11 +148,11 @@ public class PortHandler extends AbstractHandler
             return;
         }
 
-        enqueueEvent(new NorthboundEvent(neutronPort, NorthboundEvent.Action.DELETE));
+        enqueueEvent(new NorthboundEvent(neutronPort, Action.DELETE));
     }
     private void doNeutronPortDeleted(NeutronPort neutronPort) {
         logger.debug("Handling neutron delete port " + neutronPort);
-        neutronL3Adapter.handleNeutronPortEvent(neutronPort, NorthboundEvent.Action.DELETE);
+        neutronL3Adapter.handleNeutronPortEvent(neutronPort, Action.DELETE);
 
         List<Node> nodes = connectionService.getNodes();
         for (Node node : nodes) {

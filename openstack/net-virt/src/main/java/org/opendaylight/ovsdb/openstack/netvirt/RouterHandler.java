@@ -12,6 +12,7 @@ package org.opendaylight.ovsdb.openstack.netvirt;
 import org.opendaylight.controller.networkconfig.neutron.INeutronRouterAware;
 import org.opendaylight.controller.networkconfig.neutron.NeutronRouter;
 import org.opendaylight.controller.networkconfig.neutron.NeutronRouter_Interface;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 
 import org.slf4j.Logger;
@@ -56,7 +57,7 @@ public class RouterHandler extends AbstractHandler
      */
     @Override
     public void neutronRouterCreated(NeutronRouter router) {
-        enqueueEvent(new NorthboundEvent(router, AbstractEvent.Action.ADD));
+        enqueueEvent(new NorthboundEvent(router, Action.ADD));
     }
 
     /**
@@ -85,7 +86,7 @@ public class RouterHandler extends AbstractHandler
      */
     @Override
     public void neutronRouterUpdated(NeutronRouter router) {
-        enqueueEvent(new NorthboundEvent(router, AbstractEvent.Action.UPDATE));
+        enqueueEvent(new NorthboundEvent(router, Action.UPDATE));
     }
 
     /**
@@ -111,7 +112,7 @@ public class RouterHandler extends AbstractHandler
      */
     @Override
     public void neutronRouterDeleted(NeutronRouter router) {
-        enqueueEvent(new NorthboundEvent(router, AbstractEvent.Action.DELETE));
+        enqueueEvent(new NorthboundEvent(router, Action.DELETE));
     }
 
     /**
@@ -146,7 +147,7 @@ public class RouterHandler extends AbstractHandler
      */
     @Override
     public void neutronRouterInterfaceAttached(NeutronRouter router, NeutronRouter_Interface routerInterface) {
-        enqueueEvent(new NorthboundEvent(router, routerInterface, AbstractEvent.Action.ADD));
+        enqueueEvent(new NorthboundEvent(router, routerInterface, Action.ADD));
     }
 
     /**
@@ -182,7 +183,7 @@ public class RouterHandler extends AbstractHandler
      */
     @Override
     public void neutronRouterInterfaceDetached(NeutronRouter router, NeutronRouter_Interface routerInterface) {
-        enqueueEvent(new NorthboundEvent(router, routerInterface, AbstractEvent.Action.DELETE));
+        enqueueEvent(new NorthboundEvent(router, routerInterface, Action.DELETE));
     }
 
     /**

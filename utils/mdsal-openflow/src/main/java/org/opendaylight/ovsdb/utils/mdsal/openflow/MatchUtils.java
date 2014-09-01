@@ -73,6 +73,12 @@ import com.google.common.collect.Lists;
 
 public class MatchUtils {
     private static final Logger logger = LoggerFactory.getLogger(MatchUtils.class);
+    public static final short ICMP_SHORT = 1;
+    public static final short TCP_SHORT = 6;
+    public static final short UDP_SHORT = 17;
+    public static final String TCP = "tcp";
+    public static final String UDP = "udp";
+    private static final int TCP_SYN = 0x0002;
 
     /**
      * Create Ingress Port Match dpidLong, inPort
@@ -361,6 +367,312 @@ public class MatchUtils {
             metadata.setMetadataMask(metaDataMask);
         }
         matchBuilder.setMetadata(metadata.build());
+
+        return matchBuilder;
+    }
+
+
+    /**
+     * Create Source TCP Port Match
+     *
+     * @param matchBuilder @param matchbuilder MatchBuilder Object without a match yet
+     * @param tcpport      Integer representing a source TCP port
+     * @return matchBuilder Map MatchBuilder Object with a match
+     */
+    public static MatchBuilder createIpProtocolMatch(MatchBuilder matchBuilder, short ipProtocol) {
+
+        EthernetMatchBuilder ethType = new EthernetMatchBuilder();
+        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
+        ethTypeBuilder.setType(new EtherType(0x0800L));
+        ethType.setEthernetType(ethTypeBuilder.build());
+        matchBuilder.setEthernetMatch(ethType.build());
+
+        IpMatchBuilder ipMmatch = new IpMatchBuilder();
+        if (ipProtocol == TCP_SHORT) {
+            ipMmatch.setIpProtocol(TCP_SHORT);
+        }
+        else if (ipProtocol == UDP_SHORT) {
+            ipMmatch.setIpProtocol(UDP_SHORT);
+        }
+        else if (ipProtocol == ICMP_SHORT) {
+            ipMmatch.setIpProtocol(ICMP_SHORT);
+        }
+        matchBuilder.setIpMatch(ipMmatch.build());
+        return matchBuilder;
+    }
+
+    /**
+     *
+     * @return matchBuilder
+     */
+    public static MatchBuilder createTcpSynWithProtoMatch(MatchBuilder matchBuilder) {
+
+        // Ethertype match
+        EthernetMatchBuilder ethernetType = new EthernetMatchBuilder();
+        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
+        ethTypeBuilder.setType(new EtherType(0x0800L));
+        ethernetType.setEthernetType(ethTypeBuilder.build());
+        matchBuilder.setEthernetMatch(ethernetType.build());
+
+        // TCP Protocol Match
+        IpMatchBuilder ipMatch = new IpMatchBuilder(); // ipv4 version
+        ipMatch.setIpProtocol((short) 6);
+        matchBuilder.setIpMatch(ipMatch.build());
+
+        TcpFlagMatchBuilder tcpFlagMatch = new TcpFlagMatchBuilder();
+        tcpFlagMatch.setTcpFlag(TCP_SYN);
+        matchBuilder.setTcpFlagMatch(tcpFlagMatch.build());
+        return matchBuilder;
+    }
+
+    /**
+     *
+     * @return matchBuilder
+     */
+    public static MatchBuilder createTcpProtoSynMatch(MatchBuilder matchBuilder) {
+
+        // TCP Protocol Match
+        IpMatchBuilder ipMatch = new IpMatchBuilder(); // ipv4 version
+        ipMatch.setIpProtocol((short) 6);
+        matchBuilder.setIpMatch(ipMatch.build());
+
+        TcpFlagMatchBuilder tcpFlagMatch = new TcpFlagMatchBuilder();
+        tcpFlagMatch.setTcpFlag(TCP_SYN);
+        matchBuilder.setTcpFlagMatch(tcpFlagMatch.build());
+        return matchBuilder;
+    }
+
+    /**
+     *
+     * @return matchBuilder
+     */
+    public static MatchBuilder createTunnelVMIngressTcpFlagMatch(MatchBuilder matchBuilder,
+            MacAddress attachedMac, PortNumber tcpPort,
+            Integer tcpFlag, String segmentationId,
+            Ipv4Prefix srcIp) {
+
+        EthernetMatchBuilder ethernetMatch = new EthernetMatchBuilder();
+        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
+        ethTypeBuilder.setType(new EtherType(0x0800L));
+        ethernetMatch.setEthernetType(ethTypeBuilder.build());
+
+        EthernetDestinationBuilder ethDestinationBuilder = new EthernetDestinationBuilder();
+        ethDestinationBuilder.setAddress(new MacAddress(attachedMac));
+        ethernetMatch.setEthernetDestination(ethDestinationBuilder.build());
+
+        matchBuilder.setEthernetMatch(ethernetMatch.build());
+
+        Ipv4MatchBuilder ipv4match = new Ipv4MatchBuilder();
+        ipv4match.setIpv4Source(srcIp);
+        matchBuilder.setLayer3Match(ipv4match.build());
+
+        // TCP Protocol Match
+        IpMatchBuilder ipMatch = new IpMatchBuilder(); // ipv4 version
+        ipMatch.setIpProtocol((short) 6);
+        matchBuilder.setIpMatch(ipMatch.build());
+
+        // TCP Port Match
+        PortNumber dstPort = new PortNumber(tcpPort);
+        TcpMatchBuilder tcpMatch = new TcpMatchBuilder();
+        tcpMatch.setTcpDestinationPort(dstPort);
+        matchBuilder.setLayer4Match(tcpMatch.build());
+
+        TcpFlagMatchBuilder tcpFlagMatch = new TcpFlagMatchBuilder();
+        tcpFlagMatch.setTcpFlag(tcpFlag);
+        matchBuilder.setTcpFlagMatch(tcpFlagMatch.build());
+
+        TunnelBuilder tunnelBuilder = new TunnelBuilder();
+        tunnelBuilder.setTunnelId(new BigInteger(segmentationId));
+        matchBuilder.setTunnel(tunnelBuilder.build());
+
+        return matchBuilder;
+    }
+
+    /**
+     *
+     * @return matchBuilder
+     */
+    public static MatchBuilder createLocalVMIngressTcpFlagMatch(MatchBuilder matchBuilder,
+            String attachedMac, PortNumber tcpPort, Integer tcpFlag, String tunnelID) {
+
+        EthernetMatchBuilder ethernetMatch = new EthernetMatchBuilder();
+        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
+        ethTypeBuilder.setType(new EtherType(0x0800L));
+        ethernetMatch.setEthernetType(ethTypeBuilder.build());
+
+        EthernetDestinationBuilder ethDestinationBuilder = new EthernetDestinationBuilder();
+        ethDestinationBuilder.setAddress(new MacAddress(attachedMac));
+        ethernetMatch.setEthernetDestination(ethDestinationBuilder.build());
+        matchBuilder.setEthernetMatch(ethernetMatch.build());
+
+        // TCP Protocol Match
+        IpMatchBuilder ipMatch = new IpMatchBuilder(); // ipv4 version
+        ipMatch.setIpProtocol((short) 6);
+        matchBuilder.setIpMatch(ipMatch.build());
+
+        // TCP Port Match
+        PortNumber dstPort = new PortNumber(tcpPort);
+        TcpMatchBuilder tcpMatch = new TcpMatchBuilder();
+        tcpMatch.setTcpDestinationPort(dstPort);
+        matchBuilder.setLayer4Match(tcpMatch.build());
+
+        TcpFlagMatchBuilder tcpFlagMatch = new TcpFlagMatchBuilder();
+        tcpFlagMatch.setTcpFlag(TCP_SYN);
+        matchBuilder.setTcpFlagMatch(tcpFlagMatch.build());
+
+        TunnelBuilder tunnelBuilder = new TunnelBuilder();
+        tunnelBuilder.setTunnelId(new BigInteger(tunnelID));
+        matchBuilder.setTunnel(tunnelBuilder.build());
+
+        return matchBuilder;
+    }
+
+    /**
+     *
+     *
+     * @return match containing TCP_Flag (), IP Protocol (TCP), TCP_Flag (SYN)
+     */
+    public static MatchBuilder createTcpPortWithFlagMatch(MatchBuilder matchBuilder,
+            String attachedMac,
+            Integer tcpFlag, String tunnelID) {
+
+        EthernetMatchBuilder ethernetMatch = new EthernetMatchBuilder();
+        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
+        ethTypeBuilder.setType(new EtherType(0x0800L));
+        ethernetMatch.setEthernetType(ethTypeBuilder.build());
+
+        EthernetDestinationBuilder ethDestinationBuilder = new EthernetDestinationBuilder();
+        ethDestinationBuilder.setAddress(new MacAddress(attachedMac));
+        ethernetMatch.setEthernetDestination(ethDestinationBuilder.build());
+        matchBuilder.setEthernetMatch(ethernetMatch.build());
+
+        // TCP Protocol Match
+        IpMatchBuilder ipMatch = new IpMatchBuilder(); // ipv4 version
+        ipMatch.setIpProtocol(TCP_SHORT);
+        matchBuilder.setIpMatch(ipMatch.build());
+
+        TcpFlagMatchBuilder tcpFlagMatch = new TcpFlagMatchBuilder();
+        tcpFlagMatch.setTcpFlag(tcpFlag);
+        matchBuilder.setTcpFlagMatch(tcpFlagMatch.build());
+
+        TunnelBuilder tunnelBuilder = new TunnelBuilder();
+        tunnelBuilder.setTunnelId(new BigInteger(tunnelID));
+        matchBuilder.setTunnel(tunnelBuilder.build());
+
+        return matchBuilder;
+    }
+
+    public static MatchBuilder createDmacTcpSyn(MatchBuilder matchBuilder,
+            String attachedMac, PortNumber tcpPort, Integer tcpFlag, String tunnelID) {
+
+        EthernetMatchBuilder ethernetMatch = new EthernetMatchBuilder();
+        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
+        ethTypeBuilder.setType(new EtherType(0x0800L));
+        ethernetMatch.setEthernetType(ethTypeBuilder.build());
+
+        EthernetDestinationBuilder ethDestinationBuilder = new EthernetDestinationBuilder();
+        ethDestinationBuilder.setAddress(new MacAddress(attachedMac));
+        ethernetMatch.setEthernetDestination(ethDestinationBuilder.build());
+
+        matchBuilder.setEthernetMatch(ethernetMatch.build());
+
+        // TCP Protocol Match
+        IpMatchBuilder ipMatch = new IpMatchBuilder(); // ipv4 version
+        ipMatch.setIpProtocol((short) 6);
+        matchBuilder.setIpMatch(ipMatch.build());
+
+        // TCP Port Match
+        PortNumber dstPort = new PortNumber(tcpPort);
+        TcpMatchBuilder tcpMatch = new TcpMatchBuilder();
+        tcpMatch.setTcpDestinationPort(dstPort);
+        matchBuilder.setLayer4Match(tcpMatch.build());
+
+        TcpFlagMatchBuilder tcpFlagMatch = new TcpFlagMatchBuilder();
+        tcpFlagMatch.setTcpFlag(tcpFlag);
+        matchBuilder.setTcpFlagMatch(tcpFlagMatch.build());
+
+        TunnelBuilder tunnelBuilder = new TunnelBuilder();
+        tunnelBuilder.setTunnelId(new BigInteger(tunnelID));
+        matchBuilder.setTunnel(tunnelBuilder.build());
+
+        return matchBuilder;
+    }
+
+    public static MatchBuilder createDmacTcpSynIpPrefixTcpPort(MatchBuilder matchBuilder,
+            MacAddress attachedMac, PortNumber tcpPort,
+            Integer tcpFlag, String segmentationId,
+            Ipv4Prefix srcIp) {
+
+        EthernetMatchBuilder ethernetMatch = new EthernetMatchBuilder();
+        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
+        ethTypeBuilder.setType(new EtherType(0x0800L));
+        ethernetMatch.setEthernetType(ethTypeBuilder.build());
+
+        EthernetDestinationBuilder ethDestinationBuilder = new EthernetDestinationBuilder();
+        ethDestinationBuilder.setAddress(new MacAddress(attachedMac));
+        ethernetMatch.setEthernetDestination(ethDestinationBuilder.build());
+
+        matchBuilder.setEthernetMatch(ethernetMatch.build());
+
+        Ipv4MatchBuilder ipv4match = new Ipv4MatchBuilder();
+        ipv4match.setIpv4Source(srcIp);
+        matchBuilder.setLayer3Match(ipv4match.build());
+
+        // TCP Protocol Match
+        IpMatchBuilder ipMatch = new IpMatchBuilder(); // ipv4 version
+        ipMatch.setIpProtocol(TCP_SHORT);
+        matchBuilder.setIpMatch(ipMatch.build());
+
+        // TCP Port Match
+        PortNumber dstPort = new PortNumber(tcpPort);
+        TcpMatchBuilder tcpMatch = new TcpMatchBuilder();
+        tcpMatch.setTcpDestinationPort(dstPort);
+        matchBuilder.setLayer4Match(tcpMatch.build());
+
+        TcpFlagMatchBuilder tcpFlagMatch = new TcpFlagMatchBuilder();
+        tcpFlagMatch.setTcpFlag(tcpFlag);
+        matchBuilder.setTcpFlagMatch(tcpFlagMatch.build());
+
+        TunnelBuilder tunnelBuilder = new TunnelBuilder();
+        tunnelBuilder.setTunnelId(new BigInteger(segmentationId));
+        matchBuilder.setTunnel(tunnelBuilder.build());
+
+        return matchBuilder;
+    }
+
+    /**
+     * @return MatchBuilder containing the metadata match values
+     */
+    public static MatchBuilder createMacSrcIpTcpSynMatch(MatchBuilder matchBuilder,
+            MacAddress dMacAddr,  MacAddress mask, Ipv4Prefix ipPrefix) {
+
+        EthernetMatchBuilder ethernetMatch = new EthernetMatchBuilder();
+        EthernetDestinationBuilder ethDestinationBuilder = new EthernetDestinationBuilder();
+        ethDestinationBuilder.setAddress(new MacAddress(dMacAddr));
+        if (mask != null) {
+            ethDestinationBuilder.setMask(mask);
+        }
+        ethernetMatch.setEthernetDestination(ethDestinationBuilder.build());
+        matchBuilder.setEthernetMatch(ethernetMatch.build());
+        // Ethertype match
+        EthernetMatchBuilder ethernetType = new EthernetMatchBuilder();
+        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
+        ethTypeBuilder.setType(new EtherType(0x0800L));
+        ethernetType.setEthernetType(ethTypeBuilder.build());
+        matchBuilder.setEthernetMatch(ethernetType.build());
+        if (ipPrefix != null) {
+            Ipv4MatchBuilder ipv4match = new Ipv4MatchBuilder();
+            ipv4match.setIpv4Source(ipPrefix);
+            matchBuilder.setLayer3Match(ipv4match.build());
+        }
+        // TCP Protocol Match
+        IpMatchBuilder ipMatch = new IpMatchBuilder(); // ipv4 version
+        ipMatch.setIpProtocol(TCP_SHORT);
+        matchBuilder.setIpMatch(ipMatch.build());
+        // TCP Flag Match
+        TcpFlagMatchBuilder tcpFlagMatch = new TcpFlagMatchBuilder();
+        tcpFlagMatch.setTcpFlag(TCP_SYN);
+        matchBuilder.setTcpFlagMatch(tcpFlagMatch.build());
 
         return matchBuilder;
     }

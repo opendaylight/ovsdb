@@ -119,7 +119,7 @@ public abstract class AbstractServiceInstance implements OpendaylightInventoryLi
         thread.start();
     }
 
-    private NodeBuilder createNodeBuilder(String nodeId) {
+    protected NodeBuilder createNodeBuilder(String nodeId) {
         NodeBuilder builder = new NodeBuilder();
         builder.setId(new NodeId(nodeId));
         builder.setKey(new NodeKey(builder.getId()));
@@ -143,7 +143,7 @@ public abstract class AbstractServiceInstance implements OpendaylightInventoryLi
         }
     }
 
-    private void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
+    protected void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
         Preconditions.checkNotNull(mdsalConsumer);
         if (mdsalConsumer == null) {
             logger.error("ERROR finding MDSAL Service. Its possible that writeFlow is called too soon ?");

@@ -69,6 +69,16 @@ public class OF10Provider implements NetworkingProvider {
     }
 
     @Override
+    public String getName() {
+        return "OF10Provider";
+    }
+
+    @Override
+    public boolean supportsServices() {
+        return false;
+    }
+
+    @Override
     public boolean hasPerTenantTunneling() {
         return true;
     }

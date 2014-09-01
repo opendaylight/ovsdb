@@ -19,8 +19,12 @@ import org.opendaylight.controller.networkconfig.neutron.NeutronSubnet;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent;
 import org.opendaylight.ovsdb.openstack.netvirt.NorthboundEvent;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.InboundNatProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.MultiTenantAwareRouter;
-import org.opendaylight.ovsdb.openstack.netvirt.api.MultiTenantRouterForwardingProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OutboundNatProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 
 import org.slf4j.Logger;
@@ -40,7 +44,11 @@ public class NeutronL3Adapter {
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile MultiTenantAwareRouter multiTenantAwareRouter;
-    private volatile MultiTenantRouterForwardingProvider multiTenantRouterForwardingProvider;
+    private volatile L3ForwardingProvider l3ForwardingProvider;
+    private volatile InboundNatProvider inboundNatProvider;
+    private volatile OutboundNatProvider outboundNatProvider;
+    private volatile ArpProvider arpProvider;
+    private volatile RoutingProvider routingProvider;
 
     //
     // Callbacks from OVSDB's northbound handlers

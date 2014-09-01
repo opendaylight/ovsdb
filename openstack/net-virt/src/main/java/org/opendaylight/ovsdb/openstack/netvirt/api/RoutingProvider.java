@@ -17,24 +17,12 @@ import org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent;
 import java.net.InetAddress;
 
 /**
- * A MultiTenantForwardingProvider provides Multi-Tenant L3 Forwarding
+ * This interface allows Routing flows to be written to devices
  */
-public interface MultiTenantRouterForwardingProvider {
-
-    Status programStaticArpEntry(Node node, Long dpid, String segmentationId,
-                                 String macAddress, InetAddress ipAddress, AbstractEvent.Action action);
-
-    Status programIpRewriteRule(Node node, Long dpid, String segmentationId, InetAddress matchAddress,
-                                InetAddress rewriteAddress, AbstractEvent.Action action);
-
-    Status programIpRewriteExclusion(Node node, Long dpid, String segmentationId,
-                                     String excludedCidr, AbstractEvent.Action action);
+public interface RoutingProvider {
 
     Status programRouterInterface(Node node, Long dpid, String segmentationId, String macAddress,
                                   InetAddress address, int mask, AbstractEvent.Action action);
-
-    Status programForwardingTableEntry(Node node, Long dpid, String segmentationId, InetAddress ipAddress,
-                                       String macAddress, AbstractEvent.Action action);
 
     Status programDefaultRouteEntry(Node node, Long dpid, String segmentationId, String macAddress,
                                     InetAddress nextHop, AbstractEvent.Action action);

@@ -117,8 +117,20 @@ public class OF13Provider implements NetworkingProvider {
     private volatile OvsdbConnectionService connectionService;
     private volatile MdsalConsumer mdsalConsumer;
 
+    public static final String NAME = "OF13Provider";
+
     public OF13Provider(){
 
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
+    }
+
+    @Override
+    public boolean supportsServices() {
+        return true;
     }
 
     @Override

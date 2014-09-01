@@ -19,10 +19,11 @@ public enum Service {
     INGRESS_ACL ((short) 40, "Ingress Acces-control. Typically Openstack Egress Security group policies are applied here."),
     LOAD_BALANCER ((short) 50, "Distributed LBaaS"),
     ROUTING ((short) 60, "Distributed Virtual Routing (DVR)"),
-    L2_REWRITE ((short) 70, "Layer2 rewrite service"),
-    L2_FORWARDING ((short) 80, "Layer2 mac,vlan based forwarding"),
-    EGRESS_ACL ((short) 90, "Egress Acces-control.Typically Openstack Ingress Security group policies are applied here."),
-    OUTBOUND_NAT ((short) 100, "SNAT for traffic accessing external network");
+    L3_FORWARDING ((short) 70, "Layer 3 forwarding/lookup service"),
+    L2_REWRITE ((short) 80, "Layer2 rewrite service"),
+    L2_FORWARDING ((short) 90, "Layer2 mac,vlan based forwarding"),
+    EGRESS_ACL ((short) 100, "Egress Acces-control.Typically Openstack Ingress Security group policies are applied here."),
+    OUTBOUND_NAT ((short) 110, "SNAT for traffic accessing external network");
 
     short table;
     String description;

@@ -60,4 +60,6 @@ public final class Constants {
     public static final String PROVIDER_TYPE_PROPERTY = "providerType";
     public static final String OPENFLOW_VERSION_PROPERTY = "openflowVersion";
     public static final String EVENT_HANDLER_TYPE_PROPERTY = "eventHandlerType";
+    public static final String PROVIDER_NAME_PROPERTY = "providerName";
+    public static final String NAT_PROVIDER_DIRECTION = "natDirection";
 }

@@ -46,6 +46,7 @@ import org.opendaylight.ovsdb.lib.operations.Insert;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
+import org.opendaylight.ovsdb.lib.schema.BaseType.UuidBaseType;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
@@ -1175,6 +1176,39 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
 
     // SCHEMA-INDEPENDENT Configuration Service APIs
 
+    private String getTableNameForRowUuid(Node node, String databaseName, UUID rowUuid) {
+        ConcurrentMap<String, ConcurrentMap<String, Row>> cache  = ovsdbInventoryService.getCache(node, databaseName);
+        if (cache == null) return null;
+        for (String tableName : cache.keySet()) {
+            ConcurrentMap<String, Row> rows = cache.get(tableName);
+            if (rows.get(rowUuid.toString()) != null) {
+                return tableName;
+            }
+        }
+        return null;
+    }
+
+    private String getReferencingColumn (TableSchema<?> parentTableSchema, String childTableName) throws OvsdbPluginException {
+        Map<String, ColumnSchema> columnSchemas = parentTableSchema.getColumnSchemas();
+        String refColumn = null;
+        for (String columnName : columnSchemas.keySet()) {
+            ColumnSchema columnSchema = columnSchemas.get(columnName);
+            if (columnSchema.getType().getBaseType().getClass().equals(UuidBaseType.class)) {
+                UuidBaseType refType = (UuidBaseType)columnSchema.getType().getBaseType();
+                if (refType.getRefTable() != null && refType.getRefTable().equalsIgnoreCase(childTableName)) {
+                    if (refColumn == null) {
+                        refColumn = columnName;
+                    } else {
+                        throw new OvsdbPluginException("Multiple Referencing Columns for "+ childTableName +" on "+ parentTableSchema.getName());
+                    }
+                }
+            }
+        }
+        if (refColumn != null) {
+            return refColumn;
+        }
+        throw new OvsdbPluginException("No Referencing Column for "+childTableName+" on "+parentTableSchema.getName());
+    }
     /*
      * A common Insert Transaction convenience method that populates the TransactionBuilder with insert operation
      * for a Child Row and also mutates the parent row with the UUID of the inserted Child.
@@ -1282,6 +1316,17 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
         if (databaseName == null || tableName == null) {
             throw new OvsdbPluginException("databaseName, tableName and parentUuid are Mandatory Parameters");
         }
+
+        if (parentTable == null && parentUuid != null) {
+            parentTable = this.getTableNameForRowUuid(node, databaseName, parentUuid);
+        }
+
+        if (parentColumn == null && parentTable != null) {
+            DatabaseSchema dbSchema = client.getDatabaseSchema(databaseName);
+            TableSchema<GenericTableSchema> parentTableSchema = dbSchema.table(parentTable, GenericTableSchema.class);
+            parentColumn = this.getReferencingColumn(parentTableSchema, tableName);
+        }
+
         logger.debug("insertTree Connection : {} Table : {} ParentTable : {} Parent Column: {} Parent UUID : {} Row : {}",
                      client.getConnectionInfo(), tableName, parentTable, parentColumn, parentUuid, row);
 

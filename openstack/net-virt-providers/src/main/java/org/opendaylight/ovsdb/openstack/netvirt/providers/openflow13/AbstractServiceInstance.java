@@ -92,7 +92,7 @@ public abstract class AbstractServiceInstance implements OpendaylightInventoryLi
     // Let the Concrete service instance class decide if a Bride is part of the pipeline or not.
     public abstract boolean isBridgeInPipeline (String nodeId);
 
-    public int getTable() {
+    public short getTable() {
         return service.getTable();
     }
 
@@ -143,7 +143,7 @@ public abstract class AbstractServiceInstance implements OpendaylightInventoryLi
         }
     }
 
-    private void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
+    protected void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
         Preconditions.checkNotNull(mdsalConsumer);
         if (mdsalConsumer == null) {
             logger.error("ERROR finding MDSAL Service. Its possible that writeFlow is called too soon ?");

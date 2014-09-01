@@ -25,6 +25,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OutboundNatProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow10.OF10Provider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
@@ -160,6 +161,9 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency()
                           .setService(TenantNetworkManager.class)
                           .setRequired(true));
+            c.add(createServiceDependency()
+                    .setService(SecurityServicesManager.class)
+                    .setRequired(true));
             c.add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true));
             c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
             c.add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true));

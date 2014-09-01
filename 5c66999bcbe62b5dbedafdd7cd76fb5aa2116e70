@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_45ce3cb6",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/LBaaSHandler.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-09-01T16:43:55Z",
+      "side": 1,
+      "message": "Use equals(),\nUse Constants for HTTP and HTTPS \nand please change the redundant HTTP to HTTPS :-)",
+      "revId": "5c66999bcbe62b5dbedafdd7cd76fb5aa2116e70",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_e5c2f085",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/LBaaSHandler.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-09-01T16:43:55Z",
+      "side": 1,
+      "message": "equals please",
+      "revId": "5c66999bcbe62b5dbedafdd7cd76fb5aa2116e70",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

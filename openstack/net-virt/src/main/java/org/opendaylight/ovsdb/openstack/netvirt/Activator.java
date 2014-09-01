@@ -42,6 +42,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OutboundNatProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.BridgeConfigurationManagerImpl;
@@ -50,6 +51,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.impl.EventDispatcherImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.OpenstackRouter;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.ProviderNetworkManagerImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.SecurityServicesImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.TenantNetworkManagerImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.VlanConfigurationCacheImpl;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
@@ -108,7 +110,8 @@ public class Activator extends ComponentActivatorAbstractBase {
                         LBaaSHandler.class,
                         LBaaSPoolMemberHandler.class,
                         NeutronL3Adapter.class,
-                        OpenstackRouter.class};
+                        OpenstackRouter.class,
+                        SecurityServicesImpl.class};
         return res;
     }
 
@@ -275,11 +278,12 @@ public class Activator extends ComponentActivatorAbstractBase {
             Properties portSecurityHandlerProperties = new Properties();
             portSecurityHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY,
                                               AbstractEvent.HandlerType.NEUTRON_PORT_SECURITY);
-            c.setInterface(new String[] {INeutronSecurityRuleAware.class.getName(),
-                                         INeutronSecurityGroupAware.class.getName(),
-                                         AbstractHandler.class.getName()},
+            c.setInterface(new String[]{INeutronSecurityRuleAware.class.getName(),
+                                        INeutronSecurityGroupAware.class.getName(),
+                            AbstractHandler.class.getName()},
                            portSecurityHandlerProperties);
             c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
+            c.add(createServiceDependency().setService(SecurityServicesManager.class).setRequired(true));
         }
 
         if (imp.equals(FWaasHandler.class)) {

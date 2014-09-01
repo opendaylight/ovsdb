@@ -15,7 +15,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 
-import com.google.common.base.Preconditions;
+//import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
@@ -37,7 +37,7 @@ public class ProviderNetworkManagerImpl implements NetworkingProviderManager {
 
     public NetworkingProvider getProvider(Node node) {
         // This will change if/when we move to a commons library
-        Preconditions.checkArgument(node.getType().equals("OVS"));
+//        Preconditions.checkArgument(node.getType().equals("OVS"));
 
         if (nodeToProviderMapping.get(node) != null) {
             return nodeToProviderMapping.get(node);

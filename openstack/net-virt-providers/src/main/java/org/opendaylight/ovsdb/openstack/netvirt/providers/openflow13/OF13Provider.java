@@ -18,6 +18,7 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
+import org.opendaylight.controller.networkconfig.neutron.NeutronSecurityGroup;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.Status;
@@ -28,7 +29,9 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.IngressAclService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
@@ -116,6 +119,8 @@ public class OF13Provider implements NetworkingProvider {
     private volatile OvsdbConfigurationService ovsdbConfigurationService;
     private volatile OvsdbConnectionService connectionService;
     private volatile MdsalConsumer mdsalConsumer;
+    private volatile SecurityServicesManager securityServicesManager;
+    private volatile IngressAclService ingressAclService;
 
     public static final String NAME = "OF13Provider";
 
@@ -822,7 +827,19 @@ public class OF13Provider implements NetworkingProvider {
             if (networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
                 logger.debug("Program local vlan rules for interface {}", intf.getName());
                 programLocalVlanRules(node, dpid, segmentationId, attachedMac, localPort);
-            } else if (networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE) ||
+            }
+            /* If the network type is tunnel based (VXLAN/GRRE/etc) with Neutron Port Security ACLs */
+            if ((networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE) || networkType.equalsIgnoreCase
+                    (NetworkHandler.NETWORK_TYPE_VXLAN)) && securityServicesManager.isPortSecurityReady(intf)) {
+                logger.debug("Neutron port has a Port Security Group");
+                /* Retrieve the security group UUID from the Neutron Port */
+                NeutronSecurityGroup securityGroupInPort = securityServicesManager.getSecurityGroupInPort(intf);
+                logger.debug("Program Local rules for networkType: {} does contain a Port Security Group: {} " +
+                        "to be installed on DPID: {}", networkType, securityGroupInPort, dpid);
+                ingressAclService.programPortSecurityACL(node, dpid, segmentationId, attachedMac, localPort,
+                        securityGroupInPort);
+            }
+            else if (networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE) ||
                        networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN)) {
                 logger.debug("Program local bridge rules for interface {}", intf.getName());
                 programLocalBridgeRules(node, dpid, segmentationId, attachedMac, localPort);
@@ -2666,7 +2683,7 @@ public class OF13Provider implements NetworkingProvider {
         return null;
     }
 
-    private void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
+    public void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
         Preconditions.checkNotNull(mdsalConsumer);
         if (mdsalConsumer == null) {
             logger.error("ERROR finding MDSAL Service. Its possible that writeFlow is called too soon ?");

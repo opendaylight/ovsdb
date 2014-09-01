@@ -1,0 +1,23 @@
+{
+    "access-lists": {
+        "access-list": [
+            {
+                "acl-name": "http",
+                "access-list-entries": [
+                    {
+                        "rule-name": "http",
+                        "matches": {
+                            "destination-port-range": {
+                                "lower-port": "80",
+                                "upper-port": "80"
+                            }
+                        },
+                        "actions": {
+                            "service-function-path": "sfp1"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -17,6 +17,7 @@ import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
@@ -63,23 +64,23 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
 
     @Override
     public void nodeAdded(Node node, InetAddress address, int port) {
-        this.enqueueEvent(new SouthboundEvent(node, SouthboundEvent.Action.ADD));
+        this.enqueueEvent(new SouthboundEvent(node, Action.ADD));
     }
 
     @Override
     public void nodeRemoved(Node node) {
-        this.enqueueEvent(new SouthboundEvent(node, SouthboundEvent.Action.DELETE));
+        this.enqueueEvent(new SouthboundEvent(node, Action.DELETE));
     }
 
     @Override
     public void rowAdded(Node node, String tableName, String uuid, Row row) {
-        this.enqueueEvent(new SouthboundEvent(node, tableName, uuid, row, SouthboundEvent.Action.ADD));
+        this.enqueueEvent(new SouthboundEvent(node, tableName, uuid, row, Action.ADD));
     }
 
     @Override
     public void rowUpdated(Node node, String tableName, String uuid, Row oldRow, Row newRow) {
         if (this.isUpdateOfInterest(node, oldRow, newRow)) {
-            this.enqueueEvent(new SouthboundEvent(node, tableName, uuid, newRow, SouthboundEvent.Action.UPDATE));
+            this.enqueueEvent(new SouthboundEvent(node, tableName, uuid, newRow, Action.UPDATE));
         }
     }
 
@@ -119,18 +120,18 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
 
     @Override
     public void rowRemoved(Node node, String tableName, String uuid, Row row, Object context) {
-        this.enqueueEvent(new SouthboundEvent(node, tableName, uuid, row, context, SouthboundEvent.Action.DELETE));
+        this.enqueueEvent(new SouthboundEvent(node, tableName, uuid, row, context, Action.DELETE));
     }
 
-    public void processNodeUpdate(Node node, SouthboundEvent.Action action) {
-        if (action == SouthboundEvent.Action.DELETE) return;
+    public void processNodeUpdate(Node node, Action action) {
+        if (action == Action.DELETE) return;
         logger.trace("Process Node added {}", node);
         bridgeConfigurationManager.prepareNode(node);
     }
 
     private void processRowUpdate(Node node, String tableName, String uuid, Row row,
-                                  Object context, SouthboundEvent.Action action) {
-        if (action == SouthboundEvent.Action.DELETE) {
+                                  Object context, Action action) {
+        if (action == Action.DELETE) {
             if (tableName.equalsIgnoreCase(ovsdbConfigurationService.getTableName(node, Interface.class))) {
                 logger.debug("Processing update of {}. Deleted node: {}, uuid: {}, row: {}", tableName, node, uuid, row);
                 Interface deletedIntf = ovsdbConfigurationService.getTypedRow(node, Interface.class, row);
@@ -237,7 +238,7 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
         logger.trace("Interface update of node: {}, uuid: {}", node, uuid);
         NeutronNetwork network = tenantNetworkManager.getTenantNetwork(intf);
         if (network != null) {
-            neutronL3Adapter.handleInterfaceEvent(node, intf, network, AbstractEvent.Action.UPDATE);
+            neutronL3Adapter.handleInterfaceEvent(node, intf, network, Action.UPDATE);
             if (bridgeConfigurationManager.createLocalNetwork(node, network))
                 networkingProviderManager.getProvider(node).handleInterfaceUpdate(network, node, intf);
         } else {
@@ -250,7 +251,7 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
         logger.debug("handleInterfaceDelete: node: {}, uuid: {}, isLastInstanceOnNode: {}, interface: {}",
                 node, uuid, isLastInstanceOnNode, intf);
 
-        neutronL3Adapter.handleInterfaceEvent(node, intf, network, AbstractEvent.Action.DELETE);
+        neutronL3Adapter.handleInterfaceEvent(node, intf, network, Action.DELETE);
         List<String> phyIfName = bridgeConfigurationManager.getAllPhysicalInterfaceNames(node);
         if (intf.getTypeColumn().getData().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) ||
             intf.getTypeColumn().getData().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE) ||

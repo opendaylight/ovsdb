@@ -25,15 +25,18 @@ import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.lib.notation.Row;
-import org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent;
-import org.opendaylight.ovsdb.openstack.netvirt.NorthboundEvent;
 import org.opendaylight.ovsdb.openstack.netvirt.api.MultiTenantAwareRouter;
-import org.opendaylight.ovsdb.openstack.netvirt.api.MultiTenantRouterForwardingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.InboundNatProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OutboundNatProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 
 import com.google.common.base.Preconditions;
@@ -70,7 +73,11 @@ public class NeutronL3Adapter {
     private volatile INeutronSubnetCRUD neutronSubnetCache;
     private volatile INeutronPortCRUD neutronPortCache;
     private volatile MultiTenantAwareRouter multiTenantAwareRouter;
-    private volatile MultiTenantRouterForwardingProvider multiTenantRouterForwardingProvider;
+    private volatile L3ForwardingProvider l3ForwardingProvider;
+    private volatile InboundNatProvider inboundNatProvider;
+    private volatile OutboundNatProvider outboundNatProvider;
+    private volatile ArpProvider arpProvider;
+    private volatile RoutingProvider routingProvider;
 
     private Set<String> ipRewriteCache;
     private Set<String> ipRewriteExclusionCache;
@@ -92,19 +99,19 @@ public class NeutronL3Adapter {
     // Callbacks from OVSDB's northbound handlers
     //
 
-    public void handleNeutronSubnetEvent(final NeutronSubnet subnet, NorthboundEvent.Action action) {
+    public void handleNeutronSubnetEvent(final NeutronSubnet subnet, Action action) {
         logger.debug("Neutron subnet {} event : {}", action, subnet.toString());
 
         // TODO
     }
 
-    public void handleNeutronPortEvent(final NeutronPort neutronPort, NorthboundEvent.Action action) {
+    public void handleNeutronPortEvent(final NeutronPort neutronPort, Action action) {
         logger.debug("Neutron port {} event : {}", action, neutronPort.toString());
 
         // TODO
     }
 
-    public void handleNeutronRouterEvent(final NeutronRouter neutronRouter, NorthboundEvent.Action action) {
+    public void handleNeutronRouterEvent(final NeutronRouter neutronRouter, Action action) {
         logger.debug("Neutron router {} event : {}", action, neutronRouter.toString());
 
         // TODO
@@ -112,27 +119,27 @@ public class NeutronL3Adapter {
 
     public void handleNeutronRouterInterfaceEvent(final NeutronRouter neutronRouter,
                                                   final NeutronRouter_Interface neutronRouterInterface,
-                                                  NorthboundEvent.Action action) {
+                                                  Action action) {
         logger.debug(" Router {} interface {} got event {}. Subnet {}",
                      neutronRouter.getName(),
                      neutronRouterInterface.getPortUUID(),
                      action,
                      neutronRouterInterface.getSubnetUUID());
 
-        this.programFlowsForNeutronRouterInterface(neutronRouterInterface, action == AbstractEvent.Action.DELETE);
+        this.programFlowsForNeutronRouterInterface(neutronRouterInterface, action == Action.DELETE);
     }
 
     public void handleNeutronFloatingIPEvent(final NeutronFloatingIP neutronFloatingIP,
-                                             NorthboundEvent.Action action) {
+                                             Action action) {
         logger.debug(" Floating IP {} {}<->{}, network uuid {}", action,
                      neutronFloatingIP.getFixedIPAddress(),
                      neutronFloatingIP.getFloatingIPAddress(),
                      neutronFloatingIP.getFloatingNetworkUUID());
 
-        this.programFlowsForFloatingIP(neutronFloatingIP, action == AbstractEvent.Action.DELETE);
+        this.programFlowsForFloatingIP(neutronFloatingIP, action == Action.DELETE);
     }
 
-    public void handleNeutronNetworkEvent(final NeutronNetwork neutronNetwork, NorthboundEvent.Action action) {
+    public void handleNeutronNetworkEvent(final NeutronNetwork neutronNetwork, Action action) {
         logger.debug("neutronNetwork {}: network: {}", action, neutronNetwork);
 
         // TODO
@@ -141,9 +148,8 @@ public class NeutronL3Adapter {
     //
     // Callbacks from OVSDB's southbound handler
     //
-
     public void handleInterfaceEvent(final Node node, final Interface intf, final NeutronNetwork neutronNetwork,
-                                     AbstractEvent.Action action) {
+                                     Action action) {
         logger.debug("southbound interface {} node:{} interface:{}, neutronNetwork:{}",
                      action, node, intf, neutronNetwork);
 
@@ -153,7 +159,6 @@ public class NeutronL3Adapter {
     //
     // Internal helpers
     //
-
     private void programFlowsForNeutronRouterInterface(final NeutronRouter_Interface neutronRouterInterface,
                                                        Boolean isDelete) {
         Preconditions.checkNotNull(neutronRouterInterface);
@@ -178,8 +183,8 @@ public class NeutronL3Adapter {
             return;  // done: go no further w/out all the info needed...
         }
 
-        final AbstractEvent.Action action =
-                isDelete ? AbstractEvent.Action.DELETE : AbstractEvent.Action.ADD;
+        final Action action =
+                isDelete ? Action.DELETE : Action.ADD;
 
         // Keep cache for finding router's mac from network uuid
         //
@@ -192,9 +197,9 @@ public class NeutronL3Adapter {
         List<Node> nodes = connectionService.getNodes();
         for (Node node : nodes) {
             final Long dpid = getDpid(node);
-            final AbstractEvent.Action actionForNode =
+            final Action actionForNode =
                     tenantNetworkManager.isTenantNetworkPresentInNode(node, providerSegmentationId) ?
-                    action : AbstractEvent.Action.DELETE;
+                    action : Action.DELETE;
 
             for (Neutron_IPs neutronIP : ipList) {
                 final String ipStr = neutronIP.getIpAddress();
@@ -207,16 +212,16 @@ public class NeutronL3Adapter {
             // for the external neutron networks.
             //
             {
-                final AbstractEvent.Action actionForRewriteExclusion =
-                        isExternal ? AbstractEvent.Action.DELETE : actionForNode;
+                final Action actionForRewriteExclusion =
+                        isExternal ? Action.DELETE : actionForNode;
                 programIpRewriteExclusionStage1(node, dpid, providerSegmentationId, cidr, actionForRewriteExclusion);
             }
 
             // Default route. For non-external subnets, make sure that there is none configured.
             //
             if (gatewayIp != null && !gatewayIp.isEmpty()) {
-                final AbstractEvent.Action actionForNodeDefaultRoute =
-                        isExternal ? actionForNode : AbstractEvent.Action.DELETE;
+                final Action actionForNodeDefaultRoute =
+                        isExternal ? actionForNode : Action.DELETE;
                 final String defaultGatewayMacAddress = "00:01:02:03:04:05";  // FIXME!
                 programDefaultRouteStage1(node, dpid, providerSegmentationId, defaultGatewayMacAddress, gatewayIp,
                                           actionForNodeDefaultRoute);
@@ -226,7 +231,7 @@ public class NeutronL3Adapter {
 
     private void programRouterInterfaceStage1(Node node, Long dpid, String providerSegmentationId,
                                               String macAddress, String ipStr, int mask,
-                                              AbstractEvent.Action actionForNode) {
+                                              Action actionForNode) {
         // Based on the local cache, figure out whether programming needs to occur. To do this, we
         // will look at desired action for node.
         //
@@ -234,14 +239,14 @@ public class NeutronL3Adapter {
                                 ipStr + "/" + Integer.toString(mask);
         final Boolean isProgrammed = routerInterfacesCache.contains(cacheKey);
 
-        if (actionForNode == AbstractEvent.Action.DELETE && isProgrammed == Boolean.FALSE) return;
-        if (actionForNode == AbstractEvent.Action.ADD && isProgrammed == Boolean.TRUE) return;
+        if (actionForNode == Action.DELETE && isProgrammed == Boolean.FALSE) return;
+        if (actionForNode == Action.ADD && isProgrammed == Boolean.TRUE) return;
 
         Status status = this.programRouterInterfaceStage2(node, dpid, providerSegmentationId,
                                                           macAddress, ipStr, mask, actionForNode);
         if (status.isSuccess()) {
             // Update cache
-            if (actionForNode == AbstractEvent.Action.ADD) {
+            if (actionForNode == Action.ADD) {
                 // TODO: multiTenantAwareRouter.addInterface(UUID.fromString(tenant), ...);
                 routerInterfacesCache.add(cacheKey);
             } else {
@@ -254,22 +259,21 @@ public class NeutronL3Adapter {
     private Status programRouterInterfaceStage2(Node node, Long dpid, String providerSegmentationId,
                                                 String macAddress,
                                                 String address, int mask,
-                                                AbstractEvent.Action actionForNode) {
+                                                Action actionForNode) {
         Status status;
         try {
             InetAddress inetAddress = InetAddress.getByName(address);
-            status = multiTenantRouterForwardingProvider == null ?
+            status = routingProvider == null ?
                      new Status(StatusCode.SUCCESS) :
-                     multiTenantRouterForwardingProvider
-                             .programRouterInterface(node, dpid, providerSegmentationId,
-                                                     macAddress, inetAddress, mask, actionForNode);
+                     routingProvider.programRouterInterface(node, dpid, providerSegmentationId,
+                                                            macAddress, inetAddress, mask, actionForNode);
         } catch (UnknownHostException e) {
             status = new Status(StatusCode.BADREQUEST);
         }
 
         if (status.isSuccess()) {
             logger.debug("ProgramRouterInterface {} for mac:{} addr:{}/{} node:{} action:{}",
-                         multiTenantRouterForwardingProvider == null ? "skipped" : "programmed",
+                         routingProvider == null ? "skipped" : "programmed",
                          macAddress, address, mask, node, actionForNode);
         } else {
             logger.error("ProgramRouterInterface failed for mac:{} addr:{}/{} node:{} action:{} status:{}",
@@ -280,21 +284,21 @@ public class NeutronL3Adapter {
 
     private void programStaticArpStage1(Node node, Long dpid, String providerSegmentationId,
                                         String macAddress, String ipStr,
-                                        AbstractEvent.Action actionForNode) {
+                                        Action actionForNode) {
         // Based on the local cache, figure out whether programming needs to occur. To do this, we
         // will look at desired action for node.
         //
         final String cacheKey = node.toString() + ":" + providerSegmentationId + ":" + ipStr;
         final Boolean isProgrammed = staticArpEntryCache.contains(cacheKey);
 
-        if (actionForNode == AbstractEvent.Action.DELETE && isProgrammed == Boolean.FALSE) return;
-        if (actionForNode == AbstractEvent.Action.ADD && isProgrammed == Boolean.TRUE) return;
+        if (actionForNode == Action.DELETE && isProgrammed == Boolean.FALSE) return;
+        if (actionForNode == Action.ADD && isProgrammed == Boolean.TRUE) return;
 
         Status status = this.programStaticArpStage2(node, dpid, providerSegmentationId,
                                                     macAddress, ipStr, actionForNode);
         if (status.isSuccess()) {
             // Update cache
-            if (actionForNode == AbstractEvent.Action.ADD) {
+            if (actionForNode == Action.ADD) {
                 staticArpEntryCache.add(cacheKey);
             } else {
                 staticArpEntryCache.remove(cacheKey);
@@ -305,22 +309,21 @@ public class NeutronL3Adapter {
     private Status programStaticArpStage2(Node node, Long dpid, String providerSegmentationId,
                                                 String macAddress,
                                                 String address,
-                                                AbstractEvent.Action actionForNode) {
+                                                Action actionForNode) {
         Status status;
         try {
             InetAddress inetAddress = InetAddress.getByName(address);
-            status = multiTenantRouterForwardingProvider == null ?
+            status = arpProvider == null ?
                      new Status(StatusCode.SUCCESS) :
-                     multiTenantRouterForwardingProvider
-                             .programStaticArpEntry(node, dpid, providerSegmentationId,
-                                                    macAddress, inetAddress, actionForNode);
+                     arpProvider.programStaticArpEntry(node, dpid, providerSegmentationId,
+                                                       macAddress, inetAddress, actionForNode);
         } catch (UnknownHostException e) {
             status = new Status(StatusCode.BADREQUEST);
         }
 
         if (status.isSuccess()) {
             logger.debug("ProgramStaticArp {} for mac:{} addr:{} node:{} action:{}",
-                         multiTenantRouterForwardingProvider == null ? "skipped" : "programmed",
+                         arpProvider == null ? "skipped" : "programmed",
                          macAddress, address, node, actionForNode);
         } else {
             logger.error("ProgramStaticArp failed for mac:{} addr:{} node:{} action:{} status:{}",
@@ -329,23 +332,26 @@ public class NeutronL3Adapter {
         return status;
     }
 
+    /* ToDo: IP Rewrites have been broken in to two tables
+       As such we need to modify the interfaces to program in to the correct tables
+     */
     private void programIpRewriteExclusionStage1(Node node, Long dpid, String providerSegmentationId,
                                                  String cidr,
-                                                 AbstractEvent.Action actionForRewriteExclusion) {
+                                                 Action actionForRewriteExclusion) {
         // Based on the local cache, figure out whether programming needs to occur. To do this, we
         // will look at desired action for node.
         //
         final String cacheKey = node.toString() + ":" + providerSegmentationId + ":" + cidr;
         final Boolean isProgrammed = ipRewriteExclusionCache.contains(cacheKey);
 
-        if (actionForRewriteExclusion == AbstractEvent.Action.DELETE && isProgrammed == Boolean.FALSE) return;
-        if (actionForRewriteExclusion == AbstractEvent.Action.ADD && isProgrammed == Boolean.TRUE) return;
+        if (actionForRewriteExclusion == Action.DELETE && isProgrammed == Boolean.FALSE) return;
+        if (actionForRewriteExclusion == Action.ADD && isProgrammed == Boolean.TRUE) return;
 
         Status status = this.programIpRewriteExclusionStage2(node, dpid, providerSegmentationId, cidr,
                                                              actionForRewriteExclusion);
         if (status.isSuccess()) {
             // Update cache
-            if (actionForRewriteExclusion == AbstractEvent.Action.ADD) {
+            if (actionForRewriteExclusion == Action.ADD) {
                 ipRewriteExclusionCache.add(cacheKey);
             } else {
                 ipRewriteExclusionCache.remove(cacheKey);
@@ -354,14 +360,13 @@ public class NeutronL3Adapter {
     }
 
     private Status programIpRewriteExclusionStage2(Node node, Long dpid, String providerSegmentationId, String cidr,
-                                                   AbstractEvent.Action actionForNode) {
-        Status status = multiTenantRouterForwardingProvider == null ?
+                                                   Action actionForNode) {
+        Status status = inboundNatProvider == null ?
                         new Status(StatusCode.SUCCESS) :
-                        multiTenantRouterForwardingProvider
-                                .programIpRewriteExclusion(node, dpid, providerSegmentationId, cidr, actionForNode);
+                        inboundNatProvider.programIpRewriteExclusion(node, dpid, providerSegmentationId, cidr, actionForNode);
         if (status.isSuccess()) {
             logger.debug("IpRewriteExclusion {} for cidr:{} node:{} action:{}",
-                         multiTenantRouterForwardingProvider == null ? "skipped" : "programmed",
+                         inboundNatProvider == null ? "skipped" : "programmed",
                          cidr, node, actionForNode);
         } else {
             logger.error("IpRewriteExclusion failed for cidr:{} node:{} action:{} status:{}",
@@ -372,21 +377,21 @@ public class NeutronL3Adapter {
 
     private void programDefaultRouteStage1(Node node, Long dpid, String providerSegmentationId,
                                            String defaultGatewayMacAddress, String gatewayIp,
-                                           AbstractEvent.Action actionForNodeDefaultRoute) {
+                                           Action actionForNodeDefaultRoute) {
         // Based on the local cache, figure out whether programming needs to occur. To do this, we
         // will look at desired action for node.
         //
         final String cacheKey = node.toString() + ":" + providerSegmentationId + ":" + gatewayIp;
         final Boolean isProgrammed = defaultRouteCache.contains(cacheKey);
 
-        if (actionForNodeDefaultRoute == AbstractEvent.Action.DELETE && isProgrammed == Boolean.FALSE) return;
-        if (actionForNodeDefaultRoute == AbstractEvent.Action.ADD && isProgrammed == Boolean.TRUE) return;
+        if (actionForNodeDefaultRoute == Action.DELETE && isProgrammed == Boolean.FALSE) return;
+        if (actionForNodeDefaultRoute == Action.ADD && isProgrammed == Boolean.TRUE) return;
 
         Status status = this.programDefaultRouteStage2(node, dpid, providerSegmentationId,
                                                        defaultGatewayMacAddress, gatewayIp, actionForNodeDefaultRoute);
         if (status.isSuccess()) {
             // Update cache
-            if (actionForNodeDefaultRoute == AbstractEvent.Action.ADD) {
+            if (actionForNodeDefaultRoute == Action.ADD) {
                 defaultRouteCache.add(cacheKey);
             } else {
                 defaultRouteCache.remove(cacheKey);
@@ -397,23 +402,22 @@ public class NeutronL3Adapter {
     private Status programDefaultRouteStage2(Node node, Long dpid, String providerSegmentationId,
                                           String defaultGatewayMacAddress,
                                           String gatewayIp,
-                                          AbstractEvent.Action actionForNodeDefaultRoute) {
+                                          Action actionForNodeDefaultRoute) {
         Status status;
         try {
             InetAddress inetAddress = InetAddress.getByName(gatewayIp);
-            status = multiTenantRouterForwardingProvider == null ?
+            status = routingProvider == null ?
                      new Status(StatusCode.SUCCESS) :
-                     multiTenantRouterForwardingProvider
-                             .programDefaultRouteEntry(node, dpid, providerSegmentationId,
-                                                       defaultGatewayMacAddress, inetAddress,
-                                                       actionForNodeDefaultRoute);
+                     routingProvider.programDefaultRouteEntry(node, dpid, providerSegmentationId,
+                                                              defaultGatewayMacAddress, inetAddress,
+                                                              actionForNodeDefaultRoute);
         } catch (UnknownHostException e) {
             status = new Status(StatusCode.BADREQUEST);
         }
 
         if (status.isSuccess()) {
             logger.debug("ProgramDefaultRoute {} for mac:{} gatewayIp:{} node:{} action:{}",
-                         multiTenantRouterForwardingProvider == null ? "skipped" : "programmed",
+                         routingProvider == null ? "skipped" : "programmed",
                          defaultGatewayMacAddress, gatewayIp, node, actionForNodeDefaultRoute);
         } else {
             logger.error("ProgramDefaultRoute failed for mac:{} gatewayIp:{} node:{} action:{} status:{}",
@@ -440,13 +444,13 @@ public class NeutronL3Adapter {
             return;  // done: go no further w/out all the info needed...
         }
 
-        final AbstractEvent.Action action = isDelete ? AbstractEvent.Action.DELETE : AbstractEvent.Action.ADD;
+        final Action action = isDelete ? Action.DELETE : Action.ADD;
         List<Node> nodes = connectionService.getNodes();
         for (Node node : nodes) {
             final Long dpid = getDpid(node);
-            final AbstractEvent.Action actionForNode =
+            final Action actionForNode =
                     tenantNetworkManager.isTenantNetworkPresentInNode(node, providerSegmentationId) ?
-                    action : AbstractEvent.Action.DELETE;
+                    action : Action.DELETE;
 
             // Rewrite from float to fixed and vice-versa
             //
@@ -462,7 +466,7 @@ public class NeutronL3Adapter {
 
     private void programIpRewriteStage1(Node node, Long dpid, String providerSegmentationId,
                                         String matchAddress, String rewriteAddress,
-                                        AbstractEvent.Action actionForNode) {
+                                        Action actionForNode) {
         // Based on the local cache, figure out whether programming needs to occur. To do this, we
         // will look at desired action for node.
         //
@@ -470,14 +474,14 @@ public class NeutronL3Adapter {
                                 matchAddress + ":" + rewriteAddress;
         final Boolean isProgrammed = ipRewriteCache.contains(cacheKey);
 
-        if (actionForNode == AbstractEvent.Action.DELETE && isProgrammed == Boolean.FALSE) return;
-        if (actionForNode == AbstractEvent.Action.ADD && isProgrammed == Boolean.TRUE) return;
+        if (actionForNode == Action.DELETE && isProgrammed == Boolean.FALSE) return;
+        if (actionForNode == Action.ADD && isProgrammed == Boolean.TRUE) return;
 
         Status status = this.programIpRewriteStage2(node, dpid, providerSegmentationId,
                                                     matchAddress, rewriteAddress, actionForNode);
         if (status.isSuccess()) {
             // Update cache
-            if (actionForNode == AbstractEvent.Action.ADD) {
+            if (actionForNode == Action.ADD) {
                 ipRewriteCache.add(cacheKey);
             } else {
                 ipRewriteCache.remove(cacheKey);
@@ -487,23 +491,22 @@ public class NeutronL3Adapter {
 
     private Status programIpRewriteStage2(Node node, Long dpid, String providerSegmentationId,
                                           String matchAddress, String rewriteAddress,
-                                          AbstractEvent.Action actionForNode) {
+                                          Action actionForNode) {
         Status status;
         try {
             InetAddress inetMatchAddress = InetAddress.getByName(matchAddress);
             InetAddress inetRewriteAddress = InetAddress.getByName(rewriteAddress);
-            status = multiTenantRouterForwardingProvider == null ?
+            status = inboundNatProvider == null ?
                      new Status(StatusCode.SUCCESS) :
-                     multiTenantRouterForwardingProvider
-                             .programIpRewriteRule(node, dpid, providerSegmentationId,
-                                                   inetMatchAddress, inetRewriteAddress, actionForNode);
+                     inboundNatProvider.programIpRewriteRule(node, dpid, providerSegmentationId,
+                                                             inetMatchAddress, inetRewriteAddress, actionForNode);
         } catch (UnknownHostException e) {
             status = new Status(StatusCode.BADREQUEST);
         }
 
         if (status.isSuccess()) {
             logger.debug("ProgramIpRewrite {} for match:{} rewrite:{} node:{} action:{}",
-                         multiTenantRouterForwardingProvider == null ? "skipped" : "programmed",
+                         inboundNatProvider == null ? "skipped" : "programmed",
                          matchAddress, rewriteAddress, node, actionForNode);
         } else {
             logger.error("ProgramIpRewrite failed for match:{} rewrite:{} node:{} action:{} status:{}",

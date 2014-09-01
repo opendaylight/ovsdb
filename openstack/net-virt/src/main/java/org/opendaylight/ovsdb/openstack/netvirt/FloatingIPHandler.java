@@ -11,6 +11,7 @@ package org.opendaylight.ovsdb.openstack.netvirt;
 
 import org.opendaylight.controller.networkconfig.neutron.INeutronFloatingIPAware;
 import org.opendaylight.controller.networkconfig.neutron.NeutronFloatingIP;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 
 import org.slf4j.Logger;
@@ -56,7 +57,7 @@ public class FloatingIPHandler extends AbstractHandler
      */
     @Override
     public void neutronFloatingIPCreated(NeutronFloatingIP floatingIP) {
-        enqueueEvent(new NorthboundEvent(floatingIP, AbstractEvent.Action.ADD));
+        enqueueEvent(new NorthboundEvent(floatingIP, Action.ADD));
     }
 
     /**
@@ -85,7 +86,7 @@ public class FloatingIPHandler extends AbstractHandler
      */
     @Override
     public void neutronFloatingIPUpdated(NeutronFloatingIP floatingIP) {
-        enqueueEvent(new NorthboundEvent(floatingIP, AbstractEvent.Action.UPDATE));
+        enqueueEvent(new NorthboundEvent(floatingIP, Action.UPDATE));
     }
 
     /**
@@ -111,7 +112,7 @@ public class FloatingIPHandler extends AbstractHandler
      */
     @Override
     public void neutronFloatingIPDeleted(NeutronFloatingIP floatingIP) {
-        enqueueEvent(new NorthboundEvent(floatingIP, AbstractEvent.Action.DELETE));
+        enqueueEvent(new NorthboundEvent(floatingIP, Action.DELETE));
     }
 
     /**

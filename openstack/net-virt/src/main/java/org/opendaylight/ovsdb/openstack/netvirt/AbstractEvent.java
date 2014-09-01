@@ -10,6 +10,8 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt;
 
+import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
+
 /**
  * Abstract class for events used by neutron northbound and southbound events.
  */
@@ -27,7 +29,6 @@ public abstract class AbstractEvent {
 
         public static final int size = HandlerType.values().length;
     }
-    public enum Action { ADD, UPDATE, DELETE }
 
     private HandlerType handlerType;
     private Action action;

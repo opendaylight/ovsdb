@@ -28,13 +28,17 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetAware;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.switchmanager.IInventoryListener;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
+import org.opendaylight.ovsdb.openstack.netvirt.api.InboundNatProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.MultiTenantAwareRouter;
-import org.opendaylight.ovsdb.openstack.netvirt.api.MultiTenantRouterForwardingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OutboundNatProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.BridgeConfigurationManagerImpl;
@@ -296,8 +300,17 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true));
             c.add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true));
             c.add(createServiceDependency().setService(MultiTenantAwareRouter.class).setRequired(true));
-            // TODO: it should require MultiTenantRouterForwardingProvider
-            c.add(createServiceDependency().setService(MultiTenantRouterForwardingProvider.class).setRequired(false));
+            /* ToDo, we should probably just use the NetworkingProvider interface
+             * This should provide a way of getting service implementations
+             * Either that, or we should do service lookup at runtime based on getProvider().getName()
+             * This is a shortcut as for now there will only be one implementation of these classes.
+             */
+            c.add(createServiceDependency().setService(MultiTenantAwareRouter.class).setRequired(false));
+            c.add(createServiceDependency().setService(ArpProvider.class).setRequired(false));
+            c.add(createServiceDependency().setService(InboundNatProvider.class).setRequired(false));
+            c.add(createServiceDependency().setService(OutboundNatProvider.class).setRequired(false));
+            c.add(createServiceDependency().setService(RoutingProvider.class).setRequired(false));
+            c.add(createServiceDependency().setService(L3ForwardingProvider.class).setRequired(false));
         }
 
         if (imp.equals(OpenstackRouter.class)) {

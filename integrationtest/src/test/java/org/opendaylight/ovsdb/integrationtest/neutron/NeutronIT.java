@@ -256,6 +256,16 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
     private class FakeOF10Provider implements NetworkingProvider {
 
         @Override
+        public String getName() {
+            return null;
+        }
+
+        @Override
+        public boolean supportsServices() {
+            return false;
+        }
+
+        @Override
         public boolean hasPerTenantTunneling() {
             return true;
         }
@@ -288,6 +298,16 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
     }
 
     private class FakeOF13Provider implements NetworkingProvider {
+
+        @Override
+        public String getName() {
+            return null;
+        }
+
+        @Override
+        public boolean supportsServices() {
+            return false;
+        }
 
         @Override
         public boolean hasPerTenantTunneling() {

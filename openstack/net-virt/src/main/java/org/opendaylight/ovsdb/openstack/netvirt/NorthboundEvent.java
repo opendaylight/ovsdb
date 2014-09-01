@@ -16,6 +16,7 @@ import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
 import org.opendaylight.controller.networkconfig.neutron.NeutronRouter;
 import org.opendaylight.controller.networkconfig.neutron.NeutronRouter_Interface;
 import org.opendaylight.controller.networkconfig.neutron.NeutronSubnet;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 
 public class NorthboundEvent extends AbstractEvent {
 

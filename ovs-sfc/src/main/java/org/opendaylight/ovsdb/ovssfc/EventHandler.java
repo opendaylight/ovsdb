@@ -54,7 +54,7 @@ public class EventHandler {
                     try {
                         OvsSfcProvider.getOvsSfcProvider().sfp.processSfps(ev.getAction(), ev.serviceFunctionPaths);
                     } catch (Exception e) {
-                        logger.error("Exception caught in processSfp {}", ev, e);
+                        logger.error("Exception caught in processSfps {}", ev, e);
                     }
                     break;
                 default:

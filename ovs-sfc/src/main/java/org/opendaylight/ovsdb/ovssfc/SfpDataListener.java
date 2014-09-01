@@ -11,22 +11,23 @@ package org.opendaylight.ovsdb.ovssfc;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
-import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sfp.rev140701.ServiceFunctionPaths;
+//import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sfp.rev140701.ServiceFunctionPaths;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sfp.rev140701.service.function.paths.ServiceFunctionPath;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.Map;
-import java.util.Set;
+//import java.util.Set;
 
 public class SfpDataListener extends AbstractDataListener {
     private static final Logger logger = LoggerFactory.getLogger(SfpDataListener.class);
 
     public SfpDataListener (DataBroker dataBroker) {
         setDataBroker(dataBroker);
-        setIID(InstanceIdentifierUtils.createServiceFunctionPathsPath());
-        registerAsDataChangeListener();
+        //setIID(InstanceIdentifierUtils.createServiceFunctionPathsPath());
+        setIID(InstanceIdentifierUtils.createServiceFunctionPathPath());
+        registerAsDataChangeListener(DataBroker.DataChangeScope.BASE);
     }
 
     @Override
@@ -59,14 +60,16 @@ public class SfpDataListener extends AbstractDataListener {
                 //OvsSfcProvider.getOvsSfcProvider().eventHandler.enqueueSfpEvent(SfcEvent.Action.CREATE, serviceFunctionPaths);
             }
         }
-*/
-        dataObject = change.getCreatedData();
-        for (Map.Entry<InstanceIdentifier<?>, DataObject> entry : dataObject.entrySet()) {
-            if (entry.getValue() instanceof ServiceFunctionPaths) {
-                ServiceFunctionPaths serviceFunctionPaths = (ServiceFunctionPaths) entry.getValue();
-                logger.trace("\nOVSSFC CREATE: sfps:\n   {}", serviceFunctionPaths.toString());
 
-                OvsSfcProvider.getOvsSfcProvider().eventHandler.enqueueSfpsEvent(SfcEvent.Action.CREATE, serviceFunctionPaths);
+        Map<InstanceIdentifier<?>, DataObject> originalDataObject = change.getOriginalData();
+        Set<InstanceIdentifier<?>> iID = change.getRemovedPaths();
+        for (InstanceIdentifier instanceIdentifier : iID) {
+            DataObject dObject = originalDataObject.get(instanceIdentifier);
+            if (dObject instanceof ServiceFunctionPath) {
+                ServiceFunctionPath serviceFunctionPath = (ServiceFunctionPath) dataObject;
+                logger.trace("\nOVSSFC DELETE: sfp:\n   {}", serviceFunctionPath.toString());
+
+                OvsSfcProvider.getOvsSfcProvider().eventHandler.enqueueSfpEvent(SfcEvent.Action.DELETE, serviceFunctionPath);
             }
         }
 
@@ -79,16 +82,35 @@ public class SfpDataListener extends AbstractDataListener {
                 OvsSfcProvider.getOvsSfcProvider().eventHandler.enqueueSfpsEvent(SfcEvent.Action.UPDATE, updatedServiceFunctionPaths);
             }
         }
+*/
+/*
+        dataObject = change.getCreatedData();
+        for (Map.Entry<InstanceIdentifier<?>, DataObject> entry : dataObject.entrySet()) {
+            if (entry.getValue() instanceof ServiceFunctionPaths) {
+                ServiceFunctionPaths serviceFunctionPaths = (ServiceFunctionPaths) entry.getValue();
+                logger.trace("\nOVSSFC CREATE: sfps:\n   {}", serviceFunctionPaths.toString());
 
-        Map<InstanceIdentifier<?>, DataObject> originalDataObject = change.getOriginalData();
-        Set<InstanceIdentifier<?>> iID = change.getRemovedPaths();
-        for (InstanceIdentifier instanceIdentifier : iID) {
-            DataObject dObject = originalDataObject.get(instanceIdentifier);
-            if (dObject instanceof ServiceFunctionPath) {
-                ServiceFunctionPath serviceFunctionPath = (ServiceFunctionPath) dataObject;
-                logger.trace("\nOVSSFC DELETE: sfp:\n   {}", serviceFunctionPath.toString());
+                OvsSfcProvider.getOvsSfcProvider().eventHandler.enqueueSfpsEvent(SfcEvent.Action.CREATE, serviceFunctionPaths);
+            }
+        }
+*/
+        dataObject = change.getCreatedData();
+        for (Map.Entry<InstanceIdentifier<?>, DataObject> entry : dataObject.entrySet()) {
+            if (entry.getValue() instanceof ServiceFunctionPath) {
+                ServiceFunctionPath serviceFunctionPath = (ServiceFunctionPath) entry.getValue();
+                logger.trace("\nOVSSFC CREATE: sfp:\n   {}", serviceFunctionPath.toString());
 
-                OvsSfcProvider.getOvsSfcProvider().eventHandler.enqueueSfpEvent(SfcEvent.Action.DELETE, serviceFunctionPath);
+                OvsSfcProvider.getOvsSfcProvider().eventHandler.enqueueSfpEvent(SfcEvent.Action.CREATE, serviceFunctionPath);
+            }
+        }
+
+        dataObject = change.getUpdatedData();
+        for (Map.Entry<InstanceIdentifier<?>, DataObject> entry : dataObject.entrySet()) {
+            if (entry.getValue() instanceof ServiceFunctionPath) {
+                ServiceFunctionPath updatedServiceFunctionPath = (ServiceFunctionPath) entry.getValue();
+                logger.trace("\nOVSSFC UPDATE: sfp:\n   {}", updatedServiceFunctionPath.toString());
+
+                OvsSfcProvider.getOvsSfcProvider().eventHandler.enqueueSfpEvent(SfcEvent.Action.UPDATE, updatedServiceFunctionPath);
             }
         }
 

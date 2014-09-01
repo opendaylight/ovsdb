@@ -16,8 +16,9 @@
     <packaging>bundle</packaging>
 
     <properties>
-        <ietf.model.version>2010.09.24.4-SNAPSHOT</ietf.model.version>
         <jmxGeneratorPath>target/generated-sources/config</jmxGeneratorPath>
+        <ietf.model.version>2010.09.24.4-SNAPSHOT</ietf.model.version>
+        <ietf.yang.types.version>2013.07.15.1-SNAPSHOT</ietf.yang.types.version>
     </properties>
 
     <dependencies>
@@ -29,15 +30,10 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>sal-binding-config</artifactId>
-            <version>${mdsal.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.sfc</groupId>
-            <artifactId>sfc-model</artifactId>
-        </dependency>
+        <!--<dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>-->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -48,10 +44,46 @@
             <artifactId>mockito-all</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>sal-binding-config</artifactId>
+            <version>${mdsal.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>sal-common-api</artifactId>
+            <version>${mdsal.version}</version>
+        </dependency>
         <!--<dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>sal-core-api</artifactId>
+            <version>${mdsal.version}</version>
         </dependency>-->
+        <dependency>
+            <groupId>org.opendaylight.controller.model</groupId>
+            <artifactId>model-flow-base</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller.model</groupId>
+            <artifactId>model-flow-service</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller.model</groupId>
+            <artifactId>model-inventory</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.ovsdb</groupId>
+            <artifactId>plugin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.ovsdb</groupId>
+            <artifactId>utils.mdsal-openflow</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.sfc</groupId>
+            <artifactId>sfc-model</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools.model</groupId>
             <artifactId>ietf-inet-types</artifactId>
@@ -62,6 +94,11 @@
             <artifactId>ietf-yang-types</artifactId>
             <version>${ietf.model.version}</version>
         </dependency>
+        <!--<dependency>
+            <groupId>org.opendaylight.yangtools.model</groupId>
+            <artifactId>ietf-yang-types-20130715</artifactId>
+            <version>${ietf.yang.types.version}</version>
+        </dependency>-->
     </dependencies>
 
     <build>
@@ -72,6 +109,10 @@
                 <version>${bundle.plugin.version}</version>
                 <extensions>true</extensions>
                 <configuration>
+                    <instructions>
+                        <Embed-Dependency>utils.mdsal-openflow;type=!pom;inline=false</Embed-Dependency>
+                        <Embed-Transitive>true</Embed-Transitive>
+                    </instructions>
                     <manifestLocation>${project.basedir}/META-INF</manifestLocation>
                 </configuration>
             </plugin>

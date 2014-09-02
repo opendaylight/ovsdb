@@ -17,6 +17,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
@@ -169,6 +170,40 @@ public abstract class AbstractServiceInstance implements OpendaylightInventoryLi
         try {
             commitFuture.get();  // TODO: Make it async (See bug 1362)
             logger.debug("Transaction success for write of Flow "+flowBuilder.getFlowName());
+        } catch (InterruptedException|ExecutionException e) {
+            logger.error(e.getMessage(), e);
+
+        }
+    }
+
+    protected void removeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
+        Preconditions.checkNotNull(mdsalConsumer);
+        if (mdsalConsumer == null) {
+            logger.error("ERROR finding MDSAL Service.");
+            return;
+        }
+
+        DataBroker dataBroker = mdsalConsumer.getDataBroker();
+        if (dataBroker == null) {
+            logger.error("ERROR finding reference for DataBroker. Please check MD-SAL support on the Controller.");
+            return;
+        }
+
+        WriteTransaction modification = dataBroker.newWriteOnlyTransaction();
+        InstanceIdentifier<Flow> path1 = InstanceIdentifier.builder(Nodes.class)
+                .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
+                               .rev130819.nodes.Node.class, nodeBuilder.getKey())
+                .augmentation(FlowCapableNode.class).child(Table.class,
+                                                           new TableKey(flowBuilder.getTableId())).child(Flow.class, flowBuilder.getKey()).build();
+        //modification.delete(LogicalDatastoreType.OPERATIONAL, nodeBuilderToInstanceId(nodeBuilder));
+        //modification.delete(LogicalDatastoreType.OPERATIONAL, path1);
+        //modification.delete(LogicalDatastoreType.CONFIGURATION, nodeBuilderToInstanceId(nodeBuilder));
+        modification.delete(LogicalDatastoreType.CONFIGURATION, path1);
+
+        CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
+        try {
+            commitFuture.get();  // TODO: Make it async (See bug 1362)
+            logger.debug("Transaction success for deletion of Flow "+flowBuilder.getFlowName());
         } catch (InterruptedException|ExecutionException e) {
             logger.error(e.getMessage(), e);
         }

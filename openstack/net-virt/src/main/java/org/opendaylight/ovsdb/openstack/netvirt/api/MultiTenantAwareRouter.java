@@ -11,8 +11,6 @@
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
 import java.net.InetAddress;
-import java.net.InterfaceAddress;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -21,27 +19,28 @@ import java.util.UUID;
  */
 public interface MultiTenantAwareRouter {
 
-  void addInterface(UUID tenantId, String interfaceName, Set<InterfaceAddress> addresses);
+    void addInterface(UUID tenantId, String interfaceName, InetAddress address, int mask);
 
-  void addInterface(UUID tenantId, String interfaceName, String macAddress, Set<InterfaceAddress> addresses);
+    void addInterface(UUID tenantId, String interfaceName, String macAddress, InetAddress address, int mask);
 
-  void updateInterface(UUID tenantId, String interfaceName, Set<InterfaceAddress> addresses);
+    void updateInterface(UUID tenantId, String interfaceName, InetAddress address, int mask);
 
-  void updateInterface(UUID tenantId, String interfaceName, String macAddress, Set<InterfaceAddress> addresses);
+    void updateInterface(UUID tenantId, String interfaceName, String macAddress, InetAddress address, int mask);
 
-  void removeInterface(UUID tenantId, String interfaceName);
+    void removeInterface(UUID tenantId, String interfaceName);
 
-  void addRoute(UUID tenantId, InterfaceAddress destination, InetAddress nextHop);
+    void addRoute(UUID tenantId, String destinationCidr, InetAddress nextHop);
 
-  void addRoute(UUID tenantId, InterfaceAddress destination, InetAddress nextHop, Integer priority);
+    void addRoute(UUID tenantId, String destinationCidr, InetAddress nextHop, Integer priority);
 
-  void removeRoute(UUID tenantId, InterfaceAddress destination, InetAddress nextHop);
+    void removeRoute(UUID tenantId, String destinationCidr, InetAddress nextHop);
 
-  void removeRoute(UUID tenantId, InterfaceAddress destination, InetAddress nextHop, Integer priority);
+    void removeRoute(UUID tenantId, String destinationCidr, InetAddress nextHop, Integer priority);
 
-  void addDefaultRoute(UUID tenantId, InetAddress nextHop);
+    void addDefaultRoute(UUID tenantId, InetAddress nextHop);
 
-  void addDefaultRoute(UUID tenantId, InetAddress nextHop, Integer priority);
+    void addDefaultRoute(UUID tenantId, InetAddress nextHop, Integer priority);
 
+    void addNatRule(UUID tenantId, InetAddress matchAddress, InetAddress rewriteAddress);
 
 }

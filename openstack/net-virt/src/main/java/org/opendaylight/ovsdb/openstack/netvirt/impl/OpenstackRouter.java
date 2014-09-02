@@ -13,8 +13,6 @@ package org.opendaylight.ovsdb.openstack.netvirt.impl;
 import org.opendaylight.ovsdb.openstack.netvirt.api.MultiTenantAwareRouter;
 
 import java.net.InetAddress;
-import java.net.InterfaceAddress;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -24,23 +22,22 @@ import java.util.UUID;
 public class OpenstackRouter implements MultiTenantAwareRouter {
 
     @Override
-    public void addInterface(UUID tenantId, String interfaceName, Set<InterfaceAddress> addresses) {
+    public void addInterface(UUID tenantId, String interfaceName, InetAddress address, int mask) {
 
     }
 
     @Override
-    public void addInterface(UUID tenantId, String interfaceName, String macAddress, Set<InterfaceAddress> addresses) {
+    public void addInterface(UUID tenantId, String interfaceName, String macAddress, InetAddress address, int mask) {
 
     }
 
     @Override
-    public void updateInterface(UUID tenantId, String interfaceName, Set<InterfaceAddress> addresses) {
+    public void updateInterface(UUID tenantId, String interfaceName, InetAddress address, int mask) {
 
     }
 
     @Override
-    public void updateInterface(UUID tenantId, String interfaceName, String macAddress,
-                                Set<InterfaceAddress> addresses) {
+    public void updateInterface(UUID tenantId, String interfaceName, String macAddress, InetAddress address, int mask) {
 
     }
 
@@ -50,22 +47,22 @@ public class OpenstackRouter implements MultiTenantAwareRouter {
     }
 
     @Override
-    public void addRoute(UUID tenantId, InterfaceAddress destination, InetAddress nextHop) {
+    public void addRoute(UUID tenantId, String destinationCidr, InetAddress nextHop) {
 
     }
 
     @Override
-    public void addRoute(UUID tenantId, InterfaceAddress destination, InetAddress nextHop, Integer priority) {
+    public void addRoute(UUID tenantId, String destinationCidr, InetAddress nextHop, Integer priority) {
 
     }
 
     @Override
-    public void removeRoute(UUID tenantId, InterfaceAddress destination, InetAddress nextHop) {
+    public void removeRoute(UUID tenantId, String destinationCidr, InetAddress nextHop) {
 
     }
 
     @Override
-    public void removeRoute(UUID tenantId, InterfaceAddress destination, InetAddress nextHop, Integer priority) {
+    public void removeRoute(UUID tenantId, String destinationCidr, InetAddress nextHop, Integer priority) {
 
     }
 
@@ -76,6 +73,11 @@ public class OpenstackRouter implements MultiTenantAwareRouter {
 
     @Override
     public void addDefaultRoute(UUID tenantId, InetAddress nextHop, Integer priority) {
+
+    }
+
+    @Override
+    public void addNatRule(UUID tenantId, InetAddress matchAddress, InetAddress rewriteAddress) {
 
     }
 }

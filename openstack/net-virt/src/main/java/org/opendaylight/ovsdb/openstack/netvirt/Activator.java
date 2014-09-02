@@ -24,6 +24,7 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronRouterAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityGroupAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityRuleAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetAware;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.switchmanager.IInventoryListener;
@@ -31,6 +32,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.api.MultiTenantAwareRouter;
+import org.opendaylight.ovsdb.openstack.netvirt.api.MultiTenantRouterForwardingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
@@ -283,10 +285,19 @@ public class Activator extends ComponentActivatorAbstractBase {
 
         if (imp.equals(NeutronL3Adapter.class)) {
             c.setInterface(NeutronL3Adapter.class.getName(), null);
-
+            c.add(createServiceDependency()
+                          .setService(org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService.class)
+                          .setRequired(true));
+            c.add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true));
+            c.add(createServiceDependency().setService(NetworkingProviderManager.class).setRequired(true));
+            c.add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true));
+            c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
+            c.add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true));
+            c.add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true));
+            c.add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true));
             c.add(createServiceDependency().setService(MultiTenantAwareRouter.class).setRequired(true));
-            // TODO: it will require MultiTenantRouterForwardingProvider
-            // c.add(createServiceDependency().setService(MultiTenantRouterForwardingProvider.class).setRequired(true));
+            // TODO: it should require MultiTenantRouterForwardingProvider
+            c.add(createServiceDependency().setService(MultiTenantRouterForwardingProvider.class).setRequired(false));
         }
 
         if (imp.equals(OpenstackRouter.class)) {

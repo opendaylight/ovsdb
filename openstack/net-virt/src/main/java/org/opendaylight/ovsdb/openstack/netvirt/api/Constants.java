@@ -62,4 +62,15 @@ public final class Constants {
     public static final String EVENT_HANDLER_TYPE_PROPERTY = "eventHandlerType";
     public static final String PROVIDER_NAME_PROPERTY = "providerName";
     public static final String NAT_PROVIDER_DIRECTION = "natDirection";
+
+    /*
+     * MD-SAL
+     */
+
+    public static final String OPENFLOW_NODE_PREFIX = "openflow:";
+
+    /*
+     * Ethertypes
+     */
+    public static final long ARP_ETHERTYPE = 0x0806L;
 }

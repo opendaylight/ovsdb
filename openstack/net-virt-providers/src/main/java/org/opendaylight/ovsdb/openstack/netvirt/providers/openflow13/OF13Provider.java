@@ -3085,7 +3085,7 @@ public class OF13Provider implements NetworkingProvider {
         }
     }
 
-    private NodeBuilder createNodeBuilder(String nodeId) {
+    public static NodeBuilder createNodeBuilder(String nodeId) {
         NodeBuilder builder = new NodeBuilder();
         builder.setId(new NodeId(nodeId));
         builder.setKey(new NodeKey(builder.getId()));

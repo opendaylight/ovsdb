@@ -12,12 +12,32 @@ package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services;
 
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.OF13Provider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
+import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
+import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 
+import com.google.common.collect.Lists;
+
+import java.math.BigInteger;
 import java.net.InetAddress;
+import java.util.List;
 
 public class L3ForwardingService extends AbstractServiceInstance implements L3ForwardingProvider {
     public L3ForwardingService() {
@@ -36,6 +56,54 @@ public class L3ForwardingService extends AbstractServiceInstance implements L3Fo
     @Override
     public Status programForwardingTableEntry(Node node, Long dpid, String segmentationId, InetAddress ipAddress,
                                               String macAddress, Action action) {
-        return null;
+        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpid;
+
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = OF13Provider.createNodeBuilder(nodeName);
+
+        // Instructions List Stores Individual Instructions
+        InstructionsBuilder isb = new InstructionsBuilder();
+        List<Instruction> instructions = Lists.newArrayList();
+        InstructionBuilder ib = new InstructionBuilder();
+
+        MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId));
+        MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(ipAddress.getHostAddress()));
+
+        // Set Dest Mac address
+        InstructionUtils.createDlDstInstructions(ib, new MacAddress(macAddress));
+        ib.setOrder(0);
+        ib.setKey(new InstructionKey(0));
+        instructions.add(ib.build());
+
+        // Goto Next Table
+        ib = getMutablePipelineInstructionBuilder();
+        ib.setOrder(1);
+        ib.setKey(new InstructionKey(1));
+        instructions.add(ib.build());
+
+        FlowBuilder flowBuilder = new FlowBuilder();
+        flowBuilder.setMatch(matchBuilder.build());
+        flowBuilder.setInstructions(isb.setInstruction(instructions).build());
+
+        String flowId = "L3Forwarding_" + ipAddress.getHostAddress();
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setBarrier(true);
+        flowBuilder.setTableId(this.getTable());
+        flowBuilder.setKey(key);
+        flowBuilder.setPriority(1024);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+        writeFlow(flowBuilder, nodeBuilder);
+
+        if (action.equals(Action.ADD)) {
+            writeFlow(flowBuilder, nodeBuilder);
+        } else {
+            removeFlow(flowBuilder, nodeBuilder);
+        }
+
+        // ToDo: WriteFlow/RemoveFlow should return something we can use to check success
+        return new Status(StatusCode.SUCCESS);
     }
 }

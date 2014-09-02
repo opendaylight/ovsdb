@@ -11,6 +11,9 @@
 package org.opendaylight.ovsdb.openstack.netvirt;
 
 import org.opendaylight.controller.networkconfig.neutron.NeutronFloatingIP;
+import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancer;
+import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerPool;
+import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerPoolMember;
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
 import org.opendaylight.controller.networkconfig.neutron.NeutronRouter;
@@ -26,6 +29,9 @@ public class NorthboundEvent extends AbstractEvent {
     private NeutronRouter_Interface routerInterface;
     private NeutronFloatingIP neutronFloatingIP;
     private NeutronNetwork neutronNetwork;
+    private NeutronLoadBalancer loadBalancer;
+    private NeutronLoadBalancerPool loadBalancerPool;
+    private NeutronLoadBalancerPoolMember loadBalancerPoolMember;
 
     NorthboundEvent(NeutronPort port, Action action) {
         super(HandlerType.NEUTRON_PORT, action);
@@ -58,6 +64,21 @@ public class NorthboundEvent extends AbstractEvent {
         this.neutronNetwork = neutronNetwork;
     }
 
+    NorthboundEvent(NeutronLoadBalancer loadBalancer, Action action) {
+        super(HandlerType.NEUTRON_PORT, action);
+        this.loadBalancer = loadBalancer;
+    }
+
+    NorthboundEvent(NeutronLoadBalancerPool loadBalancerPool, Action action) {
+        super(HandlerType.NEUTRON_PORT, action);
+        this.loadBalancerPool = loadBalancerPool;
+    }
+
+    NorthboundEvent(NeutronLoadBalancerPoolMember loadBalancerPoolMember, Action action) {
+        super(HandlerType.NEUTRON_PORT, action);
+        this.loadBalancerPoolMember = loadBalancerPoolMember;
+    }
+
     public NeutronPort getPort() {
         return port;
     }
@@ -75,6 +96,15 @@ public class NorthboundEvent extends AbstractEvent {
     }
     public NeutronNetwork getNeutronNetwork() {
         return neutronNetwork;
+    }
+    public NeutronLoadBalancer getLoadBalancer() {
+        return loadBalancer;
+    }
+    public NeutronLoadBalancerPool getLoadBalancerPool() {
+        return loadBalancerPool;
+    }
+    public NeutronLoadBalancerPoolMember getLoadBalancerPoolMember() {
+        return loadBalancerPoolMember;
     }
 
     @Override
@@ -142,6 +172,21 @@ public class NorthboundEvent extends AbstractEvent {
             if (other.neutronNetwork != null)
                 return false;
         } else if (!neutronNetwork.equals(other.neutronNetwork))
+            return false;
+        if (loadBalancer == null) {
+            if (other.loadBalancer != null)
+                return false;
+        } else if (!loadBalancer.equals(other.loadBalancer))
+            return false;
+        if (loadBalancerPool == null) {
+            if (other.loadBalancerPool != null)
+                return false;
+        } else if (!loadBalancerPool.equals(other.loadBalancerPool))
+            return false;
+        if (loadBalancerPoolMember == null) {
+            if (other.loadBalancerPoolMember != null)
+                return false;
+        } else if (!loadBalancerPoolMember.equals(other.loadBalancerPoolMember))
             return false;
         return true;
     }

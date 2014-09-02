@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_2b9e6908",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/ArpResponderService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-09-02T13:04:29Z",
+      "side": 1,
+      "message": "Please change the Authors :) Since i added the file, it just fits the template. The actual authors who will be adding the meat must take over the Authors name on these files :)",
+      "revId": "b6d91f9ba8113d45d3c9f0f5aa9e51cd8b71d6fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_4ba3ad4f",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/InboundNatService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-09-02T13:04:29Z",
+      "side": 1,
+      "message": "Same here and applicable to other files as well.",
+      "revId": "b6d91f9ba8113d45d3c9f0f5aa9e51cd8b71d6fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

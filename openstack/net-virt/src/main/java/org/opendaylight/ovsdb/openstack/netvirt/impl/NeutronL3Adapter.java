@@ -79,16 +79,20 @@ public class NeutronL3Adapter {
     private volatile ArpProvider arpProvider;
     private volatile RoutingProvider routingProvider;
 
-    private Set<String> ipRewriteCache;
-    private Set<String> ipRewriteExclusionCache;
+    private Set<String> inboundIpRewriteCache;
+    private Set<String> outboundIpRewriteCache;
+    private Set<String> inboundIpRewriteExclusionCache;
+    private Set<String> outboundIpRewriteExclusionCache;
     private Set<String> routerInterfacesCache;
     private Set<String> staticArpEntryCache;
     private Set<String> defaultRouteCache;
     private Map<String, String> networkId2MacCache;
 
     void init() {
-        this.ipRewriteCache = new HashSet<>();
-        this.ipRewriteExclusionCache = new HashSet<>();
+        this.inboundIpRewriteCache = new HashSet<>();
+        this.outboundIpRewriteCache = new HashSet<>();
+        this.inboundIpRewriteExclusionCache = new HashSet<>();
+        this.outboundIpRewriteExclusionCache = new HashSet<>();
         this.routerInterfacesCache = new HashSet<>();
         this.staticArpEntryCache = new HashSet<>();
         this.defaultRouteCache = new HashSet<>();
@@ -183,8 +187,7 @@ public class NeutronL3Adapter {
             return;  // done: go no further w/out all the info needed...
         }
 
-        final Action action =
-                isDelete ? Action.DELETE : Action.ADD;
+        final Action action = isDelete ? Action.DELETE : Action.ADD;
 
         // Keep cache for finding router's mac from network uuid
         //
@@ -212,9 +215,11 @@ public class NeutronL3Adapter {
             // for the external neutron networks.
             //
             {
-                final Action actionForRewriteExclusion =
-                        isExternal ? Action.DELETE : actionForNode;
-                programIpRewriteExclusionStage1(node, dpid, providerSegmentationId, cidr, actionForRewriteExclusion);
+                final Action actionForRewriteExclusion = isExternal ? Action.DELETE : actionForNode;
+                programIpRewriteExclusionStage1(node, dpid, providerSegmentationId, true /* isInbound */,
+                                                cidr, actionForRewriteExclusion);
+                programIpRewriteExclusionStage1(node, dpid, providerSegmentationId, false /* isInbound */,
+                                                cidr, actionForRewriteExclusion);
             }
 
             // Default route. For non-external subnets, make sure that there is none configured.
@@ -239,8 +244,10 @@ public class NeutronL3Adapter {
                                 ipStr + "/" + Integer.toString(mask);
         final Boolean isProgrammed = routerInterfacesCache.contains(cacheKey);
 
-        if (actionForNode == Action.DELETE && isProgrammed == Boolean.FALSE) return;
-        if (actionForNode == Action.ADD && isProgrammed == Boolean.TRUE) return;
+        if (actionForNode == Action.DELETE && isProgrammed == Boolean.FALSE)
+            return;
+        if (actionForNode == Action.ADD && isProgrammed == Boolean.TRUE)
+            return;
 
         Status status = this.programRouterInterfaceStage2(node, dpid, providerSegmentationId,
                                                           macAddress, ipStr, mask, actionForNode);
@@ -291,8 +298,10 @@ public class NeutronL3Adapter {
         final String cacheKey = node.toString() + ":" + providerSegmentationId + ":" + ipStr;
         final Boolean isProgrammed = staticArpEntryCache.contains(cacheKey);
 
-        if (actionForNode == Action.DELETE && isProgrammed == Boolean.FALSE) return;
-        if (actionForNode == Action.ADD && isProgrammed == Boolean.TRUE) return;
+        if (actionForNode == Action.DELETE && isProgrammed == Boolean.FALSE)
+            return;
+        if (actionForNode == Action.ADD && isProgrammed == Boolean.TRUE)
+            return;
 
         Status status = this.programStaticArpStage2(node, dpid, providerSegmentationId,
                                                     macAddress, ipStr, actionForNode);
@@ -336,41 +345,62 @@ public class NeutronL3Adapter {
        As such we need to modify the interfaces to program in to the correct tables
      */
     private void programIpRewriteExclusionStage1(Node node, Long dpid, String providerSegmentationId,
-                                                 String cidr,
+                                                 final boolean isInbound, String cidr,
                                                  Action actionForRewriteExclusion) {
         // Based on the local cache, figure out whether programming needs to occur. To do this, we
         // will look at desired action for node.
         //
         final String cacheKey = node.toString() + ":" + providerSegmentationId + ":" + cidr;
-        final Boolean isProgrammed = ipRewriteExclusionCache.contains(cacheKey);
+        final Boolean isProgrammed = isInbound ?
+                                     inboundIpRewriteExclusionCache.contains(cacheKey):
+                                     outboundIpRewriteExclusionCache.contains(cacheKey);
 
-        if (actionForRewriteExclusion == Action.DELETE && isProgrammed == Boolean.FALSE) return;
-        if (actionForRewriteExclusion == Action.ADD && isProgrammed == Boolean.TRUE) return;
+        if (actionForRewriteExclusion == Action.DELETE && isProgrammed == Boolean.FALSE)
+            return;
+        if (actionForRewriteExclusion == Action.ADD && isProgrammed == Boolean.TRUE)
+            return;
 
         Status status = this.programIpRewriteExclusionStage2(node, dpid, providerSegmentationId, cidr,
-                                                             actionForRewriteExclusion);
+                                                             isInbound, actionForRewriteExclusion);
         if (status.isSuccess()) {
             // Update cache
             if (actionForRewriteExclusion == Action.ADD) {
-                ipRewriteExclusionCache.add(cacheKey);
+                if (isInbound) {
+                    inboundIpRewriteExclusionCache.add(cacheKey);
+                } else {
+                    outboundIpRewriteExclusionCache.add(cacheKey);
+                }
             } else {
-                ipRewriteExclusionCache.remove(cacheKey);
+                if (isInbound) {
+                    inboundIpRewriteExclusionCache.remove(cacheKey);
+                } else {
+                    outboundIpRewriteExclusionCache.remove(cacheKey);
+                }
             }
         }
     }
 
     private Status programIpRewriteExclusionStage2(Node node, Long dpid, String providerSegmentationId, String cidr,
-                                                   Action actionForNode) {
-        Status status = inboundNatProvider == null ?
-                        new Status(StatusCode.SUCCESS) :
-                        inboundNatProvider.programIpRewriteExclusion(node, dpid, providerSegmentationId, cidr, actionForNode);
+                                                   final boolean isInbound, Action actionForNode) {
+        Status status;
+        if (isInbound) {
+            status = inboundNatProvider == null ? new Status(StatusCode.SUCCESS) :
+                     inboundNatProvider.programIpRewriteExclusion(node, dpid, providerSegmentationId, cidr,
+                                                                  actionForNode);
+        } else {
+            status = outboundNatProvider == null ? new Status(StatusCode.SUCCESS) :
+                     outboundNatProvider.programIpRewriteExclusion(node, dpid, providerSegmentationId, cidr,
+                                                                   actionForNode);
+        }
+
         if (status.isSuccess()) {
-            logger.debug("IpRewriteExclusion {} for cidr:{} node:{} action:{}",
-                         inboundNatProvider == null ? "skipped" : "programmed",
+            final boolean isSkipped = isInbound ? inboundNatProvider == null : outboundNatProvider == null;
+            logger.debug("IpRewriteExclusion {} {} for cidr:{} node:{} action:{}",
+                         (isInbound ? "inbound" : "outbound"), (isSkipped ? "skipped" : "programmed"),
                          cidr, node, actionForNode);
         } else {
-            logger.error("IpRewriteExclusion failed for cidr:{} node:{} action:{} status:{}",
-                         cidr, node, actionForNode, status);
+            logger.error("IpRewriteExclusion {} failed for cidr:{} node:{} action:{} status:{}",
+                         (isInbound ? "inbound" : "outbound"), cidr, node, actionForNode, status);
         }
         return status;
     }
@@ -384,8 +414,10 @@ public class NeutronL3Adapter {
         final String cacheKey = node.toString() + ":" + providerSegmentationId + ":" + gatewayIp;
         final Boolean isProgrammed = defaultRouteCache.contains(cacheKey);
 
-        if (actionForNodeDefaultRoute == Action.DELETE && isProgrammed == Boolean.FALSE) return;
-        if (actionForNodeDefaultRoute == Action.ADD && isProgrammed == Boolean.TRUE) return;
+        if (actionForNodeDefaultRoute == Action.DELETE && isProgrammed == Boolean.FALSE)
+            return;
+        if (actionForNodeDefaultRoute == Action.ADD && isProgrammed == Boolean.TRUE)
+            return;
 
         Status status = this.programDefaultRouteStage2(node, dpid, providerSegmentationId,
                                                        defaultGatewayMacAddress, gatewayIp, actionForNodeDefaultRoute);
@@ -454,8 +486,10 @@ public class NeutronL3Adapter {
 
             // Rewrite from float to fixed and vice-versa
             //
-            programIpRewriteStage1(node, dpid, providerSegmentationId, fixedIPAddress, floatingIpAddress, actionForNode);
-            programIpRewriteStage1(node, dpid, providerSegmentationId, floatingIpAddress, fixedIPAddress, actionForNode);
+            programIpRewriteStage1(node, dpid, providerSegmentationId, true /* isInbound */,
+                                   floatingIpAddress, fixedIPAddress, actionForNode);
+            programIpRewriteStage1(node, dpid, providerSegmentationId, false /* isInboubd */,
+                                   fixedIPAddress, floatingIpAddress, actionForNode);
 
             // Respond to arps for the floating ip address
             //
@@ -465,6 +499,7 @@ public class NeutronL3Adapter {
     }
 
     private void programIpRewriteStage1(Node node, Long dpid, String providerSegmentationId,
+                                        final boolean isInbound,
                                         String matchAddress, String rewriteAddress,
                                         Action actionForNode) {
         // Based on the local cache, figure out whether programming needs to occur. To do this, we
@@ -472,44 +507,66 @@ public class NeutronL3Adapter {
         //
         final String cacheKey = node.toString() + ":" + providerSegmentationId + ":" +
                                 matchAddress + ":" + rewriteAddress;
-        final Boolean isProgrammed = ipRewriteCache.contains(cacheKey);
+        final Boolean isProgrammed = isInbound ?
+                                     inboundIpRewriteCache.contains(cacheKey) :
+                                     outboundIpRewriteCache.contains(cacheKey);
 
-        if (actionForNode == Action.DELETE && isProgrammed == Boolean.FALSE) return;
-        if (actionForNode == Action.ADD && isProgrammed == Boolean.TRUE) return;
+        if (actionForNode == Action.DELETE && isProgrammed == Boolean.FALSE)
+            return;
+        if (actionForNode == Action.ADD && isProgrammed == Boolean.TRUE)
+            return;
 
-        Status status = this.programIpRewriteStage2(node, dpid, providerSegmentationId,
+        Status status = this.programIpRewriteStage2(node, dpid, providerSegmentationId, isInbound,
                                                     matchAddress, rewriteAddress, actionForNode);
         if (status.isSuccess()) {
             // Update cache
             if (actionForNode == Action.ADD) {
-                ipRewriteCache.add(cacheKey);
+                if (isInbound) {
+                    inboundIpRewriteCache.add(cacheKey);
+                } else {
+                    outboundIpRewriteCache.add(cacheKey);
+                }
             } else {
-                ipRewriteCache.remove(cacheKey);
+                if (isInbound) {
+                    inboundIpRewriteCache.remove(cacheKey);
+                } else {
+                    outboundIpRewriteCache.remove(cacheKey);
+                }
             }
         }
     }
 
     private Status programIpRewriteStage2(Node node, Long dpid, String providerSegmentationId,
+                                          final boolean isInbound,
                                           String matchAddress, String rewriteAddress,
                                           Action actionForNode) {
         Status status;
         try {
             InetAddress inetMatchAddress = InetAddress.getByName(matchAddress);
             InetAddress inetRewriteAddress = InetAddress.getByName(rewriteAddress);
-            status = inboundNatProvider == null ?
-                     new Status(StatusCode.SUCCESS) :
-                     inboundNatProvider.programIpRewriteRule(node, dpid, providerSegmentationId,
-                                                             inetMatchAddress, inetRewriteAddress, actionForNode);
+            if (isInbound) {
+                status = inboundNatProvider == null ?
+                         new Status(StatusCode.SUCCESS) :
+                         inboundNatProvider.programIpRewriteRule(node, dpid, providerSegmentationId,
+                                                                 inetMatchAddress, inetRewriteAddress, actionForNode);
+            } else {
+                status = outboundNatProvider == null ?
+                         new Status(StatusCode.SUCCESS) :
+                         outboundNatProvider.programIpRewriteRule(node, dpid, providerSegmentationId,
+                                                                  inetMatchAddress, inetRewriteAddress, actionForNode);
+            }
         } catch (UnknownHostException e) {
             status = new Status(StatusCode.BADREQUEST);
         }
 
         if (status.isSuccess()) {
-            logger.debug("ProgramIpRewrite {} for match:{} rewrite:{} node:{} action:{}",
-                         inboundNatProvider == null ? "skipped" : "programmed",
+            final boolean isSkipped = isInbound ? inboundNatProvider == null : outboundNatProvider == null;
+            logger.debug("ProgramIpRewrite {} {} for match:{} rewrite:{} node:{} action:{}",
+                         (isInbound ? "inbound" : "outbound"), (isSkipped ? "skipped" : "programmed"),
                          matchAddress, rewriteAddress, node, actionForNode);
         } else {
-            logger.error("ProgramIpRewrite failed for match:{} rewrite:{} node:{} action:{} status:{}",
+            logger.error("ProgramIpRewrite {} failed for match:{} rewrite:{} node:{} action:{} status:{}",
+                         (isInbound ? "inbound" : "outbound"),
                          matchAddress, rewriteAddress, node, actionForNode, status);
         }
         return status;

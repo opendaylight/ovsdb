@@ -286,35 +286,8 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
     @Deprecated
     public Status updateRow (Node node, String tableName, String parentUUID, String rowUUID, Row row) {
         String databaseName = OvsVswitchdSchemaConstants.DATABASE_NAME;
-        Connection connection = connectionService.getConnection(node);
-        OvsdbClient client = connection.getClient();
-
-        logger.debug("updateRow : Connection : {} databaseName : {} tableName : {} rowUUID : {} row : {}",
-                      client.getConnectionInfo(), databaseName, tableName, rowUUID, row.toString());
-        try{
-            DatabaseSchema dbSchema = client.getDatabaseSchema(databaseName);
-            TransactionBuilder transactionBuilder = client.transactBuilder(dbSchema);
-            TableSchema<GenericTableSchema> tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
-            ColumnSchema<GenericTableSchema, UUID> _uuid = tableSchema.column("_uuid", UUID.class);
-            transactionBuilder.add(op.update(tableSchema, row)
-                                     .where(_uuid.opEqual(new UUID(rowUUID)))
-                                     .build());
-
-            ListenableFuture<List<OperationResult>> results = transactionBuilder.execute();
-            List<OperationResult> operationResults = results.get();
-            if (operationResults.isEmpty() || (transactionBuilder.getOperations().size() != operationResults.size())) {
-                return new StatusWithUuid(StatusCode.INTERNALERROR);
-            }
-            for (OperationResult result : operationResults) {
-                if (result.getError() != null) {
-                    return new StatusWithUuid(StatusCode.BADREQUEST, result.getError());
-                }
-            }
-            return new StatusWithUuid(StatusCode.SUCCESS);
-        } catch(Exception e){
-            logger.error("Error in updateRow(): ",e);
-        }
-        return new Status(StatusCode.INTERNALERROR);
+        Row<GenericTableSchema> updatedRow = this.updateRow(node, databaseName, tableName, new UUID(rowUUID), row, true);
+        return new StatusWithUuid(StatusCode.SUCCESS);
     }
 
     private void processDeleteTransaction(OvsdbClient client, String databaseName, String childTable,
@@ -396,9 +369,7 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
     @Override
     @Deprecated
     public List<String> getTables(Node node) {
-        ConcurrentMap<String, ConcurrentMap<String, Row>> cache  = ovsdbInventoryService.getCache(node, OvsVswitchdSchemaConstants.DATABASE_NAME);
-        if (cache == null) return null;
-        return new ArrayList<String>(cache.keySet());
+        return this.getTables(node, OvsVswitchdSchemaConstants.DATABASE_NAME);
     }
 
     private List<InetAddress> getControllerIPAddresses(Connection connection) {
@@ -1502,43 +1473,117 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
     public Row<GenericTableSchema> updateRow(Node node, String databaseName,
             String tableName, UUID rowUuid, Row<GenericTableSchema> row,
             boolean overwrite) throws OvsdbPluginException {
-        throw new OvsdbPluginException("Not implemented Yet");
+        Connection connection = connectionService.getConnection(node);
+        OvsdbClient client = connection.getClient();
+
+        logger.debug("updateRow : Connection : {} databaseName : {} tableName : {} rowUUID : {} row : {}",
+                      client.getConnectionInfo(), databaseName, tableName, rowUuid, row.toString());
+        try{
+            DatabaseSchema dbSchema = client.getDatabaseSchema(databaseName);
+            TransactionBuilder transactionBuilder = client.transactBuilder(dbSchema);
+            TableSchema<GenericTableSchema> tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
+            ColumnSchema<GenericTableSchema, UUID> _uuid = tableSchema.column("_uuid", UUID.class);
+            transactionBuilder.add(op.update(tableSchema, row)
+                                     .where(_uuid.opEqual(rowUuid))
+                                     .build());
+
+            ListenableFuture<List<OperationResult>> results = transactionBuilder.execute();
+            List<OperationResult> operationResults = results.get();
+            for (OperationResult result : operationResults) {
+                if (result.getError() != null) {
+                    throw new OvsdbPluginException("Error updating row : "+ result.getError());
+                }
+            }
+            if (operationResults.isEmpty() || (transactionBuilder.getOperations().size() != operationResults.size())) {
+                throw new OvsdbPluginException("Failed to update row. Please check OVS logs for more info.");
+            }
+
+            return this.getRow(node, databaseName, tableName, rowUuid);
+        } catch(Exception e){
+            throw new OvsdbPluginException("Error updating row due to an exception "+ e.getMessage());
+        }
     }
 
     @Override
     public void deleteRow(Node node, String databaseName, String tableName, String parentTable, UUID parentRowUuid,
             String parentColumn, UUID rowUuid) throws OvsdbPluginException {
-        throw new OvsdbPluginException("Not implemented Yet");
+        Connection connection = connectionService.getConnection(node);
+        OvsdbClient client = connection.getClient();
+
+        if (parentTable == null && parentRowUuid != null) {
+            parentTable = this.getTableNameForRowUuid(node, databaseName, parentRowUuid);
+        }
+
+        if (parentColumn == null && parentTable != null) {
+            DatabaseSchema dbSchema = client.getDatabaseSchema(databaseName);
+            TableSchema<GenericTableSchema> parentTableSchema = dbSchema.table(parentTable, GenericTableSchema.class);
+            parentColumn = this.getReferencingColumn(parentTableSchema, tableName);
+        }
+
+        logger.debug("deleteRow : Connection : {} databaseName : {} tableName : {} Uuid : {} ParentTable : {} ParentColumn : {}",
+                client.getConnectionInfo(), databaseName, tableName, rowUuid, parentTable, parentColumn);
+
+        DatabaseSchema dbSchema = client.getDatabaseSchema(databaseName);
+        TransactionBuilder transactionBuilder = client.transactBuilder(dbSchema);
+        this.processDeleteTransaction(client, databaseName, tableName,
+                                      parentTable, parentColumn, rowUuid.toString(), transactionBuilder);
+
+        ListenableFuture<List<OperationResult>> results = transactionBuilder.execute();
+        List<OperationResult> operationResults;
+        try {
+            operationResults = results.get();
+            if (operationResults.isEmpty() || (transactionBuilder.getOperations().size() != operationResults.size())) {
+                throw new OvsdbPluginException("Delete Operation Failed");
+            }
+            for (OperationResult result : operationResults) {
+                if (result.getError() != null) {
+                    throw new OvsdbPluginException("Delete Operation Failed with Error : "+result.getError().toString());
+                }
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     @Override
-    public void deleteRow(Node node, String databaseName, String tableName,
-            UUID rowUuid) throws OvsdbPluginException {
-        throw new OvsdbPluginException("Not implemented Yet");
+    public void deleteRow(Node node, String databaseName, String tableName, UUID rowUuid) throws OvsdbPluginException {
+        this.deleteRow(node, databaseName, tableName, null, null, null, rowUuid);
     }
 
     @Override
     public Row<GenericTableSchema> getRow(Node node, String databaseName,
             String tableName, UUID uuid) throws OvsdbPluginException {
-        throw new OvsdbPluginException("Not implemented Yet");
+        ConcurrentMap<UUID, Row<GenericTableSchema>> rows = this.getRows(node, databaseName, tableName);
+        if (rows != null) {
+            return rows.get(uuid);
+        }
+        return null;
     }
 
     @Override
     public ConcurrentMap<UUID, Row<GenericTableSchema>> getRows(Node node,
             String databaseName, String tableName) throws OvsdbPluginException {
-        throw new OvsdbPluginException("Not implemented Yet");
+        ConcurrentMap<String, Row> ovsTable = ovsdbInventoryService.getTableCache(node, databaseName, tableName);
+        if (ovsTable == null) return null;
+        ConcurrentMap<UUID, Row<GenericTableSchema>> tableDB = Maps.newConcurrentMap();
+        for (String uuidStr : ovsTable.keySet()) {
+            tableDB.put(new UUID(uuidStr), ovsTable.get(uuidStr));
+        }
+        return tableDB;
     }
 
     @Override
     public ConcurrentMap<UUID, Row<GenericTableSchema>> getRows(Node node,
             String databaseName, String tableName, String fiqlQuery)
             throws OvsdbPluginException {
-        throw new OvsdbPluginException("Not implemented Yet");
+        return this.getRows(node, databaseName, tableName);
     }
 
     @Override
     public List<String> getTables(Node node, String databaseName) throws OvsdbPluginException {
-        throw new OvsdbPluginException("Not implemented Yet");
+        ConcurrentMap<String, ConcurrentMap<String, Row>> cache  = ovsdbInventoryService.getCache(node, databaseName);
+        if (cache == null) return null;
+        return new ArrayList<String>(cache.keySet());
     }
 }
-

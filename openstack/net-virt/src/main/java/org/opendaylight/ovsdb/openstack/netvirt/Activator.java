@@ -15,8 +15,9 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallPolicyA
 import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallRuleAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronFloatingIPAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerAware;
-import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolAware;
-import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolMemberAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolMemberCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortAware;
@@ -34,6 +35,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.api.InboundNatProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.MultiTenantAwareRouter;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
@@ -242,11 +244,14 @@ public class Activator extends ComponentActivatorAbstractBase {
             Properties lbaasHandlerProperties = new Properties();
             lbaasHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY,
                     AbstractEvent.HandlerType.NEUTRON_LOAD_BALANCER);
-            c.setInterface(new String[] {INeutronLoadBalancerAware.class.getName(),
-                                         INeutronLoadBalancerPoolAware.class.getName(),
-                                         INeutronLoadBalancerPoolMemberAware.class.getName()},
+            c.setInterface(new String[] {INeutronLoadBalancerAware.class.getName()},
                                          lbaasHandlerProperties);
             c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
+            c.add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true));
+            c.add(createServiceDependency().setService(INeutronLoadBalancerCRUD.class).setRequired(true));
+            c.add(createServiceDependency().setService(INeutronLoadBalancerPoolCRUD.class).setRequired(true));
+            c.add(createServiceDependency().setService(INeutronLoadBalancerPoolMemberCRUD.class).setRequired(true));
+            c.add(createServiceDependency().setService(LoadBalancerProvider.class).setRequired(true));
         }
 
         if (imp.equals(PortSecurityHandler.class)) {

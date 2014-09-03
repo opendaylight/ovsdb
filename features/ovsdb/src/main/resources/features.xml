@@ -49,4 +49,11 @@
         <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt/${openstack.netvirt.version}</bundle>
         <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt-providers/${openstack.netvirt.providers.version}</bundle>
     </feature>
+
+    <feature name="odl-ovsdb-ovssfc" description="OpenDaylight :: OVSDB :: OVS Service Function Chaining" version='${ovsdb.ovssfc.version}'>
+        <feature version="${ovsdb.plugin.version}">odl-ovsdb-plugin</feature>
+        <feature version="${openflowplugin.version}">odl-openflow-nxm-extensions</feature>
+        <feature version="${sfc-model.version}">odl-sfc-model</feature>
+        <bundle>mvn:org.opendaylight.ovsdb/ovs-sfc/${ovsdb.ovssfc.version}</bundle>
+    </feature>
 </features>

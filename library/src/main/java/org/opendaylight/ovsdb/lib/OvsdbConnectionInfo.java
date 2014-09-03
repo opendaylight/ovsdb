@@ -14,12 +14,20 @@ import io.netty.channel.Channel;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
+@XmlRootElement(name="Connection")
 public class OvsdbConnectionInfo {
     public enum ConnectionType {
         ACTIVE, PASSIVE
     }
 
+    @XmlTransient
     private Channel channel;
+    @XmlTransient
     private ConnectionType type;
 
     public OvsdbConnectionInfo(Channel channel, ConnectionType type) {
@@ -27,20 +35,23 @@ public class OvsdbConnectionInfo {
         this.type = type;
     }
 
+    @XmlElement(name="remoteAddress")
     public InetAddress getRemoteAddress() {
         return ((InetSocketAddress)channel.remoteAddress()).getAddress();
     }
+    @XmlElement(name="remotePort")
     public int getRemotePort() {
         return ((InetSocketAddress)channel.remoteAddress()).getPort();
     }
-
+    @XmlElement(name="localAddress")
     public InetAddress getLocalAddress() {
         return ((InetSocketAddress)channel.localAddress()).getAddress();
     }
+    @XmlElement(name="localPort")
     public int getLocalPort() {
         return ((InetSocketAddress)channel.localAddress()).getPort();
     }
-
+    @XmlElement(name="connectionType")
     public ConnectionType getType() {
         return type;
     }

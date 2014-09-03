@@ -11,6 +11,7 @@
 package org.opendaylight.ovsdb.openstack.netvirt;
 
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolMemberCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
@@ -18,6 +19,10 @@ import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancer;
 import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerPool;
 import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerPoolMember;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.Property;
+import org.opendaylight.controller.sal.core.UpdateType;
+import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration;
@@ -29,6 +34,7 @@ import com.google.common.base.Preconditions;
 
 import java.net.HttpURLConnection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Handle requests for OpenStack Neutron v2.0 LBaaS API calls for /v2.0/loadbalancers.
@@ -37,11 +43,12 @@ import java.util.List;
 //TODO: Implement INeutronLoadBalancerHealthMonitorAware, INeutronLoadBalancerListenerAware, INeutronLoadBalancerPoolMemberAware,
 
 public class LBaaSHandler extends AbstractHandler
-        implements INeutronLoadBalancerAware {
+        implements INeutronLoadBalancerAware, IInventoryListener {
 
     private static final Logger logger = LoggerFactory.getLogger(LBaaSHandler.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
+    private volatile INeutronLoadBalancerCRUD neutronLBCache;
     private volatile INeutronLoadBalancerPoolCRUD neutronLBPoolCache;
     private volatile INeutronLoadBalancerPoolMemberCRUD neutronLBPoolMemberCache;
     private volatile INeutronPortCRUD neutronPortsCache;
@@ -188,5 +195,32 @@ public class LBaaSHandler extends AbstractHandler
             }
         }
         return lbConfig;
+    }
+
+    /**
+     * On the addition of a new node, we iterate through all existing loadbalancer
+     * instances and program the node for all of them. It is sufficient to do that only
+     * when a node is added, and only for the LB instances (and not individual members).
+     */
+    @Override
+    public void notifyNode(Node node, UpdateType type, Map<String, Property> propMap) {
+        logger.debug("notifyNode: Node {} update {} from Controller's inventory Service", node, type);
+        Preconditions.checkNotNull(loadBalancerProvider);
+
+        if (type.equals(UpdateType.ADDED)) {
+            for (NeutronLoadBalancer neutronLB: neutronLBCache.getAllNeutronLoadBalancers()) {
+                LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLB);
+                if (!lbConfig.isValid())
+                    logger.trace("Neutron LB configuration invalid for {} ", lbConfig.getName());
+                else
+                    loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.ADD);
+            }
+        }
+    }
+
+    @Override
+    public void notifyNodeConnector(NodeConnector arg0, UpdateType arg1,
+            Map<String, Property> arg2) {
+        //NOOP
     }
 }

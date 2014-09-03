@@ -106,6 +106,7 @@ public class Activator extends ComponentActivatorAbstractBase {
                         EventDispatcherImpl.class,
                         FWaasHandler.class,
                         LBaaSHandler.class,
+                        LBaaSPoolMemberHandler.class,
                         NeutronL3Adapter.class,
                         OpenstackRouter.class};
         return res;
@@ -249,9 +250,22 @@ public class Activator extends ComponentActivatorAbstractBase {
                                          lbaasHandlerProperties);
             c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
             c.add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true));
-            c.add(createServiceDependency().setService(INeutronLoadBalancerCRUD.class).setRequired(true));
             c.add(createServiceDependency().setService(INeutronLoadBalancerPoolCRUD.class).setRequired(true));
             c.add(createServiceDependency().setService(INeutronLoadBalancerPoolMemberCRUD.class).setRequired(true));
+            c.add(createServiceDependency().setService(LoadBalancerProvider.class).setRequired(true));
+            c.add(createServiceDependency().setService(ISwitchManager.class).setRequired(true));
+        }
+
+        if (imp.equals(LBaaSPoolMemberHandler.class)) {
+            Properties lbaasPoolMemberHandlerProperties = new Properties();
+            lbaasPoolMemberHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY,
+                    AbstractEvent.HandlerType.NEUTRON_LOAD_BALANCER_POOL_MEMBER);
+            c.setInterface(new String[] {INeutronLoadBalancerAware.class.getName()},
+                                         lbaasPoolMemberHandlerProperties);
+            c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
+            c.add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true));
+            c.add(createServiceDependency().setService(INeutronLoadBalancerCRUD.class).setRequired(true));
+            c.add(createServiceDependency().setService(INeutronLoadBalancerPoolCRUD.class).setRequired(true));
             c.add(createServiceDependency().setService(LoadBalancerProvider.class).setRequired(true));
             c.add(createServiceDependency().setService(ISwitchManager.class).setRequired(true));
         }

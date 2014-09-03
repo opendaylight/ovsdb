@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_0c8858c5",
+        "filename": "features/ovsdb/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-09-03T21:55:15Z",
+      "side": 1,
+      "message": "please also add the dependency for sfc-model bundle.",
+      "revId": "5d6d3a7046027c408e38347d9d5db60fddfa2ae2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

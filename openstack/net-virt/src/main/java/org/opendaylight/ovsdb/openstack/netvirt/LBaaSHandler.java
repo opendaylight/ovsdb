@@ -19,17 +19,19 @@ import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerPool
 import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerPoolMember;
 import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
 import org.opendaylight.controller.networkconfig.neutron.Neutron_IPs;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration;
+import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Maps;
+import com.google.common.base.Preconditions;
 
 import java.net.HttpURLConnection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Handle requests for OpenStack Neutron v2.0 LBaaS API calls for /v2.0/loadbalancers.
@@ -46,13 +48,16 @@ public class LBaaSHandler extends AbstractHandler
     private volatile INeutronLoadBalancerPoolCRUD neutronLBPoolCache;
     private volatile INeutronLoadBalancerPoolMemberCRUD neutronLBPoolMemberCache;
     private volatile INeutronPortCRUD neutronPortsCache;
-    private Map<String, LoadBalancerConfiguration> loadbalancersCache = Maps.newHashMap();
+    private volatile LoadBalancerProvider loadBalancerProvider;
+    private volatile ISwitchManager switchManager;
 
     @Override
     public int canCreateNeutronLoadBalancer(NeutronLoadBalancer neutronLoadBalancer) {
-        if (loadbalancersCache.containsKey(neutronLoadBalancer.getLoadBalancerID()))
-            return HttpURLConnection.HTTP_CONFLICT;
-        return HttpURLConnection.HTTP_OK;
+        LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLoadBalancer);
+        if (!lbConfig.isValid())
+            return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
+        else
+            return HttpURLConnection.HTTP_OK;
     }
 
     /**
@@ -72,12 +77,103 @@ public class LBaaSHandler extends AbstractHandler
             logger.debug("Neutron Load Balancer creation failed {} ", result);
             return;
         }
+        Preconditions.checkNotNull(loadBalancerProvider);
+        LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLoadBalancer);
 
-        String loadBalancerID = neutronLoadBalancer.getLoadBalancerID();
+        if (!lbConfig.isValid()) {
+            logger.trace("Neutron LB pool configuration invalid for {} ", lbConfig.getName());
+            return;
+        } else {
+            for (Node node: this.switchManager.getNodes())
+                loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.ADD);
+        }
+    }
+
+    @Override
+    public int canUpdateNeutronLoadBalancer(NeutronLoadBalancer delta, NeutronLoadBalancer original) {
+        return HttpURLConnection.HTTP_OK;
+    }
+
+    @Override
+    public void neutronLoadBalancerUpdated(NeutronLoadBalancer neutronLoadBalancer) {
+        enqueueEvent(new NorthboundEvent(neutronLoadBalancer, Action.UPDATE));
+        return;
+    }
+
+    @Override
+    public int canDeleteNeutronLoadBalancer(NeutronLoadBalancer neutronLoadBalancer) {
+        LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLoadBalancer);
+        if (!lbConfig.isValid())
+            return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
+        else
+            return HttpURLConnection.HTTP_OK;
+    }
+
+    @Override
+    public void neutronLoadBalancerDeleted(NeutronLoadBalancer neutronLoadBalancer) {
+        logger.debug("Neutron LB Deletion : {}", neutronLoadBalancer.toString());
+        enqueueEvent(new NorthboundEvent(neutronLoadBalancer, Action.DELETE));
+    }
+
+    private void doNeutronLoadBalancerDelete(NeutronLoadBalancer neutronLoadBalancer) {
+        int result = canDeleteNeutronLoadBalancer(neutronLoadBalancer);
+        if  (result != HttpURLConnection.HTTP_OK) {
+            logger.error(" delete Neutron NeutronLoadBalancer Pool validation failed for result - {} ", result);
+            return;
+        }
+        Preconditions.checkNotNull(loadBalancerProvider);
+        LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLoadBalancer);
+
+        if (!lbConfig.isValid()) {
+            logger.trace("Neutron LB pool configuration invalid for {} ", lbConfig.getName());
+            return;
+        } else {
+            for (Node node: this.switchManager.getNodes())
+                loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.DELETE);
+        }
+    }
+
+    /**
+     * Process the event.
+     *
+     * @param abstractEvent the {@link org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent} event to be handled.
+     * @see org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher
+     */
+    @Override
+    public void processEvent(AbstractEvent abstractEvent) {
+        if (!(abstractEvent instanceof NorthboundEvent)) {
+            logger.error("Unable to process abstract event " + abstractEvent);
+            return;
+        }
+        NorthboundEvent ev = (NorthboundEvent) abstractEvent;
+        switch (ev.getAction()) {
+            case ADD:
+                doNeutronLoadBalancerCreate(ev.getLoadBalancer());
+            case DELETE:
+                doNeutronLoadBalancerDelete(ev.getLoadBalancer());
+            case UPDATE:
+                /**
+                 * Currently member update requires delete and re-adding
+                 * Also, weights and weight updates are not supported
+                 */
+                doNeutronLoadBalancerDelete(ev.getLoadBalancer());
+                doNeutronLoadBalancerCreate(ev.getLoadBalancer());
+                break;
+            default:
+                logger.warn("Unable to process event action " + ev.getAction());
+                break;
+        }
+    }
+
+    /**
+     * Useful utility for extracting the loadbalancer instance
+     * configuration from the neutron LB cache
+     */
+    public LoadBalancerConfiguration extractLBConfiguration(NeutronLoadBalancer neutronLoadBalancer) {
         String loadBalancerName = neutronLoadBalancer.getLoadBalancerName();
         String loadBalancerVip = neutronLoadBalancer.getLoadBalancerVipAddress();
         String loadBalancerSubnetID = neutronLoadBalancer.getLoadBalancerVipSubnetID();
-        LoadBalancerConfiguration newLB = new LoadBalancerConfiguration(loadBalancerName, loadBalancerVip);
+        LoadBalancerConfiguration lbConfig = new LoadBalancerConfiguration(loadBalancerName, loadBalancerVip);
 
         String memberID, memberIP, memberMAC, memberProtocol;
         Integer memberPort;
@@ -101,80 +197,11 @@ public class LBaaSHandler extends AbstractHandler
                     memberMAC = this.getMacAddress(memberIP);
                     if (memberMAC == null)
                         continue;
-                    newLB.addMember(memberID, memberIP, memberMAC, memberProtocol, memberPort);
+                    lbConfig.addMember(memberID, memberIP, memberMAC, memberProtocol, memberPort);
                 }
             }
         }
-        if (newLB.isValid()) {
-            logger.trace("Neutron LB pool configuration invalid for {} ", loadBalancerName);
-            return;
-        } else {
-            loadbalancersCache.put(loadBalancerID, newLB);
-            //TODO: Trigger flowmod addition
-        }
-    }
-
-    @Override
-    public int canUpdateNeutronLoadBalancer(NeutronLoadBalancer delta, NeutronLoadBalancer original) {
-        return HttpURLConnection.HTTP_OK;
-    }
-
-    @Override
-    public void neutronLoadBalancerUpdated(NeutronLoadBalancer neutronLoadBalancer) {
-        enqueueEvent(new NorthboundEvent(neutronLoadBalancer, Action.UPDATE));
-        return;
-    }
-
-    @Override
-    public int canDeleteNeutronLoadBalancer(NeutronLoadBalancer neutronLoadBalancer) {
-        if (!loadbalancersCache.containsKey(neutronLoadBalancer.getLoadBalancerID()))
-            return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
-        return HttpURLConnection.HTTP_OK;
-    }
-
-    @Override
-    public void neutronLoadBalancerDeleted(NeutronLoadBalancer neutronLoadBalancer) {
-        logger.debug("Neutron LB Deletion : {}", neutronLoadBalancer.toString());
-        enqueueEvent(new NorthboundEvent(neutronLoadBalancer, Action.DELETE));
-    }
-
-    private void doNeutronLoadBalancerDelete(NeutronLoadBalancer neutronLoadBalancer) {
-        int result = canDeleteNeutronLoadBalancer(neutronLoadBalancer);
-        if  (result != HttpURLConnection.HTTP_OK) {
-            logger.error(" delete Neutron NeutronLoadBalancer Pool validation failed for result - {} ", result);
-            return;
-        }
-        loadbalancersCache.remove(neutronLoadBalancer.getLoadBalancerID());
-        //TODO: Trigger flowmod removals
-    }
-
-    /**
-     * Process the event.
-     *
-     * @param abstractEvent the {@link org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent} event to be handled.
-     * @see org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher
-     */
-    @Override
-    public void processEvent(AbstractEvent abstractEvent) {
-        if (!(abstractEvent instanceof NorthboundEvent)) {
-            logger.error("Unable to process abstract event " + abstractEvent);
-            return;
-        }
-        NorthboundEvent ev = (NorthboundEvent) abstractEvent;
-        switch (ev.getAction()) {
-            case ADD:
-                doNeutronLoadBalancerCreate(ev.getLoadBalancer());
-            case DELETE:
-                doNeutronLoadBalancerDelete(ev.getLoadBalancer());
-                // fall through
-            case UPDATE:
-                doNeutronLoadBalancerDelete(ev.getLoadBalancer());
-                doNeutronLoadBalancerCreate(ev.getLoadBalancer());
-                break;
-            default:
-                logger.warn("Unable to process event action " + ev.getAction());
-                break;
-        }
+        return lbConfig;
     }
 
     /**
@@ -182,7 +209,7 @@ public class LBaaSHandler extends AbstractHandler
      * @param ipAddr IP address of a member or VM
      * @return MAC address registered with that IP address
      */
-    private String getMacAddress(String ipAddr) {
+    public String getMacAddress(String ipAddr) {
             List<Neutron_IPs> fixedIPs;
             Iterator<Neutron_IPs> fixedIPIterator;
             Neutron_IPs ip;

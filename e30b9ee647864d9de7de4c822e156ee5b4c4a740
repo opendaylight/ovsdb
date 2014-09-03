@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_ec1bb4c8",
+        "filename": "features/ovsdb/src/main/resources/features.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-09-03T20:44:34Z",
+      "side": 1,
+      "message": "Please add repository section for this feature and also to the \u003cdependency\u003e section in pom.xml",
+      "revId": "e30b9ee647864d9de7de4c822e156ee5b4c4a740",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_8c78e8f9",
+        "filename": "features/ovsdb/src/main/resources/features.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-09-03T20:44:34Z",
+      "side": 1,
+      "message": "Please add \u003cdependency\u003e section in pom.xml",
+      "revId": "e30b9ee647864d9de7de4c822e156ee5b4c4a740",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

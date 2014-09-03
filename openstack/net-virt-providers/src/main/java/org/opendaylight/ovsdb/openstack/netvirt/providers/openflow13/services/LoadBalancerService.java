@@ -77,7 +77,7 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
      * 3. Append reverse rules specific to this member
      */
     @Override
-    public Status programLoadBalancerMemberRules(Node node,
+    public Status programLoadBalancerPoolMemberRules(Node node,
             LoadBalancerConfiguration lbConfig, LoadBalancerPoolMember member, org.opendaylight.ovsdb.openstack.netvirt.api.Action action) {
         NodeBuilder nodeBuilder = new NodeBuilder();
         nodeBuilder.setId((NodeId) node.getID());

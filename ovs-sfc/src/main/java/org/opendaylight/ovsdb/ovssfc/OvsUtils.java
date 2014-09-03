@@ -27,6 +27,7 @@ import java.util.Set;
 
 public class OvsUtils {
     private static final Logger logger = LoggerFactory.getLogger(OvsUtils.class);
+    private OvsSfcProvider ovsSfcProvider = OvsSfcProvider.getOvsSfcProvider();
 
     private OvsdbConnectionService getOvsdbConnectionService () {
         return (OvsdbConnectionService) ServiceHelper.getGlobalInstance(OvsdbConnectionService.class, this);
@@ -36,7 +37,7 @@ public class OvsUtils {
         return (OvsdbConfigurationService) ServiceHelper.getGlobalInstance(OvsdbConfigurationService.class, this);
     }
 
-    public Node getNode (String systemId) {
+    public Node getNodeFromSystemId (String systemId) {
         Node node = null;
 
         OvsdbConnectionService connectionService = getOvsdbConnectionService();
@@ -131,12 +132,25 @@ public class OvsUtils {
         return uuid;
     }
 
-    public Long getDpid (Node ovsNode, String bridgeUuid) {
+    public Long getDpid (Node ovsNode, String bridgeName) {
         Long dpid = 0L;
 
         if (ovsNode == null) {
             return dpid;
         }
+
+        logger.trace("\nOVSSFC Enter {}\n ovsNode: {}, bridgeName: {}",
+                Thread.currentThread().getStackTrace()[1],
+                ovsNode, bridgeName);
+
+        String bridgeUuid = ovsSfcProvider.ovsUtils.getBridgeUUID(ovsNode, bridgeName);
+        if (bridgeUuid == null) {
+            return dpid;
+        }
+
+        logger.trace("\nOVSSFC {}\n ovsNode: {}, bridgeName: {}, uuid: {}",
+                Thread.currentThread().getStackTrace()[1],
+                ovsNode, bridgeName, bridgeUuid);
 
         OvsdbConfigurationService ovsdbConfigurationService = getOvsdbConfigurationService();
         try {

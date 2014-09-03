@@ -22,10 +22,11 @@ public class OvsSfcProvider implements AutoCloseable {
     private SfpDataListener sfpDataListener;
     protected SfpHandler sfp;
     protected EventHandler eventHandler;
-    //protected AclUtils aclUtils;
+    protected AclUtils aclUtils;
     protected OvsUtils ovsUtils;
     protected SfUtils sfUtils;
     protected SffUtils sffUtils;
+    protected Flows flows;
 
     public OvsSfcProvider (DataBroker dataBroker) {
         ovsSfcProvider = this;
@@ -34,10 +35,11 @@ public class OvsSfcProvider implements AutoCloseable {
         sfcDataListener = new SfcDataListener(dataBroker);
         sffDataListener = new SffDataListener(dataBroker);
         sfpDataListener = new SfpDataListener(dataBroker);
-        //aclUtils = new AclUtils();
+        aclUtils = new AclUtils();
         ovsUtils = new OvsUtils();
         sfUtils = new SfUtils();
         sffUtils = new SffUtils();
+        flows = new Flows();
         sfp = new SfpHandler();
         eventHandler = new EventHandler();
         eventHandler.init();

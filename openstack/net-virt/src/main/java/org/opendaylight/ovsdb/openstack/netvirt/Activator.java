@@ -240,7 +240,8 @@ public class Activator extends ComponentActivatorAbstractBase {
 
         if (imp.equals(LBaaSHandler.class)) {
             Properties lbaasHandlerProperties = new Properties();
-            lbaasHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.NEUTRON_LBAAS);
+            lbaasHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY,
+                    AbstractEvent.HandlerType.NEUTRON_LOAD_BALANCER);
             c.setInterface(new String[] {INeutronLoadBalancerAware.class.getName(),
                                          INeutronLoadBalancerPoolAware.class.getName(),
                                          INeutronLoadBalancerPoolMemberAware.class.getName()},

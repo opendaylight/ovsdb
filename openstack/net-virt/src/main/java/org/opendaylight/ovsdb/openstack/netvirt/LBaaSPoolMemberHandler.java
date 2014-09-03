@@ -109,21 +109,16 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
     @Override
     public void neutronLoadBalancerPoolMemberDeleted(NeutronLoadBalancerPoolMember neutronLBPoolMember) {
         logger.debug("Neutron LB Pool Member Deletion : {}", neutronLBPoolMember.toString());
-        enqueueEvent(new NorthboundEvent(neutronLBPoolMember, Action.DELETE));
-    }
 
-    private void doNeutronLoadBalancerPoolMemberDelete(NeutronLoadBalancerPoolMember neutronLBPoolMember) {
-        Preconditions.checkNotNull(loadBalancerProvider);
-        LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLBPoolMember);
-        if (lbConfig == null) {
-            logger.trace("Neutron LB configuration invalid for member {} ", neutronLBPoolMember.getPoolMemberAddress());
-        }
-        else if (!lbConfig.isValid()) {
-            logger.trace("Neutron LB pool configuration invalid for {} ", lbConfig.getName());
-        } else {
-            for (Node node: this.switchManager.getNodes())
-                loadBalancerProvider.programLoadBalancerPoolMemberRules(node, lbConfig,
-                        lbConfig.getMembers().get(neutronLBPoolMember.getPoolMemberID()), Action.DELETE);
+        /* As of now, deleting a member involves recomputing member indices.
+         * This is best done through a complete update of the load balancer instance.
+         */
+        for (NeutronLoadBalancer neutronLB: neutronLBCache.getAllNeutronLoadBalancers()) {
+            String loadBalancerSubnetID = neutronLB.getLoadBalancerVipSubnetID();
+            if (neutronLBPoolMember.getPoolMemberSubnetID().equals(loadBalancerSubnetID)) {
+                enqueueEvent(new NorthboundEvent(neutronLB, Action.UPDATE));
+                break;
+            }
         }
     }
 
@@ -144,14 +139,13 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
             case ADD:
                 doNeutronLoadBalancerPoolMemberCreate(ev.getLoadBalancerPoolMember());
             case DELETE:
-                doNeutronLoadBalancerPoolMemberDelete(ev.getLoadBalancerPoolMember());
+                logger.warn("Load balancer pool member delete event should not have been triggered");
             case UPDATE:
                 /**
-                 * Currently member update requires delete and re-adding
-                 * Also, weights and weight updates are not supported
+                 * Typical upgrade involves changing weights. Since weights are not
+                 * supported yet, updates are not supported either.
                  */
-                doNeutronLoadBalancerPoolMemberDelete(ev.getLoadBalancerPoolMember());
-                doNeutronLoadBalancerPoolMemberCreate(ev.getLoadBalancerPoolMember());
+                logger.warn("Load balancer pool member update is not supported");
                 break;
             default:
                 logger.warn("Unable to process event action " + ev.getAction());

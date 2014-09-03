@@ -295,6 +295,11 @@ public abstract class AbstractServiceInstance implements OpendaylightInventoryLi
      */
     @Override
     public void onNodeUpdated(NodeUpdated nodeUpdated) {
+
+        if (true) {
+            return;  // FIXME: HACK!!!
+        }
+
         NodeRef ref = nodeUpdated.getNodeRef();
         InstanceIdentifier<Node> identifier = (InstanceIdentifier<Node>) ref.getValue();
         logger.info("GOT NOTIFICATION FOR "+identifier.toString());

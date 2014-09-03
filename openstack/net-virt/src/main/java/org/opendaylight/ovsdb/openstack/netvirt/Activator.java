@@ -29,6 +29,7 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetAware;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.switchmanager.IInventoryListener;
+import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
@@ -252,6 +253,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency().setService(INeutronLoadBalancerPoolCRUD.class).setRequired(true));
             c.add(createServiceDependency().setService(INeutronLoadBalancerPoolMemberCRUD.class).setRequired(true));
             c.add(createServiceDependency().setService(LoadBalancerProvider.class).setRequired(true));
+            c.add(createServiceDependency().setService(ISwitchManager.class).setRequired(true));
         }
 
         if (imp.equals(PortSecurityHandler.class)) {

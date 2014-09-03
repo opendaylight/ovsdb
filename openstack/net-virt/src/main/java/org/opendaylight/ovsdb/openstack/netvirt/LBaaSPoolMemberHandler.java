@@ -79,7 +79,7 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
             logger.trace("Neutron LB pool configuration invalid for {} ", lbConfig.getName());
         } else {
             for (Node node: this.switchManager.getNodes())
-                loadBalancerProvider.programLoadBalancerMemberRules(node, lbConfig,
+                loadBalancerProvider.programLoadBalancerPoolMemberRules(node, lbConfig,
                         lbConfig.getMembers().get(neutronLBPoolMember.getPoolMemberID()), Action.ADD);
         }
     }
@@ -122,7 +122,7 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
             logger.trace("Neutron LB pool configuration invalid for {} ", lbConfig.getName());
         } else {
             for (Node node: this.switchManager.getNodes())
-                loadBalancerProvider.programLoadBalancerMemberRules(node, lbConfig,
+                loadBalancerProvider.programLoadBalancerPoolMemberRules(node, lbConfig,
                         lbConfig.getMembers().get(neutronLBPoolMember.getPoolMemberID()), Action.DELETE);
         }
     }

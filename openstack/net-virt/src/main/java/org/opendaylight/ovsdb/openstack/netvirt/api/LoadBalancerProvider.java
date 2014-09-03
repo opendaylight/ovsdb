@@ -22,7 +22,7 @@ public interface LoadBalancerProvider {
     Status programLoadBalancerRules(Node node,
             LoadBalancerConfiguration lbConfig, Action action);
 
-    Status programLoadBalancerMemberRules(Node node,
+    Status programLoadBalancerPoolMemberRules(Node node,
             LoadBalancerConfiguration lbConfig, LoadBalancerPoolMember member, Action action);
 
 }

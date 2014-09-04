@@ -16,6 +16,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
@@ -72,7 +73,7 @@ import com.google.common.util.concurrent.Futures;
 public abstract class AbstractServiceInstance implements OpendaylightInventoryListener, Runnable, TransactionChainListener {
     public static final String SERVICE_PROPERTY ="serviceProperty";
     private static final Logger logger = LoggerFactory.getLogger(AbstractServiceInstance.class);
-
+    public static final String OPENFLOW = "openflow:";
     // OSGi Services that we are dependent on.
     private volatile MdsalConsumer mdsalConsumer;
     private volatile PipelineOrchestrator orchestrator;
@@ -207,6 +208,37 @@ public abstract class AbstractServiceInstance implements OpendaylightInventoryLi
         } catch (InterruptedException|ExecutionException e) {
             logger.error(e.getMessage(), e);
         }
+    }
+
+    public Flow getFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
+        Preconditions.checkNotNull(mdsalConsumer);
+        if (mdsalConsumer == null) {
+            logger.error("ERROR finding MDSAL Service. Its possible that writeFlow is called too soon ?");
+            return null;
+        }
+
+        DataBroker dataBroker = mdsalConsumer.getDataBroker();
+        if (dataBroker == null) {
+            logger.error("ERROR finding reference for DataBroker. Please check MD-SAL support on the Controller.");
+            return null;
+        }
+
+        InstanceIdentifier<Flow> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
+                .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Table.class,
+                new TableKey(flowBuilder.getTableId())).child(Flow.class, flowBuilder.getKey()).build();
+
+        ReadOnlyTransaction readTx = dataBroker.newReadOnlyTransaction();
+        try {
+            Optional<Flow> data = readTx.read(LogicalDatastoreType.CONFIGURATION, path1).get();
+            if (data.isPresent()) {
+                return data.get();
+            }
+        } catch (InterruptedException|ExecutionException e) {
+            logger.error(e.getMessage(), e);
+        }
+
+        logger.debug("Cannot find data for Flow " + flowBuilder.getFlowName());
+        return null;
     }
 
     /**

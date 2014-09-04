@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_dfa53448",
+        "filename": "openstack/net-virt-providers/OF13provider.pipeline.diff",
+        "patchSetId": 6
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-09-04T01:15:28Z",
+      "side": 1,
+      "message": "Please remove this file.",
+      "revId": "782d72894527e4344bcf33ddbfad4b4113999c83",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

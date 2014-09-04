@@ -81,8 +81,6 @@ public abstract class AbstractServiceInstance implements OpendaylightInventoryLi
     // Concrete Service that this AbstractServiceInstance represent
     private Service service;
 
-    private BindingTransactionChain txChain;
-
     // Process Notification in its own thread
     Thread thread = null;
     private final BlockingQueue<String> queue = new LinkedBlockingDeque<>();
@@ -112,7 +110,6 @@ public abstract class AbstractServiceInstance implements OpendaylightInventoryLi
         if (notificationService != null) {
             notificationService.registerNotificationListener(this);
         }
-        this.txChain =  mdsalConsumer.getDataBroker().createTransactionChain(this);
 
         // Never block a Notification thread. Process the notification in its own Thread.
         thread = new Thread(this);
@@ -340,6 +337,7 @@ public abstract class AbstractServiceInstance implements OpendaylightInventoryLi
             InstanceIdentifierBuilder<Node> builder = ((InstanceIdentifier<Node>) ref.getValue()).builder();
             InstanceIdentifierBuilder<FlowCapableNode> augmentation = builder.augmentation(FlowCapableNode.class);
             final InstanceIdentifier<FlowCapableNode> path = augmentation.build();
+            BindingTransactionChain txChain = mdsalConsumer.getDataBroker().createTransactionChain(this);
             CheckedFuture readFuture = txChain.newReadWriteTransaction().read(LogicalDatastoreType.OPERATIONAL, path);
             Futures.addCallback(readFuture, new FutureCallback<Optional<? extends DataObject>>() {
                 @Override

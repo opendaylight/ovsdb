@@ -19,10 +19,12 @@ import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ClassifierProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EgressAclProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.InboundNatProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.IngressAclProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.L2ForwardingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OutboundNatProvider;
@@ -169,8 +171,10 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true));
             c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
             c.add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true));
+            c.add(createServiceDependency().setService(ClassifierProvider.class).setRequired(true));
             c.add(createServiceDependency().setService(IngressAclProvider.class).setRequired(true));
             c.add(createServiceDependency().setService(EgressAclProvider.class).setRequired(true));
+            c.add(createServiceDependency().setService(L2ForwardingProvider.class).setRequired(true));
         }
 
         if (imp.equals(PipelineOrchestratorImpl.class)) {
@@ -191,7 +195,8 @@ public class Activator extends ComponentActivatorAbstractBase {
             Properties properties = new Properties();
             properties.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.CLASSIFIER);
             properties.put(Constants.PROVIDER_NAME_PROPERTY, OF13Provider.NAME);
-            c.setInterface(AbstractServiceInstance.class.getName(), properties);
+            c.setInterface(new String[] {AbstractServiceInstance.class.getName(), ClassifierProvider.class.getName()},
+                           properties);
         }
 
         if (imp.equals(ArpResponderService.class)) {
@@ -252,7 +257,8 @@ public class Activator extends ComponentActivatorAbstractBase {
             Properties properties = new Properties();
             properties.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.L2_FORWARDING);
             properties.put(Constants.PROVIDER_NAME_PROPERTY, OF13Provider.NAME);
-            c.setInterface(AbstractServiceInstance.class.getName(), properties);
+            c.setInterface(new String[] {AbstractServiceInstance.class.getName(), L2ForwardingProvider.class.getName()},
+                           properties);
         }
 
         if (imp.equals(EgressAclService.class)) {

@@ -9,10 +9,11 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services;
 
+import org.opendaylight.ovsdb.openstack.netvirt.api.ClassifierProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 
-public class ClassifierService extends AbstractServiceInstance {
+public class ClassifierService extends AbstractServiceInstance implements ClassifierProvider {
     public ClassifierService() {
         super(Service.CLASSIFIER);
     }

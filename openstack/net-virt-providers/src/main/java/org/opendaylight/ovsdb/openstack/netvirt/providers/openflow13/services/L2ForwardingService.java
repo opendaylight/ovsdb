@@ -9,10 +9,11 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services;
 
+import org.opendaylight.ovsdb.openstack.netvirt.api.L2ForwardingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 
-public class L2ForwardingService extends AbstractServiceInstance {
+public class L2ForwardingService extends AbstractServiceInstance implements L2ForwardingProvider {
     public L2ForwardingService() {
         super(Service.L2_FORWARDING);
     }

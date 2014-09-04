@@ -26,6 +26,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.InboundNatProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.IngressAclProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.L2ForwardingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OutboundNatProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
@@ -227,7 +228,8 @@ public class Activator extends ComponentActivatorAbstractBase {
             Properties properties = new Properties();
             properties.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.LOAD_BALANCER);
             properties.put(Constants.PROVIDER_NAME_PROPERTY, OF13Provider.NAME);
-            c.setInterface(AbstractServiceInstance.class.getName(), properties);
+            c.setInterface(new String[] {AbstractServiceInstance.class.getName(), LoadBalancerProvider.class.getName()},
+                           properties);
         }
 
         if (imp.equals(RoutingService.class)) {

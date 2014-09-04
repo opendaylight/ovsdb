@@ -363,7 +363,7 @@ public class NeutronL3Adapter {
             if (gatewayIp != null && !gatewayIp.isEmpty()) {
                 final Action actionForNodeDefaultRoute =
                         isExternal ? actionForNode : Action.DELETE;
-                final String defaultGatewayMacAddress = "00:01:02:03:04:05";  // FIXME!
+                final String defaultGatewayMacAddress = configurationService.getDefaultGatewayMacAddress(node);
                 programDefaultRouteStage1(node, dpid, providerSegmentationId, defaultGatewayMacAddress, gatewayIp,
                                           actionForNodeDefaultRoute);
             }

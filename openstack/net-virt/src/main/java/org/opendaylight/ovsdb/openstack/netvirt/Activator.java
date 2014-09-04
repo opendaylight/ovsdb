@@ -10,6 +10,9 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt;
 
+import java.util.Properties;
+
+import org.apache.felix.dm.Component;
 import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallPolicyAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallRuleAware;
@@ -17,6 +20,7 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronFloatingIPAware
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolMemberAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolMemberCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
@@ -25,8 +29,8 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronRouterAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityGroupAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityRuleAware;
-import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
@@ -57,9 +61,6 @@ import org.opendaylight.ovsdb.openstack.netvirt.impl.VlanConfigurationCacheImpl;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
-import org.apache.felix.dm.Component;
-
-import java.util.Properties;
 
 /**
  * OSGi bundle activator for the OVSDB Neutron Interface.
@@ -264,7 +265,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             Properties lbaasPoolMemberHandlerProperties = new Properties();
             lbaasPoolMemberHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY,
                     AbstractEvent.HandlerType.NEUTRON_LOAD_BALANCER_POOL_MEMBER);
-            c.setInterface(new String[] {INeutronLoadBalancerAware.class.getName()},
+            c.setInterface(new String[] {INeutronLoadBalancerPoolMemberAware.class.getName()},
                                          lbaasPoolMemberHandlerProperties);
             c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
             c.add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true));

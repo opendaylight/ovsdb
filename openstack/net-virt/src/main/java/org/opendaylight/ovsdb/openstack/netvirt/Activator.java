@@ -336,7 +336,6 @@ public class Activator extends ComponentActivatorAbstractBase {
              * Either that, or we should do service lookup at runtime based on getProvider().getName()
              * This is a shortcut as for now there will only be one implementation of these classes.
              */
-            c.add(createServiceDependency().setService(MultiTenantAwareRouter.class).setRequired(false));
             c.add(createServiceDependency().setService(ArpProvider.class).setRequired(false));
             c.add(createServiceDependency().setService(InboundNatProvider.class).setRequired(false));
             c.add(createServiceDependency().setService(OutboundNatProvider.class).setRequired(false));

@@ -207,4 +207,11 @@ public class ConfigurationServiceImpl implements org.opendaylight.ovsdb.openstac
 
         return Constants.OPENFLOW13;
     }
+
+    @Override
+    public String getDefaultGatewayMacAddress(Node node) {
+        final String l3gatewayForNode =
+            node != null ? System.getProperty("ovsdb.l3gateway.mac." + node.getNodeIDString()) : null;
+        return l3gatewayForNode != null ? l3gatewayForNode : System.getProperty("ovsdb.l3gateway.mac");
+    }
 }

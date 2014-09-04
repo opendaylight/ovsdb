@@ -228,6 +228,18 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
         }
     }
 
+    @Test
+    public void testGetDefaultGatewayMacAddress() throws Exception {
+        // Thread.sleep(5000);
+        String defaultGatewayMacAddress = netVirtConfigurationService.getDefaultGatewayMacAddress(node);
+
+        if (defaultGatewayMacAddress != null) {
+            String[] splits = defaultGatewayMacAddress.split(":");
+            Assert.assertTrue("Unexpected mac format", splits.length == 6);
+        }
+        // log.info("testGetDefaultGatewayMacAddress got mac {}", defaultGatewayMacAddress);
+    }
+
     @After
     public void tearDown() throws InterruptedException {
         Thread.sleep(5000);

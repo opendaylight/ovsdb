@@ -117,4 +117,12 @@ public interface ConfigurationService {
      * @return the OpenFlow version to use
      */
     public String getOpenflowVersion(Node node);
+
+    /**
+     * Returns the MacAddress to be used for the default gateway by the {@link L3ForwardingProvider}
+     * There is no default.
+     * @param node the node to query
+     * @return the MacAddress to use for the default gateway; or null if none is configured.
+     */
+    public String getDefaultGatewayMacAddress(Node node);
 }

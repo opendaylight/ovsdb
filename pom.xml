@@ -40,6 +40,7 @@
     <!-- Karaf Distribution -->
     <module>features/ovsdb</module>
     <module>features/of-nxm-extensions</module>
+    <module>features/ovs-sfc</module>
     <!-- OVSDB Distribution -->
     <module>distribution/opendaylight</module>
   </modules>

@@ -73,4 +73,27 @@ public final class Constants {
      * Ethertypes
      */
     public static final long ARP_ETHERTYPE = 0x0806L;
+
+
+    /*
+     * ACL
+     */
+    public static final Integer PROTO_MATCH_PRIORITY_DROP = 36006;
+    public static final Integer PROTO_PORT_MATCH_PRIORITY_DROP = 36005;
+    public static final Integer PREFIX_MATCH_PRIORITY_DROP = 36004;
+    public static final Integer PROTO_PREFIX_MATCH_PRIORITY_DROP = 36003;
+    public static final Integer PREFIX_PORT_MATCH_PRIORITY_DROP = 36002;
+    public static final Integer PROTO_PORT_PREFIX_MATCH_PRIORITY_DROP = 36001;
+
+    public static final Integer PROTO_MATCH_PRIORITY = 61010;
+    public static final Integer PREFIX_MATCH_PRIORITY = 61009;
+    public static final Integer PROTO_PREFIX_MATCH_PRIORITY = 61008;
+    public static final Integer PROTO_PORT_MATCH_PRIORITY = 61007;
+    public static final Integer PROTO_PORT_PREFIX_MATCH_PRIORITY = 61007;
+
+    public static final int TCP_SYN = 0x002;
+    public static final short INGRESS_ACL = 40; // Flows Destined to the VM Port go here
+    public static final short OUTBOUND_SNAT = 110; // Ingress ACL table drains traffic to this table
+
+    private static Long groupId = 1L;
 }

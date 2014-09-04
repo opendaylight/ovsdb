@@ -15,6 +15,7 @@ import java.util.List;
 import org.opendaylight.controller.networkconfig.neutron.NeutronSecurityGroup;
 import org.opendaylight.controller.networkconfig.neutron.NeutronSecurityRule;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.IngressAclProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
@@ -40,27 +41,6 @@ import com.google.common.collect.Lists;
 public class IngressAclService extends AbstractServiceInstance implements IngressAclProvider {
 
     static final Logger logger = LoggerFactory.getLogger(IngressAclService.class);
-    public static final Integer PROTO_MATCH_PRIORITY_DROP = 36006;
-    public static final Integer PROTO_PORT_MATCH_PRIORITY_DROP = 36005;
-    public static final Integer PREFIX_MATCH_PRIORITY_DROP = 36004;
-    public static final Integer PROTO_PREFIX_MATCH_PRIORITY_DROP = 36003;
-    public static final Integer PREFIX_PORT_MATCH_PRIORITY_DROP = 36002;
-    public static final Integer PROTO_PORT_PREFIX_MATCH_PRIORITY_DROP = 36001;
-
-    public static final Integer PROTO_MATCH_PRIORITY = 61010;
-    public static final Integer PREFIX_MATCH_PRIORITY = 61009;
-    public static final Integer PROTO_PREFIX_MATCH_PRIORITY = 61008;
-    public static final Integer PROTO_PORT_MATCH_PRIORITY = 61007;
-    public static final Integer PROTO_PORT_PREFIX_MATCH_PRIORITY = 61007;
-
-    public static final int TCP_SYN = 0x002;
-    public static final short INGRESS_ACL = 40; // Flows Destined to the VM Port go here
-    // TODO: break out egress to the egress table and create a parent for both ingress/egress
-    public static final short EGRESS_ACL = 100; // Flows Sourced from the VM Port go here
-    public static final short OUTBOUND_SNAT = 110; // Ingress ACL table drains traffic to this table
-
-    private static final String OPENFLOW = "openflow:";
-    private static Long groupId = 1L;
 
     public IngressAclService() {
         super(Service.INGRESS_ACL);
@@ -109,11 +89,11 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                             portSecurityRule.getSecurityRulePortMax(),
                             portSecurityRule.getSecurityRuleRemoteIpPrefix());
                     ingressACLDefaultTcpDrop(dpid, segmentationId, attachedMac,
-                            PROTO_PORT_PREFIX_MATCH_PRIORITY_DROP,
+                            Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY_DROP,
                             true);
                     ingressACLTcpPortWithPrefix(dpid, segmentationId,
                             attachedMac, true, portSecurityRule.getSecurityRulePortMin(),
-                            portSecurityRule.getSecurityRuleRemoteIpPrefix(), PROTO_PORT_PREFIX_MATCH_PRIORITY);
+                            portSecurityRule.getSecurityRuleRemoteIpPrefix(), Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
                     continue;
                 }
                 /**
@@ -130,11 +110,11 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                             portSecurityRule.getSecurityRulePortMax(),
                             portSecurityRule.getSecurityRuleRemoteIpPrefix());
                     ingressACLDefaultTcpDrop(dpid, segmentationId, attachedMac,
-                            PROTO_PORT_PREFIX_MATCH_PRIORITY_DROP,
+                                             Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY_DROP,
                             true);
                     ingressACLTcpPortWithPrefix(dpid, segmentationId,
                             attachedMac, true, portSecurityRule.getSecurityRulePortMin(),
-                            portSecurityRule.getSecurityRuleRemoteIpPrefix(), PROTO_PORT_PREFIX_MATCH_PRIORITY);
+                            portSecurityRule.getSecurityRuleRemoteIpPrefix(), Constants.PROTO_PORT_PREFIX_MATCH_PRIORITY);
                     continue;
                 }
                 /**
@@ -148,10 +128,10 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                             portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
                             portSecurityRule.getSecurityRulePortMax(),
                             portSecurityRule.getSecurityRuleRemoteIpPrefix());
-                    ingressACLDefaultTcpDrop(dpid, segmentationId, attachedMac, PROTO_PREFIX_MATCH_PRIORITY_DROP,
+                    ingressACLDefaultTcpDrop(dpid, segmentationId, attachedMac, Constants.PROTO_PREFIX_MATCH_PRIORITY_DROP,
                             true);
                     ingressACLPermitAllProto(dpid, segmentationId, attachedMac, true,
-                            portSecurityRule.getSecurityRuleRemoteIpPrefix(), PROTO_PREFIX_MATCH_PRIORITY);
+                            portSecurityRule.getSecurityRuleRemoteIpPrefix(), Constants.PROTO_PREFIX_MATCH_PRIORITY);
                     continue;
                 }
                 /**
@@ -167,9 +147,9 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                             portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
                             portSecurityRule.getSecurityRulePortMax(),
                             portSecurityRule.getSecurityRuleRemoteIpPrefix());
-                    ingressACLDefaultTcpDrop(dpid, segmentationId, attachedMac, PREFIX_MATCH_PRIORITY_DROP, true);
+                    ingressACLDefaultTcpDrop(dpid, segmentationId, attachedMac, Constants.PREFIX_MATCH_PRIORITY_DROP, true);
                     ingressACLPermitAllProto(dpid, segmentationId, attachedMac, true,
-                            portSecurityRule.getSecurityRuleRemoteIpPrefix(), PREFIX_MATCH_PRIORITY);
+                            portSecurityRule.getSecurityRuleRemoteIpPrefix(), Constants.PREFIX_MATCH_PRIORITY);
                     continue;
                 }
                 /**
@@ -183,11 +163,11 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                             portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
                             portSecurityRule.getSecurityRulePortMax(),
                             portSecurityRule.getSecurityRuleRemoteIpPrefix());
-                    ingressACLDefaultTcpDrop(dpid, segmentationId, attachedMac, PROTO_PORT_MATCH_PRIORITY_DROP,
+                    ingressACLDefaultTcpDrop(dpid, segmentationId, attachedMac, Constants.PROTO_PORT_MATCH_PRIORITY_DROP,
                             true);
                     ingressACLTcpSyn(dpid, segmentationId,
                             attachedMac, true, portSecurityRule.getSecurityRulePortMin(),
-                            PREFIX_PORT_MATCH_PRIORITY_DROP);
+                            Constants.PREFIX_PORT_MATCH_PRIORITY_DROP);
                     continue;
                 }
                 /**
@@ -202,9 +182,9 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                             portSecurityRule.getSecurityRulePortMax(),
                             portSecurityRule.getSecurityRuleRemoteIpPrefix());
                     ingressACLDefaultTcpDrop(dpid, segmentationId, attachedMac,
-                            PROTO_PORT_MATCH_PRIORITY_DROP, true);
+                                             Constants.PROTO_PORT_MATCH_PRIORITY_DROP, true);
                     ingressACLTcpSyn(dpid, segmentationId, attachedMac, true,
-                            portSecurityRule.getSecurityRulePortMin(), PROTO_PORT_MATCH_PRIORITY);
+                            portSecurityRule.getSecurityRulePortMin(), Constants.PROTO_PORT_MATCH_PRIORITY);
                     continue;
                 }
                 /**
@@ -223,158 +203,10 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                     // No need to drop until UDP/ICMP are implemented
                     // ingressACLDefaultTcpDrop(dpid, segmentationId, attachedMac, PROTO_MATCH_PRIORITY_DROP, true);
                     handleIngressAllowProto(dpid, segmentationId, attachedMac, true,
-                            portSecurityRule.getSecurityRuleProtocol(), PROTO_MATCH_PRIORITY);
+                            portSecurityRule.getSecurityRuleProtocol(), Constants.PROTO_MATCH_PRIORITY);
                     continue;
                 }
                 logger.debug("Ingress ACL Match combination not found for rule: {}", portSecurityRule);
-            }
-
-            /**
-             * Neutron Port Security ACL "egress" and "IPv4"
-             *
-             * Check that the base conditions for flow based Port Security are true:
-             * Port Security Rule Direction ("egress") and Protocol ("IPv4")
-             * Neutron defines the direction "ingress" as the vSwitch to the VM as defined in:
-             * http://docs.openstack.org/api/openstack-network/2.0/content/security_groups.html
-             *
-             */
-            if (portSecurityRule.getSecurityRuleEthertype().equalsIgnoreCase("IPv4") &&
-                    portSecurityRule.getSecurityRuleDirection().equalsIgnoreCase("egress")) {
-                logger.debug("Egress IPV4 ACL  Port Security Rule: {} ", portSecurityRule);
-                // TODO Move to EgressAclService and Implement Port Range
-
-                /**
-                 * TCP Proto (True), TCP Port Minimum (True), TCP Port Max (True), IP Prefix (True)
-                 */
-                if (String.valueOf(portSecurityRule.getSecurityRuleProtocol()).equalsIgnoreCase("tcp") &&
-                        !String.valueOf(portSecurityRule.getSecurityRulePortMin()).equalsIgnoreCase("null") &&
-                        !String.valueOf(portSecurityRule.getSecurityRulePortMax()).equalsIgnoreCase("null") &&
-                        (!String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix()).equalsIgnoreCase("null") &&
-                                !String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix())
-                                        .equalsIgnoreCase("0.0.0.0/0"))) {
-                    logger.debug("Rule #1 egress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
-                            portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
-                            portSecurityRule.getSecurityRulePortMax(),
-                            portSecurityRule.getSecurityRuleRemoteIpPrefix());
-                    egressACLDefaultTcpDrop(dpid, segmentationId, attachedMac,
-                            PROTO_PORT_PREFIX_MATCH_PRIORITY_DROP,
-                            true);
-                    egressACLTcpPortWithPrefix(dpid, segmentationId,
-                            attachedMac, true, portSecurityRule.getSecurityRulePortMin(),
-                            portSecurityRule.getSecurityRuleRemoteIpPrefix(), PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                    continue;
-                }
-                /**
-                 * TCP Proto (True), TCP Port Minimum (True), TCP Port Max (False), IP Prefix (True)
-                 */
-                if (String.valueOf(portSecurityRule.getSecurityRuleProtocol()).equalsIgnoreCase("tcp") &&
-                        !String.valueOf(portSecurityRule.getSecurityRulePortMin()).equalsIgnoreCase("null") &&
-                        String.valueOf(portSecurityRule.getSecurityRulePortMax()).equalsIgnoreCase("null") &&
-                        (!String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix()).equalsIgnoreCase("null") &&
-                                !String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix())
-                                        .equalsIgnoreCase("0.0.0.0/0"))) {
-                    logger.debug("Rule #2 egress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
-                            portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
-                            portSecurityRule.getSecurityRulePortMax(),
-                            portSecurityRule.getSecurityRuleRemoteIpPrefix());
-                    egressACLDefaultTcpDrop(dpid, segmentationId, attachedMac,
-                            PROTO_PORT_PREFIX_MATCH_PRIORITY_DROP,
-                            true);
-                    egressACLTcpPortWithPrefix(dpid, segmentationId,
-                            attachedMac, true, portSecurityRule.getSecurityRulePortMin(),
-                            portSecurityRule.getSecurityRuleRemoteIpPrefix(), PROTO_PORT_PREFIX_MATCH_PRIORITY);
-                    continue;
-                }
-                /**
-                 * TCP Proto (True), TCP Port Minimum (False), TCP Port Max (False), IP Prefix (True)
-                 */
-                if (String.valueOf(portSecurityRule.getSecurityRuleProtocol()).equalsIgnoreCase("tcp") &&
-                        String.valueOf(portSecurityRule.getSecurityRulePortMin()).equalsIgnoreCase("null") &&
-                        String.valueOf(portSecurityRule.getSecurityRulePortMax()).equalsIgnoreCase("null") &&
-                        !String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix()).equalsIgnoreCase("null")) {
-                    logger.debug("Rule #3 egress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
-                            portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
-                            portSecurityRule.getSecurityRulePortMax(),
-                            portSecurityRule.getSecurityRuleRemoteIpPrefix());
-                    egressACLDefaultTcpDrop(dpid, segmentationId, attachedMac, PROTO_PREFIX_MATCH_PRIORITY_DROP,
-                            true);
-                    egressACLPermitAllProto(dpid, segmentationId, attachedMac, true,
-                            portSecurityRule.getSecurityRuleRemoteIpPrefix(), PROTO_PREFIX_MATCH_PRIORITY);
-                    continue;
-                }
-                /**
-                 * TCP Proto (False), TCP Port Minimum (False), TCP Port Max (False), IP Prefix (True)
-                 */
-                if (String.valueOf(portSecurityRule.getSecurityRuleProtocol()).equalsIgnoreCase("null") &&
-                        String.valueOf(portSecurityRule.getSecurityRulePortMin()).equalsIgnoreCase("null") &&
-                        String.valueOf(portSecurityRule.getSecurityRulePortMin()).equalsIgnoreCase("null") &&
-                        (!String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix()).equalsIgnoreCase("null") &&
-                                !String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix())
-                                        .equalsIgnoreCase("0.0.0.0/0"))) {
-                    logger.debug("Rule #4 egress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
-                            portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
-                            portSecurityRule.getSecurityRulePortMax(),
-                            portSecurityRule.getSecurityRuleRemoteIpPrefix());
-                    egressACLDefaultTcpDrop(dpid, segmentationId, attachedMac, PREFIX_MATCH_PRIORITY_DROP, true);
-                    egressACLPermitAllProto(dpid, segmentationId, attachedMac, true,
-                            portSecurityRule.getSecurityRuleRemoteIpPrefix(), PREFIX_MATCH_PRIORITY);
-                    continue;
-                }
-                /**
-                 * TCP Proto (True), TCP Port Minimum (True), TCP Port Max (True), IP Prefix (False)
-                 */
-                if (String.valueOf(portSecurityRule.getSecurityRuleProtocol()).equalsIgnoreCase("tcp") &&
-                        !String.valueOf(portSecurityRule.getSecurityRulePortMin()).equalsIgnoreCase("null") &&
-                        !String.valueOf(portSecurityRule.getSecurityRulePortMax()).equalsIgnoreCase("null") &&
-                        String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix()).equalsIgnoreCase("null")) {
-                    logger.debug("Rule #5 egress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
-                            portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
-                            portSecurityRule.getSecurityRulePortMax(),
-                            portSecurityRule.getSecurityRuleRemoteIpPrefix());
-                    egressACLDefaultTcpDrop(dpid, segmentationId, attachedMac, PROTO_PORT_MATCH_PRIORITY_DROP,
-                            true);
-                    egressACLTcpSyn(dpid, segmentationId,
-                            attachedMac, true, portSecurityRule.getSecurityRulePortMin(), PROTO_PORT_MATCH_PRIORITY);
-                    continue;
-                }
-                /**
-                 * TCP Proto (True), TCP Port Minimum (True), TCP Port Max (False), IP Prefix (False)
-                 */
-                if (String.valueOf(portSecurityRule.getSecurityRuleProtocol()).equalsIgnoreCase("tcp") &&
-                        !String.valueOf(portSecurityRule.getSecurityRulePortMin()).equalsIgnoreCase("null") &&
-                        String.valueOf(portSecurityRule.getSecurityRulePortMax()).equalsIgnoreCase("null") &&
-                        String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix()).equalsIgnoreCase("null")) {
-                    logger.debug("Rule #6 egress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
-                            portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
-                            portSecurityRule.getSecurityRulePortMax(),
-                            portSecurityRule.getSecurityRuleRemoteIpPrefix());
-                    egressACLDefaultTcpDrop(dpid, segmentationId, attachedMac,
-                            PROTO_PORT_MATCH_PRIORITY_DROP, true);
-                    egressACLTcpSyn(dpid, segmentationId, attachedMac, true,
-                            portSecurityRule.getSecurityRulePortMin(), PROTO_PORT_MATCH_PRIORITY);
-                    continue;
-                }
-                /**
-                 * TCP Proto (True), TCP Port Minimum (False), TCP Port Max (False), IP Prefix (False or 0.0.0.0/0)
-                 */
-                if (String.valueOf(portSecurityRule.getSecurityRuleProtocol()).equalsIgnoreCase("tcp") &&
-                        String.valueOf(portSecurityRule.getSecurityRulePortMin()).equalsIgnoreCase("null") &&
-                        String.valueOf(portSecurityRule.getSecurityRulePortMax()).equalsIgnoreCase("null") &&
-                        ((String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix()).equalsIgnoreCase("null")) ||
-                                String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix())
-                                        .equalsIgnoreCase("0.0.0.0/0"))) {
-                    logger.debug("Rule #7 egress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
-                            portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
-                            portSecurityRule.getSecurityRulePortMax(),
-                            portSecurityRule.getSecurityRuleRemoteIpPrefix());
-                    // No need to drop until UDP/ICMP are implemented
-                    // egressACLDefaultTcpDrop(dpid, segmentationId, attachedMac, PROTO_MATCH_PRIORITY_DROP, true);
-                    egressAllowProto(dpid, segmentationId, attachedMac, true,
-                            portSecurityRule.getSecurityRuleProtocol(), PROTO_MATCH_PRIORITY);
-                    continue;
-                }
-                logger.debug("ACL Match combination not found for rule: {}", portSecurityRule);
-
             }
         }
     }
@@ -382,14 +214,14 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
     public void ingressACLTcpSyn(Long dpidLong, String segmentationId, String attachedMac, boolean write,
             Integer securityRulePortMin, Integer protoPortMatchPriority) {
 
-        String nodeName = OPENFLOW + dpidLong;
+        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
         PortNumber tcpPort = new PortNumber(securityRulePortMin);
         MatchBuilder matchBuilder = new MatchBuilder();
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
         FlowBuilder flowBuilder = new FlowBuilder();
 
         flowBuilder.setMatch(MatchUtils.createDmacTcpSynMatch(matchBuilder, attachedMac, tcpPort,
-                TCP_SYN, segmentationId).build());
+                                                              Constants.TCP_SYN, segmentationId).build());
 
         logger.debug("ingressACLTcpSyn MatchBuilder contains:  {}", flowBuilder.getMatch());
         String flowId = "UcastOut_ACL2" + segmentationId + "_" + attachedMac + securityRulePortMin;
@@ -399,7 +231,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         flowBuilder.setStrict(false);
         flowBuilder.setPriority(protoPortMatchPriority);
         flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(INGRESS_ACL);
+        flowBuilder.setTableId(this.getTable());
         flowBuilder.setKey(key);
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
@@ -422,7 +254,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
             flowBuilder.setInstructions(isb.build());
             writeFlow(flowBuilder, nodeBuilder);
         } else {
-            // removeFlow(flowBuilder, nodeBuilder);
+            removeFlow(flowBuilder, nodeBuilder);
         }
     }
 
@@ -430,7 +262,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
             boolean write, Integer securityRulePortMin, String securityRuleIpPrefix,
             Integer protoPortPrefixMatchPriority) {
 
-        String nodeName = OPENFLOW + dpidLong;
+        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
         PortNumber tcpPort = new PortNumber(securityRulePortMin);
 
         MatchBuilder matchBuilder = new MatchBuilder();
@@ -440,7 +272,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
 
         flowBuilder.setMatch(MatchUtils
                 .createDmacTcpSynDstIpPrefixTcpPort(matchBuilder, new MacAddress(attachedMac),
-                        tcpPort, TCP_SYN, segmentationId, srcIpPrefix).build());
+                        tcpPort, Constants.TCP_SYN, segmentationId, srcIpPrefix).build());
 
         logger.debug(" MatchBuilder contains:  {}", flowBuilder.getMatch());
         String flowId = "UcastOut2_" + segmentationId + "_" + attachedMac +
@@ -451,7 +283,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         flowBuilder.setStrict(false);
         flowBuilder.setPriority(protoPortPrefixMatchPriority);
         flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(INGRESS_ACL);
+        flowBuilder.setTableId(this.getTable());
         flowBuilder.setKey(key);
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
@@ -474,14 +306,14 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
             flowBuilder.setInstructions(isb.build());
             writeFlow(flowBuilder, nodeBuilder);
         } else {
-            // removeFlow(flowBuilder, nodeBuilder);
+            removeFlow(flowBuilder, nodeBuilder);
         }
     }
 
     public void handleIngressAllowProto(Long dpidLong, String segmentationId, String attachedMac, boolean write,
             String securityRuleProtcol, Integer protoMatchPriority) {
 
-        String nodeName = OPENFLOW + dpidLong;
+        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
 
         MatchBuilder matchBuilder = new MatchBuilder();
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
@@ -501,7 +333,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         flowBuilder.setStrict(false);
         flowBuilder.setPriority(protoMatchPriority);
         flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(INGRESS_ACL);
+        flowBuilder.setTableId(this.getTable());
         flowBuilder.setKey(key);
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
@@ -524,7 +356,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
             flowBuilder.setInstructions(isb.build());
             writeFlow(flowBuilder, nodeBuilder);
         } else {
-            // removeFlow(flowBuilder, nodeBuilder);
+            removeFlow(flowBuilder, nodeBuilder);
         }
     }
 
@@ -532,13 +364,13 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
     public void ingressACLDefaultTcpDrop(Long dpidLong, String segmentationId, String attachedMac,
             int priority, boolean write) {
 
-        String nodeName = OPENFLOW + dpidLong;
+        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
         MatchBuilder matchBuilder = new MatchBuilder();
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
         FlowBuilder flowBuilder = new FlowBuilder();
 
         flowBuilder.setMatch(MatchUtils.createDmacTcpPortWithFlagMatch(matchBuilder,
-                attachedMac, TCP_SYN, segmentationId).build());
+                attachedMac, Constants.TCP_SYN, segmentationId).build());
 
         logger.debug("MatchBuilder contains: {}", flowBuilder.getMatch());
         String flowId = "PortSec_TCP_Syn_Default_Drop_" + attachedMac;
@@ -547,7 +379,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         flowBuilder.setStrict(false);
         flowBuilder.setPriority(priority);
         flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(INGRESS_ACL);
+        flowBuilder.setTableId(this.getTable());
         flowBuilder.setKey(key);
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
@@ -574,14 +406,14 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
             flowBuilder.setInstructions(isb.build());
             writeFlow(flowBuilder, nodeBuilder);
         } else {
-            // removeFlow(flowBuilder, nodeBuilder);
+            removeFlow(flowBuilder, nodeBuilder);
         }
     }
 
     public void ingressACLPermitAllProto(Long dpidLong, String segmentationId, String attachedMac,
             boolean write, String securityRuleIpPrefix, Integer protoPortMatchPriority) {
 
-        String nodeName = OPENFLOW + dpidLong;
+        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
         Ipv4Prefix srcIpPrefix = new Ipv4Prefix(securityRuleIpPrefix);
         MatchBuilder matchBuilder = new MatchBuilder();
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
@@ -608,7 +440,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         flowBuilder.setStrict(false);
         flowBuilder.setPriority(protoPortMatchPriority);
         flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(INGRESS_ACL);
+        flowBuilder.setTableId(this.getTable());
         flowBuilder.setKey(key);
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
@@ -631,260 +463,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
             flowBuilder.setInstructions(isb.build());
             writeFlow(flowBuilder, nodeBuilder);
         } else {
-            // // removeFlow(flowBuilder, nodeBuilder);
-        }
-    }
-
-    public void egressACLDefaultTcpDrop(Long dpidLong, String segmentationId, String attachedMac,
-            int priority, boolean write) {
-
-        String nodeName = OPENFLOW + dpidLong;
-        MatchBuilder matchBuilder = new MatchBuilder();
-        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
-        FlowBuilder flowBuilder = new FlowBuilder();
-
-        flowBuilder.setMatch(MatchUtils.createSmacTcpPortWithFlagMatch(matchBuilder,
-                attachedMac, TCP_SYN, segmentationId).build());
-        logger.debug("MatchBuilder contains: {}", flowBuilder.getMatch());
-
-        String flowId = "TCP_Syn_Egress_Default_Drop_" + attachedMac;
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setStrict(false);
-        flowBuilder.setPriority(priority);
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(EGRESS_ACL);
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
-
-        if (write) {
-            // Instantiate the Builders for the OF Actions and Instructions
-            InstructionBuilder ib = new InstructionBuilder();
-            InstructionsBuilder isb = new InstructionsBuilder();
-            List<Instruction> instructions = Lists.newArrayList();
-
-            InstructionUtils.createDropInstructions(ib);
-            ib.setOrder(0);
-            ib.setKey(new InstructionKey(0));
-            instructions.add(ib.build());
-            // Add InstructionBuilder to the Instruction(s)Builder List
-            isb.setInstruction(instructions);
-
-            logger.debug("Instructions contain: {}", ib.getInstruction());
-            // Add InstructionsBuilder to FlowBuilder
-            flowBuilder.setInstructions(isb.build());
-            writeFlow(flowBuilder, nodeBuilder);
-        } else {
-            // TODO Add // removeFlow to AnstractServiceInstance
-            //// removeFlow(flowBuilder, nodeBuilder);
-        }
-    }
-
-    public void egressACLTcpPortWithPrefix(Long dpidLong, String segmentationId, String attachedMac, boolean write,
-            Integer securityRulePortMin, String securityRuleIpPrefix, Integer protoPortPrefixMatchPriority) {
-
-        String nodeName = OPENFLOW + dpidLong;
-        PortNumber tcpPort = new PortNumber(securityRulePortMin);
-        MatchBuilder matchBuilder = new MatchBuilder();
-        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
-        FlowBuilder flowBuilder = new FlowBuilder();
-        Ipv4Prefix srcIpPrefix = new Ipv4Prefix(securityRuleIpPrefix);
-
-        flowBuilder.setMatch(MatchUtils
-                .createSmacTcpSynDstIpPrefixTcpPort(matchBuilder, new MacAddress(attachedMac),
-                        tcpPort, TCP_SYN, segmentationId, srcIpPrefix).build());
-
-        logger.debug(" MatchBuilder contains:  {}", flowBuilder.getMatch());
-        String flowId = "UcastEgress_" + segmentationId + "_" + attachedMac +
-                securityRulePortMin + securityRuleIpPrefix;
-        // Add Flow Attributes
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setStrict(false);
-        flowBuilder.setPriority(protoPortPrefixMatchPriority);
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(EGRESS_ACL);
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
-
-        if (write) {
-            // Instantiate the Builders for the OF Actions and Instructions
-            InstructionBuilder ib = new InstructionBuilder();
-            InstructionsBuilder isb = new InstructionsBuilder();
-            List<Instruction> instructionsList = Lists.newArrayList();
-
-            InstructionUtils.createGotoTableInstructions(ib, OUTBOUND_SNAT);
-            ib.setOrder(0);
-            ib.setKey(new InstructionKey(0));
-            instructionsList.add(ib.build());
-            isb.setInstruction(instructionsList);
-
-            logger.debug("Instructions contain: {}", ib.getInstruction());
-            // Add InstructionsBuilder to FlowBuilder
-            flowBuilder.setInstructions(isb.build());
-            writeFlow(flowBuilder, nodeBuilder);
-        } else {
-            // TODO Add // removeFlow to AnstractServiceInstance
-            //// removeFlow(flowBuilder, nodeBuilder);
-        }
-    }
-
-
-
-    public void egressAllowProto(Long dpidLong, String segmentationId, String attachedMac, boolean write,
-            String securityRuleProtcol, Integer protoMatchPriority) {
-
-        String nodeName = OPENFLOW + dpidLong;
-        MatchBuilder matchBuilder = new MatchBuilder();
-        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
-        FlowBuilder flowBuilder = new FlowBuilder();
-
-        flowBuilder.setMatch(MatchUtils
-                .createDmacIpTcpSynMatch(matchBuilder, new MacAddress(attachedMac), null, null).build());
-        flowBuilder.setMatch(MatchUtils
-                .createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
-
-        logger.debug("MatchBuilder contains:  {}", flowBuilder.getMatch());
-        String flowId = "EgressAllProto_" + segmentationId + "_" +
-                attachedMac + "_AllowEgressTCPSyn_" + securityRuleProtcol;
-        // Add Flow Attributes
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setStrict(false);
-        flowBuilder.setPriority(protoMatchPriority);
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(EGRESS_ACL);
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
-
-        if (write) {
-            // Instantiate the Builders for the OF Actions and Instructions
-            InstructionBuilder ib = new InstructionBuilder();
-            InstructionsBuilder isb = new InstructionsBuilder();
-            List<Instruction> instructionsList = Lists.newArrayList();
-
-            InstructionUtils.createGotoTableInstructions(ib, OUTBOUND_SNAT);
-            ib.setOrder(0);
-            ib.setKey(new InstructionKey(0));
-            instructionsList.add(ib.build());
-            isb.setInstruction(instructionsList);
-
-            logger.debug("Instructions contain: {}", ib.getInstruction());
-            // Add InstructionsBuilder to FlowBuilder
-            flowBuilder.setInstructions(isb.build());
-            writeFlow(flowBuilder, nodeBuilder);
-        } else {
-            // removeFlow(flowBuilder, nodeBuilder);
-        }
-    }
-
-    public void egressACLPermitAllProto(Long dpidLong, String segmentationId, String attachedMac,
-            boolean write, String securityRuleIpPrefix, Integer protoPortMatchPriority) {
-
-        String nodeName = OPENFLOW + dpidLong;
-        Ipv4Prefix srcIpPrefix = new Ipv4Prefix(securityRuleIpPrefix);
-        MatchBuilder matchBuilder = new MatchBuilder();
-        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
-        FlowBuilder flowBuilder = new FlowBuilder();
-
-        flowBuilder.setMatch(MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId))
-                .build());
-        if (securityRuleIpPrefix != null) {
-            flowBuilder.setMatch(MatchUtils
-                    .createSmacIpTcpSynMatch(matchBuilder, new MacAddress(attachedMac), null, srcIpPrefix)
-                    .build());
-        } else {
-            flowBuilder.setMatch(MatchUtils
-                    .createSmacIpTcpSynMatch(matchBuilder, new MacAddress(attachedMac), null, null)
-                    .build());
-        }
-        logger.debug("MatchBuilder contains: {}", flowBuilder.getMatch());
-        String flowId = "Egress_Proto_ACL" + segmentationId + "_" +
-                attachedMac + "_Permit_" + securityRuleIpPrefix;
-        // Add Flow Attributes
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setStrict(false);
-        flowBuilder.setPriority(protoPortMatchPriority);
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(EGRESS_ACL);
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
-
-        if (write) {
-            // Instantiate the Builders for the OF Actions and Instructions
-            InstructionBuilder ib = new InstructionBuilder();
-            InstructionsBuilder isb = new InstructionsBuilder();
-            List<Instruction> instructionsList = Lists.newArrayList();
-
-            InstructionUtils.createGotoTableInstructions(ib, OUTBOUND_SNAT);
-            ib.setOrder(0);
-            ib.setKey(new InstructionKey(0));
-            instructionsList.add(ib.build());
-            isb.setInstruction(instructionsList);
-
-            logger.debug("Instructions contain: {}", ib.getInstruction());
-            // Add InstructionsBuilder to FlowBuilder
-            flowBuilder.setInstructions(isb.build());
-            writeFlow(flowBuilder, nodeBuilder);
-        } else {
-            // removeFlow(flowBuilder, nodeBuilder);
-        }
-    }
-
-
-    public void egressACLTcpSyn(Long dpidLong, String segmentationId, String attachedMac, boolean write,
-            Integer securityRulePortMin, Integer protoPortMatchPriority) {
-
-        String nodeName = OPENFLOW + dpidLong;
-        PortNumber tcpPort = new PortNumber(securityRulePortMin);
-        MatchBuilder matchBuilder = new MatchBuilder();
-        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
-        FlowBuilder flowBuilder = new FlowBuilder();
-
-        flowBuilder.setMatch(MatchUtils.createSmacTcpSyn(matchBuilder, attachedMac, tcpPort,
-                TCP_SYN, segmentationId).build());
-
-        logger.debug("MatchBuilder contains: {}", flowBuilder.getMatch());
-        String flowId = "Ucast_Egress_ACL" + segmentationId + "_" + attachedMac + securityRulePortMin;
-        // Add Flow Attributes
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setStrict(false);
-        flowBuilder.setPriority(protoPortMatchPriority);
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(EGRESS_ACL);
-        flowBuilder.setKey(key);
-        flowBuilder.setFlowName(flowId);
-        flowBuilder.setHardTimeout(0);
-        flowBuilder.setIdleTimeout(0);
-
-        if (write) {
-            // Instantiate the Builders for the OF Actions and Instructions
-            InstructionBuilder ib = new InstructionBuilder();
-            InstructionsBuilder isb = new InstructionsBuilder();
-            List<Instruction> instructionsList = Lists.newArrayList();
-
-            InstructionUtils.createGotoTableInstructions(ib, OUTBOUND_SNAT);
-            ib.setOrder(0);
-            ib.setKey(new InstructionKey(0));
-            instructionsList.add(ib.build());
-            isb.setInstruction(instructionsList);
-
-            logger.debug("Instructions contain: {}", ib.getInstruction());
-            // Add InstructionsBuilder to FlowBuilder
-            flowBuilder.setInstructions(isb.build());
-            writeFlow(flowBuilder, nodeBuilder);
-        } else {
-            // removeFlow(flowBuilder, nodeBuilder);
+            removeFlow(flowBuilder, nodeBuilder);
         }
     }
 }

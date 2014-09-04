@@ -33,6 +33,7 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.openstack.netvirt.api.EgressAclProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.IngressAclProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
@@ -121,6 +122,7 @@ public class OF13Provider implements NetworkingProvider {
     private volatile MdsalConsumer mdsalConsumer;
     private volatile SecurityServicesManager securityServicesManager;
     private volatile IngressAclProvider ingressAclProvider;
+    private volatile EgressAclProvider egressAclProvider;
 
     public static final String NAME = "OF13Provider";
 
@@ -838,6 +840,8 @@ public class OF13Provider implements NetworkingProvider {
                         "to be installed on DPID: {}", networkType, securityGroupInPort, dpid);
                 ingressAclProvider.programPortSecurityACL(node, dpid, segmentationId, attachedMac, localPort,
                         securityGroupInPort);
+                egressAclProvider.programPortSecurityACL(node, dpid, segmentationId, attachedMac, localPort,
+                                                         securityGroupInPort);
             }
             else if (networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE) ||
                        networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN)) {

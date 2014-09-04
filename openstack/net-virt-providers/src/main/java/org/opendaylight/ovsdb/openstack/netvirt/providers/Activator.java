@@ -20,6 +20,7 @@ import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.openstack.netvirt.api.EgressAclProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.InboundNatProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.IngressAclProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
@@ -169,6 +170,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
             c.add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true));
             c.add(createServiceDependency().setService(IngressAclProvider.class).setRequired(true));
+            c.add(createServiceDependency().setService(EgressAclProvider.class).setRequired(true));
         }
 
         if (imp.equals(PipelineOrchestratorImpl.class)) {
@@ -178,10 +180,10 @@ public class Activator extends ComponentActivatorAbstractBase {
                            .setCallbacks("registerService", "unregisterService"));
         }
 
-        if (AbstractServiceInstance.class.isAssignableFrom((Class)imp)) {
+        if (AbstractServiceInstance.class.isAssignableFrom((Class) imp)) {
             c.add(createServiceDependency()
-                    .setService(PipelineOrchestrator.class)
-                    .setRequired(true));
+                          .setService(PipelineOrchestrator.class)
+                          .setRequired(true));
             c.add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true));
         }
 
@@ -251,6 +253,14 @@ public class Activator extends ComponentActivatorAbstractBase {
             properties.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.L2_FORWARDING);
             properties.put(Constants.PROVIDER_NAME_PROPERTY, OF13Provider.NAME);
             c.setInterface(AbstractServiceInstance.class.getName(), properties);
+        }
+
+        if (imp.equals(EgressAclService.class)) {
+            Properties properties = new Properties();
+            properties.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.EGRESS_ACL);
+            properties.put(Constants.PROVIDER_NAME_PROPERTY, OF13Provider.NAME);
+            c.setInterface(new String[]{AbstractServiceInstance.class.getName(),
+                                        EgressAclProvider.class.getName()}, properties);
         }
 
         if (imp.equals(OutboundNatService.class)) {

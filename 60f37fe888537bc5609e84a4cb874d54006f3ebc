@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_5ddccc46",
+        "filename": "distribution/opendaylight/src/assemble/resources/run.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-09-04T07:58:31Z",
+      "side": 1,
+      "message": "Can you please filter out the sfc bundles for the above option ?",
+      "revId": "60f37fe888537bc5609e84a4cb874d54006f3ebc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

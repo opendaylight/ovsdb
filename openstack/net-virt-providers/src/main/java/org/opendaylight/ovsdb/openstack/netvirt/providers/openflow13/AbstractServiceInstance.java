@@ -120,7 +120,7 @@ public abstract class AbstractServiceInstance implements OpendaylightInventoryLi
         thread.start();
     }
 
-    private NodeBuilder createNodeBuilder(String nodeId) {
+    public NodeBuilder createNodeBuilder(String nodeId) {
         NodeBuilder builder = new NodeBuilder();
         builder.setId(new NodeId(nodeId));
         builder.setKey(new NodeKey(builder.getId()));

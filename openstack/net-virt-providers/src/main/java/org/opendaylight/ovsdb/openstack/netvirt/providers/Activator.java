@@ -183,6 +183,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency()
                            .setService(AbstractServiceInstance.class)
                            .setCallbacks("registerService", "unregisterService"));
+            c.add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true));
         }
 
         if (AbstractServiceInstance.class.isAssignableFrom((Class) imp)) {

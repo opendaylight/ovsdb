@@ -29,7 +29,7 @@ public class EventDispatcherImpl implements EventDispatcher {
 
     static final Logger logger = LoggerFactory.getLogger(EventDispatcher.class);
     private ExecutorService eventHandler;
-    private BlockingQueue<AbstractEvent> events;
+    private volatile BlockingQueue<AbstractEvent> events;
 
     private AbstractHandler[] handlers;
 

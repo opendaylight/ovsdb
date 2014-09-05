@@ -25,6 +25,7 @@ import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.lib.notation.Row;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.MultiTenantAwareRouter;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
@@ -181,6 +182,27 @@ public class NeutronL3Adapter {
                                      Action action) {
         logger.debug("southbound interface {} node:{} interface:{}, neutronNetwork:{}",
                      action, node, intf.getName(), neutronNetwork);
+
+        // Deletes are handled in this.handleNeutronPortEvent()
+        if (action == Action.DELETE) {
+            return;
+        }
+        // See if there is an external uuid, so we can find the respective neutronPort
+        Map<String, String> externalIds = intf.getExternalIdsColumn().getData();
+        if (externalIds == null) {
+            return;
+        }
+        String neutronPortId = externalIds.get(Constants.EXTERNAL_ID_INTERFACE_ID);
+        if (neutronPortId == null) {
+            return;
+        }
+        final NeutronPort neutronPort = neutronPortCache.getPort(neutronPortId);
+        if (neutronPort == null) {
+            logger.warn("southbound interface {} node:{} interface:{}, neutronNetwork:{} did not find port:{}",
+                         action, node, intf.getName(), neutronNetwork, neutronPortId);
+            return;
+        }
+        updateL3ForNeutronPort(neutronPort, null /*neutronRouterInterfaceFilter*/, false /*isDelete*/);
     }
 
     //

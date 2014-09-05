@@ -38,7 +38,7 @@
     <!-- Skip Coverage and IT by default -->
     <skip.coverage>true</skip.coverage>
     <skip.integrationtest>true</skip.integrationtest>
-    <skip.karaf>true</skip.karaf>
+    <skip.karaf>false</skip.karaf>
     <skip.distribution>false</skip.distribution>
     <!-- The directory where maven was executed -->
     <root.directory>${env.PWD}</root.directory>

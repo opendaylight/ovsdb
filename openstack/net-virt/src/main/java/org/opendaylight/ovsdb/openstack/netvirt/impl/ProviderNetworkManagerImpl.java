@@ -9,22 +9,21 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
-
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 
 public class ProviderNetworkManagerImpl implements NetworkingProviderManager {
 
@@ -35,15 +34,18 @@ public class ProviderNetworkManagerImpl implements NetworkingProviderManager {
     private HashMap<Long, ProviderEntry> providers = Maps.newHashMap();
     private HashMap<Node, NetworkingProvider> nodeToProviderMapping = Maps.newHashMap();
 
+    @Override
     public NetworkingProvider getProvider(Node node) {
-        // This will change if/when we move to a commons library
-        Preconditions.checkArgument(node.getType().equals("OVS"));
-
         if (nodeToProviderMapping.get(node) != null) {
             return nodeToProviderMapping.get(node);
         }
 
-        final String targetVersion = configurationService.getOpenflowVersion(node);
+        final String targetVersion = Constants.OPENFLOW13;
+        /*
+         * Since we have hard depedencies on OpenFlow1.3 to get any of the services supported, we are
+         * Hardcoding the Openflow13 as the only version that we are interested in
+         */
+        // final String targetVersion = configurationService.getOpenflowVersion(node);
 
         Predicate<ProviderEntry> providerEntryPredicate = new Predicate<ProviderEntry>() {
             @Override

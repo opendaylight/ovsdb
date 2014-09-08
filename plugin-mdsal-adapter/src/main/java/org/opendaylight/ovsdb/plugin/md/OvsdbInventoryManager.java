@@ -171,6 +171,10 @@ public class OvsdbInventoryManager implements OvsdbInventoryListener {
             OvsdbCapableNode ovsdbNode;
             try {
                 Optional<OvsdbCapableNode> data = tx.read(LogicalDatastoreType.CONFIGURATION, ovsdbNodePath).get();
+                if (!data.isPresent()) {
+                    logger.error("OVSDB node not updated. Parent node for {} does not exist", ovsdbNodePath.toString());
+                    return;
+                }
                 ovsdbNode = data.get();
             } catch (InterruptedException | ExecutionException e) {
                 logger.error("OVSDB node not updated. Parent node for {} does not exist", ovsdbNodePath.toString());
@@ -260,8 +264,11 @@ public class OvsdbInventoryManager implements OvsdbInventoryListener {
             ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
             OvsdbCapableNode ovsdbNode;
             try {
-                Optional<OvsdbCapableNode>
-                        data = tx.read(LogicalDatastoreType.CONFIGURATION, ovsdbNodePath).get();
+                Optional<OvsdbCapableNode> data = tx.read(LogicalDatastoreType.CONFIGURATION, ovsdbNodePath).get();
+                if (!data.isPresent()) {
+                    logger.error("OVSDB node not updated. Parent node for {} does not exist", ovsdbNodePath.toString());
+                    return;
+                }
                 ovsdbNode = data.get();
             } catch (InterruptedException | ExecutionException e) {
                 throw new RuntimeException("Node does not exist");

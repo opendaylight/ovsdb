@@ -10,6 +10,10 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services;
 
+import java.math.BigInteger;
+import java.net.InetAddress;
+import java.util.List;
+
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
@@ -34,10 +38,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 
 import com.google.common.collect.Lists;
-
-import java.math.BigInteger;
-import java.net.InetAddress;
-import java.util.List;
 
 public class L3ForwardingService extends AbstractServiceInstance implements L3ForwardingProvider {
     public L3ForwardingService() {
@@ -95,7 +95,6 @@ public class L3ForwardingService extends AbstractServiceInstance implements L3Fo
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
-        writeFlow(flowBuilder, nodeBuilder);
 
         if (action.equals(Action.ADD)) {
             writeFlow(flowBuilder, nodeBuilder);

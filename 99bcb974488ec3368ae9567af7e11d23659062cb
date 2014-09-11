@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "fa82b9bf_2d70da70",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/impl/ConfigurationServiceImpl.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 551,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-09-11T19:57:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa82b9bf_bb143d4d",
+      "revId": "99bcb974488ec3368ae9567af7e11d23659062cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa82b9bf_58ead7db",
         "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/impl/ConfigurationServiceImpl.java",
         "patchSetId": 7

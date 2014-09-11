@@ -5,8 +5,8 @@ LOG_COLOR=False
 #OFFLINE=True
 #RECLONE=yes
 
-HOST_IP=<%= @hosts['devstack-compute']['ipaddress'] %>
-HOST_NAME=<%= @hosts['devstack-compute']['name'] %>
+HOST_IP=<%= @hosts[@hostname]['ipaddress'] %>
+HOST_NAME=<%= @hosts[@hostname]['name'] %>
 SERVICE_HOST=<%= @hosts['devstack-control']['name'] %>
 SERVICE_HOST_NAME=<%= @hosts['devstack-control']['name'] %>
 

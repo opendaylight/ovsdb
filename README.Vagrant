@@ -4,9 +4,6 @@ ODL OVSDB Vagrant
 # Installation
 
 You can download an install for your system from [here](http://www.vagrantup.com/downloads.html)
-Vagrant can also be installed using RubyGems
-
-    gem install vagrant
 
 # Usage
 
@@ -14,7 +11,7 @@ Vagrant is a tool for creating development/test environments.
 The environment created for this project is as follows:
 
 1 x DevStack Control/Compute VM
-1 x DevStack Compute VM
+1-3 x DevStack Compute VM
 1 x Mininet VM
 
 It's assumed you already have an OVSDB development environment set up.
@@ -31,7 +28,7 @@ Follow the instructions below for Devstack and Mininet
 
 ## DevStack VMs
 
-There are two DevStack VMs. One combined control/compute node and one dedicated compute node.
+There are two DevStack VMs. One combined control/compute node and a variable number of dedicated compute nodes.
 The following steps are performed when the VM is created or when `vagrant provision` is run.
 
 - Check dependencies are installed
@@ -44,6 +41,10 @@ To start DevStack
     # or vagrant ssh devstack-compute
     cd devstack
     ./stack.sh
+
+> Note: To start more than one compute node
+>       export DEVSTACK_NUM_COMPUTE_NODES=3
+>       vagrant up
 
 ## Mininet
 

@@ -57,9 +57,9 @@ public class PipelineOrchestratorImpl implements PipelineOrchestrator, Opendayli
                                                                 Service.LOAD_BALANCER,
                                                                 Service.ROUTING,
                                                                 Service.L2_REWRITE,
-                                                                Service.L2_FORWARDING,
                                                                 Service.EGRESS_ACL,
-                                                                Service.OUTBOUND_NAT
+                                                                Service.OUTBOUND_NAT,
+                                                                Service.L2_FORWARDING
                                                               );
     Map<Service, AbstractServiceInstance> serviceRegistry = Maps.newConcurrentMap();
     private volatile MdsalConsumer mdsalConsumer;

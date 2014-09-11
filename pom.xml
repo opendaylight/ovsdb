@@ -40,6 +40,7 @@
     <!-- Config Files -->
     <module>of-extension/openflowjava-nx-config</module>
     <module>of-extension/openflowjava-nx-api-config</module>
+    <module>of-extension/nicira-extension-config</module>
     <!-- Karaf Distribution -->
     <module>features/ovsdb</module>
     <module>features/of-nxm-extensions</module>
@@ -55,5 +56,5 @@
     <tag>HEAD</tag>
     <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
   </scm>
-  
+
 </project>

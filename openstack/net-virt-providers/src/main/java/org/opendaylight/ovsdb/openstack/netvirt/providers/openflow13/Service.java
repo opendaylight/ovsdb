@@ -21,9 +21,9 @@ public enum Service {
     ROUTING ((short) 60, "Distributed Virtual Routing (DVR)"),
     L3_FORWARDING ((short) 70, "Layer 3 forwarding/lookup service"),
     L2_REWRITE ((short) 80, "Layer2 rewrite service"),
-    L2_FORWARDING ((short) 90, "Layer2 mac,vlan based forwarding"),
-    EGRESS_ACL ((short) 100, "Egress Acces-control.Typically Openstack Ingress Security group policies are applied here."),
-    OUTBOUND_NAT ((short) 110, "SNAT for traffic accessing external network");
+    EGRESS_ACL ((short) 90, "Egress Acces-control.Typically Openstack Ingress Security group policies are applied here."),
+    OUTBOUND_NAT ((short) 100, "SNAT for traffic accessing external network"),
+    L2_FORWARDING ((short) 110, "Layer2 mac,vlan based forwarding");
 
     short table;
     String description;

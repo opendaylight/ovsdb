@@ -9,8 +9,6 @@
         <bundle>mvn:org.opendaylight.openflowplugin/openflowjava-extension-nicira/${openflowplugin.version}</bundle>
         <bundle>mvn:org.opendaylight.ovsdb/of-extension.nx-ofjava/${ovsdb.nx.version}</bundle>
         <bundle>mvn:org.opendaylight.ovsdb/of-extension.nx-sal/${ovsdb.nx.version}</bundle>
-<!--
-        <configfile finalname="etc/opendaylight/karaf/42-openflowplugin.xml">mvn:org.opendaylight.openflowplugin/openflowplugin-controller-config/${project.version}/xml/config</configfile>
--->
+        <configfile finalname="etc/opendaylight/karaf/44-nicira-extension.xml">mvn:org.opendaylight.ovsdb/of-extension.nicira-extension-config</configfile>
     </feature>
 </features>

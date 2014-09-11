@@ -75,6 +75,13 @@
       <classifier>config</classifier>
       <type>xml</type>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>of-extension.nicira-extension-config</artifactId>
+      <version>${ovsdb.ofextension.version}</version>
+      <classifier>config</classifier>
+      <type>xml</type>
+    </dependency>
   </dependencies>
   <build>
     <resources>

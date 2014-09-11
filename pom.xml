@@ -37,6 +37,8 @@
     <module>ovs-sfc</module>
     <!-- Integration Tests -->
     <module>integrationtest</module>
+    <!-- Config Files -->
+    <module>of-extension/openflowjava-nx-config</module>
     <!-- Karaf Distribution -->
     <module>features/ovsdb</module>
     <module>features/of-nxm-extensions</module>

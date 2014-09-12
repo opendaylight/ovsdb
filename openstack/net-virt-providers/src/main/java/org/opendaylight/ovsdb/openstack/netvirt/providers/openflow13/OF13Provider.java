@@ -9,16 +9,20 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
 
+//import java.math.BigInteger;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
@@ -46,13 +50,23 @@ import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
+import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.OutputActionCase;
+//import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetDlDstActionCaseBuilder;
+//import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetDlSrcActionCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.output.action._case.OutputActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PushVlanActionCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetVlanIdActionCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.GroupActionCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.GroupActionCaseBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.OutputActionCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.OutputActionCaseBuilder;
+//import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.dl.dst.action._case.SetDlDstActionBuilder;
+//import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.dl.src.action._case.SetDlSrcActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.group.action._case.GroupActionBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.output.action._case.OutputActionBuilder;
+//import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.output.action._case.OutputActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.push.vlan.action._case.PushVlanActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.vlan.id.action._case.SetVlanIdActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionKey;
@@ -63,11 +77,14 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.ta
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowModFlags;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.GoToTableCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.apply.actions._case.ApplyActionsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.go.to.table._case.GoToTableBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
@@ -85,9 +102,17 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
+//import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
+//import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
+//import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.MetadataBuilder;
+//import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.VlanMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanIdBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -537,6 +562,8 @@ public class OF13Provider implements NetworkingProvider {
          * ----------------
          * Match: VM sMac and Local Ingress Port
          * Action: Set VLAN ID and GOTO Local Table 1
+         ****** NOT WORKING, now works
+         * in_port=1,vlan_tci=0x0000/0x1fff,dl_src=fa:16:3e:51:de:24 actions=push_vlan:0x8100,set_field:6097->vlan_vid,goto_table:20
          */
 
         handleLocalInPortSetVlan(dpid, TABLE_0_DEFAULT_INGRESS,
@@ -548,6 +575,7 @@ public class OF13Provider implements NetworkingProvider {
          * ----------------
          * Match: Drop any remaining Ingress Local VM Packets
          * Action: Drop w/ a low priority
+         * table=0, send_flow_rem priority=8192,in_port=1 actions=drop
          */
 
         handleDropSrcIface(dpid, localPort, true);
@@ -557,7 +585,7 @@ public class OF13Provider implements NetworkingProvider {
          * ----------------
          * Match: Match VLAN ID and Destination DL/dMAC Addr
          * Action: strip vlan, output to local port
-         * Example: table=2,vlan_id=0x5,dl_dst=00:00:00:00:00:01 actions= strip vlan, output:2
+         * Example: table=90,vlan_id=0x5,dl_dst=00:00:00:00:00:01 actions= strip vlan, output:2
          */
 
         handleLocalVlanUcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId,
@@ -635,6 +663,7 @@ public class OF13Provider implements NetworkingProvider {
     }
 
     private void programLocalIngressVlanRules(Node node, Long dpid, String segmentationId, String attachedMac, long ethPort) {
+        logger.info("programLocalingressvlanRules");
         /*
          * Table(0) Rule #2
          * ----------------
@@ -796,6 +825,7 @@ public class OF13Provider implements NetworkingProvider {
     }
 
     private void programLocalRules (String networkType, String segmentationId, Node node, Interface intf) {
+        logger.info("programLocalRules {}:{}", node, intf.getName());
         try {
             Long dpid = this.getIntegrationBridgeOFDPID(node);
             if (dpid == 0L) {
@@ -1023,7 +1053,7 @@ public class OF13Provider implements NetworkingProvider {
 
     private void programVlanRules (NeutronNetwork network, Node node, Interface intf) {
         Preconditions.checkNotNull(ovsdbConfigurationService);
-        logger.debug("Program vlan rules for interface {}", intf.getName());
+        logger.debug("programVlanRules: Program vlan rules for interface {}", intf.getName());
         try {
 
             Long dpid = this.getIntegrationBridgeOFDPID(node);
@@ -1101,7 +1131,7 @@ public class OF13Provider implements NetworkingProvider {
     private void removeVlanRules (NeutronNetwork network, Node node,
             Interface intf, boolean isLastInstanceOnNode) {
         Preconditions.checkNotNull(ovsdbConfigurationService);
-        logger.debug("Remove vlan rules for interface {}", intf.getName());
+        logger.debug("removeVlanRules: Remove vlan rules for interface {}", intf.getName());
 
         try {
 
@@ -1166,6 +1196,7 @@ public class OF13Provider implements NetworkingProvider {
         Preconditions.checkNotNull(connectionService);
         List<Node> nodes = connectionService.getNodes();
         nodes.remove(srcNode);
+        logger.info("handleInterfaceUpdate: {}", srcNode);
         this.programLocalRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), srcNode, intf);
 
         if (network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
@@ -1395,6 +1426,101 @@ public class OF13Provider implements NetworkingProvider {
         classifierProvider.programLocalInPort(dpidLong, segmentationId, inPort, attachedMac, write);
     }
 
+    public static MatchBuilder createVlanIdPresentMatch(MatchBuilder matchBuilder, boolean present) {
+        VlanMatchBuilder vlanMatchBuilder = new VlanMatchBuilder();
+        VlanIdBuilder vlanIdBuilder = new VlanIdBuilder();
+        vlanIdBuilder.setVlanIdPresent(present);
+        vlanIdBuilder.setVlanId(new VlanId(0));
+        vlanMatchBuilder.setVlanId(vlanIdBuilder.build());
+        matchBuilder.setVlanMatch(vlanMatchBuilder.build());
+
+        return matchBuilder;
+    }
+
+    private static ActionBuilder createActionBuilder(int order) {
+        ActionBuilder ab = new ActionBuilder();
+        ab.setOrder(order);
+        ab.setKey(new ActionKey(order));
+        return ab;
+    }
+
+    public static Action createPushVlanAction(int order){
+        ActionBuilder ab = createActionBuilder(order);
+        return new ActionBuilder().setAction(
+                new PushVlanActionCaseBuilder().setPushVlanAction(
+                        new PushVlanActionBuilder().setEthernetType(
+                                Integer.valueOf(0x8100)).build()).build()).setKey(new ActionKey(0)).build();
+    }
+
+    public static Action createSetDstVlanAction(int vlan, int order) {
+        ActionBuilder ab = createActionBuilder(order);
+
+        SetVlanIdActionBuilder vlanIdActionBuilder = new SetVlanIdActionBuilder();
+        VlanId vlanId = new VlanId(vlan);
+        vlanIdActionBuilder.setVlanId(vlanId);
+        ab.setAction(new SetVlanIdActionCaseBuilder().setSetVlanIdAction(
+                vlanIdActionBuilder.build()).build());
+        return ab.setKey(new ActionKey(1)).build();
+
+    }
+
+    private boolean getResult(ListenableFuture<RpcResult<TransactionStatus>> result) {
+        return getResult(result, false);
+    }
+
+    private boolean getResult(ListenableFuture<RpcResult<TransactionStatus>> result, boolean wait) {
+        try {
+            if (wait) {
+                while (!result.isDone()) {
+                    // LOG.trace("writeFlowToConfig status is not done yet");
+                }
+            }
+
+            RpcResult<TransactionStatus> rpct = result.get();
+            TransactionStatus ts = rpct.getResult();
+            if (ts != TransactionStatus.COMMITED) {
+                logger.trace("TransactionStatus result {}, result NOT SUCCESSFUL", ts.toString());
+                return false;
+            }
+
+            logger.trace("TransactionStatus result {}, result SUCCESSFUL", ts.toString());
+            return true;
+
+        } catch (Exception e) {
+            logger.trace("+++++++++++++++++  SfcProviderSffFlowWriter waitForResult() caught an Exception: ");
+            logger.error(e.getMessage(), e);
+            return false;
+        }
+    }
+
+
+    private ListenableFuture<RpcResult<TransactionStatus>> writeFlowToConfig(FlowBuilder flow, NodeBuilder nodeBuilder) {
+        // Create the NodeBuilder
+        //NodeBuilder nodeBuilder = new NodeBuilder();
+        //nodeBuilder.setId(new NodeId(sffNodeName));
+        //nodeBuilder.setKey(new NodeKey(nodeBuilder.getId()));
+
+        // Create the flow path
+        //InstanceIdentifier<Flow> flowPath = InstanceIdentifier.builder(Nodes.class)
+        //        .child(Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class)
+        //        .child(Table.class, new TableKey(flow.getTableId())).child(Flow.class, flow.getKey()).build();
+
+        InstanceIdentifier<Flow> flowPath = InstanceIdentifier.builder(Nodes.class)
+                .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class)
+                .child(Table.class, new TableKey(flow.getTableId())).child(Flow.class, flow.getKey()).build();
+
+        //InstanceIdentifier<Node> nodePath = InstanceIdentifier.builder(Nodes.class)
+        //        .child(Node.class, nodeBuilder.getKey()).toInstance();
+        InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node> nodePath = InstanceIdentifier.builder(Nodes.class)
+                .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class, nodeBuilder.getKey()).toInstance();
+
+        WriteTransaction addFlowTransaction = dataBroker.newWriteOnlyTransaction();
+        addFlowTransaction.put(LogicalDatastoreType.CONFIGURATION, nodePath, nodeBuilder.build(), true);
+        addFlowTransaction.put(LogicalDatastoreType.CONFIGURATION, flowPath, flow.build(), true);
+
+        logger.info("writeFlowToConfig: {}:{}", nodeBuilder.build(), flow.build());
+        return addFlowTransaction.commit();
+    }
     /*
      * (Table:0) Egress VM Traffic Towards TEP
      * Match: Source Ethernet Addr and OpenFlow InPort
@@ -1408,6 +1534,96 @@ public class OF13Provider implements NetworkingProvider {
             Long inPort, String attachedMac,
             boolean write) {
         classifierProvider.programLocalInPortSetVlan(dpidLong, segmentationId, inPort, attachedMac, write);
+    }
+
+    private void handleLocalInPortSetVlan(Long dpidLong, Short writeTable,
+            Short goToTableId, String segmentationId,
+            Long inPort, String attachedMac,
+            boolean write, boolean ignored) {
+        //Action actionDstMac = this.createSetDlDstAction(dstMac, 0);
+        Action actionPushVlan = this.createPushVlanAction(0);
+        Action actionDstVlan = this.createSetDstVlanAction(2001, 1);
+
+        List<Action> actionList = new ArrayList<Action>();
+
+        //actionList.add(actionDstMac);
+        actionList.add(actionPushVlan);
+        actionList.add(actionDstVlan);
+
+        // Create an Apply Action
+        ApplyActionsBuilder aab = new ApplyActionsBuilder();
+        aab.setAction(actionList);
+
+        // Wrap our Apply Action in an Instruction
+        InstructionBuilder ib = new InstructionBuilder();
+        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+        ib.setKey(new InstructionKey(0));
+        ib.setOrder(0);
+
+        GoToTableBuilder gotoTb = new GoToTableBuilder();
+        gotoTb.setTableId((short)20);
+
+        InstructionBuilder gotoTbIb = new InstructionBuilder();
+        gotoTbIb.setInstruction(new GoToTableCaseBuilder().setGoToTable(gotoTb.build()).build());
+        gotoTbIb.setKey(new InstructionKey(1));
+        gotoTbIb.setOrder(1);
+
+        // Put our Instruction in a list of Instructions
+        InstructionsBuilder isb = new InstructionsBuilder();
+        List<Instruction> instructions = new ArrayList<Instruction>();
+        instructions.add(ib.build());
+        instructions.add(gotoTbIb.build());
+        isb.setInstruction(instructions);
+
+        //
+        // Create and configure the FlowBuilder
+        FlowBuilder nextHopFlow = new FlowBuilder();
+        String flowId = "LocalMac_"+segmentationId+"_"+inPort+"_"+attachedMac;
+        nextHopFlow.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        //nextHopFlow.setId(new FlowId(String.valueOf(flowIdInc.getAndIncrement())));
+        //nextHopFlow.setKey(new FlowKey(new FlowId(Long.toString(flowIdInc.getAndIncrement()))));
+        nextHopFlow.setTableId((short)0);
+        nextHopFlow.setFlowName(flowId); // should this name
+        // be
+        // unique??
+        /*
+        BigInteger cookieValue = new BigInteger("20", 10);
+        nextHopFlow.setCookie(new FlowCookie(cookieValue));
+        nextHopFlow.setCookieMask(new FlowCookie(cookieValue));
+        nextHopFlow.setContainerName(null);
+        */
+        MatchBuilder match = new MatchBuilder();
+        /*
+        // Match on the metadata sfpId
+        MetadataBuilder metadata = new MetadataBuilder();
+        metadata.setMetadata(BigInteger.valueOf(111));
+        Integer METADATA_BITS = new Integer(0x0ffff);
+        metadata.setMetadataMask(new BigInteger(METADATA_BITS.toString(), 16));
+        match.setMetadata(metadata.build());
+        nextHopFlow.setMatch(match.build());
+        */
+        nextHopFlow.setMatch(MatchUtils.createInPortMatch(match, dpidLong, inPort).build());
+        nextHopFlow.setMatch(createVlanIdPresentMatch(match, false).build());
+
+        nextHopFlow.setStrict(false);
+        nextHopFlow.setInstructions(isb.build());
+        nextHopFlow.setPriority(16384);
+        nextHopFlow.setHardTimeout(0);
+        nextHopFlow.setIdleTimeout(0);
+        nextHopFlow.setKey(key);
+        nextHopFlow.setFlags(new FlowModFlags(false, false, false, false, false));
+        if (null == nextHopFlow.isBarrier()) {
+            nextHopFlow.setBarrier(Boolean.FALSE);
+        }
+
+        //
+        // Now write the Flow Entry
+        //getResult(writeFlowToConfig(nextHopFlow));
+        String nodeName = OPENFLOW + dpidLong;
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        //writeFlow(nextHopFlow, nodeBuilder);
+        getResult(writeFlowToConfig(nextHopFlow, nodeBuilder));
     }
 
     /*
@@ -1699,6 +1915,7 @@ public class OF13Provider implements NetworkingProvider {
 
     private void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
         Preconditions.checkNotNull(mdsalConsumer);
+        logger.info("OF13Provider.writeFlow: {}:{}", nodeBuilder.build(), flowBuilder.build());
         if (mdsalConsumer == null) {
             logger.error("ERROR finding MDSAL Service. Its possible that writeFlow is called too soon ?");
             return;

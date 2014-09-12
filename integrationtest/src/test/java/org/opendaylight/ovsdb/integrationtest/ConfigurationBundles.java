@@ -19,6 +19,12 @@ import org.ops4j.pax.exam.options.DefaultCompositeOption;
 
 
 public class ConfigurationBundles {
+    public static final String CONTROLLER = "org.opendaylight.controller";
+    public static final String CONTROLLER_MODELS = "org.opendaylight.controller.model";
+    public static final String OFLIBRARY = "org.opendaylight.openflowjava";
+    public static final String OFPLUGIN = "org.opendaylight.openflowplugin";
+    public static final String YANGTOOLS = "org.opendaylight.yangtools";
+    public static final String YANGTOOLS_MODELS = "org.opendaylight.yangtools.model";
 
     public static Option controllerBundles() {
         return new DefaultCompositeOption(
@@ -222,4 +228,73 @@ public class ConfigurationBundles {
         );
     }
 
+    public static Option ofLibraryBundles() {
+        return new DefaultCompositeOption(
+                mavenBundle(OFLIBRARY, "util").versionAsInProject(),
+                mavenBundle(OFLIBRARY, "openflow-protocol-impl").versionAsInProject(),
+                mavenBundle(OFLIBRARY, "openflow-protocol-api").versionAsInProject(),
+                mavenBundle(OFLIBRARY, "openflow-protocol-spi").versionAsInProject(),
+                mavenBundle(OFLIBRARY, "simple-client").versionAsInProject().start()
+        );
+    }
+
+    public static Option ofPluginBundles() {
+        return new DefaultCompositeOption(
+                //baseSalBundles(),
+                ofLibraryBundles(),
+                mavenBundle(OFPLUGIN, "openflowplugin-api").versionAsInProject(),
+                mavenBundle(OFPLUGIN, "openflowplugin-extension-api").versionAsInProject(),
+                mavenBundle(OFPLUGIN, "openflowplugin").versionAsInProject()
+                //mavenBundle("org.openexi", "nagasena").versionAsInProject()
+        );
+    }
+
+    public static Option flowCapableModelBundles() {
+        return new DefaultCompositeOption(
+                mavenBundle(CONTROLLER_MODELS, "model-flow-base").versionAsInProject(),
+                mavenBundle(CONTROLLER_MODELS, "model-flow-service").versionAsInProject(),
+                mavenBundle(CONTROLLER_MODELS, "model-flow-statistics").versionAsInProject(),
+                mavenBundle(CONTROLLER_MODELS, "model-inventory").versionAsInProject()
+        );
+    }
+
+    public static Option mdSalCoreBundles() {
+        return new DefaultCompositeOption(
+                mavenBundle(YANGTOOLS, "yang-binding").versionAsInProject(),
+                mavenBundle(YANGTOOLS, "concepts").versionAsInProject(),
+                mavenBundle(YANGTOOLS, "yang-common").versionAsInProject(),
+                mavenBundle(YANGTOOLS, "util").versionAsInProject(),
+                mavenBundle(YANGTOOLS, "object-cache-api").versionAsInProject(),
+                mavenBundle(CONTROLLER, "sal-binding-api").versionAsInProject(),
+                mavenBundle(CONTROLLER, "sal-binding-config").versionAsInProject(),
+                mavenBundle(CONTROLLER, "sal-common-util").versionAsInProject(), // //
+                //mavenBundle(CONTROLLER, "sal").versionAsInProject(),
+                //mavenBundle(CONTROLLER, "sal-common").versionAsInProject(),
+                mavenBundle(CONTROLLER, "sal-common-api").versionAsInProject()
+                //mavenBundle(CONTROLLER, "sal-common-impl").versionAsInProject(),
+                //mavenBundle(CONTROLLER, "sal-common-util").versionAsInProject()
+        );
+    }
+
+    public static Option baseModelBundles() {
+        return new DefaultCompositeOption( //
+                mavenBundle(YANGTOOLS_MODELS, "yang-ext").versionAsInProject(), // //
+                mavenBundle(YANGTOOLS_MODELS, "ietf-inet-types").versionAsInProject(), // //
+                mavenBundle(YANGTOOLS_MODELS, "ietf-yang-types").versionAsInProject(), // //
+                mavenBundle(YANGTOOLS_MODELS, "opendaylight-l2-types").versionAsInProject(), // //
+                mavenBundle(CONTROLLER_MODELS, "model-inventory").versionAsInProject());
+    }
+
+    public static Option ovsdbNetVirtProvidersBundles() {
+        return new DefaultCompositeOption(
+                flowCapableModelBundles(),
+                ofPluginBundles(),
+                mdSalCoreBundles(),
+                baseModelBundles(),
+                mavenBundle(CONTROLLER, "config-api").versionAsInProject(), // //
+                mavenBundle(CONTROLLER, "liblldp").versionAsInProject(),
+                mavenBundle("org.opendaylight.ovsdb", "openstack.net-virt-providers").versionAsInProject(),
+                mavenBundle("org.opendaylight.ovsdb", "utils.mdsal-openflow").versionAsInProject()
+        );
+    }
 }

@@ -12,5 +12,8 @@
         <configfile finalname="etc/opendaylight/karaf/44-openflowjava-nx-config.xml">mvn:org.opendaylight.ovsdb/of-extension.openflowjava-nx-config/${ovsdb.ofextension.version}/xml/config</configfile>
         <configfile finalname="etc/opendaylight/karaf/43-openflowjava-nx-api-config.xml">mvn:org.opendaylight.ovsdb/of-extension.openflowjava-nx-api-config/${ovsdb.ofextension.version}/xml/config</configfile>
         <configfile finalname="etc/opendaylight/karaf/44-nicira-extension.xml">mvn:org.opendaylight.ovsdb/of-extension.nicira-extension-config/${ovsdb.ofextension.version}/xml/config</configfile>
+        <configfile finalname="etc/opendaylight/karaf/50-ovs-nx-api-config.xml">mvn:org.opendaylight.ovsdb/of-extension.ovs-nx-api-config/${ovsdb.ofextension.version}/xml/config</configfile>
+        <configfile finalname="etc/opendaylight/karaf/51-ovs-nx-config.xml">mvn:org.opendaylight.ovsdb/of-extension.ovs-nx-config/${ovsdb.ofextension.version}/xml/config</configfile>
+        <configfile finalname="etc/opendaylight/karaf/52-ovs-nx-sal-config.xml">mvn:org.opendaylight.ovsdb/of-extension.nx-sal-config/${ovsdb.ofextension.version}/xml/config</configfile>
     </feature>
 </features>

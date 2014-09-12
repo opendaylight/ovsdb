@@ -9,22 +9,22 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
+import java.net.InetAddress;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
-
-import com.google.common.collect.Maps;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetAddress;
-import java.util.Map;
-import java.util.Set;
+import com.google.common.collect.Maps;
 
 public class ConfigurationServiceImpl implements org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService {
     static final Logger logger = LoggerFactory.getLogger(ConfigurationServiceImpl.class);
@@ -113,6 +113,7 @@ public class ConfigurationServiceImpl implements org.opendaylight.ovsdb.openstac
         this.patchPortNames = patchPortNames;
     }
 
+    @Override
     public String getPatchPortName(Pair portTuple){
         return this.patchPortNames.get(portTuple);
     }
@@ -170,7 +171,7 @@ public class ConfigurationServiceImpl implements org.opendaylight.ovsdb.openstac
     @Override
     public String getOpenflowVersion(Node node) {
 
-        String configuredVersion = System.getProperty("ovsdb.of.version");
+        String configuredVersion = System.getProperty("ovsdb.of.version", "1.3");
         if (configuredVersion != null){
             switch (configuredVersion){
                 case "1.0":

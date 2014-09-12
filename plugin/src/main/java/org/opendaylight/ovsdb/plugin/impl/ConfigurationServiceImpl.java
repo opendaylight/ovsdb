@@ -474,15 +474,15 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
         try {
             OvsdbSet<String> protocols = new OvsdbSet<String>();
 
-            String ofVersion = System.getProperty("ovsdb.of.version", OPENFLOW_10);
+            String ofVersion = System.getProperty("ovsdb.of.version", OPENFLOW_13);
             switch (ofVersion) {
-                case OPENFLOW_13:
-                    protocols.add("OpenFlow13");
-                    break;
                 case OPENFLOW_10:
+                    protocols.add("OpenFlow10");
+                    break;
+                case OPENFLOW_13:
                     //fall through
                 default:
-                    protocols.add("OpenFlow10");
+                    protocols.add("OpenFlow13");
                     break;
             }
             bridge.setProtocols(protocols);

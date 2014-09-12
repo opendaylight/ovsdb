@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_9ceb24b0",
+        "filename": "features/of-nxm-extensions/src/main/resources/features.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-09-12T15:22:34Z",
+      "side": 1,
+      "message": "/xml/config ?",
+      "revId": "055f58a6ae8571ddc604cc6a8ac793fc0b0fd41d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

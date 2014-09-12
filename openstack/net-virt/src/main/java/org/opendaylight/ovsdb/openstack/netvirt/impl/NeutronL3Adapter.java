@@ -119,8 +119,28 @@ public class NeutronL3Adapter {
         final boolean isAdd = action == Action.ADD;
         final boolean isDelete = action == Action.DELETE;
 
-        if (isAdd || isDelete) {
-            updateL3ForNeutronPort(neutronPort, null /*neutronRouterInterfaceFilter*/, isDelete);
+        // add 'before'
+        if (isAdd) {
+            updateL3ForNeutronPort(neutronPort, null /*neutronRouterInterfaceFilter*/, false /*isDelete*/);
+        }
+
+        // Also treat the port event as a router interface event iff the port belongs to router. This is a
+        // helper for handling cases when handleNeutronRouterInterfaceEvent is not available
+        //
+        if (neutronPort.getDeviceOwner().equalsIgnoreCase("network:router_interface")) {
+            for (Neutron_IPs neutronIP : neutronPort.getFixedIPs()) {
+                NeutronRouter_Interface neutronRouterInterface =
+                        new NeutronRouter_Interface(neutronIP.getSubnetUUID(), neutronPort.getPortUUID());
+                neutronRouterInterface.setID(neutronIP.getSubnetUUID());  // id of router interface to be same as subnet
+                neutronRouterInterface.setTenantID(neutronPort.getTenantID());
+
+                this.handleNeutronRouterInterfaceEvent(null /*neutronRouter*/, neutronRouterInterface, action);
+            }
+        }
+
+        // delete 'after'
+        if (isDelete) {
+                updateL3ForNeutronPort(neutronPort, null /*neutronRouterInterfaceFilter*/, true /*isDelete*/);
         }
     }
 
@@ -132,7 +152,7 @@ public class NeutronL3Adapter {
                                                   final NeutronRouter_Interface neutronRouterInterface,
                                                   Action action) {
         logger.debug(" Router {} interface {} got event {}. Subnet {}",
-                     neutronRouter.getName(),
+                     neutronRouter != null ? neutronRouter.getName() : "-",
                      neutronRouterInterface.getPortUUID(),
                      action,
                      neutronRouterInterface.getSubnetUUID());

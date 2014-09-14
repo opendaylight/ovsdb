@@ -102,12 +102,6 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
             // Instructions List Stores Individual Instructions
             List<Instruction> instructions = Lists.newArrayList();
 
-            // GOTO Instructions Need to be added first to the List
-            ib = this.getMutablePipelineInstructionBuilder();
-            ib.setOrder(0);
-            ib.setKey(new InstructionKey(0));
-            instructions.add(ib.build());
-
             // Set the Output Port/Iface
             InstructionUtils.createOutputPortInstructions(ib, dpidLong, localPort);
             ib.setOrder(0);
@@ -166,12 +160,6 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
             List<Instruction> instructions = Lists.newArrayList();
             List<Instruction> instructions_tmp = Lists.newArrayList();
 
-            // GOTO Instructions Need to be added first to the List
-            ib = this.getMutablePipelineInstructionBuilder();
-            ib.setOrder(0);
-            ib.setKey(new InstructionKey(0));
-            instructions.add(ib.build());
-
             /* Strip vlan and store to tmp instruction space*/
             InstructionUtils.createPopVlanInstructions(ib);
             ib.setOrder(0);
@@ -181,7 +169,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
             // Set the Output Port/Iface
             ib = new InstructionBuilder();
             InstructionUtils.addOutputPortInstructions(ib, dpidLong, localPort, instructions_tmp);
-            ib.setOrder(0);
+            ib.setOrder(1);
             ib.setKey(new InstructionKey(0));
             instructions.add(ib.build());
 
@@ -555,14 +543,9 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
             // Instructions List Stores Individual Instructions
             List<Instruction> instructions = Lists.newArrayList();
 
-            // GOTO Instructions
-            ib = this.getMutablePipelineInstructionBuilder();
-            ib.setOrder(0);
-            ib.setKey(new InstructionKey(0));
-            instructions.add(ib.build());
             // Set the Output Port/Iface
             InstructionUtils.createOutputPortInstructions(ib, dpidLong, OFPortOut);
-            ib.setOrder(1);
+            ib.setOrder(0);
             ib.setKey(new InstructionKey(1));
             instructions.add(ib.build());
 
@@ -619,11 +602,9 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
 
             // Instructions List Stores Individual Instructions
             List<Instruction> instructions = Lists.newArrayList();
-
-            // GOTO Instructions
-            ib = this.getMutablePipelineInstructionBuilder();
+            InstructionUtils.createOutputPortInstructions(ib, dpidLong, ethPort);
             ib.setOrder(0);
-            ib.setKey(new InstructionKey(0));
+            ib.setKey(new InstructionKey(1));
             instructions.add(ib.build());
 
             // Add InstructionBuilder to the Instruction(s)Builder List
@@ -688,15 +669,10 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
         }
 
         if (write) {
-            // GOTO Instruction
-            ib = this.getMutablePipelineInstructionBuilder();
-            ib.setOrder(0);
-            ib.setKey(new InstructionKey(0));
-            instructions.add(ib.build());
             // Set the Output Port/Iface
             //createOutputGroupInstructions(nodeBuilder, ib, dpidLong, OFPortOut, existingInstructions);
             createOutputPortInstructions(ib, dpidLong, OFPortOut, existingInstructions);
-            ib.setOrder(1);
+            ib.setOrder(0);
             ib.setKey(new InstructionKey(1));
             instructions.add(ib.build());
 
@@ -775,14 +751,9 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
         List<Instruction> instructions = Lists.newArrayList();
 
         if (write) {
-            // GOTO Instruction
-            ib = this.getMutablePipelineInstructionBuilder();
-            ib.setOrder(0);
-            ib.setKey(new InstructionKey(0));
-            instructions.add(ib.build());
             // Set the Output Port/Iface
             InstructionUtils.createOutputPortInstructions(ib, dpidLong, ethPort);
-            ib.setOrder(1);
+            ib.setOrder(0);
             ib.setKey(new InstructionKey(1));
             instructions.add(ib.build());
 
@@ -883,12 +854,6 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
 
             // Instructions List Stores Individual Instructions
             List<Instruction> instructions = Lists.newArrayList();
-
-            // Call the InstructionBuilder Methods Containing Actions
-            ib = this.getMutablePipelineInstructionBuilder();
-            ib.setOrder(0);
-            ib.setKey(new InstructionKey(0));
-            instructions.add(ib.build());
 
             // Set the Output Port/Iface
             InstructionUtils.createOutputPortInstructions(ib, dpidLong, ethPort);

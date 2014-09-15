@@ -116,6 +116,9 @@ public class NorthboundEvent extends AbstractEvent {
                + ", routerInterface=" + routerInterface
                + ", floatingIP=" + neutronFloatingIP
                + ", network=" + neutronNetwork
+               + ", loadBalancer=" + loadBalancer
+               + ", loadBalancerPool=" + loadBalancerPool
+               + ", loadBalancerPoolMember=" + loadBalancerPoolMember
                + "]";
     }
 

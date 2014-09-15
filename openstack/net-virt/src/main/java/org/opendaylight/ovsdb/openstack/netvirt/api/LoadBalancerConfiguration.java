@@ -150,4 +150,10 @@ public class LoadBalancerConfiguration {
     public String getName() {
         return this.name;
     }
+
+    @Override
+    public String toString() {
+        return "LoadBalancerConfiguration [name=" + name + ", vip=" + vip +
+                ", members=" + members + "]";
+    }
 }

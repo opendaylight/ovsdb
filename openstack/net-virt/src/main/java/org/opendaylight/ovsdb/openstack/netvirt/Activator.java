@@ -250,8 +250,10 @@ public class Activator extends ComponentActivatorAbstractBase {
             Properties lbaasHandlerProperties = new Properties();
             lbaasHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY,
                     AbstractEvent.HandlerType.NEUTRON_LOAD_BALANCER);
-            c.setInterface(new String[] {INeutronLoadBalancerAware.class.getName()},
-                                         lbaasHandlerProperties);
+            c.setInterface(new String[] {INeutronLoadBalancerAware.class.getName(),
+                    IInventoryListener.class.getName(),
+                    AbstractHandler.class.getName()},
+                    lbaasHandlerProperties);
             c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
             c.add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true));
             c.add(createServiceDependency().setService(INeutronLoadBalancerCRUD.class).setRequired(true));
@@ -265,8 +267,9 @@ public class Activator extends ComponentActivatorAbstractBase {
             Properties lbaasPoolMemberHandlerProperties = new Properties();
             lbaasPoolMemberHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY,
                     AbstractEvent.HandlerType.NEUTRON_LOAD_BALANCER_POOL_MEMBER);
-            c.setInterface(new String[] {INeutronLoadBalancerPoolMemberAware.class.getName()},
-                                         lbaasPoolMemberHandlerProperties);
+            c.setInterface(new String[] {INeutronLoadBalancerPoolMemberAware.class.getName(),
+                    AbstractHandler.class.getName()},
+                    lbaasPoolMemberHandlerProperties);
             c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
             c.add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true));
             c.add(createServiceDependency().setService(INeutronLoadBalancerCRUD.class).setRequired(true));

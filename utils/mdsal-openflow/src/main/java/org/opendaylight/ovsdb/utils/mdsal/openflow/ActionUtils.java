@@ -1,3 +1,12 @@
+/*
+ * Copyright (C) 2014 Red Hat, Inc.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Authors : Madhu Venugopal, Brent Salisbury, Srini Seetharaman
+ */
 package org.opendaylight.ovsdb.utils.mdsal.openflow;
 
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
@@ -306,19 +315,18 @@ public final class ActionUtils {
     }
 
     public static Action nxMultipathAction(OfjNxHashFields fields, Integer basis,
-            OfjNxMpAlgorithm algorithm, Integer maxLink, Long arg, Integer ofsNbits,
-            DstChoice dstChoice) {
+            OfjNxMpAlgorithm algorithm, Integer maxLink, Long arg, DstChoice dstChoice,
+            Integer start, Integer end) {
         NxMultipath r = new NxMultipathBuilder()
             .setFields(fields)
             .setBasis(basis)
             .setAlgorithm(algorithm)
             .setMaxLink(maxLink)
             .setArg(arg)
-            .setOfsNbits(ofsNbits)
             .setDst(new org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nx.action.multipath.grouping.nx.multipath.DstBuilder()
                 .setDstChoice(dstChoice)
-                .setStart(Integer.valueOf(0))
-                .setEnd(Integer.valueOf(31))
+                .setStart(start)
+                .setEnd(end)
                 .build())
             .build();
         return new NxActionMultipathNodesNodeTableFlowApplyActionsCaseBuilder().setNxMultipath(r).build();

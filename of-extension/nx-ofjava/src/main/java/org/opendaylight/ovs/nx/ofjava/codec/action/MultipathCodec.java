@@ -27,10 +27,15 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.action.rev140421.Ofj
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.action.rev140421.ofj.nx.action.multipath.grouping.ActionMultipath;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.action.rev140421.ofj.nx.action.multipath.grouping.ActionMultipathBuilder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Codec for the NX_MULTIPATH
  */
 public class MultipathCodec extends AbstractActionCodec {
+    private static final Logger logger = LoggerFactory.getLogger(MultipathCodec.class);
+
     public static final int LENGTH = 32;
     public static final byte NXAST_MULTIPATH_SUBTYPE = 10;
     public static final NiciraActionSerializerKey SERIALIZER_KEY =
@@ -52,7 +57,7 @@ public class MultipathCodec extends AbstractActionCodec {
         outBuffer.writeInt(action.getArg().intValue());
         outBuffer.writeZero(2);
 
-        outBuffer.writeShort(action.getOfsNbits());
+        outBuffer.writeShort(action.getOfsNbits().shortValue());
         outBuffer.writeInt(action.getDst().intValue());
     }
 

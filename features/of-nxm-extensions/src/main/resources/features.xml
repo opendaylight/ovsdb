@@ -3,17 +3,17 @@
     <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin/${openflowplugin.version}/xml/features</repository>
 
     <feature name="odl-openflow-nxm-extensions" description="OpenDaylight :: Openflow :: Nicira Extensions" version='${openflowplugin.version}'>
-        <feature version="${openflowplugin.version}">odl-openflowplugin-southbound</feature>
-        <bundle>mvn:org.opendaylight.openflowplugin/openflowplugin-extension-nicira/${openflowplugin.version}</bundle>
-        <bundle>mvn:org.opendaylight.openflowplugin/openflowjava-extension-nicira-api/${openflowplugin.version}</bundle>
-        <bundle>mvn:org.opendaylight.openflowplugin/openflowjava-extension-nicira/${openflowplugin.version}</bundle>
-        <bundle>mvn:org.opendaylight.ovsdb/of-extension.nx-ofjava/${ovsdb.nx.version}</bundle>
-        <bundle>mvn:org.opendaylight.ovsdb/of-extension.nx-sal/${ovsdb.nx.version}</bundle>
-        <configfile finalname="etc/opendaylight/karaf/44-openflowjava-nx-config.xml">mvn:org.opendaylight.ovsdb/of-extension.openflowjava-nx-config/${ovsdb.ofextension.version}/xml/config</configfile>
         <configfile finalname="etc/opendaylight/karaf/43-openflowjava-nx-api-config.xml">mvn:org.opendaylight.ovsdb/of-extension.openflowjava-nx-api-config/${ovsdb.ofextension.version}/xml/config</configfile>
+        <configfile finalname="etc/opendaylight/karaf/44-openflowjava-nx-config.xml">mvn:org.opendaylight.ovsdb/of-extension.openflowjava-nx-config/${ovsdb.ofextension.version}/xml/config</configfile>
         <configfile finalname="etc/opendaylight/karaf/44-nicira-extension.xml">mvn:org.opendaylight.ovsdb/of-extension.nicira-extension-config/${ovsdb.ofextension.version}/xml/config</configfile>
         <configfile finalname="etc/opendaylight/karaf/50-ovs-nx-api-config.xml">mvn:org.opendaylight.ovsdb/of-extension.ovs-nx-api-config/${ovsdb.ofextension.version}/xml/config</configfile>
         <configfile finalname="etc/opendaylight/karaf/51-ovs-nx-config.xml">mvn:org.opendaylight.ovsdb/of-extension.ovs-nx-config/${ovsdb.ofextension.version}/xml/config</configfile>
         <configfile finalname="etc/opendaylight/karaf/52-ovs-nx-sal-config.xml">mvn:org.opendaylight.ovsdb/of-extension.nx-sal-config/${ovsdb.ofextension.version}/xml/config</configfile>
+        <bundle>mvn:org.opendaylight.openflowplugin/openflowjava-extension-nicira-api/${openflowplugin.version}</bundle>
+        <bundle>mvn:org.opendaylight.openflowplugin/openflowjava-extension-nicira/${openflowplugin.version}</bundle>
+        <bundle>mvn:org.opendaylight.openflowplugin/openflowplugin-extension-nicira/${openflowplugin.version}</bundle>
+        <bundle>mvn:org.opendaylight.ovsdb/of-extension.nx-ofjava/${ovsdb.nx.version}</bundle>
+        <bundle>mvn:org.opendaylight.ovsdb/of-extension.nx-sal/${ovsdb.nx.version}</bundle>
+        <feature version="${openflowplugin.version}">odl-openflowplugin-southbound</feature>
     </feature>
 </features>

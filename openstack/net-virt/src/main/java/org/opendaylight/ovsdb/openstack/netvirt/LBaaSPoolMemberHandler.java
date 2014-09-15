@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 
 import java.net.HttpURLConnection;
-import java.util.List;
 
 /**
  * Handle requests for OpenStack Neutron v2.0 LBaaS API calls for
@@ -58,25 +57,28 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
             return HttpURLConnection.HTTP_OK;
     }
 
-    /**
-     * Assuming that the pool information is fully populated before this call is made,
-     * we go with creating the LoadBalancerConfiguration object for this call with
-     * all information that is necessary to insert flow_mods
-     */
     @Override
     public void neutronLoadBalancerPoolMemberCreated(NeutronLoadBalancerPoolMember neutronLBPoolMember) {
         logger.debug("Neutron LB Pool Member Creation : {}", neutronLBPoolMember.toString());
         enqueueEvent(new NorthboundEvent(neutronLBPoolMember, Action.ADD));
     }
 
+    /**
+     * Assuming that the pool information is fully populated before this call is made,
+     * we go with creating the LoadBalancerConfiguration object for this call with
+     * all information that is necessary to insert flow_mods
+     */
     private void doNeutronLoadBalancerPoolMemberCreate(NeutronLoadBalancerPoolMember neutronLBPoolMember) {
         Preconditions.checkNotNull(loadBalancerProvider);
         LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLBPoolMember);
         if (lbConfig == null) {
             logger.trace("Neutron LB configuration invalid for member {} ", neutronLBPoolMember.getPoolMemberAddress());
-        }
-        else if (!lbConfig.isValid()) {
+        } else if (lbConfig.getVip() == null) {
+            logger.trace("Neutron LB VIP not created yet for member {} ", neutronLBPoolMember.getPoolMemberID());
+        } else if (!lbConfig.isValid()) {
             logger.trace("Neutron LB pool configuration invalid for {} ", lbConfig.getName());
+        } else if (this.switchManager.getNodes().size() == 0) {
+            logger.trace("Noop with LB pool member {} creation because no nodes available.", neutronLBPoolMember.getPoolMemberID());
         } else {
             for (Node node: this.switchManager.getNodes())
                 loadBalancerProvider.programLoadBalancerPoolMemberRules(node, lbConfig,
@@ -86,13 +88,19 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
 
     @Override
     public int canUpdateNeutronLoadBalancerPoolMember(NeutronLoadBalancerPoolMember delta, NeutronLoadBalancerPoolMember original) {
-        return HttpURLConnection.HTTP_OK;
+        LoadBalancerConfiguration lbConfig = extractLBConfiguration(delta);
+        if (lbConfig == null)
+            return HttpURLConnection.HTTP_BAD_REQUEST;
+        else if (!lbConfig.isValid())
+            return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
+        else
+            return HttpURLConnection.HTTP_OK;
     }
 
     @Override
     public void neutronLoadBalancerPoolMemberUpdated(NeutronLoadBalancerPoolMember neutronLBPoolMember) {
+        logger.debug("Neutron LB Pool Member Update : {}", neutronLBPoolMember.toString());
         enqueueEvent(new NorthboundEvent(neutronLBPoolMember, Action.UPDATE));
-        return;
     }
 
     @Override
@@ -109,17 +117,7 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
     @Override
     public void neutronLoadBalancerPoolMemberDeleted(NeutronLoadBalancerPoolMember neutronLBPoolMember) {
         logger.debug("Neutron LB Pool Member Deletion : {}", neutronLBPoolMember.toString());
-
-        /* As of now, deleting a member involves recomputing member indices.
-         * This is best done through a complete update of the load balancer instance.
-         */
-        for (NeutronLoadBalancer neutronLB: neutronLBCache.getAllNeutronLoadBalancers()) {
-            String loadBalancerSubnetID = neutronLB.getLoadBalancerVipSubnetID();
-            if (neutronLBPoolMember.getPoolMemberSubnetID().equals(loadBalancerSubnetID)) {
-                enqueueEvent(new NorthboundEvent(neutronLB, Action.UPDATE));
-                break;
-            }
-        }
+        enqueueEvent(new NorthboundEvent(neutronLBPoolMember, Action.DELETE));
     }
 
     /**
@@ -138,8 +136,20 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
         switch (ev.getAction()) {
             case ADD:
                 doNeutronLoadBalancerPoolMemberCreate(ev.getLoadBalancerPoolMember());
+                break;
             case DELETE:
-                logger.warn("Load balancer pool member delete event should not have been triggered");
+                /* As of now, deleting a member involves recomputing member indices.
+                 * This is best done through a complete update of the load balancer instance.
+                 */
+                for (NeutronLoadBalancer neutronLB: neutronLBCache.getAllNeutronLoadBalancers()) {
+                    String loadBalancerSubnetID = neutronLB.getLoadBalancerVipSubnetID();
+                    if (ev.getLoadBalancerPoolMember()
+                                         .getPoolMemberSubnetID().equals(loadBalancerSubnetID)) {
+                        enqueueEvent(new NorthboundEvent(neutronLB, Action.UPDATE));
+                        break;
+                    }
+                }
+                break;
             case UPDATE:
                 /**
                  * Typical upgrade involves changing weights. Since weights are not
@@ -158,47 +168,44 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
      * configuration from the neutron LB cache based on member info
      */
     public LoadBalancerConfiguration extractLBConfiguration(NeutronLoadBalancerPoolMember neutronLBPoolMember) {
+        String memberID = neutronLBPoolMember.getPoolMemberID();
         String memberIP = neutronLBPoolMember.getPoolMemberAddress();
         String memberMAC = NeutronCacheUtils.getMacAddress(neutronPortsCache, memberIP);
-        if (memberMAC == null)
+        if (memberMAC == null) {
+            logger.trace("Neutron LB pool member {} MAC address unavailable", memberID);
             return null;
-
-        String memberID = neutronLBPoolMember.getPoolMemberID();
-        Integer memberPort = neutronLBPoolMember.getPoolMemberProtoPort();
-        String memberProtocol = null;
-        boolean found = false;
-
-        for (NeutronLoadBalancerPool neutronLBPool: neutronLBPoolCache.getAllNeutronLoadBalancerPools()) {
-            List<? extends NeutronLoadBalancerPoolMember> members =
-                    (List<? extends NeutronLoadBalancerPoolMember>)neutronLBPool.getLoadBalancerPoolMembers();
-            for (NeutronLoadBalancerPoolMember member: members) {
-                //TODO: Allow member to be present in more than 1 pool
-                if (member.getPoolMemberID().equals(neutronLBPoolMember.getPoolMemberID())) {
-                    found = true;
-                    memberProtocol = neutronLBPool.getLoadBalancerPoolProtocol();
-                    if (!(memberProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTP) ||
-                            memberProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTPS)))
-                        memberProtocol = null;
-                    break;
-                }
-            }
-            if (found)
-                break;
         }
-        if (memberProtocol == null)
+        String memberSubnetID = neutronLBPoolMember.getPoolMemberSubnetID();
+        Integer memberPort = neutronLBPoolMember.getPoolMemberProtoPort();
+        String memberPoolID = neutronLBPoolMember.getPoolID();
+        String memberProtocol = null;
+
+        if (memberSubnetID == null || memberID == null || memberPoolID == null) {
+            logger.trace("Neutron LB pool member details incomplete [id={}, pool_id={},subnet_id={}",
+                    memberID, memberPoolID, memberSubnetID);
+            return null;
+        }
+        NeutronLoadBalancerPool neutronLBPool = neutronLBPoolCache.getNeutronLoadBalancerPool(memberPoolID);
+        memberProtocol = neutronLBPool.getLoadBalancerPoolProtocol();
+        if (!(memberProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTP) ||
+                memberProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTPS)))
             return null;
 
-        String loadBalancerSubnetID, loadBalancerVip, loadBalancerName;
+        String loadBalancerSubnetID, loadBalancerVip=null, loadBalancerName=null;
         for (NeutronLoadBalancer neutronLB: neutronLBCache.getAllNeutronLoadBalancers()) {
             loadBalancerSubnetID = neutronLB.getLoadBalancerVipSubnetID();
-            if (neutronLBPoolMember.getPoolMemberSubnetID().equals(loadBalancerSubnetID)) {
+            if (memberSubnetID.equals(loadBalancerSubnetID)) {
                 loadBalancerName = neutronLB.getLoadBalancerName();
                 loadBalancerVip = neutronLB.getLoadBalancerVipAddress();
-                LoadBalancerConfiguration lbConfig = new LoadBalancerConfiguration(loadBalancerName, loadBalancerVip);
-                lbConfig.addMember(memberID, memberIP, memberMAC, memberProtocol, memberPort);
-                return lbConfig;
+                break;
             }
         }
-        return null;
+        /**
+         * It is possible that the VIP has not been created yet.
+         * In that case, we create dummy configuration that will not program rules.
+         */
+        LoadBalancerConfiguration lbConfig = new LoadBalancerConfiguration(loadBalancerName, loadBalancerVip);
+        lbConfig.addMember(memberID, memberIP, memberMAC, memberProtocol, memberPort);
+        return lbConfig;
     }
 }

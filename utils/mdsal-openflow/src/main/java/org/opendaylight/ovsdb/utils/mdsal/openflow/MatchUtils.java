@@ -141,11 +141,11 @@ public class MatchUtils {
      * @param vlanId       Integer representing a VLAN ID Integer representing a VLAN ID
      * @return matchBuilder Map MatchBuilder Object with a match
      */
-    public static MatchBuilder createVlanIdMatch(MatchBuilder matchBuilder, VlanId vlanId) {
+    public static MatchBuilder createVlanIdMatch(MatchBuilder matchBuilder, VlanId vlanId, boolean present) {
         VlanMatchBuilder vlanMatchBuilder = new VlanMatchBuilder();
         VlanIdBuilder vlanIdBuilder = new VlanIdBuilder();
         vlanIdBuilder.setVlanId(new VlanId(vlanId));
-        vlanIdBuilder.setVlanIdPresent(true);
+        vlanIdBuilder.setVlanIdPresent(present);
         vlanMatchBuilder.setVlanId(vlanIdBuilder.build());
         matchBuilder.setVlanMatch(vlanMatchBuilder.build());
 

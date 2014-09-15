@@ -130,6 +130,7 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
         // Create the OF Match using MatchBuilder
         flowBuilder.setMatch(MatchUtils.createEthSrcMatch(matchBuilder, new MacAddress(attachedMac)).build());
         flowBuilder.setMatch(MatchUtils.createInPortMatch(matchBuilder, dpidLong, inPort).build());
+        flowBuilder.setMatch(MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(0), false).build());
 
         String flowId = "LocalMac_"+segmentationId+"_"+inPort+"_"+attachedMac;
         // Add Flow Attributes
@@ -313,7 +314,7 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
 
         // Create Match(es) and Set them in the FlowBuilder Object
         flowBuilder.setMatch(
-                MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId)))
+                MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId)), true)
                 .build())
                 .setMatch(MatchUtils.createInPortMatch(matchBuilder, dpidLong, ethPort)
                         .build());

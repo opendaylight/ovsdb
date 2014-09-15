@@ -26,6 +26,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nodes.node.table.flow.instructions.instruction.instruction.write.actions._case.write.actions.action.action.NxActionMultipathNodesNodeTableFlowWriteActionsCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nx.action.multipath.grouping.NxMultipath;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nx.action.multipath.grouping.NxMultipathBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nx.action.multipath.grouping.nx.multipath.Dst;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.action.rev140714.nx.action.multipath.grouping.nx.multipath.DstBuilder;
+import org.opendaylight.openflowplugin.extension.vendor.nicira.convertor.action.RegMoveConvertor;
 
 import com.google.common.base.Preconditions;
 
@@ -36,14 +39,33 @@ ConvertorActionFromOFJava<Action, ActionPath> {
     @Override
     public org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action convert(Action input, ActionPath path) {
         ActionMultipath action = input.getAugmentation(OfjAugNxAction.class).getActionMultipath();
+        DstBuilder dstBuilder = new DstBuilder();
+        dstBuilder.setDstChoice(RegMoveConvertor.resolveDst(action.getDst()));
+        dstBuilder.setStart(resolveStart(action.getOfsNbits()));
+        dstBuilder.setEnd(resolveEnd(action.getOfsNbits()));
         NxMultipathBuilder builder = new NxMultipathBuilder();
-        builder.setFields(action.getFields());
         builder.setBasis(action.getBasis());
         builder.setAlgorithm(action.getAlgorithm());
         builder.setMaxLink(action.getMaxLink());
         builder.setArg(action.getArg());
-        builder.setOfsNbits(action.getOfsNbits());
+        builder.setDst(dstBuilder.build());
         return resolveAction(builder.build(), path);
+    }
+
+    private static int resolveStart(int ofsNBints) {
+        return extractSub(ofsNBints, 10, 6);
+    }
+
+    private static int resolveEnd(int ofsNBints) {
+        int ofs = extractSub(ofsNBints, 10, 6);
+        int nBits = extractSub(ofsNBints, 6, 0);
+        return ofs + nBits;
+    }
+
+    private static int extractSub(final int l, final int nrBits, final int offset) {
+        final int rightShifted = l >>> offset;
+        final int mask = (1 << nrBits) - 1;
+        return rightShifted & mask;
     }
 
     private static org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action resolveAction(NxMultipath value, ActionPath path) {
@@ -72,7 +94,9 @@ ConvertorActionFromOFJava<Action, ActionPath> {
         builder.setAlgorithm(nxAction.getNxMultipath().getAlgorithm());
         builder.setMaxLink(nxAction.getNxMultipath().getMaxLink());
         builder.setArg(nxAction.getNxMultipath().getArg());
-        builder.setOfsNbits(nxAction.getNxMultipath().getOfsNbits());
+        Dst dst = nxAction.getNxMultipath().getDst();
+        builder.setOfsNbits((dst.getStart() << 6) | (dst.getEnd() - dst.getStart()));
+        builder.setDst(RegMoveConvertor.resolveDst(dst.getDstChoice()));
 
         OfjAugNxActionBuilder augNxActionBuilder = new OfjAugNxActionBuilder();
         augNxActionBuilder.setActionMultipath(builder.build());

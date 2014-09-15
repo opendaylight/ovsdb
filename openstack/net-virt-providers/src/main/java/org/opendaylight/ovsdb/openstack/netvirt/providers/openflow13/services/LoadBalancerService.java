@@ -10,13 +10,13 @@
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services;
 
 import java.math.BigInteger;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration.LoadBalancerPoolMember;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerProvider;
@@ -47,15 +47,24 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.dst.choice.grouping.dst.choice.DstNxRegCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.action.rev140421.OfjNxHashFields;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.action.rev140421.OfjNxMpAlgorithm;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg0;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg1;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 
 import com.google.common.collect.Lists;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LoadBalancerService extends AbstractServiceInstance implements LoadBalancerProvider {
 
+    private static final Logger logger = LoggerFactory.getLogger(LoadBalancerProvider.class);
     private static final int DEFAULT_FLOW_PRIORITY = 32768;
+    private static final Long FIRST_PASS_REG0_MATCH_VALUE = 0L;
     private static final Long SECOND_PASS_REG0_MATCH_VALUE = 1L;
+
+    private static final Class<? extends NxmNxReg> REG_FIELD_A = NxmNxReg0.class;
+    private static final Class<? extends NxmNxReg> REG_FIELD_B = NxmNxReg1.class;
 
     public LoadBalancerService() {
         super(Service.LOAD_BALANCER);
@@ -79,8 +88,14 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
     @Override
     public Status programLoadBalancerPoolMemberRules(Node node,
             LoadBalancerConfiguration lbConfig, LoadBalancerPoolMember member, org.opendaylight.ovsdb.openstack.netvirt.api.Action action) {
+        if (!node.getType().equals(NodeIDType.OPENFLOW)) {
+            logger.trace("Ignoring non-OpenFlow node {} from flow programming", node);
+            return new Status(StatusCode.BADREQUEST);
+        }
+        logger.debug("Performing {} rules for VIP {} and member {}", action, lbConfig.getVip(), member.getIP());
+
         NodeBuilder nodeBuilder = new NodeBuilder();
-        nodeBuilder.setId((NodeId) node.getID());
+        nodeBuilder.setId(new NodeId(Constants.OPENFLOW_NODE_PREFIX + String.valueOf(node.getID())));
         nodeBuilder.setKey(new NodeKey(nodeBuilder.getId()));
 
         //Update the multipath rule
@@ -105,9 +120,14 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
      */
     @Override
     public Status programLoadBalancerRules(Node node, LoadBalancerConfiguration lbConfig, org.opendaylight.ovsdb.openstack.netvirt.api.Action action) {
-        //for (org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node node:InventoryDataServiceUtil.readAllNodes()) {
+        if (!node.getType().equals(NodeIDType.OPENFLOW)) {
+            logger.trace("Ignoring non-OpenFlow node {} from flow programming", node);
+            return new Status(StatusCode.BADREQUEST);
+        }
+        logger.debug("Performing {} rules for VIP {} and {} members", action, lbConfig.getVip(), lbConfig.getMembers().size());
+
         NodeBuilder nodeBuilder = new NodeBuilder();
-        nodeBuilder.setId((NodeId) node.getID());
+        nodeBuilder.setId(new NodeId(Constants.OPENFLOW_NODE_PREFIX + String.valueOf(node.getID())));
         nodeBuilder.setKey(new NodeKey(nodeBuilder.getId()));
 
         if (action.equals(org.opendaylight.ovsdb.openstack.netvirt.api.Action.ADD)) {
@@ -129,8 +149,9 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         MatchBuilder matchBuilder = new MatchBuilder();
         FlowBuilder flowBuilder = new FlowBuilder();
 
-        // Match Only VIP
+        // Match VIP, and Reg0==0
         MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(lbConfig.getVip()));
+        MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(REG_FIELD_A, FIRST_PASS_REG0_MATCH_VALUE));
 
         // Create the OF Actions and Instructions
         InstructionsBuilder isb = new InstructionsBuilder();
@@ -141,7 +162,7 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         List<Action> actionList = Lists.newArrayList();
 
         ActionBuilder ab = new ActionBuilder();
-        ab.setAction(ActionUtils.nxLoadRegAction(new DstNxRegCaseBuilder().setNxReg(NxmNxReg0.class).build(),
+        ab.setAction(ActionUtils.nxLoadRegAction(new DstNxRegCaseBuilder().setNxReg(REG_FIELD_A).build(),
                 BigInteger.valueOf(SECOND_PASS_REG0_MATCH_VALUE)));
         ab.setOrder(0);
         ab.setKey(new ActionKey(0));
@@ -150,7 +171,8 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         ab = new ActionBuilder();
         ab.setAction(ActionUtils.nxMultipathAction(OfjNxHashFields.NXHASHFIELDSSYMMETRICL4,
                 (Integer)0, OfjNxMpAlgorithm.NXMPALGMODULON, (Integer)lbConfig.getMembers().size(),
-                (Long)0L, (Integer)0, new DstNxRegCaseBuilder().setNxReg(NxmNxReg1.class).build()));
+                (Long)0L, new DstNxRegCaseBuilder().setNxReg(REG_FIELD_B).build(),
+                (Integer)0, (Integer)31));
         ab.setOrder(1);
         ab.setKey(new ActionKey(1));
         actionList.add(ab.build());
@@ -178,7 +200,7 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
 
-        String flowId = "LOADBALANCER_PIPELINE_FLOW_FORWARD1_" + lbConfig.getVip();
+        String flowId = "LOADBALANCER_FORWARD_FLOW1_" + lbConfig.getVip();
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setMatch(matchBuilder.build());
@@ -199,12 +221,8 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
      * @param lbConfig Configuration for this LoadBalancer instance
      */
     private void insertLoadBalancerVIPRulesSecondPass(NodeBuilder nodeBuilder, LoadBalancerConfiguration lbConfig) {
-        Iterator<Map.Entry<String, LoadBalancerPoolMember>> it = lbConfig.getMembers().entrySet().iterator();
-        Map.Entry<String, LoadBalancerPoolMember> entry;
-        while (it.hasNext()) {
-            entry = (Map.Entry<String, LoadBalancerPoolMember>)it.next();
+        for(Map.Entry<String, LoadBalancerPoolMember> entry : lbConfig.getMembers().entrySet()){
             insertLoadBalancerMemberVIPRulesSecondPass(nodeBuilder, lbConfig.getVip(), (LoadBalancerPoolMember)entry.getValue());
-            it.remove();
         }
     }
 
@@ -213,9 +231,9 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Match VIP, Reg0==1 and Reg1==Index of member
-        MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(NxmNxReg0.class, SECOND_PASS_REG0_MATCH_VALUE));
-        MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(NxmNxReg1.class, (long)member.getIndex()));
         MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(vip));
+        MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(REG_FIELD_A, SECOND_PASS_REG0_MATCH_VALUE),
+                                               new MatchUtils.RegMatch(REG_FIELD_B, (long)member.getIndex()));
 
         // Create the OF Actions and Instructions
         InstructionsBuilder isb = new InstructionsBuilder();
@@ -260,11 +278,11 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
 
-        String flowId = "LOADBALANCER_PIPELINE_FORWARD2_" + vip + "_" + member.getIP();
+        String flowId = "LOADBALANCER_FORWARD_FLOW2_" + vip + "_" + member.getIP();
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setMatch(matchBuilder.build());
-        flowBuilder.setPriority(DEFAULT_FLOW_PRIORITY + 1);
+        flowBuilder.setPriority(DEFAULT_FLOW_PRIORITY+1);
         flowBuilder.setBarrier(true);
         flowBuilder.setTableId((short) this.getTable());
         flowBuilder.setKey(key);
@@ -281,12 +299,8 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
      * @param lbConfig Configuration for this LoadBalancer instance
      */
     private void insertLoadBalancerReverseRules(NodeBuilder nodeBuilder, LoadBalancerConfiguration lbConfig) {
-        Iterator<Map.Entry<String, LoadBalancerPoolMember>> it = lbConfig.getMembers().entrySet().iterator();
-        Map.Entry<String, LoadBalancerPoolMember> entry;
-        while (it.hasNext()) {
-            entry = (Map.Entry<String, LoadBalancerPoolMember>)it.next();
+        for(Map.Entry<String, LoadBalancerPoolMember> entry : lbConfig.getMembers().entrySet()){
             insertLoadBalancerMemberReverseRules(nodeBuilder, lbConfig.getVip(), (LoadBalancerPoolMember)entry.getValue());
-            it.remove();
         }
     }
 
@@ -340,7 +354,7 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         // Add InstructionsBuilder to FlowBuilder
         flowBuilder.setInstructions(isb.build());
 
-        String flowId = "LOADBALANCER_PIPELINE_REVERSE_" + vip + "_" + member.getIP();
+        String flowId = "LOADBALANCER_REVERSE_FLOW_" + vip + "_" + member.getIP();
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setMatch(matchBuilder.build());
@@ -364,14 +378,34 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         MatchBuilder matchBuilder = new MatchBuilder();
         FlowBuilder flowBuilder = new FlowBuilder();
 
-        // Match all traffic with nw_dst==VIP
+        // Match all first pass rules
         MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(lbConfig.getVip()));
+        MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(REG_FIELD_A, FIRST_PASS_REG0_MATCH_VALUE));
 
         flowBuilder.setMatch(matchBuilder.build());
+        String flowId = "LOADBALANCER_FORWARD_FLOW1_" + lbConfig.getVip();
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setPriority(DEFAULT_FLOW_PRIORITY);
         flowBuilder.setBarrier(true);
         flowBuilder.setTableId((short) this.getTable());
+        flowBuilder.setKey(key);
         removeFlow(flowBuilder, nodeBuilder);
+
+        // Match all second pass rules
+        for(Map.Entry<String, LoadBalancerPoolMember> entry : lbConfig.getMembers().entrySet()){
+            LoadBalancerPoolMember member = (LoadBalancerPoolMember) entry.getValue();
+            MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(REG_FIELD_A, SECOND_PASS_REG0_MATCH_VALUE),
+                                                   new MatchUtils.RegMatch(REG_FIELD_B, (long)member.getIndex()));
+            MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(lbConfig.getVip()));
+
+            flowBuilder.setMatch(matchBuilder.build());
+            flowId = "LOADBALANCER_FORWARD_FLOW2_" + lbConfig.getVip() + "_" + member.getIP();
+            flowBuilder.setId(new FlowId(flowId));
+            key = new FlowKey(new FlowId(flowId));
+            flowBuilder.setKey(key);
+            removeFlow(flowBuilder, nodeBuilder);
+        }
     }
 
     /**
@@ -380,10 +414,7 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
      * @param lbConfig LoadBalancerConfiguration
      */
     private void removeLoadBalancerReverseRules(NodeBuilder nodeBuilder, LoadBalancerConfiguration lbConfig) {
-        Iterator<Map.Entry<String, LoadBalancerPoolMember>> it = lbConfig.getMembers().entrySet().iterator();
-        Map.Entry<String, LoadBalancerPoolMember> entry;
-        while (it.hasNext()) {
-            entry = (Map.Entry<String, LoadBalancerPoolMember>)it.next();
+        for(Map.Entry<String, LoadBalancerPoolMember> entry : lbConfig.getMembers().entrySet()){
             LoadBalancerPoolMember member = (LoadBalancerPoolMember) entry.getValue();
 
             MatchBuilder matchBuilder = new MatchBuilder();
@@ -398,12 +429,15 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
             else //Not possible
                 return;
 
+            String flowId = "LOADBALANCER_REVERSE_FLOW_" + lbConfig.getVip() + "_" + member.getIP();
+            flowBuilder.setId(new FlowId(flowId));
+            FlowKey key = new FlowKey(new FlowId(flowId));
             flowBuilder.setMatch(matchBuilder.build());
             flowBuilder.setPriority(DEFAULT_FLOW_PRIORITY);
             flowBuilder.setBarrier(true);
             flowBuilder.setTableId((short) this.getTable());
+            flowBuilder.setKey(key);
             removeFlow(flowBuilder, nodeBuilder);
-            it.remove();
         }
     }
 }

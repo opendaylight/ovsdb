@@ -150,7 +150,8 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         ab = new ActionBuilder();
         ab.setAction(ActionUtils.nxMultipathAction(OfjNxHashFields.NXHASHFIELDSSYMMETRICL4,
                 (Integer)0, OfjNxMpAlgorithm.NXMPALGMODULON, (Integer)lbConfig.getMembers().size(),
-                (Long)0L, (Integer)0, new DstNxRegCaseBuilder().setNxReg(NxmNxReg1.class).build()));
+                (Long)0L, new DstNxRegCaseBuilder().setNxReg(NxmNxReg1.class).build(),
+                (Integer)0, (Integer)31));
         ab.setOrder(1);
         ab.setKey(new ActionKey(1));
         actionList.add(ab.build());

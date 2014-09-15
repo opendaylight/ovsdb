@@ -77,9 +77,6 @@ module ovs-nx-sal-action {
             leaf arg {
                 type uint32;
             }
-            leaf ofs-nbits {
-                type uint16;
-            }
             container dst {
                 description "Writes value to bits start through end, inclusive, in field dst.";
                 uses ofp-nx-action:dst-choice-grouping;

@@ -64,23 +64,25 @@ public class LBaaSHandler extends AbstractHandler
             return HttpURLConnection.HTTP_OK;
     }
 
-    /**
-     * Assuming that the pool information is fully populated before this call is made,
-     * we go with creating the LoadBalancerConfiguration object for this call with
-     * all information that is necessary to insert flow_mods
-     */
     @Override
     public void neutronLoadBalancerCreated(NeutronLoadBalancer neutronLB) {
         logger.debug("Neutron LB Creation : {}", neutronLB.toString());
         enqueueEvent(new NorthboundEvent(neutronLB, Action.ADD));
     }
 
+    /**
+     * Assuming that the pool information is fully populated before this call is made,
+     * we go with creating the LoadBalancerConfiguration object for this call with
+     * all information that is necessary to insert flow_mods
+     */
     private void doNeutronLoadBalancerCreate(NeutronLoadBalancer neutronLB) {
         Preconditions.checkNotNull(loadBalancerProvider);
         LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLB);
 
         if (!lbConfig.isValid()) {
             logger.trace("Neutron LB pool configuration invalid for {} ", lbConfig.getName());
+        } else if (this.switchManager.getNodes().size() == 0) {
+            logger.trace("Noop with LB {} creation because no nodes available.", lbConfig.getName());
         } else {
             for (Node node: this.switchManager.getNodes())
                 loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.ADD);
@@ -89,19 +91,23 @@ public class LBaaSHandler extends AbstractHandler
 
     @Override
     public int canUpdateNeutronLoadBalancer(NeutronLoadBalancer delta, NeutronLoadBalancer original) {
-        return HttpURLConnection.HTTP_OK;
+        LoadBalancerConfiguration lbConfig = extractLBConfiguration(delta);
+        if (!lbConfig.isValid())
+            return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
+        else
+            return HttpURLConnection.HTTP_OK;
     }
 
     @Override
     public void neutronLoadBalancerUpdated(NeutronLoadBalancer neutronLB) {
+        logger.debug("Neutron LB Update : {}", neutronLB.toString());
         enqueueEvent(new NorthboundEvent(neutronLB, Action.UPDATE));
-        return;
     }
 
     @Override
     public int canDeleteNeutronLoadBalancer(NeutronLoadBalancer neutronLB) {
         LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLB);
-        if (!lbConfig.isValid())
+        if (lbConfig == null)
             return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
         else
             return HttpURLConnection.HTTP_OK;
@@ -119,6 +125,8 @@ public class LBaaSHandler extends AbstractHandler
 
         if (!lbConfig.isValid()) {
             logger.trace("Neutron LB pool configuration invalid for {} ", lbConfig.getName());
+        } else if (this.switchManager.getNodes().size() == 0) {
+            logger.trace("Noop with LB {} deletion because no nodes available.", lbConfig.getName());
         } else {
             for (Node node: this.switchManager.getNodes())
                 loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.DELETE);
@@ -133,6 +141,7 @@ public class LBaaSHandler extends AbstractHandler
      */
     @Override
     public void processEvent(AbstractEvent abstractEvent) {
+        logger.debug("Processing Loadbalancer event " + abstractEvent);
         if (!(abstractEvent instanceof NorthboundEvent)) {
             logger.error("Unable to process abstract event " + abstractEvent);
             return;
@@ -141,8 +150,14 @@ public class LBaaSHandler extends AbstractHandler
         switch (ev.getAction()) {
             case ADD:
                 doNeutronLoadBalancerCreate(ev.getLoadBalancer());
+                break;
             case DELETE:
+                try {
                 doNeutronLoadBalancerDelete(ev.getLoadBalancer());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
             case UPDATE:
                 /**
                  * Currently member update requires delete and re-adding
@@ -167,13 +182,15 @@ public class LBaaSHandler extends AbstractHandler
         String loadBalancerSubnetID = neutronLB.getLoadBalancerVipSubnetID();
         LoadBalancerConfiguration lbConfig = new LoadBalancerConfiguration(loadBalancerName, loadBalancerVip);
 
-        String memberID, memberIP, memberMAC, memberProtocol;
+        String memberID, memberIP, memberMAC, memberProtocol, memberSubnetID;
         Integer memberPort;
+        Boolean memberAdminStateIsUp;
 
         for (NeutronLoadBalancerPool neutronLBPool: neutronLBPoolCache.getAllNeutronLoadBalancerPools()) {
-            List<? extends NeutronLoadBalancerPoolMember> members =
-                (List<? extends NeutronLoadBalancerPoolMember>)neutronLBPool.getLoadBalancerPoolMembers();
+            List<NeutronLoadBalancerPoolMember> members = neutronLBPool.getLoadBalancerPoolMembers();
             memberProtocol = neutronLBPool.getLoadBalancerPoolProtocol();
+            if (memberProtocol == null)
+                continue;
             /*
              * Only HTTP and HTTPS are supported as of this version
              * TODO: Support all TCP load-balancers
@@ -182,8 +199,11 @@ public class LBaaSHandler extends AbstractHandler
                   memberProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTPS)))
                 continue;
             for (NeutronLoadBalancerPoolMember neutronLBPoolMember: members) {
-                if (neutronLBPoolMember.getPoolMemberSubnetID().equals(loadBalancerSubnetID) &&
-                    neutronLBPoolMember.getPoolMemberAdminStateIsUp()) {
+                memberAdminStateIsUp = neutronLBPoolMember.getPoolMemberAdminStateIsUp();
+                memberSubnetID = neutronLBPoolMember.getPoolMemberSubnetID();
+                if (memberSubnetID == null || memberAdminStateIsUp == null)
+                    continue;
+                else if (memberSubnetID.equals(loadBalancerSubnetID) && memberAdminStateIsUp.booleanValue()) {
                     memberID = neutronLBPoolMember.getPoolMemberID();
                     memberIP = neutronLBPoolMember.getPoolMemberAddress();
                     memberPort = neutronLBPoolMember.getPoolMemberProtoPort();
@@ -207,13 +227,15 @@ public class LBaaSHandler extends AbstractHandler
         logger.debug("notifyNode: Node {} update {} from Controller's inventory Service", node, type);
         Preconditions.checkNotNull(loadBalancerProvider);
 
-        if (type.equals(UpdateType.ADDED)) {
-            for (NeutronLoadBalancer neutronLB: neutronLBCache.getAllNeutronLoadBalancers()) {
-                LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLB);
-                if (!lbConfig.isValid())
-                    logger.trace("Neutron LB configuration invalid for {} ", lbConfig.getName());
-                else
+        for (NeutronLoadBalancer neutronLB: neutronLBCache.getAllNeutronLoadBalancers()) {
+            LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLB);
+            if (!lbConfig.isValid())
+                logger.trace("Neutron LB configuration invalid for {} ", lbConfig.getName());
+            else {
+               if (type.equals(UpdateType.ADDED))
                     loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.ADD);
+               else if (type.equals(UpdateType.REMOVED))
+                    loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.DELETE);
             }
         }
     }

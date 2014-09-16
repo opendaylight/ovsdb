@@ -106,6 +106,10 @@
                         </Import-Package>
                         <Embed-Dependency>utils.mdsal-openflow;type=!pom;inline=false</Embed-Dependency>
                         <Embed-Transitive>true</Embed-Transitive>
+                        <Export-Package>
+                            org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13,
+                            org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services
+                        </Export-Package>
                         <Bundle-Activator>org.opendaylight.ovsdb.openstack.netvirt.providers.Activator</Bundle-Activator>
                     </instructions>
                 </configuration>

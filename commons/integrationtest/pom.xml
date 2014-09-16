@@ -736,7 +736,7 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>openstack.net-virt</artifactId>
+      <artifactId>openstack.net-virt-providers</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
@@ -787,7 +787,7 @@
               <properties>
                 <property>
                   <name>logback.configurationFile</name>
-                  <value>${project.parent.parent.basedir}/logback.xml</value>
+                  <value>${project.parent.basedir}/logback.xml</value>
                 </property>
               </properties>
             </configuration>

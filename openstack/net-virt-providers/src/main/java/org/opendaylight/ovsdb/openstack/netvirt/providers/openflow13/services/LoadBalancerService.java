@@ -92,7 +92,8 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
             logger.trace("Ignoring non-OpenFlow node {} from flow programming", node);
             return new Status(StatusCode.BADREQUEST);
         }
-        logger.debug("Performing {} rules for VIP {} and member {}", action, lbConfig.getVip(), member.getIP());
+        logger.debug("Performing {} rules for member {} with index {} on LB with VIP {} and total members {}",
+                action, member.getIP(), member.getIndex(), lbConfig.getVip(), lbConfig.getMembers().size());
 
         NodeBuilder nodeBuilder = new NodeBuilder();
         nodeBuilder.setId(new NodeId(Constants.OPENFLOW_NODE_PREFIX + String.valueOf(node.getID())));
@@ -170,7 +171,8 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
 
         ab = new ActionBuilder();
         ab.setAction(ActionUtils.nxMultipathAction(OfjNxHashFields.NXHASHFIELDSSYMMETRICL4,
-                (Integer)0, OfjNxMpAlgorithm.NXMPALGMODULON, (Integer)lbConfig.getMembers().size(),
+                (Integer)0, OfjNxMpAlgorithm.NXMPALGMODULON,
+                (Integer)lbConfig.getMembers().size()-1, //By Nicira-Ext spec, this field is max_link minus 1
                 (Long)0L, new DstNxRegCaseBuilder().setNxReg(REG_FIELD_B).build(),
                 (Integer)0, (Integer)31));
         ab.setOrder(1);

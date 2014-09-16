@@ -24,24 +24,24 @@ public class NeutronCacheUtils {
      * @return MAC address registered with that IP address
      */
     public static String getMacAddress(INeutronPortCRUD neutronPortsCache, String ipAddr) {
-            List<Neutron_IPs> fixedIPs;
-            Iterator<Neutron_IPs> fixedIPIterator;
-            Neutron_IPs ip;
+        List<Neutron_IPs> fixedIPs;
+        Iterator<Neutron_IPs> fixedIPIterator;
+        Neutron_IPs ip;
 
-            List<NeutronPort> allPorts = neutronPortsCache.getAllPorts();
-         Iterator<NeutronPort> i = allPorts.iterator();
-         while (i.hasNext()) {
-             NeutronPort port = i.next();
-             fixedIPs = port.getFixedIPs();
-             if (fixedIPs != null && fixedIPs.size() > 0) {
-                 fixedIPIterator = fixedIPs.iterator();
-                 while (fixedIPIterator.hasNext()) {
-                     ip = fixedIPIterator.next();
-                     if (ip.getIpAddress().equals(ipAddr))
-                         return port.getMacAddress();
-                 }
-             }
-         }
+        List<NeutronPort> allPorts = neutronPortsCache.getAllPorts();
+        Iterator<NeutronPort> i = allPorts.iterator();
+        while (i.hasNext()) {
+            NeutronPort port = i.next();
+            fixedIPs = port.getFixedIPs();
+            if (fixedIPs != null && fixedIPs.size() > 0) {
+                fixedIPIterator = fixedIPs.iterator();
+                while (fixedIPIterator.hasNext()) {
+                    ip = fixedIPIterator.next();
+                    if (ip.getIpAddress().equals(ipAddr))
+                        return port.getMacAddress();
+                }
+            }
+        }
         return null;
     }
 }

@@ -88,13 +88,7 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
 
     @Override
     public int canUpdateNeutronLoadBalancerPoolMember(NeutronLoadBalancerPoolMember delta, NeutronLoadBalancerPoolMember original) {
-        LoadBalancerConfiguration lbConfig = extractLBConfiguration(delta);
-        if (lbConfig == null)
-            return HttpURLConnection.HTTP_BAD_REQUEST;
-        else if (!lbConfig.isValid())
-            return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
-        else
-            return HttpURLConnection.HTTP_OK;
+        return HttpURLConnection.HTTP_NOT_IMPLEMENTED;
     }
 
     @Override
@@ -131,20 +125,17 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
         } else if (!lbConfig.isValid()) {
             logger.trace("Neutron LB pool configuration invalid for {} ", lbConfig.getName());
         } else if (this.switchManager.getNodes().size() == 0) {
-            logger.trace("Noop with LB pool member {} creation because no nodes available.", neutronLBPoolMember.getPoolMemberID());
+            logger.trace("Noop with LB pool member {} deletion because no nodes available.", neutronLBPoolMember.getPoolMemberID());
         } else {
             /* As of now, deleting a member involves recomputing member indices.
              * This is best done through a complete update of the load balancer instance.
              */
-            for (Node node: this.switchManager.getNodes())
-                loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.DELETE);
+            LoadBalancerConfiguration newLBConfig = new LoadBalancerConfiguration(lbConfig);
+            newLBConfig.removeMember(neutronLBPoolMember.getPoolMemberID());
 
-            for (NeutronLoadBalancer neutronLB: neutronLBCache.getAllNeutronLoadBalancers()) {
-                String loadBalancerSubnetID = neutronLB.getLoadBalancerVipSubnetID();
-                if (neutronLBPoolMember.getPoolMemberSubnetID().equals(loadBalancerSubnetID)) {
-                    enqueueEvent(new NorthboundEvent(neutronLB, Action.ADD));
-                    break;
-                }
+            for (Node node: this.switchManager.getNodes()) {
+                loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.DELETE);
+                loadBalancerProvider.programLoadBalancerRules(node, newLBConfig, Action.ADD);
             }
         }
     }
@@ -173,7 +164,7 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
             case UPDATE:
                 /**
                  * Typical upgrade involves changing weights. Since weights are not
-                 * supported yet, updates are not supported either.
+                 * supported yet, updates are not supported either. TODO
                  */
                 logger.warn("Load balancer pool member update is not supported");
                 break;

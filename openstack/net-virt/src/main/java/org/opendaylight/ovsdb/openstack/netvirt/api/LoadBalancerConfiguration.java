@@ -109,6 +109,12 @@ public class LoadBalancerConfiguration {
         this.vip = vip;
     }
 
+    public LoadBalancerConfiguration(LoadBalancerConfiguration lbConfig) {
+        this.members = Maps.newHashMap(lbConfig.getMembers());
+        this.name = lbConfig.getName();
+        this.vip = lbConfig.getVip();
+    }
+
     public Map<String, LoadBalancerPoolMember> getMembers() {
         return this.members;
     }
@@ -127,6 +133,11 @@ public class LoadBalancerConfiguration {
     }
     public Map<String, LoadBalancerPoolMember> removeMember(String uuid) {
         this.members.remove(uuid);
+        /* Update indices of all other members
+         */
+        int index = 0;
+        for(Map.Entry<String, LoadBalancerPoolMember> entry : this.getMembers().entrySet())
+            ((LoadBalancerPoolMember) entry.getValue()).setIndex(index++);
         return this.members;
     }
 

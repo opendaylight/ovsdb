@@ -13,7 +13,6 @@ package org.opendaylight.ovsdb.openstack.netvirt;
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolCRUD;
-import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolMemberCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
 import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancer;
 import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerPool;
@@ -50,18 +49,14 @@ public class LBaaSHandler extends AbstractHandler
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile INeutronLoadBalancerCRUD neutronLBCache;
     private volatile INeutronLoadBalancerPoolCRUD neutronLBPoolCache;
-    private volatile INeutronLoadBalancerPoolMemberCRUD neutronLBPoolMemberCache;
     private volatile INeutronPortCRUD neutronPortsCache;
     private volatile LoadBalancerProvider loadBalancerProvider;
     private volatile ISwitchManager switchManager;
 
     @Override
     public int canCreateNeutronLoadBalancer(NeutronLoadBalancer neutronLB) {
-        LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLB);
-        if (!lbConfig.isValid())
-            return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
-        else
-            return HttpURLConnection.HTTP_OK;
+        //Always allowed and not wait for pool and members to be created
+        return HttpURLConnection.HTTP_OK;
     }
 
     @Override
@@ -91,11 +86,8 @@ public class LBaaSHandler extends AbstractHandler
 
     @Override
     public int canUpdateNeutronLoadBalancer(NeutronLoadBalancer delta, NeutronLoadBalancer original) {
-        LoadBalancerConfiguration lbConfig = extractLBConfiguration(delta);
-        if (!lbConfig.isValid())
-            return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
-        else
-            return HttpURLConnection.HTTP_OK;
+        //Update allowed anytime, even when the LB has no active pool yet
+        return HttpURLConnection.HTTP_OK;
     }
 
     @Override
@@ -106,11 +98,8 @@ public class LBaaSHandler extends AbstractHandler
 
     @Override
     public int canDeleteNeutronLoadBalancer(NeutronLoadBalancer neutronLB) {
-        LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLB);
-        if (lbConfig == null)
-            return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
-        else
-            return HttpURLConnection.HTTP_OK;
+        //Always allowed and not wait for pool to stop using it
+        return HttpURLConnection.HTTP_OK;
     }
 
     @Override
@@ -207,6 +196,10 @@ public class LBaaSHandler extends AbstractHandler
                     memberID = neutronLBPoolMember.getPoolMemberID();
                     memberIP = neutronLBPoolMember.getPoolMemberAddress();
                     memberPort = neutronLBPoolMember.getPoolMemberProtoPort();
+                    if (memberSubnetID == null || memberID == null || memberIP == null || memberPort == null) {
+                        logger.debug("Neutron LB pool member details incomplete: {}", neutronLBPoolMember);
+                        continue;
+                    }
                     memberMAC = NeutronCacheUtils.getMacAddress(neutronPortsCache, memberIP);
                     if (memberMAC == null)
                         continue;

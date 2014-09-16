@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_789bc572",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-09-16T21:40:46Z",
+      "side": 1,
+      "message": "typo: deleted",
+      "revId": "7e2e87cfc7548375d7ec45a9b84b1f9a353eabdb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

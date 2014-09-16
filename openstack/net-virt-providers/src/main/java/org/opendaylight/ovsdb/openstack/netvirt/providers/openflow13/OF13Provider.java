@@ -1711,6 +1711,11 @@ public class OF13Provider implements NetworkingProvider {
         }
 
         ReadWriteTransaction modification = dataBroker.newReadWriteTransaction();
+        InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node> nodePath = InstanceIdentifier.builder(Nodes.class)
+                .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class, nodeBuilder.getKey()).toInstance();
+
+        modification.put(LogicalDatastoreType.CONFIGURATION, nodePath, nodeBuilder.build(), true);
+
         InstanceIdentifier<Flow> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
                 .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Table.class,
                         new TableKey(flowBuilder.getTableId())).child(Flow.class, flowBuilder.getKey()).build();
@@ -1723,8 +1728,9 @@ public class OF13Provider implements NetworkingProvider {
         try {
             commitFuture.get();  // TODO: Make it async (See bug 1362)
             logger.debug("Transaction success for write of Flow "+flowBuilder.getFlowName());
-        } catch (InterruptedException|ExecutionException e) {
+        } catch (Exception e) {
             logger.error(e.getMessage(), e);
+            modification.cancel();
         }
     }
 

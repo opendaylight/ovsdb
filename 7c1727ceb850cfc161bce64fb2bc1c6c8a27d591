@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_f8459517",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/LoadBalancerService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-09-16T18:57:18Z",
+      "side": 1,
+      "message": "\" + \" looks nicer. :0 Pls put comment on how Nicira exts use \u0027-1\u0027 as value. Maybe a a ref to the doc?\n\nHow about creating a new const XXX \u003d DEFAULT_FLOW_PRIORITY + 1;   ??\n\nI see a bunch of places in this file where +1 is not used. Maybe it should?",
+      "revId": "7c1727ceb850cfc161bce64fb2bc1c6c8a27d591",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_5854c1c9",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/LoadBalancerService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-09-16T18:57:18Z",
+      "side": 1,
+      "message": "no + 1?",
+      "revId": "7c1727ceb850cfc161bce64fb2bc1c6c8a27d591",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_b8470d1d",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/LoadBalancerService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 436,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-09-16T18:57:18Z",
+      "side": 1,
+      "message": "no +1 here?",
+      "revId": "7c1727ceb850cfc161bce64fb2bc1c6c8a27d591",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -6,7 +6,10 @@
     </encoder>
   </appender>
 
-  <logger name="org.opendaylight.ovsdb" level="INFO" />
+  <logger name="org.opendaylight.ovsdb" level="TRACE" />
+  <logger name="org.opendaylight.ovsdb.lib.jsonrpc" level="INFO" />
+  <logger name="org.opendaylight.ovsdb.lib.schema.TableSchema" level="INFO" />
+  <logger name="org.opendaylight.ovsdb.lib.schema.DatabaseSchema" level="INFO" />
 
   <root level="ERROR">
     <appender-ref ref="STDOUT" />

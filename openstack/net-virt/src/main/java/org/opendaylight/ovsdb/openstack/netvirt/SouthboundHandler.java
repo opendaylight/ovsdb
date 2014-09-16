@@ -97,7 +97,7 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
             if (oldIntf.getName() == null && oldIntf.getExternalIdsColumn() == null && oldIntf.getMacColumn() == null &&
                 oldIntf.getOpenFlowPortColumn() == null && oldIntf.getOptionsColumn() == null && oldIntf.getOtherConfigColumn() == null &&
                 oldIntf.getTypeColumn() == null) {
-                logger.trace("IGNORING Interface Update: node {}, row: {}", node, newRow);
+                //logger.trace("IGNORING Interface Update: node {}, row: {}", node, newRow);
                 return false;
             }
         } else if (newRow.getTableSchema().getName().equals(ovsdbConfigurationService.getTableName(node, Port.class))) {
@@ -105,7 +105,7 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
             Port oldPort = ovsdbConfigurationService.getTypedRow(node, Port.class, oldRow);
             if (oldPort.getName() == null && oldPort.getExternalIdsColumn() == null && oldPort.getMacColumn() == null &&
                 oldPort.getInterfacesColumn() == null && oldPort.getTagColumn() == null && oldPort.getTrunksColumn() == null) {
-                logger.trace("IGNORING Port Update: node {}, row: {}", node, newRow);
+                //logger.trace("IGNORING Port Update: node {}, row: {}", node, newRow);
                 return false;
             }
         } else if (newRow.getTableSchema().getName().equals(ovsdbConfigurationService.getTableName(node, OpenVSwitch.class))) {

@@ -108,6 +108,7 @@ public abstract class AbstractServiceInstance {
 
     protected void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
         Preconditions.checkNotNull(mdsalConsumer);
+        logger.info("writeFlow: {}:{}", nodeBuilder.build(), flowBuilder.build());
         if (mdsalConsumer == null) {
             logger.error("ERROR finding MDSAL Service. Its possible that writeFlow is called too soon ?");
             return;
@@ -143,6 +144,7 @@ public abstract class AbstractServiceInstance {
 
     protected void removeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
         Preconditions.checkNotNull(mdsalConsumer);
+        logger.info("removeFlow: {}:{}", nodeBuilder, flowBuilder);
         if (mdsalConsumer == null) {
             logger.error("ERROR finding MDSAL Service.");
             return;
@@ -176,6 +178,7 @@ public abstract class AbstractServiceInstance {
 
     public Flow getFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
         Preconditions.checkNotNull(mdsalConsumer);
+        logger.info("writeFlow: {}:{}", nodeBuilder.build(), flowBuilder.build());
         if (mdsalConsumer == null) {
             logger.error("ERROR finding MDSAL Service. Its possible that writeFlow is called too soon ?");
             return null;

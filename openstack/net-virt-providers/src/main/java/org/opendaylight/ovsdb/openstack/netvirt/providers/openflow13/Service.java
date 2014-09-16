@@ -16,7 +16,7 @@ public enum Service {
     DIRECTOR ((short) 10, "Director"),
     ARP_RESPONDER ((short) 20, "Distributed ARP Responder"),
     INBOUND_NAT ((short) 30, "DNAT for inbound floating-ip traffic"),
-    INGRESS_ACL ((short) 40, "Ingress Acces-control. Typically Openstack Egress Security group policies are applied here."),
+    INGRESS_ACL ((short) 40, "Ingress Access-control. Typically Openstack Egress Security group policies are applied here."),
     LOAD_BALANCER ((short) 50, "Distributed LBaaS"),
     ROUTING ((short) 60, "Distributed Virtual Routing (DVR)"),
     L3_FORWARDING ((short) 70, "Layer 3 forwarding/lookup service"),

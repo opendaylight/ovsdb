@@ -307,6 +307,7 @@ public class InstructionUtils {
      */
     public static InstructionBuilder createSetVlanInstructions(InstructionBuilder ib, VlanId vlanId) {
 
+        logger.info("createSetVlaninstructions: {}", ib.build());
         List<Action> actionList = Lists.newArrayList();
         ActionBuilder ab = new ActionBuilder();
 
@@ -315,6 +316,7 @@ public class InstructionUtils {
         vlan.setEthernetType(IPV4);
         ab.setAction(new PushVlanActionCaseBuilder().setPushVlanAction(vlan.build()).build());
         ab.setOrder(0);
+        ab.setKey(new ActionKey(0));
         actionList.add(ab.build());
 
         /* Then we set vlan id value as vlanId */
@@ -323,7 +325,9 @@ public class InstructionUtils {
         ab = new ActionBuilder();
         ab.setAction(new SetVlanIdActionCaseBuilder().setSetVlanIdAction(vl.build()).build());
         ab.setOrder(1);
+        ab.setKey(new ActionKey(1));
         actionList.add(ab.build());
+
         // Create an Apply Action
         ApplyActionsBuilder aab = new ApplyActionsBuilder();
         aab.setAction(actionList);

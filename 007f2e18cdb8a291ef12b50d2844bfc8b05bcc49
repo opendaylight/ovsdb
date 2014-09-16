@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_0d9599e3",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-09-16T15:08:18Z",
+      "side": 1,
+      "message": "I didn\u0027t see this (as wasn\u0027t nitpicking in reviews prior to code freeze) but I\u0027d rather we used \"To\" over 2.",
+      "revId": "007f2e18cdb8a291ef12b50d2844bfc8b05bcc49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_6df8e549",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1452
+      },
+      "writtenOn": "2014-09-16T15:08:18Z",
+      "side": 1,
+      "message": "Typo iff",
+      "revId": "007f2e18cdb8a291ef12b50d2844bfc8b05bcc49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -164,25 +164,26 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
 
             // Instructions List Stores Individual Instructions
             List<Instruction> instructions = Lists.newArrayList();
-            List<Instruction> instructions_tmp = Lists.newArrayList();
-
-            // GOTO Instructions Need to be added first to the List
-            ib = this.getMutablePipelineInstructionBuilder();
-            ib.setOrder(0);
-            ib.setKey(new InstructionKey(0));
-            instructions.add(ib.build());
+            //List<Instruction> instructions_tmp = Lists.newArrayList();
 
             /* Strip vlan and store to tmp instruction space*/
             InstructionUtils.createPopVlanInstructions(ib);
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
-            instructions_tmp.add(ib.build());
+            instructions.add(ib.build());
 
             // Set the Output Port/Iface
-            ib = new InstructionBuilder();
-            InstructionUtils.addOutputPortInstructions(ib, dpidLong, localPort, instructions_tmp);
+            //ib = new InstructionBuilder();
+            //InstructionUtils.addOutputPortInstructions(ib, dpidLong, localPort, instructions_tmp);
+            createOutputPortInstructions(ib, dpidLong, localPort, instructions);
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
+            instructions.add(ib.build());
+
+            // GOTO Instructions Need to be added first to the List
+            ib = this.getMutablePipelineInstructionBuilder();
+            ib.setOrder(1);
+            ib.setKey(new InstructionKey(1));
             instructions.add(ib.build());
 
             // Add InstructionBuilder to the Instruction(s)Builder List

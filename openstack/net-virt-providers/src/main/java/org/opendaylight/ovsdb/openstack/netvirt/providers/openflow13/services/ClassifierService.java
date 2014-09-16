@@ -31,6 +31,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherTyp
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 
 import com.google.common.collect.Lists;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.VlanMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanIdBuilder;
 
 public class ClassifierService extends AbstractServiceInstance implements ClassifierProvider {
     public ClassifierService() {
@@ -110,6 +112,16 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
         }
     }
 
+    public static MatchBuilder createVlanIdPresentMatch(MatchBuilder matchBuilder, boolean present) {
+        VlanMatchBuilder vlanMatchBuilder = new VlanMatchBuilder();
+        VlanIdBuilder vlanIdBuilder = new VlanIdBuilder();
+        vlanIdBuilder.setVlanIdPresent(present);
+        vlanIdBuilder.setVlanId(new VlanId(0));
+        vlanMatchBuilder.setVlanId(vlanIdBuilder.build());
+        matchBuilder.setVlanMatch(vlanMatchBuilder.build());
+
+        return matchBuilder;
+    }
     /*
      * (Table:Classifier) Egress VM Traffic Towards TEP
      * Match: Source Ethernet Addr and OpenFlow InPort
@@ -130,6 +142,7 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
         // Create the OF Match using MatchBuilder
         flowBuilder.setMatch(MatchUtils.createEthSrcMatch(matchBuilder, new MacAddress(attachedMac)).build());
         flowBuilder.setMatch(MatchUtils.createInPortMatch(matchBuilder, dpidLong, inPort).build());
+        flowBuilder.setMatch(createVlanIdPresentMatch(matchBuilder, false).build());
 
         String flowId = "LocalMac_"+segmentationId+"_"+inPort+"_"+attachedMac;
         // Add Flow Attributes
@@ -140,6 +153,7 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
         flowBuilder.setTableId(getTable());
         flowBuilder.setKey(key);
         flowBuilder.setFlowName(flowId);
+        flowBuilder.setPriority(18000);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
 
@@ -151,13 +165,14 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
             // Instructions List Stores Individual Instructions
             List<Instruction> instructions = Lists.newArrayList();
 
-            // GOTO Instructions Need to be added first to the List
-            ib = this.getMutablePipelineInstructionBuilder();
+            // Set VLAN ID Instruction
+            InstructionUtils.createSetVlanInstructions(ib, new VlanId(Integer.valueOf(segmentationId)));
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructions.add(ib.build());
-            // Set VLAN ID Instruction
-            InstructionUtils.createSetVlanInstructions(ib, new VlanId(Integer.valueOf(segmentationId)));
+
+            // GOTO Instructions Need to be added first to the List
+            ib = this.getMutablePipelineInstructionBuilder();
             ib.setOrder(1);
             ib.setKey(new InstructionKey(1));
             instructions.add(ib.build());

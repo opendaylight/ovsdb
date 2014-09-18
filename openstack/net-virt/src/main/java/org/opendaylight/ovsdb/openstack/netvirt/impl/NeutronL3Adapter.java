@@ -90,18 +90,27 @@ public class NeutronL3Adapter {
     private Set<String> defaultRouteCache;
     private Map<String, String> networkIdToRouterMacCache;
     private Map<String, NeutronRouter_Interface> subnetIdToRouterInterfaceCache;
+    private Boolean enabled = false;
 
     void init() {
-        this.inboundIpRewriteCache = new HashSet<>();
-        this.outboundIpRewriteCache = new HashSet<>();
-        this.inboundIpRewriteExclusionCache = new HashSet<>();
-        this.outboundIpRewriteExclusionCache = new HashSet<>();
-        this.routerInterfacesCache = new HashSet<>();
-        this.staticArpEntryCache = new HashSet<>();
-        this.l3ForwardingCache = new HashSet<>();
-        this.defaultRouteCache = new HashSet<>();
-        this.networkIdToRouterMacCache = new HashMap<>();
-        this.subnetIdToRouterInterfaceCache = new HashMap<>();
+        final String enabledPropertyStr = System.getProperty("ovsdb.l3.fwd.enabled");
+        if (enabledPropertyStr != null && enabledPropertyStr.equalsIgnoreCase("yes")) {
+            this.inboundIpRewriteCache = new HashSet<>();
+            this.outboundIpRewriteCache = new HashSet<>();
+            this.inboundIpRewriteExclusionCache = new HashSet<>();
+            this.outboundIpRewriteExclusionCache = new HashSet<>();
+            this.routerInterfacesCache = new HashSet<>();
+            this.staticArpEntryCache = new HashSet<>();
+            this.l3ForwardingCache = new HashSet<>();
+            this.defaultRouteCache = new HashSet<>();
+            this.networkIdToRouterMacCache = new HashMap<>();
+            this.subnetIdToRouterInterfaceCache = new HashMap<>();
+
+            this.enabled = true;
+            logger.info("OVSDB L3 forwarding is enabled");
+        } else {
+            logger.debug("OVSDB L3 forwarding is disabled");
+        }
     }
 
     //
@@ -110,10 +119,14 @@ public class NeutronL3Adapter {
 
     public void handleNeutronSubnetEvent(final NeutronSubnet subnet, Action action) {
         logger.debug("Neutron subnet {} event : {}", action, subnet.toString());
+        if (!this.enabled)
+            return;
     }
 
     public void handleNeutronPortEvent(final NeutronPort neutronPort, Action action) {
         logger.debug("Neutron port {} event : {}", action, neutronPort.toString());
+        if (!this.enabled)
+            return;
 
         final boolean isDelete = action == Action.DELETE;
 
@@ -150,6 +163,8 @@ public class NeutronL3Adapter {
 
     public void handleNeutronRouterEvent(final NeutronRouter neutronRouter, Action action) {
         logger.debug("Neutron router {} event : {}", action, neutronRouter.toString());
+        if (!this.enabled)
+            return;
     }
 
     public void handleNeutronRouterInterfaceEvent(final NeutronRouter neutronRouter,
@@ -159,6 +174,8 @@ public class NeutronL3Adapter {
                      neutronRouterInterface.getPortUUID(),
                      action,
                      neutronRouterInterface.getSubnetUUID());
+        if (!this.enabled)
+            return;
 
         final boolean isDelete = action == Action.DELETE;
 
@@ -187,12 +204,16 @@ public class NeutronL3Adapter {
                      neutronFloatingIP.getFixedIPAddress(),
                      neutronFloatingIP.getFloatingIPAddress(),
                      neutronFloatingIP.getFloatingNetworkUUID());
+        if (!this.enabled)
+            return;
 
         this.programFlowsForFloatingIP(neutronFloatingIP, action == Action.DELETE);
     }
 
     public void handleNeutronNetworkEvent(final NeutronNetwork neutronNetwork, Action action) {
         logger.debug("neutronNetwork {}: network: {}", action, neutronNetwork);
+        if (!this.enabled)
+            return;
     }
 
     //
@@ -202,6 +223,8 @@ public class NeutronL3Adapter {
                                      Action action) {
         logger.debug("southbound interface {} node:{} interface:{}, neutronNetwork:{}",
                      action, node, intf.getName(), neutronNetwork);
+        if (!this.enabled)
+            return;
 
         // See if there is an external uuid, so we can find the respective neutronPort
         Map<String, String> externalIds = intf.getExternalIdsColumn().getData();

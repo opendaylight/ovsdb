@@ -72,7 +72,7 @@ public class ArpResponderService extends AbstractServiceInstance implements ArpP
         MatchUtils.createEtherTypeMatch(matchBuilder, new EtherType(Constants.ARP_ETHERTYPE));
 
         // Move Eth Src to Eth Dst
-        InstructionUtils.applyActionIns(ActionUtils.nxMoveEthSrcToEthDstAction());
+        ib.setInstruction(InstructionUtils.applyActionIns(ActionUtils.nxMoveEthSrcToEthDstAction()));
         ib.setOrder(0);
         ib.setKey(new InstructionKey(0));
         instructions.add(ib.build());
@@ -84,37 +84,37 @@ public class ArpResponderService extends AbstractServiceInstance implements ArpP
         instructions.add(ib.build());
 
         // Set ARP OP
-        InstructionUtils.applyActionIns(ActionUtils.nxLoadArpOpAction(BigInteger.valueOf(0x02L)));
+        ib.setInstruction(InstructionUtils.applyActionIns(ActionUtils.nxLoadArpOpAction(BigInteger.valueOf(0x02L))));
         ib.setOrder(2);
         ib.setKey(new InstructionKey(2));
         instructions.add(ib.build());
 
         // Move ARP SHA to ARP THA
-        InstructionUtils.applyActionIns(ActionUtils.nxMoveArpShaToArpThaAction());
+        ib.setInstruction(InstructionUtils.applyActionIns(ActionUtils.nxMoveArpShaToArpThaAction()));
         ib.setOrder(3);
         ib.setKey(new InstructionKey(3));
         instructions.add(ib.build());
 
         // Move ARP SPA to ARP TPA
-        InstructionUtils.applyActionIns(ActionUtils.nxMoveArpSpaToArpTpaAction());
+        ib.setInstruction(InstructionUtils.applyActionIns(ActionUtils.nxMoveArpSpaToArpTpaAction()));
         ib.setOrder(4);
         ib.setKey(new InstructionKey(4));
         instructions.add(ib.build());
 
         // Load Mac to ARP SHA
-        InstructionUtils.applyActionIns(ActionUtils.nxLoadArpShaAction(new BigInteger(macAddress)));
+        ib.setInstruction(InstructionUtils.applyActionIns(ActionUtils.nxLoadArpShaAction(new BigInteger(macAddress))));
         ib.setOrder(5);
         ib.setKey(new InstructionKey(5));
         instructions.add(ib.build());
 
         // Load IP to ARP SPA
-        InstructionUtils.applyActionIns(ActionUtils.nxLoadArpSpaAction(ipAddress.getHostAddress()));
+        ib.setInstruction(InstructionUtils.applyActionIns(ActionUtils.nxLoadArpSpaAction(ipAddress.getHostAddress())));
         ib.setOrder(6);
         ib.setKey(new InstructionKey(6));
         instructions.add(ib.build());
 
         // Output of InPort
-        InstructionUtils.applyActionIns(ActionUtils.outputAction(new NodeConnectorId(nodeName + ":INPORT")));
+        ib.setInstruction(InstructionUtils.applyActionIns(ActionUtils.outputAction(new NodeConnectorId(nodeName + ":INPORT"))));
         ib.setOrder(7);
         ib.setKey(new InstructionKey(7));
         instructions.add(ib.build());

@@ -55,10 +55,11 @@ public class ArpResponderService extends AbstractServiceInstance implements ArpP
     }
 
     @Override
-    public Status programStaticArpEntry(Node node, Long dpid, String segmentationId, String macAddress,
+    public Status programStaticArpEntry(Node node, Long dpid, String segmentationId, String macAddressStr,
                                         InetAddress ipAddress, Action action) {
 
         String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpid;
+        MacAddress macAddress = new MacAddress(macAddressStr);
 
         MatchBuilder matchBuilder = new MatchBuilder();
         NodeBuilder nodeBuilder = OF13Provider.createNodeBuilder(nodeName);
@@ -78,7 +79,7 @@ public class ArpResponderService extends AbstractServiceInstance implements ArpP
         instructions.add(ib.build());
 
         // Set Eth Src
-        InstructionUtils.createDlSrcInstructions(ib, new MacAddress(macAddress));
+        InstructionUtils.createDlSrcInstructions(ib, macAddress);
         ib.setOrder(1);
         ib.setKey(new InstructionKey(1));
         instructions.add(ib.build());
@@ -102,7 +103,7 @@ public class ArpResponderService extends AbstractServiceInstance implements ArpP
         instructions.add(ib.build());
 
         // Load Mac to ARP SHA
-        InstructionUtils.applyActionIns(ActionUtils.nxLoadArpShaAction(new BigInteger(macAddress)));
+        ib.setInstruction(InstructionUtils.applyActionIns(ActionUtils.nxLoadArpShaAction(macAddress)));
         ib.setOrder(5);
         ib.setKey(new InstructionKey(5));
         instructions.add(ib.build());

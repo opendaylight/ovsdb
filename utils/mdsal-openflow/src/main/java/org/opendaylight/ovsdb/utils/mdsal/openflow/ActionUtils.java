@@ -189,6 +189,9 @@ public final class ActionUtils {
             .setOfArpOp(Boolean.TRUE).build(), value, 15, false);
     }
 
+    public static Action nxLoadArpShaAction(MacAddress macAddress) {
+        return nxLoadArpShaAction(BigInteger.valueOf(toLong(macAddress)));
+    }
     public static Action nxLoadArpShaAction(BigInteger value) {
         return nxLoadRegAction(new DstNxArpShaCaseBuilder()
             .setNxArpSha(Boolean.TRUE).build(), value, 47, false);
@@ -330,5 +333,55 @@ public final class ActionUtils {
                 .build())
             .build();
         return new NxActionMultipathNodesNodeTableFlowApplyActionsCaseBuilder().setNxMultipath(r).build();
+    }
+
+    /**
+     * Accepts a MAC address and returns the corresponding long, where the
+     * MAC bytes are set on the lower order bytes of the long.
+     * @param macAddress
+     * @return a long containing the mac address bytes
+     */
+    public static long toLong(byte[] macAddress) {
+        long mac = 0;
+        for (int i = 0; i < 6; i++) {
+            long t = (macAddress[i] & 0xffL) << ((5-i)*8);
+            mac |= t;
+        }
+        return mac;
+    }
+
+    /**
+     * Accepts a MAC address of the form 00:aa:11:bb:22:cc, case does not
+     * matter, and returns the corresponding long, where the MAC bytes are set
+     * on the lower order bytes of the long.
+     *
+     * @param macAddress
+     *            in String format
+     * @return a long containing the mac address bytes
+     */
+    public static long toLong(MacAddress macAddress) {
+        return toLong(toMACAddress(macAddress.getValue()));
+    }
+
+    /**
+     * Accepts a MAC address of the form 00:aa:11:bb:22:cc, case does not
+     * matter, and returns a corresponding byte[].
+     * @param macAddress
+     * @return
+     */
+    public static byte[] toMACAddress(String macAddress) {
+        final String HEXES = "0123456789ABCDEF";
+        byte[] address = new byte[6];
+        String[] macBytes = macAddress.split(":");
+        if (macBytes.length != 6)
+            throw new IllegalArgumentException(
+                    "Specified MAC Address must contain 12 hex digits" +
+                    " separated pairwise by :'s.");
+        for (int i = 0; i < 6; ++i) {
+            address[i] = (byte) ((HEXES.indexOf(macBytes[i].toUpperCase()
+                                                        .charAt(0)) << 4) | HEXES.indexOf(macBytes[i].toUpperCase()
+                                                                                                  .charAt(1)));
+        }
+        return address;
     }
 }

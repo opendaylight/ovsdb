@@ -671,6 +671,13 @@ public class NeutronL3Adapter {
                                           String defaultGatewayMacAddress,
                                           String gatewayIp,
                                           Action actionForNodeDefaultRoute) {
+        // TODO: As of Helium, mac address for default gateway is required (bug 1705).
+        if (defaultGatewayMacAddress == null) {
+            logger.error("ProgramDefaultRoute mac not provided. gatewayIp:{} node:{} action:{}",
+                         defaultGatewayMacAddress, gatewayIp, node, actionForNodeDefaultRoute);
+            return new Status(StatusCode.NOTIMPLEMENTED);  // Bug 1705
+        }
+
         Status status;
         try {
             InetAddress inetAddress = InetAddress.getByName(gatewayIp);

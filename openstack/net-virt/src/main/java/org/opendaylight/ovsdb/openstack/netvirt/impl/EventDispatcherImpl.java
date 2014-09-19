@@ -51,7 +51,11 @@ public class EventDispatcherImpl implements EventDispatcher {
                         logger.info("The event handler thread was interrupted, shutting down", e);
                         return;
                     }
-                    dispatchEvent(ev);
+                    try {
+                        dispatchEvent(ev);
+                    } catch (Exception e) {
+                        logger.error("Exception in dispatching event "+ev.toString(), e);
+                    }
                 }
             }
         });

@@ -121,6 +121,10 @@ public class RoutingService extends AbstractServiceInstance implements RoutingPr
 
         String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpid;
 
+        if (macAddress == null) {
+            return new Status(StatusCode.NOTIMPLEMENTED);  // Bug 1705
+        }
+
         MatchBuilder matchBuilder = new MatchBuilder();
         NodeBuilder nodeBuilder = OF13Provider.createNodeBuilder(nodeName);
 

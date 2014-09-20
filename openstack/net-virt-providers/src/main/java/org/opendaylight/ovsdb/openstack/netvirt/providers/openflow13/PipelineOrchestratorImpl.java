@@ -116,7 +116,6 @@ public class PipelineOrchestratorImpl implements PipelineOrchestrator, Opendayli
                     }
                 } catch (Exception e) {
                     logger.warn("Processing interrupted, terminating ", e);
-                    e.printStackTrace();
                 }
 
                 while (!queue.isEmpty()) {

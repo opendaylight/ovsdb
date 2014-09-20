@@ -74,6 +74,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ListenableFuture;
 
 public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigService,
@@ -372,36 +373,20 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
         return this.getTables(node, OvsVswitchdSchemaConstants.DATABASE_NAME);
     }
 
-    private List<InetAddress> getControllerIPAddresses(Connection connection) {
+    private InetAddress getControllerIPAddress(Connection connection) {
         List<InetAddress> controllers = null;
         InetAddress controllerIP = null;
 
-        controllers = new ArrayList<InetAddress>();
         String addressString = System.getProperty("ovsdb.controller.address");
 
         if (addressString != null) {
             try {
                 controllerIP = InetAddress.getByName(addressString);
                 if (controllerIP != null) {
-                    controllers.add(controllerIP);
-                    return controllers;
+                    return controllerIP;
                 }
             } catch (UnknownHostException e) {
                 logger.error("Host {} is invalid", addressString);
-            }
-        }
-
-        if (clusterServices != null) {
-            controllers = clusterServices.getClusteredControllers();
-            if (controllers != null && controllers.size() > 0) {
-                if (controllers.size() == 1) {
-                    InetAddress controller = controllers.get(0);
-                    if (!controller.equals(InetAddress.getLoopbackAddress())) {
-                        return controllers;
-                    }
-                } else {
-                    return controllers;
-                }
             }
         }
 
@@ -411,8 +396,7 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
             try {
                 controllerIP = InetAddress.getByName(addressString);
                 if (controllerIP != null) {
-                    controllers.add(controllerIP);
-                    return controllers;
+                    return controllerIP;
                 }
             } catch (UnknownHostException e) {
                 logger.error("Host {} is invalid", addressString);
@@ -421,12 +405,11 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
 
         try {
             controllerIP = connection.getClient().getConnectionInfo().getLocalAddress();
-            controllers.add(controllerIP);
-            return controllers;
+            return controllerIP;
         } catch (Exception e) {
             logger.debug("Invalid connection provided to getControllerIPAddresses", e);
         }
-        return controllers;
+        return controllerIP;
     }
 
     private short getControllerOFPort() {
@@ -444,8 +427,7 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
         return openFlowPort;
     }
 
-    private Set<String> getCurrentControllerTargets(Node node, final String controllerTableName) {
-        Set<String> currentControllerTargets = new HashSet<>();
+    private UUID getCurrentControllerUuid(Node node, final String controllerTableName, final String target) {
         ConcurrentMap<String, Row> rows = this.getRows(node, controllerTableName);
 
         if (rows != null) {
@@ -453,12 +435,12 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
                 Controller currController = this.getTypedRow(node, Controller.class, entry.getValue());
                 Column<GenericTableSchema, String> column = currController.getTargetColumn();
                 String currTarget = column.getData();
-                if (currTarget == null) continue;
-                currentControllerTargets.add(currTarget);
+                if (currTarget != null && currTarget.equalsIgnoreCase(target)) {
+                    return currController.getUuid();
+                }
             }
         }
-
-        return currentControllerTargets;
+        return null;
     }
 
     @Override
@@ -501,28 +483,22 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
         }
 
         Status status = null;
-        Set<String> currControllerTargets = null;
-        List<InetAddress> ofControllerAddrs = this.getControllerIPAddresses(connection);
+        UUID currControllerUuid = null;
+        InetAddress ofControllerAddr = this.getControllerIPAddress(connection);
         short ofControllerPort = getControllerOFPort();
-        for (InetAddress ofControllerAddress : ofControllerAddrs) {
-            String newControllerTarget = "tcp:"+ofControllerAddress.getHostAddress()+":"+ofControllerPort;
-            Controller newController = connection.getClient().createTypedRowWrapper(Controller.class);
-            newController.setTarget(newControllerTarget);
-            final String controllerTableName = newController.getSchema().getName();
+        String newControllerTarget = "tcp:"+ofControllerAddr.getHostAddress()+":"+ofControllerPort;
+        Controller newController = connection.getClient().createTypedRowWrapper(Controller.class);
+        newController.setTarget(newControllerTarget);
+        final String controllerTableName = newController.getSchema().getName();
 
-            // get current controller targets, iff this is the first iteration
-            if (currControllerTargets == null) {
-                currControllerTargets = getCurrentControllerTargets(node, controllerTableName);
-            }
+        currControllerUuid = getCurrentControllerUuid(node, controllerTableName, newControllerTarget);
 
-            if (currControllerTargets.contains(newControllerTarget)) {
-                //ToDo: Status gets overwritten on each iteration. If any operation other than the last fails it's ignored.
-                status = this.updateRow(node, controllerTableName, null, bridgeUUID, newController.getRow());
-            } else {
-                //ToDo: Status gets overwritten on each iteration. If any operation other than the last fails it's ignored.
-                status = this.insertRow(node, controllerTableName, bridgeUUID, newController.getRow());
-                if (status.isSuccess()) currControllerTargets.add(newControllerTarget);
-            }
+        if (currControllerUuid != null) {
+            bridge = connection.getClient().createTypedRowWrapper(Bridge.class);
+            bridge.setController(Sets.newHashSet(currControllerUuid));
+            status = this.updateRow(node, bridge.getSchema().getName(), null, bridgeUUID, bridge.getRow());
+        } else {
+            status = this.insertRow(node, controllerTableName, bridgeUUID, newController.getRow());
         }
 
         if (status != null) {

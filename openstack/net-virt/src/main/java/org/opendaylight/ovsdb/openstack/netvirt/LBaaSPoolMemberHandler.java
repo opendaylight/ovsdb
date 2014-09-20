@@ -72,13 +72,13 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
         Preconditions.checkNotNull(loadBalancerProvider);
         LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLBPoolMember);
         if (lbConfig == null) {
-            logger.trace("Neutron LB configuration invalid for member {} ", neutronLBPoolMember.getPoolMemberAddress());
+            logger.debug("Neutron LB configuration invalid for member {} ", neutronLBPoolMember.getPoolMemberAddress());
         } else if (lbConfig.getVip() == null) {
-            logger.trace("Neutron LB VIP not created yet for member {} ", neutronLBPoolMember.getPoolMemberID());
+            logger.debug("Neutron LB VIP not created yet for member {} ", neutronLBPoolMember.getPoolMemberID());
         } else if (!lbConfig.isValid()) {
-            logger.trace("Neutron LB pool configuration invalid for {} ", lbConfig.getName());
+            logger.debug("Neutron LB pool configuration invalid for {} ", lbConfig.getName());
         } else if (this.switchManager.getNodes().size() == 0) {
-            logger.trace("Noop with LB pool member {} creation because no nodes available.", neutronLBPoolMember.getPoolMemberID());
+            logger.debug("Noop with LB pool member {} creation because no nodes available.", neutronLBPoolMember.getPoolMemberID());
         } else {
             for (Node node: this.switchManager.getNodes())
                 loadBalancerProvider.programLoadBalancerPoolMemberRules(node, lbConfig,
@@ -119,13 +119,13 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
 
         LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLBPoolMember);
         if (lbConfig == null) {
-            logger.trace("Neutron LB configuration invalid for member {} ", neutronLBPoolMember.getPoolMemberAddress());
+            logger.debug("Neutron LB configuration invalid for member {} ", neutronLBPoolMember.getPoolMemberAddress());
         } else if (lbConfig.getVip() == null) {
-            logger.trace("Neutron LB VIP not created yet for member {} ", neutronLBPoolMember.getPoolMemberID());
+            logger.debug("Neutron LB VIP not created yet for member {} ", neutronLBPoolMember.getPoolMemberID());
         } else if (!lbConfig.isValid()) {
-            logger.trace("Neutron LB pool configuration invalid for {} ", lbConfig.getName());
+            logger.debug("Neutron LB pool configuration invalid for {} ", lbConfig.getName());
         } else if (this.switchManager.getNodes().size() == 0) {
-            logger.trace("Noop with LB pool member {} deletion because no nodes available.", neutronLBPoolMember.getPoolMemberID());
+            logger.debug("Noop with LB pool member {} deletion because no nodes available.", neutronLBPoolMember.getPoolMemberID());
         } else {
             /* As of now, deleting a member involves recomputing member indices.
              * This is best done through a complete update of the load balancer instance.
@@ -183,7 +183,7 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
         String memberIP = neutronLBPoolMember.getPoolMemberAddress();
         String memberMAC = NeutronCacheUtils.getMacAddress(neutronPortsCache, memberIP);
         if (memberMAC == null) {
-            logger.trace("Neutron LB pool member {} MAC address unavailable", memberID);
+            logger.debug("Neutron LB pool member {} MAC address unavailable", memberID);
             return null;
         }
         String memberSubnetID = neutronLBPoolMember.getPoolMemberSubnetID();
@@ -192,7 +192,7 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
         String memberProtocol = null;
 
         if (memberSubnetID == null || memberID == null || memberPoolID == null) {
-            logger.trace("Neutron LB pool member details incomplete [id={}, pool_id={},subnet_id={}",
+            logger.debug("Neutron LB pool member details incomplete [id={}, pool_id={},subnet_id={}",
                     memberID, memberPoolID, memberSubnetID);
             return null;
         }

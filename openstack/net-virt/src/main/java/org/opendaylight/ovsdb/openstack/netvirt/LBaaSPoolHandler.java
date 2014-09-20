@@ -76,11 +76,11 @@ public class LBaaSPoolHandler extends AbstractHandler
         Preconditions.checkNotNull(loadBalancerProvider);
         List<LoadBalancerConfiguration> lbConfigList = extractLBConfiguration(neutronLBPool);
         if (lbConfigList == null) {
-            logger.trace("Neutron LB configuration invalid for pool {} ", neutronLBPool.getLoadBalancerPoolID());
+            logger.debug("Neutron LB configuration invalid for pool {} ", neutronLBPool.getLoadBalancerPoolID());
         } else if (lbConfigList.size() == 0) {
-            logger.trace("No Neutron LB VIP not created yet for pool {} ", neutronLBPool.getLoadBalancerPoolID());
+            logger.debug("No Neutron LB VIP not created yet for pool {} ", neutronLBPool.getLoadBalancerPoolID());
         } else if (this.switchManager.getNodes().size() == 0) {
-            logger.trace("Noop with LB pool {} creation because no nodes available.", neutronLBPool.getLoadBalancerPoolID());
+            logger.debug("Noop with LB pool {} creation because no nodes available.", neutronLBPool.getLoadBalancerPoolID());
         } else {
             for (LoadBalancerConfiguration lbConfig: lbConfigList) {
                 if (!lbConfig.isValid()) {
@@ -128,11 +128,11 @@ public class LBaaSPoolHandler extends AbstractHandler
 
         List<LoadBalancerConfiguration> lbConfigList = extractLBConfiguration(neutronLBPool);
         if (lbConfigList == null) {
-            logger.trace("Neutron LB configuration invalid for pool {} ", neutronLBPool.getLoadBalancerPoolID());
+            logger.debug("Neutron LB configuration invalid for pool {} ", neutronLBPool.getLoadBalancerPoolID());
         } else if (lbConfigList.size() == 0) {
-            logger.trace("No Neutron LB VIP not created yet for pool {} ", neutronLBPool.getLoadBalancerPoolID());
+            logger.debug("No Neutron LB VIP not created yet for pool {} ", neutronLBPool.getLoadBalancerPoolID());
         } else if (this.switchManager.getNodes().size() == 0) {
-            logger.trace("Noop with LB pool {} deletion because no nodes available.", neutronLBPool.getLoadBalancerPoolID());
+            logger.debug("Noop with LB pool {} deletion because no nodes available.", neutronLBPool.getLoadBalancerPoolID());
         } else {
             for (LoadBalancerConfiguration lbConfig: lbConfigList) {
                 if (!lbConfig.isValid()) {
@@ -154,7 +154,7 @@ public class LBaaSPoolHandler extends AbstractHandler
      */
     @Override
     public void processEvent(AbstractEvent abstractEvent) {
-        logger.debug("Processing Loadbalancer event " + abstractEvent);
+        logger.debug("Processing Loadbalancer Pool event " + abstractEvent);
         if (!(abstractEvent instanceof NorthboundEvent)) {
             logger.error("Unable to process abstract event " + abstractEvent);
             return;

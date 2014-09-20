@@ -169,8 +169,9 @@ public abstract class AbstractServiceInstance {
         try {
             commitFuture.get();  // TODO: Make it async (See bug 1362)
             logger.debug("Transaction success for deletion of Flow "+flowBuilder.getFlowName());
-        } catch (InterruptedException|ExecutionException e) {
+        } catch (Exception e) {
             logger.error(e.getMessage(), e);
+            modification.cancel();
         }
     }
 

@@ -75,9 +75,9 @@ public class LBaaSHandler extends AbstractHandler
         LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLB);
 
         if (!lbConfig.isValid()) {
-            logger.trace("Neutron LB pool configuration invalid for {} ", lbConfig.getName());
+            logger.debug("Neutron LB pool configuration invalid for {} ", lbConfig.getName());
         } else if (this.switchManager.getNodes().size() == 0) {
-            logger.trace("Noop with LB {} creation because no nodes available.", lbConfig.getName());
+            logger.debug("Noop with LB {} creation because no nodes available.", lbConfig.getName());
         } else {
             for (Node node: this.switchManager.getNodes())
                 loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.ADD);
@@ -113,9 +113,9 @@ public class LBaaSHandler extends AbstractHandler
         LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLB);
 
         if (!lbConfig.isValid()) {
-            logger.trace("Neutron LB pool configuration invalid for {} ", lbConfig.getName());
+            logger.debug("Neutron LB pool configuration invalid for {} ", lbConfig.getName());
         } else if (this.switchManager.getNodes().size() == 0) {
-            logger.trace("Noop with LB {} deletion because no nodes available.", lbConfig.getName());
+            logger.debug("Noop with LB {} deletion because no nodes available.", lbConfig.getName());
         } else {
             for (Node node: this.switchManager.getNodes())
                 loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.DELETE);
@@ -141,11 +141,7 @@ public class LBaaSHandler extends AbstractHandler
                 doNeutronLoadBalancerCreate(ev.getLoadBalancer());
                 break;
             case DELETE:
-                try {
                 doNeutronLoadBalancerDelete(ev.getLoadBalancer());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
                 break;
             case UPDATE:
                 /**
@@ -223,12 +219,18 @@ public class LBaaSHandler extends AbstractHandler
         for (NeutronLoadBalancer neutronLB: neutronLBCache.getAllNeutronLoadBalancers()) {
             LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLB);
             if (!lbConfig.isValid())
-                logger.trace("Neutron LB configuration invalid for {} ", lbConfig.getName());
+                logger.debug("Neutron LB configuration invalid for {} ", lbConfig.getName());
             else {
                if (type.equals(UpdateType.ADDED))
                     loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.ADD);
-               else if (type.equals(UpdateType.REMOVED))
-                    loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.DELETE);
+
+               /* When node disappears, we do nothing for now. Making a call to
+                * loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.DELETE)
+                * can lead to TransactionCommitFailedException. Similarly when node is changed,
+                * because of remove followed by add, we do nothing.
+                */
+               else //(type.equals(UpdateType.REMOVED) || type.equals(UpdateType.CHANGED))
+                    continue;
             }
         }
     }

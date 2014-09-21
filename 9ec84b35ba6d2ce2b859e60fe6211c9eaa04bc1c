@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_b982acc6",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-09-21T04:13:46Z",
+      "side": 1,
+      "message": "Why do we need this fix ?",
+      "revId": "9ec84b35ba6d2ce2b859e60fe6211c9eaa04bc1c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -136,7 +136,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
 
         // Create the OF Match using MatchBuilder
         flowBuilder.setMatch(
-                MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId))).build());
+                MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId)), true).build());
         flowBuilder.setMatch(MatchUtils.createDestEthMatch(matchBuilder, new MacAddress(attachedMac), null).build());
 
         String flowId = "VlanUcastOut_"+segmentationId+"_"+localPort+"_"+attachedMac;
@@ -287,7 +287,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
 
         // Create the OF Match using MatchBuilder
         flowBuilder.setMatch(
-                MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId))).build());
+                MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId)), true).build());
         flowBuilder.setMatch(MatchUtils.createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"),
                 new MacAddress("01:00:00:00:00:00")).build());
 
@@ -459,7 +459,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
 
         // Create Match(es) and Set them in the FlowBuilder Object
         flowBuilder.setMatch(
-                MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId))).build());
+                MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId)), true).build());
 
         if (write) {
             // Create the OF Actions and Instructions
@@ -580,7 +580,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
 
         // Create the OF Match using MatchBuilder
         flowBuilder.setMatch(
-                MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId))).build());
+                MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId)), true).build());
         flowBuilder.setMatch(MatchUtils.createDestEthMatch(matchBuilder, new MacAddress(attachedMac), null).build());
 
         String flowId = "VlanOut_"+segmentationId+"_"+ethPort+"_"+attachedMac;
@@ -725,7 +725,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
         // Create the OF Match using MatchBuilder
         // Match Vlan ID
         flowBuilder.setMatch(
-                MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId))).build());
+                MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId)), true).build());
         // Match DMAC
         flowBuilder.setMatch(MatchUtils.createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"),
                 new MacAddress("01:00:00:00:00:00")).build());
@@ -845,7 +845,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
 
         // Create Match(es) and Set them in the FlowBuilder Object
         flowBuilder.setMatch(
-                MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId))).build());
+                MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId)), true).build());
 
         if (write) {
             // Create the OF Actions and Instructions

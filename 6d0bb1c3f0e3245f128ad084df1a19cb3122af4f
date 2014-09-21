@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_391f7cb9",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/Service.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 11
+      },
+      "writtenOn": "2014-09-21T04:10:57Z",
+      "side": 1,
+      "message": "I am okay with this change. But can u also please adjust the description ? for EGRESS_ACL, the desciption says \"Ingress Access-Control\" followed by the Typical usage :-)\n\nPlease fix it to be less confusing.",
+      "revId": "6d0bb1c3f0e3245f128ad084df1a19cb3122af4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

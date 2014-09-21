@@ -840,7 +840,7 @@ public class OF13Provider implements NetworkingProvider {
                 egressAclProvider.programPortSecurityACL(node, dpid, segmentationId, attachedMac, localPort,
                         securityGroupInPort);
             }
-            else if (networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE) ||
+            if (networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE) ||
                     networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN)) {
                 logger.debug("Program local bridge rules for interface {}", intf.getName());
                 programLocalBridgeRules(node, dpid, segmentationId, attachedMac, localPort);

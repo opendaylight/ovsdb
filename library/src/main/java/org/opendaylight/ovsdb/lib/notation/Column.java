@@ -51,7 +51,7 @@ public class Column<E extends TableSchema<E>, D> {
 
     @Override
     public String toString() {
-        return "Column [schema=" + schema + ", data=" + data + "]";
+        return "["+schema.getName() + "=" + data + "]";
     }
 
     @Override

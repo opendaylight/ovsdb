@@ -55,6 +55,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.write.metadata._case.WriteMetadataBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.arp.match.fields.ArpSourceHardwareAddressBuilder;
@@ -377,6 +378,8 @@ public class InstructionUtils {
         ipsrc.setIpv4Address(prefixsrc);
         setNwsrcActionBuilder.setAddress(ipsrc.build());
         ab.setAction(new SetNwSrcActionCaseBuilder().setSetNwSrcAction(setNwsrcActionBuilder.build()).build());
+        ab.setOrder(0);
+        ab.setKey(new ActionKey(0));
         actionList.add(ab.build());
 
         // Create an Apply Action
@@ -406,6 +409,8 @@ public class InstructionUtils {
         ipdst.setIpv4Address(prefixdst);
         setNwDstActionBuilder.setAddress(ipdst.build());
         ab.setAction(new SetNwDstActionCaseBuilder().setSetNwDstAction(setNwDstActionBuilder.build()).build());
+        ab.setOrder(0);
+        ab.setKey(new ActionKey(0));
         actionList.add(ab.build());
 
         // Create an Apply Action
@@ -431,6 +436,7 @@ public class InstructionUtils {
         ActionBuilder ab = new ActionBuilder();
         ab.setAction(new DropActionCaseBuilder().setDropAction(dropAction).build());
         ab.setOrder(0);
+        ab.setKey(new ActionKey(0));
 
         // Add our drop action to a list
         List<Action> actionList = Lists.newArrayList();
@@ -483,6 +489,7 @@ public class InstructionUtils {
         setFieldBuilder.setTunnel(tunnel.build());
         ab.setAction(new SetFieldCaseBuilder().setSetField(setFieldBuilder.build()).build());
         ab.setOrder(0);
+        ab.setKey(new ActionKey(0));
         actionList.add(ab.build());
 
         ApplyActionsBuilder aab = new ApplyActionsBuilder();
@@ -514,7 +521,8 @@ public class InstructionUtils {
 
         setFieldBuilder.setLayer4Match(tcpmatch.build());
         ab.setAction(new SetFieldCaseBuilder().setSetField(setFieldBuilder.build()).build());
-        ab.setKey(new ActionKey(1));
+        ab.setOrder(0);
+        ab.setKey(new ActionKey(0));
         actionList.add(ab.build());
 
         ApplyActionsBuilder aab = new ApplyActionsBuilder();
@@ -544,7 +552,8 @@ public class InstructionUtils {
 
         setFieldBuilder.setLayer4Match(tcpmatch.build());
         ab.setAction(new SetFieldCaseBuilder().setSetField(setFieldBuilder.build()).build());
-        ab.setKey(new ActionKey(1));
+        ab.setOrder(0);
+        ab.setKey(new ActionKey(0));
         actionList.add(ab.build());
 
         ApplyActionsBuilder aab = new ApplyActionsBuilder();
@@ -574,7 +583,8 @@ public class InstructionUtils {
 
         setFieldBuilder.setLayer4Match(udpmatch.build());
         ab.setAction(new SetFieldCaseBuilder().setSetField(setFieldBuilder.build()).build());
-        ab.setKey(new ActionKey(1));
+        ab.setOrder(0);
+        ab.setKey(new ActionKey(0));
         actionList.add(ab.build());
 
         ApplyActionsBuilder aab = new ApplyActionsBuilder();
@@ -604,7 +614,8 @@ public class InstructionUtils {
 
         setFieldBuilder.setLayer4Match(udpmatch.build());
         ab.setAction(new SetFieldCaseBuilder().setSetField(setFieldBuilder.build()).build());
-        ab.setKey(new ActionKey(1));
+        ab.setOrder(0);
+        ab.setKey(new ActionKey(0));
         actionList.add(ab.build());
 
         ApplyActionsBuilder aab = new ApplyActionsBuilder();
@@ -634,6 +645,7 @@ public class InstructionUtils {
         setFieldBuilder.setIcmpv4Match(icmpv4match.build());
 
         ab.setAction(new SetFieldCaseBuilder().setSetField(setFieldBuilder.build()).build());
+        ab.setOrder(0);
         ab.setKey(new ActionKey(0));
         actionList.add(ab.build());
         ApplyActionsBuilder aab = new ApplyActionsBuilder();
@@ -663,7 +675,8 @@ public class InstructionUtils {
         setFieldBuilder.setIcmpv4Match(icmpv4match.build());
 
         ab.setAction(new SetFieldCaseBuilder().setSetField(setFieldBuilder.build()).build());
-        ab.setKey(new ActionKey(1));
+        ab.setOrder(0);
+        ab.setKey(new ActionKey(0));
         actionList.add(ab.build());
         ApplyActionsBuilder aab = new ApplyActionsBuilder();
         aab.setAction(actionList);
@@ -685,6 +698,8 @@ public class InstructionUtils {
         DecNwTtl decNwTtl = decNwTtlBuilder.build();
         ActionBuilder ab = new ActionBuilder();
         ab.setAction(new DecNwTtlCaseBuilder().setDecNwTtl(decNwTtl).build());
+        ab.setOrder(0);
+        ab.setKey(new ActionKey(0));
 
         // Add our drop action to a list
         List<Action> actionList = Lists.newArrayList();
@@ -718,6 +733,7 @@ public class InstructionUtils {
         arpmatch.setArpSourceHardwareAddress(arpsrc.build());
         setFieldBuilder.setLayer3Match(arpmatch.build());
         ab.setAction(new SetFieldCaseBuilder().setSetField(setFieldBuilder.build()).build());
+        ab.setOrder(0);
         ab.setKey(new ActionKey(0));
         actionList.add(ab.build());
 
@@ -746,6 +762,7 @@ public class InstructionUtils {
         arpdst.setAddress(macdst);
         setFieldBuilder.setLayer3Match(arpmatch.build());
         ab.setAction(new SetFieldCaseBuilder().setSetField(setFieldBuilder.build()).build());
+        ab.setOrder(0);
         ab.setKey(new ActionKey(0));
         actionList.add(ab.build());
 
@@ -773,6 +790,7 @@ public class InstructionUtils {
         arpmatch.setArpTargetTransportAddress(dstiparp);
         setFieldBuilder.setLayer3Match(arpmatch.build());
         ab.setAction(new SetFieldCaseBuilder().setSetField(setFieldBuilder.build()).build());
+        ab.setOrder(0);
         ab.setKey(new ActionKey(0));
         actionList.add(ab.build());
 
@@ -800,6 +818,7 @@ public class InstructionUtils {
         arpmatch.setArpSourceTransportAddress(srciparp);
         setFieldBuilder.setLayer3Match(arpmatch.build());
         ab.setAction(new SetFieldCaseBuilder().setSetField(setFieldBuilder.build()).build());
+        ab.setOrder(0);
         ab.setKey(new ActionKey(0));
         actionList.add(ab.build());
 
@@ -918,7 +937,10 @@ public class InstructionUtils {
         dlSrcActionBuilder.setAddress(macAddress);
 
         ab.setAction(new SetDlSrcActionCaseBuilder().setSetDlSrcAction(dlSrcActionBuilder.build()).build());
+        ab.setOrder(0);
+        ab.setKey(new ActionKey(0));
         actionList.add(ab.build());
+
 
         // Create an Apply Action
         ApplyActionsBuilder aab = new ApplyActionsBuilder();
@@ -940,6 +962,8 @@ public class InstructionUtils {
         dlDstActionBuilder.setAddress(macAddress);
 
         ab.setAction(new SetDlDstActionCaseBuilder().setSetDlDstAction(dlDstActionBuilder.build()).build());
+        ab.setOrder(0);
+        ab.setKey(new ActionKey(0));
         actionList.add(ab.build());
 
         // Create an Apply Action
@@ -960,9 +984,11 @@ public class InstructionUtils {
         int count = 0;
         for (org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action action : actions) {
             alist.add(new ActionBuilder()
-            .setOrder(Integer.valueOf(count++))
-            .setAction(action)
-            .build());
+                .setOrder(count)
+                .setKey(new ActionKey(count))
+                .setAction(action)
+                .build());
+            count++;
         }
         return alist;
     }
@@ -983,9 +1009,11 @@ public class InstructionUtils {
         int order = 0;
         for (org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.Instruction i : instructions) {
             ins.add(new InstructionBuilder()
-                .setOrder(order++)
+                .setOrder(order)
+                .setKey(new InstructionKey(order))
                 .setInstruction(i)
                 .build());
+            order++;
         }
         return new InstructionsBuilder().setInstruction(ins).build();
     }

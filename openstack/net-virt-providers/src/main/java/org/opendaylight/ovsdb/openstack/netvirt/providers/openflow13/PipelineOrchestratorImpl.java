@@ -56,6 +56,7 @@ public class PipelineOrchestratorImpl implements PipelineOrchestrator, Opendayli
                                                                 Service.INGRESS_ACL,
                                                                 Service.LOAD_BALANCER,
                                                                 Service.ROUTING,
+                                                                Service.L3_FORWARDING,
                                                                 Service.L2_REWRITE,
                                                                 Service.EGRESS_ACL,
                                                                 Service.OUTBOUND_NAT,

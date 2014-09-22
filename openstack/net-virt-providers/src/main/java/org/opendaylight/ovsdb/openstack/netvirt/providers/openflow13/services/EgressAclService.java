@@ -9,6 +9,9 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services;
 
+import java.math.BigInteger;
+import java.util.List;
+
 import org.opendaylight.controller.networkconfig.neutron.NeutronSecurityGroup;
 import org.opendaylight.controller.networkconfig.neutron.NeutronSecurityRule;
 import org.opendaylight.controller.sal.core.Node;
@@ -30,14 +33,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
-
-import com.google.common.collect.Lists;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigInteger;
-import java.util.List;
+import com.google.common.collect.Lists;
 
 public class EgressAclService extends AbstractServiceInstance implements EgressAclProvider {
 
@@ -49,12 +48,6 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
 
     public EgressAclService(Service service) {
         super(service);
-    }
-
-
-    @Override
-    public boolean isBridgeInPipeline (String nodeId) {
-        return true;
     }
 
     @Override

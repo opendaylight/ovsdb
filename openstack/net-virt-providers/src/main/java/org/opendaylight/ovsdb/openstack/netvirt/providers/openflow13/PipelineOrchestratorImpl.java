@@ -104,13 +104,15 @@ public class PipelineOrchestratorImpl implements PipelineOrchestrator, Opendayli
                 try {
                     while (true) {
                         String nodeId = queue.take();
+                        /*
+                         * Since we are hooking on OpendaylightInventoryListener and as observed in
+                         * Bug 1997 multiple Threads trying to write to a same table at the same time
+                         * causes programming issues. Hence delaying the programming by a second to
+                         * avoid the clash. This hack/workaround should be removed once Bug 1997 is resolved.
+                         */
+                        Thread.sleep(1000);
                         for (Service service : staticPipeline) {
                             AbstractServiceInstance serviceInstance = getServiceInstance(service);
-                            if (!serviceInstance.isBridgeInPipeline(nodeId)) {
-                                logger.debug("Bridge {} is not in pipeline", nodeId);
-                                continue;
-                            }
-
                             serviceInstance.programDefaultPipelineRule(nodeId);
                         }
                     }

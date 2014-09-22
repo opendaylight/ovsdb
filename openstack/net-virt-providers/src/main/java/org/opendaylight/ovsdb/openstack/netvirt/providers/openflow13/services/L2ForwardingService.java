@@ -59,11 +59,6 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
         super(service);
     }
 
-    @Override
-    public boolean isBridgeInPipeline (String nodeId) {
-        return true;
-    }
-
     /*
      * (Table:L2Forwarding) Local Unicast
      * Match: Tunnel ID and dMAC

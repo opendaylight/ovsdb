@@ -55,11 +55,6 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
         super(service);
     }
 
-    @Override
-    public boolean isBridgeInPipeline (String nodeId) {
-        return true;
-    }
-
     /*
      * (Table:Classifier) Egress VM Traffic Towards TEP
      * Match: Destination Ethernet Addr and OpenFlow InPort

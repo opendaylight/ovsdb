@@ -51,11 +51,6 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
     }
 
     @Override
-    public boolean isBridgeInPipeline(String nodeId) {
-        return true;
-    }
-
-    @Override
     public void programPortSecurityACL(Node node, Long dpid, String segmentationId, String attachedMac,
             long localPort, NeutronSecurityGroup securityGroup) {
 

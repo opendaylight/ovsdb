@@ -20,9 +20,4 @@ public class L2RewriteService extends AbstractServiceInstance {
     public L2RewriteService(Service service) {
         super(service);
     }
-
-    @Override
-    public boolean isBridgeInPipeline (String nodeId) {
-        return true;
-    }
 }

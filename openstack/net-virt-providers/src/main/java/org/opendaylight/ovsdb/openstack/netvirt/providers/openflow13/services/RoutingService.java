@@ -23,15 +23,19 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.OF13Provider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
-import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
+import org.opendaylight.ovsdb.utils.mdsal.openflow.ActionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.apply.actions._case.ApplyActionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
@@ -61,27 +65,37 @@ public class RoutingService extends AbstractServiceInstance implements RoutingPr
         InstructionsBuilder isb = new InstructionsBuilder();
         List<Instruction> instructions = Lists.newArrayList();
         InstructionBuilder ib = new InstructionBuilder();
+        ApplyActionsBuilder aab = new ApplyActionsBuilder();
+        ActionBuilder ab = new ActionBuilder();
+        List<org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action> actionList = Lists.newArrayList();
 
         String prefixString = address.getHostAddress() + "/" + mask;
         MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId));
         MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(prefixString));
 
         // Set source Mac address
-        InstructionUtils.createDlSrcInstructions(ib, new MacAddress(macAddress));
+        ab.setAction(ActionUtils.setDlSrcAction(new MacAddress(macAddress)));
+        ab.setOrder(0);
+        ab.setKey(new ActionKey(0));
+        actionList.add(ab.build());
+
+        // DecTTL
+        ab.setAction(ActionUtils.decNwTtlAction());
+        ab.setOrder(1);
+        ab.setKey(new ActionKey(1));
+        actionList.add(ab.build());
+
+        // Create Apply Actions Instruction
+        aab.setAction(actionList);
+        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
         ib.setOrder(0);
         ib.setKey(new InstructionKey(0));
         instructions.add(ib.build());
 
-        // DecTTL
-        InstructionUtils.createDecNwTtlInstructions(ib);
-        ib.setOrder(1);
-        ib.setKey(new InstructionKey(1));
-        instructions.add(ib.build());
-
         // Goto Next Table
         ib = getMutablePipelineInstructionBuilder();
-        ib.setOrder(2);
-        ib.setKey(new InstructionKey(2));
+        ib.setOrder(1);
+        ib.setKey(new InstructionKey(1));
         instructions.add(ib.build());
 
         FlowBuilder flowBuilder = new FlowBuilder();
@@ -125,23 +139,34 @@ public class RoutingService extends AbstractServiceInstance implements RoutingPr
         InstructionsBuilder isb = new InstructionsBuilder();
         List<Instruction> instructions = Lists.newArrayList();
         InstructionBuilder ib = new InstructionBuilder();
+        ApplyActionsBuilder aab = new ApplyActionsBuilder();
+        ActionBuilder ab = new ActionBuilder();
+        List<org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action> actionList = Lists.newArrayList();
+
 
         // Set source Mac address
-        InstructionUtils.createDlSrcInstructions(ib, new MacAddress(macAddress));
+        ab.setAction(ActionUtils.setDlSrcAction(new MacAddress(macAddress)));
+        ab.setOrder(0);
+        ab.setKey(new ActionKey(0));
+        actionList.add(ab.build());
+
+        // DecTTL
+        ab.setAction(ActionUtils.decNwTtlAction());
+        ab.setOrder(1);
+        ab.setKey(new ActionKey(1));
+        actionList.add(ab.build());
+
+        // Create Apply Actions Instruction
+        aab.setAction(actionList);
+        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
         ib.setOrder(0);
         ib.setKey(new InstructionKey(0));
         instructions.add(ib.build());
 
-        // DecTTL
-        InstructionUtils.createDecNwTtlInstructions(ib);
-        ib.setOrder(1);
-        ib.setKey(new InstructionKey(1));
-        instructions.add(ib.build());
-
         // Goto Next Table
         ib = getMutablePipelineInstructionBuilder();
-        ib.setOrder(2);
-        ib.setKey(new InstructionKey(2));
+        ib.setOrder(1);
+        ib.setKey(new InstructionKey(1));
         instructions.add(ib.build());
 
         FlowBuilder flowBuilder = new FlowBuilder();

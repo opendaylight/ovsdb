@@ -48,8 +48,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.ni
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.action.rev140421.OfjNxHashFields;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.action.rev140421.OfjNxMpAlgorithm;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg0;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg1;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg2;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 
 import com.google.common.collect.Lists;
@@ -60,11 +60,11 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
 
     private static final Logger logger = LoggerFactory.getLogger(LoadBalancerProvider.class);
     private static final int DEFAULT_FLOW_PRIORITY = 32768;
-    private static final Long FIRST_PASS_REG0_MATCH_VALUE = 0L;
-    private static final Long SECOND_PASS_REG0_MATCH_VALUE = 1L;
+    private static final Long FIRST_PASS_REGA_MATCH_VALUE = 0L;
+    private static final Long SECOND_PASS_REGA_MATCH_VALUE = 1L;
 
-    private static final Class<? extends NxmNxReg> REG_FIELD_A = NxmNxReg0.class;
-    private static final Class<? extends NxmNxReg> REG_FIELD_B = NxmNxReg1.class;
+    private static final Class<? extends NxmNxReg> REG_FIELD_A = NxmNxReg1.class;
+    private static final Class<? extends NxmNxReg> REG_FIELD_B = NxmNxReg2.class;
 
     public LoadBalancerService() {
         super(Service.LOAD_BALANCER);
@@ -152,7 +152,7 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
 
         // Match VIP, and Reg0==0
         MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(lbConfig.getVip()));
-        MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(REG_FIELD_A, FIRST_PASS_REG0_MATCH_VALUE));
+        MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(REG_FIELD_A, FIRST_PASS_REGA_MATCH_VALUE));
 
         // Create the OF Actions and Instructions
         InstructionsBuilder isb = new InstructionsBuilder();
@@ -164,7 +164,7 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
 
         ActionBuilder ab = new ActionBuilder();
         ab.setAction(ActionUtils.nxLoadRegAction(new DstNxRegCaseBuilder().setNxReg(REG_FIELD_A).build(),
-                BigInteger.valueOf(SECOND_PASS_REG0_MATCH_VALUE)));
+                BigInteger.valueOf(SECOND_PASS_REGA_MATCH_VALUE)));
         ab.setOrder(0);
         ab.setKey(new ActionKey(0));
         actionList.add(ab.build());
@@ -234,7 +234,7 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
 
         // Match VIP, Reg0==1 and Reg1==Index of member
         MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(vip));
-        MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(REG_FIELD_A, SECOND_PASS_REG0_MATCH_VALUE),
+        MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(REG_FIELD_A, SECOND_PASS_REGA_MATCH_VALUE),
                                                new MatchUtils.RegMatch(REG_FIELD_B, (long)member.getIndex()));
 
         // Create the OF Actions and Instructions
@@ -382,7 +382,7 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
 
         // Match all first pass rules
         MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(lbConfig.getVip()));
-        MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(REG_FIELD_A, FIRST_PASS_REG0_MATCH_VALUE));
+        MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(REG_FIELD_A, FIRST_PASS_REGA_MATCH_VALUE));
 
         flowBuilder.setMatch(matchBuilder.build());
         String flowId = "LOADBALANCER_FORWARD_FLOW1_" + lbConfig.getVip();
@@ -397,7 +397,7 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         // Match all second pass rules
         for(Map.Entry<String, LoadBalancerPoolMember> entry : lbConfig.getMembers().entrySet()){
             LoadBalancerPoolMember member = (LoadBalancerPoolMember) entry.getValue();
-            MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(REG_FIELD_A, SECOND_PASS_REG0_MATCH_VALUE),
+            MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(REG_FIELD_A, SECOND_PASS_REGA_MATCH_VALUE),
                                                    new MatchUtils.RegMatch(REG_FIELD_B, (long)member.getIndex()));
             MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(lbConfig.getVip()));
 

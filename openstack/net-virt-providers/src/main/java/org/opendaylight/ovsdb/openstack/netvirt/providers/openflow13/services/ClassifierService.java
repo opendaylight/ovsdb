@@ -15,24 +15,38 @@ import java.util.List;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ClassifierProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
+import org.opendaylight.ovsdb.utils.mdsal.openflow.ActionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.apply.actions._case.ApplyActionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg0;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.dst.choice.grouping.dst.choice.DstNxRegCaseBuilder;
 
 import com.google.common.collect.Lists;
 
 public class ClassifierService extends AbstractServiceInstance implements ClassifierProvider {
+    public final static long REG_VALUE_FROM_LOCAL = 0x1L;
+    public final static long REG_VALUE_FROM_REMOTE = 0x2L;
+    public static final Class<? extends NxmNxReg> REG_FIELD = NxmNxReg0.class;
+
     public ClassifierService() {
         super(Service.CLASSIFIER);
     }
@@ -87,13 +101,24 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
             // Instructions List Stores Individual Instructions
             List<Instruction> instructions = Lists.newArrayList();
 
-            // GOTO Instructions Need to be added first to the List
-            ib = this.getMutablePipelineInstructionBuilder();
+            // TODO Broken SetTunID
+            InstructionUtils.createSetTunnelIdInstructions(ib, new BigInteger(segmentationId));
+            ApplyActionsCase aac = (ApplyActionsCase) ib.getInstruction();
+            List<Action> actionList = aac.getApplyActions().getAction();
+
+            ActionBuilder ab = new ActionBuilder();
+            ab.setAction(ActionUtils.nxLoadRegAction(new DstNxRegCaseBuilder().setNxReg(REG_FIELD).build(),
+                    BigInteger.valueOf(REG_VALUE_FROM_LOCAL)));
+            ab.setOrder(1);
+            ab.setKey(new ActionKey(1));
+            actionList.add(ab.build());
+
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructions.add(ib.build());
-            // TODO Broken SetTunID
-            InstructionUtils.createSetTunnelIdInstructions(ib, new BigInteger(segmentationId));
+
+            // Next service GOTO Instructions Need to be appended to the List
+            ib = this.getMutablePipelineInstructionBuilder();
             ib.setOrder(1);
             ib.setKey(new InstructionKey(1));
             instructions.add(ib.build());
@@ -130,7 +155,6 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
         // Create the OF Match using MatchBuilder
         flowBuilder.setMatch(MatchUtils.createEthSrcMatch(matchBuilder, new MacAddress(attachedMac)).build());
         flowBuilder.setMatch(MatchUtils.createInPortMatch(matchBuilder, dpidLong, inPort).build());
-        flowBuilder.setMatch(MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(0), false).build());
 
         String flowId = "LocalMac_"+segmentationId+"_"+inPort+"_"+attachedMac;
         // Add Flow Attributes
@@ -152,13 +176,14 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
             // Instructions List Stores Individual Instructions
             List<Instruction> instructions = Lists.newArrayList();
 
-            // GOTO Instructions Need to be added first to the List
-            ib = this.getMutablePipelineInstructionBuilder();
+            // Set VLAN ID Instruction
+            InstructionUtils.createSetVlanInstructions(ib, new VlanId(Integer.valueOf(segmentationId)));
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructions.add(ib.build());
-            // Set VLAN ID Instruction
-            InstructionUtils.createSetVlanInstructions(ib, new VlanId(Integer.valueOf(segmentationId)));
+
+            // Next service GOTO Instructions Need to be appended to the List
+            ib = this.getMutablePipelineInstructionBuilder();
             ib.setOrder(1);
             ib.setKey(new InstructionKey(1));
             instructions.add(ib.build());
@@ -264,10 +289,27 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
             // Instructions List Stores Individual Instructions
             List<Instruction> instructions = Lists.newArrayList();
 
+            List<Action> actionList = Lists.newArrayList();
+            ActionBuilder ab = new ActionBuilder();
+            ab.setAction(ActionUtils.nxLoadRegAction(new DstNxRegCaseBuilder().setNxReg(REG_FIELD).build(),
+                    BigInteger.valueOf(REG_VALUE_FROM_REMOTE)));
+            ab.setOrder(0);
+            ab.setKey(new ActionKey(0));
+            actionList.add(ab.build());
+
+            ApplyActionsBuilder aab = new ApplyActionsBuilder();
+            aab.setAction(actionList);
+            ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+
             // Call the InstructionBuilder Methods Containing Actions
-            ib = this.getMutablePipelineInstructionBuilder();
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
+            instructions.add(ib.build());
+
+            // Append the default pipeline after the first classification
+            ib = this.getMutablePipelineInstructionBuilder();
+            ib.setOrder(1);
+            ib.setKey(new InstructionKey(1));
             instructions.add(ib.build());
 
             // Add InstructionBuilder to the Instruction(s)Builder List

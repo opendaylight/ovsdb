@@ -15,6 +15,7 @@ import java.util.List;
 import org.opendaylight.ovsdb.openstack.netvirt.api.L2ForwardingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
+import org.opendaylight.ovsdb.utils.mdsal.openflow.ActionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
@@ -42,6 +43,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.dst.choice.grouping.dst.choice.DstNxRegCaseBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +65,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
     }
 
     /*
-     * (Table:L2Forwarding) Local Broadcast Flood
+     * (Table:L2Forwarding) Local Unicast
      * Match: Tunnel ID and dMAC
      * Action: Output Port
      * table=2,tun_id=0x5,dl_dst=00:00:00:00:00:01 actions=output:2 goto:<next-table>
@@ -184,6 +186,34 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
         }
     }
 
+
+    /**
+     * Utility funcion used by the flooding logic to allow a flow to be resubmitted
+     * to the local port flooding rule, after being outputed to all available tunnel
+     * or VLAN egress ports.
+     */
+    private void appendResubmitLocalFlood(InstructionBuilder ib) {
+
+        //Update the ApplyActions instructions
+        ApplyActionsCase aac = (ApplyActionsCase) ib.getInstruction();
+        List<Action> actionList = aac.getApplyActions().getAction();
+
+        int index = actionList.size();
+        ActionBuilder ab = new ActionBuilder();
+        ab.setAction(ActionUtils.nxLoadRegAction(new DstNxRegCaseBuilder().setNxReg(ClassifierService.REG_FIELD).build(),
+                BigInteger.valueOf(ClassifierService.REG_VALUE_FROM_REMOTE)));
+        ab.setOrder(index);
+        ab.setKey(new ActionKey(index));
+        actionList.add(ab.build());
+
+        index++;
+        ab = new ActionBuilder();
+        ab.setAction(ActionUtils.nxResubmitAction(null, this.getTable()));
+        ab.setOrder(index);
+        ab.setKey(new ActionKey(index));
+        actionList.add(ab.build());
+    }
+
     /*
      * (Table:2) Local Broadcast Flood
      * Match: Tunnel ID and dMAC (::::FF:FF)
@@ -201,6 +231,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Create the OF Match using MatchBuilder
+        MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(ClassifierService.REG_FIELD, ClassifierService.REG_VALUE_FROM_REMOTE));
         flowBuilder.setMatch(MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
         flowBuilder.setMatch(MatchUtils.createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"),
                 new MacAddress("01:00:00:00:00:00")).build());
@@ -235,6 +266,11 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
             createOutputPortInstructions(ib, dpidLong, localPort, existingInstructions);
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
+
+            /* Alternative method to address Bug 2004 is to make a call
+             * here to appendResubmitLocalFlood(ib) so that we send the
+             * flow back to the local flood rule.
+             */
             instructions.add(ib.build());
 
             // Add InstructionBuilder to the Instruction(s)Builder List
@@ -261,7 +297,6 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
 
                 // Add InstructionsBuilder to FlowBuilder
                 flowBuilder.setInstructions(isb.build());
-
                 writeFlow(flowBuilder, nodeBuilder);
             }
         }
@@ -286,6 +321,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Create the OF Match using MatchBuilder
+        MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(ClassifierService.REG_FIELD, ClassifierService.REG_VALUE_FROM_REMOTE));
         flowBuilder.setMatch(
                 MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId)), true).build());
         flowBuilder.setMatch(MatchUtils.createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"),
@@ -349,6 +385,11 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
             createOutputPortInstructions(ib, dpidLong, localPort, existingInstructions);
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
+
+            /* Alternative method to address Bug 2004 is to make a call
+             * here to appendResubmitLocalFlood(ib) so that we send the
+             * flow back to the local flood rule.
+             */
             instructions.add(ib.build());
 
             // Add InstructionBuilder to the Instruction(s)Builder List
@@ -637,9 +678,9 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
 
         // Create the OF Match using MatchBuilder
         // Match TunnelID
+        MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(ClassifierService.REG_FIELD, ClassifierService.REG_VALUE_FROM_LOCAL));
         flowBuilder.setMatch(MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
         // Match DMAC
-
         flowBuilder.setMatch(MatchUtils.createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"),
                 new MacAddress("01:00:00:00:00:00")).build());
 
@@ -673,7 +714,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
             //createOutputGroupInstructions(nodeBuilder, ib, dpidLong, OFPortOut, existingInstructions);
             createOutputPortInstructions(ib, dpidLong, OFPortOut, existingInstructions);
             ib.setOrder(0);
-            ib.setKey(new InstructionKey(1));
+            ib.setKey(new InstructionKey(0));
             instructions.add(ib.build());
 
             // Add InstructionBuilder to the Instruction(s)Builder List
@@ -701,6 +742,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
 
                 // Add InstructionsBuilder to FlowBuilder
                 flowBuilder.setInstructions(isb.build());
+                writeFlow(flowBuilder, nodeBuilder);
             }
         }
     }
@@ -724,6 +766,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
 
         // Create the OF Match using MatchBuilder
         // Match Vlan ID
+        MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(ClassifierService.REG_FIELD, ClassifierService.REG_VALUE_FROM_LOCAL));
         flowBuilder.setMatch(
                 MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId)), true).build());
         // Match DMAC
@@ -754,7 +797,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
             // Set the Output Port/Iface
             InstructionUtils.createOutputPortInstructions(ib, dpidLong, ethPort);
             ib.setOrder(0);
-            ib.setKey(new InstructionKey(1));
+            ib.setKey(new InstructionKey(0));
             instructions.add(ib.build());
 
             // Add InstructionBuilder to the Instruction(s)Builder List
@@ -905,41 +948,45 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
         ActionBuilder ab = new ActionBuilder();
 
         List<Action> existingActions;
-        if (instructions != null) {
-            for (Instruction in : instructions) {
-                if (in.getInstruction() instanceof ApplyActionsCase) {
-                    existingActions = (((ApplyActionsCase) in.getInstruction()).getApplyActions().getAction());
-                    actionList.addAll(existingActions);
-                }
+        if (instructions != null && instructions.size() > 0) {
+            /**
+             * First instruction is the one containing the output ports.
+             * So, only extract the actions from that.
+             */
+            Instruction in = instructions.get(0);
+            if (in.getInstruction() instanceof ApplyActionsCase) {
+                existingActions = (((ApplyActionsCase) in.getInstruction()).getApplyActions().getAction());
+                // Only include output actions
+                for (Action action : existingActions)
+                    if (action.getAction() instanceof OutputActionCase)
+                        actionList.add(action);
             }
         }
         /* Create output action for this port*/
         OutputActionBuilder oab = new OutputActionBuilder();
-                oab.setOutputNodeConnector(ncid);
-                ab.setAction(new OutputActionCaseBuilder().setOutputAction(oab.build()).build());
-                boolean addNew = true;
+        oab.setOutputNodeConnector(ncid);
+        ab.setAction(new OutputActionCaseBuilder().setOutputAction(oab.build()).build());
+        boolean addNew = true;
 
-                /* Find the group action and get the group */
-                for (Action action : actionList) {
-                    if (action.getAction() instanceof OutputActionCase) {
-                        OutputActionCase opAction = (OutputActionCase)action.getAction();
-                        /* If output port action already in the action list of one of the buckets, skip */
-                        if (opAction.getOutputAction().getOutputNodeConnector().equals(new Uri(ncid))) {
-                            addNew = false;
-                            break;
-                        }
-                    }
-                }
-                if (addNew) {
-                    ab.setOrder(actionList.size());
-                    ab.setKey(new ActionKey(actionList.size()));
-                    actionList.add(ab.build());
-                }
-                // Create an Apply Action
-                ApplyActionsBuilder aab = new ApplyActionsBuilder();
-                aab.setAction(actionList);
-                ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
-                logger.debug("createOutputPortInstructions() : applyAction {}", aab.build());
-                return ib;
+        /* Find the group action and get the group */
+        for (Action action : actionList) {
+            OutputActionCase opAction = (OutputActionCase)action.getAction();
+            /* If output port action already in the action list of one of the buckets, skip */
+            if (opAction.getOutputAction().getOutputNodeConnector().equals(new Uri(ncid))) {
+                addNew = false;
+                break;
+            }
+        }
+        if (addNew) {
+            ab.setOrder(actionList.size());
+            ab.setKey(new ActionKey(actionList.size()));
+            actionList.add(ab.build());
+        }
+        // Create an Apply Action
+        ApplyActionsBuilder aab = new ApplyActionsBuilder();
+        aab.setAction(actionList);
+        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+        logger.debug("createOutputPortInstructions() : applyAction {}", aab.build());
+        return ib;
     }
 }

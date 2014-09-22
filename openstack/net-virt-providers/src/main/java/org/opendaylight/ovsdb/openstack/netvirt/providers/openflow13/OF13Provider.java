@@ -365,6 +365,7 @@ public class OF13Provider implements NetworkingProvider {
          */
 
         handleLocalBcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId, localPort, true);
+        handleTunnelFloodOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, localPort, true);
 
         /*
          * TODO : Optimize the following 2 writes to be restricted only for the very first port known in a segment.
@@ -429,6 +430,7 @@ public class OF13Provider implements NetworkingProvider {
          */
 
         handleLocalBcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId, localPort, false);
+        handleTunnelFloodOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, localPort, false);
     }
 
     private void programLocalIngressTunnelBridgeRules(Node node, Long dpid, String segmentationId, String attachedMac, long tunnelOFPort, long localPort) {
@@ -574,6 +576,8 @@ public class OF13Provider implements NetworkingProvider {
 
         handleLocalVlanBcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId,
                 localPort, true);
+        handleVlanFloodOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD,
+                segmentationId, localPort, true);
 
         /*
          * Table(2) Rule #3
@@ -632,6 +636,9 @@ public class OF13Provider implements NetworkingProvider {
 
         handleLocalVlanBcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId,
                 localPort, false);
+        handleVlanFloodOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD,
+                segmentationId, localPort, false);
+
     }
 
     private void programLocalIngressVlanRules(Node node, Long dpid, String segmentationId, String attachedMac, long ethPort) {

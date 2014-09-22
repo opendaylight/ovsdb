@@ -177,11 +177,9 @@ public class LBaaSHandler extends AbstractHandler
             memberProtocol = neutronLBPool.getLoadBalancerPoolProtocol();
             if (memberProtocol == null)
                 continue;
-            /*
-             * Only HTTP and HTTPS are supported as of this version
-             * TODO: Support all TCP load-balancers
-             */
-            if (!(memberProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTP) ||
+
+            if (!(memberProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_TCP) ||
+                  memberProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTP) ||
                   memberProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTPS)))
                 continue;
             for (NeutronLoadBalancerPoolMember neutronLBPoolMember: members) {

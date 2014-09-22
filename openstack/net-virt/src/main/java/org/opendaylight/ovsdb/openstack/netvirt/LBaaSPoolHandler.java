@@ -54,7 +54,8 @@ public class LBaaSPoolHandler extends AbstractHandler
         String poolProtocol = neutronLBPool.getLoadBalancerPoolProtocol();
         if (poolProtocol == null)
             return HttpURLConnection.HTTP_BAD_REQUEST;
-        else if (!(poolProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTP) ||
+        else if (!(poolProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_TCP) ||
+                poolProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTP) ||
                 poolProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTPS)))
             return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
         else
@@ -110,7 +111,8 @@ public class LBaaSPoolHandler extends AbstractHandler
         String poolProtocol = neutronLBPool.getLoadBalancerPoolProtocol();
         if (poolProtocol == null)
             return HttpURLConnection.HTTP_BAD_REQUEST;
-        else if (!(poolProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTP) ||
+        else if (!(poolProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_TCP) ||
+                poolProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTP) ||
                 poolProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTPS)))
             return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
         else

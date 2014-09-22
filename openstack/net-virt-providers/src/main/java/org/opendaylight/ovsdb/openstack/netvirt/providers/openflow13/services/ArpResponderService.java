@@ -50,11 +50,6 @@ public class ArpResponderService extends AbstractServiceInstance implements ArpP
     }
 
     @Override
-    public boolean isBridgeInPipeline (String nodeId) {
-        return true;
-    }
-
-    @Override
     public Status programStaticArpEntry(Node node, Long dpid, String segmentationId, String macAddressStr,
                                         InetAddress ipAddress, Action action) {
 

@@ -10,6 +10,8 @@
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -18,6 +20,12 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.controller.sal.utils.HexEncode;
+import org.opendaylight.ovsdb.lib.notation.Row;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
+import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
@@ -59,6 +67,8 @@ public abstract class AbstractServiceInstance {
     // OSGi Services that we are dependent on.
     private volatile MdsalConsumer mdsalConsumer;
     private volatile PipelineOrchestrator orchestrator;
+    private volatile OvsdbConfigurationService ovsdbConfigService;
+    private volatile OvsdbConnectionService connectionService;
 
     // Concrete Service that this AbstractServiceInstance represent
     private Service service;
@@ -67,8 +77,37 @@ public abstract class AbstractServiceInstance {
         this.service = service;
     }
 
-    // Let the Concrete service instance class decide if a Bride is part of the pipeline or not.
-    public abstract boolean isBridgeInPipeline (String nodeId);
+    public boolean isBridgeInPipeline (String nodeId){
+        String bridgeName = getBridgeName(nodeId.split(":")[1]);
+        logger.debug("isBridgeInPipeline: nodeId {} bridgeName {}", nodeId, bridgeName);
+        if (bridgeName != null && Constants.INTEGRATION_BRIDGE.equalsIgnoreCase(bridgeName)) {
+            return true;
+        }
+        return false;
+    }
+
+    private String getBridgeName(String nodeId){
+        List<org.opendaylight.controller.sal.core.Node> ovsNodes = connectionService.getNodes();
+
+        for (org.opendaylight.controller.sal.core.Node ovsNode : ovsNodes) {
+            Map<String, Row> bridges = ovsdbConfigService.getRows(ovsNode, ovsdbConfigService.getTableName(ovsNode, Bridge.class));
+            if (bridges == null) continue;
+            for (String brUuid : bridges.keySet()) {
+                Bridge bridge = ovsdbConfigService.getTypedRow(ovsNode, Bridge.class, bridges.get(brUuid));
+
+                Set<String> dpids = bridge.getDatapathIdColumn().getData();
+                if (dpids == null || dpids.size() == 0) return null;
+                Long dpid = HexEncode.stringToLong((String) dpids.toArray()[0]);
+                logger.debug("getBridgeName: bridgeDpid {} ofNodeDpid {}", bridge.getDatapathIdColumn().getData().toArray()[0], nodeId);
+                if (dpid.equals(Long.parseLong(nodeId))){
+                    // Found the bridge
+                    logger.debug("getOvsNode: found ovsNode {} bridge {} for ofNode {}", ovsNode.getNodeIDString(), bridge.getName(), nodeId);
+                    return bridge.getName();
+                }
+            }
+        }
+        return null;
+    }
 
     public short getTable() {
         return service.getTable();
@@ -212,6 +251,10 @@ public abstract class AbstractServiceInstance {
      * @param nodeId Node on which the default pipeline flow is programmed.
      */
     protected void programDefaultPipelineRule(String nodeId) {
+        if (!isBridgeInPipeline(nodeId)) {
+            logger.debug("Bridge {} is not in pipeline", nodeId);
+            return;
+        }
         MatchBuilder matchBuilder = new MatchBuilder();
         FlowBuilder flowBuilder = new FlowBuilder();
         NodeBuilder nodeBuilder = createNodeBuilder(nodeId);

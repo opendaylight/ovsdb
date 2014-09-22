@@ -49,11 +49,6 @@ public class L3ForwardingService extends AbstractServiceInstance implements L3Fo
     }
 
     @Override
-    public boolean isBridgeInPipeline (String nodeId) {
-        return true;
-    }
-
-    @Override
     public Status programForwardingTableEntry(Node node, Long dpid, String segmentationId, InetAddress ipAddress,
                                               String macAddress, Action action) {
         String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpid;

@@ -187,6 +187,8 @@ public class Activator extends ComponentActivatorAbstractBase {
         }
 
         if (AbstractServiceInstance.class.isAssignableFrom((Class) imp)) {
+            c.add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true));
+            c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
             c.add(createServiceDependency()
                           .setService(PipelineOrchestrator.class)
                           .setRequired(true));

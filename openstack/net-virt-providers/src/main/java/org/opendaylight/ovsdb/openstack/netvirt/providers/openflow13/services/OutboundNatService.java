@@ -10,6 +10,10 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services;
 
+import java.math.BigInteger;
+import java.net.InetAddress;
+import java.util.List;
+
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
@@ -34,10 +38,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 
 import com.google.common.collect.Lists;
 
-import java.math.BigInteger;
-import java.net.InetAddress;
-import java.util.List;
-
 public class OutboundNatService extends AbstractServiceInstance implements OutboundNatProvider {
     public OutboundNatService() {
         super(Service.OUTBOUND_NAT);
@@ -45,11 +45,6 @@ public class OutboundNatService extends AbstractServiceInstance implements Outbo
 
     public OutboundNatService(Service service) {
         super(service);
-    }
-
-    @Override
-    public boolean isBridgeInPipeline (String nodeId) {
-        return true;
     }
 
     @Override

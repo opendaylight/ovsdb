@@ -208,6 +208,7 @@ public class LBaaSPoolHandler extends AbstractHandler
             loadBalancerName = neutronLB.getLoadBalancerName();
             loadBalancerVip = neutronLB.getLoadBalancerVipAddress();
             LoadBalancerConfiguration lbConfig = new LoadBalancerConfiguration(loadBalancerName, loadBalancerVip);
+            lbConfig.setVmac(NeutronCacheUtils.getMacAddress(neutronPortsCache, loadBalancerVip));
 
             /* Iterate over all the members in this pool and find those in same
              * subnet as the VIP. Those will be included in the lbConfigList

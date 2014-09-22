@@ -217,6 +217,7 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
          * In that case, we create dummy configuration that will not program rules.
          */
         LoadBalancerConfiguration lbConfig = new LoadBalancerConfiguration(loadBalancerName, loadBalancerVip);
+        lbConfig.setVmac(NeutronCacheUtils.getMacAddress(neutronPortsCache, loadBalancerVip));
 
         /* Extract all other active members and include in LB config
          */

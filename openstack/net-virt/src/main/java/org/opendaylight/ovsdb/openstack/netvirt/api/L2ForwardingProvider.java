@@ -16,7 +16,7 @@ public interface L2ForwardingProvider {
     public void programLocalUcastOut(Long dpidLong, String segmentationId, Long localPort, String attachedMac, boolean write);
     public void programLocalVlanUcastOut(Long dpidLong, String segmentationId, Long localPort, String attachedMac, boolean write);
     public void programLocalBcastOut(Long dpidLong, String segmentationId, Long localPort, boolean write);
-    public void programLocalVlanBcastOut(Long dpidLong, String segmentationId, Long localPort, boolean write);
+    public void programLocalVlanBcastOut(Long dpidLong, String segmentationId, Long localPort, Long ethPort, boolean write);
     public void programLocalTableMiss(Long dpidLong, String segmentationId, boolean write);
     public void programLocalVlanTableMiss(Long dpidLong, String segmentationId, boolean write);
     public void programTunnelOut(Long dpidLong, String segmentationId, Long OFPortOut, String attachedMac, boolean write);

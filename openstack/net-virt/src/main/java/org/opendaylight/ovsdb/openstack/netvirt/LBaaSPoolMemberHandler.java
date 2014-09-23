@@ -13,7 +13,9 @@ package org.opendaylight.ovsdb.openstack.netvirt;
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolMemberAware;
+import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
 import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancer;
 import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerPool;
 import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerPoolMember;
@@ -28,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 
 import java.net.HttpURLConnection;
+import java.util.Map;
 
 /**
  * Handle requests for OpenStack Neutron v2.0 LBaaS API calls for
@@ -43,6 +46,8 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
     private volatile INeutronLoadBalancerPoolCRUD neutronLBPoolCache;
     private volatile INeutronLoadBalancerCRUD neutronLBCache;
     private volatile INeutronPortCRUD neutronPortsCache;
+    private volatile INeutronNetworkCRUD neutronNetworkCache;
+    private volatile INeutronSubnetCRUD neutronSubnetCache;
     private volatile LoadBalancerProvider loadBalancerProvider;
     private volatile ISwitchManager switchManager;
 
@@ -218,6 +223,11 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
          * In that case, we create dummy configuration that will not program rules.
          */
         LoadBalancerConfiguration lbConfig = new LoadBalancerConfiguration(loadBalancerName, loadBalancerVip);
+        Map.Entry<String,String> providerInfo = NeutronCacheUtils.getProviderInformation(neutronNetworkCache, neutronSubnetCache, memberSubnetID);
+        if (providerInfo != null) {
+            lbConfig.setProviderNetworkType(providerInfo.getKey());
+            lbConfig.setProviderSegmentationId(providerInfo.getValue());
+        }
         lbConfig.setVmac(NeutronCacheUtils.getMacAddress(neutronPortsCache, loadBalancerVip));
 
         /* Extract all other active members and include in LB config

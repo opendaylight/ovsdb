@@ -12,8 +12,9 @@ package org.opendaylight.ovsdb.openstack.netvirt;
 
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolAware;
-import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
 import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancer;
 import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerPool;
 import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerPoolMember;
@@ -30,6 +31,7 @@ import com.google.common.collect.Lists;
 
 import java.net.HttpURLConnection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Handle requests for OpenStack Neutron v2.0 LBaaS API calls for
@@ -43,9 +45,10 @@ public class LBaaSPoolHandler extends AbstractHandler
     private static final Logger logger = LoggerFactory.getLogger(LBaaSPoolHandler.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
-    private volatile INeutronLoadBalancerPoolCRUD neutronLBPoolCache;
     private volatile INeutronLoadBalancerCRUD neutronLBCache;
     private volatile INeutronPortCRUD neutronPortsCache;
+    private volatile INeutronNetworkCRUD neutronNetworkCache;
+    private volatile INeutronSubnetCRUD neutronSubnetCache;
     private volatile LoadBalancerProvider loadBalancerProvider;
     private volatile ISwitchManager switchManager;
 
@@ -209,7 +212,13 @@ public class LBaaSPoolHandler extends AbstractHandler
             loadBalancerSubnetID = neutronLB.getLoadBalancerVipSubnetID();
             loadBalancerName = neutronLB.getLoadBalancerName();
             loadBalancerVip = neutronLB.getLoadBalancerVipAddress();
+
             LoadBalancerConfiguration lbConfig = new LoadBalancerConfiguration(loadBalancerName, loadBalancerVip);
+            Map.Entry<String,String> providerInfo = NeutronCacheUtils.getProviderInformation(neutronNetworkCache, neutronSubnetCache, loadBalancerSubnetID);
+            if (providerInfo != null) {
+                lbConfig.setProviderNetworkType(providerInfo.getKey());
+                lbConfig.setProviderSegmentationId(providerInfo.getValue());
+            }
             lbConfig.setVmac(NeutronCacheUtils.getMacAddress(neutronPortsCache, loadBalancerVip));
 
             /* Iterate over all the members in this pool and find those in same

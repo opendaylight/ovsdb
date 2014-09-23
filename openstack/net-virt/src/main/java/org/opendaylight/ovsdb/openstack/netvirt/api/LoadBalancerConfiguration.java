@@ -97,6 +97,8 @@ public class LoadBalancerConfiguration {
     private String name;
     private String vip;
     private String vmac; //Used when a dummy neutron port is created for the VIP
+    private String providerNetworkType;
+    private String providerSegmentationId;
     private Map <String, LoadBalancerPoolMember> members;
 
     public LoadBalancerConfiguration() {
@@ -153,8 +155,11 @@ public class LoadBalancerConfiguration {
     public boolean isValid() {
         if (members.size() == 0)
             return false;
+        else if (providerNetworkType == null)
+            return false;
         return true;
     }
+
     public void setVip(String vip) {
         this.vip = vip;
     }
@@ -179,9 +184,27 @@ public class LoadBalancerConfiguration {
         return this.name;
     }
 
+    public void setProviderSegmentationId(String providerSegmentationId) {
+        this.providerSegmentationId = providerSegmentationId;
+    }
+
+    public String getProviderSegmentationId() {
+        return this.providerSegmentationId;
+    }
+    public void setProviderNetworkType(String providerNetworkType) {
+        this.providerNetworkType = providerNetworkType;
+    }
+
+    public String getProviderNetworkType() {
+        return this.providerNetworkType;
+    }
+
     @Override
     public String toString() {
-        return "LoadBalancerConfiguration [name=" + name + ", vip=" +
-            vip + ", vmac=" + vmac + ", members=" + members + "]";
+        return "LoadBalancerConfiguration [name=" + name +
+                ", vip=" + vip + ", vmac=" + vmac +
+                ", networkType=" + providerNetworkType +
+                ", segmentationId=" + providerSegmentationId +
+                ", members=" + members + "]";
     }
 }

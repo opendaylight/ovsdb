@@ -53,7 +53,7 @@ public class RoutingService extends AbstractServiceInstance implements RoutingPr
     }
 
     @Override
-    public Status programRouterInterface(Node node, Long dpid, String segmentationId, String macAddress,
+    public Status programRouterInterface(Node node, Long dpid, String sourceSegId, String destSegId, String macAddress,
                                          InetAddress address, int mask, Action action) {
 
         String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpid;
@@ -70,7 +70,7 @@ public class RoutingService extends AbstractServiceInstance implements RoutingPr
         List<org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action> actionList = Lists.newArrayList();
 
         String prefixString = address.getHostAddress() + "/" + mask;
-        MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId));
+        MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(sourceSegId));
         MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(prefixString));
 
         // Set source Mac address
@@ -85,6 +85,12 @@ public class RoutingService extends AbstractServiceInstance implements RoutingPr
         ab.setKey(new ActionKey(1));
         actionList.add(ab.build());
 
+        // Set Destination Tunnel ID
+        ab.setAction(ActionUtils.setTunnelIdAction(new BigInteger(destSegId)));
+        ab.setOrder(2);
+        ab.setKey(new ActionKey(2));
+        actionList.add(ab.build());
+
         // Create Apply Actions Instruction
         aab.setAction(actionList);
         ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
@@ -94,8 +100,8 @@ public class RoutingService extends AbstractServiceInstance implements RoutingPr
 
         // Goto Next Table
         ib = getMutablePipelineInstructionBuilder();
-        ib.setOrder(1);
-        ib.setKey(new InstructionKey(1));
+        ib.setOrder(2);
+        ib.setKey(new InstructionKey(2));
         instructions.add(ib.build());
 
         FlowBuilder flowBuilder = new FlowBuilder();

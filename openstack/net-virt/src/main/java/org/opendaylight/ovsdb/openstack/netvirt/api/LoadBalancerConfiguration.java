@@ -19,10 +19,9 @@ import java.util.Map;
  */
 
 public class LoadBalancerConfiguration {
+    public static final String PROTOCOL_TCP = "TCP";
     public static final String PROTOCOL_HTTP = "HTTP";
     public static final String PROTOCOL_HTTPS = "HTTPS";
-    public static final Integer PROTOCOL_HTTP_PORT = 80;
-    public static final Integer PROTOCOL_HTTPS_PORT = 443;
 
     public class LoadBalancerPoolMember {
         String ipAddr;

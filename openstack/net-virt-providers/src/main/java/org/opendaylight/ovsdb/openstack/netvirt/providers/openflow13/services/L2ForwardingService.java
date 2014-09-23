@@ -22,7 +22,6 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.OutputActionCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.OutputActionCaseBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.PopVlanActionCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.output.action._case.OutputActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
@@ -120,6 +119,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
      * Match: VLAN ID and dMAC
      * Action: Output Port
      * table=2,vlan_id=0x5,dl_dst=00:00:00:00:00:01 actions=output:2
+     * table=110,dl_vlan=2001,dl_dst=fa:16:3e:a3:3b:cc actions=pop_vlan,output:1
      */
 
     @Override
@@ -302,12 +302,12 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
      * Match: vlan ID and dMAC (::::FF:FF)
      * table=2,priority=16384,vlan_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
      * actions=strip_vlan, output:2,3,4,5
+     * table=110,dl_vlan=2001,dl_dst=01:00:00:00:00:00/01:00:00:00:00:00 actions=output:2,pop_vlan,output:1,output:3,output:4
      */
 
     @Override
     public void programLocalVlanBcastOut(Long dpidLong,
-            String segmentationId, Long localPort,
-            boolean write) {
+            String segmentationId, Long localPort, Long ethPort, boolean write) {
 
         String nodeName = OPENFLOW + dpidLong;
 
@@ -316,13 +316,12 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Create the OF Match using MatchBuilder
-        MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(ClassifierService.REG_FIELD, ClassifierService.REG_VALUE_FROM_REMOTE));
         flowBuilder.setMatch(
                 MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId)), true).build());
         flowBuilder.setMatch(MatchUtils.createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"),
                 new MacAddress("01:00:00:00:00:00")).build());
 
-        String flowId = "VlanBcastOut_"+segmentationId;
+        String flowId = "VlanBcastOut_"+segmentationId+"_"+ethPort;
         // Add Flow Attributes
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
@@ -336,11 +335,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
         flowBuilder.setIdleTimeout(0);
         Flow flow = this.getFlow(flowBuilder, nodeBuilder);
         // Instantiate the Builders for the OF Actions and Instructions
-        InstructionBuilder ib = new InstructionBuilder();
-        InstructionsBuilder isb = new InstructionsBuilder();
-        List<Instruction> instructions = Lists.newArrayList();
         List<Instruction> existingInstructions = null;
-        boolean add_pop_vlan = true;
         if (flow != null) {
             Instructions ins = flow.getInstructions();
             if (ins != null) {
@@ -348,46 +343,72 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
             }
         }
 
+        List<Instruction> instructions = Lists.newArrayList();
+        InstructionBuilder ib = new InstructionBuilder();
+        List<Action> actionList = null;
         if (write) {
-            if (existingInstructions != null) {
-                /* Check if pop vlan is already the first action in action list */
-                List<Action> existingActions;
-                for (Instruction in : existingInstructions) {
-                    if (in.getInstruction() instanceof ApplyActionsCase) {
-                        existingActions = (((ApplyActionsCase)
-                                in.getInstruction()).getApplyActions().getAction());
-                        if (existingActions.get(0).getAction() instanceof PopVlanActionCase) {
-                            add_pop_vlan = false;
+            if (existingInstructions == null) {
+                /* First time called there should be no instructions.
+                 * We can simply add the output:ethPort first, followed by
+                 * popVlan and then the local port. The next calls will append
+                 * the rest of the local ports.
+                 */
+                ActionBuilder ab = new ActionBuilder();
+                actionList = Lists.newArrayList();
+
+                ab.setAction(ActionUtils.outputAction(new NodeConnectorId(nodeName + ":" + ethPort)));
+                ab.setOrder(0);
+                ab.setKey(new ActionKey(0));
+                actionList.add(ab.build());
+
+                ab.setAction(ActionUtils.popVlanAction());
+                ab.setOrder(1);
+                ab.setKey(new ActionKey(1));
+                actionList.add(ab.build());
+
+                ab.setAction(ActionUtils.outputAction(new NodeConnectorId(nodeName + ":" + localPort)));
+                ab.setOrder(2);
+                ab.setKey(new ActionKey(2));
+                actionList.add(ab.build());
+            } else {
+                /* Subsequent calls require appending any new local ports for this tenant. */
+                ApplyActionsCase aac = (ApplyActionsCase) ib.getInstruction();
+                Instruction in = existingInstructions.get(0);
+                actionList = (((ApplyActionsCase) in.getInstruction()).getApplyActions().getAction());
+
+                NodeConnectorId ncid = new NodeConnectorId(nodeName + ":" + localPort);
+                boolean addNew = true;
+
+                /* Check if the port is already in the output list */
+                for (Action action : actionList) {
+                    if (action.getAction() instanceof OutputActionCase) {
+                        OutputActionCase opAction = (OutputActionCase) action.getAction();
+                        if (opAction.getOutputAction().getOutputNodeConnector().equals(new Uri(ncid))) {
+                            addNew = false;
                             break;
                         }
                     }
                 }
-            } else {
-                existingInstructions = Lists.newArrayList();
+                logger.info("VlanBcastOut_ addNew= {}", addNew);
+                if (addNew) {
+                    ActionBuilder ab = new ActionBuilder();
+
+                    ab.setAction(ActionUtils.outputAction(new NodeConnectorId(nodeName + ":" + localPort)));
+                    ab.setOrder(actionList.size());
+                    ab.setKey(new ActionKey(actionList.size()));
+                    actionList.add(ab.build());
+                }
             }
 
-            if (add_pop_vlan) {
-                /* pop vlan */
-                InstructionUtils.createPopVlanInstructions(ib);
-                ib.setOrder(0);
-                ib.setKey(new InstructionKey(0));
-                existingInstructions.add(ib.build());
-                ib = new InstructionBuilder();
-            }
-
-            // Create port list
-            //createOutputGroupInstructions(nodeBuilder, ib, dpidLong, localPort, existingInstructions);
-            createOutputPortInstructions(ib, dpidLong, localPort, existingInstructions);
+            ApplyActionsBuilder aab = new ApplyActionsBuilder();
+            aab.setAction(actionList);
+            ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
-
-            /* Alternative method to address Bug 2004 is to make a call
-             * here to appendResubmitLocalFlood(ib) so that we send the
-             * flow back to the local flood rule.
-             */
             instructions.add(ib.build());
 
             // Add InstructionBuilder to the Instruction(s)Builder List
+            InstructionsBuilder isb = new InstructionsBuilder();
             isb.setInstruction(instructions);
 
             // Add InstructionsBuilder to FlowBuilder
@@ -409,6 +430,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
                 instructions.add(ib.build());
 
                 // Add InstructionBuilder to the Instruction(s)Builder List
+                InstructionsBuilder isb = new InstructionsBuilder();
                 isb.setInstruction(instructions);
 
                 // Add InstructionsBuilder to FlowBuilder
@@ -761,14 +783,13 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
 
         // Create the OF Match using MatchBuilder
         // Match Vlan ID
-        MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(ClassifierService.REG_FIELD, ClassifierService.REG_VALUE_FROM_LOCAL));
         flowBuilder.setMatch(
                 MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId)), true).build());
         // Match DMAC
         flowBuilder.setMatch(MatchUtils.createDestEthMatch(matchBuilder, new MacAddress("01:00:00:00:00:00"),
                 new MacAddress("01:00:00:00:00:00")).build());
 
-        String flowId = "VlanFloodOut_"+segmentationId;
+        String flowId = "VlanFloodOut_"+segmentationId+"_"+ethPort;
         // Add Flow Attributes
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
@@ -870,6 +891,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
      * Match: Vlan ID
      * Action: Output port eth interface
      * table=1,priority=8192,vlan_id=0x5 actions= output port:eth1
+     * table=110,priority=8192,dl_vlan=2001 actions=output:2
      */
 
     @Override

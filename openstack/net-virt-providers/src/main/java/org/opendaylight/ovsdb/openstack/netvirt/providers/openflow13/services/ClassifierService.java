@@ -136,6 +136,7 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
      * Instruction: Set VLANID and GOTO Table Egress (n)
      * table=0,in_port=2,dl_src=00:00:00:00:00:01 \
      * actions=push_vlan, set_field:5->vlan_id,goto_table=<Next-Table>"
+     * table=0,in_port=1,vlan_tci=0x0000/0x1fff,dl_src=fa:16:3e:70:2f:c2 actions=push_vlan:0x8100,set_field:6097->vlan_vid,goto_table:20
      */
 
     @Override
@@ -150,6 +151,8 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
         // Create the OF Match using MatchBuilder
         flowBuilder.setMatch(MatchUtils.createEthSrcMatch(matchBuilder, new MacAddress(attachedMac)).build());
         flowBuilder.setMatch(MatchUtils.createInPortMatch(matchBuilder, dpidLong, inPort).build());
+        /* openflowplugin requires a vlan match to add a vlan */
+        flowBuilder.setMatch(MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(0), false).build());
 
         String flowId = "LocalMac_"+segmentationId+"_"+inPort+"_"+attachedMac;
         // Add Flow Attributes
@@ -338,10 +341,11 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
      * Match: OpenFlow InPort and vlan ID
      * Action: GOTO Local Table (20)
      * table=0,vlan_id=0x5,in_port=10, actions=goto_table:2
+     * table=0,in_port=2,dl_vlan=2001 actions=goto_table:20
      */
 
     @Override
-    public void programVlanIn(Long dpidLong, String segmentationId,  Long ethPort, boolean write) {
+    public void programVlanIn(Long dpidLong, String segmentationId, Long ethPort, boolean write) {
 
         String nodeName = OPENFLOW + dpidLong;
 
@@ -350,11 +354,8 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Create Match(es) and Set them in the FlowBuilder Object
-        flowBuilder.setMatch(
-                MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId)), true)
-                .build())
-                .setMatch(MatchUtils.createInPortMatch(matchBuilder, dpidLong, ethPort)
-                        .build());
+        flowBuilder.setMatch(MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(segmentationId)), true).build());
+        flowBuilder.setMatch(MatchUtils.createInPortMatch(matchBuilder, dpidLong, ethPort).build());
 
         if (write) {
             // Create the OF Actions and Instructions
@@ -364,7 +365,7 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
             // Instructions List Stores Individual Instructions
             List<Instruction> instructions = Lists.newArrayList();
 
-            // Call the InstructionBuilder Methods Containing Actions
+            // Append the default pipeline after the first classification
             ib = this.getMutablePipelineInstructionBuilder();
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));

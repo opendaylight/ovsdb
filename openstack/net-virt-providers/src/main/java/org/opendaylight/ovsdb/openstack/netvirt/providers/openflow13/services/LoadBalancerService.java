@@ -94,11 +94,11 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         nodeBuilder.setKey(new NodeKey(nodeBuilder.getId()));
 
         //Update the multipath rule
-        insertLoadBalancerVIPRulesFirstPass(nodeBuilder, lbConfig);
+        manageLoadBalancerVIPRulesFirstPass(nodeBuilder, lbConfig, true);
 
         if (action.equals(org.opendaylight.ovsdb.openstack.netvirt.api.Action.ADD)) {
-            insertLoadBalancerMemberVIPRulesSecondPass(nodeBuilder, lbConfig.getVip(), member);
-            insertLoadBalancerMemberReverseRules(nodeBuilder, lbConfig.getVip(), member);
+            manageLoadBalancerMemberVIPRulesSecondPass(nodeBuilder, lbConfig, member, true);
+            manageLoadBalancerMemberReverseRules(nodeBuilder, lbConfig, member, true);
             return new Status(StatusCode.SUCCESS);
         }
         /* TODO: Delete single member.
@@ -126,75 +126,35 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         nodeBuilder.setKey(new NodeKey(nodeBuilder.getId()));
 
         if (action.equals(org.opendaylight.ovsdb.openstack.netvirt.api.Action.ADD)) {
-            insertLoadBalancerVIPRulesFirstPass(nodeBuilder, lbConfig);
-            insertLoadBalancerVIPRulesSecondPass(nodeBuilder, lbConfig);
-            insertLoadBalancerReverseRules(nodeBuilder, lbConfig);
+            manageLoadBalancerVIPRulesFirstPass(nodeBuilder, lbConfig, true);
+            manageLoadBalancerVIPRulesSecondPass(nodeBuilder, lbConfig, true);
+            manageLoadBalancerReverseRules(nodeBuilder, lbConfig, true);
             return new Status(StatusCode.SUCCESS);
         }
         else if (action.equals(org.opendaylight.ovsdb.openstack.netvirt.api.Action.DELETE)) {
-            removeLoadBalancerVIPRules(nodeBuilder, lbConfig);
-            removeLoadBalancerReverseRules(nodeBuilder, lbConfig);
+            manageLoadBalancerVIPRulesFirstPass(nodeBuilder, lbConfig, false);
+            manageLoadBalancerVIPRulesSecondPass(nodeBuilder, lbConfig, false);
+            manageLoadBalancerReverseRules(nodeBuilder, lbConfig, false);
             return new Status(StatusCode.SUCCESS);
         }
 
         return new Status(StatusCode.NOTIMPLEMENTED);
     }
 
-    private void insertLoadBalancerVIPRulesFirstPass(NodeBuilder nodeBuilder, LoadBalancerConfiguration lbConfig) {
+    /**
+     * Method to insert/remove default rule for traffic destined to the VIP and no
+     * server selection performed yet
+     * @param nodeBuilder NodeBuilder
+     * @param lbConfig LoadBalancerConfiguration
+     * @param write Boolean to indicate of the flow is to be inserted or removed
+     */
+    private void manageLoadBalancerVIPRulesFirstPass(NodeBuilder nodeBuilder, LoadBalancerConfiguration lbConfig, boolean write) {
         MatchBuilder matchBuilder = new MatchBuilder();
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Match VIP, and Reg0==0
         MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(lbConfig.getVip()));
         MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(REG_FIELD_A, FIRST_PASS_REGA_MATCH_VALUE));
-
-        // Create the OF Actions and Instructions
-        InstructionsBuilder isb = new InstructionsBuilder();
-
-        // Instructions List Stores Individual Instructions
-        List<Instruction> instructions = Lists.newArrayList();
-
-        List<Action> actionList = Lists.newArrayList();
-
-        ActionBuilder ab = new ActionBuilder();
-        ab.setAction(ActionUtils.nxLoadRegAction(new DstNxRegCaseBuilder().setNxReg(REG_FIELD_A).build(),
-                BigInteger.valueOf(SECOND_PASS_REGA_MATCH_VALUE)));
-        ab.setOrder(0);
-        ab.setKey(new ActionKey(0));
-        actionList.add(ab.build());
-
-        ab = new ActionBuilder();
-        ab.setAction(ActionUtils.nxMultipathAction(OfjNxHashFields.NXHASHFIELDSSYMMETRICL4,
-                0, OfjNxMpAlgorithm.NXMPALGMODULON,
-                lbConfig.getMembers().size()-1, //By Nicira-Ext spec, this field is max_link minus 1
-                0L, new DstNxRegCaseBuilder().setNxReg(REG_FIELD_B).build(),
-                0, 31));
-        ab.setOrder(1);
-        ab.setKey(new ActionKey(1));
-        actionList.add(ab.build());
-
-        ab = new ActionBuilder();
-        ab.setAction(ActionUtils.nxResubmitAction(null, this.getTable()));
-        ab.setOrder(2);
-        ab.setKey(new ActionKey(2));
-        actionList.add(ab.build());
-
-        // Create an Apply Action
-        ApplyActionsBuilder aab = new ApplyActionsBuilder();
-        aab.setAction(actionList);
-        InstructionBuilder ib = new InstructionBuilder();
-        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
-
-        // Call the InstructionBuilder Methods Containing Actions
-        ib.setOrder(0);
-        ib.setKey(new InstructionKey(0));
-        instructions.add(ib.build());
-
-        // Add InstructionBuilder to the Instruction(s)Builder List
-        isb.setInstruction(instructions);
-
-        // Add InstructionsBuilder to FlowBuilder
-        flowBuilder.setInstructions(isb.build());
 
         String flowId = "LOADBALANCER_FORWARD_FLOW1_" + lbConfig.getVip();
         flowBuilder.setId(new FlowId(flowId));
@@ -207,22 +167,79 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
-        writeFlow(flowBuilder, nodeBuilder);
+
+        if (write) {
+            // Create the OF Actions and Instructions
+            InstructionsBuilder isb = new InstructionsBuilder();
+
+            // Instructions List Stores Individual Instructions
+            List<Instruction> instructions = Lists.newArrayList();
+
+            List<Action> actionList = Lists.newArrayList();
+
+            ActionBuilder ab = new ActionBuilder();
+            ab.setAction(ActionUtils.nxLoadRegAction(new DstNxRegCaseBuilder().setNxReg(REG_FIELD_A).build(),
+                    BigInteger.valueOf(SECOND_PASS_REGA_MATCH_VALUE)));
+            ab.setOrder(0);
+            ab.setKey(new ActionKey(0));
+            actionList.add(ab.build());
+
+            ab = new ActionBuilder();
+            ab.setAction(ActionUtils.nxMultipathAction(OfjNxHashFields.NXHASHFIELDSSYMMETRICL4,
+                    0, OfjNxMpAlgorithm.NXMPALGMODULON,
+                    lbConfig.getMembers().size()-1, //By Nicira-Ext spec, this field is max_link minus 1
+                    0L, new DstNxRegCaseBuilder().setNxReg(REG_FIELD_B).build(),
+                    0, 31));
+            ab.setOrder(1);
+            ab.setKey(new ActionKey(1));
+            actionList.add(ab.build());
+
+            ab = new ActionBuilder();
+            ab.setAction(ActionUtils.nxResubmitAction(null, this.getTable()));
+            ab.setOrder(2);
+            ab.setKey(new ActionKey(2));
+            actionList.add(ab.build());
+
+            // Create an Apply Action
+            ApplyActionsBuilder aab = new ApplyActionsBuilder();
+            aab.setAction(actionList);
+            InstructionBuilder ib = new InstructionBuilder();
+            ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+
+            // Call the InstructionBuilder Methods Containing Actions
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            instructions.add(ib.build());
+
+            // Add InstructionBuilder to the Instruction(s)Builder List
+            isb.setInstruction(instructions);
+
+            // Add InstructionsBuilder to FlowBuilder
+            flowBuilder.setInstructions(isb.build());
+
+            writeFlow(flowBuilder, nodeBuilder);
+
+        } else {
+            removeFlow(flowBuilder, nodeBuilder);
+        }
     }
 
     /*
      * Method to program each rule that matches on Reg0 and Reg1 to insert appropriate header rewriting
-     * rules for all members. This function calls insertLoadBalancerMemberVIPRulesSecondPass in turn.
+     * rules for all members. This function calls manageLoadBalancerMemberVIPRulesSecondPass in turn.
      * @param nodeBuilder Node to insert rule to
      * @param lbConfig Configuration for this LoadBalancer instance
+     * @param write Boolean to indicate of the flow is to be inserted or removed
      */
-    private void insertLoadBalancerVIPRulesSecondPass(NodeBuilder nodeBuilder, LoadBalancerConfiguration lbConfig) {
+    private void manageLoadBalancerVIPRulesSecondPass(NodeBuilder nodeBuilder, LoadBalancerConfiguration lbConfig, boolean write) {
         for(Map.Entry<String, LoadBalancerPoolMember> entry : lbConfig.getMembers().entrySet()){
-            insertLoadBalancerMemberVIPRulesSecondPass(nodeBuilder, lbConfig.getVip(), entry.getValue());
+            manageLoadBalancerMemberVIPRulesSecondPass(nodeBuilder, lbConfig, entry.getValue(), write);
         }
     }
 
-    private void insertLoadBalancerMemberVIPRulesSecondPass(NodeBuilder nodeBuilder, String vip, LoadBalancerPoolMember member) {
+    private void manageLoadBalancerMemberVIPRulesSecondPass(NodeBuilder nodeBuilder, LoadBalancerConfiguration lbConfig, LoadBalancerPoolMember member, boolean write) {
+        String vip = lbConfig.getVip();
+
         MatchBuilder matchBuilder = new MatchBuilder();
         FlowBuilder flowBuilder = new FlowBuilder();
 
@@ -230,49 +247,6 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(vip));
         MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(REG_FIELD_A, SECOND_PASS_REGA_MATCH_VALUE),
                                                new MatchUtils.RegMatch(REG_FIELD_B, (long)member.getIndex()));
-
-        // Create the OF Actions and Instructions
-        InstructionsBuilder isb = new InstructionsBuilder();
-
-        // Instructions List Stores Individual Instructions
-        List<Instruction> instructions = Lists.newArrayList();
-
-        List<Action> actionList = Lists.newArrayList();
-        ActionBuilder ab = new ActionBuilder();
-        ab.setAction(ActionUtils.setDlDstAction(new MacAddress(member.getMAC())));
-        ab.setOrder(0);
-        ab.setKey(new ActionKey(0));
-        actionList.add(ab.build());
-
-        ab = new ActionBuilder();
-        Ipv4Builder ipb = new Ipv4Builder().setIpv4Address(new Ipv4Prefix(member.getIP()));
-        ab.setAction(ActionUtils.setNwDstAction(ipb.build()));
-        ab.setOrder(1);
-        ab.setKey(new ActionKey(1));
-        actionList.add(ab.build());
-
-        // Create an Apply Action
-        ApplyActionsBuilder aab = new ApplyActionsBuilder();
-        aab.setAction(actionList);
-
-        // Call the InstructionBuilder Methods Containing Actions
-        InstructionBuilder ib = new InstructionBuilder();
-        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
-        ib.setOrder(0);
-        ib.setKey(new InstructionKey(0));
-        instructions.add(ib.build());
-
-        // Call the InstructionBuilder Methods Containing Actions
-        ib = this.getMutablePipelineInstructionBuilder();
-        ib.setOrder(1);
-        ib.setKey(new InstructionKey(1));
-        instructions.add(ib.build());
-
-        // Add InstructionBuilder to the Instruction(s)Builder List
-        isb.setInstruction(instructions);
-
-        // Add InstructionsBuilder to FlowBuilder
-        flowBuilder.setInstructions(isb.build());
 
         String flowId = "LOADBALANCER_FORWARD_FLOW2_" + vip + "_" + member.getIP();
         flowBuilder.setId(new FlowId(flowId));
@@ -285,70 +259,81 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
-        writeFlow(flowBuilder, nodeBuilder);
+
+        if (write) {
+            // Create the OF Actions and Instructions
+            InstructionsBuilder isb = new InstructionsBuilder();
+
+            // Instructions List Stores Individual Instructions
+            List<Instruction> instructions = Lists.newArrayList();
+
+            List<Action> actionList = Lists.newArrayList();
+            ActionBuilder ab = new ActionBuilder();
+            ab.setAction(ActionUtils.setDlDstAction(new MacAddress(member.getMAC())));
+            ab.setOrder(0);
+            ab.setKey(new ActionKey(0));
+            actionList.add(ab.build());
+
+            ab = new ActionBuilder();
+            Ipv4Builder ipb = new Ipv4Builder().setIpv4Address(new Ipv4Prefix(member.getIP()));
+            ab.setAction(ActionUtils.setNwDstAction(ipb.build()));
+            ab.setOrder(1);
+            ab.setKey(new ActionKey(1));
+            actionList.add(ab.build());
+
+            // Create an Apply Action
+            ApplyActionsBuilder aab = new ApplyActionsBuilder();
+            aab.setAction(actionList);
+
+            // Call the InstructionBuilder Methods Containing Actions
+            InstructionBuilder ib = new InstructionBuilder();
+            ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            instructions.add(ib.build());
+
+            // Call the InstructionBuilder Methods Containing Actions
+            ib = this.getMutablePipelineInstructionBuilder();
+            ib.setOrder(1);
+            ib.setKey(new InstructionKey(1));
+            instructions.add(ib.build());
+
+            // Add InstructionBuilder to the Instruction(s)Builder List
+            isb.setInstruction(instructions);
+
+            // Add InstructionsBuilder to FlowBuilder
+            flowBuilder.setInstructions(isb.build());
+
+            writeFlow(flowBuilder, nodeBuilder);
+
+        } else {
+            removeFlow(flowBuilder, nodeBuilder);
+        }
     }
 
     /**
      * Method to program all reverse rules that matches member {IP, Protocol, Port} for all members.
-     * This function calls insertLoadBalancerMemberReverseRules in turn.
+     * This function calls manageLoadBalancerMemberReverseRules in turn.
      * @param nodeBuilder Node to insert rule to
      * @param lbConfig Configuration for this LoadBalancer instance
      */
-    private void insertLoadBalancerReverseRules(NodeBuilder nodeBuilder, LoadBalancerConfiguration lbConfig) {
+    private void manageLoadBalancerReverseRules(NodeBuilder nodeBuilder, LoadBalancerConfiguration lbConfig, boolean write) {
         for(Map.Entry<String, LoadBalancerPoolMember> entry : lbConfig.getMembers().entrySet()){
-            insertLoadBalancerMemberReverseRules(nodeBuilder, lbConfig.getVip(), entry.getValue());
+            manageLoadBalancerMemberReverseRules(nodeBuilder, lbConfig, entry.getValue(), write);
         }
     }
 
-    private void insertLoadBalancerMemberReverseRules(NodeBuilder nodeBuilder, String vip, LoadBalancerPoolMember member) {
+    private void manageLoadBalancerMemberReverseRules(NodeBuilder nodeBuilder, LoadBalancerConfiguration lbConfig,
+            LoadBalancerPoolMember member, boolean write) {
+        String vip = lbConfig.getVip();
+        String vmac = lbConfig.getVmac();
+
         MatchBuilder matchBuilder = new MatchBuilder();
         FlowBuilder flowBuilder = new FlowBuilder();
 
         // Match MemberIP, and Protocol/Port
         MatchUtils.createSrcL3IPv4Match(matchBuilder, new Ipv4Prefix(member.getIP()));
-        if (member.getProtocol().equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTP))
-            MatchUtils.createSetSrcTcpMatch(matchBuilder, new PortNumber(LoadBalancerConfiguration.PROTOCOL_HTTP_PORT));
-        else if (member.getProtocol().equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTPS))
-            MatchUtils.createSetSrcTcpMatch(matchBuilder, new PortNumber(LoadBalancerConfiguration.PROTOCOL_HTTPS_PORT));
-        else //Not possible
-            return;
-
-        // Create the OF Actions and Instructions
-        InstructionsBuilder isb = new InstructionsBuilder();
-
-        // Instructions List Stores Individual Instructions
-        List<Instruction> instructions = Lists.newArrayList();
-
-        List<Action> actionList = Lists.newArrayList();
-        ActionBuilder ab = new ActionBuilder();
-        Ipv4Builder ipb = new Ipv4Builder().setIpv4Address(new Ipv4Prefix(vip));
-        ab.setAction(ActionUtils.setNwSrcAction(ipb.build()));
-        ab.setOrder(0);
-        ab.setKey(new ActionKey(0));
-        actionList.add(ab.build());
-
-        // Create an Apply Action
-        ApplyActionsBuilder aab = new ApplyActionsBuilder();
-        aab.setAction(actionList);
-
-        // Call the InstructionBuilder Methods Containing Actions
-        InstructionBuilder ib = new InstructionBuilder();
-        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
-        ib.setOrder(0);
-        ib.setKey(new InstructionKey(0));
-        instructions.add(ib.build());
-
-        // Call the InstructionBuilder Methods Containing Actions
-        ib = this.getMutablePipelineInstructionBuilder();
-        ib.setOrder(1);
-        ib.setKey(new InstructionKey(1));
-        instructions.add(ib.build());
-
-        // Add InstructionBuilder to the Instruction(s)Builder List
-        isb.setInstruction(instructions);
-
-        // Add InstructionsBuilder to FlowBuilder
-        flowBuilder.setInstructions(isb.build());
+        MatchUtils.createSetSrcTcpMatch(matchBuilder, new PortNumber(member.getPort()));
 
         String flowId = "LOADBALANCER_REVERSE_FLOW_" + vip + "_" + member.getIP();
         flowBuilder.setId(new FlowId(flowId));
@@ -361,78 +346,59 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
-        writeFlow(flowBuilder, nodeBuilder);
-    }
 
-    /**
-     * Method to remove all rules that are regarding traffic destined to the VIP
-     * (both first and second pass rules)
-     * @param nodeBuilder NodeBuilder
-     * @param lbConfig LoadBalancerConfiguration
-     */
-    private void removeLoadBalancerVIPRules(NodeBuilder nodeBuilder, LoadBalancerConfiguration lbConfig) {
-        MatchBuilder matchBuilder = new MatchBuilder();
-        FlowBuilder flowBuilder = new FlowBuilder();
+        if (write) {
+            // Create the OF Actions and Instructions
+            InstructionsBuilder isb = new InstructionsBuilder();
 
-        // Match all first pass rules
-        MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(lbConfig.getVip()));
-        MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(REG_FIELD_A, FIRST_PASS_REGA_MATCH_VALUE));
+            // Instructions List Stores Individual Instructions
+            List<Instruction> instructions = Lists.newArrayList();
 
-        flowBuilder.setMatch(matchBuilder.build());
-        String flowId = "LOADBALANCER_FORWARD_FLOW1_" + lbConfig.getVip();
-        flowBuilder.setId(new FlowId(flowId));
-        FlowKey key = new FlowKey(new FlowId(flowId));
-        flowBuilder.setPriority(DEFAULT_FLOW_PRIORITY);
-        flowBuilder.setBarrier(true);
-        flowBuilder.setTableId(this.getTable());
-        flowBuilder.setKey(key);
-        removeFlow(flowBuilder, nodeBuilder);
+            List<Action> actionList = Lists.newArrayList();
+            ActionBuilder ab = new ActionBuilder();
+            Ipv4Builder ipb = new Ipv4Builder().setIpv4Address(new Ipv4Prefix(vip));
+            ab.setAction(ActionUtils.setNwSrcAction(ipb.build()));
+            ab.setOrder(0);
+            ab.setKey(new ActionKey(0));
+            actionList.add(ab.build());
 
-        // Match all second pass rules
-        for(Map.Entry<String, LoadBalancerPoolMember> entry : lbConfig.getMembers().entrySet()){
-            LoadBalancerPoolMember member = entry.getValue();
-            MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(REG_FIELD_A, SECOND_PASS_REGA_MATCH_VALUE),
-                                                   new MatchUtils.RegMatch(REG_FIELD_B, (long)member.getIndex()));
-            MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(lbConfig.getVip()));
+            /* If a dummy MAC is assigned to the VIP, we use that as the
+             * source MAC for the reverse traffic.
+             */
+            if (vmac != null) {
+                ab = new ActionBuilder();
+                ab.setAction(ActionUtils.setDlDstAction(new MacAddress(vmac)));
+                ab.setOrder(1);
+                ab.setKey(new ActionKey(1));
+                actionList.add(ab.build());
+            }
 
-            flowBuilder.setMatch(matchBuilder.build());
-            flowId = "LOADBALANCER_FORWARD_FLOW2_" + lbConfig.getVip() + "_" + member.getIP();
-            flowBuilder.setId(new FlowId(flowId));
-            key = new FlowKey(new FlowId(flowId));
-            flowBuilder.setKey(key);
-            removeFlow(flowBuilder, nodeBuilder);
-        }
-    }
+            // Create an Apply Action
+            ApplyActionsBuilder aab = new ApplyActionsBuilder();
+            aab.setAction(actionList);
 
-    /**
-     * Method to remove all reverse traffic from LB member VMs
-     * @param nodeBuilder NodeBuilder
-     * @param lbConfig LoadBalancerConfiguration
-     */
-    private void removeLoadBalancerReverseRules(NodeBuilder nodeBuilder, LoadBalancerConfiguration lbConfig) {
-        for(Map.Entry<String, LoadBalancerPoolMember> entry : lbConfig.getMembers().entrySet()){
-            LoadBalancerPoolMember member = entry.getValue();
+            // Call the InstructionBuilder Methods Containing Actions
+            InstructionBuilder ib = new InstructionBuilder();
+            ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            instructions.add(ib.build());
 
-            MatchBuilder matchBuilder = new MatchBuilder();
-            FlowBuilder flowBuilder = new FlowBuilder();
+            // Call the InstructionBuilder Methods Containing Actions
+            ib = this.getMutablePipelineInstructionBuilder();
+            ib.setOrder(1);
+            ib.setKey(new InstructionKey(1));
+            instructions.add(ib.build());
 
-            // Match MemberIP, and Protocol/Port
-            MatchUtils.createSrcL3IPv4Match(matchBuilder, new Ipv4Prefix(member.getIP()));
-            if (member.getProtocol().equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTP))
-                MatchUtils.createSetSrcTcpMatch(matchBuilder, new PortNumber(LoadBalancerConfiguration.PROTOCOL_HTTP_PORT));
-            else if (member.getProtocol().equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTPS))
-                MatchUtils.createSetSrcTcpMatch(matchBuilder, new PortNumber(LoadBalancerConfiguration.PROTOCOL_HTTPS_PORT));
-            else //Not possible
-                return;
+            // Add InstructionBuilder to the Instruction(s)Builder List
+            isb.setInstruction(instructions);
 
-            String flowId = "LOADBALANCER_REVERSE_FLOW_" + lbConfig.getVip() + "_" + member.getIP();
-            flowBuilder.setId(new FlowId(flowId));
-            FlowKey key = new FlowKey(new FlowId(flowId));
-            flowBuilder.setMatch(matchBuilder.build());
-            flowBuilder.setPriority(DEFAULT_FLOW_PRIORITY);
-            flowBuilder.setBarrier(true);
-            flowBuilder.setTableId(this.getTable());
-            flowBuilder.setKey(key);
+            // Add InstructionsBuilder to FlowBuilder
+            flowBuilder.setInstructions(isb.build());
+
+            writeFlow(flowBuilder, nodeBuilder);
+
+        } else {
             removeFlow(flowBuilder, nodeBuilder);
         }
     }

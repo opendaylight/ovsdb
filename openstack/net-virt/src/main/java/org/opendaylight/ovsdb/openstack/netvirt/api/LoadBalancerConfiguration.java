@@ -97,6 +97,7 @@ public class LoadBalancerConfiguration {
 
     private String name;
     private String vip;
+    private String vmac; //Used when a dummy neutron port is created for the VIP
     private Map <String, LoadBalancerPoolMember> members;
 
     public LoadBalancerConfiguration() {
@@ -107,12 +108,21 @@ public class LoadBalancerConfiguration {
         this.members = Maps.newHashMap();
         this.name = name;
         this.vip = vip;
+        this.vmac = null;
+    }
+
+    public LoadBalancerConfiguration(String name, String vip, String vmac) {
+        this.members = Maps.newHashMap();
+        this.name = name;
+        this.vip = vip;
+        this.vmac = vmac;
     }
 
     public LoadBalancerConfiguration(LoadBalancerConfiguration lbConfig) {
         this.members = Maps.newHashMap(lbConfig.getMembers());
         this.name = lbConfig.getName();
         this.vip = lbConfig.getVip();
+        this.vmac = lbConfig.getVmac();
     }
 
     public Map<String, LoadBalancerPoolMember> getMembers() {
@@ -154,6 +164,14 @@ public class LoadBalancerConfiguration {
         return this.vip;
     }
 
+    public void setVmac(String vmac) {
+        this.vmac = vmac;
+    }
+
+    public String getVmac() {
+        return this.vmac;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -164,7 +182,7 @@ public class LoadBalancerConfiguration {
 
     @Override
     public String toString() {
-        return "LoadBalancerConfiguration [name=" + name + ", vip=" + vip +
-                ", members=" + members + "]";
+        return "LoadBalancerConfiguration [name=" + name + ", vip=" +
+            vip + ", vmac=" + vmac + ", members=" + members + "]";
     }
 }

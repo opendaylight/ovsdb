@@ -166,6 +166,7 @@ public class LBaaSHandler extends AbstractHandler
         String loadBalancerVip = neutronLB.getLoadBalancerVipAddress();
         String loadBalancerSubnetID = neutronLB.getLoadBalancerVipSubnetID();
         LoadBalancerConfiguration lbConfig = new LoadBalancerConfiguration(loadBalancerName, loadBalancerVip);
+        lbConfig.setVmac(NeutronCacheUtils.getMacAddress(neutronPortsCache, loadBalancerVip));
 
         String memberID, memberIP, memberMAC, memberProtocol, memberSubnetID;
         Integer memberPort;

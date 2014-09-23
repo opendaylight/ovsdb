@@ -20,7 +20,7 @@ import java.net.InetAddress;
  */
 public interface RoutingProvider {
 
-    Status programRouterInterface(Node node, Long dpid, String segmentationId, String macAddress,
+    Status programRouterInterface(Node node, Long dpid, String srcSegId, String dstSegId, String macAddress,
                                   InetAddress address, int mask, Action action);
 
     Status programDefaultRouteEntry(Node node, Long dpid, String segmentationId, String macAddress,

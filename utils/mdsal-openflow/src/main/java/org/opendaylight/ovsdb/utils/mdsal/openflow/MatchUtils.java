@@ -243,6 +243,18 @@ public class MatchUtils {
 
     /**
      * @param matchBuilder MatchBuilder Object without a match yet
+     * @param dstip        String containing an IPv4 prefix
+     * @return matchBuilder Map Object with a match
+     */
+    public static MatchBuilder createArpDstIpv4Match(MatchBuilder matchBuilder, Ipv4Prefix dstip) {
+        Ipv4MatchBuilder ipv4match = new Ipv4MatchBuilder();
+        ipv4match.setIpv4Destination(dstip);
+        matchBuilder.setLayer3Match(ipv4match.build());
+        return matchBuilder;
+    }
+
+    /**
+     * @param matchBuilder MatchBuilder Object without a match yet
      * @param srcip        String containing an IPv4 prefix
      * @return matchBuilder Map Object with a match
      */

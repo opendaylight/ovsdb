@@ -10,11 +10,18 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt;
 
+import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
+import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
+import org.opendaylight.controller.networkconfig.neutron.NeutronSubnet;
 import org.opendaylight.controller.networkconfig.neutron.Neutron_IPs;
+
+import java.util.AbstractMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class NeutronCacheUtils {
 
@@ -43,6 +50,38 @@ public class NeutronCacheUtils {
                     if (ip.getIpAddress().equals(ipAddr))
                         return port.getMacAddress();
                 }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Look up in the NeutronNetworkCRUD cache and NeutronSubnetCRUD cache for
+     * extracting the provider segmentation_type and segmentation_id
+     * @param subnetId Subnet UUID
+     * @return {Type: ID} pair for that subnet ID
+     */
+    public static Map.Entry<String,String> getProviderInformation(INeutronNetworkCRUD neutronNetworkCache,
+                INeutronSubnetCRUD neutronSubnetCache, String subnetID) {
+
+        String networkID = null;
+
+        List<NeutronSubnet> allSubnets = neutronSubnetCache.getAllSubnets();
+        for (NeutronSubnet subnet: allSubnets) {
+            if (subnet.getID().equals(subnetID)) {
+                networkID = subnet.getNetworkUUID();
+                break;
+            }
+        }
+        if (networkID == null)
+            return null;
+
+        List<NeutronNetwork> allNetworks = neutronNetworkCache.getAllNetworks();
+        for (NeutronNetwork network: allNetworks) {
+            if (network.getID().equals(networkID)) {
+                Map.Entry<String,String> entry = new AbstractMap.SimpleEntry<String, String>(
+                        network.getProviderNetworkType(), network.getProviderSegmentationID());
+                return entry;
             }
         }
         return null;

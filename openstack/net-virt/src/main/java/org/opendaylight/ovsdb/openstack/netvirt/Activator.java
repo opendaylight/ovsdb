@@ -261,6 +261,8 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency().setService(INeutronLoadBalancerPoolCRUD.class).setRequired(true));
             c.add(createServiceDependency().setService(LoadBalancerProvider.class).setRequired(true));
             c.add(createServiceDependency().setService(ISwitchManager.class).setRequired(true));
+            c.add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true));
+            c.add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true));
         }
 
         if (imp.equals(LBaaSPoolHandler.class)) {
@@ -273,9 +275,10 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
             c.add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true));
             c.add(createServiceDependency().setService(INeutronLoadBalancerCRUD.class).setRequired(true));
-            c.add(createServiceDependency().setService(INeutronLoadBalancerPoolCRUD.class).setRequired(true));
             c.add(createServiceDependency().setService(LoadBalancerProvider.class).setRequired(true));
             c.add(createServiceDependency().setService(ISwitchManager.class).setRequired(true));
+            c.add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true));
+            c.add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true));
         }
 
         if (imp.equals(LBaaSPoolMemberHandler.class)) {
@@ -291,6 +294,8 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency().setService(INeutronLoadBalancerPoolCRUD.class).setRequired(true));
             c.add(createServiceDependency().setService(LoadBalancerProvider.class).setRequired(true));
             c.add(createServiceDependency().setService(ISwitchManager.class).setRequired(true));
+            c.add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true));
+            c.add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true));
         }
 
         if (imp.equals(PortSecurityHandler.class)) {

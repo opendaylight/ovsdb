@@ -17,6 +17,7 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
+import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration.LoadBalancerPoolMember;
@@ -45,6 +46,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg1;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg2;
@@ -82,6 +84,14 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
     @Override
     public Status programLoadBalancerPoolMemberRules(Node node,
             LoadBalancerConfiguration lbConfig, LoadBalancerPoolMember member, org.opendaylight.ovsdb.openstack.netvirt.api.Action action) {
+        if (lbConfig == null || member == null) {
+            logger.error("Null value for LB config {} or Member {}", lbConfig, member);
+            return new Status(StatusCode.BADREQUEST);
+        }
+        if (!lbConfig.isValid()) {
+            logger.error("LB config is invalid: {}", lbConfig);
+            return new Status(StatusCode.BADREQUEST);
+        }
         if (!node.getType().equals(NodeIDType.OPENFLOW)) {
             logger.trace("Ignoring non-OpenFlow node {} from flow programming", node);
             return new Status(StatusCode.BADREQUEST);
@@ -115,6 +125,14 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
      */
     @Override
     public Status programLoadBalancerRules(Node node, LoadBalancerConfiguration lbConfig, org.opendaylight.ovsdb.openstack.netvirt.api.Action action) {
+        if (lbConfig == null) {
+            logger.error("LB config is invalid: {}", lbConfig);
+            return new Status(StatusCode.BADREQUEST);
+        }
+        if (!lbConfig.isValid()) {
+            logger.error("LB config is invalid: {}", lbConfig);
+            return new Status(StatusCode.BADREQUEST);
+        }
         if (!node.getType().equals(NodeIDType.OPENFLOW)) {
             logger.trace("Ignoring non-OpenFlow node {} from flow programming", node);
             return new Status(StatusCode.BADREQUEST);
@@ -152,7 +170,15 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         MatchBuilder matchBuilder = new MatchBuilder();
         FlowBuilder flowBuilder = new FlowBuilder();
 
-        // Match VIP, and Reg0==0
+        // Match Tunnel-ID, VIP, and Reg0==0
+        if (lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) ||
+            lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE))
+            MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(lbConfig.getProviderSegmentationId()));
+        else if (lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN))
+            MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(lbConfig.getProviderSegmentationId())), true);
+        else
+            return; //Should not get here. TODO: Other types
+
         MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(lbConfig.getVip()));
         MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(REG_FIELD_A, FIRST_PASS_REGA_MATCH_VALUE));
 
@@ -243,7 +269,15 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         MatchBuilder matchBuilder = new MatchBuilder();
         FlowBuilder flowBuilder = new FlowBuilder();
 
-        // Match VIP, Reg0==1 and Reg1==Index of member
+        // Match Tunnel-ID, VIP, Reg0==1 and Reg1==Index of member
+        if (lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) ||
+            lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE))
+            MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(lbConfig.getProviderSegmentationId()));
+        else if (lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN))
+            MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(lbConfig.getProviderSegmentationId())), true);
+        else
+            return; //Should not get here. TODO: Other types
+
         MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(vip));
         MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(REG_FIELD_A, SECOND_PASS_REGA_MATCH_VALUE),
                                                new MatchUtils.RegMatch(REG_FIELD_B, (long)member.getIndex()));
@@ -325,13 +359,22 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
 
     private void manageLoadBalancerMemberReverseRules(NodeBuilder nodeBuilder, LoadBalancerConfiguration lbConfig,
             LoadBalancerPoolMember member, boolean write) {
+
         String vip = lbConfig.getVip();
         String vmac = lbConfig.getVmac();
 
         MatchBuilder matchBuilder = new MatchBuilder();
         FlowBuilder flowBuilder = new FlowBuilder();
 
-        // Match MemberIP, and Protocol/Port
+        // Match Tunnel-ID, MemberIP, and Protocol/Port
+        if (lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) ||
+                   lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE))
+            MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(lbConfig.getProviderSegmentationId()));
+        else if (lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN))
+            MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(lbConfig.getProviderSegmentationId())), true);
+        else
+            return; //Should not get here. TODO: Other types
+
         MatchUtils.createSrcL3IPv4Match(matchBuilder, new Ipv4Prefix(member.getIP()));
         MatchUtils.createSetSrcTcpMatch(matchBuilder, new PortNumber(member.getPort()));
 

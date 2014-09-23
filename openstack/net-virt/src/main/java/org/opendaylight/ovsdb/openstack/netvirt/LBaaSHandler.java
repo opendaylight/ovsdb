@@ -13,7 +13,9 @@ package org.opendaylight.ovsdb.openstack.netvirt;
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
 import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
+import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
 import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancer;
 import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerPool;
 import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerPoolMember;
@@ -50,6 +52,8 @@ public class LBaaSHandler extends AbstractHandler
     private volatile INeutronLoadBalancerCRUD neutronLBCache;
     private volatile INeutronLoadBalancerPoolCRUD neutronLBPoolCache;
     private volatile INeutronPortCRUD neutronPortsCache;
+    private volatile INeutronNetworkCRUD neutronNetworkCache;
+    private volatile INeutronSubnetCRUD neutronSubnetCache;
     private volatile LoadBalancerProvider loadBalancerProvider;
     private volatile ISwitchManager switchManager;
 
@@ -165,7 +169,13 @@ public class LBaaSHandler extends AbstractHandler
         String loadBalancerName = neutronLB.getLoadBalancerName();
         String loadBalancerVip = neutronLB.getLoadBalancerVipAddress();
         String loadBalancerSubnetID = neutronLB.getLoadBalancerVipSubnetID();
+
         LoadBalancerConfiguration lbConfig = new LoadBalancerConfiguration(loadBalancerName, loadBalancerVip);
+        Map.Entry<String,String> providerInfo = NeutronCacheUtils.getProviderInformation(neutronNetworkCache, neutronSubnetCache, loadBalancerSubnetID);
+        if (providerInfo != null) {
+            lbConfig.setProviderNetworkType(providerInfo.getKey());
+            lbConfig.setProviderSegmentationId(providerInfo.getValue());
+        }
         lbConfig.setVmac(NeutronCacheUtils.getMacAddress(neutronPortsCache, loadBalancerVip));
 
         String memberID, memberIP, memberMAC, memberProtocol, memberSubnetID;

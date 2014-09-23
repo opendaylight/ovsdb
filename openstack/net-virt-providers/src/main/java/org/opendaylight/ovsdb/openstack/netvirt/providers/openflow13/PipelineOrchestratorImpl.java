@@ -53,12 +53,12 @@ public class PipelineOrchestratorImpl implements PipelineOrchestrator, Opendayli
                                                                 Service.CLASSIFIER,
                                                                 Service.ARP_RESPONDER,
                                                                 Service.INBOUND_NAT,
-                                                                Service.INGRESS_ACL,
+                                                                Service.EGRESS_ACL,
                                                                 Service.LOAD_BALANCER,
                                                                 Service.ROUTING,
                                                                 Service.L3_FORWARDING,
                                                                 Service.L2_REWRITE,
-                                                                Service.EGRESS_ACL,
+                                                                Service.INGRESS_ACL,
                                                                 Service.OUTBOUND_NAT,
                                                                 Service.L2_FORWARDING
                                                               );

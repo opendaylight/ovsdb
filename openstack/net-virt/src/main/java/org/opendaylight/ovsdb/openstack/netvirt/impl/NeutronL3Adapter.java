@@ -368,8 +368,8 @@ public class NeutronL3Adapter {
         final NeutronSubnet subnet = neutronSubnetCache.getSubnet(neutronRouterInterface.getSubnetUUID());
         final NeutronNetwork neutronNetwork = subnet != null ?
                                               neutronNetworkCache.getNetwork(subnet.getNetworkUUID()) : null;
-        final String providerSegmentationId = neutronNetwork != null ?
-                                              neutronNetwork.getProviderSegmentationID() : null;
+        final String destinationSegmentationId = neutronNetwork != null ?
+                                                 neutronNetwork.getProviderSegmentationID() : null;
         final String gatewayIp = subnet != null ? subnet.getGatewayIP() : null;
         final Boolean isExternal = neutronNetwork != null ? neutronNetwork.getRouterExternal() : Boolean.TRUE;
         final String cidr = subnet != null ? subnet.getCidr() : null;
@@ -378,12 +378,12 @@ public class NeutronL3Adapter {
         logger.trace("programFlowsForNeutronRouterInterface called for interface {} isDelete {}",
                      neutronRouterInterface, isDelete);
 
-        if (providerSegmentationId == null || providerSegmentationId.isEmpty() ||
+        if (destinationSegmentationId == null || destinationSegmentationId.isEmpty() ||
             cidr == null || cidr.isEmpty() ||
             macAddress == null || macAddress.isEmpty() ||
             ipList == null || ipList.isEmpty()) {
             logger.debug("programFlowsForNeutronRouterInterface is bailing seg:{} cidr:{} mac:{}  ip:{}",
-                         providerSegmentationId, cidr, macAddress, ipList);
+                         destinationSegmentationId, cidr, macAddress, ipList);
             return;  // done: go no further w/out all the info needed...
         }
 
@@ -406,7 +406,7 @@ public class NeutronL3Adapter {
         for (Node node : nodes) {
             final Long dpid = getDpid(node);
             final Action actionForNode =
-                    tenantNetworkManager.isTenantNetworkPresentInNode(node, providerSegmentationId) ?
+                    tenantNetworkManager.isTenantNetworkPresentInNode(node, destinationSegmentationId) ?
                     action : Action.DELETE;
 
             for (Neutron_IPs neutronIP : ipList) {
@@ -416,8 +416,50 @@ public class NeutronL3Adapter {
                                  node.getID(), ipStr);
                     continue;
                 }
-                programRouterInterfaceStage1(node, dpid, providerSegmentationId, macAddress, ipStr, mask, actionForNode);
-                programStaticArpStage1(node, dpid, providerSegmentationId, macAddress, ipStr, actionForNode);
+
+                for (NeutronRouter_Interface routerInterface : subnetIdToRouterInterfaceCache.values()) {
+
+                    String sourceSubnetId = routerInterface.getSubnetUUID();
+
+                    if (sourceSubnetId == null) {
+                        logger.error("Could not get provider Subnet ID from router interface {}" + routerInterface.getID());
+                        continue;
+                    }
+
+                    String sourceNetworkId = neutronSubnetCache.getSubnet(sourceSubnetId).getNetworkUUID();
+
+                    if (sourceNetworkId == null) {
+                        logger.error("Could not get provider Network ID from subnet {}" + sourceSubnetId);
+                        continue;
+                    }
+
+                    NeutronNetwork sourceNetwork = neutronNetworkCache.getNetwork(sourceNetworkId);
+
+                    if (sourceNetwork == null) {
+                        logger.error("Could not get provider Network for Network ID {}" + sourceNetworkId);
+                        continue;
+                    }
+
+                    String sourceSegmentationId = sourceNetwork.getProviderSegmentationID();
+
+                    if (! sourceNetwork.getTenantID().equals(neutronNetwork.getTenantID())) {
+                        // Isolate subnets from different tenants within the same router
+                        continue;
+                    }
+
+                    if (sourceSegmentationId == null) {
+                        logger.error("Could not get provider Segmentation ID for Subnet {}" + sourceSubnetId);
+                        continue;
+                    }
+
+                    if (sourceSegmentationId.equals(destinationSegmentationId)) {
+                        continue;
+                    }
+
+                    programRouterInterfaceStage1(node, dpid, sourceSegmentationId, destinationSegmentationId, macAddress, ipStr, mask, actionForNode);
+                }
+
+                programStaticArpStage1(node, dpid, destinationSegmentationId, macAddress, ipStr, actionForNode);
             }
 
             // Compute action to be programmed. In the case of rewrite exclusions, we must never program rules
@@ -425,9 +467,9 @@ public class NeutronL3Adapter {
             //
             {
                 final Action actionForRewriteExclusion = isExternal ? Action.DELETE : actionForNode;
-                programIpRewriteExclusionStage1(node, dpid, providerSegmentationId, true /* isInbound */,
+                programIpRewriteExclusionStage1(node, dpid, destinationSegmentationId, true /* isInbound */,
                                                 cidr, actionForRewriteExclusion);
-                programIpRewriteExclusionStage1(node, dpid, providerSegmentationId, false /* isInbound */,
+                programIpRewriteExclusionStage1(node, dpid, destinationSegmentationId, false /* isInbound */,
                                                 cidr, actionForRewriteExclusion);
             }
 
@@ -437,36 +479,39 @@ public class NeutronL3Adapter {
                 final Action actionForNodeDefaultRoute =
                         isExternal ? actionForNode : Action.DELETE;
                 final String defaultGatewayMacAddress = configurationService.getDefaultGatewayMacAddress(node);
-                programDefaultRouteStage1(node, dpid, providerSegmentationId, defaultGatewayMacAddress, gatewayIp,
+                programDefaultRouteStage1(node, dpid, destinationSegmentationId, defaultGatewayMacAddress, gatewayIp,
                                           actionForNodeDefaultRoute);
             }
         }
     }
 
-    private void programRouterInterfaceStage1(Node node, Long dpid, String providerSegmentationId,
+    private void programRouterInterfaceStage1(Node node, Long dpid, String sourceSegmentationId,
+                                              String destinationSegmentationId,
                                               String macAddress, String ipStr, int mask,
                                               Action actionForNode) {
         // Based on the local cache, figure out whether programming needs to occur. To do this, we
         // will look at desired action for node.
         //
-        final String cacheKey = node.toString() + ":" + providerSegmentationId + ":" +
+        final String cacheKey = node.toString() + ":" + sourceSegmentationId + ":" + destinationSegmentationId + ":" +
                                 ipStr + "/" + Integer.toString(mask);
         final Boolean isProgrammed = routerInterfacesCache.contains(cacheKey);
 
         if (actionForNode == Action.DELETE && isProgrammed == Boolean.FALSE) {
-            logger.trace("programRouterInterfaceStage1 for node {} providerId {} mac {} ip {} mask {} action {}" +
-                         " is already done",
-                         node.getNodeIDString(), providerSegmentationId, macAddress, ipStr, mask, actionForNode);
+            logger.trace("programRouterInterfaceStage1 for node {} sourceSegId {} destSegId {} mac {} ip {} mask {}" +
+                         "action {} is already done",
+                         node.getNodeIDString(), sourceSegmentationId, destinationSegmentationId,
+                         ipStr, mask, actionForNode);
             return;
         }
         if (actionForNode == Action.ADD && isProgrammed == Boolean.TRUE) {
-            logger.trace("programRouterInterfaceStage1 for node {} providerId {} mac {} ip {} mask {} action {}" +
-                         " is already done",
-                         node.getNodeIDString(), providerSegmentationId, macAddress, ipStr, mask, actionForNode);
+            logger.trace("programRouterInterfaceStage1 for node {} sourceSegId {} destSegId {} mac {} ip {} mask {}" +
+                         "action {} is already done",
+                         node.getNodeIDString(), sourceSegmentationId, destinationSegmentationId,
+                         ipStr, mask, actionForNode);
             return;
         }
 
-        Status status = this.programRouterInterfaceStage2(node, dpid, providerSegmentationId,
+        Status status = this.programRouterInterfaceStage2(node, dpid, sourceSegmentationId, destinationSegmentationId,
                                                           macAddress, ipStr, mask, actionForNode);
         if (status.isSuccess()) {
             // Update cache
@@ -480,7 +525,8 @@ public class NeutronL3Adapter {
         }
     }
 
-    private Status programRouterInterfaceStage2(Node node, Long dpid, String providerSegmentationId,
+    private Status programRouterInterfaceStage2(Node node, Long dpid, String sourceSegmentationId,
+                                                String destinationSegmentationId,
                                                 String macAddress,
                                                 String address, int mask,
                                                 Action actionForNode) {
@@ -489,7 +535,7 @@ public class NeutronL3Adapter {
             InetAddress inetAddress = InetAddress.getByName(address);
             status = routingProvider == null ?
                      new Status(StatusCode.SUCCESS) :
-                     routingProvider.programRouterInterface(node, dpid, providerSegmentationId,
+                     routingProvider.programRouterInterface(node, dpid, sourceSegmentationId, destinationSegmentationId,
                                                             macAddress, inetAddress, mask, actionForNode);
         } catch (UnknownHostException e) {
             status = new Status(StatusCode.BADREQUEST);

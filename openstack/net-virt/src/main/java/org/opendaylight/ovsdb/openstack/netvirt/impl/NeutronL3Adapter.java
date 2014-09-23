@@ -192,7 +192,7 @@ public class NeutronL3Adapter {
                     break;
                 }
             }
-            if (currPortIsInSameSubnet == true) {
+            if (currPortIsInSameSubnet) {
                 this.updateL3ForNeutronPort(neutronPort, isDelete);
             }
         }
@@ -674,7 +674,7 @@ public class NeutronL3Adapter {
         // TODO: As of Helium, mac address for default gateway is required (bug 1705).
         if (defaultGatewayMacAddress == null) {
             logger.error("ProgramDefaultRoute mac not provided. gatewayIp:{} node:{} action:{}",
-                         defaultGatewayMacAddress, gatewayIp, node, actionForNodeDefaultRoute);
+                         gatewayIp, node, actionForNodeDefaultRoute);
             return new Status(StatusCode.NOTIMPLEMENTED);  // Bug 1705
         }
 

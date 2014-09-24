@@ -12,6 +12,7 @@ package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services;
 import java.math.BigInteger;
 import java.util.List;
 
+//import java.util.ListIterator;
 import org.opendaylight.ovsdb.openstack.netvirt.api.L2ForwardingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
@@ -306,8 +307,8 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
      */
 
     @Override
-    public void programLocalVlanBcastOut(Long dpidLong,
-            String segmentationId, Long localPort, Long ethPort, boolean write) {
+    public void programLocalVlanBcastOut(Long dpidLong, String segmentationId,
+                                         Long localPort, Long ethPort, boolean write) {
 
         String nodeName = OPENFLOW + dpidLong;
 
@@ -389,7 +390,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
                         }
                     }
                 }
-                logger.info("VlanBcastOut_ addNew= {}", addNew);
+
                 if (addNew) {
                     ActionBuilder ab = new ActionBuilder();
 
@@ -413,13 +414,12 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
 
             // Add InstructionsBuilder to FlowBuilder
             flowBuilder.setInstructions(isb.build());
-
             writeFlow(flowBuilder, nodeBuilder);
         } else {
             //boolean flowRemove = removeOutputPortFromGroup(nodeBuilder, ib, dpidLong,
             //                     localPort, existingInstructions);
-            boolean flowRemove = InstructionUtils.removeOutputPortFromInstructions(ib, dpidLong,
-                    localPort, existingInstructions);
+            boolean flowRemove = removeOutputPortFromInstructions(ib, dpidLong, localPort, ethPort,
+                    existingInstructions);
             if (flowRemove) {
                 /* if all ports are removed, remove flow */
                 removeFlow(flowBuilder, nodeBuilder);
@@ -438,6 +438,54 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
                 writeFlow(flowBuilder, nodeBuilder);
             }
         }
+    }
+
+    private boolean removeOutputPortFromInstructions(InstructionBuilder ib, Long dpidLong, Long localPort,
+                                                     Long ethPort, List<Instruction> instructions) {
+        List<Action> actionList = Lists.newArrayList();
+        boolean removeFlow = true;
+
+        if (instructions != null) {
+            ApplyActionsCase aac = (ApplyActionsCase) ib.getInstruction();
+            Instruction in = instructions.get(0);
+            List<Action> oldActionList = (((ApplyActionsCase) in.getInstruction()).getApplyActions().getAction());
+            NodeConnectorId ncid = new NodeConnectorId(OPENFLOW + dpidLong + ":" + localPort);
+            NodeConnectorId ncidEth = new NodeConnectorId(OPENFLOW + dpidLong + ":" + ethPort);
+
+            // Remove the port from the output list
+            ActionBuilder ab = new ActionBuilder();
+            int index = 2;
+            //for (ListIterator<Action> it = oldActionList.listIterator(oldActionList.size()); it.hasPrevious();) {
+            //    Action action = it.previous();
+            for (Action action : oldActionList) {
+                if (action.getAction() instanceof OutputActionCase) {
+                    OutputActionCase opAction = (OutputActionCase) action.getAction();
+                    if (opAction.getOutputAction().getOutputNodeConnector().equals(new Uri(ncidEth))) {
+                        actionList.add(action);
+                    } else if (opAction.getOutputAction().getOutputNodeConnector().equals(new Uri(ncid)) == false) {
+                        ab.setAction(action.getAction());
+                        ab.setOrder(index);
+                        ab.setKey(new ActionKey(index));
+                        actionList.add(ab.build());
+                        index++;
+                    }
+                } else {
+                    actionList.add(action);
+                }
+            }
+            ApplyActionsBuilder aab = new ApplyActionsBuilder();
+            aab.setAction(actionList);
+            ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+        }
+
+        if (actionList != null && actionList.size() > 2) {
+            // Add InstructionBuilder to the Instruction(s)Builder List
+            InstructionsBuilder isb = new InstructionsBuilder();
+            isb.setInstruction(instructions);
+            removeFlow = false;
+        }
+
+        return removeFlow;
     }
 
     /*

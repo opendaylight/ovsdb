@@ -1227,13 +1227,20 @@ public class OF13Provider implements NetworkingProvider {
             for (Node dstNode : nodes) {
                 InetAddress src = configurationService.getTunnelEndPoint(srcNode);
                 InetAddress dst = configurationService.getTunnelEndPoint(dstNode);
-                Status status = addTunnelPort(srcNode, network.getProviderNetworkType(), src, dst);
-                if (status.isSuccess()) {
-                    this.programTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), dst, srcNode, intf, true);
-                }
-                addTunnelPort(dstNode, network.getProviderNetworkType(), dst, src);
-                if (status.isSuccess()) {
-                    this.programTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), src, dstNode, intf, false);
+                if ((src != null) && (dst != null)) {
+                    Status status = addTunnelPort(srcNode, network.getProviderNetworkType(), src, dst);
+                    if (status.isSuccess()) {
+                        this.programTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), dst, srcNode, intf, true);
+                    }
+                    addTunnelPort(dstNode, network.getProviderNetworkType(), dst, src);
+                    if (status.isSuccess()) {
+                        this.programTunnelRules(network.getProviderNetworkType(), network.getProviderSegmentationID(), src, dstNode, intf, false);
+                    }
+                } else {
+                    logger.warn("Tunnel end-point configuration missing. Please configure it in OpenVSwitch Table. " +
+                            "Check source {} or destination {}",
+                            src != null ? src.getHostAddress() : "null",
+                            dst != null ? dst.getHostAddress() : "null");
                 }
             }
         }
@@ -1304,12 +1311,19 @@ public class OF13Provider implements NetworkingProvider {
                 for (Node dstNode : nodes) {
                     InetAddress src = configurationService.getTunnelEndPoint(srcNode);
                     InetAddress dst = configurationService.getTunnelEndPoint(dstNode);
-                    logger.info("Remove tunnel rules for interface " + intf.getName() + " on srcNode " + srcNode.getNodeIDString());
-                    this.removeTunnelRules(tunnelType, network.getProviderSegmentationID(),
-                            dst, srcNode, intf, true, isLastInstanceOnNode);
-                    logger.info("Remove tunnel rules for interface " + intf.getName() + " on dstNode " + dstNode.getNodeIDString());
-                    this.removeTunnelRules(tunnelType, network.getProviderSegmentationID(),
-                            src, dstNode, intf, false, isLastInstanceOnNode);
+                    if ((src != null) && (dst != null)) {
+                        logger.info("Remove tunnel rules for interface " + intf.getName() + " on srcNode " + srcNode.getNodeIDString());
+                        this.removeTunnelRules(tunnelType, network.getProviderSegmentationID(),
+                                dst, srcNode, intf, true, isLastInstanceOnNode);
+                        logger.info("Remove tunnel rules for interface " + intf.getName() + " on dstNode " + dstNode.getNodeIDString());
+                        this.removeTunnelRules(tunnelType, network.getProviderSegmentationID(),
+                                src, dstNode, intf, false, isLastInstanceOnNode);
+                    } else {
+                        logger.warn("Tunnel end-point configuration missing. Please configure it in OpenVSwitch Table. ",
+                                "Check source {} or destination {}",
+                                src != null ? src.getHostAddress() : "null",
+                                dst != null ? dst.getHostAddress() : "null");
+                    }
                 }
             }
         }

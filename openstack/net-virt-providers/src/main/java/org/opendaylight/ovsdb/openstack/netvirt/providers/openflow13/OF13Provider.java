@@ -704,14 +704,14 @@ public class OF13Provider implements NetworkingProvider {
          * Action: Go to table 2
          * -------------------------------------------
          * Example: table=1,priority=8192,vlan_id=0x5 actions=output:1,goto_table:2
+         * table=110,priority=8192,dl_vlan=2001 actions=output:2
          */
 
-        handleVlanMiss(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD,
-                segmentationId, ethPort, true);
+        handleVlanMiss(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, ethPort, true);
     }
 
     private void removeRemoteEgressVlanRules(Node node, Long dpid, String segmentationId,
-                                             String attachedMac, long ethPort) {
+                                             String attachedMac, long localPort, long ethPort) {
         /*
          * Table(1) Rule #1
          * ----------------
@@ -724,29 +724,6 @@ public class OF13Provider implements NetworkingProvider {
 
         //handleVlanOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD,
         //        segmentationId, ethPort, attachedMac, false);
-    }
-
-    private void removePerVlanRules(Node node, Long dpid, String segmentationId, long localPort, long ethPort) {
-        /*
-         * Table(2) Rule #3
-         * ----------------
-         * Match: Any Remaining Flows w/a VLAN ID
-         * Action: Drop w/ a low priority
-         * Example: table=2,priority=8192,vlan_id=0x5 actions=drop
-         */
-
-        handleLocalVlanTableMiss(dpid, TABLE_2_LOCAL_FORWARD, segmentationId,
-                false);
-
-        /*
-         * Table(0) Rule #2
-         * ----------------
-         * Match: Ingress port = physical interface, Vlan ID
-         * Action: GOTO Local Table 2
-         */
-
-        handleVlanIn(dpid, TABLE_0_DEFAULT_INGRESS, TABLE_2_LOCAL_FORWARD,
-                segmentationId, ethPort, false);
 
         /*
          * Table(1) Rule #2
@@ -760,6 +737,40 @@ public class OF13Provider implements NetworkingProvider {
          */
 
         handleLocalVlanBcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId, localPort, ethPort, false);
+    }
+
+    private void removePerVlanRules(Node node, Long dpid, String segmentationId, long localPort, long ethPort) {
+        /*
+         * Table(2) Rule #3
+         * ----------------
+         * Match: Any Remaining Flows w/a VLAN ID
+         * Action: Drop w/ a low priority
+         * Example: table=2,priority=8192,vlan_id=0x5 actions=drop
+         */
+
+        //handleLocalVlanTableMiss(dpid, TABLE_2_LOCAL_FORWARD, segmentationId, false);
+
+        /*
+         * Table(0) Rule #2
+         * ----------------
+         * Match: Ingress port = physical interface, Vlan ID
+         * Action: GOTO Local Table 2
+         */
+
+        handleVlanIn(dpid, TABLE_0_DEFAULT_INGRESS, TABLE_2_LOCAL_FORWARD, segmentationId, ethPort, false);
+
+        /*
+         * Table(1) Rule #2
+         * ----------------
+         * Match: Match VLAN ID and L2 ::::FF:FF Flooding
+         * Action: Flood to local and remote VLAN members
+         * -------------------------------------------
+         * Example: table=1,priority=16384,vlan_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
+         * actions=output:10 (eth port),goto_table:2
+         * table=110, priority=16384,dl_vlan=2001,dl_dst=01:00:00:00:00:00/01:00:00:00:00:00 actions=output:2,pop_vlan,output:1,output:3,output:4
+         */
+
+        //handleLocalVlanBcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId, localPort, ethPort, false);
 
         /*
          * Table(1) Rule #2
@@ -781,6 +792,7 @@ public class OF13Provider implements NetworkingProvider {
          * Action: Go to table 2
          * -------------------------------------------
          * Example: table=1,priority=8192,vlan_id=0x5 actions=output:1,goto_table:2
+         * table=110,priority=8192,dl_vlan=2001 actions=output:2
          */
 
         handleVlanMiss(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, ethPort, false);
@@ -1188,7 +1200,7 @@ public class OF13Provider implements NetworkingProvider {
                         }
                         logger.debug("Identified eth port {} -> OF ({}) on {}", ethIntf.getName(), ethOFPort, node);
 
-                        removeRemoteEgressVlanRules(node, dpid, network.getProviderSegmentationID(), attachedMac, ethOFPort);
+                        removeRemoteEgressVlanRules(node, dpid, network.getProviderSegmentationID(), attachedMac, localPort, ethOFPort);
                         if (isLastInstanceOnNode) {
                             removePerVlanRules(node, dpid, network.getProviderSegmentationID(), localPort, ethOFPort);
                         }
@@ -1537,6 +1549,7 @@ public class OF13Provider implements NetworkingProvider {
      * Match: Vlan ID
      * Action: Output port eth interface
      * table=1,priority=8192,vlan_id=0x5 actions= output port:eth1
+     * table=110,priority=8192,dl_vlan=2001 actions=output:2
      */
 
     private void handleVlanMiss(Long dpidLong, Short writeTable,
@@ -1589,11 +1602,11 @@ public class OF13Provider implements NetworkingProvider {
      * Match: vlan ID and dMAC (::::FF:FF)
      * table=2,priority=16384,vlan_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
      * actions=strip_vlan, output:2,3,4,5
+     * table=110,dl_vlan=2001,dl_dst=01:00:00:00:00:00/01:00:00:00:00:00 actions=output:2,pop_vlan,output:1,output:3,output:4
      */
 
-    private void handleLocalVlanBcastOut(Long dpidLong, Short writeTable,
-            String segmentationId, Long localPort, Long ethPort,
-            boolean write) {
+    private void handleLocalVlanBcastOut(Long dpidLong, Short writeTable, String segmentationId,
+                                         Long localPort, Long ethPort, boolean write) {
         l2ForwardingProvider.programLocalVlanBcastOut(dpidLong, segmentationId, localPort, ethPort, write);
     }
 

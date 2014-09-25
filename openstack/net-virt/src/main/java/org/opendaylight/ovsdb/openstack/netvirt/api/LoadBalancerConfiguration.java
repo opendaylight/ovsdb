@@ -124,6 +124,8 @@ public class LoadBalancerConfiguration {
         this.name = lbConfig.getName();
         this.vip = lbConfig.getVip();
         this.vmac = lbConfig.getVmac();
+        this.providerNetworkType = lbConfig.getProviderNetworkType();
+        this.providerSegmentationId = lbConfig.getProviderSegmentationId();
     }
 
     public Map<String, LoadBalancerPoolMember> getMembers() {

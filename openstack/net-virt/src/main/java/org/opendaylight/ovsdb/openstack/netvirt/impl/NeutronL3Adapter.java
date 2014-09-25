@@ -135,7 +135,8 @@ public class NeutronL3Adapter {
         // Treat the port event as a router interface event if the port belongs to router. This is a
         // helper for handling cases when handleNeutronRouterInterfaceEvent is not available
         //
-        if (neutronPort.getDeviceOwner().equalsIgnoreCase("network:router_interface")) {
+        if (neutronPort.getDeviceOwner().equalsIgnoreCase("network:router_interface") ||
+            neutronPort.getDeviceOwner().equalsIgnoreCase("network:router_gateway")) {
             for (Neutron_IPs neutronIP : neutronPort.getFixedIPs()) {
                 NeutronRouter_Interface neutronRouterInterface =
                         new NeutronRouter_Interface(neutronIP.getSubnetUUID(), neutronPort.getPortUUID());
@@ -406,8 +407,10 @@ public class NeutronL3Adapter {
         }
         for (Node node : nodes) {
             final Long dpid = getDpid(node);
+            // Action for current node: external networks are tenant independent. Being so, we must assume that it
+            // is needed independent of the tenant's presence (Bug 2094).
             final Action actionForNode =
-                    tenantNetworkManager.isTenantNetworkPresentInNode(node, destinationSegmentationId) ?
+                    isExternal || tenantNetworkManager.isTenantNetworkPresentInNode(node, destinationSegmentationId) ?
                     action : Action.DELETE;
 
             for (Neutron_IPs neutronIP : ipList) {

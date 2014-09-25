@@ -186,11 +186,6 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
     public LoadBalancerConfiguration extractLBConfiguration(NeutronLoadBalancerPoolMember neutronLBPoolMember) {
         String memberID = neutronLBPoolMember.getPoolMemberID();
         String memberIP = neutronLBPoolMember.getPoolMemberAddress();
-        String memberMAC = NeutronCacheUtils.getMacAddress(neutronPortsCache, memberIP);
-        if (memberMAC == null) {
-            logger.debug("Neutron LB pool member {} MAC address unavailable", memberID);
-            return null;
-        }
         String memberSubnetID = neutronLBPoolMember.getPoolMemberSubnetID();
         Integer memberPort = neutronLBPoolMember.getPoolMemberProtoPort();
         String memberPoolID = neutronLBPoolMember.getPoolID();
@@ -201,6 +196,11 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
                     memberID, memberPoolID, memberSubnetID);
             return null;
         }
+        String memberMAC = NeutronCacheUtils.getMacAddress(neutronPortsCache, memberSubnetID, memberIP);
+        if (memberMAC == null) {
+            logger.debug("Neutron LB pool member {} MAC address unavailable", memberID);
+            return null;
+        }
         NeutronLoadBalancerPool neutronLBPool = neutronLBPoolCache.getNeutronLoadBalancerPool(memberPoolID);
         memberProtocol = neutronLBPool.getLoadBalancerPoolProtocol();
         if (!(memberProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_TCP) ||
@@ -208,7 +208,7 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
                 memberProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTPS)))
             return null;
 
-        String loadBalancerSubnetID, loadBalancerVip=null, loadBalancerName=null;
+        String loadBalancerSubnetID=null, loadBalancerVip=null, loadBalancerName=null;
         for (NeutronLoadBalancer neutronLB: neutronLBCache.getAllNeutronLoadBalancers()) {
             loadBalancerSubnetID = neutronLB.getLoadBalancerVipSubnetID();
             if (memberSubnetID.equals(loadBalancerSubnetID)) {
@@ -228,7 +228,7 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
             lbConfig.setProviderNetworkType(providerInfo.getKey());
             lbConfig.setProviderSegmentationId(providerInfo.getValue());
         }
-        lbConfig.setVmac(NeutronCacheUtils.getMacAddress(neutronPortsCache, loadBalancerVip));
+        lbConfig.setVmac(NeutronCacheUtils.getMacAddress(neutronPortsCache, loadBalancerSubnetID, loadBalancerVip));
 
         /* Extract all other active members and include in LB config
          */
@@ -250,7 +250,7 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
             if (otherMemberIP == null || otherMemberSubnetID == null || otherMemberAdminStateIsUp == null)
                 continue;
             else if (otherMemberAdminStateIsUp.booleanValue()) {
-                otherMemberMAC = NeutronCacheUtils.getMacAddress(neutronPortsCache, otherMemberIP);
+                otherMemberMAC = NeutronCacheUtils.getMacAddress(neutronPortsCache, otherMemberSubnetID, otherMemberIP);
                 if (otherMemberMAC == null)
                     continue;
                 lbConfig.addMember(otherMemberID, otherMemberIP, otherMemberMAC, otherMemberProtocol, otherMemberPort);

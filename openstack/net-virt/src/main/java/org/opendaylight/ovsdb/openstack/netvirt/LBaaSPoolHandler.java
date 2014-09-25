@@ -219,7 +219,7 @@ public class LBaaSPoolHandler extends AbstractHandler
                 lbConfig.setProviderNetworkType(providerInfo.getKey());
                 lbConfig.setProviderSegmentationId(providerInfo.getValue());
             }
-            lbConfig.setVmac(NeutronCacheUtils.getMacAddress(neutronPortsCache, loadBalancerVip));
+            lbConfig.setVmac(NeutronCacheUtils.getMacAddress(neutronPortsCache, loadBalancerSubnetID, loadBalancerVip));
 
             /* Iterate over all the members in this pool and find those in same
              * subnet as the VIP. Those will be included in the lbConfigList
@@ -240,7 +240,7 @@ public class LBaaSPoolHandler extends AbstractHandler
                         logger.debug("Neutron LB pool member details incomplete: {}", neutronLBPoolMember);
                         continue;
                     }
-                    memberMAC = NeutronCacheUtils.getMacAddress(neutronPortsCache, memberIP);
+                    memberMAC = NeutronCacheUtils.getMacAddress(neutronPortsCache, memberSubnetID, memberIP);
                     if (memberMAC == null)
                         continue;
                     lbConfig.addMember(memberID, memberIP, memberMAC, poolProtocol, memberPort);

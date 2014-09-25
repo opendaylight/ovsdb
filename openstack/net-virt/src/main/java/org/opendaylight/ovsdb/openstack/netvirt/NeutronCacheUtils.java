@@ -30,8 +30,8 @@ public class NeutronCacheUtils {
      * @param ipAddr IP address of a member or VM
      * @return MAC address registered with that IP address
      */
-    public static String getMacAddress(INeutronPortCRUD neutronPortsCache, String ipAddr) {
-        if (ipAddr == null)
+    public static String getMacAddress(INeutronPortCRUD neutronPortsCache, String subnetID, String ipAddr) {
+        if (ipAddr == null || subnetID == null)
             return null;
 
         List<Neutron_IPs> fixedIPs;
@@ -47,7 +47,7 @@ public class NeutronCacheUtils {
                 fixedIPIterator = fixedIPs.iterator();
                 while (fixedIPIterator.hasNext()) {
                     ip = fixedIPIterator.next();
-                    if (ip.getIpAddress().equals(ipAddr))
+                    if (ip.getIpAddress().equals(ipAddr) && ip.getSubnetUUID().equals(subnetID))
                         return port.getMacAddress();
                 }
             }

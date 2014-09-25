@@ -176,7 +176,7 @@ public class LBaaSHandler extends AbstractHandler
             lbConfig.setProviderNetworkType(providerInfo.getKey());
             lbConfig.setProviderSegmentationId(providerInfo.getValue());
         }
-        lbConfig.setVmac(NeutronCacheUtils.getMacAddress(neutronPortsCache, loadBalancerVip));
+        lbConfig.setVmac(NeutronCacheUtils.getMacAddress(neutronPortsCache, loadBalancerSubnetID, loadBalancerVip));
 
         String memberID, memberIP, memberMAC, memberProtocol, memberSubnetID;
         Integer memberPort;
@@ -205,7 +205,7 @@ public class LBaaSHandler extends AbstractHandler
                         logger.debug("Neutron LB pool member details incomplete: {}", neutronLBPoolMember);
                         continue;
                     }
-                    memberMAC = NeutronCacheUtils.getMacAddress(neutronPortsCache, memberIP);
+                    memberMAC = NeutronCacheUtils.getMacAddress(neutronPortsCache, memberSubnetID, memberIP);
                     if (memberMAC == null)
                         continue;
                     lbConfig.addMember(memberID, memberIP, memberMAC, memberProtocol, memberPort);

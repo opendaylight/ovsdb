@@ -185,16 +185,17 @@ public class NeutronL3Adapter {
         // see if they are affected by l3
         //
         for (NeutronPort neutronPort : neutronPortCache.getAllPorts()) {
-            boolean currPortIsInSameSubnet = false;
-            for (Neutron_IPs neutronIP : neutronPort.getFixedIPs()) {
-                if (neutronRouterInterface.getSubnetUUID().equalsIgnoreCase(neutronIP.getSubnetUUID())) {
-                    currPortIsInSameSubnet = true;
-                    break;
+            boolean currPortShouldBeDeleted = false;
+            // Note: delete in this case only applies to 1)router interface delete and 2)ports on the same subnet
+            if (isDelete) {
+                for (Neutron_IPs neutronIP : neutronPort.getFixedIPs()) {
+                    if (neutronRouterInterface.getSubnetUUID().equalsIgnoreCase(neutronIP.getSubnetUUID())) {
+                        currPortShouldBeDeleted = true;
+                        break;
+                    }
                 }
             }
-            if (currPortIsInSameSubnet == true) {
-                this.updateL3ForNeutronPort(neutronPort, isDelete);
-            }
+            this.updateL3ForNeutronPort(neutronPort, currPortShouldBeDeleted);
         }
     }
 
@@ -280,20 +281,21 @@ public class NeutronL3Adapter {
         }
         for (Node node : nodes) {
             final Long dpid = getDpid(node);
-            final Action actionForNode =
-                    tenantNetworkManager.isTenantNetworkPresentInNode(node, providerSegmentationId) ?
-                    action : Action.DELETE;
+            final boolean tenantNetworkPresentInNode =
+                    tenantNetworkManager.isTenantNetworkPresentInNode(node, providerSegmentationId);
             for (Neutron_IPs neutronIP : neutronPort.getFixedIPs()) {
                 final String tenantIpStr = neutronIP.getIpAddress();
                 if (tenantIpStr.isEmpty()) {
                     continue;
                 }
 
-                // Configure L3 fwd
-                programL3ForwardingStage1(node, dpid, providerSegmentationId, tenantMac, tenantIpStr, actionForNode);
+                // Configure L3 fwd. We do that regardless of tenant network present, because these rules are
+                // still needed when routing to subnets non-local to node (bug 2076).
+                programL3ForwardingStage1(node, dpid, providerSegmentationId, tenantMac, tenantIpStr, action);
 
-                // Configure distributed ARP responder
-                programStaticArpStage1(node, dpid, providerSegmentationId, tenantMac, tenantIpStr, actionForNode);
+                // Configure distributed ARP responder. Only needed if tenant network exists in node.
+                programStaticArpStage1(node, dpid, providerSegmentationId, tenantMac, tenantIpStr,
+                                       tenantNetworkPresentInNode ? action : Action.DELETE);
             }
         }
     }

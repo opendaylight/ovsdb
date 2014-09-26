@@ -127,8 +127,22 @@ public class OvsdbConnectionService implements OvsdbConnection {
     }
 
     @Override
-    public void registerConnectionListener(OvsdbConnectionListener listener) {
+    public void registerConnectionListener(final OvsdbConnectionListener listener) {
         connectionListeners.add(listener);
+        // This is a fix for bug 1802. See the comment linked below for
+        // a detailed description of why it's necessary. In short, Karaf
+        // requires us to assume nothing about load order, so we need to
+        // play back existing connections, in case the library is loaded
+        // before the plugin.
+        // More info: https://bugs.opendaylight.org/show_bug.cgi?id=1802#c0
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                for (OvsdbClient client : connections.keySet()) {
+                    listener.connected(client);
+                }
+            }
+        });
     }
 
     @Override

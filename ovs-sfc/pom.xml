@@ -7,18 +7,18 @@
     <parent>
         <groupId>org.opendaylight.ovsdb</groupId>
         <artifactId>commons</artifactId>
-        <version>1.2.0-SNAPSHOT</version>
+        <version>1.2.0-Helium</version>
         <relativePath>../commons/parent</relativePath>
     </parent>
     <artifactId>ovssfc</artifactId>
     <name>OpenDaylight OVS Service Function Chaining</name>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1-Helium</version>
     <packaging>bundle</packaging>
 
     <properties>
         <jmxGeneratorPath>target/generated-sources/config</jmxGeneratorPath>
-        <ietf.model.version>2010.09.24.4-SNAPSHOT</ietf.model.version>
-        <ietf.yang.types.version>2013.07.15.1-SNAPSHOT</ietf.yang.types.version>
+        <ietf.model.version>2010.09.24.4-Helium</ietf.model.version>
+        <ietf.yang.types.version>2013.07.15.1-Helium</ietf.yang.types.version>
     </properties>
 
     <dependencies>
@@ -78,7 +78,7 @@
         <dependency>
             <groupId>org.opendaylight.ovsdb</groupId>
             <artifactId>utils.mdsal-openflow</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.0.0-Helium</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.sfc</groupId>

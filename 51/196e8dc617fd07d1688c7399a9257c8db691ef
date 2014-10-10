@@ -1,0 +1,8 @@
+Verified+1: jenkins-ovsdb <jenkins-ovsdb@opendaylight.org>
+Code-Review+2: Sam Hague <shague@redhat.com>
+Verified+1: Sam Hague <shague@redhat.com>
+Submitted-by: Sam Hague <shague@redhat.com>
+Submitted-at: Fri, 10 Oct 2014 21:38:08 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/11898
+Project: ovsdb
+Branch: refs/heads/master

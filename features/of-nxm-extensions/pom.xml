@@ -4,19 +4,19 @@
   <parent>
     <groupId>org.opendaylight.ovsdb</groupId>
     <artifactId>commons</artifactId>
-    <version>1.2.0-Helium</version>
+    <version>1.2.1-SNAPSHOT</version>
     <relativePath>../../commons/parent</relativePath>
   </parent>
   <artifactId>features-openflow-nxm</artifactId>
   <name>Openflow Nicira Extensions Karaf Feature</name>
-  <version>0.0.3-Helium</version>
+  <version>0.0.4-SNAPSHOT</version>
   <packaging>jar</packaging>
   <properties>
     <features.file>features.xml</features.file>
-    <openflowjava.version>0.5-Helium</openflowjava.version>
-    <openflowplugin.version>0.0.3-Helium</openflowplugin.version>
+    <openflowjava.version>0.5.1-SNAPSHOT</openflowjava.version>
+    <openflowplugin.version>0.0.4-SNAPSHOT</openflowplugin.version>
     <openflowj.version>1.0.2</openflowj.version>
-    <ovsdb.nx.version>1.0.0-Helium</ovsdb.nx.version>
+    <ovsdb.nx.version>1.0.1-SNAPSHOT</ovsdb.nx.version>
   </properties>
   <dependencies>
     <dependency>
@@ -54,12 +54,12 @@
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>of-extension.nx-ofjava</artifactId>
-      <version>1.0.0-Helium</version>
+      <version>1.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>of-extension.nx-sal</artifactId>
-      <version>1.0.0-Helium</version>
+      <version>1.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
@@ -155,7 +155,7 @@
           <systemPropertyVariables>
             <karaf.distro.groupId>org.opendaylight.controller</karaf.distro.groupId>
             <karaf.distro.artifactId>opendaylight-karaf-empty</karaf.distro.artifactId>
-            <karaf.distro.version>1.4.2-Helium</karaf.distro.version>
+            <karaf.distro.version>1.4.3-SNAPSHOT</karaf.distro.version>
           </systemPropertyVariables>
           <dependenciesToScan>
            <dependency>org.opendaylight.yangtools:features-test</dependency>

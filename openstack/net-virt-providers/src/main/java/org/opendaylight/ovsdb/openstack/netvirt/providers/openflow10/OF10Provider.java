@@ -22,6 +22,7 @@ import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.controller.switchmanager.Switch;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
@@ -57,7 +58,7 @@ public class OF10Provider implements NetworkingProvider {
     public static final int LLDP_PRIORITY = 1000;
     public static final int NORMAL_PRIORITY = 0;
 
-    private volatile org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService configurationService;
+    private volatile ConfigurationService configurationService;
     private volatile BridgeConfigurationManager bridgeConfigurationManager;
     private volatile TenantNetworkManager tenantNetworkManager;
     private volatile OvsdbConfigurationService ovsdbConfigurationService;

@@ -25,6 +25,7 @@ import org.opendaylight.ovsdb.integrationtest.ConfigurationBundles;
 import org.opendaylight.ovsdb.integrationtest.OvsdbIntegrationTestBase;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.Version;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
@@ -79,7 +80,7 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
     @Inject
     BridgeConfigurationManager bridgeConfigurationManager;
     @Inject
-    org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService netVirtConfigurationService;
+    ConfigurationService netVirtConfigurationService;
 
     Boolean tearDownBridge = false;
 

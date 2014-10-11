@@ -17,6 +17,7 @@ import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
@@ -50,7 +51,7 @@ public class NetworkHandler extends AbstractHandler
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile TenantNetworkManager tenantNetworkManager;
     private volatile BridgeConfigurationManager bridgeConfigurationManager;
-    private volatile org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService configurationService;
+    private volatile ConfigurationService configurationService;
     private volatile OvsdbConfigurationService ovsdbConfigurationService;
     private volatile OvsdbConnectionService connectionService;
     private volatile INeutronNetworkCRUD neutronNetworkCache;

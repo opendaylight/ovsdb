@@ -19,6 +19,7 @@ import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
@@ -46,7 +47,7 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
     List<Node> nodeCache;
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
-    private volatile org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService configurationService;
+    private volatile ConfigurationService configurationService;
     private volatile BridgeConfigurationManager bridgeConfigurationManager;
     private volatile TenantNetworkManager tenantNetworkManager;
     private volatile NetworkingProviderManager networkingProviderManager;

@@ -20,6 +20,7 @@ import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ClassifierProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EgressAclProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.InboundNatProvider;
@@ -133,7 +134,7 @@ public class Activator extends ComponentActivatorAbstractBase {
 
             c.setInterface(NetworkingProvider.class.getName(), of10Properties);
             c.add(createServiceDependency()
-                          .setService(org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService.class)
+                          .setService(ConfigurationService.class)
                           .setRequired(true));
             c.add(createServiceDependency()
                           .setService(BridgeConfigurationManager.class)
@@ -158,7 +159,7 @@ public class Activator extends ComponentActivatorAbstractBase {
 
             c.setInterface(NetworkingProvider.class.getName(), of13Properties);
             c.add(createServiceDependency()
-                          .setService(org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService.class)
+                          .setService(ConfigurationService.class)
                           .setRequired(true));
             c.add(createServiceDependency()
                           .setService(BridgeConfigurationManager.class)

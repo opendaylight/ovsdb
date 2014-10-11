@@ -25,6 +25,7 @@ import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.lib.notation.Row;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.MultiTenantAwareRouter;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
@@ -65,7 +66,7 @@ public class NeutronL3Adapter {
     static final Logger logger = LoggerFactory.getLogger(NeutronL3Adapter.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
-    private volatile org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService configurationService;
+    private volatile ConfigurationService configurationService;
     private volatile TenantNetworkManager tenantNetworkManager;
     private volatile NetworkingProviderManager networkingProviderManager;
     private volatile OvsdbConfigurationService ovsdbConfigurationService;

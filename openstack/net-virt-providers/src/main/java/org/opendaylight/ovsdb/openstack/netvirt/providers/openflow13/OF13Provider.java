@@ -32,6 +32,7 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ClassifierProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EgressAclProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.IngressAclProvider;
@@ -109,7 +110,7 @@ public class OF13Provider implements NetworkingProvider {
     private static final String OPENFLOW = "openflow:";
     private static Long groupId = 1L;
 
-    private volatile org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService configurationService;
+    private volatile ConfigurationService configurationService;
     private volatile BridgeConfigurationManager bridgeConfigurationManager;
     private volatile TenantNetworkManager tenantNetworkManager;
     private volatile OvsdbConfigurationService ovsdbConfigurationService;

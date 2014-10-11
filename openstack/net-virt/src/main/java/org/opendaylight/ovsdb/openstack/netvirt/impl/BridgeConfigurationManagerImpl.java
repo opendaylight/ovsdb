@@ -18,6 +18,7 @@ import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
@@ -43,7 +44,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     static final Logger logger = LoggerFactory.getLogger(BridgeConfigurationManagerImpl.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
-    private volatile org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService configurationService;
+    private volatile ConfigurationService configurationService;
     private volatile NetworkingProviderManager networkingProviderManager;
     private volatile OvsdbConfigurationService ovsdbConfigurationService;
 

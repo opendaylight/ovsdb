@@ -1,31 +1,9 @@
 DIRECTORY ORGANIZATION
 ======================
 
-- library : Contains Schema-independent library that is a reference implementation for RFC 7047.
-            This module doesn't depend on any of the Opendaylight components.
-            This library module can also be used independently in a non-OSGi environment.
-
-- schemas :
-  |-- openvswitch : Schema wrapper that represents http://openvswitch.org/ovs-vswitchd.conf.db.5.pdf
-  |-- hardwarevtep: Schema wrapper that represents http://openvswitch.org/docs/vtep.5.pdf
-
-- plugin : Contains Opendaylight Southbound Plugin APIs and provides an simpler API interface on top of library layer.
-           Ideally, this module should also be schema independent. But due to legacy reasons this layer contains some
-           deprecated functionalities that assume openvswitch schema.
-
-- northbound : Provides AD-SAL style Northbound REST APIs.
-               Supports the legacy v2 APIs to provide backward compatibility for Hydrogen Release
-               Also supports the newer v3 APIs to provide schema-independent access to the OVSDB protocol.
-
-- openstack
-  |-- net-virt : Handles the Openstack Neutron ML2 and Network Service calls and performs all the logic required
-                 for Network Virtualization.
-  |-- net-virt-providers : Mostly contains data-path programming functionalities via OpenFlow or potentially
-                           other protocols.
-
 - commons
-  |-- parent : Contains Parent pom.xml for all the ovsdb modules.
-  |-- integrationtest : Contains the parent pom.xml for all the integrationtest needs.
+  +-- parent : Contains Parent pom.xml for all the ovsdb modules.
+  +-- integrationtest : Contains the parent pom.xml for all the integrationtest needs.
 
 - distribution : Builds a working controller distribution based on the controller + ovsdb modules and other
                  dependant modules such as openflowplugin
@@ -34,15 +12,49 @@ DIRECTORY ORGANIZATION
 
 - integrationtest : Contains all the PAX-Exam based integrationTests that covers IT for all of the above modules.
 
+- library : Contains Schema-independent library that is a reference implementation for RFC 7047.
+            This module doesn't depend on any of the Opendaylight components.
+            This library module can also be used independently in a non-OSGi environment.
+
+- northbound : Provides AD-SAL style Northbound REST APIs.
+               Supports the legacy v2 APIs to provide backward compatibility for Hydrogen Release
+               Also supports the newer v3 APIs to provide schema-independent access to the OVSDB protocol.
+
+- of-extension : Adds OpenFlow Nicera extensions.
+
+- openstack
+  +-- net-virt : Handles the Openstack Neutron ML2 and Network Service calls and performs all the logic required
+                 for Network Virtualization.
+  +-- net-virt-providers : Mostly contains data-path programming functionalities via OpenFlow or potentially
+                           other protocols.
+
+- ovs-sfc : SFC implementation using the OVSDB project. Currently it is just a shell.
+
+- plugin : Contains Opendaylight Southbound Plugin APIs and provides an simpler API interface on top of library layer.
+           Ideally, this module should also be schema independent. But due to legacy reasons this layer contains some
+           deprecated functionalities that assume openvswitch schema.
+
+- plugin-mdsal-adapter : Adds an MD-SAL Adapter for the OVSDB Plugin. The adapter updates the MD-SAL with nodes
+                         as they are added and removed from the inventory. The Yang model provides a reference
+                         between OVSDB nodes and the OpenFlow nodes (bridges) that they manage.
+
+- plugin-shell : Contains a Karaf shell framework for OVSDB plugin and printCache command-line.
+
 - resources : Contains some useful resources such as scripts, testing utilities and tools used for deployment
               or testing the binaries generated from the OVSDB project.
+
+- schemas :
+  +-- openvswitch : Schema wrapper that represents http://openvswitch.org/ovs-vswitchd.conf.db.5.pdf
+  +-- hardwarevtep: Schema wrapper that represents http://openvswitch.org/docs/vtep.5.pdf
+
+- utils : MD-SAL OpenFlow utilities.
 
 HOW TO BUILD & RUN
 ==================
 
 Pre-requisites : JDK 1.7+, Maven 3+
 
-1. Building a OVSDB based Opendaylight Virtualization edition :
+1. Building an OVSDB based Opendaylight Virtualization edition :
    1. This is the legacy way to build and distribute Opendaylight archives. And this method was
       followed in Hydrogen and possibly in Helium release as well.
 
@@ -118,4 +130,9 @@ To run the integration tests:
     # Linux
     mvn verify -Pintegrationtest -Dovsdbserver.ipaddress=127.0.0.1 -Dovsdbserver.port=6640
     fig stop
+
+Skipping unit tests and karaf tests
+====================
+
+mvn clean install -Dmaven.test.skip=true -Dskip.karaf=true
 

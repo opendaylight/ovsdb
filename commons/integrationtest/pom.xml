@@ -736,10 +736,6 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>openstack.net-virt</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>northbound</artifactId>
     </dependency>
     <dependency>

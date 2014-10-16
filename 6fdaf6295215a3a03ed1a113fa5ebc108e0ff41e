@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_7abaf9e2",
+        "filename": "of-extension/nicira-extension-config/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-10-16T13:17:31Z",
+      "side": 1,
+      "message": "hmm... wouldn\u0027t be better to use variable as it was before?",
+      "revId": "6fdaf6295215a3a03ed1a113fa5ebc108e0ff41e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

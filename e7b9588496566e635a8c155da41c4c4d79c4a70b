@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_8760c536",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-10-17T17:03:16Z",
+      "side": 1,
+      "message": "Can you add a description of the problem and the fix? This will help when understanding the commit without actually needing to look at the code.",
+      "revId": "e7b9588496566e635a8c155da41c4c4d79c4a70b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_c776cd06",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-10-17T17:03:16Z",
+      "side": 1,
+      "message": "Can you break the code into if/then\u0027s so it is easier to read?",
+      "revId": "e7b9588496566e635a8c155da41c4c4d79c4a70b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_e773d113",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/impl/ConfigurationServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-10-17T17:03:16Z",
+      "side": 1,
+      "message": "not needed for this commit, but we should make these strings constants. This would be another reason to have a propertyUtils class to handle everything.",
+      "revId": "e7b9588496566e635a8c155da41c4c4d79c4a70b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

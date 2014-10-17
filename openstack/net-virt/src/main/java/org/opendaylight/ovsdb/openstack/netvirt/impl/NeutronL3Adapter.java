@@ -41,6 +41,9 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 
 import com.google.common.base.Preconditions;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,7 +96,7 @@ public class NeutronL3Adapter {
     private Boolean enabled = false;
 
     void init() {
-        final String enabledPropertyStr = System.getProperty("ovsdb.l3.fwd.enabled");
+        final String enabledPropertyStr = getProperty(this.getClass(), "ovsdb.l3.fwd.enabled");
         if (enabledPropertyStr != null && enabledPropertyStr.equalsIgnoreCase("yes")) {
             this.inboundIpRewriteCache = new HashSet<>();
             this.outboundIpRewriteCache = new HashSet<>();
@@ -111,6 +114,23 @@ public class NeutronL3Adapter {
         } else {
             logger.debug("OVSDB L3 forwarding is disabled");
         }
+    }
+
+    // TODO: move getProperty() to a common module
+    private static String getProperty(Class<?> classParam, final String propertyStr) {
+        String value = null;
+        Bundle bundle = FrameworkUtil.getBundle(classParam);
+
+        if (bundle != null) {
+            BundleContext bundleContext = bundle.getBundleContext();
+            if (bundleContext != null) {
+                value = bundleContext.getProperty(propertyStr);
+            }
+        }
+        if (value == null) {
+            value = System.getProperty(propertyStr);
+        }
+        return value;
     }
 
     //

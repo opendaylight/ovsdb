@@ -21,6 +21,10 @@ import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
+
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -212,7 +216,15 @@ public class ConfigurationServiceImpl implements org.opendaylight.ovsdb.openstac
     @Override
     public String getDefaultGatewayMacAddress(Node node) {
         final String l3gatewayForNode =
-            node != null ? System.getProperty("ovsdb.l3gateway.mac." + node.getNodeIDString()) : null;
-        return l3gatewayForNode != null ? l3gatewayForNode : System.getProperty("ovsdb.l3gateway.mac");
+            node != null ? getProperty(this.getClass(), "ovsdb.l3gateway.mac." + node.getNodeIDString()) : null;
+        return l3gatewayForNode != null ? l3gatewayForNode : getProperty(this.getClass(), "ovsdb.l3gateway.mac");
+    }
+
+    // TODO: move getProperty() to a common module
+    private static String getProperty(Class<?> classParam, final String propertyStr) {
+        Bundle bundle = FrameworkUtil.getBundle(classParam);
+        BundleContext bundleContext = (bundle == null) ? null : bundle.getBundleContext();
+        String value = (bundleContext == null) ? null : bundleContext.getProperty(propertyStr);
+        return (value == null) ? System.getProperty(propertyStr) : value;
     }
 }

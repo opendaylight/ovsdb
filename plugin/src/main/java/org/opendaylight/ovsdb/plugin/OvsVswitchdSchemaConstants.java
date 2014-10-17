@@ -11,6 +11,9 @@
 package org.opendaylight.ovsdb.plugin;
 
 import com.google.common.collect.Maps;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 
 import java.util.Map;
 
@@ -48,8 +51,18 @@ import java.util.Map;
         addParentColumnToMutate("Manager", "Open_vSwitch", "manager_options");
         addParentColumnToMutate("Controller", "Bridge", "controller");
         // Keep the default value if the property is not set
-        if (System.getProperty(OVSDB_AUTOCONFIGURECONTROLLER) != null)
-            autoConfigureController = Boolean.getBoolean(OVSDB_AUTOCONFIGURECONTROLLER);
+        final String autoConfigureControllerStr = getProperty(OvsVswitchdSchemaConstants.class, OVSDB_AUTOCONFIGURECONTROLLER);
+        if (autoConfigureControllerStr != null) {
+            autoConfigureController = Boolean.getBoolean(autoConfigureControllerStr);
+        }
+    }
+
+    // TODO: move getProperty() to a common module
+    private static String getProperty(Class<?> classParam, final String propertyStr) {
+        Bundle bundle = FrameworkUtil.getBundle(classParam);
+        BundleContext bundleContext = (bundle == null) ? null : bundle.getBundleContext();
+        String value = (bundleContext == null) ? null : bundleContext.getProperty(propertyStr);
+        return (value == null) ? System.getProperty(propertyStr) : value;
     }
 
     public static boolean shouldConfigureController (String databaseName, String tableName) {

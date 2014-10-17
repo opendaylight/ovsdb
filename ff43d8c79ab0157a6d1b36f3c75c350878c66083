@@ -16,6 +16,24 @@
       "revId": "ff43d8c79ab0157a6d1b36f3c75c350878c66083",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_078915ca",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-10-17T18:48:23Z",
+      "side": 1,
+      "message": "yeah, it comes back as \u0027null\u0027 when it is not present. Coming back as \"\" is also okay, because code checks for \"yes\" explicitly.",
+      "parentUuid": "ba8cc1f7_479f1d04",
+      "revId": "ff43d8c79ab0157a6d1b36f3c75c350878c66083",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

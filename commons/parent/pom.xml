@@ -33,7 +33,7 @@
     <schema.openvswitch.version>1.1.0-SNAPSHOT</schema.openvswitch.version>
     <schema.hardwarevtep.version>1.1.0-SNAPSHOT</schema.hardwarevtep.version>
     <ovsdb.ofextension.version>1.1.0-SNAPSHOT</ovsdb.ofextension.version>
-    <utils.mdsal.openflow>1.1.0-SNAPSHOT</utils.mdsal.openflow>
+    <ovsdb.utils>1.1.0-SNAPSHOT</ovsdb.utils>
     <ovsdb.ovssfc.version>0.1.0-SNAPSHOT</ovsdb.ovssfc.version>
     <!-- Skip Coverage and IT by default -->
     <skip.coverage>true</skip.coverage>
@@ -313,6 +313,11 @@
         <groupId>org.opendaylight.ovsdb</groupId>
         <artifactId>of-extension.nx-sal</artifactId>
         <version>${ovsdb.ofextension.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.ovsdb</groupId>
+        <artifactId>utils</artifactId>
+        <version>${ovsdb.utils}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.sfc</groupId>

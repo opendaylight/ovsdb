@@ -29,7 +29,7 @@
     <module>plugin-shell</module>
     <module>plugin-mdsal-adapter</module>
     <module>northbound</module>
-    <module>utils/mdsal-openflow</module>
+    <module>utils</module>
     <module>openstack/net-virt</module>
     <module>openstack/net-virt-providers</module>
     <module>of-extension/nx-ofjava</module>

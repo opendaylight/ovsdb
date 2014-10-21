@@ -62,8 +62,7 @@
         </dependency>
         <dependency>
           <groupId>org.opendaylight.ovsdb</groupId>
-          <artifactId>utils.mdsal-openflow</artifactId>
-          <version>1.1.0-SNAPSHOT</version>
+          <artifactId>utils</artifactId>
         </dependency>
         <dependency>
           <groupId>junit</groupId>
@@ -104,7 +103,7 @@
                             org.osgi.framework,
                             *
                         </Import-Package>
-                        <Embed-Dependency>utils.mdsal-openflow;type=!pom;inline=false</Embed-Dependency>
+                        <Embed-Dependency>utils;type=!pom;inline=false</Embed-Dependency>
                         <Embed-Transitive>true</Embed-Transitive>
                         <Bundle-Activator>org.opendaylight.ovsdb.openstack.netvirt.providers.Activator</Bundle-Activator>
                     </instructions>

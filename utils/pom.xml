@@ -11,7 +11,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>utils</artifactId>
-  <name>OpenDaylight OVS utility for md-sal based OpenFlow</name>
+  <name>OpenDaylight OVS utilities</name>
   <version>1.1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
@@ -42,14 +42,6 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>library</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>plugin</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.openflowplugin</groupId>

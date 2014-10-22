@@ -15,6 +15,10 @@
 
   <dependencies>
     <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>utils</artifactId>
+    </dependency>
+    <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
     </dependency>
@@ -101,8 +105,9 @@
                 org.osgi.framework,
                 javax.net.ssl,
                 *</Import-Package>
-            <Bundle-Activator>org.opendaylight.ovsdb.lib.Activator</Bundle-Activator>
+            <Embed-Dependency>utils;type=!pom;inline=false</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
+            <Bundle-Activator>org.opendaylight.ovsdb.lib.Activator</Bundle-Activator>
             <Export-Package>
                 org.opendaylight.ovsdb.lib,
                 org.opendaylight.ovsdb.lib.error,

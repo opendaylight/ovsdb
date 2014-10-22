@@ -43,10 +43,8 @@ import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcDecoder;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcEndpoint;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcServiceBinderHandler;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
+import org.opendaylight.ovsdb.utils.properties.Config;
 
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -165,7 +163,7 @@ public class OvsdbConnectionService implements OvsdbConnection {
      * be overridden using the ovsdb.listenPort system property.
      */
     private static void startOvsdbManager() {
-        String portString = getProperty(OvsdbConnectionService.class, OVSDB_LISTENPORT);
+        String portString = Config.getProperty(OvsdbConnectionService.class, OVSDB_LISTENPORT);
         if (portString != null) {
             ovsdbListenPort = Integer.decode(portString).intValue();
         }
@@ -176,23 +174,6 @@ public class OvsdbConnectionService implements OvsdbConnection {
                 ovsdbManager();
             }
         }.start();
-    }
-
-    // TODO: move getProperty() to a common module
-    private static String getProperty(Class<?> classParam, final String propertyStr) {
-        String value = null;
-        Bundle bundle = FrameworkUtil.getBundle(classParam);
-
-        if (bundle != null) {
-            BundleContext bundleContext = bundle.getBundleContext();
-            if (bundleContext != null) {
-                value = bundleContext.getProperty(propertyStr);
-            }
-        }
-        if (value == null) {
-            value = System.getProperty(propertyStr);
-        }
-        return value;
     }
 
     /**

@@ -21,10 +21,8 @@ import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
+import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -175,7 +173,7 @@ public class ConfigurationServiceImpl implements org.opendaylight.ovsdb.openstac
     @Override
     public String getOpenflowVersion(Node node) {
 
-        String configuredVersion = System.getProperty("ovsdb.of.version", "1.3");
+        String configuredVersion = ConfigProperties.getProperty(this.getClass(), "ovsdb.of.version", "1.3");
         if (configuredVersion != null){
             switch (configuredVersion){
                 case "1.0":
@@ -216,24 +214,9 @@ public class ConfigurationServiceImpl implements org.opendaylight.ovsdb.openstac
     @Override
     public String getDefaultGatewayMacAddress(Node node) {
         final String l3gatewayForNode =
-            node != null ? getProperty(this.getClass(), "ovsdb.l3gateway.mac." + node.getNodeIDString()) : null;
-        return l3gatewayForNode != null ? l3gatewayForNode : getProperty(this.getClass(), "ovsdb.l3gateway.mac");
-    }
-
-    // TODO: move getProperty() to a common module
-    private static String getProperty(Class<?> classParam, final String propertyStr) {
-        String value = null;
-        Bundle bundle = FrameworkUtil.getBundle(classParam);
-
-        if (bundle != null) {
-            BundleContext bundleContext = bundle.getBundleContext();
-            if (bundleContext != null) {
-                value = bundleContext.getProperty(propertyStr);
-            }
-        }
-        if (value == null) {
-            value = System.getProperty(propertyStr);
-        }
-        return value;
+            node != null ?
+            ConfigProperties.getProperty(this.getClass(), "ovsdb.l3gateway.mac." + node.getNodeIDString()) : null;
+        return l3gatewayForNode != null ?
+               l3gatewayForNode : ConfigProperties.getProperty(this.getClass(), "ovsdb.l3gateway.mac");
     }
 }

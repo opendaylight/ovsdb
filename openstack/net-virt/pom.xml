@@ -39,6 +39,11 @@
       <artifactId>schema.openvswitch</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>utils.config</artifactId>
+      <version>${ovsdb.utils.config.version}</version>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
@@ -64,7 +69,9 @@
               org.slf4j,
               org.osgi.framework,
               *</Import-Package>
-              <Export-Package>
+            <Embed-Dependency>utils.config;type=!pom;inline=false</Embed-Dependency>
+            <Embed-Transitive>true</Embed-Transitive>
+            <Export-Package>
                   org.opendaylight.ovsdb.openstack.netvirt.api
               </Export-Package>
             <Bundle-Activator>org.opendaylight.ovsdb.openstack.netvirt.Activator</Bundle-Activator>

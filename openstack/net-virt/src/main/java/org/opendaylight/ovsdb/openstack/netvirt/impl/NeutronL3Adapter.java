@@ -40,11 +40,9 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OutboundNatProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
+import org.opendaylight.ovsdb.utils.common.ConfigProperties;
 
 import com.google.common.base.Preconditions;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,7 +95,7 @@ public class NeutronL3Adapter {
     private Boolean enabled = false;
 
     void init() {
-        final String enabledPropertyStr = getProperty(this.getClass(), "ovsdb.l3.fwd.enabled");
+        final String enabledPropertyStr = ConfigProperties.getProperty(this.getClass(), "ovsdb.l3.fwd.enabled");
         if (enabledPropertyStr != null && enabledPropertyStr.equalsIgnoreCase("yes")) {
             this.inboundIpRewriteCache = new HashSet<>();
             this.outboundIpRewriteCache = new HashSet<>();
@@ -115,23 +113,6 @@ public class NeutronL3Adapter {
         } else {
             logger.debug("OVSDB L3 forwarding is disabled");
         }
-    }
-
-    // TODO: move getProperty() to a common module
-    private static String getProperty(Class<?> classParam, final String propertyStr) {
-        String value = null;
-        Bundle bundle = FrameworkUtil.getBundle(classParam);
-
-        if (bundle != null) {
-            BundleContext bundleContext = bundle.getBundleContext();
-            if (bundleContext != null) {
-                value = bundleContext.getProperty(propertyStr);
-            }
-        }
-        if (value == null) {
-            value = System.getProperty(propertyStr);
-        }
-        return value;
     }
 
     //
@@ -796,7 +777,7 @@ public class NeutronL3Adapter {
         // TODO: As of Helium, mac address for default gateway is required (bug 1705).
         if (defaultGatewayMacAddress == null) {
             logger.error("ProgramDefaultRoute mac not provided. gatewayIp:{} node:{} action:{}",
-                         defaultGatewayMacAddress, gatewayIp, node, actionForNodeDefaultRoute);
+                         gatewayIp, node, actionForNodeDefaultRoute);
             return new Status(StatusCode.NOTIMPLEMENTED);  // Bug 1705
         }
 

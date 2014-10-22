@@ -66,8 +66,8 @@ import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Manager;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
+import org.opendaylight.ovsdb.utils.common.ConfigProperties;
 
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
@@ -378,7 +378,7 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
     private InetAddress getControllerIPAddress(Connection connection) {
         InetAddress controllerIP = null;
 
-        String addressString = getProperty(this.getClass(), "ovsdb.controller.address");
+        String addressString = ConfigProperties.getProperty(this.getClass(), "ovsdb.controller.address");
 
         if (addressString != null) {
             try {
@@ -391,7 +391,7 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
             }
         }
 
-        addressString = getProperty(this.getClass(), "of.address");
+        addressString = ConfigProperties.getProperty(this.getClass(), "of.address");
 
         if (addressString != null) {
             try {
@@ -416,7 +416,7 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
     private short getControllerOFPort() {
         Short defaultOpenFlowPort = 6633;
         Short openFlowPort = defaultOpenFlowPort;
-        String portString = getProperty(this.getClass(), "of.listenPort");
+        String portString = ConfigProperties.getProperty(this.getClass(), "of.listenPort");
         if (portString != null) {
             try {
                 openFlowPort = Short.decode(portString).shortValue();
@@ -426,23 +426,6 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
             }
         }
         return openFlowPort;
-    }
-
-    // TODO: move getProperty() to a common module
-    private static String getProperty(Class<?> classParam, final String propertyStr) {
-        String value = null;
-        Bundle bundle = FrameworkUtil.getBundle(classParam);
-
-        if (bundle != null) {
-            BundleContext bundleContext = bundle.getBundleContext();
-            if (bundleContext != null) {
-                value = bundleContext.getProperty(propertyStr);
-            }
-        }
-        if (value == null) {
-            value = System.getProperty(propertyStr);
-        }
-        return value;
     }
 
     private UUID getCurrentControllerUuid(Node node, final String controllerTableName, final String target) {

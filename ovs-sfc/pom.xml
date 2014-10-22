@@ -77,8 +77,13 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.ovsdb</groupId>
+            <artifactId>utils.common</artifactId>
+            <version>${ovsdb.utils.common.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.ovsdb</groupId>
             <artifactId>utils.mdsal-openflow</artifactId>
-            <version>1.1.0-SNAPSHOT</version>
+            <version>${utils.mdsal.openflow.version}</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.sfc</groupId>
@@ -110,7 +115,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Embed-Dependency>utils.mdsal-openflow;type=!pom;inline=false</Embed-Dependency>
+                        <Embed-Dependency>utils.common,utils.mdsal-openflow;type=!pom;inline=false</Embed-Dependency>
                         <Embed-Transitive>true</Embed-Transitive>
                         <Include-Resource>
                             /OSGI-OPT/ovs-sfc/53-ovssfc-provider.xml=${project.basedir}/src/main/resources/initial/53-ovssfc-provider.xml,{maven-resources}

@@ -47,7 +47,7 @@ DIRECTORY ORGANIZATION
   +-- openvswitch : Schema wrapper that represents http://openvswitch.org/ovs-vswitchd.conf.db.5.pdf
   +-- hardwarevtep: Schema wrapper that represents http://openvswitch.org/docs/vtep.5.pdf
 
-- utils : MD-SAL OpenFlow utilities.
+- utils : MD-SAL OpenFlow and OVSDB common utilities.
 
 HOW TO BUILD & RUN
 ==================

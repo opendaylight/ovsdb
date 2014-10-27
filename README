@@ -7,10 +7,12 @@ DIRECTORY ORGANIZATION
 
 - distribution : Builds a working controller distribution based on the controller + ovsdb modules and other
                  dependant modules such as openflowplugin
+  +-- opendaylight : older, OSGi-based distribution
+  +-- opendaylight-karaf : karaf-based distribution
 
 - features : This folder contains all the Karaf related files.
 
-- integrationtest : Contains all the PAX-Exam based integrationTests that covers IT for all of the above modules.
+- integrationtest : Contains all the PAX-Exam based integrationTests that covers IT for all the modules.
 
 - library : Contains Schema-independent library that is a reference implementation for RFC 7047.
             This module doesn't depend on any of the Opendaylight components.
@@ -25,14 +27,14 @@ DIRECTORY ORGANIZATION
 - openstack
   +-- net-virt : Handles the Openstack Neutron ML2 and Network Service calls and performs all the logic required
                  for Network Virtualization.
-  +-- net-virt-providers : Mostly contains data-path programming functionalities via OpenFlow or potentially
+  +-- net-virt-providers : Mostly contains data-path programming functionality via OpenFlow or potentially
                            other protocols.
 
 - ovs-sfc : SFC implementation using the OVSDB project. Currently it is just a shell.
 
-- plugin : Contains Opendaylight Southbound Plugin APIs and provides an simpler API interface on top of library layer.
+- plugin : Contains Opendaylight Southbound Plugin APIs and provides a simpler API interface on top of library layer.
            Ideally, this module should also be schema independent. But due to legacy reasons this layer contains some
-           deprecated functionalities that assume openvswitch schema.
+           deprecated functionality that assumes openvswitch schema.
 
 - plugin-mdsal-adapter : Adds an MD-SAL Adapter for the OVSDB Plugin. The adapter updates the MD-SAL with nodes
                          as they are added and removed from the inventory. The Yang model provides a reference
@@ -69,6 +71,7 @@ Pre-requisites : JDK 1.7+, Maven 3+
 
 
 2. Building a Karaf Feature and deploying it in an Opendaylight Karaf distribution :
+*** This method is deprecated and an update will be added in the future.
    1. This is a new method for Opendaylight distribution wherein there is no defined editions such
       as Base, Virtualization or SP editions. Rather each of the projects will generate features in
       form of .kar files. The end-customer can choose to deploy the required feature based on his/her
@@ -135,4 +138,3 @@ Skipping unit tests and karaf tests
 ====================
 
 mvn clean install -Dmaven.test.skip=true -Dskip.karaf=true
-

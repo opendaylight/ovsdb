@@ -12,7 +12,6 @@ package org.opendaylight.ovsdb.plugin.impl;
 import java.net.InetAddress;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,17 +20,12 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
-import org.opendaylight.controller.sal.core.ConstructionException;
-import org.opendaylight.controller.sal.core.Description;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.UpdateType;
-import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
 import org.opendaylight.controller.sal.inventory.IPluginOutInventoryService;
-import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.ovsdb.lib.message.TableUpdate;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Row;
@@ -42,7 +36,6 @@ import org.opendaylight.ovsdb.plugin.api.OvsVswitchdSchemaConstants;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
 import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryService;
-import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
@@ -55,8 +48,7 @@ import com.google.common.collect.Maps;
  *
  *
  */
-public class InventoryServiceImpl implements IPluginInInventoryService,
-                                             OvsdbInventoryService,
+public class InventoryServiceImpl implements OvsdbInventoryService,
                                              InventoryServiceInternal {
     private static final Logger logger = LoggerFactory
             .getLogger(InventoryServiceImpl.class);
@@ -67,8 +59,6 @@ public class InventoryServiceImpl implements IPluginInInventoryService,
     private ConcurrentMap<Node, NodeDatabase> dbCache = Maps.newConcurrentMap();
     private ScheduledExecutorService executor;
     private OvsdbConfigurationService ovsdbConfigurationService;
-
-    private volatile IPluginOutInventoryService salInventoryService;
 
     private Set<OvsdbInventoryListener> ovsdbInventoryListeners = Sets.newCopyOnWriteArraySet();
 
@@ -235,40 +225,6 @@ public class InventoryServiceImpl implements IPluginInInventoryService,
             };
             executor.execute(updateControllerRunnable);
         }
-    }
-
-    private void updateOFBridgeName(final Node node, final Bridge bridge) {
-        Runnable updateNameRunnable = new Runnable() {
-            @Override
-            public void run() {
-                Set<String> dpids = bridge.getDatapathIdColumn().getData();
-                String bridgeName = bridge.getName();
-                if (dpids == null || bridgeName == null) return;
-                for (String dpid : dpids) {
-                    Long dpidLong = Long.valueOf(HexEncode.stringToLong(dpid));
-                    try {
-                        Node ofNode = new Node(Node.NodeIDType.OPENFLOW, dpidLong);
-                        Description descProp = new Description(bridgeName);
-                        Set<Property> props = new HashSet<Property>();
-                        props.add(descProp);
-
-                        if (salInventoryService != null) {
-                            logger.debug("Updating Bridge Name {} on OF node {}", bridgeName, ofNode);
-                            salInventoryService.updateNode(ofNode, UpdateType.CHANGED, props);
-                        } else {
-                            logger.error("Error accessing SAL Inventory plugin");
-                        }
-                    } catch (ConstructionException e) {
-                        logger.error("Failed to construct node for " + dpid, e);
-                    }
-                }
-            }
-        };
-        executor.execute(updateNameRunnable);
-        // Add a delay & re-execute to compensate for the current OpenFlow plugin bug of
-        // overriding the Description with a Null value after the first statistics timer.
-        // Hopefully this will be resolved in the newer version of the Openflow plugin.
-        executor.schedule(updateNameRunnable, 30, TimeUnit.SECONDS);
     }
 
     @Override

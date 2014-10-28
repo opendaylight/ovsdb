@@ -43,7 +43,6 @@ import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcDecoder;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcEndpoint;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcServiceBinderHandler;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
-import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +79,6 @@ public class OvsdbConnectionService implements OvsdbConnection {
     private static Set<OvsdbConnectionListener> connectionListeners = Sets.newHashSet();
     private static Map<OvsdbClient, Channel> connections = Maps.newHashMap();
     private static OvsdbConnection connectionService;
-    private static int ovsdbListenPort = DEFAULT_SERVER_PORT;
 
     public static OvsdbConnection getService() {
         if (connectionService == null) {
@@ -162,16 +160,12 @@ public class OvsdbConnectionService implements OvsdbConnection {
      * By default the ovsdb passive connection will listen in port 6640 which can
      * be overridden using the ovsdb.listenPort system property.
      */
-    private static void startOvsdbManager() {
-        String portString = ConfigProperties.getProperty(OvsdbConnectionService.class, OVSDB_LISTENPORT);
-        if (portString != null) {
-            ovsdbListenPort = Integer.decode(portString).intValue();
-        }
+    public static void startOvsdbManager(final int ovsdbListenPort) {
 
         new Thread() {
             @Override
             public void run() {
-                ovsdbManager();
+                ovsdbManager(ovsdbListenPort);
             }
         }.start();
     }
@@ -180,7 +174,7 @@ public class OvsdbConnectionService implements OvsdbConnection {
      * OVSDB Passive listening thread that uses Netty ServerBootstrap to open passive connection
      * and handle channel callbacks.
      */
-    private static void ovsdbManager() {
+    private static void ovsdbManager(int port) {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
@@ -204,7 +198,7 @@ public class OvsdbConnectionService implements OvsdbConnection {
             b.option(ChannelOption.TCP_NODELAY, true);
             b.option(ChannelOption.RCVBUF_ALLOCATOR, new AdaptiveRecvByteBufAllocator(65535, 65535, 65535));
             // Start the server.
-            ChannelFuture f = b.bind(ovsdbListenPort).sync();
+            ChannelFuture f = b.bind(port).sync();
             Channel serverListenChannel =  f.channel();
             // Wait until the server socket is closed.
             serverListenChannel.closeFuture().sync();
@@ -215,10 +209,6 @@ public class OvsdbConnectionService implements OvsdbConnection {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }
-    }
-
-    static {
-        startOvsdbManager();
     }
 
     private static ExecutorService executorService = Executors.newFixedThreadPool(10);

@@ -32,6 +32,7 @@ import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
 import org.opendaylight.controller.sal.inventory.IPluginOutInventoryService;
 import org.opendaylight.controller.sal.utils.HexEncode;
+import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
 import org.opendaylight.ovsdb.lib.message.TableUpdate;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Row;
@@ -43,8 +44,10 @@ import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
 import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryService;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
+import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 
 import com.google.common.collect.Sets;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,6 +81,16 @@ public class InventoryServiceImpl implements IPluginInInventoryService,
      *
      */
     public void init() {
+        /* Star ovsdb server before plugin service start */
+        String OVSDB_LISTENPORT = "ovsdb.listenPort";
+        String portString = ConfigProperties.getProperty(OvsdbConnectionService.class, OVSDB_LISTENPORT);
+        int DEFAULT_SERVER_PORT = 6640;
+        int ovsdbListenPort = DEFAULT_SERVER_PORT;
+        if (portString != null) {
+            ovsdbListenPort = Integer.decode(portString).intValue();
+        }
+        OvsdbConnectionService.startOvsdbManager(ovsdbListenPort);
+
         Node.NodeIDType.registerIDType("OVS", String.class);
         NodeConnector.NodeConnectorIDType.registerIDType("OVS", String.class, "OVS");
         this.executor = Executors.newSingleThreadScheduledExecutor();

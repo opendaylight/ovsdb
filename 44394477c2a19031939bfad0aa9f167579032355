@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_813ae634",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-10-28T21:17:38Z",
+      "side": 1,
+      "message": "we should get rid of these from here DEFAULT_SERVER_PORT and OVSDB_LISTENPORT",
+      "revId": "44394477c2a19031939bfad0aa9f167579032355",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_213f5a27",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-10-28T21:17:38Z",
+      "side": 1,
+      "message": "I think that now that we are making the instantiation public, we should add a boolean to indicate that it has been created.\nSee: https://gist.github.com/13cf0d0bcc484d198e1b",
+      "revId": "44394477c2a19031939bfad0aa9f167579032355",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_413cde2f",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-10-28T21:17:38Z",
+      "side": 1,
+      "message": "Now that this is public, it should be synchronized and have a way of keeping the caller from calling it multiple times.\nSee: https://gist.github.com/13cf0d0bcc484d198e1b",
+      "revId": "44394477c2a19031939bfad0aa9f167579032355",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_41237e05",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/impl/InventoryServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-10-28T21:17:38Z",
+      "side": 1,
+      "message": "I think these should be final static strings. Please see:\nhttps://gist.github.com/b2c6577daa9f480f79ae",
+      "revId": "44394477c2a19031939bfad0aa9f167579032355",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_e14892ce",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/impl/InventoryServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-10-28T21:17:38Z",
+      "side": 1,
+      "message": "I think we run into a pickle here. 2 things:\n1)this code only knows of the \u0027abstract\u0027 connection service interface, so there is no way of getting to the static function of the \u0027impl\u0027 object.\n2) I worry that if plugin is separated from library, nothing will trigger the static function.\n\nAre we sure that calling it at this time is similarly timed to when the static { } was being invoked?",
+      "revId": "44394477c2a19031939bfad0aa9f167579032355",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

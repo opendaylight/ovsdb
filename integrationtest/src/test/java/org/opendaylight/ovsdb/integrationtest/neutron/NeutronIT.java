@@ -24,6 +24,7 @@ import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.ovsdb.integrationtest.ConfigurationBundles;
 import org.opendaylight.ovsdb.integrationtest.OvsdbIntegrationTestBase;
 import org.opendaylight.ovsdb.lib.notation.Row;
+import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
@@ -35,6 +36,7 @@ import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 
 import com.google.common.collect.ImmutableMap;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.felix.dm.Component;
 import org.apache.felix.dm.DependencyManager;
 import org.junit.After;
@@ -83,6 +85,7 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
     ConfigurationService netVirtConfigurationService;
 
     Boolean tearDownBridge = false;
+    ImmutablePair<UUID, Map<String, String>> tearDownOpenVSwitchOtherConfig = null;
 
     // Configure the OSGi container
     @Configuration
@@ -197,6 +200,7 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
         Thread.sleep(5000);
 
         final String endpointAddress = "10.10.10.10";
+        final InetAddress endpointAddressInet = InetAddress.getByName(endpointAddress);
 
         Map<String, Row> ovsRows = ovsdbConfigurationService.getRows(node,
                                                               ovsdbConfigurationService.getTableName(node, OpenVSwitch.class));
@@ -205,15 +209,39 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
                                                             ovsRows.values().iterator().next());
 
         Assert.assertEquals(null, netVirtConfigurationService.getTunnelEndPoint(node));
+        final UUID originalVersion = ovsRow.getVersion();
 
-        ovsRow.setOtherConfig(ImmutableMap.of(netVirtConfigurationService.getTunnelEndpointKey(), endpointAddress));
+        OpenVSwitch updateOvsRow = ovsdbConfigurationService.createTypedRow(node, OpenVSwitch.class);
+
+        updateOvsRow.setOtherConfig(
+                ImmutableMap.of(netVirtConfigurationService.getTunnelEndpointKey(), endpointAddress));
+
+        updateOvsRow.setSsl(ovsRow.getSslColumn().getData());   // update ssl, but keep values unchanged
+
         ovsdbConfigurationService.updateRow(node,
                                             ovsdbConfigurationService.getTableName(node, OpenVSwitch.class),
                                             null,
                                             ovsRow.getUuid().toString(),
-                                            ovsRow.getRow());
+                                            updateOvsRow.getRow());
 
-        Assert.assertEquals(InetAddress.getByName(endpointAddress), netVirtConfigurationService.getTunnelEndPoint(node));
+        // Remember original value so it can be restored on tearDown
+        tearDownOpenVSwitchOtherConfig = ImmutablePair.of(ovsRow.getUuid(),
+                                                          ovsRow.getOtherConfigColumn().getData());
+
+        // Make sure tunnel end point was set
+        Assert.assertEquals(endpointAddressInet, netVirtConfigurationService.getTunnelEndPoint(node));
+
+        // Fetch rows again, and compare tunnel end point values
+        ovsRows = ovsdbConfigurationService.getRows(node,
+                                                    ovsdbConfigurationService.getTableName(node, OpenVSwitch.class));
+        ovsRow = ovsdbConfigurationService.getTypedRow(node,
+                                                       OpenVSwitch.class,
+                                                       ovsRows.values().iterator().next());
+
+        Assert.assertEquals(ovsRow.getOtherConfigColumn(), updateOvsRow.getOtherConfigColumn());
+
+        // expect version of row to be changed, due to the update
+        Assert.assertNotEquals(ovsRow.getVersion(), originalVersion);
     }
 
     @Test
@@ -246,10 +274,29 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
         Thread.sleep(5000);
 
         if (tearDownBridge) {
-            String uuid = bridgeConfigurationManager.getBridgeUuid(node,
-                                                                   netVirtConfigurationService.getIntegrationBridgeName());
-            ovsdbConfigurationService.deleteRow(node, ovsdbConfigurationService.getTableName(node, Bridge.class), uuid);
+            try {
+                String uuid = bridgeConfigurationManager.getBridgeUuid(node,
+                                                                       netVirtConfigurationService.getIntegrationBridgeName());
+                ovsdbConfigurationService.deleteRow(node, ovsdbConfigurationService.getTableName(node, Bridge.class), uuid);
+            } catch (Exception e) {
+                log.error("tearDownBridge Exception : " + e.getMessage());
+            }
             tearDownBridge = false;
+        }
+
+        if (tearDownOpenVSwitchOtherConfig != null) {
+            try {
+                OpenVSwitch updateOvsRow = ovsdbConfigurationService.createTypedRow(node, OpenVSwitch.class);
+                updateOvsRow.setOtherConfig(tearDownOpenVSwitchOtherConfig.getRight());
+                ovsdbConfigurationService.updateRow(node,
+                                                    ovsdbConfigurationService.getTableName(node, OpenVSwitch.class),
+                                                    null,
+                                                    tearDownOpenVSwitchOtherConfig.getLeft().toString(),
+                                                    updateOvsRow.getRow());
+            } catch (Exception e) {
+                log.error("tearDownOpenVSwitchOtherConfig Exception : " + e.getMessage());
+            }
+            tearDownOpenVSwitchOtherConfig = null;
         }
 
         DependencyManager dm = new DependencyManager(bc);

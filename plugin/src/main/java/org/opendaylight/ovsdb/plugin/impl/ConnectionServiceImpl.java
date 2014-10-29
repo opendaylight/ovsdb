@@ -106,7 +106,7 @@ public class ConnectionServiceImpl implements IPluginInConnectionService,
             ovsdbListenPort = Integer.decode(portString).intValue();
         }
 
-        if (!connectionLib.startOvsdbManager(ovsdbListenPort)) {
+        if (!connectionLib.startOvsdbManager(ovsdbListenPort, null)) {
             logger.warn("Start OVSDB manager call from ConnectionService was not necessary");
         }
 

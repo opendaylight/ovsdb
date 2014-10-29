@@ -26,6 +26,7 @@ import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.CharsetUtil;
+import io.netty.handler.ssl.SslContext;
 
 import java.net.InetAddress;
 import java.util.Collection;
@@ -86,7 +87,12 @@ public class OvsdbConnectionService implements OvsdbConnection {
         return connectionService;
     }
     @Override
-    public OvsdbClient connect(InetAddress address, int port) {
+    public OvsdbClient connect(final InetAddress address, final int port) {
+        return connectWithSsl(address, port, null);
+    }
+    @Override
+    public OvsdbClient connectWithSsl(final InetAddress address, final int port,
+                               final SslContext sslContext) {
         try {
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.group(new NioEventLoopGroup());
@@ -97,6 +103,11 @@ public class OvsdbConnectionService implements OvsdbConnection {
             bootstrap.handler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 public void initChannel(SocketChannel channel) throws Exception {
+                    if (sslContext != null) {
+                        /* First add ssl handler if ssl context is given */
+                        channel.pipeline().addLast(sslContext.newHandler(channel.alloc(),
+                                                   address.toString(), port));
+                    }
                     channel.pipeline().addLast(
                             //new LoggingHandler(LogLevel.INFO),
                             new JsonRpcDecoder(100000),
@@ -161,12 +172,13 @@ public class OvsdbConnectionService implements OvsdbConnection {
      */
     @Override
     synchronized
-    public boolean startOvsdbManager(final int ovsdbListenPort) {
+    public boolean startOvsdbManager(final int ovsdbListenPort,
+                                     final SslContext sslContext) {
         if (!singletonCreated) {
             new Thread() {
                 @Override
                 public void run() {
-                    ovsdbManager(ovsdbListenPort);
+                    ovsdbManager(ovsdbListenPort, sslContext);
                 }
             }.start();
             singletonCreated = true;
@@ -180,7 +192,7 @@ public class OvsdbConnectionService implements OvsdbConnection {
      * OVSDB Passive listening thread that uses Netty ServerBootstrap to open passive connection
      * and handle channel callbacks.
      */
-    private static void ovsdbManager(int port) {
+    private static void ovsdbManager(int port, final SslContext sslContext) {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
@@ -193,6 +205,11 @@ public class OvsdbConnectionService implements OvsdbConnection {
                  @Override
                  public void initChannel(SocketChannel channel) throws Exception {
                      logger.debug("New Passive channel created : "+ channel.toString());
+                     if (sslContext != null) {
+                         /* Add SSL handler first if SSL context is provided */
+                         channel.pipeline().addLast(sslContext.newHandler(channel.alloc()));
+                     }
+
                      channel.pipeline().addLast(
                              new JsonRpcDecoder(100000),
                              new StringEncoder(CharsetUtil.UTF_8),

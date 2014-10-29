@@ -106,7 +106,7 @@ public class ConnectionServiceImpl implements IPluginInConnectionService,
             ovsdbListenPort = Integer.decode(portString).intValue();
         }
 
-        if (!connectionLib.startOvsdbManager(ovsdbListenPort)) {
+        if (!connectionLib.startOvsdbManager(ovsdbListenPort, null)) {
             logger.warn("Start OVSDB manager call from ConnectionService was not necessary");
         }
 
@@ -162,7 +162,7 @@ public class ConnectionServiceImpl implements IPluginInConnectionService,
         }
 
         try {
-            OvsdbClient client = connectionLib.connect(address, port);
+            OvsdbClient client = connectionLib.connect(address, port, null);
             return handleNewConnection(identifier, client);
         } catch (InterruptedException e) {
             logger.error("Thread was interrupted during connect", e);

@@ -110,7 +110,7 @@ public abstract class OpenVswitchSchemaTestBase implements OvsdbRPC.Callback{
             }
 
             OvsdbConnection connection = OvsdbConnectionService.getService();
-            return connection.connect(address, port);
+            return connection.connect(address, port, null);
         } else if (connectionType.equalsIgnoreCase(CONNECTION_TYPE_PASSIVE)) {
             ExecutorService executor = Executors.newFixedThreadPool(1);
             Future<OvsdbClient> passiveConnection = executor.submit(new PassiveListener());

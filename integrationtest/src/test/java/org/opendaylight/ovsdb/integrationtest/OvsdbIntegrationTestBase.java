@@ -119,7 +119,7 @@ public abstract class OvsdbIntegrationTestBase {
             }
 
             OvsdbConnection connection = (OvsdbConnection)ServiceHelper.getGlobalInstance(OvsdbConnection.class, this);
-            return connection.connect(address, port);
+            return connection.connect(address, port, null);
         } else if (connectionType.equalsIgnoreCase(CONNECTION_TYPE_PASSIVE)) {
             ExecutorService executor = Executors.newFixedThreadPool(1);
             Future<OvsdbClient> passiveConnection = executor.submit(new PassiveListener());

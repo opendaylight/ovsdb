@@ -1,0 +1,9 @@
+Verified+1: jenkins-ovsdb <jenkins-ovsdb@opendaylight.org>
+Code-Review+2: Sam Hague <shague@redhat.com>
+Code-Review+1: Hsin-Yi Shen <syshen66@gmail.com>
+Code-Review+1: Flavio Fernandes <ffernand@redhat.com>
+Submitted-by: Sam Hague <shague@redhat.com>
+Submitted-at: Wed, 29 Oct 2014 19:23:46 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/12300
+Project: ovsdb
+Branch: refs/heads/master

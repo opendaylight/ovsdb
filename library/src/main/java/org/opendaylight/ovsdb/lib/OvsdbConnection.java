@@ -43,6 +43,11 @@ public interface OvsdbConnection {
     public void disconnect(OvsdbClient client);
 
     /**
+     * Method to start ovsdb server for passive connection
+     */
+    public boolean startOvsdbManager(final int ovsdbListenPort);
+
+    /**
      * Method to register a Passive Connection Listener with the ConnectionService.
      * @param listener Passive Connection listener interested in Passive OVSDB connection requests.
      */

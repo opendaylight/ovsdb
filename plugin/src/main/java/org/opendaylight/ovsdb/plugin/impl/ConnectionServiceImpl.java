@@ -47,7 +47,7 @@ import org.opendaylight.ovsdb.plugin.internal.IPAddressProperty;
 import org.opendaylight.ovsdb.plugin.internal.L4PortProperty;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryService;
-
+import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,6 +66,7 @@ public class ConnectionServiceImpl implements IPluginInConnectionService,
 
     // Properties that can be set in config.ini
     private static final Integer defaultOvsdbPort = 6640;
+    private final static String OVSDB_LISTENPORT = "ovsdb.listenPort";
 
 
     private ConcurrentMap<String, Connection> ovsdbConnections = new ConcurrentHashMap<String, Connection>();
@@ -98,6 +99,15 @@ public class ConnectionServiceImpl implements IPluginInConnectionService,
      * the services provided by the class are registered in the service registry
      */
     void start() {
+        /* Star ovsdb server first */
+        String portString = ConfigProperties.getProperty(OvsdbConnectionService.class, OVSDB_LISTENPORT);
+        int ovsdbListenPort = defaultOvsdbPort;
+        if (portString != null) {
+            ovsdbListenPort = Integer.decode(portString).intValue();
+        }
+        connectionLib.startOvsdbManager(ovsdbListenPort);
+
+        /* Then get connection clients */
         Collection<OvsdbClient> connections = connectionLib.getConnections();
         for (OvsdbClient client : connections) {
             this.connected(client);

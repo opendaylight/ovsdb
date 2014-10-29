@@ -1499,7 +1499,8 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
             List<OperationResult> operationResults = results.get();
             for (OperationResult result : operationResults) {
                 if (result.getError() != null) {
-                    throw new OvsdbPluginException("Error updating row : "+ result.getError());
+                    throw new OvsdbPluginException("Error updating row : " + result.getError() +
+                                                   " Details: " + result.getDetails());
                 }
             }
             if (operationResults.isEmpty() || (transactionBuilder.getOperations().size() != operationResults.size())) {

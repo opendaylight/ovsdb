@@ -47,7 +47,7 @@ import org.opendaylight.ovsdb.plugin.internal.IPAddressProperty;
 import org.opendaylight.ovsdb.plugin.internal.L4PortProperty;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryService;
-
+import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +65,8 @@ public class ConnectionServiceImpl implements IPluginInConnectionService,
     protected static final Logger logger = LoggerFactory.getLogger(ConnectionServiceImpl.class);
 
     // Properties that can be set in config.ini
-    private static final Integer defaultOvsdbPort = 6640;
+    private static final Integer DEFAULT_OVSDB_PORT = 6640;
+    private static final String OVSDB_LISTENPORT = "ovsdb.listenPort";
 
 
     private ConcurrentMap<String, Connection> ovsdbConnections = new ConcurrentHashMap<String, Connection>();
@@ -98,6 +99,18 @@ public class ConnectionServiceImpl implements IPluginInConnectionService,
      * the services provided by the class are registered in the service registry
      */
     void start() {
+        /* Start ovsdb server before getting connection clients */
+        String portString = ConfigProperties.getProperty(OvsdbConnectionService.class, OVSDB_LISTENPORT);
+        int ovsdbListenPort = DEFAULT_OVSDB_PORT;
+        if (portString != null) {
+            ovsdbListenPort = Integer.decode(portString).intValue();
+        }
+
+        if (!connectionLib.startOvsdbManager(ovsdbListenPort)) {
+            logger.warn("Start OVSDB manager call from ConnectionService was not necessary");
+        }
+
+        /* Then get connection clients */
         Collection<OvsdbClient> connections = connectionLib.getConnections();
         for (OvsdbClient client : connections) {
             this.connected(client);
@@ -143,9 +156,9 @@ public class ConnectionServiceImpl implements IPluginInConnectionService,
 
         try {
             port = Integer.parseInt(params.get(ConnectionConstants.PORT));
-            if (port == 0) port = defaultOvsdbPort;
+            if (port == 0) port = DEFAULT_OVSDB_PORT;
         } catch (Exception e) {
-            port = defaultOvsdbPort;
+            port = DEFAULT_OVSDB_PORT;
         }
 
         try {

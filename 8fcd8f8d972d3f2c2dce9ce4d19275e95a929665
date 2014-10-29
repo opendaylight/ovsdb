@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_0c036d10",
+        "filename": "integrationtest/src/test/java/org/opendaylight/ovsdb/integrationtest/neutron/NeutronIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-10-29T15:14:46Z",
+      "side": 1,
+      "message": "Why does this have to be done?",
+      "revId": "8fcd8f8d972d3f2c2dce9ce4d19275e95a929665",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_a7fffa00",
+        "filename": "integrationtest/src/test/java/org/opendaylight/ovsdb/integrationtest/neutron/NeutronIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-10-29T15:14:46Z",
+      "side": 1,
+      "message": "Was there a need to add a var for this instead of leaving it as was?",
+      "revId": "8fcd8f8d972d3f2c2dce9ce4d19275e95a929665",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_c7047e17",
+        "filename": "integrationtest/src/test/java/org/opendaylight/ovsdb/integrationtest/neutron/NeutronIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-10-29T15:14:46Z",
+      "side": 1,
+      "message": "Good to add this test.",
+      "revId": "8fcd8f8d972d3f2c2dce9ce4d19275e95a929665",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

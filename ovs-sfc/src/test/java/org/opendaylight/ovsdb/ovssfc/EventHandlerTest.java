@@ -1,5 +1,6 @@
 package org.opendaylight.ovsdb.ovssfc;
 
+import static org.junit.Assert.assertTrue;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -59,6 +60,11 @@ public class EventHandlerTest {
         //sfcProvider.eventHandler.shutdownNow();
         sfcProvider.eventHandler.stop();
         //System.out.println(">>>>>Running test stop 2");
+    }
+
+    @Test
+    public void testNA () {
+        assertTrue(true);
     }
 
     @Ignore

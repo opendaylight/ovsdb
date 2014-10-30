@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_b9ecfec8",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/OvsdbConnection.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-10-30T00:38:47Z",
+      "side": 1,
+      "message": "Update the comments",
+      "revId": "61213343be3aec2907b9b5d3b1f3446335d55fde",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_99e7bae4",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/OvsdbConnection.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-10-30T00:38:47Z",
+      "side": 1,
+      "message": "Would it be better to have two methods: one with ssl and the other without? That way the existing code doesn\u0027t have to change and the users don\u0027t have to know anything about ssl.",
+      "revId": "61213343be3aec2907b9b5d3b1f3446335d55fde",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_d9dd4216",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/OvsdbConnection.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-10-30T00:38:47Z",
+      "side": 1,
+      "message": "Can you change the var to not be abbreviated? Having more readable names in the interface is more readable since this is public.",
+      "revId": "61213343be3aec2907b9b5d3b1f3446335d55fde",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_f9e286d4",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-10-30T00:38:47Z",
+      "side": 1,
+      "message": "Same comment about more readable var names. Applies to all the instances where this occurs.",
+      "revId": "61213343be3aec2907b9b5d3b1f3446335d55fde",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_d9046280",
+        "filename": "library/src/test/java/org/opendaylight/ovsdb/lib/OvsdbTestBase.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-10-30T00:38:47Z",
+      "side": 1,
+      "message": "Can you add a proper IT test for using ssl",
+      "revId": "61213343be3aec2907b9b5d3b1f3446335d55fde",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

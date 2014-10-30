@@ -69,6 +69,11 @@
           <groupId>org.opendaylight.ovsdb</groupId>
           <artifactId>of-extension.nx-ofjava</artifactId>
         </dependency>
+        <dependency>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+          <scope>test</scope>
+        </dependency>
     </dependencies>
   <build>
     <plugins>

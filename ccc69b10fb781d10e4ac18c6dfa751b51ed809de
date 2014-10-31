@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_ef363803",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/OvsdbConnection.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1018
+      },
+      "writtenOn": "2014-10-31T22:10:17Z",
+      "side": 1,
+      "message": "I define a separate api as suggested. Interface can\u0027t have private static method. The ssl method has to be public.I assume \"private static\" is typo. Please check the new patch",
+      "parentUuid": "ba8cc1f7_cf9b34c8",
+      "revId": "ccc69b10fb781d10e4ac18c6dfa751b51ed809de",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_4f6884ba",
         "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-10-31T14:05:31Z",
       "side": 1,
       "message": "annotate what null is, please:\n\nreturn connectWithSsl(address, port, null /*SslContext*/);",
+      "revId": "ccc69b10fb781d10e4ac18c6dfa751b51ed809de",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_8f3becea",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1018
+      },
+      "writtenOn": "2014-10-31T22:10:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_4f6884ba",
       "revId": "ccc69b10fb781d10e4ac18c6dfa751b51ed809de",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_af403057",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1018
+      },
+      "writtenOn": "2014-10-31T22:10:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_ef795894",
+      "revId": "ccc69b10fb781d10e4ac18c6dfa751b51ed809de",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_cf74949e",
         "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/impl/ConnectionServiceImpl.java",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2014-10-31T14:03:24Z",
       "side": 1,
       "message": "Can we add a method that takes ssl as a param? So we woudl have two methods, the older existing one which does not take ssl context and the new one which does take the context.\n\nReading this code with null is not intuitive since the user now has to go into this method to see what the null value is used for, which means don\u0027t use ssl.",
+      "revId": "ccc69b10fb781d10e4ac18c6dfa751b51ed809de",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_4f25e4c0",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/impl/ConnectionServiceImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1018
+      },
+      "writtenOn": "2014-10-31T22:10:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_cf74949e",
       "revId": "ccc69b10fb781d10e4ac18c6dfa751b51ed809de",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

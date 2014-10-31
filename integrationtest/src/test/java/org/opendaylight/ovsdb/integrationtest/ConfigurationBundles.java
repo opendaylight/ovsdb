@@ -222,4 +222,10 @@ public class ConfigurationBundles {
         );
     }
 
+    public static Option ovsdbDefaultUtilsConfigBundles() {
+        return new DefaultCompositeOption(
+                mavenBundle("org.opendaylight.ovsdb", "utils.config").versionAsInProject(),
+                mavenBundle("org.mockito", "mockito-all").versionAsInProject()
+        );
+    }
 }

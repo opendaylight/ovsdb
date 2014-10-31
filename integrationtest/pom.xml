@@ -120,6 +120,8 @@
               <excludes>
               <!-- Disabling NorthboundIT tests till the issues are resolved in Jenkins -->
                 <exclude>**/*NorthboundIT*</exclude>
+              <!-- Disabling UtilsConfigIT tests till the issues are resolved in Jenkins -->
+                <exclude>**/*UtilsConfigIT*</exclude>
               </excludes>
             </configuration>
           </execution>

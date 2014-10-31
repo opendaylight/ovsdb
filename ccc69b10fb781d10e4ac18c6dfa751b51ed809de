@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_cf74949e",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/impl/ConnectionServiceImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-10-31T14:03:24Z",
+      "side": 1,
+      "message": "Can we add a method that takes ssl as a param? So we woudl have two methods, the older existing one which does not take ssl context and the new one which does take the context.\n\nReading this code with null is not intuitive since the user now has to go into this method to see what the null value is used for, which means don\u0027t use ssl.",
+      "revId": "ccc69b10fb781d10e4ac18c6dfa751b51ed809de",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

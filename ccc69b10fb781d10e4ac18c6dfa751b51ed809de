@@ -2,6 +2,57 @@
   "comments": [
     {
       "key": {
+        "uuid": "ba8cc1f7_cf9b34c8",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/OvsdbConnection.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-10-31T14:05:31Z",
+      "side": 1,
+      "message": "Please leave original api alone and write:\n\nprivate static void ovsdbManagerWithSsl(...);",
+      "revId": "ccc69b10fb781d10e4ac18c6dfa751b51ed809de",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_4f6884ba",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-10-31T14:05:31Z",
+      "side": 1,
+      "message": "annotate what null is, please:\n\nreturn connectWithSsl(address, port, null /*SslContext*/);",
+      "revId": "ccc69b10fb781d10e4ac18c6dfa751b51ed809de",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_ef795894",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-10-31T14:05:31Z",
+      "side": 1,
+      "message": "This change is a bit inconsistent with the change above.\nPlease write a variant of this api that takes in the sslContext, and have this code call the new one with \u0027null\u0027. Like:\n\nprivate static void ovsdbManager(int port, final SslContext sslContext) {\n   ovsdbManagerWithSsl(port, null /*SslContext*/);\n{",
+      "revId": "ccc69b10fb781d10e4ac18c6dfa751b51ed809de",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_cf74949e",
         "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/impl/ConnectionServiceImpl.java",
         "patchSetId": 3

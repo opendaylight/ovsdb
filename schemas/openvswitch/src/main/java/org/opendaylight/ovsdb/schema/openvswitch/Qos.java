@@ -45,9 +45,9 @@ public interface Qos extends TypedBaseTable<GenericTableSchema> {
     @TypedColumn (name="other_config", method= MethodType.SETDATA, fromVersion="1.0.0")
     public void setOtherConfig(Map<String, String> otherConfig) ;
 
-    @TypedColumn (name="externalIds", method= MethodType.GETCOLUMN, fromVersion="1.0.0")
+    @TypedColumn (name="external_ids", method= MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn() ;
 
-    @TypedColumn (name="externalIds", method= MethodType.SETDATA, fromVersion="1.0.0")
+    @TypedColumn (name="external_ids", method= MethodType.SETDATA, fromVersion="1.0.0")
     public void setExternalIds(Map<String, String> externalIds) ;
 }

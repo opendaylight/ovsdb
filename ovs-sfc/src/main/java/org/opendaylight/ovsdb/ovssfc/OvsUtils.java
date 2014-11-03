@@ -158,7 +158,7 @@ public class OvsUtils {
                     .getRow(ovsNode, ovsdbConfigurationService.getTableName(ovsNode, Bridge.class), bridgeUuid);
             Bridge bridge = ovsdbConfigurationService.getTypedRow(ovsNode, Bridge.class, bridgeRow);
             Set<String> dpids = bridge.getDatapathIdColumn().getData();
-            if (dpids != null || dpids.size() != 0) {
+            if (dpids != null && !dpids.isEmpty()) {
                 dpid = HexEncode.stringToLong((String) dpids.toArray()[0]);
             }
         } catch (Exception e) {

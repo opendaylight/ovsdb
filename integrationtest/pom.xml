@@ -45,6 +45,16 @@
       <artifactId>mockito-all</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>openstack.net-virt-providers</artifactId>
+      <version>1.1.0-SNAPSHOT</version>
+    </dependency>
+    <!--<dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>utils.config</artifactId>
+      <version>1.1.0-SNAPSHOT</version>
+    </dependency>-->
   </dependencies>
   <build>
     <pluginManagement>
@@ -77,9 +87,26 @@
             </lifecycleMappingMetadata>
           </configuration>
         </plugin>
+        <!--<plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.2</version>
+          <configuration>
+            <verbose>true</verbose>
+            <compilerArgument>-verbose -verbose:class</compilerArgument>
+          </configuration>
+        </plugin>-->
       </plugins>
     </pluginManagement>
     <plugins>
+      <!--<plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <verbose>true</verbose>
+          <compilerArgument>-verbose</compilerArgument>
+        </configuration>
+      </plugin>-->
       <plugin>
         <groupId>org.apache.servicemix.tooling</groupId>
         <artifactId>depends-maven-plugin</artifactId>

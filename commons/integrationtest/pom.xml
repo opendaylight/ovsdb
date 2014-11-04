@@ -14,7 +14,8 @@
 
   <properties>
     <!-- Overrides -->
-    <exam.version>3.5.0</exam.version>
+    <!--<exam.version>3.5.0</exam.version>-->
+    <exam.version>4.0.0</exam.version>
     <url.version>1.6.0</url.version>
     <!-- Controller Dependencies for Pax Exam -->
     <arphandler.version>0.6.0-SNAPSHOT</arphandler.version>

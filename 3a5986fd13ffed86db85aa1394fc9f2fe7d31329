@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_a87346b0",
+        "filename": "utils/config/src/test/java/org/opendaylight/ovsdb/utils/config/ConfigPropertiesTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-11-04T12:30:32Z",
+      "side": 1,
+      "message": "With the mock tests below thre isn\u0027t much value in this test method, so might as well just remove it.",
+      "revId": "3a5986fd13ffed86db85aa1394fc9f2fe7d31329",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_886e82c8",
+        "filename": "utils/config/src/test/java/org/opendaylight/ovsdb/utils/config/ConfigPropertiesTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-11-04T12:30:32Z",
+      "side": 1,
+      "message": "I could see these tests:\n\n1. bundle is null, returned from a mock\n\n2. bundleContext is null\n\n3. value returned from bundleContext.getProperty is null. Then System.getProperty is called and can returna  valid value if key is found and aonother if not found and the default value is returned.\n\n4. value returned from ConfigProperties.gerProperty is null\n\n5. is a test needed if the user does not supply a default value? Is null returned if the key is invalid?\n\nYou can also add mock verify statements to verify that the different getProperty calls methods were called, which also shows code path coverage.",
+      "revId": "3a5986fd13ffed86db85aa1394fc9f2fe7d31329",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_e8794e94",
+        "filename": "utils/config/src/test/java/org/opendaylight/ovsdb/utils/config/ConfigPropertiesTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-11-04T12:30:32Z",
+      "side": 1,
+      "message": "Does this throw an exception that can be caught?",
+      "revId": "3a5986fd13ffed86db85aa1394fc9f2fe7d31329",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

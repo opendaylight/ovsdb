@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_48af1ae4",
+        "filename": "utils/config/src/test/java/org/opendaylight/ovsdb/utils/config/ConfigPropertiesTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-11-04T12:42:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_a87346b0",
+      "revId": "3a5986fd13ffed86db85aa1394fc9f2fe7d31329",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_886e82c8",
         "filename": "utils/config/src/test/java/org/opendaylight/ovsdb/utils/config/ConfigPropertiesTest.java",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_08b9122e",
+        "filename": "utils/config/src/test/java/org/opendaylight/ovsdb/utils/config/ConfigPropertiesTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-11-04T12:42:37Z",
+      "side": 1,
+      "message": "sounds good. I think I have a subset of these now. I will re-write it to have these 5 tests explicitly.\n\nI\u0027m not familiar with mock verify. Let me look into that.",
+      "parentUuid": "ba8cc1f7_886e82c8",
+      "revId": "3a5986fd13ffed86db85aa1394fc9f2fe7d31329",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_e8794e94",
         "filename": "utils/config/src/test/java/org/opendaylight/ovsdb/utils/config/ConfigPropertiesTest.java",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2014-11-04T12:30:32Z",
       "side": 1,
       "message": "Does this throw an exception that can be caught?",
+      "revId": "3a5986fd13ffed86db85aa1394fc9f2fe7d31329",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_68ac5eee",
+        "filename": "utils/config/src/test/java/org/opendaylight/ovsdb/utils/config/ConfigPropertiesTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-11-04T12:42:37Z",
+      "side": 1,
+      "message": "no, it does not. it will simply return \u0027null\u0027",
+      "parentUuid": "ba8cc1f7_e8794e94",
       "revId": "3a5986fd13ffed86db85aa1394fc9f2fe7d31329",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

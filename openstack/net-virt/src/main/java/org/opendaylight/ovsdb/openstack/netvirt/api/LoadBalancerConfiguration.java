@@ -62,16 +62,39 @@ public class LoadBalancerConfiguration {
         public void setIndex(int index) {
             this.index = index;
         }
-        public boolean equals(LoadBalancerPoolMember other) {
-            if (other.ipAddr != ipAddr)
+
+        /**
+         * Overridden equals() where index is not checked.
+         */
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
                 return false;
-            else if (other.macAddr != macAddr)
+            if (getClass() != obj.getClass())
                 return false;
-            else if (other.protocol != protocol)
+            LoadBalancerPoolMember other = (LoadBalancerPoolMember) obj;
+            if (ipAddr == null) {
+                if (other.ipAddr != null)
+                    return false;
+            } else if (!ipAddr.equals(other.ipAddr))
                 return false;
-            else if (other.port != port)
+            if (macAddr == null) {
+                if (other.macAddr != null)
+                    return false;
+            } else if (!macAddr.equals(other.macAddr))
                 return false;
-            //Ignore Index
+            if (port == null) {
+                if (other.port != null)
+                    return false;
+            } else if (!port.equals(other.port))
+                return false;
+            if (protocol == null) {
+                if (other.protocol != null)
+                    return false;
+            } else if (!protocol.equals(other.protocol))
+                return false;
             return true;
         }
 
@@ -84,12 +107,11 @@ public class LoadBalancerConfiguration {
         @Override
         public int hashCode() {
             final int prime = 31;
-            int result = super.hashCode();
+            int result = 1;
             result = prime * result + ((ipAddr == null) ? 0 : ipAddr.hashCode());
             result = prime * result + ((macAddr == null) ? 0 : macAddr.hashCode());
             result = prime * result + ((protocol == null) ? 0 : protocol.hashCode());
             result = prime * result + ((port == null) ? 0 : port.hashCode());
-            result = prime * result + index;
             return result;
         }
     }

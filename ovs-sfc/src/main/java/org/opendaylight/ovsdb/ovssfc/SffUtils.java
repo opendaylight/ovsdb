@@ -13,14 +13,14 @@ import com.google.common.base.Optional;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 //import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sf.rev140701.service.functions.ServiceFunction;
-import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.ovs.rev140701.ServiceFunctionForwarder1;
-import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.ovs.rev140701.service.function.forwarders.service.function.forwarder.ovs.ExternalIds;
+//import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.ovs.rev140701.ServiceFunctionForwarder1;
+//import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.ovs.rev140701.service.function.forwarders.service.function.forwarder.ovs.ExternalIds;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.sff.rev140701.service.function.forwarders.ServiceFunctionForwarder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+//import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class SffUtils {
@@ -50,12 +50,12 @@ public class SffUtils {
     public String getSystemId (ServiceFunctionForwarder serviceFunctionForwarder) {
         String systemId = "";
 
-        List<ExternalIds> externalIds = serviceFunctionForwarder.getAugmentation(ServiceFunctionForwarder1.class).getOvs().getExternalIds();
-        for (ExternalIds externalId : externalIds) {
-            if (externalId.getName().equals("system-id")) {
-                systemId = externalId.getValue();
-            }
-        }
+        //List<ExternalIds> externalIds = serviceFunctionForwarder.getAugmentation(ServiceFunctionForwarder1.class).getOvs().getExternalIds();
+        //for (ExternalIds externalId : externalIds) {
+        //    if (externalId.getName().equals("system-id")) {
+        //        systemId = externalId.getValue();
+        //    }
+        //}
 
         logger.trace("\nOVSSFC {}\n system-id: {}",
                 Thread.currentThread().getStackTrace()[1],

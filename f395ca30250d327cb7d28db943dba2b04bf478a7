@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba8cc1f7_03ad7388",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-11-05T13:35:19Z",
+      "side": 1,
+      "message": "Please add reference to bug/sonar so we can locate this gerrit in the future:\n\nhttps://bugs.opendaylight.org/show_bug.cgi?id\u003d2316\n\nOther than that, it looks good. Thanks!",
+      "revId": "f395ca30250d327cb7d28db943dba2b04bf478a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

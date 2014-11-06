@@ -4,6 +4,7 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
     <repository>mvn:org.opendaylight.controller/features-nsf/${nsf.version}/xml/features</repository>
+    <repository>mvn:org.opendaylight.controller/features-adsal-compatibility/${odl.karaf.base.version}/xml/features</repository>
     <repository>mvn:org.opendaylight.ovsdb/features-openflow-nxm/${openflowplugin.version}/xml/features</repository>
     <repository>mvn:org.opendaylight.ovsdb/features-ovsdb/${ovsdb.library.version}/xml/features</repository>
     <repository>mvn:org.opendaylight.sfc/features-sfc/0.1.0-SNAPSHOT/xml/features</repository>
@@ -14,6 +15,7 @@
         <feature version="${ovsdb.plugin.version}">odl-ovsdb-plugin</feature>
         <feature version="${openflowplugin.version}">odl-openflow-nxm-extensions</feature>
         <feature version="${nsf.version}">odl-nsf-all</feature>
+        <feature version="${sal.version}">odl-adsal-compatibility</feature>
         <feature version='0.1.0-SNAPSHOT'>odl-sfc-provider</feature>
         <feature version='0.1.0-SNAPSHOT'>odl-sfc-model</feature>
         <bundle>mvn:org.opendaylight.ovsdb/ovssfc/${ovsdb.ovssfc.version}</bundle>

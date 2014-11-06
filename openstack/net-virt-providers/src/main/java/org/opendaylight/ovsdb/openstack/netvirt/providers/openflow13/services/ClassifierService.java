@@ -425,7 +425,7 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
         List<Instruction> instructions = Lists.newArrayList();
 
         // Call the InstructionBuilder Methods Containing Actions
-        InstructionUtils.createSendToControllerInstructions(ib);
+        InstructionUtils.createSendToControllerInstructions(nodeName, ib);
         ib.setOrder(0);
         ib.setKey(new InstructionKey(0));
         instructions.add(ib.build());

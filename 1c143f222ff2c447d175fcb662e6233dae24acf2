@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_7cf89d7c",
+        "filename": "ovs-sfc/src/main/java/org/opendaylight/ovsdb/ovssfc/Flows.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-11-06T13:17:39Z",
+      "side": 1,
+      "message": "yeah, I don\u0027t like it either; but that is what NodeId is.\nI could 1) rename nodeName to nodeId and 2) require caller to\npass in NodeId.\n\nTrouble with 1 is that I would touch mode lines of code than I wanted, but that is NDB.\n\nTrouble with 2 is that NodeId caomed from yang:\norg.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819\nand I would have to polute caller with that import.\n\nWould you be okay if we did #1 only?\n\n-- flavio",
+      "parentUuid": "ba8cc1f7_fc04ad7f",
+      "revId": "1c143f222ff2c447d175fcb662e6233dae24acf2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_3cdbf51c",
         "filename": "utils/mdsal-openflow/src/main/java/org/opendaylight/ovsdb/utils/mdsal/openflow/InstructionUtils.java",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_5cefd9b0",
+        "filename": "utils/mdsal-openflow/src/main/java/org/opendaylight/ovsdb/utils/mdsal/openflow/InstructionUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-11-06T13:17:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba8cc1f7_3cdbf51c",
+      "revId": "1c143f222ff2c447d175fcb662e6233dae24acf2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_5cd8391d",
         "filename": "utils/mdsal-openflow/src/main/java/org/opendaylight/ovsdb/utils/mdsal/openflow/InstructionUtils.java",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2014-11-06T13:06:16Z",
       "side": 1,
       "message": "Does any of this get used on the flows with real ports or is this just applicable to the special ports like CONTROLLER, FLOOD, etc?",
+      "revId": "1c143f222ff2c447d175fcb662e6233dae24acf2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_3cf2159b",
+        "filename": "utils/mdsal-openflow/src/main/java/org/opendaylight/ovsdb/utils/mdsal/openflow/InstructionUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-11-06T13:17:39Z",
+      "side": 1,
+      "message": "it can be used as a Short, actually. The controller, flood, normal are just special values.",
+      "parentUuid": "ba8cc1f7_5cd8391d",
       "revId": "1c143f222ff2c447d175fcb662e6233dae24acf2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

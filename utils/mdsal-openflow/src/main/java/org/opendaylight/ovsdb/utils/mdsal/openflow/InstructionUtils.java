@@ -10,6 +10,7 @@
 package org.opendaylight.ovsdb.utils.mdsal.openflow;
 
 import static org.opendaylight.ovsdb.utils.mdsal.openflow.ActionUtils.dropAction;
+import org.opendaylight.controller.sal.compatibility.NodeMapping;
 
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
@@ -57,6 +58,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.arp.match.fields.ArpSourceHardwareAddressBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.arp.match.fields.ArpTargetHardwareAddressBuilder;
@@ -84,18 +86,18 @@ public class InstructionUtils {
     /**
      * Create Send to Controller Reserved Port Instruction (packet_in)
      *
+     * @param nodeName Uri Prefix, containing nodeConnectorType and dpId (aka NodeId)
      * @param ib Map InstructionBuilder without any instructions
      * @return ib Map InstructionBuilder with instructions
      */
-    public static InstructionBuilder createSendToControllerInstructions(InstructionBuilder ib) {
+    public static InstructionBuilder createSendToControllerInstructions(String nodeName, InstructionBuilder ib) {
 
         List<Action> actionList = Lists.newArrayList();
         ActionBuilder ab = new ActionBuilder();
 
         OutputActionBuilder output = new OutputActionBuilder();
         output.setMaxLength(MAX_LENGTH);
-        Uri value = new Uri("CONTROLLER");
-        output.setOutputNodeConnector(value);
+        output.setOutputNodeConnector(NodeMapping.toControllerNodeConnectorId(new NodeId(nodeName)));
         ab.setAction(new OutputActionCaseBuilder().setOutputAction(output.build()).build());
         ab.setOrder(0);
         ab.setKey(new ActionKey(0));
@@ -114,18 +116,18 @@ public class InstructionUtils {
     /**
      * Create NORMAL Reserved Port Instruction (packet_in)
      *
+     * @param nodeId Uri Prefix, containing nodeConnectorType and dpId (aka NodeId)
      * @param ib Map InstructionBuilder without any instructions
      * @return ib Map InstructionBuilder with instructions
      */
 
-    public static InstructionBuilder createNormalInstructions(InstructionBuilder ib) {
+    public static InstructionBuilder createNormalInstructions(String nodeId, InstructionBuilder ib) {
 
         List<Action> actionList = Lists.newArrayList();
         ActionBuilder ab = new ActionBuilder();
 
         OutputActionBuilder output = new OutputActionBuilder();
-        Uri value = new Uri("NORMAL");
-        output.setOutputNodeConnector(value);
+        output.setOutputNodeConnector(NodeMapping.toNormalNodeConnectorId(new NodeId(nodeId)));
         ab.setAction(new OutputActionCaseBuilder().setOutputAction(output.build()).build());
         ab.setOrder(0);
         ab.setKey(new ActionKey(0));

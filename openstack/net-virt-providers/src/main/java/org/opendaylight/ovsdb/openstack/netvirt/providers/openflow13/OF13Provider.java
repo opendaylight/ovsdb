@@ -1398,7 +1398,7 @@ public class OF13Provider implements NetworkingProvider {
         List<Instruction> instructions = Lists.newArrayList();
 
         // Call the InstructionBuilder Methods Containing Actions
-        InstructionUtils.createNormalInstructions(ib);
+        InstructionUtils.createNormalInstructions(nodeName, ib);
         ib.setOrder(0);
         ib.setKey(new InstructionKey(0));
         instructions.add(ib.build());

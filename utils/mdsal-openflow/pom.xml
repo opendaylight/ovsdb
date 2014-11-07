@@ -44,6 +44,11 @@
       <artifactId>sal</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-compatibility</artifactId>
+      <version>${mdsal.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>library</artifactId>
     </dependency>

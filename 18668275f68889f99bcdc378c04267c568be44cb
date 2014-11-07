@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba8cc1f7_e29e4656",
+        "filename": "plugin-shell/src/test/java/org/opendaylight/ovsdb/plugin/shell/PrintCacheTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-11-07T12:44:19Z",
+      "side": 1,
+      "message": "Sure, we can talk whenever about it",
+      "parentUuid": "ba8cc1f7_bf6db706",
+      "revId": "18668275f68889f99bcdc378c04267c568be44cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_df72fbe4",
         "filename": "plugin-shell/src/test/resources/org/opendaylight/ovsdb/plugin/shell/test_schema.json",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-11-07T02:49:24Z",
       "side": 1,
       "message": "Nice!\n\nCould/should this file be in a directory called \u0027resources\u0027 ? I\u0027m pretty sure that is likely just a convention, tho.",
+      "revId": "18668275f68889f99bcdc378c04267c568be44cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_82a3ba9d",
+        "filename": "plugin-shell/src/test/resources/org/opendaylight/ovsdb/plugin/shell/test_schema.json",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-11-07T12:44:19Z",
+      "side": 1,
+      "message": "it is in a resources directory but the plugin that reads it in uses the same hierarchy as the test.java source.",
+      "parentUuid": "ba8cc1f7_df72fbe4",
       "revId": "18668275f68889f99bcdc378c04267c568be44cb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

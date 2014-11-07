@@ -66,7 +66,7 @@ public class NodeDatabase {
             if (tableDB == null) continue;
             for (String tableName : tableDB.keySet()) {
                 ConcurrentMap<String, Row> tableRows = this.getTableCache(dbName, tableName);
-                System.out.println("\t Table "+tableName);
+                System.out.println("\tTable "+tableName);
                 for (String uuid : tableRows.keySet()) {
                     Row row = tableRows.get(uuid);
                     Collection<Column> columns = row.getColumns();

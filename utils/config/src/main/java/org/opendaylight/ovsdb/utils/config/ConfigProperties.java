@@ -16,6 +16,10 @@ import org.osgi.framework.FrameworkUtil;
 
 public class ConfigProperties {
 
+    private ConfigProperties() {
+        // empty
+    }
+
     public static String getProperty(Class<?> classParam, final String propertyStr) {
         return getProperty(classParam, propertyStr, null);
     }

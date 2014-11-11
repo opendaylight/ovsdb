@@ -97,6 +97,6 @@ public class PrintCacheTest {
         // Capture the output from PrintCache and compare it to what is expected
         printCacheTest.doExecute();
         System.setOut(originalBaos);
-        assertEquals("PrintCache output does not match expected output:", CACHE, baos.toString());
+        assertEquals("PrintCache output does not match expected output:  ", CACHE, baos.toString());
     }
 }

@@ -4,19 +4,19 @@
   <parent>
     <groupId>org.opendaylight.ovsdb</groupId>
     <artifactId>commons</artifactId>
-    <version>1.2.1-Helium-SR1</version>
+    <version>1.2.2-SNAPSHOT</version>
     <relativePath>../../commons/parent</relativePath>
   </parent>
   <artifactId>features-openflow-nxm</artifactId>
   <name>Openflow Nicira Extensions Karaf Feature</name>
-  <version>0.0.4-Helium-SR1</version>
+  <version>0.0.5-SNAPSHOT</version>
   <packaging>jar</packaging>
   <properties>
     <features.file>features.xml</features.file>
-    <openflowjava.version>0.5.1-Helium-SR1</openflowjava.version>
-    <openflowplugin.version>0.0.4-Helium-SR1</openflowplugin.version>
+    <openflowjava.version>0.5.2-SNAPSHOT</openflowjava.version>
+    <openflowplugin.version>0.0.5-SNAPSHOT</openflowplugin.version>
     <openflowj.version>1.0.2</openflowj.version>
-    <ovsdb.nx.version>1.0.1-Helium-SR1</ovsdb.nx.version>
+    <ovsdb.nx.version>1.0.2-SNAPSHOT</ovsdb.nx.version>
   </properties>
   <dependencies>
     <dependency>
@@ -54,12 +54,12 @@
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>of-extension.nx-ofjava</artifactId>
-      <version>1.0.1-Helium-SR1</version>
+      <version>1.0.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>of-extension.nx-sal</artifactId>
-      <version>1.0.1-Helium-SR1</version>
+      <version>1.0.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
@@ -155,7 +155,7 @@
           <systemPropertyVariables>
             <karaf.distro.groupId>org.opendaylight.controller</karaf.distro.groupId>
             <karaf.distro.artifactId>opendaylight-karaf-empty</karaf.distro.artifactId>
-            <karaf.distro.version>1.4.3-Helium-SR1</karaf.distro.version>
+            <karaf.distro.version>1.4.4-SNAPSHOT</karaf.distro.version>
           </systemPropertyVariables>
           <dependenciesToScan>
            <dependency>org.opendaylight.yangtools:features-test</dependency>

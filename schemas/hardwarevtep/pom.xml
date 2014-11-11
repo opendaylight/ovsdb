@@ -4,11 +4,11 @@
   <parent>
     <groupId>org.opendaylight.ovsdb</groupId>
     <artifactId>commons</artifactId>
-    <version>1.2.1-Helium-SR1</version>
+    <version>1.2.2-SNAPSHOT</version>
     <relativePath>../../commons/parent</relativePath>
   </parent>
   <artifactId>schema.hardwarevtep</artifactId>
-  <version>1.0.1-Helium-SR1</version>
+  <version>1.0.2-SNAPSHOT</version>
   <name>OVSDB hardware_vtep Schema</name>
   <packaging>bundle</packaging>
 

@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "ba8cc1f7_79c1847f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-11-11T20:50:44Z",
+      "side": 1,
+      "message": "this is a sample on the commit message.",
+      "revId": "11b541b6c32ffc988ad82ebf4fa25dfee08b068c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba8cc1f7_f9d59443",
         "filename": "plugin-shell/src/test/java/org/opendaylight/ovsdb/plugin/shell/PrintCacheTest.java",
         "patchSetId": 1
@@ -13,6 +30,23 @@
       "writtenOn": "2014-11-11T20:49:12Z",
       "side": 1,
       "message": "a comment",
+      "revId": "11b541b6c32ffc988ad82ebf4fa25dfee08b068c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba8cc1f7_59c4c091",
+        "filename": "plugin-shell/src/test/java/org/opendaylight/ovsdb/plugin/shell/PrintCacheTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-11-11T20:50:44Z",
+      "side": 1,
+      "message": "this is a sample comment on your change. ;)",
       "revId": "11b541b6c32ffc988ad82ebf4fa25dfee08b068c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

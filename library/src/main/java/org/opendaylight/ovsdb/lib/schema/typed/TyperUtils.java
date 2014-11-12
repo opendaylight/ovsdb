@@ -304,7 +304,7 @@ public class TyperUtils {
                 return proxy;
             }
 
-            private Object processGetTableSchema() throws Throwable {
+            private Object processGetTableSchema() {
                 if (dbSchema == null) return null;
                 return getTableSchema(dbSchema, klazz);
             }
@@ -362,7 +362,7 @@ public class TyperUtils {
                 try {
                     TableSchema<?> schema = (TableSchema<?>)processGetTableSchema();
                     tableName = schema.getName();
-                } catch (Throwable e) {
+                } catch (Exception e) {
                     tableName = "";
                 }
                 if (row == null) return tableName;

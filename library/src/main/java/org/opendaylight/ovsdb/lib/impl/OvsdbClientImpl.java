@@ -288,7 +288,7 @@ public class OvsdbClientImpl implements OvsdbClient {
                             } else if (schema.size() == 1) {
                                 sfuture.set(schema);
                             }
-                        } catch (Throwable e) {
+                        } catch (Exception e) {
                             sfuture.setException(e);
                         }
                         return null;

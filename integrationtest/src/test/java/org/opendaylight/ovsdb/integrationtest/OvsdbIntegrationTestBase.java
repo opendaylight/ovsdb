@@ -5,10 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Authors : Madhu Venugopal
+ * Authors : Madhu Venugopal, Sam Hague
  */
 package org.opendaylight.ovsdb.integrationtest;
 
+import static junit.framework.Assert.assertFalse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -35,8 +36,13 @@ import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class OvsdbIntegrationTestBase {
+    private static final Logger LOG = LoggerFactory.getLogger(OvsdbIntegrationTestBase.class);
     protected final static String IDENTIFIER = "TEST";
     protected final static String SERVER_IPADDRESS = "ovsdbserver.ipaddress";
     protected final static String SERVER_PORT = "ovsdbserver.port";
@@ -44,12 +50,9 @@ public abstract class OvsdbIntegrationTestBase {
     protected final static String CONNECTION_TYPE_ACTIVE = "active";
     protected final static String CONNECTION_TYPE_PASSIVE = "passive";
     protected final static int CONNECTION_INIT_TIMEOUT = 10000;
-
     protected final static String DEFAULT_SERVER_PORT = "6640";
 
-    /**
-     * Represents the Open Vswitch Schema
-     */
+    private static boolean bundlesReady = false;
     public final static String OPEN_VSWITCH_SCHEMA = "Open_vSwitch";
     public final static String HARDWARE_VTEP = "hardware_vtep";
 
@@ -157,5 +160,47 @@ public abstract class OvsdbIntegrationTestBase {
             assertEquals(this.client.getConnectionInfo(), client.getConnectionInfo());
             this.client = null;
         }
+    }
+
+    public String stateToString(int state) {
+        switch (state) {
+            case Bundle.ACTIVE:
+                return "ACTIVE";
+            case Bundle.INSTALLED:
+                return "INSTALLED";
+            case Bundle.RESOLVED:
+                return "RESOLVED";
+            case Bundle.UNINSTALLED:
+                return "UNINSTALLED";
+            default:
+                return "Not CONVERTED";
+        }
+    }
+
+    public void areWeReady(BundleContext bc) throws InterruptedException {
+        if (bundlesReady) {
+            LOG.info("Bundles already loaded");
+            return;
+        }
+        assertNotNull(bc);
+        boolean debugit = false;
+        Bundle b[] = bc.getBundles();
+        for (Bundle element : b) {
+            int state = element.getState();
+            if (state != Bundle.ACTIVE && state != Bundle.RESOLVED) {
+                LOG.info("Bundle:" + element.getSymbolicName() + " state:"
+                        + stateToString(state));
+                debugit = true;
+            }
+        }
+        if (debugit) {
+            LOG.debug("Do some debugging because some bundle is unresolved");
+            Thread.sleep(600000);
+        }
+
+        // Assert if true, if false we are good to go!
+        assertFalse("There is a problem with loading the bundles.", debugit);
+        bundlesReady = true;
+        LOG.info("Bundles loaded");
     }
 }

@@ -217,21 +217,6 @@ public class OvsdbNorthboundIT extends OvsdbIntegrationTestBase {
         return UuidHelper.getOvsUuid();
     }
 
-     private String stateToString(int state) {
-        switch (state) {
-            case Bundle.ACTIVE:
-                return "ACTIVE";
-            case Bundle.INSTALLED:
-                return "INSTALLED";
-            case Bundle.RESOLVED:
-                return "RESOLVED";
-            case Bundle.UNINSTALLED:
-                return "UNINSTALLED";
-            default:
-                return "Not CONVERTED";
-        }
-    }
-
     @Before
     public void areWeReady() throws InterruptedException {
         assertNotNull(bc);

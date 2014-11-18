@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a91bd0f_880a1bd1",
+        "filename": "integrationtest/src/test/java/org/opendaylight/ovsdb/integrationtest/schema/hardwarevtep/HardwareVTEPIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-11-18T22:26:48Z",
+      "side": 1,
+      "message": "not sure if you know this, but you can get the stack trace in the log by doing something like this:\n\nLOG.error(\"Exception \", t.fillInStackTrace());",
+      "revId": "38559a8d6ce8debf1d4fd05bf7f33c727d9b6add",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

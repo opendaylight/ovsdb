@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.ovsdb</groupId>
@@ -14,86 +16,13 @@
 
   <dependencies>
     <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-annotations</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>commons-collections</groupId>
-      <artifactId>commons-collections</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>equinoxSDK381</groupId>
-      <artifactId>org.eclipse.osgi</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-all</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.portlet</groupId>
-      <artifactId>portlet-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpcore-nio</artifactId>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>library</artifactId>
       <version>${ovsdb.library.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-    </dependency>
   </dependencies>
 
   <build>
-    <testResources>
-      <testResource>
-        <filtering>true</filtering>
-        <directory>src/test/resources</directory>
-      </testResource>
-    </testResources>
     <plugins>
       <plugin>
         <groupId>org.apache.felix</groupId>
@@ -102,21 +31,6 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Import-Package>org.opendaylight.ovsdb.lib,
-                org.opendaylight.ovsdb.lib.jsonrpc,
-                org.opendaylight.ovsdb.lib.notation,
-                org.opendaylight.ovsdb.lib.operations,
-                org.opendaylight.ovsdb.lib.message,
-                org.opendaylight.ovsdb.lib.schema,
-                org.opendaylight.ovsdb.lib.schema.typed,
-                org.apache.commons.lang3.builder,
-                org.apache.commons.lang3.tuple,
-                org.apache.felix.dm,
-                org.slf4j,
-                org.eclipse.osgi.framework.console,
-                org.osgi.framework,
-                javax.net.ssl,
-                *</Import-Package>
             <Embed-Transitive>true</Embed-Transitive>
             <Export-Package>org.opendaylight.ovsdb.schema.hardwarevtep</Export-Package>
           </instructions>
@@ -128,19 +42,9 @@
         <artifactId>maven-checkstyle-plugin</artifactId>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-failsafe-plugin</artifactId>
-      </plugin>
-      <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</developerConnection>
-    <tag>HEAD</tag>
-    <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
-  </scm>
 </project>

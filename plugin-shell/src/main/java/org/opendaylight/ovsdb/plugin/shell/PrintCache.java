@@ -9,15 +9,10 @@
  */
 package org.opendaylight.ovsdb.plugin.shell;
 
-import java.util.Collection;
-import java.util.concurrent.ConcurrentMap;
-
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.ovsdb.lib.notation.Column;
-import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryService;
 
 @Command(scope = "ovs", name = "printCache", description="Prints OVSDB Cache")

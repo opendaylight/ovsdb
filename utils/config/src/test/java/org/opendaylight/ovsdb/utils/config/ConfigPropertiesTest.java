@@ -18,7 +18,6 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.lang.System;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.powermock.api.mockito.PowerMockito;

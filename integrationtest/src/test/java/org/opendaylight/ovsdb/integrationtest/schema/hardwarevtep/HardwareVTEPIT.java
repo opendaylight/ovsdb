@@ -14,6 +14,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.options;
@@ -31,7 +32,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 import junit.framework.Assert;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -141,7 +141,7 @@ public class HardwareVTEPIT  extends OvsdbIntegrationTestBase {
     @Before
     public void setUp () throws ExecutionException, InterruptedException, IOException {
         areWeReady(bc);
-        assertTrue(HARDWARE_VTEP + " is required.", checkSchema(HARDWARE_VTEP));
+        assumeTrue(HARDWARE_VTEP + " is required.", checkSchema(HARDWARE_VTEP));
         assertTrue("Failed to monitor tables", monitorTables());
     }
 
@@ -310,7 +310,7 @@ public class HardwareVTEPIT  extends OvsdbIntegrationTestBase {
      */
     public void managerInsert () throws ExecutionException, InterruptedException {
         //Ensure test only proceeds if HW VTEP is supported
-        Assume.assumeTrue(isSchemaSupported(getClient(), HARDWARE_VTEP));
+        assumeTrue(isSchemaSupported(getClient(), HARDWARE_VTEP));
 
         //proceed only if schema was already retrieved successfully
         Assert.assertNotNull(getDbSchema());
@@ -350,7 +350,7 @@ public class HardwareVTEPIT  extends OvsdbIntegrationTestBase {
     }
 
     public void managerDelete () throws ExecutionException, InterruptedException {
-        Assume.assumeTrue(isSchemaSupported(getClient(), HARDWARE_VTEP));
+        assumeTrue(isSchemaSupported(getClient(), HARDWARE_VTEP));
 
         Manager manager = getClient().getTypedRowWrapper(Manager.class, null);
         Global global = getClient().getTypedRowWrapper(Global.class, null);

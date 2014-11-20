@@ -185,7 +185,8 @@ public class OpenVSwitchIT extends OvsdbIntegrationTestBase {
         areWeReady(bc);
         assertTrue(OPEN_VSWITCH_SCHEMA + " is required.", checkSchema(OPEN_VSWITCH_SCHEMA));
         assertTrue("Failed to monitor tables", monitorTables());
-        schemaVersion = getClient().getDatabaseSchema("Open_vSwitch").getVersion();
+        schemaVersion = getClient().getDatabaseSchema(OPEN_VSWITCH_SCHEMA).getVersion();
+        LOG.info("{} schema version = {}", OPEN_VSWITCH_SCHEMA, schemaVersion);
     }
 
     public boolean checkSchema (String schema) {

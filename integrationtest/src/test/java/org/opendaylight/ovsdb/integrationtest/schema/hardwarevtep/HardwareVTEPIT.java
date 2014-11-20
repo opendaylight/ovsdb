@@ -143,6 +143,8 @@ public class HardwareVTEPIT  extends OvsdbIntegrationTestBase {
         areWeReady(bc);
         assumeTrue(HARDWARE_VTEP + " is required.", checkSchema(HARDWARE_VTEP));
         assertTrue("Failed to monitor tables", monitorTables());
+        LOG.info("{} schema version = {}", OPEN_VSWITCH_SCHEMA,
+                getClient().getDatabaseSchema(OPEN_VSWITCH_SCHEMA).getVersion());
     }
 
     public boolean checkSchema (String schema) {

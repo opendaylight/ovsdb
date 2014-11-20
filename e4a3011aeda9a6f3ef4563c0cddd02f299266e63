@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a91bd0f_f424dec7",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/impl/ConfigurationServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 963,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-11-20T15:52:17Z",
+      "side": 1,
+      "message": "Why is the fillInStackTrace() needed? I thought you could simple say logger.warn(\"Thread interrupted\", e)? If it is the same  information, I would prefer the simple e.",
+      "revId": "e4a3011aeda9a6f3ef4563c0cddd02f299266e63",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

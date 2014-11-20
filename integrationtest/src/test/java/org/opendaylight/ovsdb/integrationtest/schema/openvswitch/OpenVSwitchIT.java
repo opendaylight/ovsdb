@@ -507,6 +507,7 @@ public class OpenVSwitchIT extends OvsdbIntegrationTestBase {
     public void testFlowSampleCollectorSetTableNotSupported () {
         // Don't run this test if the table is not supported
         assumeTrue(schemaVersion.compareTo(flowSampleCollectorSetFromVersion) < 0);
+
         boolean isExceptionRaised = false;
         try {
             FlowSampleCollectorSet flowSampleCollectorSet = getClient().createTypedRowWrapper(FlowSampleCollectorSet.class);
@@ -563,6 +564,9 @@ public class OpenVSwitchIT extends OvsdbIntegrationTestBase {
 
     @Test
     public void testFlowSampleCollectorSet () throws ExecutionException, InterruptedException {
+        // Don't run this test if the table is not supported
+        assumeTrue(schemaVersion.compareTo(flowSampleCollectorSetFromVersion) >= 0);
+
         testBridgeUuid = bridgeInsert();
         testFlowSampleCollectorSetInsert();
         testFlowSampleCollectorSetDelete();
@@ -573,6 +577,7 @@ public class OpenVSwitchIT extends OvsdbIntegrationTestBase {
     public void testFlowTableTableNotSupported () {
         // Don't run this test if the table is not supported
         assumeTrue(schemaVersion.compareTo(flowTableFromVersion) < 0);
+
         boolean isExceptionRaised = false;
         try {
             FlowTable flowTable = getClient().createTypedRowWrapper(FlowTable.class);
@@ -629,6 +634,9 @@ public class OpenVSwitchIT extends OvsdbIntegrationTestBase {
     }
 
     public void testFlowTableDelete () throws ExecutionException, InterruptedException {
+        // Don't run this test if the table is not supported
+        assumeTrue(schemaVersion.compareTo(flowTableFromVersion) >= 0);
+
         FlowTable flowTable = getClient().getTypedRowWrapper(FlowTable.class, null);
         Bridge bridge = getClient().getTypedRowWrapper(Bridge.class, null);
 
@@ -648,7 +656,9 @@ public class OpenVSwitchIT extends OvsdbIntegrationTestBase {
 
     @Test
     public void setTestFlowTableSet () throws ExecutionException, InterruptedException {
-        schemaVersion = getClient().getDatabaseSchema("Open_vSwitch").getVersion();
+        // Don't run this test if the table is not supported
+        assumeTrue(schemaVersion.compareTo(flowTableFromVersion) >= 0);
+
         UUID testBridgeUuid = bridgeInsert();
         testFlowTableInsert();
         testFlowTableDelete();
@@ -659,6 +669,7 @@ public class OpenVSwitchIT extends OvsdbIntegrationTestBase {
     public void testIpfixTableNotSupported () {
         // Don't run this test if the table is not supported
         assumeTrue(schemaVersion.compareTo(ipfixFromVersion) < 0);
+
         boolean isExceptionRaised = false;
         try {
             IPFIX ipfix = getClient().createTypedRowWrapper(IPFIX.class);
@@ -669,7 +680,6 @@ public class OpenVSwitchIT extends OvsdbIntegrationTestBase {
     }
 
     public void testIpfixInsert () throws ExecutionException, InterruptedException {
-
         // Don't run this test if the table is not supported
         assumeTrue(schemaVersion.compareTo(ipfixFromVersion) >= 0);
 
@@ -717,6 +727,9 @@ public class OpenVSwitchIT extends OvsdbIntegrationTestBase {
     }
 
     public void testIpfixDelete () throws ExecutionException, InterruptedException {
+        // Don't run this test if the table is not supported
+        assumeTrue(schemaVersion.compareTo(ipfixFromVersion) >= 0);
+
         FlowTable flowTable = getClient().getTypedRowWrapper(FlowTable.class, null);
         Bridge bridge = getClient().getTypedRowWrapper(Bridge.class, null);
 
@@ -736,6 +749,9 @@ public class OpenVSwitchIT extends OvsdbIntegrationTestBase {
 
     @Test
     public void testIpfix () throws ExecutionException, InterruptedException {
+        // Don't run this test if the table is not supported
+        assumeTrue(schemaVersion.compareTo(ipfixFromVersion) >= 0);
+
         testBridgeUuid = bridgeInsert();
         testIpfixInsert();
         testIpfixDelete();

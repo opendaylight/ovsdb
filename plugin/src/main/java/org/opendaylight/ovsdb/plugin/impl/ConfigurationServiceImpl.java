@@ -960,7 +960,7 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
             Thread.sleep(2000);
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.warn("Thread interrupted", e);
         }
 
         Interface interfaceRow = client.createTypedRowWrapper(Interface.class);

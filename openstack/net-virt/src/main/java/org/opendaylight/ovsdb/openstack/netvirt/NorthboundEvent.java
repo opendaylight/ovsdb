@@ -137,60 +137,82 @@ public class NorthboundEvent extends AbstractEvent {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
+        }
         NorthboundEvent other = (NorthboundEvent) obj;
         if (port == null) {
-            if (other.port != null)
+            if (other.port != null) {
                 return false;
-        } else if (!port.equals(other.port))
+            }
+        } else if (!port.equals(other.port)) {
             return false;
+        }
         if (subnet == null) {
-            if (other.subnet != null)
+            if (other.subnet != null) {
                 return false;
-        } else if (!subnet.equals(other.subnet))
+            }
+        } else if (!subnet.equals(other.subnet)) {
             return false;
+        }
         if (router == null) {
-            if (other.router != null)
+            if (other.router != null) {
                 return false;
-        } else if (!router.equals(other.router))
+            }
+        } else if (!router.equals(other.router)) {
             return false;
+        }
         if (routerInterface == null) {
-            if (other.routerInterface != null)
+            if (other.routerInterface != null) {
                 return false;
-        } else if (!routerInterface.equals(other.routerInterface))
+            }
+        } else if (!routerInterface.equals(other.routerInterface)) {
             return false;
+        }
         if (neutronFloatingIP == null) {
-            if (other.neutronFloatingIP != null)
+            if (other.neutronFloatingIP != null) {
                 return false;
-        } else if (!neutronFloatingIP.equals(other.neutronFloatingIP))
+            }
+        } else if (!neutronFloatingIP.equals(other.neutronFloatingIP)) {
             return false;
+        }
         if (neutronNetwork == null) {
-            if (other.neutronNetwork != null)
+            if (other.neutronNetwork != null) {
                 return false;
-        } else if (!neutronNetwork.equals(other.neutronNetwork))
+            }
+        } else if (!neutronNetwork.equals(other.neutronNetwork)) {
             return false;
+        }
         if (loadBalancer == null) {
-            if (other.loadBalancer != null)
+            if (other.loadBalancer != null) {
                 return false;
-        } else if (!loadBalancer.equals(other.loadBalancer))
+            }
+        } else if (!loadBalancer.equals(other.loadBalancer)) {
             return false;
+        }
         if (loadBalancerPool == null) {
-            if (other.loadBalancerPool != null)
+            if (other.loadBalancerPool != null) {
                 return false;
-        } else if (!loadBalancerPool.equals(other.loadBalancerPool))
+            }
+        } else if (!loadBalancerPool.equals(other.loadBalancerPool)) {
             return false;
+        }
         if (loadBalancerPoolMember == null) {
-            if (other.loadBalancerPoolMember != null)
+            if (other.loadBalancerPoolMember != null) {
                 return false;
-        } else if (!loadBalancerPoolMember.equals(other.loadBalancerPoolMember))
+            }
+        } else if (!loadBalancerPoolMember.equals(other.loadBalancerPoolMember)) {
             return false;
+        }
         return true;
     }
 }

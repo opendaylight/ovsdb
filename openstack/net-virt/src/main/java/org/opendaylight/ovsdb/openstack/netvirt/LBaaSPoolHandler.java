@@ -55,14 +55,15 @@ public class LBaaSPoolHandler extends AbstractHandler
     @Override
     public int canCreateNeutronLoadBalancerPool(NeutronLoadBalancerPool neutronLBPool) {
         String poolProtocol = neutronLBPool.getLoadBalancerPoolProtocol();
-        if (poolProtocol == null)
+        if (poolProtocol == null) {
             return HttpURLConnection.HTTP_BAD_REQUEST;
-        else if (!(poolProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_TCP) ||
+        } else if (!(poolProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_TCP) ||
                 poolProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTP) ||
-                poolProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTPS)))
+                poolProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTPS))) {
             return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
-        else
+        } else {
             return HttpURLConnection.HTTP_OK;
+        }
     }
 
     @Override
@@ -91,8 +92,9 @@ public class LBaaSPoolHandler extends AbstractHandler
                     logger.debug("Neutron LB pool configuration invalid for {} ", lbConfig.getName());
                     continue;
                 } else {
-                    for (Node node: this.switchManager.getNodes())
+                    for (Node node: this.switchManager.getNodes()) {
                         loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.ADD);
+                    }
                 }
             }
         }
@@ -112,14 +114,15 @@ public class LBaaSPoolHandler extends AbstractHandler
     @Override
     public int canDeleteNeutronLoadBalancerPool(NeutronLoadBalancerPool neutronLBPool) {
         String poolProtocol = neutronLBPool.getLoadBalancerPoolProtocol();
-        if (poolProtocol == null)
+        if (poolProtocol == null) {
             return HttpURLConnection.HTTP_BAD_REQUEST;
-        else if (!(poolProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_TCP) ||
+        } else if (!(poolProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_TCP) ||
                 poolProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTP) ||
-                poolProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTPS)))
+                poolProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTPS))) {
             return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
-        else
+        } else {
             return HttpURLConnection.HTTP_OK;
+        }
     }
 
     @Override
@@ -144,8 +147,9 @@ public class LBaaSPoolHandler extends AbstractHandler
                     logger.debug("Neutron LB pool configuration invalid for {} ", lbConfig.getName());
                     continue;
                 } else {
-                    for (Node node: this.switchManager.getNodes())
+                    for (Node node: this.switchManager.getNodes()) {
                         loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.DELETE);
+                    }
                 }
             }
         }
@@ -191,11 +195,13 @@ public class LBaaSPoolHandler extends AbstractHandler
      */
     public List<LoadBalancerConfiguration> extractLBConfiguration(NeutronLoadBalancerPool neutronLBPool) {
         String poolProtocol = neutronLBPool.getLoadBalancerPoolProtocol();
-        if (poolProtocol == null)
+        if (poolProtocol == null) {
             return null;
+        }
         if (!(poolProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTP) ||
-                poolProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTPS)))
+                poolProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTPS))) {
             return null;
+        }
 
         List<NeutronLoadBalancerPoolMember> poolMembers = neutronLBPool.getLoadBalancerPoolMembers();
         if (poolMembers.size() == 0) {
@@ -230,9 +236,9 @@ public class LBaaSPoolHandler extends AbstractHandler
             for (NeutronLoadBalancerPoolMember neutronLBPoolMember: neutronLBPool.getLoadBalancerPoolMembers()) {
                 memberAdminStateIsUp = neutronLBPoolMember.getPoolMemberAdminStateIsUp();
                 memberSubnetID = neutronLBPoolMember.getPoolMemberSubnetID();
-                if (memberSubnetID == null || memberAdminStateIsUp == null)
+                if (memberSubnetID == null || memberAdminStateIsUp == null) {
                     continue;
-                else if (memberSubnetID.equals(loadBalancerSubnetID) && memberAdminStateIsUp.booleanValue()) {
+                } else if (memberSubnetID.equals(loadBalancerSubnetID) && memberAdminStateIsUp.booleanValue()) {
                     memberID = neutronLBPoolMember.getPoolMemberID();
                     memberIP = neutronLBPoolMember.getPoolMemberAddress();
                     memberPort = neutronLBPoolMember.getPoolMemberProtoPort();
@@ -241,8 +247,9 @@ public class LBaaSPoolHandler extends AbstractHandler
                         continue;
                     }
                     memberMAC = NeutronCacheUtils.getMacAddress(neutronPortsCache, memberSubnetID, memberIP);
-                    if (memberMAC == null)
+                    if (memberMAC == null) {
                         continue;
+                    }
                     lbConfig.addMember(memberID, memberIP, memberMAC, poolProtocol, memberPort);
                 }
             }

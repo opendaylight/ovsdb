@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a91bd0f_77a44b57",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/impl/ConfigurationServiceImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 963,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-11-21T14:16:34Z",
+      "side": 1,
+      "message": "Should this be a warn or an error? I realized the gerrits from Marcus last night that error was used.\n\nI see mixed use all through the code - error, warn, info debug... But most are error.",
+      "range": {
+        "startLine": 963,
+        "startChar": 32,
+        "endLine": 963,
+        "endChar": 43
+      },
+      "revId": "64cbb6ce1c8556bdcd4d3c199944d3c07943a1e4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

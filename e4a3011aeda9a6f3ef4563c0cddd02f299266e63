@@ -16,6 +16,24 @@
       "revId": "e4a3011aeda9a6f3ef4563c0cddd02f299266e63",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a91bd0f_5cd12ccc",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/impl/ConfigurationServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 963,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-11-21T13:06:59Z",
+      "side": 1,
+      "message": "Argh... I\u0027m dead wrong! :)\n\nYou are absolutely right; the Log(\"test\", e) shows the stack just fine. Will listen to what sonar (and you are saying).\n\n---\n        Throwable e \u003d new Throwable();\n        log.info(\"XXX this is just e\", e);\n        log.info(\"XXX this is e with trace\", e.fillInStackTrace());\n---\n\n08:01:08.073 [main] INFO  o.o.o.i.neutron.NeutronIT - XXX this is just e\njava.lang.Throwable: null\n\tat org.opendaylight.ovsdb.integrationtest.neutron.NeutronIT.testPrintStraceInLog(NeutronIT.java:251) ~[test-classes/:na]\n\tat sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:1.7.0_67]\n...\n\n\n08:01:08.074 [main] INFO  o.o.o.i.neutron.NeutronIT - XXX this is e with trace\njava.lang.Throwable: null\n\tat org.opendaylight.ovsdb.integrationtest.neutron.NeutronIT.testPrintStraceInLog(NeutronIT.java:253) [bundlefile:na]\n\tat sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:1.7.0_67]\n...",
+      "parentUuid": "9a91bd0f_f424dec7",
+      "revId": "e4a3011aeda9a6f3ef4563c0cddd02f299266e63",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

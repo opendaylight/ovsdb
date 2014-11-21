@@ -14,7 +14,7 @@ import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 
 public class SouthboundEvent extends AbstractEvent {
-    public enum Type { NODE, ROW };
+    public enum Type { NODE, ROW }
     private Type type;
     private Node node;
     private String tableName;
@@ -78,35 +78,47 @@ public class SouthboundEvent extends AbstractEvent {
     }
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
-        if (!super.equals(obj))
+        }
+        if (!super.equals(obj)) {
             return false;
+        }
         SouthboundEvent other = (SouthboundEvent) obj;
         if (node == null) {
-            if (other.node != null)
+            if (other.node != null) {
                 return false;
-        } else if (!node.equals(other.node))
+            }
+        } else if (!node.equals(other.node)) {
             return false;
+        }
         if (tableName == null) {
-            if (other.tableName != null)
+            if (other.tableName != null) {
                 return false;
-        } else if (!tableName.equals(other.tableName))
+            }
+        } else if (!tableName.equals(other.tableName)) {
             return false;
+        }
         if (type == null) {
-            if (other.type != null)
+            if (other.type != null) {
                 return false;
-        } else if (!type.equals(other.type))
+            }
+        } else if (!type.equals(other.type)) {
             return false;
+        }
         if (uuid == null) {
-            if (other.uuid != null)
+            if (other.uuid != null) {
                 return false;
-        } else if (!uuid.equals(other.uuid))
+            }
+        } else if (!uuid.equals(other.uuid)) {
             return false;
+        }
         return true;
     }
 }

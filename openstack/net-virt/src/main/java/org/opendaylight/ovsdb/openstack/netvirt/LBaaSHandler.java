@@ -83,8 +83,9 @@ public class LBaaSHandler extends AbstractHandler
         } else if (this.switchManager.getNodes().size() == 0) {
             logger.debug("Noop with LB {} creation because no nodes available.", lbConfig.getName());
         } else {
-            for (Node node: this.switchManager.getNodes())
+            for (Node node: this.switchManager.getNodes()) {
                 loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.ADD);
+            }
         }
     }
 
@@ -121,8 +122,9 @@ public class LBaaSHandler extends AbstractHandler
         } else if (this.switchManager.getNodes().size() == 0) {
             logger.debug("Noop with LB {} deletion because no nodes available.", lbConfig.getName());
         } else {
-            for (Node node: this.switchManager.getNodes())
+            for (Node node: this.switchManager.getNodes()) {
                 loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.DELETE);
+            }
         }
     }
 
@@ -185,18 +187,21 @@ public class LBaaSHandler extends AbstractHandler
         for (NeutronLoadBalancerPool neutronLBPool: neutronLBPoolCache.getAllNeutronLoadBalancerPools()) {
             List<NeutronLoadBalancerPoolMember> members = neutronLBPool.getLoadBalancerPoolMembers();
             memberProtocol = neutronLBPool.getLoadBalancerPoolProtocol();
-            if (memberProtocol == null)
+            if (memberProtocol == null) {
                 continue;
+            }
 
             if (!(memberProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_TCP) ||
                   memberProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTP) ||
-                  memberProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTPS)))
+                  memberProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTPS))) {
                 continue;
+            }
             for (NeutronLoadBalancerPoolMember neutronLBPoolMember: members) {
                 memberAdminStateIsUp = neutronLBPoolMember.getPoolMemberAdminStateIsUp();
                 memberSubnetID = neutronLBPoolMember.getPoolMemberSubnetID();
-                if (memberSubnetID == null || memberAdminStateIsUp == null)
+                if (memberSubnetID == null || memberAdminStateIsUp == null) {
                     continue;
+                }
                 else if (memberSubnetID.equals(loadBalancerSubnetID) && memberAdminStateIsUp.booleanValue()) {
                     memberID = neutronLBPoolMember.getPoolMemberID();
                     memberIP = neutronLBPoolMember.getPoolMemberAddress();
@@ -206,8 +211,9 @@ public class LBaaSHandler extends AbstractHandler
                         continue;
                     }
                     memberMAC = NeutronCacheUtils.getMacAddress(neutronPortsCache, memberSubnetID, memberIP);
-                    if (memberMAC == null)
+                    if (memberMAC == null) {
                         continue;
+                    }
                     lbConfig.addMember(memberID, memberIP, memberMAC, memberProtocol, memberPort);
                 }
             }
@@ -227,19 +233,22 @@ public class LBaaSHandler extends AbstractHandler
 
         for (NeutronLoadBalancer neutronLB: neutronLBCache.getAllNeutronLoadBalancers()) {
             LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLB);
-            if (!lbConfig.isValid())
+            if (!lbConfig.isValid()) {
                 logger.debug("Neutron LB configuration invalid for {} ", lbConfig.getName());
-            else {
-               if (type.equals(UpdateType.ADDED))
-                    loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.ADD);
+            } else {
+               if (type.equals(UpdateType.ADDED)) {
+                   loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.ADD);
 
                /* When node disappears, we do nothing for now. Making a call to
                 * loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.DELETE)
                 * can lead to TransactionCommitFailedException. Similarly when node is changed,
                 * because of remove followed by add, we do nothing.
                 */
-               else //(type.equals(UpdateType.REMOVED) || type.equals(UpdateType.CHANGED))
-                    continue;
+
+                 //(type.equals(UpdateType.REMOVED) || type.equals(UpdateType.CHANGED))
+               } else {
+                   continue;
+               }
             }
         }
     }

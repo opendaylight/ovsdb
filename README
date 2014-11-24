@@ -56,20 +56,7 @@ HOW TO BUILD & RUN
 
 Pre-requisites : JDK 1.7+, Maven 3+
 
-1. Building an OVSDB based Opendaylight Virtualization edition :
-   1. This is the legacy way to build and distribute Opendaylight archives. And this method was
-      followed in Hydrogen and possibly in Helium release as well.
-
-   2. From the root folder(that hosts this README), execute "mvn clean install"
-      That should build a full distribution archive and distribution directory that will contain
-      Opendaylight Controller + OVSDB bundles + Openflow Plugins under
-      distribution/opendaylight/target/distribution.ovsdb-X.X.X-osgipackage
-
-   3. Upon successful completion of a build, the Controller with OVSDB can be executed by :
-      cd distribution/opendaylight/target/distribution.ovsdb-X.X.X-osgipackage/opendaylight/
-      ./run.sh -virt ovsdb
-
-2. Building a Karaf Feature and deploying it in an Opendaylight Karaf distribution :
+1. Building a Karaf Feature and deploying it in an Opendaylight Karaf distribution :
    1. This is a new method for Opendaylight distribution wherein there is no defined editions such
       as Base, Virtualization or SP editions. The end-customer can choose to deploy the required feature
       based on his/her deployment needs.
@@ -82,7 +69,7 @@ Pre-requisites : JDK 1.7+, Maven 3+
 
    4. Once karaf has started and you see the Opendaylight ascii art in the console, the last step
       is to start the OVSDB plugin framework with the following command in the karaf console:
-      "feature:install odl-ovsdb-openstack" (without quotation marks).
+      "feature:install odl-ovsdb-openstack odl-ovsdb-northbound" (without quotation marks).
 
    Sample output from Karaf console :
 
@@ -98,8 +85,44 @@ Pre-requisites : JDK 1.7+, Maven 3+
    odl-openflow-nxm-extensions      | 0.0.3-SNAPSHOT      | x         | ovsdb-0.0.3-SNAPSHOT                  | OpenDaylight :: Openflow :: Nicira Extensions
 
 
-3. Building a Karaf Feature and deploying it in an Opendaylight Karaf distribution :
-*** This method is deprecated and an update will be added in the future.
+2. Building a bundle and deploying it in an Opendaylight Karaf distribution :
+   This method can be used to update and test new code in a bundle. If the bundle of interest is rebuilt as a
+   snapshot with the same version as what it already defined in a feature repo then that new bundle will be used
+   when the feature is loaded in karaf. If karaf is already running with the feature loaded then follow the steps
+   below to load the new bundle:
+
+   1. Find the bundle id of the bundle you are going to rebuild:
+      - bundle:list -s | grep <bundlename>, i.e. bundle:list -s | grep odl-ovsdb-plugin
+
+   2. Instruct karaf to watch the new bundle and reload it if it changes:
+      - bundle:watch <id>
+      - The id is the value returned in 1 above.
+      - You can also watch the bundle URL itself:
+        - bundle:watch mvn:org.opendaylight.ovsdb/plugin/1.0.2-SNAPSHOT
+
+   3. Rebuild bundle.
+      - cd bundle dir, i.e. cd ovsdb/plugin
+      - mvn clean install. This will install the new bundle into the local mvn repo.
+
+   4. karaf will see the changed bundle and reload it.
+
+
+3. Building an OVSDB based Opendaylight Virtualization edition:
+   1. This is the legacy way to build and distribute Opendaylight archives. This method was
+      followed in Hydrogen. It might still work in Helium but it is best effort for support.
+      The preferred method for Helium and later is to use karaf.
+
+   2. From the root folder(that hosts this README), execute "mvn clean install"
+      That should build a full distribution archive and distribution directory that will contain
+      Opendaylight Controller + OVSDB bundles + Openflow Plugins under
+      distribution/opendaylight/target/distribution.ovsdb-X.X.X-osgipackage
+
+   3. Upon successful completion of a build, the Controller with OVSDB can be executed by :
+      cd distribution/opendaylight/target/distribution.ovsdb-X.X.X-osgipackage/opendaylight/
+      ./run.sh -virt ovsdb
+
+4. Building a Karaf Feature and deploying it in an Opendaylight Karaf distribution :
+*** This method is deprecated.
    1. This is a new method for Opendaylight distribution wherein there is no defined editions such
       as Base, Virtualization or SP editions. Rather each of the projects will generate features in
       form of .kar files. The end-customer can choose to deploy the required feature based on his/her

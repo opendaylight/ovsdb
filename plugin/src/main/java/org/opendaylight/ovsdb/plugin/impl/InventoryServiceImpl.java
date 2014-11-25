@@ -273,8 +273,12 @@ public class InventoryServiceImpl implements IPluginInInventoryService,
 
     @Override
     public void printCache(Node n) {
-        NodeDatabase db = dbCache.get(n);
-        if (db != null) db.printTableCache();
+        if ((dbCache != null) && (!dbCache.isEmpty())) {
+            NodeDatabase db = dbCache.get(n);
+            if (db != null) {
+                db.printTableCache();
+            }
+        }
     }
 
     @Override

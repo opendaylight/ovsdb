@@ -22,6 +22,30 @@
       "revId": "e46c98aba067c7c01b663b967b19ae2dcb20e69a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_ac403657",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/ArpResponderService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-12-03T16:11:41Z",
+      "side": 1,
+      "message": "short of making Ipv4Prefix type smarter, I don\u0027t really know how.\n\nWe could create a util in ovsdb to do this, but what I see folks doing is what I did here.\n\nI could look into adding a constructor for Ipv4Prefix that takes an Ipv4Address as param... is that what you are thinking of? If so, this involves playing with yang a bit.",
+      "parentUuid": "7a96c907_cc31020d",
+      "range": {
+        "startLine": 76,
+        "startChar": 8,
+        "endLine": 76,
+        "endChar": 18
+      },
+      "revId": "e46c98aba067c7c01b663b967b19ae2dcb20e69a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

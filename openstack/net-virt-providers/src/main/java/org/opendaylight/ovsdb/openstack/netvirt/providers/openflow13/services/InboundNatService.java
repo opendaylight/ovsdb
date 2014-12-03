@@ -60,10 +60,10 @@ public class InboundNatService extends AbstractServiceInstance implements Inboun
         InstructionBuilder ib = new InstructionBuilder();
 
         MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId));
-        MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(matchAddress.getHostAddress()));
+        MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(matchAddress.getHostAddress()+"/32"));
 
         // Set Dest IP address
-        InstructionUtils.createNwDstInstructions(ib, new Ipv4Prefix(rewriteAddress.getHostAddress()));
+        InstructionUtils.createNwDstInstructions(ib, new Ipv4Prefix(rewriteAddress.getHostAddress()+"/32"));
         ib.setOrder(0);
         ib.setKey(new InstructionKey(0));
         instructions.add(ib.build());

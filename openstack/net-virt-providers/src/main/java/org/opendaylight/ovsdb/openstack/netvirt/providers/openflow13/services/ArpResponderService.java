@@ -73,7 +73,7 @@ public class ArpResponderService extends AbstractServiceInstance implements ArpP
 
         MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId));
         MatchUtils.createEtherTypeMatch(matchBuilder, new EtherType(Constants.ARP_ETHERTYPE));
-        MatchUtils.createArpDstIpv4Match(matchBuilder, new Ipv4Prefix(ipAddress.getHostAddress()));
+        MatchUtils.createArpDstIpv4Match(matchBuilder, new Ipv4Prefix(ipAddress.getHostAddress()+"/32"));
 
         // Move Eth Src to Eth Dst
         ab.setAction(ActionUtils.nxMoveEthSrcToEthDstAction());

@@ -62,7 +62,7 @@ public class L3ForwardingService extends AbstractServiceInstance implements L3Fo
         InstructionBuilder ib = new InstructionBuilder();
 
         MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId));
-        MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(ipAddress.getHostAddress()));
+        MatchUtils.createDstL3IPv4Match(matchBuilder, MatchUtils.iPv4PrefixFromIPv4Address(ipAddress.getHostAddress()));
 
         // Set Dest Mac address
         InstructionUtils.createDlDstInstructions(ib, new MacAddress(macAddress));

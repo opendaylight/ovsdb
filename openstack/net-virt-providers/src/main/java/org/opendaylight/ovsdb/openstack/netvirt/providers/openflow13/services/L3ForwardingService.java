@@ -25,7 +25,6 @@ import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.OF13Provide
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
@@ -62,7 +61,7 @@ public class L3ForwardingService extends AbstractServiceInstance implements L3Fo
         InstructionBuilder ib = new InstructionBuilder();
 
         MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId));
-        MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(ipAddress.getHostAddress()));
+        MatchUtils.createDstL3IPv4Match(matchBuilder, MatchUtils.iPv4PrefixFromIPv4Address(ipAddress.getHostAddress()));
 
         // Set Dest Mac address
         InstructionUtils.createDlDstInstructions(ib, new MacAddress(macAddress));

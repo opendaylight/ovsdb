@@ -24,7 +24,6 @@ import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.OF13Provide
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.ActionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionKey;
@@ -73,7 +72,7 @@ public class ArpResponderService extends AbstractServiceInstance implements ArpP
 
         MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId));
         MatchUtils.createEtherTypeMatch(matchBuilder, new EtherType(Constants.ARP_ETHERTYPE));
-        MatchUtils.createArpDstIpv4Match(matchBuilder, new Ipv4Prefix(ipAddress.getHostAddress()));
+        MatchUtils.createArpDstIpv4Match(matchBuilder, MatchUtils.iPv4PrefixFromIPv4Address(ipAddress.getHostAddress()));
 
         // Move Eth Src to Eth Dst
         ab.setAction(ActionUtils.nxMoveEthSrcToEthDstAction());

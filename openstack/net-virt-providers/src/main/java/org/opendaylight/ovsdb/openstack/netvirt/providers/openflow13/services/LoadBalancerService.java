@@ -26,7 +26,6 @@ import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractSer
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.ActionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
@@ -179,7 +178,7 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         else
             return; //Should not get here. TODO: Other types
 
-        MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(lbConfig.getVip()));
+        MatchUtils.createDstL3IPv4Match(matchBuilder, MatchUtils.iPv4PrefixFromIPv4Address(lbConfig.getVip()));
         MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(REG_FIELD_A, FIRST_PASS_REGA_MATCH_VALUE));
 
         String flowId = "LOADBALANCER_FORWARD_FLOW1_" + lbConfig.getVip();
@@ -278,7 +277,7 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         else
             return; //Should not get here. TODO: Other types
 
-        MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(vip));
+        MatchUtils.createDstL3IPv4Match(matchBuilder, MatchUtils.iPv4PrefixFromIPv4Address(vip));
         MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(REG_FIELD_A, SECOND_PASS_REGA_MATCH_VALUE),
                                                new MatchUtils.RegMatch(REG_FIELD_B, (long)member.getIndex()));
 
@@ -309,7 +308,7 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
             actionList.add(ab.build());
 
             ab = new ActionBuilder();
-            Ipv4Builder ipb = new Ipv4Builder().setIpv4Address(new Ipv4Prefix(member.getIP()));
+            Ipv4Builder ipb = new Ipv4Builder().setIpv4Address(MatchUtils.iPv4PrefixFromIPv4Address(member.getIP()));
             ab.setAction(ActionUtils.setNwDstAction(ipb.build()));
             ab.setOrder(1);
             ab.setKey(new ActionKey(1));
@@ -375,7 +374,7 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         else
             return; //Should not get here. TODO: Other types
 
-        MatchUtils.createSrcL3IPv4Match(matchBuilder, new Ipv4Prefix(member.getIP()));
+        MatchUtils.createSrcL3IPv4Match(matchBuilder, MatchUtils.iPv4PrefixFromIPv4Address(member.getIP()));
         MatchUtils.createSetSrcTcpMatch(matchBuilder, new PortNumber(member.getPort()));
 
         String flowId = "LOADBALANCER_REVERSE_FLOW_" + vip + "_" + member.getIP();
@@ -399,7 +398,7 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
 
             List<Action> actionList = Lists.newArrayList();
             ActionBuilder ab = new ActionBuilder();
-            Ipv4Builder ipb = new Ipv4Builder().setIpv4Address(new Ipv4Prefix(vip));
+            Ipv4Builder ipb = new Ipv4Builder().setIpv4Address(MatchUtils.iPv4PrefixFromIPv4Address(vip));
             ab.setAction(ActionUtils.setNwSrcAction(ipb.build()));
             ab.setOrder(0);
             ab.setKey(new ActionKey(0));

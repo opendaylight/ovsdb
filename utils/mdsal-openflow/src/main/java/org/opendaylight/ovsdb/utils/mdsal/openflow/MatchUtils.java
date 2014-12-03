@@ -991,4 +991,14 @@ public class MatchUtils {
                 .build());
         return emb.build();
     }
+
+    /**
+     * Create ipv4 prefix from ipv4 address, by appending /32 mask
+     *
+     * @param ipv4AddressString the ip address, in string format
+     * @return Ipv4Prefix with ipv4Address and /32 mask
+     */
+    public static Ipv4Prefix iPv4PrefixFromIPv4Address(String ipv4AddressString) {
+        return new Ipv4Prefix(ipv4AddressString + "/32");
+    }
 }

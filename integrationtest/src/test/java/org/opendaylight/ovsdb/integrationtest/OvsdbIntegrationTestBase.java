@@ -36,6 +36,11 @@ import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
+
+import org.junit.Rule;
+import org.junit.rules.TestRule;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -203,4 +208,22 @@ public abstract class OvsdbIntegrationTestBase {
         bundlesReady = true;
         LOG.info("Bundles loaded");
     }
+
+    /*
+     * Method adds a log as each test method starts and finishes. This is useful when
+     * the test suite is used because the suites only print a final summary.
+     */
+    @Rule
+    public TestRule watcher = new TestWatcher() {
+        @Override
+        protected void starting(Description description) {
+            LOG.info("TestWatcher: Starting test: {}",
+                     description.getDisplayName());
+        }
+
+        @Override
+        protected void finished(Description description) {
+            LOG.info("TestWatcher: Finished test: {}", description.getDisplayName());
+        }
+    };
 }

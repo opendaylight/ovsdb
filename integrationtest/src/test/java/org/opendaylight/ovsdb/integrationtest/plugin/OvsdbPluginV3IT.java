@@ -143,7 +143,7 @@ public class OvsdbPluginV3IT extends OvsdbIntegrationTestBase {
             identifier = connectionInfo.getRemoteAddress().getHostAddress()+":"+connectionInfo.getRemotePort();
         }
         assertEquals(Node.fromString("OVS|" + identifier), connectionService.getNodes().get(0));
-        System.out.println("Nodes = "+ connectionService.getNodes());
+        log.info("Nodes = "+ connectionService.getNodes());
         /*
          * Test sequence :
          * 1. Print Cache and Assert to make sure the bridge is not created yet.
@@ -204,7 +204,7 @@ public class OvsdbPluginV3IT extends OvsdbIntegrationTestBase {
         Row bridgeRow = ovsdbConfigurationService.getRow(node, databaseName, bridge.getSchema().getName(), status.getUuid());
         assertNotNull(bridgeRow);
         bridge = connection.getClient().getTypedRowWrapper(Bridge.class, bridgeRow);
-        System.out.println("Bridge UUID "+bridge.getUuid()+" Status Uuid "+status.getUuid());
+        log.info("Bridge UUID "+bridge.getUuid()+" Status Uuid "+status.getUuid());
         assertEquals(bridge.getUuid(), status.getUuid());
 
         bridge = connection.getClient().createTypedRowWrapper(Bridge.class);
@@ -251,12 +251,12 @@ public class OvsdbPluginV3IT extends OvsdbIntegrationTestBase {
 
     public void printCache() throws Exception {
         List<String> tables = ovsdbConfigurationService.getTables(node, databaseName);
-        System.out.println("Tables = "+tables);
+        log.info("Tables = "+tables);
         assertNotNull(tables);
         for (String table : tables) {
-            System.out.println("Table "+table);
+            log.info("Table "+table);
             ConcurrentMap<UUID, Row<GenericTableSchema>> rows = ovsdbConfigurationService.getRows(node, databaseName, table);
-            System.out.println(rows);
+            log.info(rows.toString());
         }
     }
 

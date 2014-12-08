@@ -23,18 +23,21 @@ import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 import javax.inject.Inject;
 
 import org.apache.felix.dm.Component;
 import org.apache.felix.dm.DependencyManager;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
+import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.integrationtest.ConfigurationBundles;
 import org.opendaylight.ovsdb.integrationtest.OvsdbIntegrationTestBase;
@@ -143,7 +146,7 @@ public class OvsdbPluginV3IT extends OvsdbIntegrationTestBase {
             identifier = connectionInfo.getRemoteAddress().getHostAddress()+":"+connectionInfo.getRemotePort();
         }
         assertEquals(Node.fromString("OVS|" + identifier), connectionService.getNodes().get(0));
-        System.out.println("Nodes = "+ connectionService.getNodes());
+        log.info("Nodes = "+ connectionService.getNodes());
         /*
          * Test sequence :
          * 1. Print Cache and Assert to make sure the bridge is not created yet.
@@ -204,7 +207,7 @@ public class OvsdbPluginV3IT extends OvsdbIntegrationTestBase {
         Row bridgeRow = ovsdbConfigurationService.getRow(node, databaseName, bridge.getSchema().getName(), status.getUuid());
         assertNotNull(bridgeRow);
         bridge = connection.getClient().getTypedRowWrapper(Bridge.class, bridgeRow);
-        System.out.println("Bridge UUID "+bridge.getUuid()+" Status Uuid "+status.getUuid());
+        log.info("Bridge UUID "+bridge.getUuid()+" Status Uuid "+status.getUuid());
         assertEquals(bridge.getUuid(), status.getUuid());
 
         bridge = connection.getClient().createTypedRowWrapper(Bridge.class);
@@ -251,12 +254,12 @@ public class OvsdbPluginV3IT extends OvsdbIntegrationTestBase {
 
     public void printCache() throws Exception {
         List<String> tables = ovsdbConfigurationService.getTables(node, databaseName);
-        System.out.println("Tables = "+tables);
+        log.info("Tables = "+tables);
         assertNotNull(tables);
         for (String table : tables) {
-            System.out.println("Table "+table);
+            log.info("Table "+table);
             ConcurrentMap<UUID, Row<GenericTableSchema>> rows = ovsdbConfigurationService.getRows(node, databaseName, table);
-            System.out.println(rows);
+            log.info(rows.toString());
         }
     }
 
@@ -264,27 +267,66 @@ public class OvsdbPluginV3IT extends OvsdbIntegrationTestBase {
 
         @Override
         public void nodeAdded(Node node, InetAddress address, int port) {
-
+            log.info("FakeListener got callback: nodeAdded(Node {}, InetAddress {}, int {})",
+                     node, address, port);
         }
 
         @Override
         public void nodeRemoved(Node node) {
-
+            log.info("FakeListener got callback: nodeRemoved(Node {})", node);
         }
 
         @Override
         public void rowAdded(Node node, String tableName, String uuid, Row row) {
-
+            log.info("FakeListener got callback: rowAdded(Node {}, String {}, String {}, Row {})",
+                     node, tableName, uuid, row);
         }
 
         @Override
         public void rowUpdated(Node node, String tableName, String uuid, Row old, Row row) {
-
+            log.info("FakeListener got callback: rowUpdated(Node {}, String {}, String {}, Row {}, Row {})",
+                     node, tableName, uuid, old, row);
         }
 
         @Override
         public void rowRemoved(Node node, String tableName, String uuid, Row row, Object context) {
+            log.info("FakeListener got callback: rowRemoved(Node {}, String {}, String {}, Row {}, Object {})",
+                     node, tableName, uuid, row, context);
+        }
+    }
 
+    @After
+    public void tearDown() throws InterruptedException {
+        Thread.sleep(5000);
+        OvsdbConnectionService
+                connectionService = (OvsdbConnectionService)ServiceHelper.getGlobalInstance(OvsdbConnectionService.class, this);
+
+        if (connectionService.getNodes() == null) {
+            return;  // no nodes: noop
+        }
+
+        int bridgesRemoved = 0;
+        List<Node> nodes = connectionService.getNodes();
+        for (Node node : nodes) {
+            Map<String, Row> bridgeRows =
+                    ovsdbConfigurationService.getRows(node, ovsdbConfigurationService.getTableName(node, Bridge.class));
+            if (bridgeRows == null) {
+                continue;
+            }
+            for (Row bridgeRow : bridgeRows.values()) {
+                Bridge bridge = ovsdbConfigurationService.getTypedRow(node, Bridge.class, bridgeRow);
+                log.trace("Test clean up removing Bridge " + bridge.getUuid());
+                Status delStatus = ovsdbConfigurationService.deleteRow(node,
+                                                                       bridge.getSchema().getName(),
+                                                                       bridge.getUuid().toString());
+                assertTrue(delStatus.isSuccess());
+                bridgesRemoved++;
+            }
+        }
+
+        if (bridgesRemoved > 0) {
+            log.debug("Test clean up removed " + bridgesRemoved + " bridges");
+            Thread.sleep(2000); // TODO : Remove this Sleep once the Select operation is resolved.
         }
     }
 

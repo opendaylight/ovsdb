@@ -29,7 +29,11 @@ import javax.inject.Inject;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 import org.opendaylight.ovsdb.integrationtest.ConfigurationBundles;
 import org.opendaylight.ovsdb.integrationtest.OvsdbIntegrationTestBase;
@@ -81,6 +85,24 @@ public class OvsdbLibraryIT extends OvsdbIntegrationTestBase {
             junitBundles()
         );
     }
+
+    /*
+     * Method adds a log as each test method starts and finishes. This is useful when
+     * the test suite is used because the suites only print a final summary.
+     */
+    @Rule
+    public TestRule watcher = new TestWatcher() {
+        @Override
+        protected void starting(Description description) {
+            log.info("TestWatcher: Starting test: {}",
+                     description.getDisplayName());
+        }
+
+        @Override
+        protected void finished(Description description) {
+            log.info("TestWatcher: Finished test: {}", description.getDisplayName());
+        }
+    };
 
     @Before
     public void areWeReady() throws InterruptedException {

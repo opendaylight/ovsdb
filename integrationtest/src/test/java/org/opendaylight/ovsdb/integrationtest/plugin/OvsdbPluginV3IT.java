@@ -30,7 +30,11 @@ import javax.inject.Inject;
 import org.apache.felix.dm.Component;
 import org.apache.felix.dm.DependencyManager;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.opendaylight.controller.sal.core.Node;
@@ -99,6 +103,24 @@ public class OvsdbPluginV3IT extends OvsdbIntegrationTestBase {
             junitBundles()
         );
     }
+
+    /*
+     * Method adds a log as each test method starts and finishes. This is useful when
+     * the test suite is used because the suites only print a final summary.
+     */
+    @Rule
+    public TestRule watcher = new TestWatcher() {
+        @Override
+        protected void starting(Description description) {
+            log.info("TestWatcher: Starting test: {}",
+                     description.getDisplayName());
+        }
+
+        @Override
+        protected void finished(Description description) {
+            log.info("TestWatcher: Finished test: {}", description.getDisplayName());
+        }
+    };
 
     @Before
     public void areWeReady() throws InterruptedException {

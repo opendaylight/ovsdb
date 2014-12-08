@@ -66,6 +66,7 @@ public abstract class OvsdbIntegrationTestBase {
         String addressStr = props.getProperty(SERVER_IPADDRESS);
         String portStr = props.getProperty(SERVER_PORT, DEFAULT_SERVER_PORT);
         String connectionType = props.getProperty(CONNECTION_TYPE, "active");
+        Node node = null;
 
         OvsdbConnectionService
                 connection = (OvsdbConnectionService)ServiceHelper.getGlobalInstance(OvsdbConnectionService.class, this);
@@ -78,17 +79,22 @@ public abstract class OvsdbIntegrationTestBase {
             Map<ConnectionConstants, String> params = new HashMap<ConnectionConstants, String>();
             params.put(ConnectionConstants.ADDRESS, addressStr);
             params.put(ConnectionConstants.PORT, portStr);
-            return connection.connect(IDENTIFIER, params);
+            node = connection.connect(IDENTIFIER, params);
         }  else if (connectionType.equalsIgnoreCase(CONNECTION_TYPE_PASSIVE)) {
             // Wait for CONNECTION_INIT_TIMEOUT for the Passive connection to be initiated by the ovsdb-server.
             Thread.sleep(CONNECTION_INIT_TIMEOUT);
             List<Node> nodes = connection.getNodes();
             assertNotNull(nodes);
             assertTrue(nodes.size() > 0);
-            return nodes.get(0);
+            node = nodes.get(0);
         }
-        fail("Connection parameter ("+CONNECTION_TYPE+") must be active or passive");
-        return null;
+
+        if (node != null) {
+            LOG.info("getPluginTestConnection: Successfully connected to {}", node);
+        } else {
+            fail("Connection parameter (" + CONNECTION_TYPE + ") must be active or passive");
+        }
+        return node;
     }
 
     public OvsdbClient getTestConnection() throws IOException, InterruptedException, ExecutionException, TimeoutException {

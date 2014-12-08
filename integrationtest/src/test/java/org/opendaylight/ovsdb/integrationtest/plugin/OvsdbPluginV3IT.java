@@ -10,7 +10,6 @@
 package org.opendaylight.ovsdb.integrationtest.plugin;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -20,11 +19,13 @@ import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperty;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 
+import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 
 import org.apache.felix.dm.Component;
@@ -54,8 +55,9 @@ import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerSuite;
 import org.ops4j.pax.exam.util.PathUtils;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +66,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
 @RunWith(PaxExam.class)
+@ExamReactorStrategy(PerSuite.class)
 public class OvsdbPluginV3IT extends OvsdbIntegrationTestBase {
     private Logger log = LoggerFactory.getLogger(OvsdbPluginV3IT.class);
     @Inject
@@ -101,23 +104,11 @@ public class OvsdbPluginV3IT extends OvsdbIntegrationTestBase {
     }
 
     @Before
-    public void areWeReady() throws InterruptedException {
-        assertNotNull(bc);
-        boolean debugit = false;
-        Bundle b[] = bc.getBundles();
-        for (Bundle element : b) {
-            int state = element.getState();
-            if (state != Bundle.ACTIVE && state != Bundle.RESOLVED) {
-                log.info("Bundle:" + element.getSymbolicName() + " state:"
-                          + stateToString(state));
-                debugit = true;
-            }
-        }
-        if (debugit) {
-            log.debug("Do some debugging because some bundle is unresolved");
-        }
+    public void setUp () throws ExecutionException, InterruptedException, IOException {
+        areWeReady(bc);
+    }
 
-        assertFalse(debugit);
+    public void getConnection () throws InterruptedException {
         try {
             node = getPluginTestConnection();
         } catch (Exception e) {
@@ -128,7 +119,11 @@ public class OvsdbPluginV3IT extends OvsdbIntegrationTestBase {
 
     @Test
     public void apiTests() throws Exception {
-        Thread.sleep(5000);
+        getConnection();
+        assertNotNull("Node should not be null", node);
+        assertNotNull("OvsdbConfigurationService should not be null", ovsdbConfigurationService);
+
+        Thread.sleep(1000);
         OvsdbConnectionService
                 connectionService = (OvsdbConnectionService)ServiceHelper.getGlobalInstance(OvsdbConnectionService.class, this);
 
@@ -196,8 +191,6 @@ public class OvsdbPluginV3IT extends OvsdbIntegrationTestBase {
         StatusWithUuid status = insertBridge(connection, parentUuid);
         assertTrue(status.isSuccess());
 
-        Thread.sleep(2000);
-
         // 3. Assert to make sure the bridge is created with a valid Uuid.
         printCache();
         Bridge bridge = connection.getClient().getTypedRowWrapper(Bridge.class, null);
@@ -221,7 +214,6 @@ public class OvsdbPluginV3IT extends OvsdbIntegrationTestBase {
         } catch (Exception e) {
             fail(e.getMessage());
         }
-        Thread.sleep(2000);
 
         // 5. Assert to make sure the bridge is deleted
         bridgeRow = ovsdbConfigurationService.getRow(node, databaseName, bridge.getSchema().getName(), status.getUuid());

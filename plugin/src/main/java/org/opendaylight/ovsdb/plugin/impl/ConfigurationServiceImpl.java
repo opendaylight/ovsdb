@@ -347,7 +347,7 @@ public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigServ
                 }
             }
         } catch (InterruptedException | ExecutionException e) {
-            logger.error("Error in deleteRow()", e);
+            logger.error("Error in deleteRow() {} {}", node, tableName, e);
         }
 
         return new Status(StatusCode.SUCCESS);

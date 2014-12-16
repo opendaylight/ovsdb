@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_ac6d8806",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-12-16T01:25:10Z",
+      "side": 1,
+      "message": "this line is really loooooong. Should we break it?",
+      "range": {
+        "startLine": 9,
+        "startChar": 39,
+        "endLine": 9,
+        "endChar": 43
+      },
+      "revId": "6b0ab8f58f091f26722d69cc9ca87c840ac4bac6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

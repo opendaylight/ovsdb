@@ -9,32 +9,32 @@
 */
 package org.opendaylight.ovsdb.ovssfc;
 
-import com.google.common.base.Optional;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.acl.rev140701.Actions1;
-import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.acl.rev140701.Actions1Builder;
-import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.acl.rev140701.access.lists.access.list.access.list.entries.actions.SfcAction;
-import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.acl.rev140701.access.lists.access.list.access.list.entries.actions.sfc.action.AclServiceFunctionPath;
-import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.acl.rev140701.access.lists.access.list.access.list.entries.actions.sfc.action.AclServiceFunctionPathBuilder;
+//import com.google.common.base.Optional;
+//import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
+//import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+//import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.acl.rev140701.Actions1;
+//import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.acl.rev140701.Actions1Builder;
+//import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.acl.rev140701.access.lists.access.list.access.list.entries.actions.SfcAction;
+//import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.acl.rev140701.access.lists.access.list.access.list.entries.actions.sfc.action.AclServiceFunctionPath;
+//import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.sfc.acl.rev140701.access.lists.access.list.access.list.entries.actions.sfc.action.AclServiceFunctionPathBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev140520.AccessLists;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev140520.AccessListsBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev140520.access.lists.AccessList;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev140520.access.lists.AccessListBuilder;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev140520.access.lists.access.list.AccessListEntries;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev140520.access.lists.access.list.AccessListEntriesBuilder;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev140520.access.lists.access.list.access.list.entries.ActionsBuilder;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev140520.access.lists.access.list.access.list.entries.MatchesBuilder;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev140520.access.lists.access.list.access.list.entries.matches.ace.type.AceIpBuilder;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.packet.fields.rev140625.acl.transport.header.fields.DestinationPortRangeBuilder;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+//import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev140520.access.lists.AccessListBuilder;
+//import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev140520.access.lists.access.list.AccessListEntries;
+//import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev140520.access.lists.access.list.AccessListEntriesBuilder;
+//import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev140520.access.lists.access.list.access.list.entries.ActionsBuilder;
+//import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev140520.access.lists.access.list.access.list.entries.MatchesBuilder;
+//import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.acl.rev140520.access.lists.access.list.access.list.entries.matches.ace.type.AceIpBuilder;
+//import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
+//import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.packet.fields.rev140625.acl.transport.header.fields.DestinationPortRangeBuilder;
+//import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
+//import java.util.ArrayList;
+//import java.util.List;
+//import java.util.concurrent.ExecutionException;
 
 public class AclUtils {
     private static final Logger logger = LoggerFactory.getLogger(AclUtils.class);
@@ -43,10 +43,10 @@ public class AclUtils {
 
     public AclUtils () {
         // TODO: remove these when then acl restconf is fixed
-        setAccessList();
-        setAccessLists();
+        //setAccessList();
+        //setAccessLists();
     }
-
+/*
     public AccessLists readAccessLists () {
         InstanceIdentifier<AccessLists> iID =
                 InstanceIdentifierUtils.createAccessListsPath();
@@ -79,11 +79,11 @@ public class AclUtils {
             List<AccessListEntries> accessListEntriesList = accessList.getAccessListEntries();
             for (AccessListEntries accessListEntries : accessListEntriesList) {
                 SfcAction sfcAction = accessListEntries.getActions().getAugmentation(Actions1.class).getSfcAction();
-                String aclServicePathName = ((AclServiceFunctionPath)sfcAction).getServiceFunctionPath();
-                if (servicePathName.equals(aclServicePathName)) {
-                    accessListEntry = accessListEntries;
-                    break;
-                }
+                //String aclServicePathName = ((AclServiceFunctionPath)sfcAction).getServiceFunctionPath();
+                //if (servicePathName.equals(aclServicePathName)) {
+                //    accessListEntry = accessListEntries;
+                //    break;
+                //}
             }
         }
 
@@ -115,11 +115,11 @@ public class AclUtils {
         MatchesBuilder matchesBuilder = new MatchesBuilder();
         matchesBuilder.setAceType(aceIpBuilder.build());
 
-        AclServiceFunctionPathBuilder aclServiceFunctionPathBuilder = new AclServiceFunctionPathBuilder();
-        aclServiceFunctionPathBuilder.setServiceFunctionPath("sfp1");
+        //AclServiceFunctionPathBuilder aclServiceFunctionPathBuilder = new AclServiceFunctionPathBuilder();
+        //aclServiceFunctionPathBuilder.setServiceFunctionPath("sfp1");
 
         Actions1Builder actions1Builder = new Actions1Builder();
-        actions1Builder.setSfcAction(aclServiceFunctionPathBuilder.build());
+        //actions1Builder.setSfcAction(aclServiceFunctionPathBuilder.build());
 
         ActionsBuilder actionsBuilder = new ActionsBuilder();
         actionsBuilder.addAugmentation(Actions1.class, actions1Builder.build());
@@ -152,11 +152,11 @@ public class AclUtils {
         MatchesBuilder matchesBuilder = new MatchesBuilder();
         matchesBuilder.setAceType(aceIpBuilder.build());
 
-        AclServiceFunctionPathBuilder aclServiceFunctionPathBuilder = new AclServiceFunctionPathBuilder();
-        aclServiceFunctionPathBuilder.setServiceFunctionPath("sfp1");
+        //AclServiceFunctionPathBuilder aclServiceFunctionPathBuilder = new AclServiceFunctionPathBuilder();
+        //aclServiceFunctionPathBuilder.setServiceFunctionPath("sfp1");
 
         Actions1Builder actions1Builder = new Actions1Builder();
-        actions1Builder.setSfcAction(aclServiceFunctionPathBuilder.build());
+        //actions1Builder.setSfcAction(aclServiceFunctionPathBuilder.build());
 
         ActionsBuilder actionsBuilder = new ActionsBuilder();
         actionsBuilder.addAugmentation(Actions1.class, actions1Builder.build());
@@ -181,4 +181,5 @@ public class AclUtils {
         accessLists = accessListsBuilder.build();
         return accessListsBuilder.build();
     }
+*/
 }

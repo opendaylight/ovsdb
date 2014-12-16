@@ -85,7 +85,7 @@ public class SfpHandler {
                 serviceFunctionPath.getName());
 
         // TODO: replace with correct getAccessList when the restonf issue is fixed.
-        AccessListEntries accessListEntries = ovsSfcProvider.aclUtils.getAccessList(serviceFunctionPath.getName());
+        AccessListEntries accessListEntries = null;// = ovsSfcProvider.aclUtils.getAccessList(serviceFunctionPath.getName());
         logger.trace("\n   acl: {}", accessListEntries);
         // TODO: code to convert acl into flows
 

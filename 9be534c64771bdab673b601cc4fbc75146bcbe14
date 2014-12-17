@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_9dda3877",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/impl/ConfigurationServiceImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 350,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-12-17T23:07:29Z",
+      "side": 1,
+      "message": "how are node and tableName printed? Should the output be more like: logger.error(\"Error in deleteRow() {} {} {}\", node, tableName, e);",
+      "range": {
+        "startLine": 350,
+        "startChar": 35,
+        "endLine": 350,
+        "endChar": 44
+      },
+      "revId": "9be534c64771bdab673b601cc4fbc75146bcbe14",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

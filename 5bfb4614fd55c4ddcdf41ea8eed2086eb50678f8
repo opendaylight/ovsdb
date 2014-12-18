@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_dd87600e",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/api/LoadBalancerConfigurationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-12-18T04:48:12Z",
+      "side": 1,
+      "message": "code style nitpick: statics listed first in alphabetical order and then all the rest in alphabetical order",
+      "range": {
+        "startLine": 20,
+        "startChar": 7,
+        "endLine": 20,
+        "endChar": 13
+      },
+      "revId": "5bfb4614fd55c4ddcdf41ea8eed2086eb50678f8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_9d79d831",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/api/LoadBalancerConfigurationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-12-18T04:48:12Z",
+      "side": 1,
+      "message": "is there a need for these to be static? Looks like these values are always overwritten for each test in the setUp method.",
+      "range": {
+        "startLine": 23,
+        "startChar": 12,
+        "endLine": 23,
+        "endChar": 18
+      },
+      "revId": "5bfb4614fd55c4ddcdf41ea8eed2086eb50678f8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_bd8294fe",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/api/LoadBalancerConfigurationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-12-18T04:48:12Z",
+      "side": 1,
+      "message": "How is this test different from the above test? I see the same block of code - except for the last assertEquals() below.",
+      "range": {
+        "startLine": 69,
+        "startChar": 8,
+        "endLine": 69,
+        "endChar": 11
+      },
+      "revId": "5bfb4614fd55c4ddcdf41ea8eed2086eb50678f8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5de4b03a",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/api/LoadBalancerConfigurationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-12-18T04:48:12Z",
+      "side": 1,
+      "message": "Is there value in checking the returned values to match what were used in the addMember?",
+      "range": {
+        "startLine": 88,
+        "startChar": 22,
+        "endLine": 88,
+        "endChar": 26
+      },
+      "revId": "5bfb4614fd55c4ddcdf41ea8eed2086eb50678f8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7d7c0c21",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/api/LoadBalancerConfigurationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-12-18T04:48:12Z",
+      "side": 1,
+      "message": "curious why static values are used here and in other cases for addMember the valuesArray is used?",
+      "range": {
+        "startLine": 93,
+        "startChar": 16,
+        "endLine": 93,
+        "endChar": 17
+      },
+      "revId": "5bfb4614fd55c4ddcdf41ea8eed2086eb50678f8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -193,7 +193,7 @@ public class PortHandler extends AbstractHandler
                     }
                 }
             } catch (Exception e) {
-                logger.error("Exception during handlingNeutron network delete");
+                logger.error("Exception during handlingNeutron port delete", e);
             }
         }
         logger.debug(" PORT delete successful for tenant-id - {}, " +

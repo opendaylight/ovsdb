@@ -201,7 +201,7 @@ public class NetworkHandler extends AbstractHandler
                             }
                         }
                     } catch (Exception e) {
-                        logger.error("Exception during handlingNeutron network delete");
+                        logger.error("Exception during handlingNeutron network delete", e);
                     }
                 }
             }

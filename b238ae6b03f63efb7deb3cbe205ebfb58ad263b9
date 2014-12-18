@@ -22,6 +22,30 @@
       "revId": "b238ae6b03f63efb7deb3cbe205ebfb58ad263b9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7df88c7c",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/VlanConfigurationCacheImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2014-12-18T12:36:09Z",
+      "side": 1,
+      "message": "yes, it works. I see it used in multiple places [1].\nThe issue here is that there should be no {} placeholder\nfor the exception. Using + node or \"... {}\", node is semantic equivalent.\n\n[1] https://github.com/opendaylight/ovsdb/blob/master/openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundEvent.java#L66",
+      "parentUuid": "7a96c907_9d923856",
+      "range": {
+        "startLine": 61,
+        "startChar": 36,
+        "endLine": 61,
+        "endChar": 39
+      },
+      "revId": "b238ae6b03f63efb7deb3cbe205ebfb58ad263b9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

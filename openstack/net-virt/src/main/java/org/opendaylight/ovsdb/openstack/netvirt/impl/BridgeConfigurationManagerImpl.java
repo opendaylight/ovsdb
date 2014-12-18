@@ -206,7 +206,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
                 try {
                     isCreated = this.createBridges(node, network);
                 } catch (Exception e) {
-                    logger.error("Error creating internal net network ", node, e);
+                    logger.error("Error creating internal net network " + node, e);
                 }
             } else {
                 isCreated = true;
@@ -217,7 +217,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
                 try {
                     isCreated = this.createBridges(node, network);
                 } catch (Exception e) {
-                    logger.error("Error creating internal net network ", node, e);
+                    logger.error("Error creating internal net network " + node, e);
                 }
             } else {
                 isCreated = true;
@@ -319,8 +319,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
                 }
             }
         } catch (Exception e) {
-            logger.error("Unable to find physical interface for Node: {}",
-                         node, e);
+            logger.error("Unable to find physical interface for Node: " + node, e);
         }
 
         logger.debug("Physical interface for Node: {}, If: {}",

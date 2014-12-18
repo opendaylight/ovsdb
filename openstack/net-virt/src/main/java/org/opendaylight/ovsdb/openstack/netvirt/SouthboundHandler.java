@@ -289,7 +289,7 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
                 }
             }
         } catch (Exception e) {
-            logger.debug("Failed to get Port tag for for Intf {}:{}", intf, e);
+            logger.debug("Failed to get Port tag for for Intf " + intf, e);
         }
         return null;
     }

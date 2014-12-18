@@ -58,7 +58,7 @@ public class VlanConfigurationCacheImpl implements VlanConfigurationCache {
             nodeUuid = (String)ovsTable.keySet().toArray()[0];
         }
         catch (Exception e) {
-            logger.error("Unable to get the Open_vSwitch table for Node {}: {}", node, e);
+            logger.error("Unable to get the Open_vSwitch table for Node " + node, e);
         }
 
         return nodeUuid;
@@ -122,7 +122,7 @@ public class VlanConfigurationCacheImpl implements VlanConfigurationCache {
             configurationCache.put(nodeUuid, nodeConfiguration);
         }
         catch (Exception e) {
-            logger.debug("Error getting Port table for Node {}: {}", node, e);
+            logger.debug("Error getting Port table for Node " + node, e);
         }
     }
 

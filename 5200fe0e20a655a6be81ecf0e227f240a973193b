@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_fd8fbc21",
+        "filename": "openstack/net-virt/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-12-18T05:07:12Z",
+      "side": 1,
+      "message": "Can these comments be removed?",
+      "range": {
+        "startLine": 54,
+        "startChar": 23,
+        "endLine": 54,
+        "endChar": 24
+      },
+      "revId": "5200fe0e20a655a6be81ecf0e227f240a973193b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_1d95c832",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImplTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-12-18T05:07:12Z",
+      "side": 1,
+      "message": "How is this different than PowerMock? In most cases we use:\n\n@RunWith(PowerMockRunner.class).\n\nMight be better to stay consistent. Otherwise it si fine to keep this if it is doing something extra.",
+      "range": {
+        "startLine": 56,
+        "startChar": 9,
+        "endLine": 56,
+        "endChar": 27
+      },
+      "revId": "5200fe0e20a655a6be81ecf0e227f240a973193b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_9da0f891",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImplTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-12-18T05:07:12Z",
+      "side": 1,
+      "message": "I see getBridge is public. Is there a different reason this does not work?",
+      "range": {
+        "startLine": 202,
+        "startChar": 11,
+        "endLine": 202,
+        "endChar": 20
+      },
+      "revId": "5200fe0e20a655a6be81ecf0e227f240a973193b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5daa7071",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImplTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2014-12-18T05:07:12Z",
+      "side": 1,
+      "message": "Do we want to check the different conditions that would return either true or false - i.e. no br-int, no provider, missing br-net, missing patch, missing physical interface, different paths for openflow 1.0 and 1.3.\n\nSimilar question for the other tests",
+      "range": {
+        "startLine": 218,
+        "startChar": 16,
+        "endLine": 218,
+        "endChar": 35
+      },
+      "revId": "5200fe0e20a655a6be81ecf0e227f240a973193b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

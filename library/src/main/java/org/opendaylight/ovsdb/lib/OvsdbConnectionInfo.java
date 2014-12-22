@@ -11,13 +11,17 @@
 package org.opendaylight.ovsdb.lib;
 
 import io.netty.channel.Channel;
+import io.netty.handler.ssl.SslHandler;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.security.cert.Certificate;
 
+import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+
 
 @XmlRootElement(name="Connection")
 public class OvsdbConnectionInfo {
@@ -54,6 +58,14 @@ public class OvsdbConnectionInfo {
     @XmlElement(name="connectionType")
     public ConnectionType getType() {
         return type;
+    }
+    @XmlElement(name="clientCertificate")
+    public Certificate getCertificate() throws SSLPeerUnverifiedException {
+        SslHandler sslHandler = (SslHandler) channel.pipeline().get("ssl");
+        if (sslHandler != null) {
+            return sslHandler.engine().getSession().getPeerCertificates()[0];
+        }
+        return null;
     }
 
     @Override

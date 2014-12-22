@@ -12,7 +12,7 @@ package org.opendaylight.ovsdb.lib;
 
 import java.net.InetAddress;
 import java.util.Collection;
-import io.netty.handler.ssl.SslContext;
+import javax.net.ssl.SSLContext;
 
 /**
  * OvsDBConnection Interface provides OVSDB connection management APIs which includes
@@ -46,7 +46,7 @@ public interface OvsdbConnection {
      * @return OvsDBClient The primary Client interface for the ovsdb connection.
      */
     public OvsdbClient connectWithSsl(final InetAddress address, final int port,
-                                      final SslContext sslContext);
+                                      final SSLContext sslContext);
 
     /**
      * Method to disconnect an existing connection.
@@ -63,7 +63,7 @@ public interface OvsdbConnection {
      * Method to start ovsdb server for passive connection with SSL
      */
     public boolean startOvsdbManagerWithSsl(final int ovsdbListenPort,
-                                     final SslContext sslContext);
+                                     final SSLContext sslContext);
 
     /**
      * Method to register a Passive Connection Listener with the ConnectionService.

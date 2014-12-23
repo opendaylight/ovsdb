@@ -1,0 +1,10 @@
+Verified+1: jenkins-ovsdb <jenkins-ovsdb@opendaylight.org>
+Code-Review+1: Sharad Mishra <sharad.d.mishra@intel.com>
+Code-Review+1: Eric Multanen <eric.w.multanen@intel.com>
+Code-Review+2: Sam Hague <shague@redhat.com>
+Code-Review+2: Flavio Fernandes <ffernand@redhat.com>
+Submitted-by: Flavio Fernandes <ffernand@redhat.com>
+Submitted-at: Tue, 23 Dec 2014 15:55:33 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/13721
+Project: ovsdb
+Branch: refs/heads/master

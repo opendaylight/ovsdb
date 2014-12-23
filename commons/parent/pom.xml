@@ -5,14 +5,14 @@
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>odlparent</artifactId>
-    <version>1.4.3-Helium-SR1</version>
+    <version>1.4.3-Helium-SR1.1</version>
     <relativePath></relativePath>
   </parent>
 
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>commons</artifactId>
   <name>OVSDB Parent POM</name>
-  <version>1.2.1-Helium-SR1</version>
+  <version>1.2.1-Helium-SR1.1</version>
   <packaging>pom</packaging>
   <prerequisites>
     <maven>3.0</maven>
@@ -24,18 +24,18 @@
     <!-- Surefire/Failsafe Arguments -->
     <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
     <!-- OVSB Component Versions -->
-    <ovsdb.library.version>1.0.1-Helium-SR1</ovsdb.library.version>
-    <ovsdb.plugin.version>1.0.1-Helium-SR1</ovsdb.plugin.version>
-    <plugin.shell.version>1.0.1-Helium-SR1</plugin.shell.version>
-    <openstack.netvirt.version>1.0.1-Helium-SR1</openstack.netvirt.version>
-    <openstack.netvirt.providers.version>1.0.1-Helium-SR1</openstack.netvirt.providers.version>
-    <ovsdb.northbound.version>0.6.1-Helium-SR1</ovsdb.northbound.version>
-    <schema.openvswitch.version>1.0.1-Helium-SR1</schema.openvswitch.version>
-    <schema.hardwarevtep.version>1.0.1-Helium-SR1</schema.hardwarevtep.version>
-    <ovsdb.ofextension.version>1.0.1-Helium-SR1</ovsdb.ofextension.version>
-    <ovsdb.utils.config.version>1.0.1-Helium-SR1</ovsdb.utils.config.version>
-    <utils.mdsal.openflow.version>1.0.1-Helium-SR1</utils.mdsal.openflow.version>
-    <ovsdb.ovssfc.version>0.0.2-Helium-SR1</ovsdb.ovssfc.version>
+    <ovsdb.library.version>1.0.1-Helium-SR1.1</ovsdb.library.version>
+    <ovsdb.plugin.version>1.0.1-Helium-SR1.1</ovsdb.plugin.version>
+    <plugin.shell.version>1.0.1-Helium-SR1.1</plugin.shell.version>
+    <openstack.netvirt.version>1.0.1-Helium-SR1.1</openstack.netvirt.version>
+    <openstack.netvirt.providers.version>1.0.1-Helium-SR1.1</openstack.netvirt.providers.version>
+    <ovsdb.northbound.version>0.6.1-Helium-SR1.1</ovsdb.northbound.version>
+    <schema.openvswitch.version>1.0.1-Helium-SR1.1</schema.openvswitch.version>
+    <schema.hardwarevtep.version>1.0.1-Helium-SR1.1</schema.hardwarevtep.version>
+    <ovsdb.ofextension.version>1.0.1-Helium-SR1.1</ovsdb.ofextension.version>
+    <ovsdb.utils.config.version>1.0.1-Helium-SR1.1</ovsdb.utils.config.version>
+    <utils.mdsal.openflow.version>1.0.1-Helium-SR1.1</utils.mdsal.openflow.version>
+    <ovsdb.ovssfc.version>0.0.2-Helium-SR1.1</ovsdb.ovssfc.version>
     <!-- Skip Coverage and IT by default -->
     <skip.coverage>true</skip.coverage>
     <skip.integrationtest>true</skip.integrationtest>
@@ -51,34 +51,34 @@
     <!-- Override the JaCoCo version in ODL Parent -->
     <jacoco.version>0.6.4.201312101107</jacoco.version>
     <!-- ODL Dependency Versions -->
-    <containermanager.version>0.5.3-Helium-SR1</containermanager.version>
-    <forwardingrulesmanager.version>0.6.1-Helium-SR1</forwardingrulesmanager.version>
-    <networkconfig.neutron.version>0.4.3-Helium-SR1</networkconfig.neutron.version>
-    <clustering.services.version>0.5.2-Helium-SR1</clustering.services.version>
-    <sal.version>0.8.2-Helium-SR1</sal.version>
-    <sal.connection.version>0.1.3-Helium-SR1</sal.connection.version>
-    <sal.networkconfiguration.version>0.0.4-Helium-SR1</sal.networkconfiguration.version>
-    <mdsal.version>1.1.1-Helium-SR1</mdsal.version>
-    <openflowplugin.version>0.0.4-Helium-SR1</openflowplugin.version>
-    <openflowplugin-nicira.version>0.0.4-Helium-SR1</openflowplugin-nicira.version>
-    <openflowplugin-extension.version>0.0.4-Helium-SR1</openflowplugin-extension.version>
-    <openflowjava-nicira.version>0.0.4-Helium-SR1</openflowjava-nicira.version>
-    <openflowjava-extension.version>0.0.4-Helium-SR1</openflowjava-extension.version>
-    <openflowjava.version>0.5.1-Helium-SR1</openflowjava.version>
-    <controller.config.version>0.2.6-Helium-SR1</controller.config.version>
-    <switchmanager.api.version>0.7.2-Helium-SR1</switchmanager.api.version>
-    <yangtools.version>0.6.3-Helium-SR1</yangtools.version>
-    <northbound.commons.version>0.4.3-Helium-SR1</northbound.commons.version>
-    <checkstyle.rules.version>0.0.4-Helium-SR1</checkstyle.rules.version>
+    <containermanager.version>0.5.3-Helium-SR1.1</containermanager.version>
+    <forwardingrulesmanager.version>0.6.1-Helium-SR1.1</forwardingrulesmanager.version>
+    <networkconfig.neutron.version>0.4.3-Helium-SR1.1</networkconfig.neutron.version>
+    <clustering.services.version>0.5.2-Helium-SR1.1</clustering.services.version>
+    <sal.version>0.8.2-Helium-SR1.1</sal.version>
+    <sal.connection.version>0.1.3-Helium-SR1.1</sal.connection.version>
+    <sal.networkconfiguration.version>0.0.4-Helium-SR1.1</sal.networkconfiguration.version>
+    <mdsal.version>1.1.1-Helium-SR1.1</mdsal.version>
+    <openflowplugin.version>0.0.4-Helium-SR1.1</openflowplugin.version>
+    <openflowplugin-nicira.version>0.0.4-Helium-SR1.1</openflowplugin-nicira.version>
+    <openflowplugin-extension.version>0.0.4-Helium-SR1.1</openflowplugin-extension.version>
+    <openflowjava-nicira.version>0.0.4-Helium-SR1.1</openflowjava-nicira.version>
+    <openflowjava-extension.version>0.0.4-Helium-SR1.1</openflowjava-extension.version>
+    <openflowjava.version>0.5.1-Helium-SR1.1</openflowjava.version>
+    <controller.config.version>0.2.6-Helium-SR1.1</controller.config.version>
+    <switchmanager.api.version>0.7.2-Helium-SR1.1</switchmanager.api.version>
+    <yangtools.version>0.6.3-Helium-SR1.1</yangtools.version>
+    <northbound.commons.version>0.4.3-Helium-SR1.1</northbound.commons.version>
+    <checkstyle.rules.version>0.0.4-Helium-SR1.1</checkstyle.rules.version>
     <!-- 3rd Pary Dependency Versions -->
     <commons.collection.version>1.0</commons.collection.version>
     <portlet.version>2.0</portlet.version>
     <powermock.version>1.5.2</powermock.version>
     <httpcomponents.version>4.2.1</httpcomponents.version>
     <karaf.shell.version>3.0.0</karaf.shell.version>
-    <odl.karaf.base.version>1.4.3-Helium-SR1</odl.karaf.base.version>
-    <nsf.version>0.4.3-Helium-SR1</nsf.version>
-    <sfc-model.version>0.0.2-Helium-SR1</sfc-model.version>
+    <odl.karaf.base.version>1.4.3-Helium-SR1.1</odl.karaf.base.version>
+    <nsf.version>0.4.3-Helium-SR1.1</nsf.version>
+    <sfc-model.version>0.0.2-Helium-SR1.1</sfc-model.version>
   </properties>
 
   <dependencyManagement>
@@ -197,7 +197,7 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>opendaylight-karaf-empty</artifactId>
-        <version>1.4.3-Helium-SR1</version>
+        <version>1.4.3-Helium-SR1.1</version>
         <type>zip</type>
       </dependency>
       <dependency>
@@ -354,7 +354,7 @@
             <dependency>
               <groupId>org.opendaylight.controller</groupId>
               <artifactId>checkstyle</artifactId>
-              <version>0.0.4-Helium-SR1</version>
+              <version>0.0.4-Helium-SR1.1</version>
             </dependency>
           </dependencies>
           <executions>

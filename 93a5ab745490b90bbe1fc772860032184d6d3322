@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_df3e6db8",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-01-02T14:03:12Z",
+      "side": 1,
+      "message": "Hi Raj,\n\nCan you elaborate a bit more on this change? I would like to learn more about how it is used and how/if it differs from the other projects in odl.\n\nThanks,\n\n-- flavio",
+      "range": {
+        "startLine": 7,
+        "startChar": 14,
+        "endLine": 7,
+        "endChar": 19
+      },
+      "revId": "93a5ab745490b90bbe1fc772860032184d6d3322",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

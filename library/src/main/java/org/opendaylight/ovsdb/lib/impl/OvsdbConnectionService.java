@@ -26,7 +26,10 @@ import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.CharsetUtil;
-import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslHandler;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
 
 import java.net.InetAddress;
 import java.util.Collection;
@@ -44,7 +47,6 @@ import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcDecoder;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcEndpoint;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcServiceBinderHandler;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,7 +94,7 @@ public class OvsdbConnectionService implements OvsdbConnection {
     }
     @Override
     public OvsdbClient connectWithSsl(final InetAddress address, final int port,
-                               final SslContext sslContext) {
+                               final SSLContext sslContext) {
         try {
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.group(new NioEventLoopGroup());
@@ -105,8 +107,10 @@ public class OvsdbConnectionService implements OvsdbConnection {
                 public void initChannel(SocketChannel channel) throws Exception {
                     if (sslContext != null) {
                         /* First add ssl handler if ssl context is given */
-                        channel.pipeline().addLast(sslContext.newHandler(channel.alloc(),
-                                                   address.toString(), port));
+                        SSLEngine engine =
+                           sslContext.createSSLEngine(address.toString(), port);
+                        engine.setUseClientMode(true);
+                        channel.pipeline().addLast("ssl", new SslHandler(engine));
                     }
                     channel.pipeline().addLast(
                             //new LoggingHandler(LogLevel.INFO),
@@ -195,7 +199,7 @@ public class OvsdbConnectionService implements OvsdbConnection {
     @Override
     synchronized
     public boolean startOvsdbManagerWithSsl(final int ovsdbListenPort,
-                                     final SslContext sslContext) {
+                                     final SSLContext sslContext) {
         if (!singletonCreated) {
             new Thread() {
                 @Override
@@ -222,7 +226,7 @@ public class OvsdbConnectionService implements OvsdbConnection {
      * OVSDB Passive listening thread that uses Netty ServerBootstrap to open
      * passive connection with Ssl and handle channel callbacks.
      */
-    private static void ovsdbManagerWithSsl(int port, final SslContext sslContext) {
+    private static void ovsdbManagerWithSsl(int port, final SSLContext sslContext) {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
@@ -237,7 +241,10 @@ public class OvsdbConnectionService implements OvsdbConnection {
                      logger.debug("New Passive channel created : "+ channel.toString());
                      if (sslContext != null) {
                          /* Add SSL handler first if SSL context is provided */
-                         channel.pipeline().addLast(sslContext.newHandler(channel.alloc()));
+                         SSLEngine engine = sslContext.createSSLEngine();
+                         engine.setUseClientMode(false); // work in a server mode
+                         engine.setNeedClientAuth(true); // need client authentication
+                         channel.pipeline().addLast("ssl", new SslHandler(engine));
                      }
 
                      channel.pipeline().addLast(

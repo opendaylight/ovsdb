@@ -11,6 +11,7 @@
 
   <artifactId>ovsdb</artifactId>
   <version>1.0.2-SNAPSHOT</version>
+  <name>ovsdb</name> <!-- Used by Sonar to set project name -->
   <packaging>pom</packaging>
 
   <prerequisites>

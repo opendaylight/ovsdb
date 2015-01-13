@@ -77,18 +77,6 @@ public class MdsalConsumerImpl implements BindingAwareConsumer, MdsalConsumer, B
     }
 
     @Override
-    public Collection<? extends ProviderFunctionality> getFunctionality() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Collection<? extends RpcService> getImplementations() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public void onSessionInitiated(ProviderContext session) {
         notificationService = session.getSALService(NotificationProviderService.class);
     }

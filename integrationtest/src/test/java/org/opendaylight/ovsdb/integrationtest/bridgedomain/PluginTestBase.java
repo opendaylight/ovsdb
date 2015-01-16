@@ -1,21 +1,25 @@
 /*
- * [[ Authors will Fill in the Copyright header ]]
  *
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this distribution,
- * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *  Copyright (C) 2014 Red Hat, Inc.
  *
- * Authors : Brent Salisbury, Hugo Trippaers
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ *  and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ *  Authors : Sam Hague
+ * /
  */
-package org.opendaylight.ovsdb.plugin;
+package org.opendaylight.ovsdb.integrationtest.bridgedomain;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
 import junit.framework.Assert;
-
+import org.junit.Rule;
+import org.junit.rules.TestRule;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -23,8 +27,11 @@ import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
 import org.opendaylight.ovsdb.plugin.impl.ConfigurationServiceImpl;
 import org.opendaylight.ovsdb.plugin.impl.ConnectionServiceImpl;
 import org.opendaylight.ovsdb.plugin.impl.InventoryServiceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class PluginTestBase {
+    private static final Logger LOG = LoggerFactory.getLogger(PluginTestBase.class);
     private final static String identifier = "TEST";
     protected final static String BRIDGE_NAME = "JUNIT_TEST_BRIDGE";
     protected final static String PORT_NAME = "test0";
@@ -55,8 +62,8 @@ public abstract class PluginTestBase {
     }
 
     public TestObjects getTestConnection() throws IOException {
-        if (OvsdbPluginTestSuiteIT.getTestObjects() != null) {
-            return OvsdbPluginTestSuiteIT.getTestObjects();
+        if (BridgeDomainTestSuiteIT.getTestObjects() != null) {
+            return BridgeDomainTestSuiteIT.getTestObjects();
         }
         Properties props = loadProperties();
         String address = props.getProperty(SERVER_IPADDRESS);
@@ -100,8 +107,21 @@ public abstract class PluginTestBase {
             e.printStackTrace();
         }
         TestObjects testObject = new TestObjects(connectionService, node, inventory, configurationService);
-        OvsdbPluginTestSuiteIT.setTestObjects(testObject);
+        BridgeDomainTestSuiteIT.setTestObjects(testObject);
         return testObject;
     }
 
+    @Rule
+    public TestRule watcher = new TestWatcher() {
+        @Override
+        protected void starting(Description description) {
+            LOG.info("TestWatcher: Starting test: {}",
+                    description.getDisplayName());
+        }
+
+        @Override
+        protected void finished(Description description) {
+            LOG.info("TestWatcher: Finished test: {}", description.getDisplayName());
+        }
+    };
 }

@@ -1,0 +1,47 @@
+module southbound {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:example";
+    prefix "southbound";
+
+    import network-topology {prefix "topo"; revision-date "2013-10-21"; }
+    import yang-ext { prefix "ext"; }
+    
+    revision "2015-01-05" {
+        description "Initial revision of southbound model";
+    }
+    
+    
+    identity tunnel-type-base {
+        description "Base identity for all tunnel-types";
+    }
+    
+    identity tunnel-type-vxlan {
+        description "Tunnel type for vxlan tunnels";
+        base tunnel-type-base;
+    }
+    
+    identity tunnel-type-gre {
+        description "Tunnel type for gre tunnels";
+        base tunnel-type-base;
+    }
+    
+    augment "/topo:network-topology/topo:topology/topo:node" {
+        ext:augment-identifier "supported-tunnels";
+        list supported-tunnels {
+            leaf tunnel-type {
+                type identityref {
+                    base tunnel-type-base;
+                }
+            }
+        }
+    }
+
+    augment "/topo:network-topology/topo:topology/topo:link" {
+        ext:augment-identifier "tunnel";
+        leaf tunnel-type {
+            type identityref {
+                base tunnel-type-base;
+            }
+        }
+    }
+}

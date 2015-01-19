@@ -27,3 +27,5 @@ target-ide/
 .vagrant
 .DS_Store
 .checkstyle
+yang-gen-config
+yang-gen-sal

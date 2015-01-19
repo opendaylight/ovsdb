@@ -1,0 +1,9 @@
+module southbound {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:example";
+    prefix "southbound";
+
+    revision "2015-01-05" {
+        description "Initial revision of southbound model";
+    }
+}

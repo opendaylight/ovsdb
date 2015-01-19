@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_6008c32d",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/osgi/Activator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-01-19T20:37:12Z",
+      "side": 1,
+      "message": "why is this needed?",
+      "range": {
+        "startLine": 10,
+        "startChar": 12,
+        "endLine": 10,
+        "endChar": 24
+      },
+      "revId": "f1c375d320d39b29a55a874debd4c6a3ba5c7d40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_00077f1d",
+        "filename": "pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-01-19T20:37:12Z",
+      "side": 1,
+      "message": "why call this southbound? Or is this just temporary?",
+      "range": {
+        "startLine": 56,
+        "startChar": 12,
+        "endLine": 56,
+        "endChar": 22
+      },
+      "revId": "f1c375d320d39b29a55a874debd4c6a3ba5c7d40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_d303b30b",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionListenerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-01-19T20:37:12Z",
+      "side": 1,
+      "message": "Ideally you would want to sue the plugin interface. plugin sits on top of the library.",
+      "range": {
+        "startLine": 11,
+        "startChar": 13,
+        "endLine": 11,
+        "endChar": 40
+      },
+      "revId": "f1c375d320d39b29a55a874debd4c6a3ba5c7d40",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

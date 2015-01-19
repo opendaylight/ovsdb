@@ -53,6 +53,7 @@
     <!-- OVSDB Distribution -->
     <module>distribution/opendaylight</module>
     <module>distribution/opendaylight-karaf</module>
+    <module>southbound</module>
   </modules>
 
   <scm>

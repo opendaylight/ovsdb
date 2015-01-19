@@ -1,0 +1,51 @@
+module ovsdb {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:ovsdb";
+    prefix "southbound";
+
+    import network-topology {prefix "topo"; revision-date "2013-10-21"; }
+    import yang-ext { prefix "ext"; }
+    import ietf-inet-types { prefix inet; }
+    import tunnel { prefix tunnel; }
+    import ietf-yang-types { prefix yang; revision-date "2013-07-15";}
+    
+    revision "2015-01-05" {
+        description "Initial revision of southbound model";
+    }
+    grouping ovsdb-bridge-attributes {
+        leaf bridge-uuid {
+            description "The unique identifier of the bridge";
+            type yang:uuid;
+        }
+
+        leaf bridge-name {
+            description "The name of the bridge";
+            type string;
+        }
+
+        leaf managed-by {
+            description "The OVSDB which this bridge belongs to";
+            type topo:node-ref;
+        }
+    }
+    
+    grouping ovsdb-node-attributes {
+        uses tunnel:ip-port-locator;
+
+        leaf-list managed-node-entry {
+            type topo:node-ref;
+        }
+    }
+    
+    augment "/topo:network-topology/topo:topology/topo:node" {
+        description "Augmentation for bridge nodes managed by ovsdb";
+        ext:augment-identifier "ovsdb-managed-node-augmentation";
+        uses ovsdb-bridge-attributes;
+    }
+    
+    augment "/topo:network-topology/topo:topology/topo:node" {
+        description "Augment topology node for an ovsdb node";
+        ext:augment-identifier "ovsdb-node-augmentation";
+        uses ovsdb-node-attributes;
+    }
+}

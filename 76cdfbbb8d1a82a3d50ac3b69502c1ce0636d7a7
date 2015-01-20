@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_9110c302",
+        "filename": "southbound/southbound-api/src/main/yang/tunnel.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-01-20T20:44:27Z",
+      "side": 1,
+      "message": "Is this different than tunnel-type-vxlan ?",
+      "range": {
+        "startLine": 24,
+        "startChar": 31,
+        "endLine": 24,
+        "endChar": 34
+      },
+      "revId": "76cdfbbb8d1a82a3d50ac3b69502c1ce0636d7a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -28,8 +28,8 @@
   </properties>
   <dependencies>
     <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>features-openflow-nxm</artifactId>
+      <groupId>org.opendaylight.openflowplugin</groupId>
+      <artifactId>features-openflowplugin-extension</artifactId>
       <version>${openflowplugin.version}</version>
       <classifier>features</classifier>
       <type>xml</type>

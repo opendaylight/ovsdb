@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_769acd64",
+        "filename": "features/ovsdb/src/main/resources/features.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 226
+      },
+      "writtenOn": "2015-01-20T16:22:26Z",
+      "side": 1,
+      "message": "I think you still need to pull in the extension feature from the openflowplugin here -- if the odl-ovsdb-openstack feature in OVSDB needed it before (i.e. the one that used to be defined in OVSDB), then it should need the new one in the openflowplugin.",
+      "range": {
+        "startLine": 48,
+        "startChar": 5,
+        "endLine": 48,
+        "endChar": 12
+      },
+      "revId": "79061b3470dc68328678684a7495d3a4971703d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

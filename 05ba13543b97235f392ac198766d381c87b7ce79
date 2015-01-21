@@ -132,6 +132,30 @@
       "revId": "05ba13543b97235f392ac198766d381c87b7ce79",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_67ac5536",
+        "filename": "pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-01-21T19:40:55Z",
+      "side": 1,
+      "message": "Thomas has shown me the light -this is already commented out. I *think* this will cause an issue for integration because integration includes the ovs-sfc feature. The builds might work as long as some ovssfc features exists up on maven but it likely would cause an issue at some point.",
+      "parentUuid": "7a96c907_e7c065e2",
+      "range": {
+        "startLine": 43,
+        "startChar": 17,
+        "endLine": 43,
+        "endChar": 25
+      },
+      "revId": "05ba13543b97235f392ac198766d381c87b7ce79",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

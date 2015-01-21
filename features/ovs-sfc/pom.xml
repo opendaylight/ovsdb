@@ -29,13 +29,6 @@
   <dependencies>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>features-openflow-nxm</artifactId>
-      <version>${openflowplugin.version}</version>
-      <classifier>features</classifier>
-      <type>xml</type>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>features-ovsdb</artifactId>
       <version>${ovsdb.library.version}</version>
       <classifier>features</classifier>
@@ -52,6 +45,13 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>features-adsal-compatibility</artifactId>
       <version>${odl.karaf.base.version}</version>
+      <classifier>features</classifier>
+      <type>xml</type>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.openflowplugin</groupId>
+      <artifactId>features-openflowplugin-extension</artifactId>
+      <version>${openflowplugin.version}</version>
       <classifier>features</classifier>
       <type>xml</type>
     </dependency>

@@ -312,11 +312,6 @@
         <version>${ovsdb.ofextension.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.opendaylight.ovsdb</groupId>
-        <artifactId>of-extension.nx-sal</artifactId>
-        <version>${ovsdb.ofextension.version}</version>
-      </dependency>
-      <dependency>
         <groupId>org.opendaylight.sfc</groupId>
         <artifactId>sfc-model</artifactId>
         <version>${sfc-model.version}</version>

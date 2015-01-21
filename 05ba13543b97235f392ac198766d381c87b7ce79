@@ -108,6 +108,30 @@
       "revId": "05ba13543b97235f392ac198766d381c87b7ce79",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e7c065e2",
+        "filename": "pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-01-21T19:35:37Z",
+      "side": 1,
+      "message": "the change would also need to be made in integration project since it also pulls in ovs-sfc.",
+      "parentUuid": "7a96c907_07c5513b",
+      "range": {
+        "startLine": 43,
+        "startChar": 17,
+        "endLine": 43,
+        "endChar": 25
+      },
+      "revId": "05ba13543b97235f392ac198766d381c87b7ce79",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

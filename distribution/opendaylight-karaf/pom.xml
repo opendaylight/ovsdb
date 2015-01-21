@@ -56,7 +56,7 @@
     <!-- Other ODL features needed -->
     <dependency>
       <groupId>org.opendaylight.integration</groupId>
-      <artifactId>features-integration</artifactId>
+      <artifactId>features-integration-index</artifactId>
       <version>0.3.0-SNAPSHOT</version>
       <classifier>features</classifier>
       <type>xml</type>

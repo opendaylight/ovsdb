@@ -22,8 +22,6 @@ DIRECTORY ORGANIZATION
                Supports the legacy v2 APIs to provide backward compatibility for Hydrogen Release
                Also supports the newer v3 APIs to provide schema-independent access to the OVSDB protocol.
 
-- of-extension : Adds OpenFlow Nicera extensions.
-
 - openstack
   +-- net-virt : Handles the Openstack Neutron ML2 and Network Service calls and performs all the logic required
                  for Network Virtualization.
@@ -82,7 +80,6 @@ Pre-requisites : JDK 1.7+, Maven 3+
    odl-ovsdb-northbound             | 0.6.0-SNAPSHOT      |           | ovsdb-1.0.0-SNAPSHOT                  | OpenDaylight :: OVSDB :: Northbound
    odl-ovsdb-openstack              | 1.0.0-SNAPSHOT      | x         | ovsdb-1.0.0-SNAPSHOT                  | OpenDaylight :: OVSDB :: OpenStack Network Virtual
    odl-ovsdb-ovssfc                 | 0.0.1-SNAPSHOT      |           | ovsdb-0.0.1-SNAPSHOT                  | OpenDaylight :: OVSDB :: OVS Service Function Chai
-   odl-openflow-nxm-extensions      | 0.0.3-SNAPSHOT      | x         | ovsdb-0.0.3-SNAPSHOT                  | OpenDaylight :: Openflow :: Nicira Extensions
 
 
 2. Building a bundle and deploying it in an Opendaylight Karaf distribution :

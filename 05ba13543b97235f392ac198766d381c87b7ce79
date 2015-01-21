@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_0777913b",
+        "filename": "commons/parent/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-01-21T17:14:13Z",
+      "side": 1,
+      "message": "Shouldn\u0027t this go away also? Surprised this even builds since these are no longer valid right? Can you clean your local .m2 of the ovsdb nxm extensions?",
+      "range": {
+        "startLine": 310,
+        "startChar": 34,
+        "endLine": 310,
+        "endChar": 39
+      },
+      "revId": "05ba13543b97235f392ac198766d381c87b7ce79",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_2772cd49",
+        "filename": "distribution/opendaylight/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-01-21T17:14:13Z",
+      "side": 1,
+      "message": "same here, the of-extension code is gone right?",
+      "range": {
+        "startLine": 185,
+        "startChar": 19,
+        "endLine": 185,
+        "endChar": 28
+      },
+      "revId": "05ba13543b97235f392ac198766d381c87b7ce79",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_c789a927",
+        "filename": "features/ovs-sfc/src/main/resources/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-01-21T17:14:13Z",
+      "side": 1,
+      "message": "just remove these dependencies since they are not used",
+      "range": {
+        "startLine": 9,
+        "startChar": 76,
+        "endLine": 9,
+        "endChar": 85
+      },
+      "revId": "05ba13543b97235f392ac198766d381c87b7ce79",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e78ce537",
+        "filename": "features/ovs-sfc/src/main/resources/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-01-21T17:14:13Z",
+      "side": 1,
+      "message": "same here",
+      "revId": "05ba13543b97235f392ac198766d381c87b7ce79",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

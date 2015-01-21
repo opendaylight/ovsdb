@@ -33,7 +33,6 @@
     <ovsdb.northbound.version>0.7.0-SNAPSHOT</ovsdb.northbound.version>
     <schema.openvswitch.version>1.1.0-SNAPSHOT</schema.openvswitch.version>
     <schema.hardwarevtep.version>1.1.0-SNAPSHOT</schema.hardwarevtep.version>
-    <ovsdb.ofextension.version>1.1.0-SNAPSHOT</ovsdb.ofextension.version>
     <ovsdb.utils.config.version>1.1.0-SNAPSHOT</ovsdb.utils.config.version>
     <utils.mdsal.openflow.version>1.1.0-SNAPSHOT</utils.mdsal.openflow.version>
     <ovsdb.ovssfc.version>0.1.0-SNAPSHOT</ovsdb.ovssfc.version>
@@ -62,6 +61,7 @@
     <mdsal.version>1.2.0-SNAPSHOT</mdsal.version>
     <openflowplugin.version>0.1.0-SNAPSHOT</openflowplugin.version>
     <openflowplugin-nicira.version>0.1.0-SNAPSHOT</openflowplugin-nicira.version>
+    <openflowplugin-nicira-config.version>0.1.0-SNAPSHOT</openflowplugin-nicira-config.version>
     <openflowplugin-extension.version>0.1.0-SNAPSHOT</openflowplugin-extension.version>
     <openflowjava-nicira.version>0.1.0-SNAPSHOT</openflowjava-nicira.version>
     <openflowjava-extension.version>0.1.0-SNAPSHOT</openflowjava-extension.version>
@@ -253,6 +253,11 @@
       </dependency>
       <dependency>
           <groupId>org.opendaylight.openflowplugin</groupId>
+          <artifactId>openflowplugin-extension-nicira-config</artifactId>
+          <version>${openflowplugin-nicira-config.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.opendaylight.openflowplugin</groupId>
           <artifactId>openflowplugin</artifactId>
           <version>${openflowplugin.version}</version>
       </dependency>
@@ -305,16 +310,6 @@
         <groupId>org.opendaylight.ovsdb</groupId>
         <artifactId>plugin-mdsal-adapter</artifactId>
         <version>${ovsdb.plugin.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.ovsdb</groupId>
-        <artifactId>of-extension.nx-ofjava</artifactId>
-        <version>${ovsdb.ofextension.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.ovsdb</groupId>
-        <artifactId>of-extension.nx-sal</artifactId>
-        <version>${ovsdb.ofextension.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.sfc</groupId>

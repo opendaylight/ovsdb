@@ -31,7 +31,7 @@ done
 find configuration/initial -type l -exec rm {} \;
 
 # OF Filter selection
-OF_FILTER="org.opendaylight.(openflowplugin|openflowjava|controller.sal-compatibility|ovsdb.of-extension)"
+OF_FILTER="org.opendaylight.(openflowplugin|openflowjava|controller.sal-compatibility)"
 OF_PLUGIN_RUNTIME="1.0"
 if (( $OF13 != 0 )); then
     OF_PLUGIN_RUNTIME="1.3"

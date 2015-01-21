@@ -62,10 +62,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.ni
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxTunIdKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.nx.reg.grouping.NxmNxRegBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.nx.tun.id.grouping.NxmNxTunIdBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.NxmNxNspKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.nxm.nx.nsp.grouping.NxmNxNspBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.NxmNxNsiKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.nxm.nx.nsi.grouping.NxmNxNsiBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxNspKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.nx.nsp.grouping.NxmNxNspBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxmNxNsiKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.nxm.nx.nsi.grouping.NxmNxNsiBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -929,8 +929,8 @@ public class MatchUtils {
     }
 
     public static void addNxNsp(MatchBuilder match, long nsp) {
-        org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.NxAugMatchNodesNodeTableFlow am =
-                new org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.NxAugMatchNodesNodeTableFlowBuilder()
+        org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxAugMatchNodesNodeTableFlow am =
+                new org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxAugMatchNodesNodeTableFlowBuilder()
                 .setNxmNxNsp(new NxmNxNspBuilder()
                 .setValue(nsp)
                 .build())
@@ -939,8 +939,8 @@ public class MatchUtils {
     }
 
     public static void addNxNsi(MatchBuilder match, short nsi) {
-        org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.NxAugMatchNodesNodeTableFlow am =
-                new org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.NxAugMatchNodesNodeTableFlowBuilder()
+        org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxAugMatchNodesNodeTableFlow am =
+                new org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxAugMatchNodesNodeTableFlowBuilder()
                 .setNxmNxNsi(new NxmNxNsiBuilder()
                 .setNsi(nsi)
                 .build())
@@ -948,7 +948,7 @@ public class MatchUtils {
         addExtension(match, NxmNxNsiKey.class, am);
     }
 
-    private static void addExtension (MatchBuilder match, Class<? extends ExtensionKey> extensionKey, org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.NxAugMatchNodesNodeTableFlow am) {
+    private static void addExtension (MatchBuilder match, Class<? extends ExtensionKey> extensionKey, org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxAugMatchNodesNodeTableFlow am) {
         GeneralAugMatchNodesNodeTableFlow existingAugmentations = match.getAugmentation(GeneralAugMatchNodesNodeTableFlow.class);
         List<ExtensionList> extensions = null;
         if (existingAugmentations != null ) {
@@ -961,7 +961,7 @@ public class MatchUtils {
         extensions.add(new ExtensionListBuilder()
                            .setExtensionKey(extensionKey)
                            .setExtension(new ExtensionBuilder()
-                           .addAugmentation(org.opendaylight.yang.gen.v1.urn.opendaylight.ovs.nx.sal.match.rev140714.NxAugMatchNodesNodeTableFlow.class, am)
+                           .addAugmentation(org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.match.rev140714.NxAugMatchNodesNodeTableFlow.class, am)
                            .build())
                            .build());
 

@@ -34,22 +34,13 @@
     <module>utils/mdsal-openflow</module>
     <module>openstack/net-virt</module>
     <module>openstack/net-virt-providers</module>
-    <module>of-extension/nx-ofjava</module>
-    <module>of-extension/nx-sal</module>
     <module>ovs-sfc</module>
     <!-- Integration Tests -->
     <module>integrationtest</module>
     <!-- Config Files -->
-    <module>of-extension/openflowjava-nx-config</module>
-    <module>of-extension/openflowjava-nx-api-config</module>
-    <module>of-extension/nicira-extension-config</module>
-    <module>of-extension/ovs-nx-api-config</module>
-    <module>of-extension/ovs-nx-config</module>
-    <module>of-extension/nx-sal-config</module>
     <!-- Karaf Distribution -->
     <module>features/ovsdb</module>
-    <module>features/of-nxm-extensions</module>
-    <module>features/ovs-sfc</module>
+    <!-- <module>features/ovs-sfc</module> -->
     <!-- OVSDB Distribution -->
     <module>distribution/opendaylight</module>
     <module>distribution/opendaylight-karaf</module>

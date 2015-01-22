@@ -46,6 +46,30 @@
       "revId": "76cdfbbb8d1a82a3d50ac3b69502c1ce0636d7a7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_2202bb0b",
+        "filename": "southbound/southbound-api/src/main/yang/tunnel.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 248
+      },
+      "writtenOn": "2015-01-22T10:15:22Z",
+      "side": 1,
+      "message": "VXLAN-GPE is specified here: http://tools.ietf.org/html/draft-quinn-vxlan-gpe-03",
+      "parentUuid": "7a96c907_111b531c",
+      "range": {
+        "startLine": 24,
+        "startChar": 31,
+        "endLine": 24,
+        "endChar": 34
+      },
+      "revId": "76cdfbbb8d1a82a3d50ac3b69502c1ce0636d7a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -8,7 +8,7 @@
  * Authors : Madhu Venugopal
  */
 
-package org.opendaylight.ovsdb.lib;
+package org.opendaylight.ovsdb.integrationtest.ovsdbclient;
 import java.util.Map;
 import java.util.Set;
 

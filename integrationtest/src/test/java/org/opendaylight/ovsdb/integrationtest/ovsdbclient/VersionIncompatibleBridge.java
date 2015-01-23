@@ -8,7 +8,7 @@
  * Authors : Madhu Venugopal
  */
 
-package org.opendaylight.ovsdb.lib;
+package org.opendaylight.ovsdb.integrationtest.ovsdbclient;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 

@@ -7,7 +7,7 @@
  *
  * Authors : Madhu Venugopal
  */
-package org.opendaylight.ovsdb.lib;
+package org.opendaylight.ovsdb.integrationtest.ovsdbclient;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -22,10 +22,20 @@ import java.util.concurrent.TimeoutException;
 
 import junit.framework.Assert;
 
+import org.junit.Rule;
+import org.junit.rules.TestRule;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
+import org.opendaylight.ovsdb.lib.OvsdbClient;
+import org.opendaylight.ovsdb.lib.OvsdbConnection;
+import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
 import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class OvsdbTestBase implements OvsdbRPC.Callback{
+    private static final Logger LOG = LoggerFactory.getLogger(OvsdbTestBase.class);
     private final static String SERVER_IPADDRESS = "ovsdbserver.ipaddress";
     private final static String SERVER_PORT = "ovsdbserver.port";
     private final static String CONNECTION_TYPE = "ovsdbserver.connection";
@@ -114,4 +124,18 @@ public abstract class OvsdbTestBase implements OvsdbRPC.Callback{
             this.client = null;
         }
     }
+
+    @Rule
+    public TestRule watcher = new TestWatcher() {
+        @Override
+        protected void starting(Description description) {
+            LOG.info("TestWatcher: Starting test: {}",
+                    description.getDisplayName());
+        }
+
+        @Override
+        protected void finished(Description description) {
+            LOG.info("TestWatcher: Finished test: {}", description.getDisplayName());
+        }
+    };
 }

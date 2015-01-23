@@ -7,7 +7,7 @@
  *
  * Authors : Ashwin Raveendran
  */
-package org.opendaylight.ovsdb.lib;
+package org.opendaylight.ovsdb.integrationtest.ovsdbclient;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
@@ -23,6 +23,8 @@ import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.ovsdb.lib.MonitorCallBack;
+import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
 import org.opendaylight.ovsdb.lib.message.MonitorRequest;
 import org.opendaylight.ovsdb.lib.message.MonitorRequestBuilder;

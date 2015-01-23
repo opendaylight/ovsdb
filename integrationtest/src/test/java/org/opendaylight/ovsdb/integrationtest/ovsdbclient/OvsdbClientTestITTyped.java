@@ -8,7 +8,7 @@
  * Authors : Ashwin Raveendran, Madhu Venugopal
  */
 
-package org.opendaylight.ovsdb.lib;
+package org.opendaylight.ovsdb.integrationtest.ovsdbclient;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
@@ -24,6 +24,7 @@ import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
 import org.opendaylight.ovsdb.lib.message.UpdateNotification;
 import org.opendaylight.ovsdb.lib.notation.Mutator;

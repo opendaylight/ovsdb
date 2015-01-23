@@ -60,9 +60,9 @@ import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 
 @RunWith(PaxExamParameterized.class)
 @ExamReactorStrategy(PerClass.class)
-public class OvsdbNorthboundIT extends OvsdbIntegrationTestBase {
+public class OvsdbNorthboundV2IT extends OvsdbIntegrationTestBase {
 
-    private Logger log = LoggerFactory.getLogger(OvsdbNorthboundIT.class);
+    private Logger log = LoggerFactory.getLogger(OvsdbNorthboundV2IT.class);
     public static final String USERNAME = "admin";
     public static final String PASSWORD = "admin";
     public static final String BASE_URI = "http://localhost:8888";
@@ -81,7 +81,7 @@ public class OvsdbNorthboundIT extends OvsdbIntegrationTestBase {
 
     @Parameterized.Parameters(name = "ApiTest{index}:{0}")
     public static List<Object[]> getData() throws FileNotFoundException {
-        ClassLoader classloader = OvsdbNorthboundIT.class.getClassLoader();
+        ClassLoader classloader = OvsdbNorthboundV2IT.class.getClassLoader();
         InputStream input = classloader.getResourceAsStream("northbound.yaml");
         Yaml yaml = new Yaml();
         List<Map<String, Object>> object = (List<Map<String, Object>>) yaml.load(input);
@@ -102,7 +102,7 @@ public class OvsdbNorthboundIT extends OvsdbIntegrationTestBase {
     private String fJson;
     private int fExpectedStatusCode;
 
-    public OvsdbNorthboundIT(String testCase, String operation, String path, String json, int expectedStatusCode){
+    public OvsdbNorthboundV2IT (String testCase, String operation, String path, String json, int expectedStatusCode){
         fTestCase = testCase;
         fOperation = operation;
         fPath = path;
@@ -191,7 +191,7 @@ public class OvsdbNorthboundIT extends OvsdbIntegrationTestBase {
         if (UuidHelper.getOvsUuid() == null) {
             Client client = Client.create();
             client.addFilter(new HTTPBasicAuthFilter(USERNAME, PASSWORD));
-            String uri = OvsdbNorthboundIT.BASE_URI + "/ovsdb/nb/v2/node/OVS/${node}/tables/open_vswitch/rows";
+            String uri = OvsdbNorthboundV2IT.BASE_URI + "/ovsdb/nb/v2/node/OVS/${node}/tables/open_vswitch/rows";
             WebResource webResource = client.resource(expand(uri));
             ClientResponse response = webResource.accept(MEDIA_TYPE_JSON)
                     .get(ClientResponse.class);
@@ -282,4 +282,3 @@ public class OvsdbNorthboundIT extends OvsdbIntegrationTestBase {
         );
     }
 }
-

@@ -31,7 +31,7 @@
       <artifactId>model-inventory</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller.model</groupId>
+      <groupId>org.opendaylight.openflowplugin.model</groupId>
       <artifactId>model-flow-service</artifactId>
     </dependency>
     <!-- Controller Dependencies -->
@@ -47,6 +47,20 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-compatibility</artifactId>
       <version>${mdsal.version}</version>
+      <exclusions>
+        <exclusion>
+            <groupId>org.opendaylight.controller.model</groupId>
+            <artifactId>model-flow-base</artifactId>
+        </exclusion>
+        <exclusion>
+            <groupId>org.opendaylight.controller.model</groupId>
+            <artifactId>model-flow-statistics</artifactId>
+        </exclusion>
+        <exclusion>
+            <groupId>org.opendaylight.controller.model</groupId>
+            <artifactId>model-flow-service</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>

@@ -162,19 +162,19 @@
         <version>${switchmanager.api.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.opendaylight.controller.model</groupId>
+        <groupId>org.opendaylight.openflowplugin.model</groupId>
         <artifactId>model-flow-base</artifactId>
-        <version>${mdsal.version}</version>
+        <version>${openflowplugin.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.opendaylight.controller.model</groupId>
+        <groupId>org.opendaylight.openflowplugin.model</groupId>
         <artifactId>model-flow-statistics</artifactId>
-        <version>${mdsal.version}</version>
+        <version>${openflowplugin.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.opendaylight.controller.model</groupId>
+        <groupId>org.opendaylight.openflowplugin.model</groupId>
         <artifactId>model-flow-service</artifactId>
-        <version>${mdsal.version}</version>
+        <version>${openflowplugin.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller.model</groupId>

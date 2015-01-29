@@ -44,25 +44,6 @@
       <artifactId>sal</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-compatibility</artifactId>
-      <version>${mdsal.version}</version>
-      <exclusions>
-        <exclusion>
-            <groupId>org.opendaylight.controller.model</groupId>
-            <artifactId>model-flow-base</artifactId>
-        </exclusion>
-        <exclusion>
-            <groupId>org.opendaylight.controller.model</groupId>
-            <artifactId>model-flow-statistics</artifactId>
-        </exclusion>
-        <exclusion>
-            <groupId>org.opendaylight.controller.model</groupId>
-            <artifactId>model-flow-service</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>library</artifactId>
     </dependency>

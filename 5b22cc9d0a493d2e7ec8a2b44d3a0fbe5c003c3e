@@ -143,6 +143,30 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_372bc383",
+        "filename": "southbound/pom.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-01-29T21:50:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_a40d5f40",
+      "range": {
+        "startLine": 12,
+        "startChar": 13,
+        "endLine": 12,
+        "endChar": 14
+      },
+      "revId": "5b22cc9d0a493d2e7ec8a2b44d3a0fbe5c003c3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_64599759",
         "filename": "southbound/pom.xml",
         "patchSetId": 9
@@ -225,6 +249,30 @@
       "side": 1,
       "message": "These should be fixed, and its probably an artifact of your previous comment about parents.",
       "parentUuid": "7a96c907_8454e321",
+      "range": {
+        "startLine": 8,
+        "startChar": 4,
+        "endLine": 8,
+        "endChar": 10
+      },
+      "revId": "5b22cc9d0a493d2e7ec8a2b44d3a0fbe5c003c3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_d7213fa0",
+        "filename": "southbound/southbound-api/src/main/yang/overlay.yang",
+        "patchSetId": 9
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-01-29T21:50:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_c408ab2f",
       "range": {
         "startLine": 8,
         "startChar": 4,
@@ -483,6 +531,30 @@
       "side": 1,
       "message": "Yes, this file should be removed.  In fact, how would you feel about putting it in .gitignore?",
       "parentUuid": "7a96c907_6430b701",
+      "range": {
+        "startLine": 10,
+        "startChar": 17,
+        "endLine": 10,
+        "endChar": 31
+      },
+      "revId": "5b22cc9d0a493d2e7ec8a2b44d3a0fbe5c003c3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_f7247bb0",
+        "filename": "southbound/southbound-impl/src/main/config/maven-metadata-local.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-01-29T21:50:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_97141745",
       "range": {
         "startLine": 10,
         "startChar": 17,

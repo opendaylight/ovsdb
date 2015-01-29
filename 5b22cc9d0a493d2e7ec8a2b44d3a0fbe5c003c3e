@@ -1,0 +1,280 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_0449b38a",
+        "filename": "library/pom.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-01-29T20:55:31Z",
+      "side": 1,
+      "message": "what was the reason for moving the activator out?",
+      "range": {
+        "startLine": 105,
+        "startChar": 57,
+        "endLine": 105,
+        "endChar": 61
+      },
+      "revId": "5b22cc9d0a493d2e7ec8a2b44d3a0fbe5c003c3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_a45f9f40",
+        "filename": "pom.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-01-29T20:55:31Z",
+      "side": 1,
+      "message": "Can we move southbound up to the other ovsdb components section?",
+      "range": {
+        "startLine": 47,
+        "startChar": 12,
+        "endLine": 47,
+        "endChar": 22
+      },
+      "revId": "5b22cc9d0a493d2e7ec8a2b44d3a0fbe5c003c3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_c45aeb4f",
+        "filename": "southbound/pom.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-01-29T20:55:31Z",
+      "side": 1,
+      "message": "why is the parent not commons/parent like all the other modules in ovsdb?",
+      "range": {
+        "startLine": 12,
+        "startChar": 13,
+        "endLine": 12,
+        "endChar": 14
+      },
+      "revId": "5b22cc9d0a493d2e7ec8a2b44d3a0fbe5c003c3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_64599759",
+        "filename": "southbound/pom.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-01-29T20:55:31Z",
+      "side": 1,
+      "message": "Why is this aggregator?",
+      "range": {
+        "startLine": 14,
+        "startChar": 25,
+        "endLine": 14,
+        "endChar": 35
+      },
+      "revId": "5b22cc9d0a493d2e7ec8a2b44d3a0fbe5c003c3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_8454e321",
+        "filename": "southbound/southbound-api/src/main/yang/overlay.yang",
+        "patchSetId": 9
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-01-29T20:55:31Z",
+      "side": 1,
+      "message": "How did all these whitespaces  make it through the checkstyle?",
+      "range": {
+        "startLine": 8,
+        "startChar": 4,
+        "endLine": 8,
+        "endChar": 10
+      },
+      "revId": "5b22cc9d0a493d2e7ec8a2b44d3a0fbe5c003c3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_24338f15",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 9
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-01-29T20:55:31Z",
+      "side": 1,
+      "message": "whitespace",
+      "range": {
+        "startLine": 11,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 4
+      },
+      "revId": "5b22cc9d0a493d2e7ec8a2b44d3a0fbe5c003c3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_4436db04",
+        "filename": "southbound/southbound-artifacts/pom.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-01-29T20:55:31Z",
+      "side": 1,
+      "message": "is it better to name things southbound.api? Also the other modules in southbound.",
+      "range": {
+        "startLine": 14,
+        "startChar": 14,
+        "endLine": 14,
+        "endChar": 24
+      },
+      "revId": "5b22cc9d0a493d2e7ec8a2b44d3a0fbe5c003c3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e43cc7e4",
+        "filename": "southbound/southbound-features/pom.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-01-29T20:55:31Z",
+      "side": 1,
+      "message": "OVSDB has a different directory structure for features and karaf. Can this be moved into that structure?",
+      "range": {
+        "startLine": 12,
+        "startChar": 19,
+        "endLine": 12,
+        "endChar": 27
+      },
+      "revId": "5b22cc9d0a493d2e7ec8a2b44d3a0fbe5c003c3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_0440d354",
+        "filename": "southbound/southbound-features/pom.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-01-29T20:55:31Z",
+      "side": 1,
+      "message": "Can these values be pulled from some higher level pom? The ovsdb parent pom has these values.",
+      "range": {
+        "startLine": 23,
+        "startChar": 25,
+        "endLine": 23,
+        "endChar": 33
+      },
+      "revId": "5b22cc9d0a493d2e7ec8a2b44d3a0fbe5c003c3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_a426bfcc",
+        "filename": "southbound/southbound-features/src/main/features/features.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-01-29T20:55:31Z",
+      "side": 1,
+      "message": "Should this be named more like odl-ovsdb-xxx since this is the ovsdb southbound?",
+      "range": {
+        "startLine": 10,
+        "startChar": 33,
+        "endLine": 10,
+        "endChar": 40
+      },
+      "revId": "5b22cc9d0a493d2e7ec8a2b44d3a0fbe5c003c3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_6430b701",
+        "filename": "southbound/southbound-impl/src/main/config/maven-metadata-local.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-01-29T20:55:31Z",
+      "side": 1,
+      "message": "What is the significance of this file? I don\u0027t recall seeing it or ever needing it before. Can it be removed?",
+      "range": {
+        "startLine": 10,
+        "startChar": 17,
+        "endLine": 10,
+        "endChar": 31
+      },
+      "revId": "5b22cc9d0a493d2e7ec8a2b44d3a0fbe5c003c3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_842b8393",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbNodeDataChangeListener.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-01-29T20:55:31Z",
+      "side": 1,
+      "message": "How does this work with the exiting plugin-mdsal-adapter that adds an OVSDB mdsal node to the datastore?",
+      "range": {
+        "startLine": 19,
+        "startChar": 13,
+        "endLine": 19,
+        "endChar": 40
+      },
+      "revId": "5b22cc9d0a493d2e7ec8a2b44d3a0fbe5c003c3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

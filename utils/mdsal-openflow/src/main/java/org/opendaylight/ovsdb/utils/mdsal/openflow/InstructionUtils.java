@@ -10,7 +10,6 @@
 package org.opendaylight.ovsdb.utils.mdsal.openflow;
 
 import static org.opendaylight.ovsdb.utils.mdsal.openflow.ActionUtils.dropAction;
-import org.opendaylight.controller.sal.compatibility.NodeMapping;
 
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
@@ -45,6 +44,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.address.address.Ipv4Builder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.OutputPortValues;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Instructions;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCase;
@@ -97,7 +97,9 @@ public class InstructionUtils {
 
         OutputActionBuilder output = new OutputActionBuilder();
         output.setMaxLength(MAX_LENGTH);
-        output.setOutputNodeConnector(NodeMapping.toControllerNodeConnectorId(new NodeId(nodeName)));
+        NodeId nodeId = new NodeId(nodeName);
+        output.setOutputNodeConnector(new NodeConnectorId(nodeId.getValue() + ":"
+                + OutputPortValues.CONTROLLER.toString()));
         ab.setAction(new OutputActionCaseBuilder().setOutputAction(output.build()).build());
         ab.setOrder(0);
         ab.setKey(new ActionKey(0));
@@ -116,18 +118,20 @@ public class InstructionUtils {
     /**
      * Create NORMAL Reserved Port Instruction (packet_in)
      *
-     * @param nodeId Uri Prefix, containing nodeConnectorType and dpId (aka NodeId)
+     * @param nodeName Uri Prefix, containing nodeConnectorType and dpId (aka NodeId)
      * @param ib Map InstructionBuilder without any instructions
      * @return ib Map InstructionBuilder with instructions
      */
 
-    public static InstructionBuilder createNormalInstructions(String nodeId, InstructionBuilder ib) {
+    public static InstructionBuilder createNormalInstructions(String nodeName, InstructionBuilder ib) {
 
         List<Action> actionList = Lists.newArrayList();
         ActionBuilder ab = new ActionBuilder();
 
         OutputActionBuilder output = new OutputActionBuilder();
-        output.setOutputNodeConnector(NodeMapping.toNormalNodeConnectorId(new NodeId(nodeId)));
+        NodeId nodeId = new NodeId(nodeName);
+        output.setOutputNodeConnector(new NodeConnectorId(nodeId.getValue() + ":"
+                + OutputPortValues.NORMAL.toString()));
         ab.setAction(new OutputActionCaseBuilder().setOutputAction(output.build()).build());
         ab.setOrder(0);
         ab.setKey(new ActionKey(0));

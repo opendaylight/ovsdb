@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_441d7b72",
+        "filename": "library/pom.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-01-29T21:13:18Z",
+      "side": 1,
+      "message": "The Activator is not needed when using the Library from the MD-SAL, and pulls through other dependencies.  \n\nIt *is* needed when used from the AD-SAL side, and so thus need to be retained.\n\nBy putting it in its own package, the package containing the activator can be excluded with a BND Private-Package stanza, without in anyway changing the behavior for those who need it on the AD-SAL side :)",
+      "parentUuid": "7a96c907_0449b38a",
+      "range": {
+        "startLine": 105,
+        "startChar": 57,
+        "endLine": 105,
+        "endChar": 61
+      },
+      "revId": "5b22cc9d0a493d2e7ec8a2b44d3a0fbe5c003c3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_a45f9f40",
         "filename": "pom.xml",
         "patchSetId": 9
@@ -36,6 +60,30 @@
       "writtenOn": "2015-01-29T20:55:31Z",
       "side": 1,
       "message": "Can we move southbound up to the other ovsdb components section?",
+      "range": {
+        "startLine": 47,
+        "startChar": 12,
+        "endLine": 47,
+        "endChar": 22
+      },
+      "revId": "5b22cc9d0a493d2e7ec8a2b44d3a0fbe5c003c3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e4136764",
+        "filename": "pom.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-01-29T21:13:18Z",
+      "side": 1,
+      "message": "How would you like to see that organized?\n\nThe reason right now its in its own subtree was because the fastest way to get going was with the startup archetype, which is self contained :)",
+      "parentUuid": "7a96c907_a45f9f40",
       "range": {
         "startLine": 47,
         "startChar": 12,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_a40d5f40",
+        "filename": "southbound/pom.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-01-29T21:13:18Z",
+      "side": 1,
+      "message": "Because the archetype helpfully made the pom from the directory containing it the parent.  I\u0027m happy to change it to commons/parent if you\u0027d like, but as this pom is *just* aggregating, it has no effect on how any of the modules containing actual content build.",
+      "parentUuid": "7a96c907_c45aeb4f",
+      "range": {
+        "startLine": 12,
+        "startChar": 13,
+        "endLine": 12,
+        "endChar": 14
+      },
+      "revId": "5b22cc9d0a493d2e7ec8a2b44d3a0fbe5c003c3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_64599759",
         "filename": "southbound/pom.xml",
         "patchSetId": 9
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_04177352",
+        "filename": "southbound/pom.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-01-29T21:13:18Z",
+      "side": 1,
+      "message": "Its aggregating the modules under it and nothing more.\n\nIts the naming convention from the startup archetype.",
+      "parentUuid": "7a96c907_64599759",
+      "range": {
+        "startLine": 14,
+        "startChar": 25,
+        "endLine": 14,
+        "endChar": 35
+      },
+      "revId": "5b22cc9d0a493d2e7ec8a2b44d3a0fbe5c003c3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_8454e321",
         "filename": "southbound/southbound-api/src/main/yang/overlay.yang",
         "patchSetId": 9
@@ -105,6 +201,30 @@
       "writtenOn": "2015-01-29T20:55:31Z",
       "side": 1,
       "message": "How did all these whitespaces  make it through the checkstyle?",
+      "range": {
+        "startLine": 8,
+        "startChar": 4,
+        "endLine": 8,
+        "endChar": 10
+      },
+      "revId": "5b22cc9d0a493d2e7ec8a2b44d3a0fbe5c003c3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_c408ab2f",
+        "filename": "southbound/southbound-api/src/main/yang/overlay.yang",
+        "patchSetId": 9
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-01-29T21:13:18Z",
+      "side": 1,
+      "message": "These should be fixed, and its probably an artifact of your previous comment about parents.",
+      "parentUuid": "7a96c907_8454e321",
       "range": {
         "startLine": 8,
         "startChar": 4,
@@ -163,6 +283,30 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_6407571d",
+        "filename": "southbound/southbound-artifacts/pom.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-01-29T21:13:18Z",
+      "side": 1,
+      "message": "Ah... this is *not* the API.  the -artifacts pattern is to give folks one version to depend on even as the modules listed might change versions.  So if I consume the southbound I could have\n\n\u003cdependencyManagement\u003e\n  \u003cdepedenency\u003e\n     \u003cgroupId\u003eorg.opendaylight.ovsdb\u003c/groupId\u003e\n     \u003cartifactId\u003esouthbound-artifacts\u003c/artifactId\u003e\n     \u003cversion\u003e1.1.0-SNAPSHOT\u003c/version\u003e\n     \u003ctype\u003epom\u003c/type\u003e\n     \u003cscope\u003eimport\u003c/scope\u003e\n  \u003c/dependency\u003e\n\u003c/dependencyManagement\u003e\n\nAnd if somewhere else I had\n\n\u003cdependency\u003e\n    \u003cgroupId\u003eorg.opendaylight.ovsdb\u003c/groupId\u003e\n    \u003cartifactId\u003esouthbound-api\u003c/artifactId\u003e\n\u003c/dependency\u003e\n\nEverything would keep working even if I changed the version of southbound-api without changing the versions of other things.  It in effect gives us a pseudo version across multiple modules.",
+      "parentUuid": "7a96c907_4436db04",
+      "range": {
+        "startLine": 14,
+        "startChar": 14,
+        "endLine": 14,
+        "endChar": 24
+      },
+      "revId": "5b22cc9d0a493d2e7ec8a2b44d3a0fbe5c003c3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_e43cc7e4",
         "filename": "southbound/southbound-features/pom.xml",
         "patchSetId": 9
@@ -174,6 +318,30 @@
       "writtenOn": "2015-01-29T20:55:31Z",
       "side": 1,
       "message": "OVSDB has a different directory structure for features and karaf. Can this be moved into that structure?",
+      "range": {
+        "startLine": 12,
+        "startChar": 19,
+        "endLine": 12,
+        "endChar": 27
+      },
+      "revId": "5b22cc9d0a493d2e7ec8a2b44d3a0fbe5c003c3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_37042314",
+        "filename": "southbound/southbound-features/pom.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-01-29T21:13:18Z",
+      "side": 1,
+      "message": "Possibly... this came from two things:\n\n1)  The archetype gives it for free\n2)  It out of the box \n   a)  Takes advantage of best practices from features-parent and karaf parent\n   b)  Gives us a feature consumable by those who just want the SB, and not other things\n   c)  Provides a karaf distro that is *only* running the SB to test with.",
+      "parentUuid": "7a96c907_e43cc7e4",
       "range": {
         "startLine": 12,
         "startChar": 19,
@@ -209,6 +377,30 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_d70a9f20",
+        "filename": "southbound/southbound-features/pom.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-01-29T21:13:18Z",
+      "side": 1,
+      "message": "The parent here is the features-parent, which contains the heavy lifting for features stuff (and is being maintained).  One could interpose an intermediate features-parent I suppose where these things could be done, but I\u0027m not sure it buys us much.\n\nI will note that I agree with your instincts here, and tried a number of ways of \u0027side-loading\u0027 them to no avail :(\n\nAlso.. this feeds into the discussion of trying to put things like mdsal.version into odlparent... currently there is resistance to that for reasons having to do with the desire to do continuous integration that need to be worked through.",
+      "parentUuid": "7a96c907_0440d354",
+      "range": {
+        "startLine": 23,
+        "startChar": 25,
+        "endLine": 23,
+        "endChar": 33
+      },
+      "revId": "5b22cc9d0a493d2e7ec8a2b44d3a0fbe5c003c3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_a426bfcc",
         "filename": "southbound/southbound-features/src/main/features/features.xml",
         "patchSetId": 9
@@ -220,6 +412,30 @@
       "writtenOn": "2015-01-29T20:55:31Z",
       "side": 1,
       "message": "Should this be named more like odl-ovsdb-xxx since this is the ovsdb southbound?",
+      "range": {
+        "startLine": 10,
+        "startChar": 33,
+        "endLine": 10,
+        "endChar": 40
+      },
+      "revId": "5b22cc9d0a493d2e7ec8a2b44d3a0fbe5c003c3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_f70d5b38",
+        "filename": "southbound/southbound-features/src/main/features/features.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-01-29T21:13:18Z",
+      "side": 1,
+      "message": "Yes, and I\u0027m happy to correct them.. this was inherited from the archetype (which is my way of saying... oops... screwed up because I let the automation do slightly more work than I should have ;) )",
+      "parentUuid": "7a96c907_a426bfcc",
       "range": {
         "startLine": 10,
         "startChar": 33,
@@ -255,6 +471,30 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_97141745",
+        "filename": "southbound/southbound-impl/src/main/config/maven-metadata-local.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-01-29T21:13:18Z",
+      "side": 1,
+      "message": "Yes, this file should be removed.  In fact, how would you feel about putting it in .gitignore?",
+      "parentUuid": "7a96c907_6430b701",
+      "range": {
+        "startLine": 10,
+        "startChar": 17,
+        "endLine": 10,
+        "endChar": 31
+      },
+      "revId": "5b22cc9d0a493d2e7ec8a2b44d3a0fbe5c003c3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_842b8393",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbNodeDataChangeListener.java",
         "patchSetId": 9
@@ -266,6 +506,30 @@
       "writtenOn": "2015-01-29T20:55:31Z",
       "side": 1,
       "message": "How does this work with the exiting plugin-mdsal-adapter that adds an OVSDB mdsal node to the datastore?",
+      "range": {
+        "startLine": 19,
+        "startChar": 13,
+        "endLine": 19,
+        "endChar": 40
+      },
+      "revId": "5b22cc9d0a493d2e7ec8a2b44d3a0fbe5c003c3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_b70fd32d",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbNodeDataChangeListener.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-01-29T21:13:18Z",
+      "side": 1,
+      "message": "I don\u0027t believe this class has any interaction or overlap with it.  As \u0027adapting\u0027 to the AD-SAL does not meet the needs of consumers for this, it simply doesn\u0027t interact with the adapter.",
+      "parentUuid": "7a96c907_842b8393",
       "range": {
         "startLine": 19,
         "startChar": 13,

@@ -555,16 +555,6 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal.networkconfiguration</artifactId>
-      <version>${sal.networkconfiguration.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal.networkconfiguration.implementation</artifactId>
-      <version>${sal.networkconfiguration.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
       <artifactId>security</artifactId>
       <version>${security.version}</version>
     </dependency>

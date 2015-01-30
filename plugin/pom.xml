@@ -86,10 +86,6 @@
       <artifactId>sal.connection</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal.networkconfiguration</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>library</artifactId>
     </dependency>
@@ -140,7 +136,6 @@
               org.opendaylight.controller.sal.utils,
               org.opendaylight.controller.sal.connection,
               org.opendaylight.controller.clustering.services,
-              org.opendaylight.controller.sal.networkconfig.bridgedomain,
               org.opendaylight.ovsdb.lib.error,
               org.opendaylight.ovsdb.lib.notation,
               org.opendaylight.ovsdb.lib.operations,

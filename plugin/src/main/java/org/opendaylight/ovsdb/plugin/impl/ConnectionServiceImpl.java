@@ -41,7 +41,6 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
-import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
 import org.opendaylight.ovsdb.plugin.api.Connection;
 import org.opendaylight.ovsdb.plugin.internal.IPAddressProperty;
 import org.opendaylight.ovsdb.plugin.internal.L4PortProperty;
@@ -60,7 +59,6 @@ import com.google.common.collect.Lists;
  */
 public class ConnectionServiceImpl implements IPluginInConnectionService,
                                               OvsdbConnectionService,
-                                              IConnectionServiceInternal,
                                               OvsdbConnectionListener {
     protected static final Logger logger = LoggerFactory.getLogger(ConnectionServiceImpl.class);
 

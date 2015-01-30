@@ -51,8 +51,6 @@ public class ConfigurationBundles {
                 mavenBundle("org.opendaylight.controller", "sal.connection").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "sal.connection.implementation").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "sal.implementation").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "sal.networkconfiguration").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "sal.networkconfiguration.implementation").versionAsInProject(),
                 mavenBundle("org.slf4j", "log4j-over-slf4j").versionAsInProject(),
                 mavenBundle("org.slf4j", "slf4j-api").versionAsInProject()
 
@@ -142,8 +140,6 @@ public class ConfigurationBundles {
                 mavenBundle("org.opendaylight.controller","forwardingrulesmanager.implementation").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller","sal.connection.implementation").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller","sal.implementation").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller","sal.networkconfiguration").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller","sal.networkconfiguration.implementation").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller.thirdparty", "com.sun.jersey.jersey-servlet").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller.thirdparty", "net.sf.jung2").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller.thirdparty", "org.apache.catalina.filters.CorsFilter").versionAsInProject().noStart(),

@@ -20,7 +20,6 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
 import org.opendaylight.controller.sal.inventory.IPluginOutInventoryService;
-import org.opendaylight.controller.sal.networkconfig.bridgedomain.IPluginInBridgeDomainConfigService;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.INodeConnectorFactory;
 import org.opendaylight.controller.sal.utils.INodeFactory;
@@ -84,8 +83,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             // Set the protocolPluginType property which will be used
             // by SAL
             props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "OVS");
-            c.setInterface(new String[] { IPluginInBridgeDomainConfigService.class.getName(),
-                                          OvsdbConfigurationService.class.getName()}, props);
+            c.setInterface(new String[] { OvsdbConfigurationService.class.getName()}, props);
 
             c.add(createServiceDependency()
                     .setService(OvsdbConnectionService.class)

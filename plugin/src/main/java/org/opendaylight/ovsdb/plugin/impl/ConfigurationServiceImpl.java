@@ -52,7 +52,6 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
-import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
 import org.opendaylight.ovsdb.plugin.api.Connection;
 import org.opendaylight.ovsdb.plugin.api.OvsVswitchdSchemaConstants;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
@@ -81,7 +80,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 public class ConfigurationServiceImpl implements IPluginInBridgeDomainConfigService,
                                                  OvsdbConfigurationService,
-                                                 OvsdbConfigService,
                                                  CommandProvider
 {
     private static final Logger logger = LoggerFactory

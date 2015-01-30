@@ -30,7 +30,6 @@ import org.opendaylight.ovsdb.lib.message.TableUpdate;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.plugin.InventoryServiceInternal;
 import org.opendaylight.ovsdb.plugin.internal.NodeDatabase;
 import org.opendaylight.ovsdb.plugin.api.OvsVswitchdSchemaConstants;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
@@ -48,8 +47,7 @@ import com.google.common.collect.Maps;
  *
  *
  */
-public class InventoryServiceImpl implements OvsdbInventoryService,
-                                             InventoryServiceInternal {
+public class InventoryServiceImpl implements OvsdbInventoryService {
     private static final Logger logger = LoggerFactory
             .getLogger(InventoryServiceImpl.class);
     private final Set<IPluginOutInventoryService> pluginOutInventoryServices =
@@ -241,12 +239,6 @@ public class InventoryServiceImpl implements OvsdbInventoryService,
     public void addNode(Node node, Set<Property> props) {
         addNodeProperty(node, UpdateType.ADDED, props);
     }
-
-    @Override
-    @Deprecated public void notifyNodeAdded(Node node) {
-        //noop
-    }
-
 
     @Override
     public void notifyNodeAdded(Node node, InetAddress address, int port) {

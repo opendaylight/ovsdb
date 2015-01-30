@@ -26,9 +26,6 @@ import org.opendaylight.controller.sal.utils.INodeConnectorFactory;
 import org.opendaylight.controller.sal.utils.INodeFactory;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
-import org.opendaylight.ovsdb.plugin.IConnectionServiceInternal;
-import org.opendaylight.ovsdb.plugin.InventoryServiceInternal;
-import org.opendaylight.ovsdb.plugin.OvsdbConfigService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
@@ -88,8 +85,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             // by SAL
             props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "OVS");
             c.setInterface(new String[] { IPluginInBridgeDomainConfigService.class.getName(),
-                                          OvsdbConfigurationService.class.getName(),
-                                          OvsdbConfigService.class.getName()}, props);
+                                          OvsdbConfigurationService.class.getName()}, props);
 
             c.add(createServiceDependency()
                     .setService(OvsdbConnectionService.class)
@@ -112,8 +108,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.setInterface(
                     new String[] {IPluginInConnectionService.class.getName(),
                                   OvsdbConnectionService.class.getName(),
-                                  OvsdbConnectionListener.class.getName(),
-                                  IConnectionServiceInternal.class.getName()}, props);
+                                  OvsdbConnectionListener.class.getName()}, props);
             c.add(createServiceDependency()
                     .setService(OvsdbInventoryService.class)
                     .setRequired(true));
@@ -128,8 +123,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             props.put("scope", "Global");
             c.setInterface(
                     new String[]{IPluginInInventoryService.class.getName(),
-                                 OvsdbInventoryService.class.getName(),
-                                 InventoryServiceInternal.class.getName()}, props);
+                                 OvsdbInventoryService.class.getName()}, props);
             c.add(createServiceDependency()
                           .setService(IPluginOutInventoryService.class, "(scope=Global)")
                           .setCallbacks("setPluginOutInventoryServices",

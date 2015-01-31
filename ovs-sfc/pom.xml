@@ -17,23 +17,17 @@
 
     <properties>
         <jmxGeneratorPath>target/generated-sources/config</jmxGeneratorPath>
-        <ietf.model.version>2010.09.24.7-SNAPSHOT</ietf.model.version>
-        <ietf.yang.types.version>2013.07.15.7-SNAPSHOT</ietf.yang.types.version>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-        </dependency>
-        <!--<dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-        </dependency>-->
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -46,19 +40,24 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
+            <artifactId>config-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>sal</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>sal-binding-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-config</artifactId>
-            <version>${mdsal.version}</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-common-api</artifactId>
-            <version>${mdsal.version}</version>
         </dependency>
-        <!--<dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>sal-core-api</artifactId>
-            <version>${mdsal.version}</version>
-        </dependency>-->
         <dependency>
             <groupId>org.opendaylight.controller.model</groupId>
             <artifactId>model-flow-base</artifactId>
@@ -73,36 +72,47 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.ovsdb</groupId>
+            <artifactId>library</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.ovsdb</groupId>
             <artifactId>plugin</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.ovsdb</groupId>
-            <artifactId>utils.config</artifactId>
-            <version>${ovsdb.utils.config.version}</version>
+            <artifactId>schema.openvswitch</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.ovsdb</groupId>
             <artifactId>utils.mdsal-openflow</artifactId>
-            <version>${utils.mdsal.openflow.version}</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.sfc</groupId>
             <artifactId>sfc-model</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>concepts</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>yang-binding</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>yang-common</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.opendaylight.yangtools.model</groupId>
             <artifactId>ietf-inet-types</artifactId>
-            <version>${ietf.model.version}</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools.model</groupId>
-            <artifactId>ietf-yang-types</artifactId>
-            <version>${ietf.model.version}</version>
+            <artifactId>opendaylight-l2-types</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.opendaylight.yangtools.model</groupId>
-            <artifactId>ietf-yang-types-20130715</artifactId>
-            <version>${ietf.yang.types.version}</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
     </dependencies>
 
@@ -115,7 +125,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Embed-Dependency>utils.config,utils.mdsal-openflow;type=!pom;inline=false</Embed-Dependency>
+                        <Embed-Dependency>utils.mdsal-openflow;type=!pom;inline=false</Embed-Dependency>
                         <Embed-Transitive>true</Embed-Transitive>
                         <Include-Resource>
                             /OSGI-OPT/ovs-sfc/53-ovssfc-provider.xml=${project.basedir}/src/main/resources/initial/53-ovssfc-provider.xml,{maven-resources}

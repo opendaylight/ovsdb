@@ -124,7 +124,6 @@
               org.opendaylight.ovsdb.plugin.internal
             </Private-Package>
             <Export-Package>
-              <!-- ToDo: Remove this line after the deprecated APIs have been removed -->
               org.opendaylight.ovsdb.plugin,
               org.opendaylight.ovsdb.plugin.api,
               org.opendaylight.ovsdb.plugin.error

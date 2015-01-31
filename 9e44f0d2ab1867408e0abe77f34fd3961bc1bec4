@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_1abcaedb",
+        "filename": "pom.xml",
+        "patchSetId": 14
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-01-31T00:09:36Z",
+      "side": 1,
+      "message": "move this line up... leaving it here makes it look like it is part of the \u0027distribution\u0027 list",
+      "range": {
+        "startLine": 47,
+        "startChar": 12,
+        "endLine": 47,
+        "endChar": 22
+      },
+      "revId": "9e44f0d2ab1867408e0abe77f34fd3961bc1bec4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

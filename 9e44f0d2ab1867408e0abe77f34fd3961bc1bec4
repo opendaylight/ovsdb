@@ -22,6 +22,29 @@
       "revId": "9e44f0d2ab1867408e0abe77f34fd3961bc1bec4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_ba91fa53",
+        "filename": "southbound/southbound-features/pom.xml",
+        "patchSetId": 14
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-01-31T00:48:47Z",
+      "side": 1,
+      "message": "Hmm... I would like to spend a little time on this.\n\nIs this going to be part of the ovsdb distribution?\nIf not, I think it would be critical to have a mechanism\nin place that rejects incompatible features from being loaded. That is so, because having more than 1 instance of the ovsdb library listening on port 6640 is going to be a really bad thing.\n\nOther than the convenience of parking \u0027southbound\u0027 here, I can\u0027t see much difference than writing a feature/bundle that happens to use the ovsdb library. In other words, this is not adding md-sal ability to ovsdb; this is simply an orthogonal bundle that also uses the ovsdb library w/out any regards for the fact that the library has no support for being instantiated more than once for a given JVM.\n\nAm I missing something?",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 2
+      },
+      "revId": "9e44f0d2ab1867408e0abe77f34fd3961bc1bec4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

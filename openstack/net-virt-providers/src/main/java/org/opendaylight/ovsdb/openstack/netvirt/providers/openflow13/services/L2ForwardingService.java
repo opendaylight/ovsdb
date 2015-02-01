@@ -184,7 +184,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
 
 
     /**
-     * Utility funcion used by the flooding logic to allow a flow to be resubmitted
+     * Utility function used by the flooding logic to allow a flow to be resubmitted
      * to the local port flooding rule, after being outputed to all available tunnel
      * or VLAN egress ports.
      */

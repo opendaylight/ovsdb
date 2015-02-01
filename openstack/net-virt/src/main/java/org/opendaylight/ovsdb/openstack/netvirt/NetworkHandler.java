@@ -175,23 +175,23 @@ public class NetworkHandler extends AbstractHandler
                             for (Row portRow : ports.values()) {
                                 Port port = ovsdbConfigurationService.getTypedRow(node, Port.class, portRow);
                                 for (UUID interfaceUuid : port.getInterfacesColumn().getData()) {
-                                    Interface interfaceRow = (Interface) ovsdbConfigurationService
+                                    Row ifaceRow = ovsdbConfigurationService
                                             .getRow(node,
                                                     ovsdbConfigurationService.getTableName(node, Interface.class),
                                                     interfaceUuid.toString());
-
-                                    String interfaceType = interfaceRow.getTypeColumn().getData();
+                                    Interface iface = ovsdbConfigurationService.getTypedRow(node, Interface.class, ifaceRow);
+                                    String interfaceType = iface.getTypeColumn().getData();
                                     if (interfaceType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN)
                                         || interfaceType.equalsIgnoreCase(
                                             NetworkHandler.NETWORK_TYPE_GRE)) {
                                         /* delete tunnel ports on this node */
-                                        logger.trace("Delete tunnel interface {}", interfaceRow);
+                                        logger.trace("Delete tunnel interface {}", iface.getName());
                                         ovsdbConfigurationService.deleteRow(node,
                                                                      ovsdbConfigurationService.getTableName(node, Port.class),
                                                                      port.getUuid().toString());
                                         break;
-                                    } else if (!phyIfName.isEmpty() && phyIfName.contains(interfaceRow.getName())) {
-                                        logger.trace("Delete physical interface {}", interfaceRow);
+                                    } else if (!phyIfName.isEmpty() && phyIfName.contains(iface.getName())) {
+                                        logger.trace("Delete physical interface {}", iface.getName());
                                         ovsdbConfigurationService.deleteRow(node,
                                                                      ovsdbConfigurationService.getTableName(node, Port.class),
                                                                      port.getUuid().toString());

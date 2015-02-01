@@ -164,15 +164,15 @@ public class PortHandler extends AbstractHandler
                     for (Row portRow : portRows.values()) {
                         Port port = ovsdbConfigurationService.getTypedRow(node, Port.class, portRow);
                         for (UUID interfaceUuid : port.getInterfacesColumn().getData()) {
-                            Interface interfaceRow = (Interface) ovsdbConfigurationService
+                            Row ifaceRow = ovsdbConfigurationService
                                     .getRow(node,
                                             ovsdbConfigurationService.getTableName(node, Interface.class),
                                             interfaceUuid.toString());
-
-                            Map<String, String> externalIds = interfaceRow.getExternalIdsColumn().getData();
+                            Interface iface = ovsdbConfigurationService.getTypedRow(node, Interface.class, ifaceRow);
+                            Map<String, String> externalIds = iface.getExternalIdsColumn().getData();
 
                             if (externalIds == null) {
-                                logger.trace("No external_ids seen in {}", interfaceRow);
+                                logger.trace("No external_ids seen in {}", iface.getName());
                                 continue;
                             }
 
@@ -183,7 +183,7 @@ public class PortHandler extends AbstractHandler
                             }
 
                             if (neutronPortId.equalsIgnoreCase(neutronPort.getPortUUID())) {
-                                logger.trace("neutronPortDeleted: Delete interface {}", interfaceRow.getName());
+                                logger.trace("neutronPortDeleted: Delete interface {}", iface.getName());
                                 ovsdbConfigurationService.deleteRow(node,
                                                              ovsdbConfigurationService.getTableName(node, Port.class),
                                                              port.getUuid().toString());

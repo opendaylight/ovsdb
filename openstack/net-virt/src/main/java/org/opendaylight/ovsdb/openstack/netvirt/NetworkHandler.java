@@ -109,6 +109,11 @@ public class NetworkHandler extends AbstractHandler
     @Override
     public int canUpdateNetwork(NeutronNetwork delta,
                                 NeutronNetwork original) {
+        if (delta.isShared()) {
+            logger.error(" Network shared attribute not supported ");
+            return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
+        }
+
         logger.trace("canUpdateNetwork: network delta {} --- original {}", delta, original);
         return HttpURLConnection.HTTP_OK;
     }

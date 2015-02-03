@@ -67,11 +67,7 @@ public class NetworkHandler extends AbstractHandler
      */
     @Override
     public int canCreateNetwork(NeutronNetwork network) {
-        if (network.isShared()) {
-            logger.error(" Network shared attribute not supported ");
-            return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
-        }
-
+        logger.trace("canCreateNetwork: network {}", network);
         return HttpURLConnection.HTTP_CREATED;
     }
 

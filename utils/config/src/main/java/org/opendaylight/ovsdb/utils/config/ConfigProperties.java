@@ -14,7 +14,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 
-public class ConfigProperties {
+public final class ConfigProperties {
 
     private ConfigProperties() {
         // empty

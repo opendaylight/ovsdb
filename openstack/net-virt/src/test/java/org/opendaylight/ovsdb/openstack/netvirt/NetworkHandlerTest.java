@@ -81,6 +81,10 @@ public class NetworkHandlerTest {
      */
     @Test
     public void testCanUpdateNetwork() {
+        when(neutronNetwork.isShared())
+                                    .thenReturn(true)
+                                    .thenReturn(false);
+        assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_NOT_ACCEPTABLE, networkHandler.canUpdateNetwork(neutronNetwork, neutronNetwork));
         assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_OK, networkHandler.canUpdateNetwork(neutronNetwork, neutronNetwork));
     }
 

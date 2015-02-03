@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_26c94f26",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/NetworkHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-03T14:48:41Z",
+      "side": 0,
+      "message": "Not knowing the history of this particular check, I would like to better understand why you think is it okay to allow shared netorks now, and it was not before. Does \u0027git blame\u0027 give us any insight on who/how this check end up here?",
+      "range": {
+        "startLine": 70,
+        "startChar": 20,
+        "endLine": 70,
+        "endChar": 28
+      },
+      "revId": "c33863fd5017fc1a32dbfd215d7a581cb43562b8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e6d287d1",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/NetworkHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-03T14:48:41Z",
+      "side": 0,
+      "message": "this block change seems to be completely unecessary. Please consider leaving it as it was before.",
+      "range": {
+        "startLine": 87,
+        "startChar": 41,
+        "endLine": 87,
+        "endChar": 43
+      },
+      "revId": "c33863fd5017fc1a32dbfd215d7a581cb43562b8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

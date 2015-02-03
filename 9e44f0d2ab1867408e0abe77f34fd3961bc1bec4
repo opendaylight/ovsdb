@@ -42,6 +42,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_e8afb592",
+        "filename": "southbound/pom.xml",
+        "patchSetId": 14
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-03T20:14:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_3acc0a35",
+      "revId": "9e44f0d2ab1867408e0abe77f34fd3961bc1bec4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_dad2c6d1",
         "filename": "southbound/pom.xml",
         "patchSetId": 14
@@ -53,6 +71,24 @@
       "writtenOn": "2015-01-31T20:56:15Z",
       "side": 1,
       "message": "You probably want to have a breakline here. I should probably go hunt down whatever auto-generated it and file a patch to fix this too.",
+      "revId": "9e44f0d2ab1867408e0abe77f34fd3961bc1bec4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_8896314b",
+        "filename": "southbound/pom.xml",
+        "patchSetId": 14
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-03T20:14:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_dad2c6d1",
       "revId": "9e44f0d2ab1867408e0abe77f34fd3961bc1bec4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -76,6 +112,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_689ba572",
+        "filename": "southbound/southbound-api/src/main/yang/overlay.yang",
+        "patchSetId": 14
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-03T20:14:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_fad542b9",
+      "revId": "9e44f0d2ab1867408e0abe77f34fd3961bc1bec4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_9adc3ee6",
         "filename": "southbound/southbound-api/src/main/yang/overlay.yang",
         "patchSetId": 14
@@ -93,6 +147,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_088a211b",
+        "filename": "southbound/southbound-api/src/main/yang/overlay.yang",
+        "patchSetId": 14
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-03T20:14:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_9adc3ee6",
+      "revId": "9e44f0d2ab1867408e0abe77f34fd3961bc1bec4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_bad7babe",
         "filename": "southbound/southbound-api/src/main/yang/overlay.yang",
         "patchSetId": 14
@@ -104,6 +176,24 @@
       "writtenOn": "2015-01-31T20:56:15Z",
       "side": 1,
       "message": "trailing whitespace",
+      "revId": "9e44f0d2ab1867408e0abe77f34fd3961bc1bec4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_288d9d31",
+        "filename": "southbound/southbound-api/src/main/yang/overlay.yang",
+        "patchSetId": 14
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-03T20:14:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_bad7babe",
       "revId": "9e44f0d2ab1867408e0abe77f34fd3961bc1bec4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -229,6 +319,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_c883d902",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 14
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-03T20:14:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_9a03de41",
+      "revId": "9e44f0d2ab1867408e0abe77f34fd3961bc1bec4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_bafeda36",
         "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
         "patchSetId": 14
@@ -246,6 +354,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_887dd11e",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 14
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-03T20:14:49Z",
+      "side": 1,
+      "message": "I am open to uuid... I was just copying some of the work Dave Tucker had done.",
+      "parentUuid": "7a96c907_bafeda36",
+      "revId": "9e44f0d2ab1867408e0abe77f34fd3961bc1bec4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_5afd5639",
         "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
         "patchSetId": 14
@@ -257,6 +383,24 @@
       "writtenOn": "2015-01-31T20:56:15Z",
       "side": 1,
       "message": "same here, \"bridge-name\" or just \"name\"",
+      "revId": "9e44f0d2ab1867408e0abe77f34fd3961bc1bec4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_a878cd2b",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 14
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-03T20:14:49Z",
+      "side": 1,
+      "message": "Again, open to \u0027name\u0027...",
+      "parentUuid": "7a96c907_5afd5639",
       "revId": "9e44f0d2ab1867408e0abe77f34fd3961bc1bec4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -303,6 +447,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_c89af962",
+        "filename": "southbound/southbound-impl/pom.xml",
+        "patchSetId": 14
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-03T20:14:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_1a97ceed",
+      "revId": "9e44f0d2ab1867408e0abe77f34fd3961bc1bec4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_3a9aca14",
         "filename": "southbound/southbound-impl/pom.xml",
         "patchSetId": 14
@@ -314,6 +476,24 @@
       "writtenOn": "2015-01-31T20:56:15Z",
       "side": 1,
       "message": "Is this groupId or project.groupId?",
+      "revId": "9e44f0d2ab1867408e0abe77f34fd3961bc1bec4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e89d755a",
+        "filename": "southbound/southbound-impl/pom.xml",
+        "patchSetId": 14
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-03T20:14:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_3a9aca14",
       "revId": "9e44f0d2ab1867408e0abe77f34fd3961bc1bec4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -337,6 +517,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_88a4f1a6",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OVSDBClientKey.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-03T20:14:49Z",
+      "side": 1,
+      "message": "I could see that... but this was meant as a warning to folks altering the code, not a statement to consumers....",
+      "parentUuid": "7a96c907_daa08645",
+      "revId": "9e44f0d2ab1867408e0abe77f34fd3961bc1bec4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_5a9476e1",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
         "patchSetId": 14
@@ -348,6 +546,24 @@
       "writtenOn": "2015-01-31T20:56:15Z",
       "side": 1,
       "message": "It seems odd to me that the two createNodeId functions approach their implementation in totally different ways, is there a reason?",
+      "revId": "9e44f0d2ab1867408e0abe77f34fd3961bc1bec4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_a89f6d4f",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-03T20:14:49Z",
+      "side": 1,
+      "message": "This one is called by the createNodeId above it... the second (previous) createNodeId is just a convenience method...",
+      "parentUuid": "7a96c907_5a9476e1",
       "revId": "9e44f0d2ab1867408e0abe77f34fd3961bc1bec4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -371,6 +587,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_68a9657a",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundProvider.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-03T20:14:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_7a8ff2cc",
+      "revId": "9e44f0d2ab1867408e0abe77f34fd3961bc1bec4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_3ac16ae4",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundProvider.java",
         "patchSetId": 14
@@ -382,6 +616,24 @@
       "writtenOn": "2015-01-31T20:56:15Z",
       "side": 1,
       "message": "In my experience, you really want to register your listener and know it\u0027s working before you do your initialization. Otherwise there\u0027s a weird window where things can change without you knowing about them.",
+      "revId": "9e44f0d2ab1867408e0abe77f34fd3961bc1bec4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_08b8e1c6",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundProvider.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-03T20:14:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_3ac16ae4",
       "revId": "9e44f0d2ab1867408e0abe77f34fd3961bc1bec4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -405,6 +657,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_e8b495d2",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundProvider.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-03T20:14:49Z",
+      "side": 1,
+      "message": "I was working from this:https://wiki.opendaylight.org/view/Logging_Best_Practices",
+      "parentUuid": "7a96c907_dab72685",
+      "revId": "9e44f0d2ab1867408e0abe77f34fd3961bc1bec4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_faba226d",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundProvider.java",
         "patchSetId": 14
@@ -416,6 +686,24 @@
       "writtenOn": "2015-01-31T20:56:15Z",
       "side": 1,
       "message": "This seems like severe not error.",
+      "revId": "9e44f0d2ab1867408e0abe77f34fd3961bc1bec4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_a8c68d47",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundProvider.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-03T20:14:49Z",
+      "side": 1,
+      "message": "I was working from this:\nhttps://wiki.opendaylight.org/view/Logging_Best_Practices",
+      "parentUuid": "7a96c907_faba226d",
       "revId": "9e44f0d2ab1867408e0abe77f34fd3961bc1bec4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

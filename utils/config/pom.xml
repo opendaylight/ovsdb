@@ -5,14 +5,14 @@
   <parent>
     <artifactId>commons</artifactId>
     <groupId>org.opendaylight.ovsdb</groupId>
-    <version>1.2.2-SNAPSHOT</version>
+    <version>1.2.2-Helium-SR2</version>
     <relativePath>../../commons/parent/pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>utils.config</artifactId>
   <name>OpenDaylight OVS common utility</name>
-  <version>1.0.2-SNAPSHOT</version>
+  <version>1.0.2-Helium-SR2</version>
   <packaging>jar</packaging>
 
   <dependencies>

@@ -4,21 +4,21 @@
   <parent>
     <groupId>org.opendaylight.ovsdb</groupId>
     <artifactId>commons</artifactId>
-    <version>1.2.2-Helium-SR2</version>
+    <version>1.2.3-SNAPSHOT</version>
     <relativePath>../../commons/parent/</relativePath>
   </parent>
   <artifactId>distribution-karaf</artifactId>
   <groupId>org.opendaylight.ovsdb</groupId>
-  <version>1.0.2-Helium-SR2</version>
+  <version>1.0.3-SNAPSHOT</version>
   <packaging>pom</packaging>
   <prerequisites>
     <maven>3.0</maven>
   </prerequisites>
   <properties>
-    <branding.version>1.0.2-Helium-SR2</branding.version>
-    <karaf.resources.version>1.4.4-Helium-SR2</karaf.resources.version>
+    <branding.version>1.0.3-SNAPSHOT</branding.version>
+    <karaf.resources.version>1.4.5-SNAPSHOT</karaf.resources.version>
     <karaf.version>3.0.1</karaf.version>
-    <feature.ovsdb.version>1.0.2-Helium-SR2</feature.ovsdb.version>
+    <feature.ovsdb.version>1.0.3-SNAPSHOT</feature.ovsdb.version>
   </properties>
 
   <dependencies>
@@ -86,7 +86,7 @@
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>features-openflow-nxm</artifactId>
-      <version>0.0.5-Helium-SR2</version>
+      <version>0.0.6-SNAPSHOT</version>
       <classifier>features</classifier>
       <type>xml</type>
       <scope>runtime</scope>
@@ -94,7 +94,7 @@
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>features-ovs-sfc</artifactId>
-      <version>0.0.3-Helium-SR2</version>
+      <version>0.0.4-SNAPSHOT</version>
       <classifier>features</classifier>
       <type>xml</type>
       <scope>runtime</scope>

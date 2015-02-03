@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 public class SfpHandler {
-    private static final Logger logger = LoggerFactory.getLogger(SfpHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SfpHandler.class);
     private OvsSfcProvider ovsSfcProvider = OvsSfcProvider.getOvsSfcProvider();
     private int vlan;
 
@@ -34,7 +34,7 @@ public class SfpHandler {
     }
 
     void processSfp (SfcEvent.Action action, ServiceFunctionPath serviceFunctionPath) {
-        logger.trace("\nOVSSFC Enter: {}, action: {}\n   sfp: {}",
+        LOGGER.trace("\nOVSSFC Enter: {}, action: {}\n   sfp: {}",
                 Thread.currentThread().getStackTrace()[1],
                 action.toString(),
                 serviceFunctionPath.toString());
@@ -50,11 +50,11 @@ public class SfpHandler {
                 break;
         }
 
-        logger.trace("\nOVSSFC Exit: {}", Thread.currentThread().getStackTrace()[1]);
+        LOGGER.trace("\nOVSSFC Exit: {}", Thread.currentThread().getStackTrace()[1]);
     }
 
     void processSfps (SfcEvent.Action action, ServiceFunctionPaths serviceFunctionPaths) {
-        logger.trace("\nOVSSFC Enter: {}, action: {}\n   sfps: {}",
+        LOGGER.trace("\nOVSSFC Enter: {}, action: {}\n   sfps: {}",
                 Thread.currentThread().getStackTrace()[1],
                 action.toString(),
                 serviceFunctionPaths.toString());
@@ -69,7 +69,7 @@ public class SfpHandler {
             break;
         }
 
-        logger.trace("\nOVSSFC Exit: {}", Thread.currentThread().getStackTrace()[1]);
+        LOGGER.trace("\nOVSSFC Exit: {}", Thread.currentThread().getStackTrace()[1]);
     }
 
     /*
@@ -80,13 +80,14 @@ public class SfpHandler {
      *
      */
     private void sfpUpdate (ServiceFunctionPath serviceFunctionPath) {
-        logger.trace("\nOVSSFC {}\n Building SFP {}",
+        LOGGER.trace("\nOVSSFC {}\n Building SFP {}",
                 Thread.currentThread().getStackTrace()[1],
                 serviceFunctionPath.getName());
 
         // TODO: replace with correct getAccessList when the restonf issue is fixed.
-        AccessListEntries accessListEntries = null;// = ovsSfcProvider.aclUtils.getAccessList(serviceFunctionPath.getName());
-        logger.trace("\n   acl: {}", accessListEntries);
+        //ovsSfcProvider.aclUtils.getAccessList(serviceFunctionPath.getName());
+        AccessListEntries accessListEntries = null;
+        LOGGER.trace("\n   acl: {}", accessListEntries);
         // TODO: code to convert acl into flows
 
         String serviceFunctionForwarderName;
@@ -94,7 +95,7 @@ public class SfpHandler {
         Short startingIndex = serviceFunctionPath.getStartingIndex();
         List<ServicePathHop> servicePathHopList = serviceFunctionPath.getServicePathHop();
         for (ServicePathHop servicePathHop : servicePathHopList) {
-            logger.trace("\n   sph: {}", servicePathHop);
+            LOGGER.trace("\n   sph: {}", servicePathHop);
 
             serviceFunctionForwarderName = servicePathHop.getServiceFunctionForwarder();
             serviceFunctionForwarder = ovsSfcProvider.sffUtils.readServiceFunctionForwarder(serviceFunctionForwarderName);
@@ -104,7 +105,7 @@ public class SfpHandler {
                 if (ovsNode != null) {
                     Long dpid = ovsSfcProvider.ovsUtils.getDpid(ovsNode, serviceFunctionForwarderName);
                     if (dpid.equals(0)) {
-                        logger.warn("cannot find dpid for {}", serviceFunctionForwarderName);
+                        LOGGER.warn("cannot find dpid for {}", serviceFunctionForwarderName);
                         continue;
                     }
                     if (servicePathHop.getServiceIndex().equals(startingIndex)) {

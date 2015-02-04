@@ -2,6 +2,8 @@ package org.opendaylight.ovsdb.southbound;
 
 import java.net.UnknownHostException;
 import java.util.Map.Entry;
+import java.util.Map;
+import java.util.Set;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
@@ -40,7 +42,7 @@ public class OvsdbNodeDataChangeListener implements DataChangeListener, AutoClos
     @Override
     public void onDataChanged(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-       LOG.info("Received change to ovsdbNode: {}",changes);
+       LOG.info("Received change to ovsdbNode: {}", changes);
        for( Entry<InstanceIdentifier<?>, DataObject> created : changes.getCreatedData().entrySet()) {
            // TODO validate we have the correct kind of InstanceIdentifier
            if(created.getValue() instanceof OvsdbNodeAugmentation) {
@@ -53,7 +55,17 @@ public class OvsdbNodeDataChangeListener implements DataChangeListener, AutoClos
        }
        // TODO handle case of updates to ovsdb nodes as needed
 
-       // TODO handle case of delete of ovsdb nodes as needed
+        Map<InstanceIdentifier<?>, DataObject> originalDataObject = changes.getOriginalData();
+        Set<InstanceIdentifier<?>> iID = changes.getRemovedPaths();
+        for (InstanceIdentifier instanceIdentifier : iID) {
+            if (originalDataObject.get(instanceIdentifier) instanceof OvsdbNodeAugmentation) {
+                try {
+                    cm.disconnect((OvsdbNodeAugmentation)originalDataObject.get(instanceIdentifier));
+                } catch (UnknownHostException e) {
+                    LOG.warn("Failed to disconnect ovsdbNode", e);
+                }
+            }
+        }
     }
 
     @Override

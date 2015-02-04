@@ -143,25 +143,6 @@ public class OF13Provider implements NetworkingProvider {
         return false;
     }
 
-    private Status getTunnelReadinessStatus (Node node, String tunnelKey) {
-        InetAddress srcTunnelEndPoint = configurationService.getTunnelEndPoint(node);
-        if (srcTunnelEndPoint == null) {
-            logger.error("Tunnel Endpoint not configured for Node {}", node);
-            return new Status(StatusCode.NOTFOUND, "Tunnel Endpoint not configured for "+ node);
-        }
-
-        if (!bridgeConfigurationManager.isNodeNeutronReady(node)) {
-            logger.error(node+" is not Overlay ready");
-            return new Status(StatusCode.NOTACCEPTABLE, node+" is not Overlay ready");
-        }
-
-        if (!tenantNetworkManager.isTenantNetworkPresentInNode(node, tunnelKey)) {
-            logger.debug(node+" has no VM corresponding to segment "+ tunnelKey);
-            return new Status(StatusCode.NOTACCEPTABLE, node+" has no VM corresponding to segment "+ tunnelKey);
-        }
-        return new Status(StatusCode.SUCCESS);
-    }
-
     private String getTunnelName(String tunnelType, InetAddress dst) {
         return tunnelType+"-"+dst.getHostAddress();
     }
@@ -1504,20 +1485,6 @@ public class OF13Provider implements NetworkingProvider {
     }
 
     /*
-     * (Table:1) Egress VLAN Traffic
-     * Match: Destination Ethernet Addr and VLAN id
-     * Instruction: GOTO Table Table 2
-     * table=1,vlan_id=0x5,dl_dst=00:00:00:00:00:08 \
-     * actions= goto_table:2"
-     */
-
-    private void handleVlanOut(Long dpidLong, Short writeTable,
-            Short goToTableId, String segmentationId,
-            Long ethPort, String attachedMac, boolean write) {
-        l2ForwardingProvider.programVlanOut(dpidLong, segmentationId, ethPort, attachedMac, write);
-    }
-
-    /*
      * (Table:1) Egress Tunnel Traffic
      * Match: Destination Ethernet Addr and Local InPort
      * Instruction: Set TunnelID and GOTO Table Tunnel Table (n)
@@ -1529,20 +1496,6 @@ public class OF13Provider implements NetworkingProvider {
             Short localTable, String segmentationId,
             Long OFPortOut, boolean write) {
         l2ForwardingProvider.programTunnelFloodOut(dpidLong, segmentationId, OFPortOut, write);
-    }
-
-    /*
-     * (Table:1) Egress VLAN Traffic
-     * Match: Destination Ethernet Addr and VLAN id
-     * Instruction: GOTO table 2 and Output port eth interface
-     * Example: table=1,priority=16384,vlan_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
-     * actions=output:eth1,goto_table:2
-     */
-
-    private void handleVlanFloodOut(Long dpidLong, Short writeTable,
-            Short localTable, String segmentationId,
-            Long localPort, Long ethPort, boolean write) {
-        //l2ForwardingProvider.programVlanFloodOut(dpidLong, segmentationId, localPort, ethPort, write);
     }
 
     /*
@@ -1637,18 +1590,6 @@ public class OF13Provider implements NetworkingProvider {
         l2ForwardingProvider.programLocalTableMiss(dpidLong, segmentationId, write);
     }
 
-    /*
-     * (Table:1) Local Table Miss
-     * Match: Any Remaining Flows w/a VLAN ID
-     * Action: Drop w/ a low priority
-     * table=2,priority=8192,vlan_id=0x5 actions=drop
-     */
-
-    private void handleLocalVlanTableMiss(Long dpidLong, Short writeTable,
-            String segmentationId, boolean write) {
-        l2ForwardingProvider.programLocalVlanTableMiss(dpidLong, segmentationId, write);
-    }
-
     private Group getGroup(GroupBuilder groupBuilder, NodeBuilder nodeBuilder) {
         Preconditions.checkNotNull(mdsalConsumer);
         if (mdsalConsumer == null) {
@@ -1734,36 +1675,6 @@ public class OF13Provider implements NetworkingProvider {
             logger.error(e.getMessage(), e);
         }
     }
-    private Flow getFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
-        Preconditions.checkNotNull(mdsalConsumer);
-        if (mdsalConsumer == null) {
-            logger.error("ERROR finding MDSAL Service. Its possible that writeFlow is called too soon ?");
-            return null;
-        }
-
-        dataBroker = mdsalConsumer.getDataBroker();
-        if (dataBroker == null) {
-            logger.error("ERROR finding reference for DataBroker. Please check MD-SAL support on the Controller.");
-            return null;
-        }
-
-        InstanceIdentifier<Flow> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
-                .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Table.class,
-                        new TableKey(flowBuilder.getTableId())).child(Flow.class, flowBuilder.getKey()).build();
-
-        ReadOnlyTransaction readTx = dataBroker.newReadOnlyTransaction();
-        try {
-            Optional<Flow> data = readTx.read(LogicalDatastoreType.CONFIGURATION, path1).get();
-            if (data.isPresent()) {
-                return data.get();
-            }
-        } catch (InterruptedException|ExecutionException e) {
-            logger.error(e.getMessage(), e);
-        }
-
-        logger.debug("Cannot find data for Flow " + flowBuilder.getFlowName());
-        return null;
-    }
 
     private void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
         Preconditions.checkNotNull(mdsalConsumer);
@@ -1791,39 +1702,6 @@ public class OF13Provider implements NetworkingProvider {
         try {
             commitFuture.get();  // TODO: Make it async (See bug 1362)
             logger.debug("Transaction success for write of Flow "+flowBuilder.getFlowName());
-        } catch (InterruptedException|ExecutionException e) {
-            logger.error(e.getMessage(), e);
-        }
-    }
-
-    private void removeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
-        Preconditions.checkNotNull(mdsalConsumer);
-        if (mdsalConsumer == null) {
-            logger.error("ERROR finding MDSAL Service.");
-            return;
-        }
-
-        dataBroker = mdsalConsumer.getDataBroker();
-        if (dataBroker == null) {
-            logger.error("ERROR finding reference for DataBroker. Please check MD-SAL support on the Controller.");
-            return;
-        }
-
-        WriteTransaction modification = dataBroker.newWriteOnlyTransaction();
-        InstanceIdentifier<Flow> path1 = InstanceIdentifier.builder(Nodes.class)
-                .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
-                        .rev130819.nodes.Node.class, nodeBuilder.getKey())
-                        .augmentation(FlowCapableNode.class).child(Table.class,
-                                new TableKey(flowBuilder.getTableId())).child(Flow.class, flowBuilder.getKey()).build();
-        //modification.delete(LogicalDatastoreType.OPERATIONAL, nodeBuilderToInstanceId(nodeBuilder));
-        //modification.delete(LogicalDatastoreType.OPERATIONAL, path1);
-        //modification.delete(LogicalDatastoreType.CONFIGURATION, nodeBuilderToInstanceId(nodeBuilder));
-        modification.delete(LogicalDatastoreType.CONFIGURATION, path1);
-
-        CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
-        try {
-            commitFuture.get();  // TODO: Make it async (See bug 1362)
-            logger.debug("Transaction success for deletion of Flow "+flowBuilder.getFlowName());
         } catch (InterruptedException|ExecutionException e) {
             logger.error(e.getMessage(), e);
         }
@@ -2133,12 +2011,6 @@ public class OF13Provider implements NetworkingProvider {
         builder.setId(new NodeId(nodeId));
         builder.setKey(new NodeKey(builder.getId()));
         return builder;
-    }
-
-    private InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node> nodeBuilderToInstanceId(NodeBuilder
-            node) {
-        return InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class,
-                node.getKey()).toInstance();
     }
 
     private String getInternalBridgeUUID (Node node, String bridgeName) {

@@ -27,10 +27,8 @@ import javax.ws.rs.core.UriInfo;
 
 @Path("/v3/")
 public class OvsdbNorthboundV3 {
-    protected static final Logger logger = LoggerFactory.getLogger(OvsdbNorthboundV3.class);
 
     @Context
-    private UriInfo _uriInfo;
     private String username;
 
     @Context

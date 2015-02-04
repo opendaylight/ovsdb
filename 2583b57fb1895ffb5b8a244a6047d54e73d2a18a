@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_8bf94b82",
+        "filename": "northbound/src/main/java/org/opendaylight/ovsdb/northbound/OvsdbNorthboundV3.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-02-04T02:05:29Z",
+      "side": 1,
+      "message": "maybe just delete this line since logger isn\u0027t used",
+      "range": {
+        "startLine": 30,
+        "startChar": 14,
+        "endLine": 30,
+        "endChar": 20
+      },
+      "revId": "2583b57fb1895ffb5b8a244a6047d54e73d2a18a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_6bee3fb6",
+        "filename": "northbound/src/main/java/org/opendaylight/ovsdb/northbound/OvsdbRow.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-02-04T02:05:29Z",
+      "side": 1,
+      "message": "whitespace should be removed. I am supresed the checkstyle not catch this and fail the build. Did any warning come out?",
+      "range": {
+        "startLine": 59,
+        "startChar": 9,
+        "endLine": 59,
+        "endChar": 10
+      },
+      "revId": "2583b57fb1895ffb5b8a244a6047d54e73d2a18a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

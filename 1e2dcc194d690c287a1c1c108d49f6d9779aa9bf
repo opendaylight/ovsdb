@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_b1f598cc",
+        "filename": "southbound/southbound-api/src/main/yang/overlay.yang",
+        "patchSetId": 20
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-02-04T11:10:42Z",
+      "side": 1,
+      "message": "Data-plane port number is bit confusing, at a first glance it looks like switch port. L4 port number is probably more clear.",
+      "revId": "1e2dcc194d690c287a1c1c108d49f6d9779aa9bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_b1911854",
+        "filename": "southbound/southbound-api/src/main/yang/overlay.yang",
+        "patchSetId": 20
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-02-04T11:10:42Z",
+      "side": 1,
+      "message": "just a suggestion -- supported-tunnel-types looks more intuitive to me.",
+      "revId": "1e2dcc194d690c287a1c1c108d49f6d9779aa9bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_91d2dcfe",
+        "filename": "southbound/southbound-api/src/main/yang/overlay.yang",
+        "patchSetId": 20
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-02-04T11:10:42Z",
+      "side": 1,
+      "message": "IMHO, using source-end-point seems better option. Source is too generic even in topo context. I assume going forward we will add more construct, so it\u0027s good if we can use specific name that clearly differentiate them.",
+      "revId": "1e2dcc194d690c287a1c1c108d49f6d9779aa9bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_b1cd985f",
+        "filename": "southbound/southbound-api/src/main/yang/overlay.yang",
+        "patchSetId": 20
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-02-04T11:10:42Z",
+      "side": 1,
+      "message": "same as above.",
+      "revId": "1e2dcc194d690c287a1c1c108d49f6d9779aa9bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_b12278ff",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 20
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-02-04T11:10:42Z",
+      "side": 1,
+      "message": "I am not yang expert as such, but i think if we can separate out even the bridge related models out of this yang and put it in separate yang, it will be easier to maintain in longer term. Like if someone want to make changes to bridge attributes and want to bump the version of the yang file, having separate yang files will limit the scope of java files modifications? let me know your thoughts.",
+      "revId": "1e2dcc194d690c287a1c1c108d49f6d9779aa9bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_b13b5837",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 20
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-02-04T11:10:42Z",
+      "side": 1,
+      "message": "will managed-node-entry contain list of all the bridges that is controlled by that specific node? And i believe node signifies the ovsdb instance running on end host (machine)? Isn\u0027t it that using container \"managed-bridges\" and then having leaf-list of bridge will give it a better structure?",
+      "revId": "1e2dcc194d690c287a1c1c108d49f6d9779aa9bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_311748a5",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 20
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-02-04T11:10:42Z",
+      "side": 1,
+      "message": "If we go by the above structure i suggested above, we can augment these attributes at the bridge level, rather then dumping at the node level. let me know your thoughts.",
+      "revId": "1e2dcc194d690c287a1c1c108d49f6d9779aa9bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

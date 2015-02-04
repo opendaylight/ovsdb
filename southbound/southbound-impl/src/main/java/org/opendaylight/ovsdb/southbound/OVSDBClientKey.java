@@ -13,6 +13,8 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.overlay.rev150105.IpPortLocator;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OVSDBClientKey {
     /*
@@ -21,15 +23,23 @@ public class OVSDBClientKey {
      */
     private IpAddress ipaddress;
     private PortNumber port;
+    private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionManager.class);
 
     OVSDBClientKey(IpPortLocator locator) {
         ipaddress = locator.getIp();
         port = locator.getPort();
     }
 
+    OVSDBClientKey(IpAddress ip, PortNumber port) {
+        ipaddress = ip;
+        port = port;
+        LOG.info("CREATE KEY IP, PORT: ip={} port={}", ipaddress, port);
+    }
+
     OVSDBClientKey(OvsdbClient client) {
         ipaddress = SouthboundMapper.createIpAddress(client.getConnectionInfo().getRemoteAddress());
         port = new PortNumber(client.getConnectionInfo().getRemotePort());
+        LOG.info("CREATE KEY CLIENT: ip={} port={}", ipaddress, port);
     }
 
     public IpAddress getIp() {

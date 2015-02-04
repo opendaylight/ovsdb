@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoCloseable {
     Map<OVSDBClientKey,OvsdbClient> clients = new ConcurrentHashMap<OVSDBClientKey,OvsdbClient>();
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionManager.class);
+    private OvsdbClient lastclient;
 
     DataBroker db;
 
@@ -64,8 +65,25 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         OvsdbClient client = OvsdbConnectionService.getService().connect(ip, ovsdbNode.getPort().getValue().intValue());
         OVSDBClientKey key = new OVSDBClientKey(client);
         clients.put(key, client);
+        lastclient = client;
+        LOG.info("CONNECTING - client is {}, KEY={}", client, key);
         connected(client); // For connections from the controller to the ovs instance, the library doesn't call this method for us
         return client;
+    }
+
+    public void disconnect(OvsdbNodeAugmentation ovsdbNode) throws UnknownHostException {
+        OVSDBClientKey key = new OVSDBClientKey(ovsdbNode.getIp(), ovsdbNode.getPort());
+        OvsdbClient client = clients.get(key);
+        if (client != null) {
+            LOG.info("DISCONNECTING FROM {}:{}",client);
+            client.disconnect();
+            disconnected(client);
+        }
+        else {
+            LOG.info("DISCONNECTING - client is null, key={}", key);
+            lastclient.disconnect();
+            disconnected(lastclient);
+        }
     }
 
     @Override

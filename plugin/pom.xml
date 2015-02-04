@@ -45,10 +45,6 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>clustering.services</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal</artifactId>
     </dependency>
     <dependency>
@@ -101,7 +97,6 @@
               org.opendaylight.controller.sal.match,
               org.opendaylight.controller.sal.utils,
               org.opendaylight.controller.sal.connection,
-              org.opendaylight.controller.clustering.services,
               org.opendaylight.ovsdb.lib.error,
               org.opendaylight.ovsdb.lib.notation,
               org.opendaylight.ovsdb.lib.operations,

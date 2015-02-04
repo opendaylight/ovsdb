@@ -13,7 +13,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.apache.felix.dm.Component;
-import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.sal.connection.IPluginInConnectionService;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.sal.core.Node;
@@ -91,10 +90,6 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.add(createServiceDependency()
                     .setService(OvsdbInventoryService.class)
                     .setRequired(true));
-            c.add(createServiceDependency()
-                    .setService(IClusterGlobalServices.class)
-                    .setCallbacks("setClusterServices", "unsetClusterServices")
-                    .setRequired(false));
         }
 
         if (imp.equals(ConnectionServiceImpl.class)) {

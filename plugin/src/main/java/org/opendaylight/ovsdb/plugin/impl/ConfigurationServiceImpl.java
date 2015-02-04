@@ -23,7 +23,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 
 import org.eclipse.osgi.framework.console.CommandProvider;
-import org.opendaylight.controller.clustering.services.IClusterGlobalServices;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
@@ -132,18 +131,6 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
     public void unsetInventoryServiceInternal(OvsdbInventoryService ovsdbInventoryService) {
         if (this.ovsdbInventoryService == ovsdbInventoryService) {
             this.ovsdbInventoryService = null;
-        }
-    }
-
-    private IClusterGlobalServices clusterServices;
-
-    public void setClusterServices(IClusterGlobalServices i) {
-        this.clusterServices = i;
-    }
-
-    public void unsetClusterServices(IClusterGlobalServices i) {
-        if (this.clusterServices == i) {
-            this.clusterServices = null;
         }
     }
 

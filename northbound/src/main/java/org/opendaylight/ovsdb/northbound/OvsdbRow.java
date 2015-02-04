@@ -54,18 +54,27 @@ public class OvsdbRow {
     public static OvsdbRow fromJsonNode(OvsdbClient client, String dbName, JsonNode json) {
         JsonNode parentUuidNode = json.get(PARENTUUID);
         String parentUuid = null;
-        if (parentUuidNode != null) parentUuid = parentUuidNode.asText();
+        if (parentUuidNode != null) {
+            parentUuid = parentUuidNode.asText();
+        }
 
         JsonNode parentTableNode = json.get(PARENTTABLE);
         String parentTable = null;
-        if (parentTableNode != null) parentTable = parentTableNode.asText();
+        if (parentTableNode != null) {
+            parentTable = parentTableNode.asText();
+        }
 
         JsonNode parentColumnNode = json.get(PARENTCOLUMN);
         String parentColumn = null;
-        if (parentColumnNode != null) parentColumn = parentColumnNode.asText();
+        if (parentColumnNode != null) {
+            parentColumn = parentColumnNode.asText();
+        }
 
         JsonNode rowNode = json.get(ROW);
-        if (rowNode == null) return null;
+        if (rowNode == null) {
+            return null;
+        }
+
         for(Iterator<String> fieldNames = rowNode.fieldNames(); fieldNames.hasNext();) {
             String tableName = fieldNames.next();
             Row<GenericTableSchema> row = null;

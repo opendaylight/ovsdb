@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_bc6fafc4",
+        "filename": "northbound/src/main/java/org/opendaylight/ovsdb/northbound/OvsdbNorthboundV3.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-04T12:46:51Z",
+      "side": 0,
+      "message": "Also remove the imports:\nimport org.slf4j.Logger;\nimport org.slf4j.LoggerFactory;",
+      "range": {
+        "startLine": 30,
+        "startChar": 66,
+        "endLine": 30,
+        "endChar": 67
+      },
+      "revId": "17a0dc64b8825d3ea61f0350c0131987c76920c2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

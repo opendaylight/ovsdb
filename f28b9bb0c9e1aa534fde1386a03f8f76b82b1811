@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_5c30ebe7",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-04T12:41:07Z",
+      "side": 1,
+      "message": "please update commit message, so we have a better reference to the sonar bugfix this is about",
+      "range": {
+        "startLine": 7,
+        "startChar": 11,
+        "endLine": 7,
+        "endChar": 12
+      },
+      "revId": "f28b9bb0c9e1aa534fde1386a03f8f76b82b1811",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

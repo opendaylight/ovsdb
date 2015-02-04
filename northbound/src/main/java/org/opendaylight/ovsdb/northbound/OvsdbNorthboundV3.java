@@ -13,13 +13,9 @@ import org.opendaylight.controller.northbound.commons.exception.UnauthorizedExce
 import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
 import org.opendaylight.controller.sal.authorization.Privilege;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.UriInfo;
 
 /**
 * OVSDB Northbound V3 REST API
@@ -27,8 +23,6 @@ import javax.ws.rs.core.UriInfo;
 
 @Path("/v3/")
 public class OvsdbNorthboundV3 {
-    protected static final Logger LOGGER = LoggerFactory.getLogger(OvsdbNorthboundV3.class);
-
     @Context
     private String username;
 

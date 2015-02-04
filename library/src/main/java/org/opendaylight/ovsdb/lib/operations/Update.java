@@ -32,7 +32,7 @@ public class Update<E extends TableSchema<E>> extends Operation<E> implements Co
 
     Map<String, Object> row = Maps.newHashMap();
     String uuid;
-    //Where where;
+
     List<Condition> where = Lists.newArrayList();
 
     private String uuidName;

@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_9dcaed6c",
+        "filename": "southbound/southbound-api/src/main/yang/overlay.yang",
+        "patchSetId": 20
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-02-05T02:38:00Z",
+      "side": 1,
+      "message": "will change the description in follow up patch.",
+      "parentUuid": "7a96c907_b1f598cc",
+      "revId": "1e2dcc194d690c287a1c1c108d49f6d9779aa9bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_b1911854",
         "filename": "southbound/southbound-api/src/main/yang/overlay.yang",
         "patchSetId": 20
@@ -30,6 +48,24 @@
       "writtenOn": "2015-02-04T11:10:42Z",
       "side": 1,
       "message": "just a suggestion -- supported-tunnel-types looks more intuitive to me.",
+      "revId": "1e2dcc194d690c287a1c1c108d49f6d9779aa9bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7dcfe17f",
+        "filename": "southbound/southbound-api/src/main/yang/overlay.yang",
+        "patchSetId": 20
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-02-05T02:38:00Z",
+      "side": 1,
+      "message": "will change it to supported-tunnel-type-entry",
+      "parentUuid": "7a96c907_b1911854",
       "revId": "1e2dcc194d690c287a1c1c108d49f6d9779aa9bf",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_bdb569ef",
+        "filename": "southbound/southbound-api/src/main/yang/overlay.yang",
+        "patchSetId": 20
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-02-05T02:38:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_91d2dcfe",
+      "revId": "1e2dcc194d690c287a1c1c108d49f6d9779aa9bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_b1cd985f",
         "filename": "southbound/southbound-api/src/main/yang/overlay.yang",
         "patchSetId": 20
@@ -64,6 +118,24 @@
       "writtenOn": "2015-02-04T11:10:42Z",
       "side": 1,
       "message": "same as above.",
+      "revId": "1e2dcc194d690c287a1c1c108d49f6d9779aa9bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_ddb875e7",
+        "filename": "southbound/southbound-api/src/main/yang/overlay.yang",
+        "patchSetId": 20
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-02-05T02:38:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_b1cd985f",
       "revId": "1e2dcc194d690c287a1c1c108d49f6d9779aa9bf",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_bd3c89e3",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 20
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-02-05T02:38:00Z",
+      "side": 1,
+      "message": "Discussed with ed, will push new patch to address it.",
+      "parentUuid": "7a96c907_b12278ff",
+      "revId": "1e2dcc194d690c287a1c1c108d49f6d9779aa9bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_b13b5837",
         "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
         "patchSetId": 20
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_dd3f15d5",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 20
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-02-05T02:38:00Z",
+      "side": 1,
+      "message": "will push follow on patch to merge it.",
+      "parentUuid": "7a96c907_b13b5837",
+      "revId": "1e2dcc194d690c287a1c1c108d49f6d9779aa9bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_311748a5",
         "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
         "patchSetId": 20
@@ -115,6 +223,24 @@
       "writtenOn": "2015-02-04T11:10:42Z",
       "side": 1,
       "message": "If we go by the above structure i suggested above, we can augment these attributes at the bridge level, rather then dumping at the node level. let me know your thoughts.",
+      "revId": "1e2dcc194d690c287a1c1c108d49f6d9779aa9bf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7d2601d0",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 20
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-02-05T02:38:00Z",
+      "side": 1,
+      "message": "Will address this in follow up patch.",
+      "parentUuid": "7a96c907_311748a5",
       "revId": "1e2dcc194d690c287a1c1c108d49f6d9779aa9bf",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

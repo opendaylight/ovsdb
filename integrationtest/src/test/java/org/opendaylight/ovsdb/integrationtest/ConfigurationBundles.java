@@ -48,8 +48,6 @@ public class ConfigurationBundles {
                 mavenBundle("org.opendaylight.controller", "containermanager").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "containermanager.it.implementation").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "sal").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "sal.connection").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "sal.connection.implementation").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "sal.implementation").versionAsInProject(),
                 mavenBundle("org.slf4j", "log4j-over-slf4j").versionAsInProject(),
                 mavenBundle("org.slf4j", "slf4j-api").versionAsInProject()

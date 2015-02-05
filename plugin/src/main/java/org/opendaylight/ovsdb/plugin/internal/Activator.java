@@ -13,7 +13,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.apache.felix.dm.Component;
-import org.opendaylight.controller.sal.connection.IPluginInConnectionService;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -99,8 +98,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             // by SAL
             props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "OVS");
             c.setInterface(
-                    new String[] {IPluginInConnectionService.class.getName(),
-                                  OvsdbConnectionService.class.getName(),
+                    new String[] {OvsdbConnectionService.class.getName(),
                                   OvsdbConnectionListener.class.getName()}, props);
             c.add(createServiceDependency()
                     .setService(OvsdbInventoryService.class)

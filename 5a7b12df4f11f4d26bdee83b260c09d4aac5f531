@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_3eedccef",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-02-05T22:49:33Z",
+      "side": 1,
+      "message": "shouldn\u0027t you remove the client from collection?",
+      "revId": "5a7b12df4f11f4d26bdee83b260c09d4aac5f531",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3ec4ec5d",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-02-05T22:49:33Z",
+      "side": 1,
+      "message": "This seems to be an exception path. Should we disconnect the last connection ??",
+      "revId": "5a7b12df4f11f4d26bdee83b260c09d4aac5f531",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

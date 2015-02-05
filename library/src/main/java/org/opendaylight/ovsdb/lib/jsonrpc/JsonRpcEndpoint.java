@@ -106,7 +106,7 @@ public class JsonRpcEndpoint {
                 }
 
                 String s = objectMapper.writeValueAsString(request);
-                logger.trace("{}", s);
+                logger.trace("getClient Request : {}", s);
 
                 SettableFuture<Object> sf = SettableFuture.create();
                 methodContext.put(request.getId(), new CallContext(request, method, sf));

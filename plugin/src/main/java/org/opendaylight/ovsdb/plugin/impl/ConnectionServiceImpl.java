@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.sal.connection.ConnectionConstants;
-import org.opendaylight.controller.sal.connection.IPluginInConnectionService;
+//import org.opendaylight.controller.sal.connection.IPluginInConnectionService;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.utils.Status;
@@ -57,7 +57,7 @@ import com.google.common.collect.Lists;
  * Represents the openflow plugin component in charge of programming the flows
  * the flow programming and relay them to functional modules above SAL.
  */
-public class ConnectionServiceImpl implements IPluginInConnectionService,
+public class ConnectionServiceImpl implements //IPluginInConnectionService,
                                               OvsdbConnectionService,
                                               OvsdbConnectionListener {
     protected static final Logger logger = LoggerFactory.getLogger(ConnectionServiceImpl.class);
@@ -109,8 +109,10 @@ public class ConnectionServiceImpl implements IPluginInConnectionService,
         }
 
         /* Then get connection clients */
+        logger.info("CONNECT start connected clients");
         Collection<OvsdbClient> connections = connectionLib.getConnections();
         for (OvsdbClient client : connections) {
+            logger.info("CONNECT start connected clients client = {}", client);
             this.connected(client);
         }
     }
@@ -126,7 +128,7 @@ public class ConnectionServiceImpl implements IPluginInConnectionService,
         }
     }
 
-    @Override
+    //@Override
     public Status disconnect(Node node) {
         String identifier = (String) node.getID();
         Connection connection = ovsdbConnections.get(identifier);
@@ -140,7 +142,7 @@ public class ConnectionServiceImpl implements IPluginInConnectionService,
         }
     }
 
-    @Override
+    //@Override
     public Node connect(String identifier, Map<ConnectionConstants, String> params) {
         InetAddress address;
         Integer port;
@@ -192,7 +194,7 @@ public class ConnectionServiceImpl implements IPluginInConnectionService,
         }
         return nodes;
     }
-
+/*
     @Override
     public void notifyClusterViewChanged() {
     }
@@ -200,10 +202,12 @@ public class ConnectionServiceImpl implements IPluginInConnectionService,
     @Override
     public void notifyNodeDisconnectFromMaster(Node arg0) {
     }
-
+*/
     private Node handleNewConnection(String identifier, OvsdbClient client) throws InterruptedException, ExecutionException {
         Connection connection = new Connection(identifier, client);
         Node node = connection.getNode();
+        logger.info("CONNECT handleNewConnection identifier: {}, client {}",
+                identifier, client.getConnectionInfo());
         ovsdbConnections.put(identifier, connection);
         List<String> dbs = client.getDatabases().get();
         for (String db : dbs) {
@@ -333,6 +337,7 @@ public class ConnectionServiceImpl implements IPluginInConnectionService,
     @Override
     public void connected(OvsdbClient client) {
         String identifier = getConnectionIdentifier(client);
+        logger.info("CONNECT connected identifier={}, client={}", identifier, client);
         try {
             this.handleNewConnection(identifier, client);
         } catch (InterruptedException | ExecutionException e) {
@@ -343,6 +348,7 @@ public class ConnectionServiceImpl implements IPluginInConnectionService,
     @Override
     public void disconnected(OvsdbClient client) {
         Connection connection = ovsdbConnections.get(this.getConnectionIdentifier(client));
+        logger.info("CONNECT disconnected connection={}, client={}", connection, client);
         if (connection == null) return;
         this.disconnect(connection.getNode());
     }

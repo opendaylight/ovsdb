@@ -23,8 +23,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 
-import org.opendaylight.controller.sal.connection.ConnectionConstants;
-import org.opendaylight.controller.sal.connection.IPluginInConnectionService;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.utils.Status;
@@ -42,6 +40,7 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.plugin.api.Connection;
+import org.opendaylight.ovsdb.plugin.api.ConnectionConstants;
 import org.opendaylight.ovsdb.plugin.internal.IPAddressProperty;
 import org.opendaylight.ovsdb.plugin.internal.L4PortProperty;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
@@ -57,8 +56,7 @@ import com.google.common.collect.Lists;
  * Represents the openflow plugin component in charge of programming the flows
  * the flow programming and relay them to functional modules above SAL.
  */
-public class ConnectionServiceImpl implements IPluginInConnectionService,
-                                              OvsdbConnectionService,
+public class ConnectionServiceImpl implements OvsdbConnectionService,
                                               OvsdbConnectionListener {
     protected static final Logger logger = LoggerFactory.getLogger(ConnectionServiceImpl.class);
 
@@ -111,6 +109,7 @@ public class ConnectionServiceImpl implements IPluginInConnectionService,
         /* Then get connection clients */
         Collection<OvsdbClient> connections = connectionLib.getConnections();
         for (OvsdbClient client : connections) {
+            logger.info("CONNECT start connected clients client = {}", client);
             this.connected(client);
         }
     }
@@ -126,7 +125,6 @@ public class ConnectionServiceImpl implements IPluginInConnectionService,
         }
     }
 
-    @Override
     public Status disconnect(Node node) {
         String identifier = (String) node.getID();
         Connection connection = ovsdbConnections.get(identifier);
@@ -140,7 +138,6 @@ public class ConnectionServiceImpl implements IPluginInConnectionService,
         }
     }
 
-    @Override
     public Node connect(String identifier, Map<ConnectionConstants, String> params) {
         InetAddress address;
         Integer port;
@@ -191,14 +188,6 @@ public class ConnectionServiceImpl implements IPluginInConnectionService,
             nodes.add(connection.getNode());
         }
         return nodes;
-    }
-
-    @Override
-    public void notifyClusterViewChanged() {
-    }
-
-    @Override
-    public void notifyNodeDisconnectFromMaster(Node arg0) {
     }
 
     private Node handleNewConnection(String identifier, OvsdbClient client) throws InterruptedException, ExecutionException {

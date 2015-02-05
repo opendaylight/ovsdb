@@ -539,16 +539,6 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal.connection</artifactId>
-      <version>${sal.connection.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal.connection.implementation</artifactId>
-      <version>${sal.connection.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal.implementation</artifactId>
       <version>${sal.implementation.version}</version>
     </dependency>

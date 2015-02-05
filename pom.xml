@@ -43,7 +43,6 @@
     <module>features/ovsdb</module>
     <module>features/ovs-sfc</module>
     <!-- OVSDB Distribution -->
-    <module>distribution/opendaylight</module>
     <module>distribution/opendaylight-karaf</module>
   </modules>
 

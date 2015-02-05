@@ -12,7 +12,6 @@ package org.opendaylight.ovsdb.plugin.api;
 import java.util.List;
 import java.util.Map;
 
-import org.opendaylight.controller.sal.connection.ConnectionConstants;
 import org.opendaylight.controller.sal.core.Node;
 
 public interface OvsdbConnectionService {

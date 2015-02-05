@@ -71,5 +71,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <artifactId>southbound-api</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam-features</artifactId>
+      <type>xml</type>
+      <version>${exam.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

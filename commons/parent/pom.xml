@@ -58,6 +58,7 @@
     <sal.version>0.9.0-SNAPSHOT</sal.version>
     <sal.connection.version>0.2.0-SNAPSHOT</sal.connection.version>
     <mdsal.version>1.2.0-SNAPSHOT</mdsal.version>
+    <neutron.version>0.5.0-SNAPSHOT</neutron.version>
     <openflowplugin.version>0.1.0-SNAPSHOT</openflowplugin.version>
     <openflowjava-nicira.version>0.1.0-SNAPSHOT</openflowjava-nicira.version>
     <openflowjava-extension.version>0.1.0-SNAPSHOT</openflowjava-extension.version>

@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_dd163555",
+        "filename": "commons/parent/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-02-05T02:40:30Z",
+      "side": 1,
+      "message": "this was the original version and probably should stay since I think it is still in the networkconfig.neutron path.",
+      "range": {
+        "startLine": 56,
+        "startChar": 19,
+        "endLine": 56,
+        "endChar": 26
+      },
+      "revId": "83f0b3d33b1fab6e1a0a0976428eb3f080250a3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7d0da13d",
+        "filename": "features/ovsdb/src/main/resources/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-02-05T02:40:30Z",
+      "side": 1,
+      "message": "can any of the nsf stuff be removed? neutron used to be all tied up in it.",
+      "range": {
+        "startLine": 5,
+        "startChar": 48,
+        "endLine": 5,
+        "endChar": 56
+      },
+      "revId": "83f0b3d33b1fab6e1a0a0976428eb3f080250a3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_9d08ad2e",
+        "filename": "features/ovsdb/src/main/resources/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-02-05T02:40:30Z",
+      "side": 1,
+      "message": "Same thing, can this be removed or trimmed down? Right now it is nsf-all but we likely don\u0027t need it all now.",
+      "range": {
+        "startLine": 53,
+        "startChar": 9,
+        "endLine": 53,
+        "endChar": 16
+      },
+      "revId": "83f0b3d33b1fab6e1a0a0976428eb3f080250a3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

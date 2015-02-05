@@ -35,6 +35,7 @@
     <module>openstack/net-virt</module>
     <module>openstack/net-virt-providers</module>
     <module>ovs-sfc</module>
+    <module>southbound</module>
     <!-- Integration Tests -->
     <module>integrationtest</module>
     <!-- Config Files -->

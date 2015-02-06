@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_8e0dcbea",
+        "filename": "integrationtest/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-06T16:36:57Z",
+      "side": 1,
+      "message": "hm... it would be nice to keep them enabled so we know we are not breaking things as we do the process. Can\u0027t we skip or remove the tests that become irrelevant instead?",
+      "range": {
+        "startLine": 122,
+        "startChar": 49,
+        "endLine": 122,
+        "endChar": 58
+      },
+      "revId": "487226ef4bd7998fb39b9566805913c099820912",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

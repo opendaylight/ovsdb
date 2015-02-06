@@ -16,6 +16,7 @@ import org.opendaylight.controller.sal.authorization.Privilege;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriInfo;
 
 /**
 * OVSDB Northbound V3 REST API
@@ -24,6 +25,7 @@ import javax.ws.rs.core.SecurityContext;
 @Path("/v3/")
 public class OvsdbNorthboundV3 {
     @Context
+    private UriInfo _uriInfo;
     private String username;
 
     @Context

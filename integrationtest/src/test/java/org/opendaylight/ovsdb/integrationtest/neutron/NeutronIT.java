@@ -77,7 +77,6 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
     private OvsdbConfigurationService ovsdbConfigurationService;
     private Node node = null;
 
-    Component of10Provider;
     Component of13Provider;
 
     @Inject
@@ -140,23 +139,15 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
         }
 
         //Register fake NetworkingProviders
-        Properties of10Properties = new Properties();
-        of10Properties.put(Constants.OPENFLOW_VERSION_PROPERTY, Constants.OPENFLOW10);
-
         Properties of13Properties = new Properties();
         of13Properties.put(Constants.OPENFLOW_VERSION_PROPERTY, Constants.OPENFLOW13);
 
         DependencyManager dm = new DependencyManager(bc);
 
-        of10Provider = dm.createComponent();
-        of10Provider.setInterface(NetworkingProvider.class.getName(), of10Properties);
-        of10Provider.setImplementation(new FakeOF10Provider());
-
         of13Provider = dm.createComponent();
         of13Provider.setInterface(NetworkingProvider.class.getName(), of13Properties);
         of13Provider.setImplementation(new FakeOF13Provider());
 
-        dm.add(of10Provider);
         dm.add(of13Provider);
     }
 
@@ -289,7 +280,6 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
         }
 
         DependencyManager dm = new DependencyManager(bc);
-        dm.remove(of10Provider);
         dm.remove(of13Provider);
     }
 
@@ -300,50 +290,6 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
                                                             OpenVSwitch.class,
                                                             ovsRows.values().iterator().next());
         return Version.fromString(ovsRow.getOvsVersionColumn().getData().iterator().next());
-    }
-
-    private class FakeOF10Provider implements NetworkingProvider {
-
-        @Override
-        public String getName() {
-            return null;
-        }
-
-        @Override
-        public boolean supportsServices() {
-            return false;
-        }
-
-        @Override
-        public boolean hasPerTenantTunneling() {
-            return true;
-        }
-
-        @Override
-        public Status handleInterfaceUpdate(String tunnelType, String tunnelKey) {
-            return null;
-        }
-
-        @Override
-        public Status handleInterfaceUpdate(NeutronNetwork network, Node source, Interface intf) {
-            return null;
-        }
-
-        @Override
-        public Status handleInterfaceDelete(String tunnelType, NeutronNetwork network, Node source, Interface intf,
-                                            boolean isLastInstanceOnNode) {
-            return null;
-        }
-
-        @Override
-        public void initializeFlowRules(Node node) {
-
-        }
-
-        @Override
-        public void initializeOFFlowRules(Node openflowNode) {
-
-        }
     }
 
     private class FakeOF13Provider implements NetworkingProvider {

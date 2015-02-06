@@ -74,7 +74,6 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
 
     OvsdbConnectionService connectionService;
     OvsdbInventoryService ovsdbInventoryService;
-    protected static final String OPENFLOW_10 = "1.0";
     protected static final String OPENFLOW_13 = "1.3";
 
     void init() {
@@ -430,9 +429,6 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
 
             String ofVersion = System.getProperty("ovsdb.of.version", OPENFLOW_13);
             switch (ofVersion) {
-                case OPENFLOW_10:
-                    protocols.add("OpenFlow10");
-                    break;
                 case OPENFLOW_13:
                     //fall through
                 default:

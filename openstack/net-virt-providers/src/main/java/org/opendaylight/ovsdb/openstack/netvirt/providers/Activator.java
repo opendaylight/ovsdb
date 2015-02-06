@@ -13,10 +13,8 @@ package org.opendaylight.ovsdb.openstack.netvirt.providers;
 import java.util.Properties;
 
 import org.apache.felix.dm.Component;
-import org.opendaylight.controller.forwardingrulesmanager.IForwardingRulesManager;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
-import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ClassifierProvider;
@@ -33,7 +31,6 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.OutboundNatProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
-import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow10.OF10Provider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.MdsalConsumer;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.MdsalConsumerImpl;
@@ -88,7 +85,6 @@ public class Activator extends ComponentActivatorAbstractBase {
     @Override
     public Object[] getImplementations() {
         Object[] res = {MdsalConsumerImpl.class,
-                        OF10Provider.class,
                         OF13Provider.class,
                         PipelineOrchestratorImpl.class,
                         ClassifierService.class,
@@ -126,32 +122,6 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.setInterface(MdsalConsumer.class.getName(), null);
             c.add(createServiceDependency().setService(BindingAwareBroker.class).setRequired(true));
         }
-
-        if (imp.equals(OF10Provider.class)) {
-            Properties of10Properties = new Properties();
-            of10Properties.put(Constants.SOUTHBOUND_PROTOCOL_PROPERTY, "ovsdb");
-            of10Properties.put(Constants.OPENFLOW_VERSION_PROPERTY, Constants.OPENFLOW10);
-
-            c.setInterface(NetworkingProvider.class.getName(), of10Properties);
-            c.add(createServiceDependency()
-                          .setService(ConfigurationService.class)
-                          .setRequired(true));
-            c.add(createServiceDependency()
-                          .setService(BridgeConfigurationManager.class)
-                          .setRequired(true));
-            c.add(createServiceDependency()
-                          .setService(TenantNetworkManager.class)
-                          .setRequired(true));
-            c.add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true));
-            c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
-            c.add(createServiceDependency().
-                    setService(IForwardingRulesManager.class).
-                    setRequired(true));
-            c.add(createServiceDependency().
-                    setService(ISwitchManager.class).
-                    setRequired(true));
-        }
-
         if (imp.equals(OF13Provider.class)) {
             Properties of13Properties = new Properties();
             of13Properties.put(Constants.SOUTHBOUND_PROTOCOL_PROPERTY, "ovsdb");

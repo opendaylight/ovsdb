@@ -11,13 +11,11 @@ package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import java.net.InetAddress;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.lib.notation.Row;
-import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
@@ -173,42 +171,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     @Override
     public String getOpenflowVersion(Node node) {
-
-        String configuredVersion = ConfigProperties.getProperty(this.getClass(), "ovsdb.of.version", "1.3");
-        if (configuredVersion != null){
-            switch (configuredVersion){
-                case "1.0":
-                    return Constants.OPENFLOW10;
-                case "1.3":
-                    //fall through
-                default:
-                    return Constants.OPENFLOW13;
-
-            }
-        }
-
-        Map<String, Row> ovsRows = ovsdbConfigurationService.getRows(node,
-                ovsdbConfigurationService.getTableName(node, OpenVSwitch.class));
-
-        if (ovsRows == null) {
-            logger.info("The OVS node {} has no Open_vSwitch rows", node.toString());
-            return null;
-        }
-
-        Version ovsVersion = null;
-        // While there is only one entry in the HashMap, we can't access it by index...
-        for (Row row : ovsRows.values()) {
-            OpenVSwitch ovsRow = ovsdbConfigurationService.getTypedRow(node, OpenVSwitch.class, row);
-            Set<String> versionSet = ovsRow.getOvsVersionColumn().getData();
-            if (versionSet != null && versionSet.iterator().hasNext()) {
-                ovsVersion = Version.fromString(versionSet.iterator().next());
-            }
-        }
-
-        if (ovsVersion == null || ovsVersion.compareTo(Constants.OPENFLOW13_SUPPORTED) < 0) {
-            return Constants.OPENFLOW10;
-        }
-
         return Constants.OPENFLOW13;
     }
 

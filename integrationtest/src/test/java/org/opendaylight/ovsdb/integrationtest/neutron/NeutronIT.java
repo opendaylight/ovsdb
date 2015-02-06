@@ -42,7 +42,6 @@ import org.apache.felix.dm.DependencyManager;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -218,23 +217,13 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
         Assert.assertNotEquals(ovsRow.getVersion(), originalVersion);
     }
 
-    // Note: The openFlow version is now determined by configuration's getProperty("ovsdb.of.version", "1.3").
-    // Thus, the ovs version attribute (returned by ovs' OpenVSwitch table) is not used to determine what is
-    // the openFlow version chosen by netVirtConfigurationService.
-    // See: https://git.opendaylight.org/gerrit/#/c/11084/
-    //      https://github.com/opendaylight/ovsdb/commit/2bc58c9cca16dc3e389cdfc18593578748fd52d5
-    @Ignore("netVirtConfigurationService.getOpenflowVersion(node) is not dependent on Constants.OPENFLOW13_SUPPORTED")
     @Test
     public void testGetOpenflowVersion() throws Exception {
         Thread.sleep(5000);
 
         Version ovsVersion = this.getOvsVersion();
-
-        if (ovsVersion.compareTo(Constants.OPENFLOW13_SUPPORTED) < 0) {
-            Assert.assertEquals(Constants.OPENFLOW10, netVirtConfigurationService.getOpenflowVersion(node));
-        } else {
-            Assert.assertEquals(Constants.OPENFLOW13, netVirtConfigurationService.getOpenflowVersion(node));
-        }
+        Assert.assertTrue(ovsVersion.compareTo(Constants.OPENFLOW13_SUPPORTED) >= 0);
+        Assert.assertEquals(Constants.OPENFLOW13, netVirtConfigurationService.getOpenflowVersion(node));
     }
 
     @Test

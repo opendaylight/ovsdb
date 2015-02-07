@@ -44,7 +44,6 @@ public final class Constants {
     /*
      * OpenFlow Versions
      */
-    public static final String OPENFLOW10 = "OpenFlow10";
     public static final String OPENFLOW13 = "OpenFlow13";
     public static final Version OPENFLOW13_SUPPORTED = Version.fromString("1.10.0");
 

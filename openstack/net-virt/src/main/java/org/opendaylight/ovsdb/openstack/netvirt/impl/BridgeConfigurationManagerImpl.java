@@ -651,11 +651,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
          */
 
         try {
-            if (!networkingProviderManager.getProvider(node).hasPerTenantTunneling()) {
-                protocols.add(Constants.OPENFLOW13);
-            } else {
-                protocols.add(Constants.OPENFLOW10);
-            }
+	    protocols.add(Constants.OPENFLOW13);
             bridge.setProtocols(protocols);
         } catch (SchemaVersionMismatchException e) {
             logger.info(e.toString());

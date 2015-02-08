@@ -12,8 +12,8 @@ package org.opendaylight.ovsdb.plugin.internal;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.apache.felix.dm.Component;
-import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
+import org.apache.felix.dm.DependencyActivatorBase;
+import org.apache.felix.dm.DependencyManager;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
@@ -33,6 +33,7 @@ import org.opendaylight.ovsdb.plugin.impl.InventoryServiceImpl;
 import org.opendaylight.ovsdb.plugin.impl.NodeConnectorFactory;
 import org.opendaylight.ovsdb.plugin.impl.NodeFactory;
 
+import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,32 +42,87 @@ import org.slf4j.LoggerFactory;
  *
  *
  */
-public class Activator extends ComponentActivatorAbstractBase {
+public class Activator extends DependencyActivatorBase {
     protected static final Logger logger = LoggerFactory
             .getLogger(Activator.class);
 
-    /**
-     * Function called when the activator starts just after some initializations
-     * are done by the ComponentActivatorAbstractBase.
-     * Here it registers the node Type
-     *
-     */
     @Override
-    public void init() {
+    public void init(BundleContext context, DependencyManager manager) throws Exception {
+        logger.info("shague>>>>> init");
         Node.NodeIDType.registerIDType("OVS", String.class);
         NodeConnector.NodeConnectorIDType.registerIDType("OVS", String.class, "OVS");
+
+        Dictionary<String, Object> props = new Hashtable<String, Object>();
+        props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "OVS");
+
+        manager.add(createComponent()
+                        .setInterface(OvsdbConfigurationService.class.getName(), props)
+                        .setImplementation(ConfigurationServiceImpl.class)
+                        .add(createServiceDependency()
+                                        .setService(OvsdbConnectionService.class)
+                                        .setRequired(true))
+                        .add(createServiceDependency()
+                                .setService(OvsdbInventoryService.class)
+                                .setRequired(true)));
+
+        Dictionary<String, Object> props2 = new Hashtable<String, Object>();
+        props2.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "OVS");
+        manager.add(createComponent()
+                        .setInterface(
+                                new String[] {OvsdbConnectionService.class.getName(),
+                                        OvsdbConnectionListener.class.getName()}, props2)
+                        .setImplementation(ConnectionServiceImpl.class)
+                        .add(createServiceDependency()
+                                .setService(OvsdbInventoryService.class)
+                                .setRequired(true))
+                        .add(createServiceDependency()
+                                .setService(OvsdbConnection.class)
+                                .setRequired(true))
+        );
+
+        Dictionary<String, Object> props3 = new Hashtable<>();
+        props3.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "OVS");
+        props3.put("scope", "Global");
+        manager.add(createComponent()
+                        .setInterface(
+                                new String[]{IPluginInInventoryService.class.getName(),
+                                        OvsdbInventoryService.class.getName()}, props3)
+                        .setImplementation(InventoryServiceImpl.class)
+                        .add(createServiceDependency()
+                                .setService(IPluginOutInventoryService.class, "(scope=Global)")
+                                .setCallbacks("setPluginOutInventoryServices",
+                                        "unsetPluginOutInventoryServices")
+                                .setRequired(true))
+                        .add(createServiceDependency()
+                                .setService(OvsdbInventoryListener.class)
+                                .setCallbacks("listenerAdded", "listenerRemoved"))
+                        .add(createServiceDependency()
+                                .setService(OvsdbConfigurationService.class)
+                                .setRequired(false)));
+
+        Dictionary<String, Object> props4 = new Hashtable<String, Object>();
+        props4.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "OVS");
+        props4.put("protocolName", "OVS");
+
+        manager.add(createComponent()
+                .setInterface(INodeFactory.class.getName(), props4)
+                .setImplementation(NodeFactory.class));
+
+        Dictionary<String, Object> props5 = new Hashtable<String, Object>();
+        props5.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "OVS");
+        props5.put("protocolName", "OVS");
+
+        manager.add(createComponent()
+                .setInterface(INodeConnectorFactory.class.getName(), props5)
+                .setImplementation(NodeConnectorFactory.class));
     }
 
-    /**
-     * Function called when the activator stops just before the cleanup done by
-     * ComponentActivatorAbstractBase
-     *
-     */
     @Override
-    public void destroy() {
+    public void destroy(BundleContext context, DependencyManager manager) throws Exception {
         Node.NodeIDType.unRegisterIDType("OVS");
         NodeConnector.NodeConnectorIDType.unRegisterIDType("OVS");
     }
+/*
     @Override
     public Object[] getGlobalImplementations() {
         Object[] res = { ConnectionServiceImpl.class, ConfigurationServiceImpl.class, NodeFactory.class, NodeConnectorFactory.class, InventoryServiceImpl.class };
@@ -146,6 +202,6 @@ public class Activator extends ComponentActivatorAbstractBase {
             props.put("protocolName", "OVS");
             c.setInterface(INodeConnectorFactory.class.getName(), props);
         }
-
     }
+*/
 }

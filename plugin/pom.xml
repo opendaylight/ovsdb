@@ -81,7 +81,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Import-Package>
+            <!--<Import-Package>
               org.opendaylight.controller.sal.packet,
               org.opendaylight.controller.sal.action,
               org.opendaylight.controller.sal.discovery,
@@ -105,7 +105,7 @@
               org.osgi.framework,
               javax.net.ssl,
               *
-            </Import-Package>
+            </Import-Package>-->
             <Embed-Dependency>commons-codec,javax.servlet-api,portlet-api,commons-collections,utils.config;type=!pom;inline=false</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Bundle-Activator>org.opendaylight.ovsdb.plugin.internal.Activator</Bundle-Activator>

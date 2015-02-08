@@ -82,15 +82,7 @@
         <configuration>
           <instructions>
             <Import-Package>
-              org.opendaylight.controller.sal.packet,
-              org.opendaylight.controller.sal.action,
-              org.opendaylight.controller.sal.discovery,
-              org.opendaylight.controller.sal.topology,
               org.opendaylight.controller.sal.core,
-              org.opendaylight.controller.sal.flowprogrammer,
-              org.opendaylight.controller.sal.reader,
-              org.opendaylight.controller.sal.inventory,
-              org.opendaylight.controller.sal.match,
               org.opendaylight.controller.sal.utils,
               org.opendaylight.ovsdb.lib.error,
               org.opendaylight.ovsdb.lib.notation,

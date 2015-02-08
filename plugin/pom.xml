@@ -81,31 +81,6 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Import-Package>
-              org.opendaylight.controller.sal.packet,
-              org.opendaylight.controller.sal.action,
-              org.opendaylight.controller.sal.discovery,
-              org.opendaylight.controller.sal.topology,
-              org.opendaylight.controller.sal.core,
-              org.opendaylight.controller.sal.flowprogrammer,
-              org.opendaylight.controller.sal.reader,
-              org.opendaylight.controller.sal.inventory,
-              org.opendaylight.controller.sal.match,
-              org.opendaylight.controller.sal.utils,
-              org.opendaylight.ovsdb.lib.error,
-              org.opendaylight.ovsdb.lib.notation,
-              org.opendaylight.ovsdb.lib.operations,
-              org.opendaylight.ovsdb.lib.message,
-              org.opendaylight.ovsdb.schema.openvswitch,
-              org.apache.commons.lang3.builder,
-              org.apache.commons.lang3.tuple,
-              org.apache.felix.dm,
-              org.slf4j,
-              org.eclipse.osgi.framework.console,
-              org.osgi.framework,
-              javax.net.ssl,
-              *
-            </Import-Package>
             <Embed-Dependency>commons-codec,javax.servlet-api,portlet-api,commons-collections,utils.config;type=!pom;inline=false</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Bundle-Activator>org.opendaylight.ovsdb.plugin.internal.Activator</Bundle-Activator>

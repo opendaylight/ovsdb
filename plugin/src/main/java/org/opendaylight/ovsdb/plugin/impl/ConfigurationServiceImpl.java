@@ -94,14 +94,6 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
      *
      */
     void start() {
-        registerWithOSGIConsole();
-    }
-
-    private void registerWithOSGIConsole() {
-        BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass())
-                .getBundleContext();
-        bundleContext.registerService(CommandProvider.class.getName(), this,
-                null);
     }
 
     /**

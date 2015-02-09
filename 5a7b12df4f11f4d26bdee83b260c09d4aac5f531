@@ -114,6 +114,29 @@
       "revId": "5a7b12df4f11f4d26bdee83b260c09d4aac5f531",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_fd6a03ed",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbNodeDataChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-09T21:01:58Z",
+      "side": 1,
+      "message": "This looks about right at first glance :)",
+      "range": {
+        "startLine": 69,
+        "startChar": 12,
+        "endLine": 69,
+        "endChar": 13
+      },
+      "revId": "5a7b12df4f11f4d26bdee83b260c09d4aac5f531",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

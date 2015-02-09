@@ -1,6 +1,6 @@
 module datapath-port-types {
     yang-version 1;
-    namespace "urn:opendaylight:params:xml:ns:yang:example";
+    namespace "urn:opendaylight:params:xml:ns:yang:data-port-types";
     prefix "datapathport";
 
     import network-topology {prefix "topo"; revision-date "2013-10-21"; }

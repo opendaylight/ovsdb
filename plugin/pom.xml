@@ -83,7 +83,6 @@
           <instructions>
             <Import-Package>
               org.opendaylight.controller.sal.core,
-              org.opendaylight.controller.sal.utils,
               org.opendaylight.ovsdb.lib.error,
               org.opendaylight.ovsdb.lib.notation,
               org.opendaylight.ovsdb.lib.operations,

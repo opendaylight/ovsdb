@@ -2,6 +2,69 @@
   "comments": [
     {
       "key": {
+        "uuid": "7a96c907_9db41f83",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OVSDBClientKey.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-09T20:52:12Z",
+      "side": 1,
+      "message": "Could we bring the logs in compliance withhttps://wiki.opendaylight.org/view/Logging_Best_Practices\nor get a TODO comment on them if they are aggressive for a reason now so we can go back and fix them later?",
+      "revId": "5a7b12df4f11f4d26bdee83b260c09d4aac5f531",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_bdb9db7a",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OVSDBClientKey.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-09T20:52:12Z",
+      "side": 1,
+      "message": "Could we bring the logs in compliance withhttps://wiki.opendaylight.org/view/Logging_Best_Practices or get a TODO comment on them if they are aggressive for a reason now so we can go back and fix them later?",
+      "range": {
+        "startLine": 42,
+        "startChar": 68,
+        "endLine": 42,
+        "endChar": 70
+      },
+      "revId": "5a7b12df4f11f4d26bdee83b260c09d4aac5f531",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5db21795",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-09T20:52:12Z",
+      "side": 1,
+      "message": "This is actually a good use of INFO (IMHO :) ).",
+      "range": {
+        "startLine": 69,
+        "startChar": 65,
+        "endLine": 69,
+        "endChar": 67
+      },
+      "revId": "5a7b12df4f11f4d26bdee83b260c09d4aac5f531",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_3eedccef",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
         "patchSetId": 1
@@ -13,6 +76,24 @@
       "writtenOn": "2015-02-05T22:49:33Z",
       "side": 1,
       "message": "shouldn\u0027t you remove the client from collection?",
+      "revId": "5a7b12df4f11f4d26bdee83b260c09d4aac5f531",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7dafd32a",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-09T20:52:12Z",
+      "side": 1,
+      "message": "If memory serves, disconnected(client) removes it from the collection.",
+      "parentUuid": "7a96c907_3eedccef",
       "revId": "5a7b12df4f11f4d26bdee83b260c09d4aac5f531",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

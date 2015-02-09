@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoCloseable {
-    Map<OVSDBClientKey,OvsdbClient> clients = new ConcurrentHashMap<OVSDBClientKey,OvsdbClient>();
+    Map<OvsdbClientKey,OvsdbConnectionInstance> clients = new ConcurrentHashMap<OvsdbClientKey,OvsdbConnectionInstance>();
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionManager.class);
 
     DataBroker db;
@@ -33,10 +33,11 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     }
 
     @Override
-    public void connected(OvsdbClient client) {
-        LOG.info("OVSDB Connection from {}:{}",client.getConnectionInfo().getRemoteAddress(),
-                client.getConnectionInfo().getRemotePort());
-        OVSDBClientKey key = new OVSDBClientKey(client);
+    public void connected(OvsdbClient externalClient) {
+        LOG.info("OVSDB Connection from {}:{}",externalClient.getConnectionInfo().getRemoteAddress(),
+                externalClient.getConnectionInfo().getRemotePort());
+        OvsdbClientKey key = new OvsdbClientKey(externalClient);
+        OvsdbConnectionInstance client = new OvsdbConnectionInstance(key,externalClient);
         clients.put(key, client);
         WriteTransaction transaction = db.newWriteOnlyTransaction();
         transaction.put(LogicalDatastoreType.OPERATIONAL, key.toInstanceIndentifier(),
@@ -49,7 +50,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     public void disconnected(OvsdbClient client) {
         LOG.info("OVSDB Disconnect from {}:{}",client.getConnectionInfo().getRemoteAddress(),
                 client.getConnectionInfo().getRemotePort());
-        OVSDBClientKey key = new OVSDBClientKey(client);
+        OvsdbClientKey key = new OvsdbClientKey(client);
         WriteTransaction transaction = db.newWriteOnlyTransaction();
         transaction.delete(LogicalDatastoreType.OPERATIONAL, key.toInstanceIndentifier());
         // TODO - Check the future and retry if needed
@@ -62,8 +63,9 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         // TODO use transaction chains to handle ordering issues between disconnected and connected when writing to the operational store
         InetAddress ip = SouthboundMapper.createInetAddress(ovsdbNode.getIp());
         OvsdbClient client = OvsdbConnectionService.getService().connect(ip, ovsdbNode.getPort().getValue().intValue());
-        OVSDBClientKey key = new OVSDBClientKey(client);
-        clients.put(key, client);
+        OvsdbClientKey key = new OvsdbClientKey(client);
+        OvsdbConnectionInstance instance = new OvsdbConnectionInstance(key,client);
+        clients.put(key, instance);
         connected(client); // For connections from the controller to the ovs instance, the library doesn't call this method for us
         return client;
     }

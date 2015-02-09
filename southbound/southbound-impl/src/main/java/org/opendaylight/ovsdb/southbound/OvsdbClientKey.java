@@ -14,7 +14,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.overlay.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-public class OVSDBClientKey {
+public class OvsdbClientKey {
     /*
      * This class is immutable.  If you are in anyway changing its fields after
      * creation, your are doing it wrong :)
@@ -22,12 +22,12 @@ public class OVSDBClientKey {
     private IpAddress ipaddress;
     private PortNumber port;
 
-    OVSDBClientKey(IpPortLocator locator) {
+    OvsdbClientKey(IpPortLocator locator) {
         ipaddress = locator.getIp();
         port = locator.getPort();
     }
 
-    OVSDBClientKey(OvsdbClient client) {
+    OvsdbClientKey(OvsdbClient client) {
         ipaddress = SouthboundMapper.createIpAddress(client.getConnectionInfo().getRemoteAddress());
         port = new PortNumber(client.getConnectionInfo().getRemotePort());
     }
@@ -58,7 +58,7 @@ public class OVSDBClientKey {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        OVSDBClientKey other = (OVSDBClientKey) obj;
+        OvsdbClientKey other = (OvsdbClientKey) obj;
         if (ipaddress == null) {
             if (other.ipaddress != null)
                 return false;

@@ -222,8 +222,9 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
         Thread.sleep(5000);
 
         Version ovsVersion = this.getOvsVersion();
-        Assert.assertTrue(ovsVersion.compareTo(Constants.OPENFLOW13_SUPPORTED) >= 0);
-        Assert.assertEquals(Constants.OPENFLOW13, netVirtConfigurationService.getOpenflowVersion(node));
+        if (ovsVersion.compareTo(Constants.OPENFLOW13_SUPPORTED) >= 0) {
+            Assert.assertEquals(Constants.OPENFLOW13, netVirtConfigurationService.getOpenflowVersion(node));
+        }
     }
 
     @Test

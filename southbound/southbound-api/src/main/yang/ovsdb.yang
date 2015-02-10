@@ -12,6 +12,17 @@ module ovsdb {
     revision "2015-01-05" {
         description "Initial revision of southbound model";
     }
+    
+    typedef ovsdb-bridge-ref {
+        description "A reference to an ovsdb bridge";
+        type instance-identifier;
+    }
+    
+    typedef ovsdb-node-ref {
+        description "A reference to an ovsdb node";
+        type instance-identifier;
+    }
+    
     grouping ovsdb-bridge-attributes {
         leaf bridge-uuid {
             description "The unique identifier of the bridge";
@@ -25,7 +36,7 @@ module ovsdb {
 
         leaf managed-by {
             description "The OVSDB which this bridge belongs to";
-            type topo:node-ref;
+            type ovsdb-node-ref;
         }
     }
 
@@ -33,7 +44,7 @@ module ovsdb {
         uses overlay:ip-port-locator;
 
         leaf-list managed-node-entry {
-            type topo:node-ref;
+            type ovsdb-bridge-ref;
         }
     }
 

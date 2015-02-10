@@ -85,7 +85,6 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         OvsdbClient client = clients.get(key);
         if (client != null) {
             client.disconnect();
-            disconnected(client);
         }
     }
 

@@ -10,11 +10,9 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.providers;
 
-import java.util.Properties;
-
-import org.apache.felix.dm.Component;
+import org.apache.felix.dm.DependencyActivatorBase;
+import org.apache.felix.dm.DependencyManager;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
-import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ClassifierProvider;
@@ -52,205 +50,196 @@ import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.Ro
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 
+import org.osgi.framework.BundleContext;
+
+import java.util.Dictionary;
+import java.util.Hashtable;
+
 /**
  * OSGi Bundle Activator for the Neutron providers
  */
-public class Activator extends ComponentActivatorAbstractBase {
-    /**
-     * Function called when the activator starts just after some
-     * initializations are done by the
-     * ComponentActivatorAbstractBase.
-     */
+public class Activator extends DependencyActivatorBase {
+
     @Override
-    public void init() {
+    public void init(BundleContext context, DependencyManager manager) throws Exception {
+
+        manager.add(createComponent()
+                .setInterface(MdsalConsumer.class.getName(), null)
+                .setImplementation(MdsalConsumerImpl.class)
+                .add(createServiceDependency().setService(BindingAwareBroker.class).setRequired(true)));
+
+        Dictionary<String, Object> props1 = new Hashtable<>();
+        props1.put(Constants.SOUTHBOUND_PROTOCOL_PROPERTY, "ovsdb");
+        props1.put(Constants.OPENFLOW_VERSION_PROPERTY, Constants.OPENFLOW13);
+
+        manager.add(createComponent()
+                .setInterface(NetworkingProvider.class.getName(), props1)
+                .setImplementation(OF13Provider.class)
+                .add(createServiceDependency().setService(ConfigurationService.class).setRequired(true))
+                .add(createServiceDependency().setService(BridgeConfigurationManager.class).setRequired(true))
+                .add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true))
+                .add(createServiceDependency().setService(SecurityServicesManager.class).setRequired(true))
+                .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
+                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
+                .add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true))
+                .add(createServiceDependency().setService(ClassifierProvider.class).setRequired(true))
+                .add(createServiceDependency().setService(IngressAclProvider.class).setRequired(true))
+                .add(createServiceDependency().setService(EgressAclProvider.class).setRequired(true))
+                .add(createServiceDependency().setService(L2ForwardingProvider.class).setRequired(true)));
+
+        manager.add(createComponent()
+                .setInterface(PipelineOrchestrator.class.getName(), null)
+                .setImplementation(PipelineOrchestratorImpl.class)
+                .add(createServiceDependency().setService(AbstractServiceInstance.class)
+                        .setCallbacks("registerService", "unregisterService"))
+                .add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true)));
+
+        Dictionary<String, Object> props2 = new Hashtable<>();
+        props2.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.CLASSIFIER);
+        props2.put(Constants.PROVIDER_NAME_PROPERTY, OF13Provider.NAME);
+
+        manager.add(createComponent()
+                .setInterface(new String[]{AbstractServiceInstance.class.getName(), ClassifierProvider.class.getName()},
+                        props2)
+                .setImplementation(ClassifierService.class)
+                .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
+                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
+                .add(createServiceDependency().setService(PipelineOrchestrator.class).setRequired(true))
+                .add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true)));
+
+        Dictionary<String, Object> props3 = new Hashtable<>();
+        props3.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.ARP_RESPONDER);
+        props3.put(Constants.PROVIDER_NAME_PROPERTY, OF13Provider.NAME);
+
+        manager.add(createComponent()
+                .setInterface(new String[]{AbstractServiceInstance.class.getName(), ArpProvider.class.getName()},
+                        props3)
+                .setImplementation(ArpResponderService.class)
+                .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
+                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
+                .add(createServiceDependency().setService(PipelineOrchestrator.class).setRequired(true))
+                .add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true)));
+
+        Dictionary<String, Object> props4 = new Hashtable<>();
+        props4.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.INBOUND_NAT);
+        props4.put(Constants.PROVIDER_NAME_PROPERTY, OF13Provider.NAME);
+
+        manager.add(createComponent()
+                .setInterface(new String[]{AbstractServiceInstance.class.getName(),
+                        InboundNatProvider.class.getName()}, props4)
+                .setImplementation(InboundNatService.class)
+                .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
+                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
+                .add(createServiceDependency().setService(PipelineOrchestrator.class).setRequired(true))
+                .add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true)));
+
+        Dictionary<String, Object> props5 = new Hashtable<>();
+        props5.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.INGRESS_ACL);
+        props5.put(Constants.PROVIDER_NAME_PROPERTY, OF13Provider.NAME);
+
+        manager.add(createComponent()
+                .setInterface(new String[]{AbstractServiceInstance.class.getName(), IngressAclProvider.class.getName()},
+                        props5)
+                .setImplementation(IngressAclService.class)
+                .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
+                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
+                .add(createServiceDependency().setService(PipelineOrchestrator.class).setRequired(true))
+                .add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true)));
+
+        Dictionary<String, Object> props6 = new Hashtable<>();
+        props6.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.LOAD_BALANCER);
+        props6.put(Constants.PROVIDER_NAME_PROPERTY, OF13Provider.NAME);
+
+        manager.add(createComponent()
+                .setInterface(new String[] {AbstractServiceInstance.class.getName(),
+                                LoadBalancerProvider.class.getName()}, props6)
+                .setImplementation(LoadBalancerService.class)
+                .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
+                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
+                .add(createServiceDependency().setService(PipelineOrchestrator.class).setRequired(true))
+                .add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true)));
+
+        Dictionary<String, Object> props7 = new Hashtable<>();
+        props7.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.ROUTING);
+        props7.put(Constants.PROVIDER_NAME_PROPERTY, OF13Provider.NAME);
+
+        manager.add(createComponent()
+                .setInterface(new String[] {AbstractServiceInstance.class.getName(), RoutingProvider.class.getName()},
+                        props7)
+                .setImplementation(RoutingService.class)
+                .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
+                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
+                .add(createServiceDependency().setService(PipelineOrchestrator.class).setRequired(true))
+                .add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true)));
+
+        Dictionary<String, Object> props8 = new Hashtable<>();
+        props8.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.L3_FORWARDING);
+        props8.put(Constants.PROVIDER_NAME_PROPERTY, OF13Provider.NAME);
+
+        manager.add(createComponent()
+                .setInterface(new String[] {AbstractServiceInstance.class.getName(),
+                                L3ForwardingProvider.class.getName()}, props8)
+                .setImplementation(L3ForwardingService.class)
+                .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
+                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
+                .add(createServiceDependency().setService(PipelineOrchestrator.class).setRequired(true))
+                .add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true)));
+
+        Dictionary<String, Object> props9 = new Hashtable<>();
+        props9.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.L2_REWRITE);
+        props9.put(Constants.PROVIDER_NAME_PROPERTY, OF13Provider.NAME);
+
+        manager.add(createComponent()
+                .setInterface(AbstractServiceInstance.class.getName(), props9)
+                .setImplementation(L2RewriteService.class)
+                .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
+                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
+                .add(createServiceDependency().setService(PipelineOrchestrator.class).setRequired(true))
+                .add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true)));
+
+        Dictionary<String, Object> props10 = new Hashtable<>();
+        props10.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.L2_FORWARDING);
+        props10.put(Constants.PROVIDER_NAME_PROPERTY, OF13Provider.NAME);
+
+        manager.add(createComponent()
+                .setInterface(new String[] {AbstractServiceInstance.class.getName(),
+                                L2ForwardingProvider.class.getName()},
+                        props10)
+                .setImplementation(L2ForwardingService.class)
+                .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
+                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
+                .add(createServiceDependency().setService(PipelineOrchestrator.class).setRequired(true))
+                .add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true)));
+
+        Dictionary<String, Object> props11 = new Hashtable<>();
+        props11.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.EGRESS_ACL);
+        props11.put(Constants.PROVIDER_NAME_PROPERTY, OF13Provider.NAME);
+
+        manager.add(createComponent()
+                .setInterface(new String[]{AbstractServiceInstance.class.getName(), EgressAclProvider.class.getName()},
+                        props11)
+                .setImplementation(EgressAclService.class)
+                .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
+                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
+                .add(createServiceDependency().setService(PipelineOrchestrator.class).setRequired(true))
+                .add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true)));
+
+        Dictionary<String, Object> props12 = new Hashtable<>();
+        props12.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.OUTBOUND_NAT);
+        props12.put(Constants.PROVIDER_NAME_PROPERTY, OF13Provider.NAME);
+
+        manager.add(createComponent()
+                .setInterface(new String[]{AbstractServiceInstance.class.getName(),
+                                OutboundNatProvider.class.getName()},
+                        props12)
+                .setImplementation(OutboundNatService.class)
+                .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
+                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
+                .add(createServiceDependency().setService(PipelineOrchestrator.class).setRequired(true))
+                .add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true)));
     }
 
-    /**
-     * Function called when the activator stops just before the
-     * cleanup done by ComponentActivatorAbstractBase.
-     *
-     */
     @Override
-    public void destroy() {
-    }
-
-    /**
-     * Function that is used to communicate to dependency manager the
-     * list of known implementations for services inside a container.
-     *
-     * @return An array containing all the CLASS objects that will be
-     * instantiated in order to get an fully working implementation
-     * Object
-     */
-    @Override
-    public Object[] getImplementations() {
-        Object[] res = {MdsalConsumerImpl.class,
-                        OF13Provider.class,
-                        PipelineOrchestratorImpl.class,
-                        ClassifierService.class,
-                        ArpResponderService.class,
-                        InboundNatService.class,
-                        IngressAclService.class,
-                        LoadBalancerService.class,
-                        RoutingService.class,
-                        L3ForwardingService.class,
-                        L2RewriteService.class,
-                        L2ForwardingService.class,
-                        EgressAclService.class,
-                        OutboundNatService.class};
-        return res;
-    }
-
-    /**
-     * Function that is called when configuration of the dependencies
-     * is required.
-     *
-     * @param c dependency manager Component object, used for
-     * configuring the dependencies exported and imported
-     * @param imp Implementation class that is being configured,
-     * needed as long as the same routine can configure multiple
-     * implementations
-     * @param containerName The containerName being configured, this allow
-     * also optional per-container different behavior if needed, usually
-     * should not be the case though.
-     */
-    @Override
-    public void configureInstance(Component c, Object imp,
-                                  String containerName) {
-
-        if (imp.equals(MdsalConsumerImpl.class)) {
-            c.setInterface(MdsalConsumer.class.getName(), null);
-            c.add(createServiceDependency().setService(BindingAwareBroker.class).setRequired(true));
-        }
-        if (imp.equals(OF13Provider.class)) {
-            Properties of13Properties = new Properties();
-            of13Properties.put(Constants.SOUTHBOUND_PROTOCOL_PROPERTY, "ovsdb");
-            of13Properties.put(Constants.OPENFLOW_VERSION_PROPERTY, Constants.OPENFLOW13);
-
-            c.setInterface(NetworkingProvider.class.getName(), of13Properties);
-            c.add(createServiceDependency()
-                          .setService(ConfigurationService.class)
-                          .setRequired(true));
-            c.add(createServiceDependency()
-                          .setService(BridgeConfigurationManager.class)
-                          .setRequired(true));
-            c.add(createServiceDependency()
-                          .setService(TenantNetworkManager.class)
-                          .setRequired(true));
-            c.add(createServiceDependency()
-                    .setService(SecurityServicesManager.class)
-                    .setRequired(true));
-            c.add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true));
-            c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
-            c.add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true));
-            c.add(createServiceDependency().setService(ClassifierProvider.class).setRequired(true));
-            c.add(createServiceDependency().setService(IngressAclProvider.class).setRequired(true));
-            c.add(createServiceDependency().setService(EgressAclProvider.class).setRequired(true));
-            c.add(createServiceDependency().setService(L2ForwardingProvider.class).setRequired(true));
-        }
-
-        if (imp.equals(PipelineOrchestratorImpl.class)) {
-            c.setInterface(PipelineOrchestrator.class.getName(), null);
-            c.add(createServiceDependency()
-                           .setService(AbstractServiceInstance.class)
-                           .setCallbacks("registerService", "unregisterService"));
-            c.add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true));
-        }
-
-        if (AbstractServiceInstance.class.isAssignableFrom((Class) imp)) {
-            c.add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true));
-            c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
-            c.add(createServiceDependency()
-                          .setService(PipelineOrchestrator.class)
-                          .setRequired(true));
-            c.add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true));
-        }
-
-        if (imp.equals(ClassifierService.class)) {
-            Properties properties = new Properties();
-            properties.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.CLASSIFIER);
-            properties.put(Constants.PROVIDER_NAME_PROPERTY, OF13Provider.NAME);
-            c.setInterface(new String[] {AbstractServiceInstance.class.getName(), ClassifierProvider.class.getName()},
-                           properties);
-        }
-
-        if (imp.equals(ArpResponderService.class)) {
-            Properties properties = new Properties();
-            properties.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.ARP_RESPONDER);
-            properties.put(Constants.PROVIDER_NAME_PROPERTY, OF13Provider.NAME);
-            c.setInterface(new String[] {AbstractServiceInstance.class.getName(), ArpProvider.class.getName()},
-                           properties);
-        }
-
-        if (imp.equals(InboundNatService.class)) {
-            Properties properties = new Properties();
-            properties.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.INBOUND_NAT);
-            properties.put(Constants.PROVIDER_NAME_PROPERTY, OF13Provider.NAME);
-            c.setInterface(new String[] {AbstractServiceInstance.class.getName(), InboundNatProvider.class.getName()},
-                           properties);
-        }
-
-        if (imp.equals(IngressAclService.class)) {
-            Properties properties = new Properties();
-            properties.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.INGRESS_ACL);
-            properties.put(Constants.PROVIDER_NAME_PROPERTY, OF13Provider.NAME);
-            c.setInterface(new String[]{AbstractServiceInstance.class.getName(),
-                                        IngressAclProvider.class.getName()}, properties);
-        }
-
-        if (imp.equals(LoadBalancerService.class)) {
-            Properties properties = new Properties();
-            properties.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.LOAD_BALANCER);
-            properties.put(Constants.PROVIDER_NAME_PROPERTY, OF13Provider.NAME);
-            c.setInterface(new String[] {AbstractServiceInstance.class.getName(), LoadBalancerProvider.class.getName()},
-                           properties);
-        }
-
-        if (imp.equals(RoutingService.class)) {
-            Properties properties = new Properties();
-            properties.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.ROUTING);
-            properties.put(Constants.PROVIDER_NAME_PROPERTY, OF13Provider.NAME);
-            c.setInterface(new String[] {AbstractServiceInstance.class.getName(), RoutingProvider.class.getName()},
-                           properties);
-        }
-
-        if (imp.equals(L3ForwardingService.class)) {
-            Properties properties = new Properties();
-            properties.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.L3_FORWARDING);
-            properties.put(Constants.PROVIDER_NAME_PROPERTY, OF13Provider.NAME);
-            c.setInterface(new String[] {AbstractServiceInstance.class.getName(), L3ForwardingProvider.class.getName()},
-                           properties);
-        }
-
-        if (imp.equals(L2RewriteService.class)) {
-            Properties properties = new Properties();
-            properties.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.L2_REWRITE);
-            properties.put(Constants.PROVIDER_NAME_PROPERTY, OF13Provider.NAME);
-            c.setInterface(AbstractServiceInstance.class.getName(), properties);
-        }
-
-        if (imp.equals(L2ForwardingService.class)) {
-            Properties properties = new Properties();
-            properties.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.L2_FORWARDING);
-            properties.put(Constants.PROVIDER_NAME_PROPERTY, OF13Provider.NAME);
-            c.setInterface(new String[] {AbstractServiceInstance.class.getName(), L2ForwardingProvider.class.getName()},
-                           properties);
-        }
-
-        if (imp.equals(EgressAclService.class)) {
-            Properties properties = new Properties();
-            properties.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.EGRESS_ACL);
-            properties.put(Constants.PROVIDER_NAME_PROPERTY, OF13Provider.NAME);
-            c.setInterface(new String[]{AbstractServiceInstance.class.getName(),
-                                        EgressAclProvider.class.getName()}, properties);
-        }
-
-        if (imp.equals(OutboundNatService.class)) {
-            Properties properties = new Properties();
-            properties.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.OUTBOUND_NAT);
-            properties.put(Constants.PROVIDER_NAME_PROPERTY, OF13Provider.NAME);
-            c.setInterface(new String[] {AbstractServiceInstance.class.getName(), OutboundNatProvider.class.getName()},
-                           properties);
-        }
+    public void destroy(BundleContext context, DependencyManager manager) throws Exception {
     }
 }

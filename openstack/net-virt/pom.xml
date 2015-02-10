@@ -81,17 +81,6 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Import-Package>
-              org.opendaylight.controller.networkconfig.neutron,
-              org.opendaylight.controller.switchmanager,
-              org.opendaylight.controller.sal.core,
-              org.opendaylight.controller.sal.utils,
-              org.opendaylight.ovsdb.plugin.api,
-              org.opendaylight.ovsdb.lib.notation,
-              org.apache.felix.dm,
-              org.slf4j,
-              org.osgi.framework,
-              *</Import-Package>
             <Embed-Dependency>utils.config;type=!pom;inline=false</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Export-Package>

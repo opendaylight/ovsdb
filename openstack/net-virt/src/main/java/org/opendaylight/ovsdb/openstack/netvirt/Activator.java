@@ -10,9 +10,11 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt;
 
-import java.util.Properties;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
-import org.apache.felix.dm.Component;
+import org.apache.felix.dm.DependencyActivatorBase;
+import org.apache.felix.dm.DependencyManager;
 import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallPolicyAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallRuleAware;
@@ -31,7 +33,6 @@ import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityGroupAw
 import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityRuleAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetAware;
 import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
-import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
@@ -63,311 +64,242 @@ import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
 
+import org.osgi.framework.BundleContext;
+
 /**
  * OSGi bundle activator for the OVSDB Neutron Interface.
  */
-public class Activator extends ComponentActivatorAbstractBase {
-    /**
-     * Function called when the activator starts just after some
-     * initializations are done by the
-     * ComponentActivatorAbstractBase.
-     */
+public class Activator extends DependencyActivatorBase {
+
     @Override
-    public void init() {
+    public void init(BundleContext context, DependencyManager manager) throws Exception {
+
+        manager.add(createComponent()
+                .setInterface(ConfigurationService.class.getName(), null)
+                .setImplementation(ConfigurationServiceImpl.class)
+                .add(createServiceDependency().setService(OvsdbConfigurationService.class)));
+
+        manager.add(createComponent()
+                .setInterface(BridgeConfigurationManager.class.getName(), null)
+                .setImplementation(BridgeConfigurationManagerImpl.class)
+                .add(createServiceDependency().setService(ConfigurationService.class).setRequired(true))
+                .add(createServiceDependency().setService(NetworkingProviderManager.class))
+                .add(createServiceDependency().setService(OvsdbConfigurationService.class)));
+
+        manager.add(createComponent()
+                .setInterface(TenantNetworkManager.class.getName(), null)
+                .setImplementation(TenantNetworkManagerImpl.class)
+                .add(createServiceDependency().setService(NetworkingProviderManager.class))
+                .add(createServiceDependency().setService(OvsdbConfigurationService.class))
+                .add(createServiceDependency().setService(OvsdbConnectionService.class))
+                .add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
+                .add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true))
+                .add(createServiceDependency().setService(VlanConfigurationCache.class)));
+
+        manager.add(createComponent()
+                .setInterface(VlanConfigurationCache.class.getName(), null)
+                .setImplementation(VlanConfigurationCacheImpl.class)
+                .add(createServiceDependency().setService(OvsdbConfigurationService.class))
+                .add(createServiceDependency().setService(TenantNetworkManager.class)));
+
+        Dictionary<String, Object> floatingIPHandlerPorperties = new Hashtable<>();
+        floatingIPHandlerPorperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY,
+                AbstractEvent.HandlerType.NEUTRON_FLOATING_IP);
+
+        manager.add(createComponent()
+                .setInterface(new String[]{INeutronFloatingIPAware.class.getName(), AbstractHandler.class.getName()},
+                        floatingIPHandlerPorperties)
+                .setImplementation(FloatingIPHandler.class)
+                .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
+                .add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true)));
+
+        Dictionary<String, Object> networkHandlerProperties = new Hashtable<>();
+        networkHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.NEUTRON_NETWORK);
+
+        manager.add(createComponent()
+                .setInterface(new String[]{INeutronNetworkAware.class.getName(), AbstractHandler.class.getName()},
+                        networkHandlerProperties)
+                .setImplementation(NetworkHandler.class)
+                .add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true))
+                .add(createServiceDependency().setService(BridgeConfigurationManager.class).setRequired(true))
+                .add(createServiceDependency().setService(ConfigurationService.class).setRequired(true))
+                .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
+                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
+                .add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
+                .add(createServiceDependency().setService(OvsdbInventoryListener.class).setRequired(true))
+                .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
+                .add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true)));
+
+        Dictionary<String, Object> subnetHandlerProperties = new Hashtable<>();
+        subnetHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.NEUTRON_SUBNET);
+
+        manager.add(createComponent()
+                .setInterface(new String[]{INeutronSubnetAware.class.getName(), AbstractHandler.class.getName()},
+                        subnetHandlerProperties)
+                .setImplementation(SubnetHandler.class)
+                .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
+                .add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true)));
+
+        Dictionary<String, Object> portHandlerProperties = new Hashtable<>();
+        portHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.NEUTRON_PORT);
+
+        manager.add(createComponent()
+                .setInterface(new String[]{INeutronPortAware.class.getName(), AbstractHandler.class.getName()},
+                        portHandlerProperties)
+                .setImplementation(PortHandler.class)
+                .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
+                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
+                .add(createServiceDependency().setService(OvsdbInventoryListener.class).setRequired(true))
+                .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
+                .add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true)));
+
+        Dictionary<String, Object> routerHandlerProperties = new Hashtable<>();
+        routerHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.NEUTRON_ROUTER);
+
+        manager.add(createComponent()
+                .setInterface(new String[]{INeutronRouterAware.class.getName(), AbstractHandler.class.getName()},
+                        routerHandlerProperties)
+                .setImplementation(RouterHandler.class)
+                .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
+                .add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true)));
+
+        Dictionary<String, Object> southboundHandlerProperties = new Hashtable<>();
+        southboundHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.SOUTHBOUND);
+
+        manager.add(createComponent()
+                .setInterface(new String[]{OvsdbInventoryListener.class.getName(), IInventoryListener.class.getName(),
+                                AbstractHandler.class.getName()},
+                        southboundHandlerProperties)
+                .setImplementation(SouthboundHandler.class)
+                .add(createServiceDependency().setService(ConfigurationService.class).setRequired(true))
+                .add(createServiceDependency().setService(BridgeConfigurationManager.class).setRequired(true))
+                .add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true))
+                .add(createServiceDependency().setService(NetworkingProviderManager.class).setRequired(true))
+                .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
+                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
+                .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
+                .add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true)));
+
+        Dictionary<String, Object> lbaasHandlerProperties = new Hashtable<>();
+        lbaasHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY,
+                AbstractEvent.HandlerType.NEUTRON_LOAD_BALANCER);
+
+        manager.add(createComponent()
+                .setInterface(new String[]{INeutronLoadBalancerAware.class.getName(),
+                                IInventoryListener.class.getName(), AbstractHandler.class.getName()},
+                        lbaasHandlerProperties)
+                .setImplementation(LBaaSHandler.class)
+                .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
+                .add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true))
+                .add(createServiceDependency().setService(INeutronLoadBalancerCRUD.class).setRequired(true))
+                .add(createServiceDependency().setService(INeutronLoadBalancerPoolCRUD.class).setRequired(true))
+                .add(createServiceDependency().setService(LoadBalancerProvider.class).setRequired(true))
+                .add(createServiceDependency().setService(ISwitchManager.class).setRequired(true))
+                .add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
+                .add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true)));
+
+        Dictionary<String, Object> lbaasPoolHandlerProperties = new Hashtable<>();
+        lbaasPoolHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY,
+                AbstractEvent.HandlerType.NEUTRON_LOAD_BALANCER_POOL);
+
+        manager.add(createComponent()
+                .setInterface(new String[]{INeutronLoadBalancerPoolAware.class.getName(),
+                        AbstractHandler.class.getName()}, lbaasPoolHandlerProperties)
+                .setImplementation(LBaaSPoolHandler.class)
+                .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
+                .add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true))
+                .add(createServiceDependency().setService(INeutronLoadBalancerCRUD.class).setRequired(true))
+                .add(createServiceDependency().setService(LoadBalancerProvider.class).setRequired(true))
+                .add(createServiceDependency().setService(ISwitchManager.class).setRequired(true))
+                .add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
+                .add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true)));
+
+        Dictionary<String, Object> lbaasPoolMemberHandlerProperties = new Hashtable<>();
+        lbaasPoolMemberHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY,
+                AbstractEvent.HandlerType.NEUTRON_LOAD_BALANCER_POOL_MEMBER);
+
+        manager.add(createComponent()
+                .setInterface(new String[] {INeutronLoadBalancerPoolMemberAware.class.getName(),
+                        AbstractHandler.class.getName()}, lbaasPoolMemberHandlerProperties)
+                .setImplementation(LBaaSPoolMemberHandler.class)
+                .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
+                .add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true))
+                .add(createServiceDependency().setService(INeutronLoadBalancerCRUD.class).setRequired(true))
+                .add(createServiceDependency().setService(INeutronLoadBalancerPoolCRUD.class).setRequired(true))
+                .add(createServiceDependency().setService(LoadBalancerProvider.class).setRequired(true))
+                .add(createServiceDependency().setService(ISwitchManager.class).setRequired(true))
+                .add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
+                .add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true)));
+
+        Dictionary<String, Object> portSecurityHandlerProperties = new Hashtable<>();
+        portSecurityHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY,
+                AbstractEvent.HandlerType.NEUTRON_PORT_SECURITY);
+
+        manager.add(createComponent()
+                .setInterface(new String[]{INeutronSecurityRuleAware.class.getName(),
+                                INeutronSecurityGroupAware.class.getName(), AbstractHandler.class.getName()},
+                        portSecurityHandlerProperties)
+                .setImplementation(PortSecurityHandler.class)
+                .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
+                .add(createServiceDependency().setService(SecurityServicesManager.class).setRequired(true)));
+
+        manager.add(createComponent()
+                .setInterface(new String[]{SecurityServicesManager.class.getName()}, null)
+                .setImplementation(SecurityServicesImpl.class));
+
+        Dictionary<String, Object> fWaasHandlerProperties = new Hashtable<>();
+        fWaasHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.NEUTRON_FWAAS);
+
+        manager.add(createComponent()
+                .setInterface(new String[] {INeutronFirewallAware.class.getName(),
+                                INeutronFirewallRuleAware.class.getName(), INeutronFirewallPolicyAware.class.getName(),
+                                AbstractHandler.class.getName()}, fWaasHandlerProperties)
+                .setImplementation(FWaasHandler.class)
+                .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true)));
+
+        manager.add(createComponent()
+                .setInterface(NetworkingProviderManager.class.getName(), null)
+                .setImplementation(ProviderNetworkManagerImpl.class)
+                .add(createServiceDependency().setService(ConfigurationService.class).setRequired(true))
+                .add(createServiceDependency().setService(NetworkingProvider.class)
+                        .setCallbacks("providerAdded", "providerRemoved")));
+
+        manager.add(createComponent()
+                .setInterface(EventDispatcher.class.getName(), null)
+                .setImplementation(EventDispatcherImpl.class)
+                .add(createServiceDependency()
+                        .setService(AbstractHandler.class)
+                        .setCallbacks("eventHandlerAdded", "eventHandlerRemoved")));
+
+        manager.add(createComponent()
+                .setInterface(NeutronL3Adapter.class.getName(), null)
+                .setImplementation(NeutronL3Adapter.class)
+                .add(createServiceDependency().setService(ConfigurationService.class).setRequired(true))
+                .add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true))
+                .add(createServiceDependency().setService(NetworkingProviderManager.class).setRequired(true))
+                .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
+                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
+                .add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
+                .add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true))
+                .add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true))
+                .add(createServiceDependency().setService(MultiTenantAwareRouter.class).setRequired(true))
+                /* ToDo, we should probably just use the NetworkingProvider interface
+                 * This should provide a way of getting service implementations
+                 * Either that, or we should do service lookup at runtime based on getProvider().getName()
+                 * This is a shortcut as for now there will only be one implementation of these classes.
+                 */
+                .add(createServiceDependency().setService(ArpProvider.class).setRequired(false))
+                .add(createServiceDependency().setService(InboundNatProvider.class).setRequired(false))
+                .add(createServiceDependency().setService(OutboundNatProvider.class).setRequired(false))
+                .add(createServiceDependency().setService(RoutingProvider.class).setRequired(false))
+                .add(createServiceDependency().setService(L3ForwardingProvider.class).setRequired(false)));
+
+        manager.add(createComponent()
+                .setInterface(MultiTenantAwareRouter.class.getName(), null)
+                .setImplementation(OpenstackRouter.class));
     }
 
-    /**
-     * Function called when the activator stops just before the
-     * cleanup done by ComponentActivatorAbstractBase.
-     *
-     */
     @Override
-    public void destroy() {
-    }
-
-    /**
-     * Function that is used to communicate to dependency manager the
-     * list of known implementations for services inside a container.
-     *
-     * @return An array containing all the CLASS objects that will be
-     * instantiated in order to get an fully working implementation
-     * Object
-     */
-    @Override
-    public Object[] getImplementations() {
-        Object[] res = {ConfigurationServiceImpl.class,
-                        BridgeConfigurationManagerImpl.class,
-                        TenantNetworkManagerImpl.class,
-                        VlanConfigurationCacheImpl.class,
-                        FloatingIPHandler.class,
-                        NetworkHandler.class,
-                        SubnetHandler.class,
-                        PortHandler.class,
-                        RouterHandler.class,
-                        SouthboundHandler.class,
-                        PortSecurityHandler.class,
-                        ProviderNetworkManagerImpl.class,
-                        EventDispatcherImpl.class,
-                        FWaasHandler.class,
-                        LBaaSHandler.class,
-                        LBaaSPoolHandler.class,
-                        LBaaSPoolMemberHandler.class,
-                        NeutronL3Adapter.class,
-                        OpenstackRouter.class,
-                        SecurityServicesImpl.class};
-        return res;
-    }
-
-    /**
-     * Function that is called when configuration of the dependencies
-     * is required.
-     *
-     * @param c dependency manager Component object, used for
-     * configuring the dependencies exported and imported
-     * @param imp Implementation class that is being configured,
-     * needed as long as the same routine can configure multiple
-     * implementations
-     * @param containerName The containerName being configured, this allow
-     * also optional per-container different behavior if needed, usually
-     * should not be the case though.
-     */
-    @Override
-    public void configureInstance(Component c, Object imp,
-                                  String containerName) {
-        if (imp.equals(ConfigurationServiceImpl.class)) {
-            c.setInterface(ConfigurationService.class.getName(), null);
-            c.add(createServiceDependency().setService(OvsdbConfigurationService.class));
-        }
-
-        if (imp.equals(BridgeConfigurationManagerImpl.class)) {
-            c.setInterface(BridgeConfigurationManager.class.getName(), null);
-            c.add(createServiceDependency().setService(
-                    ConfigurationService.class).setRequired(true));
-            c.add(createServiceDependency().setService(NetworkingProviderManager.class));
-            c.add(createServiceDependency().setService(OvsdbConfigurationService.class));
-        }
-
-        if (imp.equals(TenantNetworkManagerImpl.class)) {
-            c.setInterface(TenantNetworkManager.class.getName(), null);
-            c.add(createServiceDependency().setService(NetworkingProviderManager.class));
-            c.add(createServiceDependency().setService(OvsdbConfigurationService.class));
-            c.add(createServiceDependency().setService(OvsdbConnectionService.class));
-            c.add(createServiceDependency().
-                    setService(INeutronNetworkCRUD.class).
-                    setRequired(true));
-            c.add(createServiceDependency().
-                    setService(INeutronPortCRUD.class).
-                    setRequired(true));
-            c.add(createServiceDependency().setService(VlanConfigurationCache.class));
-        }
-
-        if (imp.equals(VlanConfigurationCacheImpl.class)) {
-            c.setInterface(VlanConfigurationCache.class.getName(), null);
-            c.add(createServiceDependency().setService(OvsdbConfigurationService.class));
-            c.add(createServiceDependency().setService(TenantNetworkManager.class));
-        }
-
-        if (imp.equals(FloatingIPHandler.class)) {
-            Properties floatingIPHandlerPorperties = new Properties();
-            floatingIPHandlerPorperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY,
-                                            AbstractEvent.HandlerType.NEUTRON_FLOATING_IP);
-            c.setInterface(new String[]{INeutronFloatingIPAware.class.getName(),
-                                        AbstractHandler.class.getName()},
-                           floatingIPHandlerPorperties);
-            c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
-            c.add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true));
-        }
-
-        if (imp.equals(NetworkHandler.class)) {
-            Properties networkHandlerProperties = new Properties();
-            networkHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY,
-                                         AbstractEvent.HandlerType.NEUTRON_NETWORK);
-            c.setInterface(new String[]{INeutronNetworkAware.class.getName(),
-                                        AbstractHandler.class.getName()},
-                           networkHandlerProperties);
-            c.add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true));
-            c.add(createServiceDependency().setService(BridgeConfigurationManager.class).setRequired(true));
-            c.add(createServiceDependency().setService(ConfigurationService.class).setRequired(true));
-            c.add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true));
-            c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
-            c.add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true));
-            c.add(createServiceDependency().setService(OvsdbInventoryListener.class).setRequired(true));
-            c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
-            c.add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true));
-        }
-
-        if (imp.equals(SubnetHandler.class)) {
-            Properties subnetHandlerProperties = new Properties();
-            subnetHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.NEUTRON_SUBNET);
-            c.setInterface(new String[]{INeutronSubnetAware.class.getName(),
-                                        AbstractHandler.class.getName()},
-                           subnetHandlerProperties);
-            c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
-            c.add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true));
-        }
-
-        if (imp.equals(PortHandler.class)) {
-            Properties portHandlerProperties = new Properties();
-            portHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.NEUTRON_PORT);
-            c.setInterface(new String[]{INeutronPortAware.class.getName(),
-                                        AbstractHandler.class.getName()},
-                           portHandlerProperties);
-            c.add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true));
-            c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
-            c.add(createServiceDependency().setService(OvsdbInventoryListener.class).setRequired(true));
-            c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
-            c.add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true));
-        }
-
-        if (imp.equals(RouterHandler.class)) {
-            Properties routerHandlerProperties = new Properties();
-            routerHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.NEUTRON_ROUTER);
-            c.setInterface(new String[]{INeutronRouterAware.class.getName(),
-                                        AbstractHandler.class.getName()},
-                           routerHandlerProperties);
-            c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
-            c.add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true));
-        }
-
-        if (imp.equals(SouthboundHandler.class)) {
-            Properties southboundHandlerProperties = new Properties();
-            southboundHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.SOUTHBOUND);
-            c.setInterface(new String[]{OvsdbInventoryListener.class.getName(),
-                                        IInventoryListener.class.getName(),
-                                        AbstractHandler.class.getName()},
-                           southboundHandlerProperties);
-            c.add(createServiceDependency().setService(ConfigurationService.class).setRequired(true));
-            c.add(createServiceDependency().setService(BridgeConfigurationManager.class).setRequired(true));
-            c.add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true));
-            c.add(createServiceDependency().setService(NetworkingProviderManager.class).setRequired(true));
-            c.add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true));
-            c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
-            c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
-            c.add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true));
-        }
-
-        if (imp.equals(LBaaSHandler.class)) {
-            Properties lbaasHandlerProperties = new Properties();
-            lbaasHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY,
-                    AbstractEvent.HandlerType.NEUTRON_LOAD_BALANCER);
-            c.setInterface(new String[] {INeutronLoadBalancerAware.class.getName(),
-                    IInventoryListener.class.getName(),
-                    AbstractHandler.class.getName()},
-                    lbaasHandlerProperties);
-            c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
-            c.add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true));
-            c.add(createServiceDependency().setService(INeutronLoadBalancerCRUD.class).setRequired(true));
-            c.add(createServiceDependency().setService(INeutronLoadBalancerPoolCRUD.class).setRequired(true));
-            c.add(createServiceDependency().setService(LoadBalancerProvider.class).setRequired(true));
-            c.add(createServiceDependency().setService(ISwitchManager.class).setRequired(true));
-            c.add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true));
-            c.add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true));
-        }
-
-        if (imp.equals(LBaaSPoolHandler.class)) {
-            Properties lbaasPoolHandlerProperties = new Properties();
-            lbaasPoolHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY,
-                    AbstractEvent.HandlerType.NEUTRON_LOAD_BALANCER_POOL);
-            c.setInterface(new String[] {INeutronLoadBalancerPoolAware.class.getName(),
-                    AbstractHandler.class.getName()},
-                    lbaasPoolHandlerProperties);
-            c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
-            c.add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true));
-            c.add(createServiceDependency().setService(INeutronLoadBalancerCRUD.class).setRequired(true));
-            c.add(createServiceDependency().setService(LoadBalancerProvider.class).setRequired(true));
-            c.add(createServiceDependency().setService(ISwitchManager.class).setRequired(true));
-            c.add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true));
-            c.add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true));
-        }
-
-        if (imp.equals(LBaaSPoolMemberHandler.class)) {
-            Properties lbaasPoolMemberHandlerProperties = new Properties();
-            lbaasPoolMemberHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY,
-                    AbstractEvent.HandlerType.NEUTRON_LOAD_BALANCER_POOL_MEMBER);
-            c.setInterface(new String[] {INeutronLoadBalancerPoolMemberAware.class.getName(),
-                    AbstractHandler.class.getName()},
-                    lbaasPoolMemberHandlerProperties);
-            c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
-            c.add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true));
-            c.add(createServiceDependency().setService(INeutronLoadBalancerCRUD.class).setRequired(true));
-            c.add(createServiceDependency().setService(INeutronLoadBalancerPoolCRUD.class).setRequired(true));
-            c.add(createServiceDependency().setService(LoadBalancerProvider.class).setRequired(true));
-            c.add(createServiceDependency().setService(ISwitchManager.class).setRequired(true));
-            c.add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true));
-            c.add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true));
-        }
-
-        if (imp.equals(PortSecurityHandler.class)) {
-            Properties portSecurityHandlerProperties = new Properties();
-            portSecurityHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY,
-                                              AbstractEvent.HandlerType.NEUTRON_PORT_SECURITY);
-            c.setInterface(new String[]{INeutronSecurityRuleAware.class.getName(),
-                                        INeutronSecurityGroupAware.class.getName(),
-                            AbstractHandler.class.getName()},
-                           portSecurityHandlerProperties);
-            c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
-            c.add(createServiceDependency().setService(SecurityServicesManager.class).setRequired(true));
-        }
-
-        if (imp.equals(SecurityServicesImpl.class)) {
-            c.setInterface(new String[] {SecurityServicesManager.class.getName()}, null);
-        }
-
-        if (imp.equals(FWaasHandler.class)) {
-            Properties fWaasHandlerProperties = new Properties();
-            fWaasHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.NEUTRON_FWAAS);
-            c.setInterface(new String[] {INeutronFirewallAware.class.getName(),
-                            INeutronFirewallRuleAware.class.getName(),
-                            INeutronFirewallPolicyAware.class.getName(),
-                            AbstractHandler.class.getName()},
-                    fWaasHandlerProperties);
-            c.add(createServiceDependency().setService(EventDispatcher.class).setRequired(true));
-        }
-
-        if (imp.equals(ProviderNetworkManagerImpl.class)) {
-            c.setInterface(NetworkingProviderManager.class.getName(), null);
-            c.add(createServiceDependency()
-                    .setService(ConfigurationService.class)
-                    .setRequired(true));
-            c.add(createServiceDependency()
-                    .setService(NetworkingProvider.class)
-                    .setCallbacks("providerAdded", "providerRemoved"));
-        }
-
-        if (imp.equals(EventDispatcherImpl.class)) {
-            c.setInterface(EventDispatcher.class.getName(), null);
-            c.add(createServiceDependency()
-                          .setService(AbstractHandler.class)
-                          .setCallbacks("eventHandlerAdded", "eventHandlerRemoved"));
-        }
-
-        if (imp.equals(NeutronL3Adapter.class)) {
-            c.setInterface(NeutronL3Adapter.class.getName(), null);
-            c.add(createServiceDependency()
-                          .setService(ConfigurationService.class)
-                          .setRequired(true));
-            c.add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true));
-            c.add(createServiceDependency().setService(NetworkingProviderManager.class).setRequired(true));
-            c.add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true));
-            c.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true));
-            c.add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true));
-            c.add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true));
-            c.add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true));
-            c.add(createServiceDependency().setService(MultiTenantAwareRouter.class).setRequired(true));
-            /* ToDo, we should probably just use the NetworkingProvider interface
-             * This should provide a way of getting service implementations
-             * Either that, or we should do service lookup at runtime based on getProvider().getName()
-             * This is a shortcut as for now there will only be one implementation of these classes.
-             */
-            c.add(createServiceDependency().setService(ArpProvider.class).setRequired(false));
-            c.add(createServiceDependency().setService(InboundNatProvider.class).setRequired(false));
-            c.add(createServiceDependency().setService(OutboundNatProvider.class).setRequired(false));
-            c.add(createServiceDependency().setService(RoutingProvider.class).setRequired(false));
-            c.add(createServiceDependency().setService(L3ForwardingProvider.class).setRequired(false));
-        }
-
-        if (imp.equals(OpenstackRouter.class)) {
-            c.setInterface(MultiTenantAwareRouter.class.getName(), null);
-        }
+    public void destroy(BundleContext context, DependencyManager manager) throws Exception {
     }
 }

@@ -53,7 +53,6 @@ public class OvsdbNodeDataChangeListener implements DataChangeListener, AutoClos
             }
            }
        }
-       // TODO handle case of updates to ovsdb nodes as needed
 
         Map<InstanceIdentifier<?>, DataObject> originalDataObject = changes.getOriginalData();
         Set<InstanceIdentifier<?>> iID = changes.getRemovedPaths();
@@ -63,6 +62,26 @@ public class OvsdbNodeDataChangeListener implements DataChangeListener, AutoClos
                     cm.disconnect((OvsdbNodeAugmentation)originalDataObject.get(instanceIdentifier));
                 } catch (UnknownHostException e) {
                     LOG.warn("Failed to disconnect ovsdbNode", e);
+                }
+            }
+        }
+
+        for( Entry<InstanceIdentifier<?>, DataObject> original : changes.getOriginalData().entrySet()) {
+            if(original.getValue() instanceof OvsdbNodeAugmentation) {
+                try {
+                 cm.disconnect((OvsdbNodeAugmentation)original.getValue());
+             } catch (UnknownHostException e) {
+                 LOG.warn("Failed to connect to ovsdbNode", e);
+             }
+            }
+        }
+
+        for( Entry<InstanceIdentifier<?>, DataObject> updated : changes.getUpdatedData().entrySet()) {
+            if (updated.getValue() instanceof OvsdbNodeAugmentation) {
+                try {
+                    cm.connect((OvsdbNodeAugmentation)updated.getValue());
+                } catch (UnknownHostException e) {
+                    LOG.warn("Failed to update ovsdbNode", e);
                 }
             }
         }

@@ -70,6 +70,15 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         return client;
     }
 
+    public void disconnect(OvsdbNodeAugmentation ovsdbNode) throws UnknownHostException {
+        OvsdbClientKey key = new OvsdbClientKey(ovsdbNode.getIp(), ovsdbNode.getPort());
+        OvsdbClient client = clients.get(key);
+        if (client != null) {
+            client.disconnect();
+            disconnected(client);
+        }
+    }
+
     @Override
     public void close() throws Exception {
         for(OvsdbClient client: clients.values()) {

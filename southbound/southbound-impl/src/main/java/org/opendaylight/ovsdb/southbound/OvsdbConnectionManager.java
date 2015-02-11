@@ -13,14 +13,24 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.overlay.rev150105.IpPortLocator;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAttributes;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbManagedNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.CheckedFuture;
 
 public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoCloseable {
     Map<OvsdbClientKey,OvsdbConnectionInstance> clients = new ConcurrentHashMap<OvsdbClientKey,OvsdbConnectionInstance>();
@@ -86,5 +96,57 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         }
     }
 
+    public OvsdbClient getClient(OvsdbClientKey key) {
+        return clients.get(key);
+    }
 
+    public OvsdbClient getClient(IpPortLocator loc) {
+        Preconditions.checkNotNull(loc);
+        return getClient(new OvsdbClientKey(loc));
+    }
+
+    public OvsdbClient getClient(OvsdbBridgeAttributes mn) {
+        Preconditions.checkNotNull(mn);
+        try {
+            OvsdbNodeRef ref = mn.getManagedBy();
+            if(ref != null) {
+                ReadOnlyTransaction transaction = db.newReadOnlyTransaction();
+                CheckedFuture<?, ReadFailedException> nf = transaction.read(LogicalDatastoreType.OPERATIONAL, ref.getValue());
+                transaction.close();
+                Object obj = nf.get();
+                if(obj instanceof Node) {
+                    OvsdbNodeAugmentation ovsdbNode = ((Node)obj).getAugmentation(OvsdbNodeAugmentation.class);
+                    if(ovsdbNode !=null) {
+                        return getClient(ovsdbNode);
+                    } else {
+                        LOG.warn("OvsdbManagedNode {} claims to be managed by {} but that OvsdbNode does not exist",mn,ref.getValue());
+                        return null;
+                    }
+                } else {
+                    LOG.warn("Mysteriously got back a thing which is *not* a topology Node: {}",obj);
+                    return null;
+                }
+            } else {
+                LOG.warn("Cannot find client for OvsdbManagedNode without a specified ManagedBy {}",mn);
+                return null;
+            }
+         } catch (Exception e) {
+             LOG.warn("Failed to get OvsdbNode that manages OvsdbManagedNode {}",mn, e);
+             return null;
+         }
+    }
+
+    public OvsdbClient getClient(Node node) {
+        Preconditions.checkNotNull(node);
+        OvsdbNodeAugmentation ovsdbNode = node.getAugmentation(OvsdbNodeAugmentation.class);
+        OvsdbManagedNodeAugmentation ovsdbManagedNode = node.getAugmentation(OvsdbManagedNodeAugmentation.class);
+        if(ovsdbNode != null) {
+            return getClient(ovsdbNode);
+        } else if (ovsdbManagedNode != null) {
+            return getClient(ovsdbManagedNode);
+        } else {
+            LOG.warn("This is not a node that gives any hint how to find its OVSDB Manager: {}",node);
+            return null;
+        }
+    }
 }

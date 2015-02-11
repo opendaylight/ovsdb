@@ -22,6 +22,29 @@
       "revId": "2b22f367942ca520ecdac982c0c4217419c48696",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_2befbeea",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbNodeDataChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-11T20:52:31Z",
+      "side": 1,
+      "message": "Sam,\n\nQuestion... (and this gets to your connect on update question).  Could you see the possibility of someone editing an ovsdb node to use a different port etc?\n\nSomething like\n\nip 8.8.8.8\nport: 6640\n\nBut then later they edit the ovsdb node to be\n\nip 8.8.8.8\nport 6641\n\n?\n\nIn that kind of an update case, I would expect we might want to \n\u0027disconnect\u0027 from 6640, and then \u0027connect\u0027 to 6641...\n\nBut not sure if that\u0027s a real case... I guess the question is... what would an update case look like for us?",
+      "range": {
+        "startLine": 71,
+        "startChar": 0,
+        "endLine": 71,
+        "endChar": 16
+      },
+      "revId": "2b22f367942ca520ecdac982c0c4217419c48696",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

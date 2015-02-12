@@ -45,6 +45,30 @@
       "revId": "2b22f367942ca520ecdac982c0c4217419c48696",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_2455abfa",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbNodeDataChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-02-12T18:18:47Z",
+      "side": 1,
+      "message": "isn\u0027t it that in this scenario, ovsdb will disconnect and connect again?",
+      "parentUuid": "7a96c907_2befbeea",
+      "range": {
+        "startLine": 71,
+        "startChar": 0,
+        "endLine": 71,
+        "endChar": 16
+      },
+      "revId": "2b22f367942ca520ecdac982c0c4217419c48696",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

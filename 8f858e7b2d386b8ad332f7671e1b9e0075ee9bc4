@@ -22,6 +22,30 @@
       "revId": "8f858e7b2d386b8ad332f7671e1b9e0075ee9bc4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e40ca33d",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbNodeDataChangeListener.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-12T18:05:14Z",
+      "side": 1,
+      "message": "I think Sam is probably right here, if we already have a connection for the ip-port-locator in question, we don\u0027t need to do anything at all.\n\nShould be a simple check :)",
+      "parentUuid": "7a96c907_ae3f5c86",
+      "range": {
+        "startLine": 72,
+        "startChar": 32,
+        "endLine": 72,
+        "endChar": 53
+      },
+      "revId": "8f858e7b2d386b8ad332f7671e1b9e0075ee9bc4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

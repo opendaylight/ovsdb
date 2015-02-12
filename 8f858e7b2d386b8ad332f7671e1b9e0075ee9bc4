@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_ae3f5c86",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbNodeDataChangeListener.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-02-12T02:43:09Z",
+      "side": 1,
+      "message": "Should the actual data be checked to determine if it is something that would need a disconnect? There are various cases where you would update an ovsdb node but it shouldn\u0027t disconnect.\n\nWhen does this listener fire - only when something from the northbound restconf updates the datastore? Or can any other update to the datastore make it fire?",
+      "range": {
+        "startLine": 72,
+        "startChar": 32,
+        "endLine": 72,
+        "endChar": 53
+      },
+      "revId": "8f858e7b2d386b8ad332f7671e1b9e0075ee9bc4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

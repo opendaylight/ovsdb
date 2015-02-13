@@ -143,6 +143,7 @@ public class PipelineOrchestratorImpl implements PipelineOrchestrator, Opendayli
     }
 
 
+    /* TODO ADSAL: replace onNodeUpdated with dataChangeListener: https://bugs.opendaylight.org/show_bug.cgi?id=2707 */
     /**
      * Process the Node update notification. Check for Openflow node and make sure if the bridge is part of the Pipeline before
      * programming the Pipeline specific flows.

@@ -13,7 +13,18 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <repository>mvn:org.opendaylight.yangtools/features-yangtools/${yangtools.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.controller/features-mdsal/${mdsal.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.controller/features-restconf/${mdsal.version}/xml/features</repository>
-  <feature name='odl-ovsdb-southbound-api' version='${project.version}' description='OpenDaylight :: southbound :: api '>
+  <feature name='odl-ovsdb-southbound-all' version='${project.version}' description='OpenDaylight :: southbound :: All'>
+        <!--
+          List all of the user consumable features you define in this feature file here.
+          Generally you would *not* list individual bundles here, but only features defined in *this* file.
+          It is useful to list them in the same order they occur in the file.
+        -->
+        <feature version='${project.version}'>odl-ovsdb-southbound-api</feature>
+        <feature version='${project.version}'>odl-ovsdb-southbound-impl</feature>
+        <feature version='${project.version}'>odl-ovsdb-southbound-impl-rest</feature>
+        <feature version='${project.version}'>odl-ovsdb-southbound-impl-ui</feature>
+  </feature>
+    <feature name='odl-ovsdb-southbound-api' version='${project.version}' description='OpenDaylight :: southbound :: api '>
     <feature version='${yangtools.version}'>odl-yangtools-models</feature>
     <bundle>mvn:org.opendaylight.ovsdb/southbound-api/${project.version}</bundle>
   </feature>

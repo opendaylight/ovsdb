@@ -20,6 +20,7 @@ import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
+import org.opendaylight.ovsdb.southbound.OvsdbDataCollectionOperation.OperationType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.overlay.rev150105.IpPortLocator;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbManagedNodeAugmentation;
@@ -38,8 +39,11 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     DataBroker db;
 
+    private OvsdbOperationalDataCollectionManager ovsdbOperDataCollectionManager;
+
     public OvsdbConnectionManager(DataBroker db) {
         this.db = db;
+        ovsdbOperDataCollectionManager = new OvsdbOperationalDataCollectionManagerImpl();
     }
 
     @Override
@@ -54,6 +58,9 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 SouthboundMapper.createNode(client));
         // TODO - Check the future and retry if needed
         transaction.submit();
+
+        // Hook it to bridge operational data collector
+        ovsdbOperDataCollectionManager.enqueue(new OvsdbBridgeOperDataCollector(OperationType.FETCH_OVSDB_OPER_DATA,externalClient,db));
     }
 
     @Override

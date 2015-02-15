@@ -1,21 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-    <features name="ovsdb-${project.version}"
+<features name="ovsdb-${project.version}"
           xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
-    <repository>mvn:org.opendaylight.controller/features-nsf/${nsf.version}/xml/features</repository>
-    <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin-extension/${openflowplugin.version}/xml/features</repository>
-    <repository>mvn:org.opendaylight.ovsdb/features-ovsdb/${ovsdb.library.version}/xml/features</repository>
-    <repository>mvn:org.opendaylight.sfc/features-sfc/0.1.0-SNAPSHOT/xml/features</repository>
 
-    <feature name="odl-ovsdb-ovssfc"
-             description="OpenDaylight :: OVSDB :: OVS Service Function Chaining"
-             version='${ovsdb.ovssfc.version}'>
-        <feature version="${ovsdb.plugin.version}">odl-ovsdb-plugin</feature>
-        <feature version="${openflowplugin.version}">odl-openflowplugin-nxm-extensions</feature>
-        <feature version="${nsf.version}">odl-nsf-all</feature>
-        <feature version='0.1.0-SNAPSHOT'>odl-sfc-provider</feature>
-        <feature version='0.1.0-SNAPSHOT'>odl-sfc-model</feature>
-        <bundle>mvn:org.opendaylight.ovsdb/ovssfc/${ovsdb.ovssfc.version}</bundle>
-    </feature>
+  <feature name="odl-ovsdb-ovssfc"
+           description="OpenDaylight :: OVSDB :: OVS Service Function Chaining"
+           version='${ovsdb.ovssfc.version}'>
+  </feature>
 </features>

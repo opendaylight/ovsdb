@@ -28,27 +28,6 @@
   </properties>
   <dependencies>
     <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>features-ovsdb</artifactId>
-      <version>${ovsdb.library.version}</version>
-      <classifier>features</classifier>
-      <type>xml</type>
-      </dependency>
-    <dependency>
-      <groupId>org.opendaylight.sfc</groupId>
-      <artifactId>features-sfc</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
-      <classifier>features</classifier>
-      <type>xml</type>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.openflowplugin</groupId>
-      <artifactId>features-openflowplugin-extension</artifactId>
-      <version>${openflowplugin.version}</version>
-      <classifier>features</classifier>
-      <type>xml</type>
-    </dependency>
-    <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>features-test</artifactId>
     </dependency>
@@ -56,14 +35,6 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>opendaylight-karaf-empty</artifactId>
       <type>zip</type>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>plugin</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>ovssfc</artifactId>
     </dependency>
   </dependencies>
   <build>

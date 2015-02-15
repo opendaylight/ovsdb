@@ -34,8 +34,6 @@
     <module>utils/mdsal-openflow</module>
     <module>openstack/net-virt</module>
     <module>openstack/net-virt-providers</module>
-    <module>ovs-sfc</module>
-    <module>southbound</module>
     <!-- <module>southbound</module> REVERT-ME -->
     <!-- Integration Tests -->
     <module>integrationtest</module>

@@ -277,6 +277,30 @@ public class OvsdbConnectionService implements OvsdbConnection {
             @Override
             public void run() {
                 OvsdbClient client = getChannelClient(channel, ConnectionType.PASSIVE, Executors.newFixedThreadPool(NUM_THREADS));
+
+                SslHandler sslHandler = (SslHandler) channel.pipeline().get("ssl");
+                if (sslHandler != null) {
+                    //Wait until ssl handshake is complete
+                    int count = 0;
+                    logger.debug("Check if ssl handshake is done");
+                    while (sslHandler.engine().getSession().getCipherSuite()
+                                            .equals("SSL_NULL_WITH_NULL_NULL")
+                                            && count < 10) {
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            logger.error("Exception : {}", e.toString());
+                            e.printStackTrace();
+                        }
+                        count++;
+                    }
+                    if (sslHandler.engine().getSession().getCipherSuite()
+                                           .equals("SSL_NULL_WITH_NULL_NULL")) {
+                        logger.debug("Ssl hanshake is not compelete yet");
+                        return;
+                    }
+                }
+                logger.debug("Notify listener");
                 for (OvsdbConnectionListener listener : connectionListeners) {
                     listener.connected(client);
                 }

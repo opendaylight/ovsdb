@@ -10,8 +10,6 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
 
-import java.util.Collection;
-
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
@@ -20,7 +18,6 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderCo
 import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
-import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +28,7 @@ public class MdsalConsumerImpl implements BindingAwareConsumer, MdsalConsumer, B
     private ConsumerContext consumerContext = null;
     private DataBroker dataBroker;
     private NotificationProviderService notificationService;
+    private FlowCapableNodeDataChangeListener flowCapableNodeChangeListener;
 
     static final Logger logger = LoggerFactory.getLogger(MdsalConsumerImpl.class);
 
@@ -61,6 +59,7 @@ public class MdsalConsumerImpl implements BindingAwareConsumer, MdsalConsumer, B
         this.consumerContext = session;
         dataBroker = session.getSALService(DataBroker.class);
         logger.info("OVSDB Neutron Session Initialized with CONSUMER CONTEXT {}", session.toString());
+        flowCapableNodeChangeListener = new FlowCapableNodeDataChangeListener(dataBroker);
     }
 
     @Override

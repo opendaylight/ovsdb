@@ -10,43 +10,19 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-
-import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
-import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorRemoved;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorUpdated;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRef;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeRemoved;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeUpdated;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.OpendaylightInventoryListener;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
-import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.InstanceIdentifierBuilder;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-
-public class PipelineOrchestratorImpl implements PipelineOrchestrator, OpendaylightInventoryListener, TransactionChainListener {
+public class PipelineOrchestratorImpl implements PipelineOrchestrator {
 
     private static final Logger logger = LoggerFactory.getLogger(PipelineOrchestratorImpl.class);
     private List<Service> staticPipeline = Lists.newArrayList(
@@ -63,7 +39,6 @@ public class PipelineOrchestratorImpl implements PipelineOrchestrator, Opendayli
                                                                 Service.L2_FORWARDING
                                                               );
     Map<Service, AbstractServiceInstance> serviceRegistry = Maps.newConcurrentMap();
-    private volatile MdsalConsumer mdsalConsumer;
     private volatile BlockingQueue<String> queue;
     private ExecutorService eventHandler;
     public PipelineOrchestratorImpl() {
@@ -93,11 +68,8 @@ public class PipelineOrchestratorImpl implements PipelineOrchestrator, Opendayli
     public void init() {
         eventHandler = Executors.newSingleThreadExecutor();
         this.queue = new LinkedBlockingQueue<String>();
-        NotificationProviderService notificationService = mdsalConsumer.getNotificationService();
-        if (notificationService != null) {
-            notificationService.registerNotificationListener(this);
-        }
     }
+
     public void start() {
         eventHandler.submit(new Runnable()  {
             @Override
@@ -111,6 +83,7 @@ public class PipelineOrchestratorImpl implements PipelineOrchestrator, Opendayli
                          * causes programming issues. Hence delaying the programming by a second to
                          * avoid the clash. This hack/workaround should be removed once Bug 1997 is resolved.
                          */
+                        logger.info(">>>>> dequeue: {}", nodeId);
                         Thread.sleep(1000);
                         for (Service service : staticPipeline) {
                             AbstractServiceInstance serviceInstance = getServiceInstance(service);
@@ -134,76 +107,13 @@ public class PipelineOrchestratorImpl implements PipelineOrchestrator, Opendayli
         eventHandler.shutdownNow();
     }
 
-    void enqueue(String nodeId) {
+    @Override
+    public void enqueue(String nodeId) {
+        logger.info(">>>>> enqueue: {}", nodeId);
         try {
             queue.put(new String(nodeId));
         } catch (InterruptedException e) {
             logger.warn("Failed to enqueue operation {}", nodeId, e);
         }
     }
-
-
-    /* TODO ADSAL: replace onNodeUpdated with dataChangeListener: https://bugs.opendaylight.org/show_bug.cgi?id=2707 */
-    /**
-     * Process the Node update notification. Check for Openflow node and make sure if the bridge is part of the Pipeline before
-     * programming the Pipeline specific flows.
-     */
-    @Override
-    public void onNodeUpdated(NodeUpdated nodeUpdated) {
-        NodeRef ref = nodeUpdated.getNodeRef();
-        InstanceIdentifier<Node> identifier = (InstanceIdentifier<Node>) ref.getValue();
-        logger.debug("Node Update received for : "+identifier.toString());
-        final NodeKey key = identifier.firstKeyOf(Node.class, NodeKey.class);
-        final String nodeId = key.getId().getValue();
-        if (key != null && key.getId().getValue().contains("openflow")) {
-            InstanceIdentifierBuilder<Node> builder = ((InstanceIdentifier<Node>) ref.getValue()).builder();
-            InstanceIdentifierBuilder<FlowCapableNode> augmentation = builder.augmentation(FlowCapableNode.class);
-            final InstanceIdentifier<FlowCapableNode> path = augmentation.build();
-            BindingTransactionChain txChain = mdsalConsumer.getDataBroker().createTransactionChain(this);
-            CheckedFuture readFuture = txChain.newReadWriteTransaction().read(LogicalDatastoreType.OPERATIONAL, path);
-            Futures.addCallback(readFuture, new FutureCallback<Optional<? extends DataObject>>() {
-                @Override
-                public void onSuccess(Optional<? extends DataObject> optional) {
-                    if (!optional.isPresent()) {
-                        enqueue(nodeId);
-                    }
-                }
-
-                @Override
-                public void onFailure(Throwable throwable) {
-                    logger.debug(String.format("Can't retrieve node data for node %s. Writing node data with table0.", nodeId));
-                    enqueue(nodeId);
-                }
-            });
-        }
-    }
-
-    @Override
-    public void onTransactionChainFailed(final TransactionChain<?, ?> chain, final AsyncTransaction<?, ?> transaction,
-            final Throwable cause) {
-        logger.error("Failed to export Flow Capable Inventory, Transaction {} failed.",transaction.getIdentifier(),cause);
-    }
-
-    @Override
-    public void onTransactionChainSuccessful(final TransactionChain<?, ?> chain) {
-    }
-
-    @Override
-    public void onNodeConnectorRemoved(NodeConnectorRemoved arg0) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onNodeConnectorUpdated(NodeConnectorUpdated arg0) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onNodeRemoved(NodeRemoved arg0) {
-        // TODO Auto-generated method stub
-
-    }
-
 }

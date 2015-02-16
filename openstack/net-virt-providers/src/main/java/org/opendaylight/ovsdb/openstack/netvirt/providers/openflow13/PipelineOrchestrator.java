@@ -17,4 +17,5 @@ package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
 public interface PipelineOrchestrator {
     public Service getNextServiceInPipeline(Service service);
     AbstractServiceInstance getServiceInstance(Service service);
+    public void enqueue(String nodeId);
 }

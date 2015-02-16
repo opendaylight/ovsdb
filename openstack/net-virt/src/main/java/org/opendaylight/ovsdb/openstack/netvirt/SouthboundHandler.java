@@ -65,6 +65,7 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
 
     @Override
     public void nodeAdded(Node node, InetAddress address, int port) {
+        logger.info("nodeAdded: {}", node);
         this.enqueueEvent(new SouthboundEvent(node, Action.ADD));
     }
 

@@ -16,7 +16,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
         <module>
           <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:southbound:impl">prefix:southbound-impl</type>
-          <name>southbound-default</name>
+          <name>prefix:southbound-impl</name>
           <broker>
             <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-broker-osgi-registry</type>
             <name>binding-osgi-broker</name>

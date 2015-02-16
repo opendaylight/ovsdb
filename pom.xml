@@ -34,13 +34,13 @@
     <module>utils/mdsal-openflow</module>
     <module>openstack/net-virt</module>
     <module>openstack/net-virt-providers</module>
-    <!-- <module>southbound</module> REVERT-ME -->
+    <module>southbound</module>
     <!-- Integration Tests -->
     <module>integrationtest</module>
     <!-- Config Files -->
     <!-- Karaf Distribution -->
     <module>features/ovsdb</module>
-    <module>features/ovs-sfc</module>
+    <!--<module>features/ovs-sfc</module>-->
     <!-- OVSDB Distribution -->
     <module>distribution/opendaylight-karaf</module>
   </modules>

@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_63d87f7b",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-02-17T03:39:12Z",
+      "side": 1,
+      "message": "Does this return null if there is no ssl?\n\nIf no ssl, is there any impact to the code or does it take longer for the connection to work?",
+      "range": {
+        "startLine": 281,
+        "startChar": 41,
+        "endLine": 281,
+        "endChar": 51
+      },
+      "revId": "ec9752b91203885a530a101a3e18782b65b2d76b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

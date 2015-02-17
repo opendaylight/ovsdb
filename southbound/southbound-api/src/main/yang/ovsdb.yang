@@ -52,6 +52,12 @@ module ovsdb {
         description "Augmentation for bridge nodes managed by ovsdb";
         ext:augment-identifier "ovsdb-managed-node-augmentation";
         uses ovsdb-bridge-attributes;
+//        list bridge {
+//            description "All bridges managed by this node. Examples:
+//               br0, br-int, br-tun, etc";
+//            key "bridge-uuid";
+//            uses ovsdb-bridge-attributes;
+//        }
     }
 
     augment "/topo:network-topology/topo:topology/topo:node" {

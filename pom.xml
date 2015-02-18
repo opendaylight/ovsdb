@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<!--
+Copyright (C) 2014 Red Hat, Inc. and others. All rights reserved.
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v1.0 which accompanies this distribution,
+and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -11,39 +20,47 @@
 
   <artifactId>ovsdb</artifactId>
   <version>1.1.0-SNAPSHOT</version>
-  <name>ovsdb</name> <!-- Used by Sonar to set project name -->
+  <name>${project.artifactId}</name>
   <packaging>pom</packaging>
 
   <prerequisites>
-    <maven>3.0</maven>
+    <maven>3.1.1</maven>
   </prerequisites>
 
   <modules>
     <!-- Parent POM files -->
     <module>commons/parent</module>
     <module>commons/integrationtest</module>
+    <module>distribution/opendaylight-karaf</module>
+    <module>features/ovsdb</module>
+    <module>features/ovs-sfc</module>
     <!-- OVSDB Components -->
     <module>library</module>
-    <module>schemas/openvswitch</module>
-    <module>schemas/hardwarevtep</module>
+    <module>northbound</module>
+    <module>openstack/net-virt</module>
+    <module>openstack/net-virt-providers</module>
     <module>plugin</module>
     <module>plugin-shell</module>
     <module>plugin-mdsal-adapter</module>
-    <module>northbound</module>
+    <module>schemas/hardwarevtep</module>
+    <module>schemas/openvswitch</module>
+    <module>southbound</module>
     <module>utils/config</module>
     <module>utils/mdsal-openflow</module>
-    <module>openstack/net-virt</module>
-    <module>openstack/net-virt-providers</module>
-    <module>southbound</module>
     <!-- Integration Tests -->
     <module>integrationtest</module>
-    <!-- Config Files -->
-    <!-- Karaf Distribution -->
-    <module>features/ovsdb</module>
-    <module>features/ovs-sfc</module>
-    <!-- OVSDB Distribution -->
-    <module>distribution/opendaylight-karaf</module>
   </modules>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</connection>

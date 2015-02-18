@@ -10,6 +10,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>features-parent</artifactId>
     <version>1.5.0-SNAPSHOT</version>
+    <relativePath></relativePath>
   </parent>
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>southbound-features</artifactId>
@@ -62,12 +63,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <classifier>features</classifier>
     </dependency>
     <dependency>
-      <groupId>${groupId}</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>southbound-impl</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>${groupId}</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>southbound-api</artifactId>
       <version>${project.version}</version>
     </dependency>

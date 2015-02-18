@@ -42,6 +42,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_5733bd62",
+        "filename": "pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-02-18T14:11:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_dcc37487",
+      "revId": "724b1cc4e1ddd5bb55cac12d040615a1ba710d59",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_9cb96c17",
         "filename": "southbound/southbound-features/pom.xml",
         "patchSetId": 1
@@ -53,6 +71,30 @@
       "writtenOn": "2015-02-18T05:59:27Z",
       "side": 1,
       "message": "is this needed at all?",
+      "range": {
+        "startLine": 13,
+        "startChar": 32,
+        "endLine": 13,
+        "endChar": 33
+      },
+      "revId": "724b1cc4e1ddd5bb55cac12d040615a1ba710d59",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_b7fa4173",
+        "filename": "southbound/southbound-features/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-02-18T14:11:33Z",
+      "side": 1,
+      "message": "A complaint came out from the compiler without it.",
+      "parentUuid": "7a96c907_9cb96c17",
       "range": {
         "startLine": 13,
         "startChar": 32,

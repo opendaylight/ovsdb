@@ -1,83 +1,87 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<!--
+Copyright (C) 2014 Red Hat, Inc. and others. All rights reserved.
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v1.0 which accompanies this distribution,
+and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>odlparent</artifactId>
     <version>1.5.0-SNAPSHOT</version>
-    <relativePath></relativePath>
   </parent>
 
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>commons</artifactId>
-  <name>OVSDB Parent POM</name>
+  <name>${project.artifactId}.parent</name>
   <version>1.3.0-SNAPSHOT</version>
   <packaging>pom</packaging>
+
   <prerequisites>
-    <maven>3.0</maven>
+    <maven>3.1.1</maven>
   </prerequisites>
 
   <properties>
+    <checkstyle.rules.version>0.1.0-SNAPSHOT</checkstyle.rules.version>
     <lifecycle.mapping.version>1.0.0</lifecycle.mapping.version>
     <!-- ODL repository / plugin repository -->
     <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
     <!-- Surefire/Failsafe Arguments -->
     <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
-    <!-- OVSB Component Versions -->
-    <ovsdb.library.version>1.1.0-SNAPSHOT</ovsdb.library.version>
-    <ovsdb.plugin.version>1.1.0-SNAPSHOT</ovsdb.plugin.version>
-    <plugin.shell.version>1.1.0-SNAPSHOT</plugin.shell.version>
+    <!-- OVSDB Component Versions -->
     <openstack.netvirt.version>1.1.0-SNAPSHOT</openstack.netvirt.version>
     <openstack.netvirt.providers.version>1.1.0-SNAPSHOT</openstack.netvirt.providers.version>
+    <ovsdb.library.version>1.1.0-SNAPSHOT</ovsdb.library.version>
     <ovsdb.northbound.version>0.7.0-SNAPSHOT</ovsdb.northbound.version>
-    <schema.openvswitch.version>1.1.0-SNAPSHOT</schema.openvswitch.version>
-    <schema.hardwarevtep.version>1.1.0-SNAPSHOT</schema.hardwarevtep.version>
-    <ovsdb.utils.config.version>1.1.0-SNAPSHOT</ovsdb.utils.config.version>
-    <utils.mdsal.openflow.version>1.1.0-SNAPSHOT</utils.mdsal.openflow.version>
+    <ovsdb.plugin.version>1.1.0-SNAPSHOT</ovsdb.plugin.version>
     <ovsdb.ovssfc.version>0.1.0-SNAPSHOT</ovsdb.ovssfc.version>
+    <ovsdb.utils.config.version>1.1.0-SNAPSHOT</ovsdb.utils.config.version>
+    <plugin.shell.version>1.1.0-SNAPSHOT</plugin.shell.version>
+    <schema.hardwarevtep.version>1.1.0-SNAPSHOT</schema.hardwarevtep.version>
+    <schema.openvswitch.version>1.1.0-SNAPSHOT</schema.openvswitch.version>
+    <utils.mdsal.openflow.version>1.1.0-SNAPSHOT</utils.mdsal.openflow.version>
     <!-- Skip Coverage and IT by default -->
     <skip.coverage>true</skip.coverage>
+    <skip.distribution>false</skip.distribution>
     <skip.integrationtest>true</skip.integrationtest>
     <skip.karaf>false</skip.karaf>
-    <skip.distribution>false</skip.distribution>
-    <!-- The directory where maven was executed -->
+    <!-- The directory where maven was executed TODO see if this can be removed -->
     <root.directory>${env.PWD}</root.directory>
-    <!-- UT reports are per-module -->
-    <sonar.jacoco.reportPath>target/code-coverage/jacoco.exec</sonar.jacoco.reportPath>
     <!-- IT report is aggregated to enable PAX Exam coverage to be logged -->
     <sonar.jacoco.itReportPath>${root.directory}/target/code-coverage/jacoco-it.exec</sonar.jacoco.itReportPath>
     <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-    <!-- Override the JaCoCo version in ODL Parent -->
-    <jacoco.version>0.6.4.201312101107</jacoco.version>
     <!-- ODL Dependency Versions -->
-    <containermanager.version>0.6.0-SNAPSHOT</containermanager.version>
-    <forwardingrulesmanager.version>0.7.0-SNAPSHOT</forwardingrulesmanager.version>
-    <networkconfig.neutron.version>0.5.0-SNAPSHOT</networkconfig.neutron.version>
     <clustering.services.version>0.6.0-SNAPSHOT</clustering.services.version>
-    <sal.version>0.9.0-SNAPSHOT</sal.version>
+    <containermanager.version>0.6.0-SNAPSHOT</containermanager.version>
+    <controller.config.version>0.3.0-SNAPSHOT</controller.config.version>
+    <forwardingrulesmanager.version>0.7.0-SNAPSHOT</forwardingrulesmanager.version>
+    <ietf.model.version>2010.09.24.7-SNAPSHOT</ietf.model.version>
+    <ietf.yang.types.version>2013.07.15.7-SNAPSHOT</ietf.yang.types.version>
     <mdsal.version>1.2.0-SNAPSHOT</mdsal.version>
+    <networkconfig.neutron.version>0.5.0-SNAPSHOT</networkconfig.neutron.version>
+    <northbound.commons.version>0.5.0-SNAPSHOT</northbound.commons.version>
+    <nsf.version>0.5.0-SNAPSHOT</nsf.version>
+    <odl.karaf.base.version>1.5.0-SNAPSHOT</odl.karaf.base.version>
     <opendaylight-l2-types.version>2013.08.27.7-SNAPSHOT</opendaylight-l2-types.version>
-    <openflowplugin.version>0.1.0-SNAPSHOT</openflowplugin.version>
     <openflowjava-nicira.version>0.1.0-SNAPSHOT</openflowjava-nicira.version>
     <openflowjava-extension.version>0.1.0-SNAPSHOT</openflowjava-extension.version>
     <openflowjava.version>0.6.0-SNAPSHOT</openflowjava.version>
-    <controller.config.version>0.3.0-SNAPSHOT</controller.config.version>
+    <openflowplugin.version>0.1.0-SNAPSHOT</openflowplugin.version>
+    <sal.version>0.9.0-SNAPSHOT</sal.version>
     <switchmanager.api.version>0.8.0-SNAPSHOT</switchmanager.api.version>
     <yangtools.version>0.7.0-SNAPSHOT</yangtools.version>
     <yang-ext.version>2013.09.07.7-SNAPSHOT</yang-ext.version>
-    <ietf.model.version>2010.09.24.7-SNAPSHOT</ietf.model.version>
-    <ietf.yang.types.version>2013.07.15.7-SNAPSHOT</ietf.yang.types.version>
-    <northbound.commons.version>0.5.0-SNAPSHOT</northbound.commons.version>
-    <checkstyle.rules.version>0.1.0-SNAPSHOT</checkstyle.rules.version>
     <!-- 3rd Pary Dependency Versions -->
     <commons.collection.version>1.0</commons.collection.version>
+    <httpcomponents.version>4.2.1</httpcomponents.version>
     <portlet.version>2.0</portlet.version>
     <powermock.version>1.5.2</powermock.version>
-    <httpcomponents.version>4.2.1</httpcomponents.version>
-    <karaf.shell.version>3.0.0</karaf.shell.version>
-    <odl.karaf.base.version>1.5.0-SNAPSHOT</odl.karaf.base.version>
-    <nsf.version>0.5.0-SNAPSHOT</nsf.version>
   </properties>
 
   <dependencyManagement>
@@ -103,34 +107,19 @@
         <version>${httpcomponents.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.powermock</groupId>
-        <artifactId>powermock-module-junit4</artifactId>
-        <version>${powermock.version}</version>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>commons.northbound</artifactId>
+        <version>${northbound.commons.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.powermock</groupId>
-        <artifactId>powermock-api-mockito</artifactId>
-        <version>${powermock.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.powermock</groupId>
-        <artifactId>powermock-core</artifactId>
-        <version>${powermock.version}</version>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>config-api</artifactId>
+        <version>${controller.config.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>clustering.services</artifactId>
         <version>${clustering.services.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>sal</artifactId>
-        <version>${sal.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>sal-common-api</artifactId>
-        <version>${mdsal.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -149,12 +138,28 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
+        <artifactId>opendaylight-karaf-empty</artifactId>
+        <version>1.5.0-SNAPSHOT</version>
+        <type>zip</type>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal</artifactId>
+        <version>${sal.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal-binding-api</artifactId>
         <version>${mdsal.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal-binding-config</artifactId>
+        <version>${mdsal.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>sal-common-api</artifactId>
         <version>${mdsal.version}</version>
       </dependency>
       <dependency>
@@ -174,12 +179,12 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller.model</groupId>
-        <artifactId>model-flow-statistics</artifactId>
+        <artifactId>model-flow-service</artifactId>
         <version>${mdsal.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller.model</groupId>
-        <artifactId>model-flow-service</artifactId>
+        <artifactId>model-flow-statistics</artifactId>
         <version>${mdsal.version}</version>
       </dependency>
       <dependency>
@@ -225,79 +230,63 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.yangtools.model</groupId>
-        <artifactId>yang-ext</artifactId>
-        <version>${yang-ext.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools.model</groupId>
         <artifactId>opendaylight-l2-types</artifactId>
         <version>${opendaylight-l2-types.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>opendaylight-karaf-empty</artifactId>
-        <version>1.5.0-SNAPSHOT</version>
-        <type>zip</type>
+        <groupId>org.opendaylight.yangtools.model</groupId>
+        <artifactId>yang-ext</artifactId>
+        <version>${yang-ext.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>commons.northbound</artifactId>
-        <version>${northbound.commons.version}</version>
+        <groupId>org.opendaylight.openflowjava</groupId>
+        <artifactId>openflow-protocol-api</artifactId>
+        <version>${openflowjava.version}</version>
       </dependency>
       <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>config-api</artifactId>
-          <version>${controller.config.version}</version>
+        <groupId>org.opendaylight.openflowjava</groupId>
+        <artifactId>openflow-protocol-impl</artifactId>
+        <version>${openflowjava.version}</version>
       </dependency>
       <dependency>
-          <groupId>org.opendaylight.openflowjava</groupId>
-          <artifactId>openflow-protocol-api</artifactId>
-          <version>${openflowjava.version}</version>
+        <groupId>org.opendaylight.openflowjava</groupId>
+        <artifactId>openflow-protocol-spi</artifactId>
+        <version>${openflowjava.version}</version>
       </dependency>
       <dependency>
-          <groupId>org.opendaylight.openflowjava</groupId>
-          <artifactId>openflow-protocol-spi</artifactId>
-          <version>${openflowjava.version}</version>
-      </dependency>
-        <dependency>
-            <groupId>org.opendaylight.openflowjava</groupId>
-            <artifactId>openflow-protocol-impl</artifactId>
-            <version>${openflowjava.version}</version>
-        </dependency>
-      <dependency>
-          <groupId>org.opendaylight.openflowjava</groupId>
-          <artifactId>util</artifactId>
-          <version>${openflowjava.version}</version>
+        <groupId>org.opendaylight.openflowjava</groupId>
+        <artifactId>util</artifactId>
+        <version>${openflowjava.version}</version>
       </dependency>
       <dependency>
-          <groupId>org.opendaylight.openflowplugin</groupId>
-          <artifactId>openflowjava-extension-nicira-api</artifactId>
-          <version>${openflowjava-nicira.version}</version>
+        <groupId>org.opendaylight.openflowplugin</groupId>
+        <artifactId>openflowplugin</artifactId>
+        <version>${openflowplugin.version}</version>
       </dependency>
       <dependency>
-          <groupId>org.opendaylight.openflowplugin</groupId>
-          <artifactId>openflowjava-extension-nicira</artifactId>
-          <version>${openflowjava-nicira.version}</version>
+        <groupId>org.opendaylight.openflowplugin</groupId>
+        <artifactId>openflowjava-extension-nicira</artifactId>
+        <version>${openflowjava-nicira.version}</version>
       </dependency>
       <dependency>
-          <groupId>org.opendaylight.openflowplugin</groupId>
-          <artifactId>openflowplugin-extension-api</artifactId>
-          <version>${openflowplugin.version}</version>
+        <groupId>org.opendaylight.openflowplugin</groupId>
+        <artifactId>openflowjava-extension-nicira-api</artifactId>
+        <version>${openflowjava-nicira.version}</version>
       </dependency>
       <dependency>
-          <groupId>org.opendaylight.openflowplugin</groupId>
-          <artifactId>openflowplugin-extension-nicira</artifactId>
-          <version>${openflowplugin.version}</version>
+        <groupId>org.opendaylight.openflowplugin</groupId>
+        <artifactId>openflowplugin-extension-api</artifactId>
+        <version>${openflowplugin.version}</version>
       </dependency>
       <dependency>
-          <groupId>org.opendaylight.openflowplugin</groupId>
-          <artifactId>openflowplugin-extension-nicira-config</artifactId>
-          <version>${openflowplugin.version}</version>
+        <groupId>org.opendaylight.openflowplugin</groupId>
+        <artifactId>openflowplugin-extension-nicira</artifactId>
+        <version>${openflowplugin.version}</version>
       </dependency>
       <dependency>
-          <groupId>org.opendaylight.openflowplugin</groupId>
-          <artifactId>openflowplugin</artifactId>
-          <version>${openflowplugin.version}</version>
+        <groupId>org.opendaylight.openflowplugin</groupId>
+        <artifactId>openflowplugin-extension-nicira-config</artifactId>
+        <version>${openflowplugin.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.ovsdb</groupId>
@@ -306,13 +295,8 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.ovsdb</groupId>
-        <artifactId>plugin</artifactId>
-        <version>${ovsdb.plugin.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.ovsdb</groupId>
-        <artifactId>plugin-shell</artifactId>
-        <version>${plugin.shell.version}</version>
+        <artifactId>northbound</artifactId>
+        <version>${ovsdb.northbound.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.ovsdb</groupId>
@@ -326,8 +310,18 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.ovsdb</groupId>
-        <artifactId>northbound</artifactId>
-        <version>${ovsdb.northbound.version}</version>
+        <artifactId>plugin</artifactId>
+        <version>${ovsdb.plugin.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.ovsdb</groupId>
+        <artifactId>plugin-mdsal-adapter</artifactId>
+        <version>${ovsdb.plugin.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.ovsdb</groupId>
+        <artifactId>plugin-shell</artifactId>
+        <version>${plugin.shell.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.ovsdb</groupId>
@@ -341,11 +335,6 @@
       </dependency>
       <dependency>
         <groupId>org.opendaylight.ovsdb</groupId>
-        <artifactId>plugin-mdsal-adapter</artifactId>
-        <version>${ovsdb.plugin.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.ovsdb</groupId>
         <artifactId>utils.config</artifactId>
         <version>${ovsdb.utils.config.version}</version>
       </dependency>
@@ -353,6 +342,21 @@
         <groupId>org.opendaylight.ovsdb</groupId>
         <artifactId>utils.mdsal-openflow</artifactId>
         <version>${utils.mdsal.openflow.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.powermock</groupId>
+        <artifactId>powermock-module-junit4</artifactId>
+        <version>${powermock.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.powermock</groupId>
+        <artifactId>powermock-api-mockito</artifactId>
+        <version>${powermock.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.powermock</groupId>
+        <artifactId>powermock-core</artifactId>
+        <version>${powermock.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -517,12 +521,10 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>${maven.surefire.version}</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-failsafe-plugin</artifactId>
-          <version>${failsafe.version}</version>
           <executions>
             <execution>
               <id>failsafe-integration-tests</id>
@@ -594,93 +596,13 @@
       </plugins>
     </pluginManagement>
   </build>
-  <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
+
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</developerConnection>
     <tag>HEAD</tag>
     <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
   </scm>
-
-  <repositories>
-    <!-- Opendaylight public group -->
-    <repository>
-      <id>opendaylight-public</id>
-      <name>opendaylight-public</name>
-      <url>${nexusproxy}/groups/public/</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <releases>
-        <enabled>true</enabled>
-        <updatePolicy>never</updatePolicy>
-      </releases>
-    </repository>
-    <!-- OpenDayLight Released artifact -->
-    <repository>
-      <id>opendaylight-release</id>
-      <name>opendaylight-release</name>
-      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.release/</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-    </repository>
-    <!-- OpenDayLight Snapshot artifact -->
-    <repository>
-      <id>opendaylight-snapshot</id>
-      <name>opendaylight-snapshot</name>
-      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </repository>
-  </repositories>
-
-  <pluginRepositories>
-    <!-- Opendaylight public group -->
-    <pluginRepository>
-      <id>opendaylight-public</id>
-      <name>opendaylight-public</name>
-      <url>${nexusproxy}/groups/public/</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <releases>
-        <enabled>true</enabled>
-        <updatePolicy>never</updatePolicy>
-      </releases>
-    </pluginRepository>
-    <!-- OpenDayLight Released artifact -->
-    <pluginRepository>
-      <id>opendaylight-release</id>
-      <name>opendaylight-release</name>
-      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.release/</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-    </pluginRepository>
-    <!-- OpenDayLight Snapshot artifact -->
-    <pluginRepository>
-      <id>opendaylight-snapshot</id>
-      <name>opendaylight-snapshot</name>
-      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </pluginRepository>
-  </pluginRepositories>
 
   <profiles>
     <profile>

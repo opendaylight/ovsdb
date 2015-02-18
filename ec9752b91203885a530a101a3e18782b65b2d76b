@@ -22,6 +22,30 @@
       "revId": "ec9752b91203885a530a101a3e18782b65b2d76b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7c9d8065",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1018
+      },
+      "writtenOn": "2015-02-18T06:51:05Z",
+      "side": 1,
+      "message": "Yes it will return null when there is no ssl. Line 247 in this file has:\n                        channel.pipeline().addLast(\"ssl\", new SslHandler(engine));\n\nAnd this line only executes when sslContext exists, i.e, we only insert ssl handler to channel pipeline with name \"ssl\" when we have ssl context.\n\nWhen there is no ssl, the get method will fail to find a channel handler with name \"ssl\" and it will return null by method definition (http://netty.io/4.0/api/io/netty/channel/ChannelPipeline.html) :\n    Returns:\n        the handler with the specified name. null if there\u0027s no such handler in this pipeline.\n\nIf there is no ssl, the flow will be:\n1. Check if pipeline has handler with name \"ssl\".\n2. Get null as search result and skip the operations in if{} below.\n3. Notify all listeners. \n\nThere is no delay on connection to work if there is no ssl. Please note the connection handshake (either tcp or ssl) is already running on different thread context and we never try to block or interrupt that thread here. So there is no impact on getting connection ready.\n\nHere we use another thread and the only job for this thread is to notify all listeners. For tcp connection, it will just skip the checks and go ahead to notify all listeners. I don\u0027t think there is impact on tcp side.",
+      "parentUuid": "7a96c907_63d87f7b",
+      "range": {
+        "startLine": 281,
+        "startChar": 41,
+        "endLine": 281,
+        "endChar": 51
+      },
+      "revId": "ec9752b91203885a530a101a3e18782b65b2d76b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_9246334e",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbBridgeOperDataCollector.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-02-18T17:40:42Z",
+      "side": 1,
+      "message": "yes, that\u0027s in Todo :)",
+      "parentUuid": "7a96c907_57209dab",
+      "range": {
+        "startLine": 53,
+        "startChar": 0,
+        "endLine": 53,
+        "endChar": 2
+      },
+      "revId": "678af8705c248f29733188ca7be961a73bf996cc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_f710c95a",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbBridgeOperDataCollector.java",
         "patchSetId": 1
@@ -36,6 +60,24 @@
       "writtenOn": "2015-02-18T17:10:27Z",
       "side": 1,
       "message": "Don\u0027t forget to make sure that we have the back pointer from ovsdb-node to the ovsdb-managed-node so we can see all nodes managed by a particular ovsdb-managed-node",
+      "revId": "678af8705c248f29733188ca7be961a73bf996cc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_32771fa2",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbBridgeOperDataCollector.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-02-18T17:40:42Z",
+      "side": 1,
+      "message": "Yup, next patch will have it.",
+      "parentUuid": "7a96c907_f710c95a",
       "revId": "678af8705c248f29733188ca7be961a73bf996cc",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

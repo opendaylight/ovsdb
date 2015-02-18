@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "7a96c907_b70ec139",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-18T17:13:13Z",
+      "side": 1,
+      "message": "Please use ovsd-node-augmented nodes to represent the ovsdb instance, and ovsdb-managed-node to represent the bridges... as such, having a list of bridges under a bridge does not make sense.  Also, breaks topology, which breaks overlay :(",
+      "range": {
+        "startLine": 61,
+        "startChar": 4,
+        "endLine": 61,
+        "endChar": 5
+      },
+      "revId": "9ecaeb37f361679e817f6be1cc88434ca83748e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_5c3f6488",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbMonitorCallback.java",
         "patchSetId": 1

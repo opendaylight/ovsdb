@@ -22,6 +22,30 @@
       "revId": "65120cc7a1d1a0639b0584a189dc3bb2a3a9f529",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_48db1a50",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/impl/InventoryServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-02-19T14:18:22Z",
+      "side": 0,
+      "message": "yeah, this one was never used. Even the props set were not really used in ovsdb. It was really just to satisfy the IPlugin interface.",
+      "parentUuid": "7a96c907_885042d5",
+      "range": {
+        "startLine": 123,
+        "startChar": 63,
+        "endLine": 123,
+        "endChar": 84
+      },
+      "revId": "65120cc7a1d1a0639b0584a189dc3bb2a3a9f529",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

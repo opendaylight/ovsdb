@@ -34,7 +34,7 @@ public class TyperUtils {
     private static final String GETCOLUMN_ENDS_WITH="Column";
     private static final String GETROW_ENDS_WITH="Row";
 
-    private static <T> String getTableName (Class<T> klazz) {
+    public static <T> String getTableName (Class<T> klazz) {
         TypedTable typedTable = klazz.getAnnotation(TypedTable.class);
         if (typedTable != null) {
             return typedTable.name();

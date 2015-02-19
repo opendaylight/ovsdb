@@ -68,6 +68,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <northbound.commons.version>0.5.0-SNAPSHOT</northbound.commons.version>
     <nsf.version>0.5.0-SNAPSHOT</nsf.version>
     <odl.karaf.base.version>1.5.0-SNAPSHOT</odl.karaf.base.version>
+    <odlparent.version>1.5.0-SNAPSHOT</odlparent.version>
     <opendaylight-l2-types.version>2013.08.27.7-SNAPSHOT</opendaylight-l2-types.version>
     <openflowjava-nicira.version>0.1.0-SNAPSHOT</openflowjava-nicira.version>
     <openflowjava-extension.version>0.1.0-SNAPSHOT</openflowjava-extension.version>
@@ -193,6 +194,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <version>${mdsal.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.opendaylight.odlparent</groupId>
+        <artifactId>features-test</artifactId>
+        <version>${odlparent.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
         <groupId>org.opendaylight.yangtools</groupId>
         <artifactId>concepts</artifactId>
         <version>${yangtools.version}</version>
@@ -206,12 +213,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <groupId>org.opendaylight.yangtools</groupId>
         <artifactId>yang-common</artifactId>
         <version>${yangtools.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>features-test</artifactId>
-        <version>${yangtools.version}</version>
-        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.yangtools.model</groupId>

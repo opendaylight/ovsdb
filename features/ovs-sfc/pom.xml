@@ -28,13 +28,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
   <dependencies>
     <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>features-test</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>opendaylight-karaf-empty</artifactId>
       <type>zip</type>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.odlparent</groupId>
+      <artifactId>features-test</artifactId>
     </dependency>
   </dependencies>
 
@@ -79,7 +79,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <karaf.distro.version>1.5.0-SNAPSHOT</karaf.distro.version>
           </systemPropertyVariables>
           <dependenciesToScan>
-           <dependency>org.opendaylight.yangtools:features-test</dependency>
+           <dependency>org.opendaylight.odlparent:features-test</dependency>
           </dependenciesToScan>
         </configuration>
       </plugin>

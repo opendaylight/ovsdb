@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_685376e2",
+        "filename": "integrationtest/src/test/java/org/opendaylight/ovsdb/integrationtest/plugin/OvsdbPluginIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-19T13:23:20Z",
+      "side": 1,
+      "message": "how about using X.class.isAssignableFrom((Class) node)) or\nif (node instanceof OvsdbNodeAugmentation) {...}\nin order to verify that the node is what is being expected?",
+      "range": {
+        "startLine": 145,
+        "startChar": 10,
+        "endLine": 145,
+        "endChar": 22
+      },
+      "revId": "333bb9c494b25538d842bc0931cc0d776f000256",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -10,13 +10,11 @@
 package org.opendaylight.ovsdb.plugin.impl;
 
 import java.net.InetAddress;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -25,7 +23,6 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.UpdateType;
-import org.opendaylight.controller.sal.inventory.IPluginOutInventoryService;
 import org.opendaylight.ovsdb.lib.message.TableUpdate;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Row;
@@ -50,10 +47,7 @@ import com.google.common.collect.Maps;
 public class InventoryServiceImpl implements OvsdbInventoryService {
     private static final Logger logger = LoggerFactory
             .getLogger(InventoryServiceImpl.class);
-    private final Set<IPluginOutInventoryService> pluginOutInventoryServices =
-            new CopyOnWriteArraySet<IPluginOutInventoryService>();
     private ConcurrentMap<Node, Map<String, Property>> nodeProps = new ConcurrentHashMap<Node, Map<String, Property>>();
-    private ConcurrentMap<NodeConnector, Map<String, Property>> nodeConnectorProps = new ConcurrentHashMap<NodeConnector, Map<String, Property>>();
     private ConcurrentMap<Node, NodeDatabase> dbCache = Maps.newConcurrentMap();
     private ScheduledExecutorService executor;
     private OvsdbConfigurationService ovsdbConfigurationService;
@@ -66,8 +60,6 @@ public class InventoryServiceImpl implements OvsdbInventoryService {
      *
      */
     public void init() {
-        Node.NodeIDType.registerIDType("OVS", String.class);
-        NodeConnector.NodeConnectorIDType.registerIDType("OVS", String.class, "OVS");
         this.executor = Executors.newSingleThreadScheduledExecutor();
     }
 
@@ -98,14 +90,6 @@ public class InventoryServiceImpl implements OvsdbInventoryService {
         this.executor.shutdownNow();
     }
 
-    public void setPluginOutInventoryServices(IPluginOutInventoryService service) {
-            this.pluginOutInventoryServices.add(service);
-    }
-
-    public void unsetPluginOutInventoryServices(IPluginOutInventoryService service) {
-            this.pluginOutInventoryServices.remove(service);
-    }
-
     public void setOvsdbConfigurationService(OvsdbConfigurationService service) {
         ovsdbConfigurationService = service;
     }
@@ -113,18 +97,6 @@ public class InventoryServiceImpl implements OvsdbInventoryService {
     public void unsetConfigurationService(OvsdbConfigurationService service) {
         ovsdbConfigurationService = null;
     }
-
-    @Override
-    public ConcurrentMap<Node, Map<String, Property>> getNodeProps() {
-        return nodeProps;
-    }
-
-    @Override
-    public ConcurrentMap<NodeConnector, Map<String, Property>> getNodeConnectorProps(
-            Boolean refresh) {
-        return nodeConnectorProps;
-    }
-
 
     @Override
     public ConcurrentMap<String, ConcurrentMap<String, Row>> getCache(Node n, String databaseName) {
@@ -257,9 +229,14 @@ public class InventoryServiceImpl implements OvsdbInventoryService {
             nProp.put(prop.getName(), prop);
         }
         nodeProps.put(node, nProp);
+        /*
+         * TODO: Remove following code. It updates to sal about newly added node and
+         * it's property. To move this bundle to MD-SAL we need to store this data in
+         * md-sal config/operational data store.
         for (IPluginOutInventoryService service : pluginOutInventoryServices) {
             service.updateNode(node, type, props);
         }
+        */
     }
 
     @Override
@@ -270,16 +247,16 @@ public class InventoryServiceImpl implements OvsdbInventoryService {
             }
         }
 
-        for (IPluginOutInventoryService service : pluginOutInventoryServices) {
+        /*
+         * TODO: Remove following code. It updates to sal about newly added node and
+         * it's property. To move this bundle to MD-SAL we need to store this data in
+         * md-sal config/operational data store.
+         for (IPluginOutInventoryService service : pluginOutInventoryServices) {
             service.updateNode(node, UpdateType.REMOVED, null);
         }
+        */
         nodeProps.remove(node);
         dbCache.remove(node);
-    }
-
-    @Override
-    public Set<Node> getConfiguredNotConnectedNodes() {
-        return Collections.emptySet();
     }
 
     private void listenerAdded(OvsdbInventoryListener listener) {

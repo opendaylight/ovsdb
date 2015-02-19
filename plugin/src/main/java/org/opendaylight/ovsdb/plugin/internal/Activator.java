@@ -9,18 +9,10 @@
  */
 package org.opendaylight.ovsdb.plugin.internal;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-
 import org.apache.felix.dm.DependencyActivatorBase;
 import org.apache.felix.dm.DependencyManager;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
-import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
-import org.opendaylight.controller.sal.inventory.IPluginOutInventoryService;
-import org.opendaylight.controller.sal.utils.GlobalConstants;
-import org.opendaylight.controller.sal.utils.INodeConnectorFactory;
-import org.opendaylight.controller.sal.utils.INodeFactory;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
@@ -30,8 +22,6 @@ import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryService;
 import org.opendaylight.ovsdb.plugin.impl.ConfigurationServiceImpl;
 import org.opendaylight.ovsdb.plugin.impl.ConnectionServiceImpl;
 import org.opendaylight.ovsdb.plugin.impl.InventoryServiceImpl;
-import org.opendaylight.ovsdb.plugin.impl.NodeConnectorFactory;
-import org.opendaylight.ovsdb.plugin.impl.NodeFactory;
 
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -51,11 +41,8 @@ public class Activator extends DependencyActivatorBase {
         Node.NodeIDType.registerIDType("OVS", String.class);
         NodeConnector.NodeConnectorIDType.registerIDType("OVS", String.class, "OVS");
 
-        Dictionary<String, Object> props = new Hashtable<String, Object>();
-        props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "OVS");
-
         manager.add(createComponent()
-                        .setInterface(OvsdbConfigurationService.class.getName(), props)
+                        .setInterface(OvsdbConfigurationService.class.getName(), null)
                         .setImplementation(ConfigurationServiceImpl.class)
                         .add(createServiceDependency()
                                         .setService(OvsdbConnectionService.class)
@@ -64,12 +51,10 @@ public class Activator extends DependencyActivatorBase {
                                 .setService(OvsdbInventoryService.class)
                                 .setRequired(true)));
 
-        Dictionary<String, Object> props2 = new Hashtable<String, Object>();
-        props2.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "OVS");
         manager.add(createComponent()
                         .setInterface(
                                 new String[] {OvsdbConnectionService.class.getName(),
-                                        OvsdbConnectionListener.class.getName()}, props2)
+                                        OvsdbConnectionListener.class.getName()}, null)
                         .setImplementation(ConnectionServiceImpl.class)
                         .add(createServiceDependency()
                                 .setService(OvsdbInventoryService.class)
@@ -79,41 +64,15 @@ public class Activator extends DependencyActivatorBase {
                                 .setRequired(true))
         );
 
-        Dictionary<String, Object> props3 = new Hashtable<>();
-        props3.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "OVS");
-        props3.put("scope", "Global");
         manager.add(createComponent()
-                        .setInterface(
-                                new String[]{IPluginInInventoryService.class.getName(),
-                                        OvsdbInventoryService.class.getName()}, props3)
+                        .setInterface(OvsdbInventoryService.class.getName(), null)
                         .setImplementation(InventoryServiceImpl.class)
-                        .add(createServiceDependency()
-                                .setService(IPluginOutInventoryService.class, "(scope=Global)")
-                                .setCallbacks("setPluginOutInventoryServices",
-                                        "unsetPluginOutInventoryServices")
-                                .setRequired(true))
                         .add(createServiceDependency()
                                 .setService(OvsdbInventoryListener.class)
                                 .setCallbacks("listenerAdded", "listenerRemoved"))
                         .add(createServiceDependency()
                                 .setService(OvsdbConfigurationService.class)
                                 .setRequired(false)));
-
-        Dictionary<String, Object> props4 = new Hashtable<String, Object>();
-        props4.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "OVS");
-        props4.put("protocolName", "OVS");
-
-        manager.add(createComponent()
-                .setInterface(INodeFactory.class.getName(), props4)
-                .setImplementation(NodeFactory.class));
-
-        Dictionary<String, Object> props5 = new Hashtable<String, Object>();
-        props5.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "OVS");
-        props5.put("protocolName", "OVS");
-
-        manager.add(createComponent()
-                .setInterface(INodeConnectorFactory.class.getName(), props5)
-                .setImplementation(NodeConnectorFactory.class));
     }
 
     @Override

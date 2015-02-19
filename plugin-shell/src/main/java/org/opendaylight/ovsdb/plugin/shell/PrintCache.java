@@ -24,6 +24,7 @@ public class PrintCache extends OsgiCommandSupport{
 
     @Override
     protected Object doExecute() throws Exception {
+        /* TODO Node.fromString lookup fails because the "OVS|id" is no longer written to the node.*/
         Node node = Node.fromString(nodeName);
         ovsdbInventory.printCache(node);
         return null;

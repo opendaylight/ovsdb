@@ -62,6 +62,7 @@ public class PrintCacheTest {
         assertEquals(Version.fromString("6.12.0"), schema.getVersion());
 
         // mock a node since PrintCache requires a Node
+        /* TODO Node.fromString lookup fails because the "OVS|id" is no longer written to the node.*/
         Node.NodeIDType.registerIDType(OVS, String.class);
         NodeConnector.NodeConnectorIDType.registerIDType(OVS, String.class, OVS);
         Node node = new Node(OVS, "1");

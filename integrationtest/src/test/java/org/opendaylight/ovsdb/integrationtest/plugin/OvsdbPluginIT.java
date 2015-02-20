@@ -141,8 +141,7 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
         if (connectionInfo.getType().equals(OvsdbConnectionInfo.ConnectionType.PASSIVE)) {
             identifier = connectionInfo.getRemoteAddress().getHostAddress()+":"+connectionInfo.getRemotePort();
         }
-        /* TODO Node.fromString lookup fails because the "OVS|id" is no longer written to the node.*/
-        //assertEquals(Node.fromString("OVS|" + identifier), connectionService.getNodes().get(0));
+        assertEquals(node, connectionService.getNode("OVS|" + identifier));
         System.out.println("Nodes = "+ connectionService.getNodes());
         /*
          * Test sequence :
@@ -179,7 +178,7 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
         componentB.setImplementation(listenerB);
         dm.add(componentB);
 
-        Node newNode = Node.fromString("OVS:10.10.10.10:65342");
+        Node newNode = Node.fromString("OVS|10.10.10.10:65342");
         InetAddress address = InetAddress.getByName("10.10.10.10");
         int port = 65342;
 

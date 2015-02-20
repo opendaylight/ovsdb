@@ -1,0 +1,159 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_15768ad7",
+        "filename": "northbound/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-20T12:09:17Z",
+      "side": 1,
+      "message": "Nice!\nAny reason why jersey one is explicitly provided?\nI\u0027m assuming so. :) In such case, please leave a comment here explaining why.",
+      "range": {
+        "startLine": 104,
+        "startChar": 43,
+        "endLine": 104,
+        "endChar": 50
+      },
+      "revId": "3ba814d5474cf60cdf6cfece836865c442087f3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_754cae9e",
+        "filename": "northbound/src/main/java/org/opendaylight/ovsdb/northbound/OvsdbNorthboundV2.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-20T12:09:17Z",
+      "side": 1,
+      "message": "delete line 42",
+      "range": {
+        "startLine": 42,
+        "startChar": 47,
+        "endLine": 42,
+        "endChar": 53
+      },
+      "revId": "3ba814d5474cf60cdf6cfece836865c442087f3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3542a668",
+        "filename": "northbound/src/main/java/org/opendaylight/ovsdb/northbound/OvsdbNorthboundV2.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 363,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-20T12:09:17Z",
+      "side": 1,
+      "message": "we should try to get a static factory method instead of constructors here.\n\nref: http://www.coderanch.com/t/409915/java/java/static-factory-methods",
+      "range": {
+        "startLine": 363,
+        "startChar": 36,
+        "endLine": 363,
+        "endChar": 37
+      },
+      "revId": "3ba814d5474cf60cdf6cfece836865c442087f3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_95385af0",
+        "filename": "northbound/src/main/java/org/opendaylight/ovsdb/northbound/OvsdbNorthboundV2.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 606,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-20T12:09:17Z",
+      "side": 1,
+      "message": "same as comment in 363",
+      "range": {
+        "startLine": 606,
+        "startChar": 37,
+        "endLine": 606,
+        "endChar": 47
+      },
+      "revId": "3ba814d5474cf60cdf6cfece836865c442087f3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_553e52db",
+        "filename": "northbound/src/main/java/org/opendaylight/ovsdb/northbound/OvsdbNorthboundV2.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 688,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-20T12:09:17Z",
+      "side": 1,
+      "message": "same as comment in 363",
+      "range": {
+        "startLine": 688,
+        "startChar": 24,
+        "endLine": 688,
+        "endChar": 36
+      },
+      "revId": "3ba814d5474cf60cdf6cfece836865c442087f3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_b52c76ad",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/api/OvsdbConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-20T12:09:17Z",
+      "side": 1,
+      "message": "unused import?",
+      "revId": "3ba814d5474cf60cdf6cfece836865c442087f3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_751a6e7e",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/api/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-20T12:09:17Z",
+      "side": 1,
+      "message": "unrelated change",
+      "range": {
+        "startLine": 20,
+        "startChar": 23,
+        "endLine": 20,
+        "endChar": 24
+      },
+      "revId": "3ba814d5474cf60cdf6cfece836865c442087f3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

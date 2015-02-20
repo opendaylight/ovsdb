@@ -17,6 +17,6 @@ import org.opendaylight.controller.sal.core.Node;
 public interface OvsdbConnectionService {
     public Connection getConnection(Node node);
     public List<Node> getNodes();
-    public Node getNode (String identifier);
+    public Node getNode(String identifier);
     public Node connect(String identifier, Map<ConnectionConstants, String> params);
 }

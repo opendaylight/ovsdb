@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_3b07f719",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/api/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-02-20T15:19:27Z",
+      "side": 1,
+      "message": "You could have ignored this in the previous review - it was just a lonely space",
+      "range": {
+        "startLine": 20,
+        "startChar": 23,
+        "endLine": 20,
+        "endChar": 24
+      },
+      "revId": "79bbdf762ce73de98604fb6dc6c90fb491eeea99",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

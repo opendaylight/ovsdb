@@ -7,19 +7,19 @@
  *
  * Authors : Madhu Venugopal, Brent Salisbury
  */
-package org.opendaylight.ovsdb.plugin.api;
+package org.opendaylight.ovsdb.compatibility.plugin.api;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.ovsdb.plugin.api.Status;
+import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.ovsdb.compatibility.plugin.error.OvsdbPluginException;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
-import org.opendaylight.ovsdb.plugin.error.OvsdbPluginException;
 
 public interface OvsdbConfigurationService {
 

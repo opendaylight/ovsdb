@@ -99,30 +99,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package></Export-Package>
-            <Import-Package>org.opendaylight.controller.sal.utils,
-              org.opendaylight.controller.northbound.commons,
-              org.opendaylight.controller.northbound.commons.exception,
-              org.opendaylight.controller.northbound.commons.utils,
+            <Import-Package>
               com.sun.jersey.spi.container.servlet,
-              org.opendaylight.controller.sal.core,
-              org.opendaylight.controller.sal.authorization,
-              org.opendaylight.ovsdb.plugin.api,
-              org.opendaylight.ovsdb.lib,
-              org.opendaylight.ovsdb.lib.jsonrpc,
-              org.opendaylight.ovsdb.lib.notation,
-              org.opendaylight.ovsdb.lib.operations,
-              org.opendaylight.ovsdb.lib.message,
-              org.opendaylight.ovsdb.lib.schema,
-              org.opendaylight.ovsdb.lib.schema.typed,
-              javax.ws.rs,
-              javax.ws.rs.core,
-              javax.xml.bind,
-              javax.xml.bind.annotation,
-              org.slf4j,
-              org.apache.catalina.filters,
-              !org.codehaus.enunciate.jaxrs,*</Import-Package>
-            <Export-Package></Export-Package>
+              !org.codehaus.enunciate.jaxrs,
+              *</Import-Package>
             <Web-ContextPath>/ovsdb/nb</Web-ContextPath>
             <Jaxrs-Resources>,${classes;ANNOTATION;javax.ws.rs.Path}</Jaxrs-Resources>
           </instructions>

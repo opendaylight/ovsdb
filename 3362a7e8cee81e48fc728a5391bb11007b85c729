@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_06d09e1d",
+        "filename": "ovsdb-plugin-compatibility-layer/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-02-20T21:42:24Z",
+      "side": 1,
+      "message": "should we just call this plugin-compatibility-layer? ovsdb is already in the bundle name. Could even just be compatibility-layer since plugin doesn\u0027t need to be there either",
+      "range": {
+        "startLine": 2,
+        "startChar": 85,
+        "endLine": 2,
+        "endChar": 94
+      },
+      "revId": "3362a7e8cee81e48fc728a5391bb11007b85c729",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_26cd9a85",
+        "filename": "ovsdb-plugin-compatibility-layer/resources/logback.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-02-20T21:42:24Z",
+      "side": 1,
+      "message": "what is this used for? I think this might be a remnant from when I moved the it tests and forgot to remove this file",
+      "revId": "3362a7e8cee81e48fc728a5391bb11007b85c729",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_86a34eb1",
+        "filename": "ovsdb-plugin-compatibility-layer/src/test/java/org/opendaylight/ovsdb/compatibility/plugin/impl/NodeFactoryTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-02-20T21:42:24Z",
+      "side": 1,
+      "message": "the NodeFactory files are not in this patch. They were removed recently so we need to drag those files back up for the compatibility layer.",
+      "range": {
+        "startLine": 2,
+        "startChar": 35,
+        "endLine": 2,
+        "endChar": 36
+      },
+      "revId": "3362a7e8cee81e48fc728a5391bb11007b85c729",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

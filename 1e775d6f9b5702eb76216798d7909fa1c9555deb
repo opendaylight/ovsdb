@@ -22,6 +22,30 @@
       "revId": "1e775d6f9b5702eb76216798d7909fa1c9555deb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_58852905",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/impl/ConnectionServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-02-20T13:49:07Z",
+      "side": 1,
+      "message": "This method can be called with and without OVS. A node has an id and a type. The type is OVS and the id is any string. Some places in the code used the form OVS|192.168.120.1:6640 and in others simply 192:168.120.1:6640. The connection.id stored is just the 192.168.120.1.",
+      "parentUuid": "7a96c907_5823e9a6",
+      "range": {
+        "startLine": 190,
+        "startChar": 17,
+        "endLine": 190,
+        "endChar": 21
+      },
+      "revId": "1e775d6f9b5702eb76216798d7909fa1c9555deb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

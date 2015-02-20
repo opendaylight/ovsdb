@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_5801a968",
+        "filename": "northbound/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-20T15:12:42Z",
+      "side": 1,
+      "message": "understood. thanks!",
+      "parentUuid": "7a96c907_187b2129",
+      "range": {
+        "startLine": 104,
+        "startChar": 43,
+        "endLine": 104,
+        "endChar": 50
+      },
+      "revId": "3ba814d5474cf60cdf6cfece836865c442087f3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_754cae9e",
         "filename": "northbound/src/main/java/org/opendaylight/ovsdb/northbound/OvsdbNorthboundV2.java",
         "patchSetId": 1
@@ -60,6 +84,30 @@
       "writtenOn": "2015-02-20T12:09:17Z",
       "side": 1,
       "message": "delete line 42",
+      "range": {
+        "startLine": 42,
+        "startChar": 47,
+        "endLine": 42,
+        "endChar": 53
+      },
+      "revId": "3ba814d5474cf60cdf6cfece836865c442087f3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_980bb18d",
+        "filename": "northbound/src/main/java/org/opendaylight/ovsdb/northbound/OvsdbNorthboundV2.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-20T15:12:42Z",
+      "side": 1,
+      "message": "don\u0027t want to delete this line?!? ;)",
+      "parentUuid": "7a96c907_754cae9e",
       "range": {
         "startLine": 42,
         "startChar": 47,
@@ -107,6 +155,30 @@
       "side": 1,
       "message": "This is temporary code that will go away with the next patches for removing the adsal node and the shim layer.",
       "parentUuid": "7a96c907_3542a668",
+      "range": {
+        "startLine": 363,
+        "startChar": 36,
+        "endLine": 363,
+        "endChar": 37
+      },
+      "revId": "3ba814d5474cf60cdf6cfece836865c442087f3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_38fcdd71",
+        "filename": "northbound/src/main/java/org/opendaylight/ovsdb/northbound/OvsdbNorthboundV2.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 363,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-20T15:12:42Z",
+      "side": 1,
+      "message": "understood. thanks.",
+      "parentUuid": "7a96c907_9896513e",
       "range": {
         "startLine": 363,
         "startChar": 36,
@@ -200,6 +272,24 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_18d001f5",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/api/OvsdbConfigurationService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-20T15:12:42Z",
+      "side": 1,
+      "message": "sorry for the confusion. it was just me noticing that Status was not used. Row is fine.",
+      "parentUuid": "7a96c907_18a24199",
+      "revId": "3ba814d5474cf60cdf6cfece836865c442087f3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_751a6e7e",
         "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/api/OvsdbConnectionService.java",
         "patchSetId": 1
@@ -235,6 +325,30 @@
       "side": 1,
       "message": "Done",
       "parentUuid": "7a96c907_751a6e7e",
+      "range": {
+        "startLine": 20,
+        "startChar": 23,
+        "endLine": 20,
+        "endChar": 24
+      },
+      "revId": "3ba814d5474cf60cdf6cfece836865c442087f3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_b8d8ed1e",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/api/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-20T15:12:42Z",
+      "side": 1,
+      "message": "heh, now I feel like an ass... :)\nlet me make a small nit pick gerrit so we do not forget about this change. I like the change, btw!",
+      "parentUuid": "7a96c907_78b825c8",
       "range": {
         "startLine": 20,
         "startChar": 23,

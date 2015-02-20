@@ -36,6 +36,7 @@ import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 
 import com.google.common.collect.ImmutableMap;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.felix.dm.Component;
 import org.apache.felix.dm.DependencyManager;

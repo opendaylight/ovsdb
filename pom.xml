@@ -40,6 +40,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <module>openstack/net-virt</module>
     <module>openstack/net-virt-providers</module>
     <module>plugin</module>
+    <module>ovsdb-plugin-compatibility-layer</module>
     <module>plugin-shell</module>
     <module>plugin-mdsal-adapter</module>
     <module>schemas/hardwarevtep</module>

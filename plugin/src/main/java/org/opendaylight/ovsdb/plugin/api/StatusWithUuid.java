@@ -9,8 +9,8 @@
  */
 package org.opendaylight.ovsdb.plugin.api;
 
-import org.opendaylight.controller.sal.utils.Status;
-import org.opendaylight.controller.sal.utils.StatusCode;
+import org.opendaylight.ovsdb.plugin.api.Status;
+import org.opendaylight.ovsdb.plugin.api.StatusCode;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 
 /**

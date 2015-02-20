@@ -20,6 +20,7 @@ import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
+import org.opendaylight.ovsdb.southbound.OvsdbDataCollectionOperation.OperationType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.overlay.rev150105.IpPortLocator;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbManagedNodeAugmentation;
@@ -31,6 +32,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 
 public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoCloseable {
     Map<OvsdbClientKey,OvsdbConnectionInstance> clients = new ConcurrentHashMap<OvsdbClientKey,OvsdbConnectionInstance>();
@@ -38,12 +41,15 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     DataBroker db;
 
+    private OvsdbOperationalDataCollectionManager ovsdbOperDataCollectionManager;
+
     public OvsdbConnectionManager(DataBroker db) {
         this.db = db;
+        ovsdbOperDataCollectionManager = new OvsdbOperationalDataCollectionManagerImpl();
     }
 
     @Override
-    public void connected(OvsdbClient externalClient) {
+    public void connected(final OvsdbClient externalClient) {
         LOG.info("OVSDB Connection from {}:{}",externalClient.getConnectionInfo().getRemoteAddress(),
                 externalClient.getConnectionInfo().getRemotePort());
         OvsdbClientKey key = new OvsdbClientKey(externalClient);
@@ -52,8 +58,22 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         WriteTransaction transaction = db.newWriteOnlyTransaction();
         transaction.put(LogicalDatastoreType.OPERATIONAL, key.toInstanceIndentifier(),
                 SouthboundMapper.createNode(client));
-        // TODO - Check the future and retry if needed
-        transaction.submit();
+
+        // Hook it to bridge operational data collector
+        Futures.addCallback(transaction.submit(), new FutureCallback<Void>(){
+
+            @Override
+            public void onFailure(Throwable arg0) {
+                LOG.info("Transaction failed while writing Node data to operational data store");
+            }
+
+            @Override
+            public void onSuccess(Void arg0) {
+                LOG.info("Node data is stored successfully to operational data store");
+                ovsdbOperDataCollectionManager.enqueue(new OvsdbBridgeOperDataCollector(OperationType.FETCH_OVSDB_OPER_DATA,externalClient,db));
+            }
+
+        });
     }
 
     @Override

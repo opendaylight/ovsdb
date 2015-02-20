@@ -182,6 +182,23 @@ public class ConnectionServiceImpl implements OvsdbConnectionService,
     }
 
     @Override
+    public Node getNode (String identifier) {
+        String id = identifier;
+
+        String[] pair = identifier.split("[|,:]+");
+        if (pair[0].equals("OVS")) {
+            id = pair[1];
+        }
+
+        Connection connection = ovsdbConnections.get(id);
+        if (connection != null) {
+            return connection.getNode();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
     public List<Node> getNodes() {
         List<Node> nodes = new ArrayList<Node>();
         for (Connection connection : ovsdbConnections.values()) {

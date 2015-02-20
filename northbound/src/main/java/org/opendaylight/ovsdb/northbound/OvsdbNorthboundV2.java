@@ -332,9 +332,10 @@ public class OvsdbNorthboundV2 {
             throw new ServiceUnavailableException("OVS Configuration Service " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
-        Node node = Node.fromString(nodeType, nodeId);
         OvsdbConnectionService
                 connectionService = (OvsdbConnectionService)ServiceHelper.getGlobalInstance(OvsdbConnectionService.class, this);
+        Node node = connectionService.getNode(nodeId);
+
         OvsdbClient client = connectionService.getConnection(node).getClient();
         OvsdbRow localRow = OvsdbRow.fromJsonNode(client, OvsVswitchdSchemaConstants.DATABASE_NAME, rowJson);
         String bckCompatibleTableName = this.getBackwardCompatibleTableName(client, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName);
@@ -424,9 +425,9 @@ public class OvsdbNorthboundV2 {
             throw new ServiceUnavailableException("UserManager " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
-        Node node = Node.fromString(nodeType, nodeId);
         OvsdbConnectionService
                 connectionService = (OvsdbConnectionService)ServiceHelper.getGlobalInstance(OvsdbConnectionService.class, this);
+        Node node = connectionService.getNode(nodeId);
         OvsdbClient client = connectionService.getConnection(node).getClient();
         String bckCompatibleTableName = this.getBackwardCompatibleTableName(client, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName);
 
@@ -507,9 +508,9 @@ public class OvsdbNorthboundV2 {
             throw new ServiceUnavailableException("UserManager " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
-        Node node = Node.fromString(nodeType, nodeId);
         OvsdbConnectionService
                 connectionService = (OvsdbConnectionService)ServiceHelper.getGlobalInstance(OvsdbConnectionService.class, this);
+        Node node = connectionService.getNode(nodeId);
         OvsdbClient client = connectionService.getConnection(node).getClient();
         String bckCompatibleTableName = this.getBackwardCompatibleTableName(client, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName);
         Map<String, Row> rows = null;
@@ -582,9 +583,9 @@ public class OvsdbNorthboundV2 {
             throw new ServiceUnavailableException("OVS Configuration Service " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
-        Node node = Node.fromString(nodeType, nodeId);
         OvsdbConnectionService
                 connectionService = (OvsdbConnectionService)ServiceHelper.getGlobalInstance(OvsdbConnectionService.class, this);
+        Node node = connectionService.getNode(nodeId);
         OvsdbClient client = connectionService.getConnection(node).getClient();
         String bckCompatibleTableName = this.getBackwardCompatibleTableName(client, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName);
         OvsdbRow localRow = OvsdbRow.fromJsonNode(client, OvsVswitchdSchemaConstants.DATABASE_NAME, rowJson);
@@ -663,9 +664,9 @@ public class OvsdbNorthboundV2 {
             throw new ServiceUnavailableException("OVS Configuration Service " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
-        Node node = Node.fromString(nodeType, nodeId);
         OvsdbConnectionService
                 connectionService = (OvsdbConnectionService)ServiceHelper.getGlobalInstance(OvsdbConnectionService.class, this);
+        Node node = connectionService.getNode(nodeId);
         OvsdbClient client = connectionService.getConnection(node).getClient();
         String bckCompatibleTableName = this.getBackwardCompatibleTableName(client, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName);
 

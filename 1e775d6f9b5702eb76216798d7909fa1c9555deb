@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_5823e9a6",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/impl/ConnectionServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-20T12:16:46Z",
+      "side": 1,
+      "message": "we should check and see if split returned a 2 element array.\nif we must have OVS then we should not even bother calling ovsdbConnections below.\n\nthat would be a simple check and will make this code a lot safer.",
+      "range": {
+        "startLine": 190,
+        "startChar": 17,
+        "endLine": 190,
+        "endChar": 21
+      },
+      "revId": "1e775d6f9b5702eb76216798d7909fa1c9555deb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

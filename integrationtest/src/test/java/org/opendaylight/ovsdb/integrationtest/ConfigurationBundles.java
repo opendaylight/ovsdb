@@ -176,6 +176,7 @@ public class ConfigurationBundles {
 
     public static Option ovsdbPluginBundles() {
         return new DefaultCompositeOption(
+                mavenBundle("org.opendaylight.ovsdb", "ovsdb-plugin-compatibility-layer").versionAsInProject(),
                 mavenBundle("org.opendaylight.ovsdb", "plugin").versionAsInProject(),
                 mavenBundle("org.mockito", "mockito-all").versionAsInProject()
         );

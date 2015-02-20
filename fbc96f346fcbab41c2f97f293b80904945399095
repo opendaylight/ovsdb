@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7a96c907_d8fdb9b2",
+        "filename": "southbound/southbound-impl/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-02-20T13:41:34Z",
+      "side": 1,
+      "message": "This is packaging the schema.openvswitch packages privately to the bundle, because existing scheme.openvswitch is under different group-id then southbound plugin and that was causing run time loading issue.",
+      "parentUuid": "7a96c907_18400133",
+      "range": {
+        "startLine": 51,
+        "startChar": 114,
+        "endLine": 51,
+        "endChar": 120
+      },
+      "revId": "fbc96f346fcbab41c2f97f293b80904945399095",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_b848ed5c",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbBridgeOperDataCollector.java",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2015-02-20T13:13:34Z",
       "side": 1,
       "message": "indent",
+      "range": {
+        "startLine": 263,
+        "startChar": 4,
+        "endLine": 263,
+        "endChar": 5
+      },
+      "revId": "fbc96f346fcbab41c2f97f293b80904945399095",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_38a93d90",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbBridgeOperDataCollector.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-02-20T13:41:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_b848ed5c",
       "range": {
         "startLine": 263,
         "startChar": 4,

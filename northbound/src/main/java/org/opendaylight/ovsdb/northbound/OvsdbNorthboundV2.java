@@ -39,7 +39,7 @@ import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
 import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
-import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.ovsdb.plugin.api.Status;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -355,7 +355,9 @@ public class OvsdbNorthboundV2 {
                     .entity(uuid.toString())
                     .build();
         }
-        return NorthboundUtils.getResponse(statusWithUuid);
+        return NorthboundUtils.getResponse(
+                new org.opendaylight.controller.sal.utils.Status(
+                        org.opendaylight.controller.sal.utils.StatusCode.SUCCESS));
     }
 
     /**
@@ -595,7 +597,9 @@ public class OvsdbNorthboundV2 {
         }
 
         Status status = ovsdbTable.updateRow(node, bckCompatibleTableName, localRow.getParentUuid(), rowUuid, localRow.getRow());
-        return NorthboundUtils.getResponse(status);
+        return NorthboundUtils.getResponse(
+                new org.opendaylight.controller.sal.utils.Status(
+                        org.opendaylight.controller.sal.utils.StatusCode.SUCCESS));
     }
 
     /**
@@ -674,7 +678,9 @@ public class OvsdbNorthboundV2 {
         if (status.isSuccess()) {
             return Response.noContent().build();
         }
-        return NorthboundUtils.getResponse(status);
+        return NorthboundUtils.getResponse(
+                new org.opendaylight.controller.sal.utils.Status(
+                        org.opendaylight.controller.sal.utils.StatusCode.SUCCESS));
     }
 
     private String getBackwardCompatibleTableName(OvsdbClient client, String databaseName, String tableName) {

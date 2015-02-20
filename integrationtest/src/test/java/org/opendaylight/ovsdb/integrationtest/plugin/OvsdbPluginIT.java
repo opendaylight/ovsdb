@@ -23,7 +23,6 @@ import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import org.junit.After;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
-import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.ovsdb.integrationtest.ConfigurationBundles;
 import org.opendaylight.ovsdb.integrationtest.OvsdbIntegrationTestBase;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
@@ -34,12 +33,14 @@ import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
 import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryService;
+import org.opendaylight.ovsdb.plugin.api.Status;
 import org.opendaylight.ovsdb.plugin.api.StatusWithUuid;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+
 import org.apache.felix.dm.Component;
 import org.apache.felix.dm.DependencyManager;
 import org.junit.Before;

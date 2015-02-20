@@ -50,6 +50,7 @@
         <feature version="${openflowplugin.version}">odl-openflowplugin-southbound</feature>
         <feature version="${openflowplugin.version}">odl-openflowplugin-flow-services</feature>
         <feature version="${nsf.version}">odl-nsf-all</feature>
+        <bundle>mvn:org.opendaylight.ovsdb/ovsdb-plugin-compatibility-layer/${ovsdb.plugin.compatibility.layer.version}</bundle>
         <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt/${openstack.netvirt.version}</bundle>
         <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt-providers/${openstack.netvirt.providers.version}</bundle>
     </feature>

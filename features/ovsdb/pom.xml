@@ -93,6 +93,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>ovsdb-plugin-compatibility-layer</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>plugin-shell</artifactId>
     </dependency>
     <dependency>

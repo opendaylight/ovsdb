@@ -51,6 +51,38 @@ module ovsdb {
         }
     }
 
+
+    grouping ovsdb-bridge-port-attributes {
+        leaf port-uuid {
+            description "The unique identifier of the port";
+            type yang:uuid;
+        }
+
+        leaf port-name {
+            description "The name of the port";
+            type string;
+        }
+
+        list interfaces {
+            description "List of interfaces for the port";
+            key "interface-name";
+            leaf interface-name {
+                description "The name of the interface";
+                type string;
+            }
+
+            leaf interface-uuid {
+                description "The unique identifier of the interface";
+                type yang:uuid;
+            }
+
+            leaf interface-type {
+                description "The type of the interface";
+                type string;
+            }
+        }
+    }
+
     augment "/topo:network-topology/topo:topology/topo:node" {
         description "Augmentation for bridge nodes managed by ovsdb";
         ext:augment-identifier "ovsdb-managed-node-augmentation";
@@ -61,5 +93,11 @@ module ovsdb {
         description "Augment topology node for an ovsdb node";
         ext:augment-identifier "ovsdb-node-augmentation";
         uses ovsdb-node-attributes;
+    }
+
+    augment "/topo:network-topology/topo:topology/topo:node/topo:termination-point" {
+        description "Augment topology node termination-point for an ovsdb bridge port";
+        ext:augment-identifier "ovsdb-port-termination-point-augmentation";
+        uses ovsdb-bridge-port-attributes;
     }
 }

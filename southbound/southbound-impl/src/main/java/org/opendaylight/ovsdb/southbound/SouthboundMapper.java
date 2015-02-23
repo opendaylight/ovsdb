@@ -42,11 +42,21 @@ public class SouthboundMapper {
         nodeBuilder.addAugmentation(OvsdbNodeAugmentation.class, createOvsdbAugmentation(client));
         return nodeBuilder.build();
     }
+    public static Node createNode(OvsdbClientKey key) {
+        NodeBuilder nodeBuilder = new NodeBuilder();
+        nodeBuilder.setNodeId(createNodeId(key.getIp(),key.getPort()));
+        nodeBuilder.addAugmentation(OvsdbNodeAugmentation.class, createOvsdbAugmentation(key));
+        return nodeBuilder.build();
+    }
 
     public static OvsdbNodeAugmentation createOvsdbAugmentation(OvsdbClient client) {
+        return createOvsdbAugmentation(new OvsdbClientKey(client));
+    }
+
+    public static OvsdbNodeAugmentation createOvsdbAugmentation(OvsdbClientKey key) {
         OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = new OvsdbNodeAugmentationBuilder();
-        ovsdbNodeBuilder.setIp(createIpAddress(client.getConnectionInfo().getRemoteAddress()));
-        ovsdbNodeBuilder.setPort(new PortNumber(client.getConnectionInfo().getRemotePort()));
+        ovsdbNodeBuilder.setIp(key.getIp());
+        ovsdbNodeBuilder.setPort(key.getPort());
         return ovsdbNodeBuilder.build();
     }
 
@@ -93,9 +103,18 @@ public class SouthboundMapper {
     }
 
     public static NodeId createManagedNodeId(OvsdbConnectionInfo connectionInfo, UUID managedNodeId) {
-        return new NodeId(createNodeId(createIpAddress(connectionInfo.getRemoteAddress()),
-                new PortNumber(connectionInfo.getRemotePort())).getValue()
-                + "/"+SouthboundConstants.BRIDGE_URI_PREFIX+":"+managedNodeId.toString());
+        return createManagedNodeId(createIpAddress(connectionInfo.getRemoteAddress()),
+                new PortNumber(connectionInfo.getRemotePort()),
+                managedNodeId);
+    }
+
+    public static NodeId createManagedNodeId(OvsdbClientKey key, UUID managedModeId) {
+        return createManagedNodeId(key.getIp(),key.getPort(),managedModeId);
+    }
+
+    public static NodeId createManagedNodeId(IpAddress ip, PortNumber port, UUID managedModeId) {
+        return new NodeId(createNodeId(ip,port)
+                + "/"+SouthboundConstants.BRIDGE_URI_PREFIX+":"+managedModeId.toString());
     }
 
     public static NodeId createNodeId(IpAddress ip, PortNumber port) {

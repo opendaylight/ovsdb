@@ -46,17 +46,6 @@ module ovsdb {
         leaf-list managed-node-entry {
             type ovsdb-bridge-ref;
         }
-        // New fields below
-        list bridge {
-            key "bridge-uuid";
-            leaf bridge-uuid {
-                description "The unique identifier of the bridge";
-                type yang:uuid;
-            }
-            leaf bridge-ref {
-                type ovsdb-bridge-ref;
-            }
-        }
     }
 
     augment "/topo:network-topology/topo:topology/topo:node" {

@@ -77,7 +77,7 @@ public class OvsdbClientKey {
         return true;
     }
 
-    InstanceIdentifier<Node> toInstanceIndentifier() {
+    public InstanceIdentifier<Node> toInstanceIndentifier() {
         return SouthboundMapper.createInstanceIdentifier(ipaddress,port);
     }
 }

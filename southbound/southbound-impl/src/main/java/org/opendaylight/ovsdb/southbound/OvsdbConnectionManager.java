@@ -14,13 +14,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
-import org.opendaylight.ovsdb.southbound.OvsdbDataCollectionOperation.OperationType;
+import org.opendaylight.ovsdb.southbound.transactions.md.OvsdbNodeRemoveCommand;
+import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.overlay.rev150105.IpPortLocator;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbManagedNodeAugmentation;
@@ -32,20 +32,17 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
 
 public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoCloseable {
     Map<OvsdbClientKey,OvsdbConnectionInstance> clients = new ConcurrentHashMap<OvsdbClientKey,OvsdbConnectionInstance>();
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionManager.class);
 
-    DataBroker db;
+    private DataBroker db;
+    private TransactionInvoker txInvoker;
 
-    private OvsdbOperationalDataCollectionManager ovsdbOperDataCollectionManager;
-
-    public OvsdbConnectionManager(DataBroker db) {
+    public OvsdbConnectionManager(DataBroker db,TransactionInvoker txInvoker) {
         this.db = db;
-        ovsdbOperDataCollectionManager = new OvsdbOperationalDataCollectionManagerImpl();
+        this.txInvoker = txInvoker;
     }
 
     @Override
@@ -53,27 +50,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         LOG.info("OVSDB Connection from {}:{}",externalClient.getConnectionInfo().getRemoteAddress(),
                 externalClient.getConnectionInfo().getRemotePort());
         OvsdbClientKey key = new OvsdbClientKey(externalClient);
-        OvsdbConnectionInstance client = new OvsdbConnectionInstance(key,externalClient);
+        OvsdbConnectionInstance client = new OvsdbConnectionInstance(key,externalClient,txInvoker);
         clients.put(key, client);
-        WriteTransaction transaction = db.newWriteOnlyTransaction();
-        transaction.put(LogicalDatastoreType.OPERATIONAL, key.toInstanceIndentifier(),
-                SouthboundMapper.createNode(client));
-
-        // Hook it to bridge operational data collector
-        Futures.addCallback(transaction.submit(), new FutureCallback<Void>(){
-
-            @Override
-            public void onFailure(Throwable arg0) {
-                LOG.info("Transaction failed while writing Node data to operational data store");
-            }
-
-            @Override
-            public void onSuccess(Void arg0) {
-                LOG.info("Node data is stored successfully to operational data store");
-                ovsdbOperDataCollectionManager.enqueue(new OvsdbBridgeOperDataCollector(OperationType.FETCH_OVSDB_OPER_DATA,externalClient,db));
-            }
-
-        });
     }
 
     @Override
@@ -81,10 +59,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         LOG.info("OVSDB Disconnect from {}:{}",client.getConnectionInfo().getRemoteAddress(),
                 client.getConnectionInfo().getRemotePort());
         OvsdbClientKey key = new OvsdbClientKey(client);
-        WriteTransaction transaction = db.newWriteOnlyTransaction();
-        transaction.delete(LogicalDatastoreType.OPERATIONAL, key.toInstanceIndentifier());
-        // TODO - Check the future and retry if needed
-        transaction.submit();
+        txInvoker.invoke(new OvsdbNodeRemoveCommand(key,null,null));
         clients.remove(key);
     }
 
@@ -93,9 +68,6 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         // TODO use transaction chains to handle ordering issues between disconnected and connected when writing to the operational store
         InetAddress ip = SouthboundMapper.createInetAddress(ovsdbNode.getIp());
         OvsdbClient client = OvsdbConnectionService.getService().connect(ip, ovsdbNode.getPort().getValue().intValue());
-        OvsdbClientKey key = new OvsdbClientKey(client);
-        OvsdbConnectionInstance instance = new OvsdbConnectionInstance(key,client);
-        clients.put(key, instance);
         connected(client); // For connections from the controller to the ovs instance, the library doesn't call this method for us
         return client;
     }

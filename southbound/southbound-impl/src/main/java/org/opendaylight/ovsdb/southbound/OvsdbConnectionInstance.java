@@ -30,6 +30,8 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
+import org.opendaylight.ovsdb.southbound.transactions.md.OvsdbNodeCreateCommand;
+import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,12 +42,19 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionInstance.class);
     private OvsdbClient client;
     private OvsdbClientKey key;
+    private TransactionInvoker txInvoker;
     private MonitorCallBack callback;
 
-    OvsdbConnectionInstance(OvsdbClientKey key,OvsdbClient client) {
+    OvsdbConnectionInstance(OvsdbClientKey key,OvsdbClient client,TransactionInvoker txInvoker) {
         this.key = key;
         this.client = client;
-        this.callback = new OvsdbMonitorCallback();
+        this.txInvoker = txInvoker;
+        txInvoker.invoke(new OvsdbNodeCreateCommand(key, null,null));
+        registerCallBack();
+    }
+
+    private void registerCallBack() {
+        this.callback = new OvsdbMonitorCallback(key,txInvoker);
         try {
             List<String> databases = getDatabases().get();
             if(databases != null) {

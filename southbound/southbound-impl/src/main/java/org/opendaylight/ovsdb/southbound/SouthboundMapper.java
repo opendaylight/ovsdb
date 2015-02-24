@@ -84,6 +84,23 @@ public class SouthboundMapper {
         return createInstanceIdentifier(createIpAddress(client.getConnectionInfo().getRemoteAddress()),
                 new PortNumber(client.getConnectionInfo().getRemotePort()));
     }
+
+    public static InstanceIdentifier<Node> createInstanceIdentifier(NodeId nodeId) {
+        InstanceIdentifier<Node> nodePath = InstanceIdentifier
+                .create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+                .child(Node.class,new NodeKey(nodeId));
+        return nodePath;
+    }
+
+    public static InstanceIdentifier<Node> createInstanceIdentifier(OvsdbClientKey key,UUID uuid) {
+        return createInstanceIdentifier(createManagedNodeId(key, uuid));
+    }
+
+    public static InstanceIdentifier<Node> createInstanceIndentifier(OvsdbClientKey key) {
+        return createInstanceIdentifier(key.getIp(), key.getPort());
+    }
+
     public static InstanceIdentifier<Node> createInstanceIdentifier(IpAddress ip, PortNumber port) {
         InstanceIdentifier<Node> path = InstanceIdentifier
                 .create(NetworkTopology.class)

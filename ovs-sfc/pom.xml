@@ -67,11 +67,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>sal-common-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller.model</groupId>
+      <groupId>org.opendaylight.openflowplugin.model</groupId>
       <artifactId>model-flow-base</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller.model</groupId>
+      <groupId>org.opendaylight.openflowplugin.model</groupId>
       <artifactId>model-flow-service</artifactId>
     </dependency>
     <dependency>

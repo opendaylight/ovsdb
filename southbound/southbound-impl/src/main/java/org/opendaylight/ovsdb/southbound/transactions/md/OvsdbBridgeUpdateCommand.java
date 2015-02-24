@@ -71,10 +71,7 @@ public class OvsdbBridgeUpdateCommand implements TransactionCommand {
                     ovsdbManagedNodeBuilder.setManagedBy(new OvsdbNodeRef(nodePath));
                     managedNodeBuilder.addAugmentation(OvsdbManagedNodeAugmentation.class, ovsdbManagedNodeBuilder.build());
 
-                    InstanceIdentifier<Node> managedNodePath = InstanceIdentifier
-                            .create(NetworkTopology.class)
-                            .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
-                            .child(Node.class,new NodeKey(manageNodeId));
+                    InstanceIdentifier<Node> managedNodePath = SouthboundMapper.createInstanceIdentifier(manageNodeId);
 
                     LOG.debug("Store managed node augmentation data {}",ovsdbManagedNodeBuilder.toString());
                     transaction.put(LogicalDatastoreType.OPERATIONAL, managedNodePath, managedNodeBuilder.build());

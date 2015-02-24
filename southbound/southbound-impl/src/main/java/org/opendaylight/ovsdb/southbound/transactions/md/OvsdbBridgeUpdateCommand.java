@@ -30,26 +30,21 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 
-public class OvsdbBridgeUpdateCommand implements TransactionCommand {
+public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbBridgeUpdateCommand.class);
 
-    private TableUpdates updates;
-    private DatabaseSchema dbSchema;
-
-    private OvsdbClientKey key;
-
-    public OvsdbBridgeUpdateCommand(OvsdbClientKey key,TableUpdates updates, DatabaseSchema dbSchema) {
-        this.updates = updates;
-        this.dbSchema = dbSchema;
-        this.key = key;
+    public OvsdbBridgeUpdateCommand(OvsdbClientKey key, TableUpdates updates,
+            DatabaseSchema dbSchema) {
+        super(key,updates,dbSchema);
     }
+
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        List<TypedBaseTable<?>> updatedRows = TransactionUtils.extractRowsUpdated(Bridge.class, updates, dbSchema);
+        List<TypedBaseTable<?>> updatedRows = TransactionUtils.extractRowsUpdated(Bridge.class, getUpdates(), getDbSchema());
         for(TypedBaseTable<?> updatedRow : updatedRows) {
             if(updatedRow instanceof Bridge) {
                 Bridge bridge = (Bridge)updatedRow;
-                final InstanceIdentifier<Node> nodePath = key.toInstanceIndentifier();
+                final InstanceIdentifier<Node> nodePath = getKey().toInstanceIndentifier();
                 Optional<Node> node = Optional.absent();
                 try{
                     node = transaction.read(LogicalDatastoreType.OPERATIONAL, nodePath).checkedGet();
@@ -59,7 +54,7 @@ public class OvsdbBridgeUpdateCommand implements TransactionCommand {
                 if(node.isPresent()){
                     LOG.info("Node {} is present",node);
                     NodeBuilder managedNodeBuilder = new NodeBuilder();
-                    NodeId manageNodeId = SouthboundMapper.createManagedNodeId(key, bridge.getUuid());
+                    NodeId manageNodeId = SouthboundMapper.createManagedNodeId(getKey(), bridge.getUuid());
                     managedNodeBuilder.setNodeId(manageNodeId);
 
                     OvsdbManagedNodeAugmentationBuilder ovsdbManagedNodeBuilder = new OvsdbManagedNodeAugmentationBuilder();
@@ -75,7 +70,7 @@ public class OvsdbBridgeUpdateCommand implements TransactionCommand {
 
                     //Update node with managed node reference
                     NodeBuilder nodeBuilder = new NodeBuilder();
-                    nodeBuilder.setNodeId(SouthboundMapper.createNodeId(key.getIp(),key.getPort()));
+                    nodeBuilder.setNodeId(SouthboundMapper.createNodeId(getKey().getIp(),getKey().getPort()));
 
                     OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = new OvsdbNodeAugmentationBuilder();
                     List<ManagedNodeEntry> managedNodes = new ArrayList<ManagedNodeEntry>();

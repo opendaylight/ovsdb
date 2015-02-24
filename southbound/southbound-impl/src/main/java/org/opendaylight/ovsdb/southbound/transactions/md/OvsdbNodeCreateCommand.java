@@ -7,18 +7,16 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.southbound.OvsdbClientKey;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 
-public class OvsdbNodeCreateCommand implements TransactionCommand {
-
-    private OvsdbClientKey key;
+public class OvsdbNodeCreateCommand extends AbstractTransactionCommand {
 
     public OvsdbNodeCreateCommand(OvsdbClientKey key,TableUpdates updates,DatabaseSchema dbSchema) {
-        this.key = key;
+        super(key,updates,dbSchema);
     }
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        transaction.put(LogicalDatastoreType.OPERATIONAL, key.toInstanceIndentifier(),
-                SouthboundMapper.createNode(key));
+        transaction.put(LogicalDatastoreType.OPERATIONAL, getKey().toInstanceIndentifier(),
+                SouthboundMapper.createNode(getKey()));
     }
 
 }

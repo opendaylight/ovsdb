@@ -19,27 +19,22 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OvsdbBridgeRemovedCommand implements TransactionCommand {
+public class OvsdbBridgeRemovedCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbBridgeUpdateCommand.class);
 
-    private TableUpdates updates;
-    private DatabaseSchema dbSchema;
-
-    private OvsdbClientKey key;
-
-    public OvsdbBridgeRemovedCommand(OvsdbClientKey key,TableUpdates updates, DatabaseSchema dbSchema) {
-        this.updates = updates;
-        this.dbSchema = dbSchema;
-        this.key = key;
+    public OvsdbBridgeRemovedCommand(OvsdbClientKey key, TableUpdates updates,
+            DatabaseSchema dbSchema) {
+        super(key,updates,dbSchema);
     }
+
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        List<TypedBaseTable<?>> removedRows = TransactionUtils.extractRowsRemoved(Bridge.class, updates, dbSchema);
+        List<TypedBaseTable<?>> removedRows = TransactionUtils.extractRowsRemoved(Bridge.class, getUpdates(), getDbSchema());
         for(TypedBaseTable<?> removedRow : removedRows) {
             if(removedRow instanceof Bridge) {
                 Bridge bridge = (Bridge)removedRow;
-                InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(key, bridge.getUuid());
-                InstanceIdentifier<ManagedNodeEntry> mnIid = SouthboundMapper.createInstanceIndentifier(key)
+                InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getKey(), bridge.getUuid());
+                InstanceIdentifier<ManagedNodeEntry> mnIid = SouthboundMapper.createInstanceIndentifier(getKey())
                         .augmentation(OvsdbNodeAugmentation.class)
                         .child(ManagedNodeEntry.class, new ManagedNodeEntryKey(new OvsdbBridgeRef(bridgeIid)));
                 // TODO handle removal of reference to managed node from model

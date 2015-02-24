@@ -20,12 +20,12 @@ import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
 import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.ovsdb.integrationtest.ConfigurationBundles;
 import org.opendaylight.ovsdb.integrationtest.OvsdbIntegrationTestBase;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.notation.Version;
-import org.opendaylight.ovsdb.plugin.api.Status;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;

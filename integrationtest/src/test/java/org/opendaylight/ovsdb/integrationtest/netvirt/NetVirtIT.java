@@ -62,7 +62,7 @@ public class NetVirtIT extends OvsdbIntegrationTestBase {
                        "odl-base-all"),
                 features("mvn:org.opendaylight.controller/features-neutron/0.5.0-SNAPSHOT/xml/features",
                         "odl-neutron-all"),
-                features("mvn:org.opendaylight.ovsdb/features-ovsdb/1.1.1-SNAPSHOT/xml/features",
+                features("mvn:org.opendaylight.ovsdb/features-ovsdb/1.1.0-SNAPSHOT/xml/features",
                         "odl-ovsdb-openstack")
         };
     }

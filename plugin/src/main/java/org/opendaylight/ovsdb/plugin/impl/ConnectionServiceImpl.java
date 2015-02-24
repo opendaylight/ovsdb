@@ -25,6 +25,8 @@ import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.Property;
+import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.lib.MonitorCallBack;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
@@ -39,8 +41,6 @@ import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.plugin.api.Connection;
 import org.opendaylight.ovsdb.plugin.api.ConnectionConstants;
-import org.opendaylight.ovsdb.plugin.api.Status;
-import org.opendaylight.ovsdb.plugin.api.StatusCode;
 import org.opendaylight.ovsdb.plugin.internal.IPAddressProperty;
 import org.opendaylight.ovsdb.plugin.internal.L4PortProperty;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;

@@ -39,6 +39,7 @@ import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
 import org.opendaylight.controller.sal.authorization.Privilege;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
+import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -46,7 +47,6 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.plugin.api.OvsVswitchdSchemaConstants;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
-import org.opendaylight.ovsdb.plugin.api.Status;
 import org.opendaylight.ovsdb.plugin.api.StatusWithUuid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -355,11 +355,7 @@ public class OvsdbNorthboundV2 {
                     .entity(uuid.toString())
                     .build();
         }
-        /* TODO better way to return the status. Likely the shim will handle this */
-        //return NorthboundUtils.getResponse(statusWithUuid);
-        return NorthboundUtils.getResponse(
-                new org.opendaylight.controller.sal.utils.Status(
-                        org.opendaylight.controller.sal.utils.StatusCode.SUCCESS));
+        return NorthboundUtils.getResponse(statusWithUuid);
     }
 
     /**
@@ -599,10 +595,7 @@ public class OvsdbNorthboundV2 {
         }
 
         Status status = ovsdbTable.updateRow(node, bckCompatibleTableName, localRow.getParentUuid(), rowUuid, localRow.getRow());
-        /* TODO better way to return the status. Likely the shim will handle this */
-        return NorthboundUtils.getResponse(
-                new org.opendaylight.controller.sal.utils.Status(
-                        org.opendaylight.controller.sal.utils.StatusCode.SUCCESS));
+        return NorthboundUtils.getResponse(status);
     }
 
     /**
@@ -681,10 +674,7 @@ public class OvsdbNorthboundV2 {
         if (status.isSuccess()) {
             return Response.noContent().build();
         }
-        /* TODO better way to return the status. Likely the shim will handle this */
-        return NorthboundUtils.getResponse(
-                new org.opendaylight.controller.sal.utils.Status(
-                        org.opendaylight.controller.sal.utils.StatusCode.SUCCESS));
+        return NorthboundUtils.getResponse(status);
     }
 
     private String getBackwardCompatibleTableName(OvsdbClient client, String databaseName, String tableName) {

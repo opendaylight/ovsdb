@@ -23,6 +23,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.Column;
@@ -46,8 +48,6 @@ import org.opendaylight.ovsdb.plugin.api.OvsVswitchdSchemaConstants;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryService;
-import org.opendaylight.ovsdb.plugin.api.Status;
-import org.opendaylight.ovsdb.plugin.api.StatusCode;
 import org.opendaylight.ovsdb.plugin.api.StatusWithUuid;
 import org.opendaylight.ovsdb.plugin.error.OvsdbPluginException;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;

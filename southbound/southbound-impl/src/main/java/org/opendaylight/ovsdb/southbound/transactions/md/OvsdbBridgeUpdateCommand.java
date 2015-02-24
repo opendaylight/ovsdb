@@ -1,6 +1,7 @@
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -39,7 +40,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        List<Bridge> updatedRows = TransactionUtils.extractRowsUpdated(Bridge.class, getUpdates(), getDbSchema());
+        Collection<Bridge> updatedRows = TransactionUtils.extractRowsUpdated(Bridge.class, getUpdates(), getDbSchema()).values();
         for(Bridge bridge : updatedRows) {
             final InstanceIdentifier<Node> nodePath = getKey().toInstanceIndentifier();
             Optional<Node> node = Optional.absent();

@@ -1,6 +1,6 @@
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -28,7 +28,7 @@ public class OvsdbBridgeRemovedCommand extends AbstractTransactionCommand {
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        List<Bridge> removedRows = TransactionUtils.extractRowsRemoved(Bridge.class, getUpdates(), getDbSchema());
+        Collection<Bridge> removedRows = TransactionUtils.extractRowsRemoved(Bridge.class, getUpdates(), getDbSchema()).values();
         for(Bridge bridge : removedRows) {
             InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getKey(), bridge.getUuid());
             InstanceIdentifier<ManagedNodeEntry> mnIid = SouthboundMapper.createInstanceIndentifier(getKey())

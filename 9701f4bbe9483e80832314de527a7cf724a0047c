@@ -1,0 +1,84 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_4ff0f666",
+        "filename": "commons/parent/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 364,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-02-24T16:44:42Z",
+      "side": 1,
+      "message": "tabs are in the file",
+      "range": {
+        "startLine": 364,
+        "startChar": 8,
+        "endLine": 364,
+        "endChar": 15
+      },
+      "revId": "9701f4bbe9483e80832314de527a7cf724a0047c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_ef00e235",
+        "filename": "features/ovsdb/src/main/resources/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-02-24T16:44:42Z",
+      "side": 1,
+      "message": "would this be better as it\u0027s own feature so that it is not always included? I could see net-virt quickly not needing this layer and only vtn needing it.",
+      "revId": "9701f4bbe9483e80832314de527a7cf724a0047c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_2fa24a4b",
+        "filename": "ovsdb-plugin-compatibility-layer/resources/logback.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-02-24T16:44:42Z",
+      "side": 1,
+      "message": "pretty sure this file is not needed. This was a left over remnant from when integration tests were in the dir and I forgot to remove it.",
+      "revId": "9701f4bbe9483e80832314de527a7cf724a0047c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_ef8782b3",
+        "filename": "ovsdb-plugin-compatibility-layer/src/main/java/org/opendaylight/ovsdb/compatibility/plugin/impl/StatusConvertorUtil.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-02-24T16:44:42Z",
+      "side": 1,
+      "message": "bunch of tabs",
+      "range": {
+        "startLine": 15,
+        "startChar": 1,
+        "endLine": 15,
+        "endChar": 7
+      },
+      "revId": "9701f4bbe9483e80832314de527a7cf724a0047c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -9,6 +9,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.southbound.OvsdbClientKey;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
@@ -40,7 +41,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        Collection<Bridge> updatedRows = TransactionUtils.extractRowsUpdated(Bridge.class, getUpdates(), getDbSchema()).values();
+        Collection<Bridge> updatedRows = TyperUtils.extractRowsUpdated(Bridge.class, getUpdates(), getDbSchema()).values();
         for(Bridge bridge : updatedRows) {
             final InstanceIdentifier<Node> nodePath = getKey().toInstanceIndentifier();
             Optional<Node> node = Optional.absent();

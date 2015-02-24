@@ -6,6 +6,7 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.southbound.OvsdbClientKey;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
@@ -28,7 +29,7 @@ public class OvsdbBridgeRemovedCommand extends AbstractTransactionCommand {
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        Collection<Bridge> removedRows = TransactionUtils.extractRowsRemoved(Bridge.class, getUpdates(), getDbSchema()).values();
+        Collection<Bridge> removedRows = TyperUtils.extractRowsRemoved(Bridge.class, getUpdates(), getDbSchema()).values();
         for(Bridge bridge : removedRows) {
             InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getKey(), bridge.getUuid());
             InstanceIdentifier<ManagedNodeEntry> mnIid = SouthboundMapper.createInstanceIndentifier(getKey())

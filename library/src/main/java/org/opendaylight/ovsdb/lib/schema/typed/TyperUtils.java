@@ -12,20 +12,26 @@ package org.opendaylight.ovsdb.lib.schema.typed;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.opendaylight.ovsdb.lib.error.ColumnSchemaNotFoundException;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.error.TableSchemaNotFoundException;
 import org.opendaylight.ovsdb.lib.error.TyperException;
 import org.opendaylight.ovsdb.lib.error.UnsupportedMethodException;
+import org.opendaylight.ovsdb.lib.message.TableUpdate;
+import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Row;
+import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
+import com.google.common.base.Preconditions;
 import com.google.common.reflect.Reflection;
 
 public class TyperUtils {
@@ -371,4 +377,95 @@ public class TyperUtils {
         }
         );
     }
+
+    /**
+     * This method extracts all row updates of Class<T> klazz from a TableUpdates
+     * that correspond to insertion or updates of rows of type klazz.
+     * Example:
+     * <code>
+     * Map<UUID,Bridge> updatedBridges = extractRowsUpdated(Bridge.class,updates,dbSchema)
+     * </code>
+     *
+     * @param klazz Class for row type to be extracted
+     * @param updates TableUpdates from which to extract rowUpdates
+     * @param dbSchema Dbschema for the TableUpdates
+     * @return Map<UUID,T> for the type of things being sought
+     */
+    public static <T> Map<UUID,T> extractRowsUpdated(Class<T> klazz,TableUpdates updates,DatabaseSchema dbSchema) {
+        Preconditions.checkNotNull(klazz);
+        Preconditions.checkNotNull(updates);
+        Preconditions.checkNotNull(dbSchema);
+        Map<UUID,T> result = new HashMap<UUID,T>();
+
+        Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> rowUpdates = extractRowUpdates(klazz,updates,dbSchema);
+        for (TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema> rowUpdate : rowUpdates.values()) {
+            if(rowUpdate != null) {
+                if(rowUpdate.getNew() != null) {
+                    Row<GenericTableSchema> row = rowUpdate.getNew();
+                    result.put(rowUpdate.getUuid(),TyperUtils.getTypedRowWrapper(dbSchema,klazz,row));
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * This method extracts all row updates of Class<T> klazz from a TableUpdates
+     * that correspond to removal of rows of type klazz.
+     * Example:
+     * <code>
+     * Map<UUID,Bridge> updatedBridges = extractRowsRemoved(Bridge.class,updates,dbSchema)
+     * </code>
+     *
+     * @param klazz Class for row type to be extracted
+     * @param updates TableUpdates from which to extract rowUpdates
+     * @param dbSchema Dbschema for the TableUpdates
+     * @return Map<UUID,T> for the type of things being sought
+     */
+    public static <T> Map<UUID,T> extractRowsRemoved(Class<T> klazz,TableUpdates updates,DatabaseSchema dbSchema) {
+        Preconditions.checkNotNull(klazz);
+        Preconditions.checkNotNull(updates);
+        Preconditions.checkNotNull(dbSchema);
+        Map<UUID,T> result = new HashMap<UUID,T>();
+
+        Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> rowUpdates = extractRowUpdates(klazz,updates,dbSchema);
+        for (TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema> rowUpdate : rowUpdates.values()) {
+            if(rowUpdate != null) {
+                if(rowUpdate.getNew() == null && rowUpdate.getOld() != null) {
+                    Row<GenericTableSchema> row = rowUpdate.getOld();
+                    result.put(rowUpdate.getUuid(),TyperUtils.getTypedRowWrapper(dbSchema,klazz,row));
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * This method extracts all RowUpdates of Class<T> klazz from a TableUpdates
+     * that correspond to rows of type klazz.
+     * Example:
+     * <code>
+     * Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> updatedBridges = extractRowsUpdates(Bridge.class,updates,dbSchema)
+     * </code>
+     *
+     * @param klazz Class for row type to be extracted
+     * @param updates TableUpdates from which to extract rowUpdates
+     * @param dbSchema Dbschema for the TableUpdates
+     * @return Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> for the type of things being sought
+     */
+    public static Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> extractRowUpdates(Class<?> klazz,TableUpdates updates,DatabaseSchema dbSchema) {
+        Preconditions.checkNotNull(klazz);
+        Preconditions.checkNotNull(updates);
+        Preconditions.checkNotNull(dbSchema);
+        Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> result = new HashMap<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>>();
+        TableUpdate<GenericTableSchema> update = updates.getUpdate(TyperUtils.getTableSchema(dbSchema, klazz));
+        if(update != null) {
+            Map<UUID, TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> rows = update.getRows();
+            if(rows != null) {
+                return rows;
+            }
+        }
+        return result;
+    }
+
 }

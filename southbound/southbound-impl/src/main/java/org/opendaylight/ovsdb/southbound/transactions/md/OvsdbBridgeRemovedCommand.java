@@ -6,7 +6,6 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.southbound.OvsdbClientKey;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
@@ -29,18 +28,15 @@ public class OvsdbBridgeRemovedCommand extends AbstractTransactionCommand {
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        List<TypedBaseTable<?>> removedRows = TransactionUtils.extractRowsRemoved(Bridge.class, getUpdates(), getDbSchema());
-        for(TypedBaseTable<?> removedRow : removedRows) {
-            if(removedRow instanceof Bridge) {
-                Bridge bridge = (Bridge)removedRow;
-                InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getKey(), bridge.getUuid());
-                InstanceIdentifier<ManagedNodeEntry> mnIid = SouthboundMapper.createInstanceIndentifier(getKey())
-                        .augmentation(OvsdbNodeAugmentation.class)
-                        .child(ManagedNodeEntry.class, new ManagedNodeEntryKey(new OvsdbBridgeRef(bridgeIid)));
-                // TODO handle removal of reference to managed node from model
-                transaction.delete(LogicalDatastoreType.OPERATIONAL, bridgeIid);
-                transaction.delete(LogicalDatastoreType.OPERATIONAL, mnIid);
-            }
+        List<Bridge> removedRows = TransactionUtils.extractRowsRemoved(Bridge.class, getUpdates(), getDbSchema());
+        for(Bridge bridge : removedRows) {
+            InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getKey(), bridge.getUuid());
+            InstanceIdentifier<ManagedNodeEntry> mnIid = SouthboundMapper.createInstanceIndentifier(getKey())
+                    .augmentation(OvsdbNodeAugmentation.class)
+                    .child(ManagedNodeEntry.class, new ManagedNodeEntryKey(new OvsdbBridgeRef(bridgeIid)));
+            // TODO handle removal of reference to managed node from model
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, bridgeIid);
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, mnIid);
         }
     }
 

@@ -8,7 +8,6 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.southbound.OvsdbClientKey;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
@@ -40,50 +39,47 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        List<TypedBaseTable<?>> updatedRows = TransactionUtils.extractRowsUpdated(Bridge.class, getUpdates(), getDbSchema());
-        for(TypedBaseTable<?> updatedRow : updatedRows) {
-            if(updatedRow instanceof Bridge) {
-                Bridge bridge = (Bridge)updatedRow;
-                final InstanceIdentifier<Node> nodePath = getKey().toInstanceIndentifier();
-                Optional<Node> node = Optional.absent();
-                try{
-                    node = transaction.read(LogicalDatastoreType.OPERATIONAL, nodePath).checkedGet();
-                }catch (final ReadFailedException e) {
-                    LOG.debug("Read Operational/DS for Node fail! {}", nodePath, e);
-                }
-                if(node.isPresent()){
-                    LOG.info("Node {} is present",node);
-                    NodeBuilder managedNodeBuilder = new NodeBuilder();
-                    NodeId manageNodeId = SouthboundMapper.createManagedNodeId(getKey(), bridge.getUuid());
-                    managedNodeBuilder.setNodeId(manageNodeId);
+        List<Bridge> updatedRows = TransactionUtils.extractRowsUpdated(Bridge.class, getUpdates(), getDbSchema());
+        for(Bridge bridge : updatedRows) {
+            final InstanceIdentifier<Node> nodePath = getKey().toInstanceIndentifier();
+            Optional<Node> node = Optional.absent();
+            try{
+                node = transaction.read(LogicalDatastoreType.OPERATIONAL, nodePath).checkedGet();
+            }catch (final ReadFailedException e) {
+                LOG.debug("Read Operational/DS for Node fail! {}", nodePath, e);
+            }
+            if(node.isPresent()){
+                LOG.info("Node {} is present",node);
+                NodeBuilder managedNodeBuilder = new NodeBuilder();
+                NodeId manageNodeId = SouthboundMapper.createManagedNodeId(getKey(), bridge.getUuid());
+                managedNodeBuilder.setNodeId(manageNodeId);
 
-                    OvsdbManagedNodeAugmentationBuilder ovsdbManagedNodeBuilder = new OvsdbManagedNodeAugmentationBuilder();
-                    ovsdbManagedNodeBuilder.setBridgeName(bridge.getName());
-                    ovsdbManagedNodeBuilder.setBridgeUuid(new Uuid(bridge.getUuid().toString()));
-                    ovsdbManagedNodeBuilder.setManagedBy(new OvsdbNodeRef(nodePath));
-                    managedNodeBuilder.addAugmentation(OvsdbManagedNodeAugmentation.class, ovsdbManagedNodeBuilder.build());
+                OvsdbManagedNodeAugmentationBuilder ovsdbManagedNodeBuilder = new OvsdbManagedNodeAugmentationBuilder();
+                ovsdbManagedNodeBuilder.setBridgeName(bridge.getName());
+                ovsdbManagedNodeBuilder.setBridgeUuid(new Uuid(bridge.getUuid().toString()));
+                ovsdbManagedNodeBuilder.setManagedBy(new OvsdbNodeRef(nodePath));
+                managedNodeBuilder.addAugmentation(OvsdbManagedNodeAugmentation.class, ovsdbManagedNodeBuilder.build());
 
-                    InstanceIdentifier<Node> managedNodePath = SouthboundMapper.createInstanceIdentifier(manageNodeId);
+                InstanceIdentifier<Node> managedNodePath = SouthboundMapper.createInstanceIdentifier(manageNodeId);
 
-                    LOG.debug("Store managed node augmentation data {}",ovsdbManagedNodeBuilder.toString());
-                    transaction.put(LogicalDatastoreType.OPERATIONAL, managedNodePath, managedNodeBuilder.build());
+                LOG.debug("Store managed node augmentation data {}",ovsdbManagedNodeBuilder.toString());
+                transaction.put(LogicalDatastoreType.OPERATIONAL, managedNodePath, managedNodeBuilder.build());
 
-                    //Update node with managed node reference
-                    NodeBuilder nodeBuilder = new NodeBuilder();
-                    nodeBuilder.setNodeId(SouthboundMapper.createNodeId(getKey().getIp(),getKey().getPort()));
+                //Update node with managed node reference
+                NodeBuilder nodeBuilder = new NodeBuilder();
+                nodeBuilder.setNodeId(SouthboundMapper.createNodeId(getKey().getIp(),getKey().getPort()));
 
-                    OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = new OvsdbNodeAugmentationBuilder();
-                    List<ManagedNodeEntry> managedNodes = new ArrayList<ManagedNodeEntry>();
-                    ManagedNodeEntry entry = new ManagedNodeEntryBuilder().setBridgeRef(new OvsdbBridgeRef(managedNodePath)).build();
-                    managedNodes.add(entry);
-                    ovsdbNodeBuilder.setManagedNodeEntry(managedNodes);
+                OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = new OvsdbNodeAugmentationBuilder();
+                List<ManagedNodeEntry> managedNodes = new ArrayList<ManagedNodeEntry>();
+                ManagedNodeEntry entry = new ManagedNodeEntryBuilder().setBridgeRef(new OvsdbBridgeRef(managedNodePath)).build();
+                managedNodes.add(entry);
+                ovsdbNodeBuilder.setManagedNodeEntry(managedNodes);
 
-                    nodeBuilder.addAugmentation(OvsdbNodeAugmentation.class, ovsdbNodeBuilder.build());
+                nodeBuilder.addAugmentation(OvsdbNodeAugmentation.class, ovsdbNodeBuilder.build());
 
-                    LOG.debug("Update node with managed node ref {}",ovsdbNodeBuilder.toString());
-                    transaction.merge(LogicalDatastoreType.OPERATIONAL, nodePath, nodeBuilder.build());
+                LOG.debug("Update node with managed node ref {}",ovsdbNodeBuilder.toString());
+                transaction.merge(LogicalDatastoreType.OPERATIONAL, nodePath, nodeBuilder.build());
 
-                }
             }
         }
     }

@@ -17,11 +17,11 @@ import com.google.common.base.Preconditions;
 
 public class TransactionUtils {
 
-    public static List<TypedBaseTable<?>> extractRowsUpdated(Class<? extends TypedBaseTable<?>> klazz,TableUpdates updates,DatabaseSchema dbSchema) {
+    public static <T> List<T> extractRowsUpdated(Class<T> klazz,TableUpdates updates,DatabaseSchema dbSchema) {
         Preconditions.checkNotNull(klazz);
         Preconditions.checkNotNull(updates);
         Preconditions.checkNotNull(dbSchema);
-        List<TypedBaseTable<?>> result = new ArrayList<TypedBaseTable<?>>();
+        List<T> result = new ArrayList<T>();
 
         List<TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> rowUpdates = extractRowUpdates(klazz,updates,dbSchema);
         for (TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema> rowUpdate : rowUpdates) {
@@ -35,11 +35,11 @@ public class TransactionUtils {
         return result;
     }
 
-    public static List<TypedBaseTable<?>> extractRowsRemoved(Class<? extends TypedBaseTable<?>> klazz,TableUpdates updates,DatabaseSchema dbSchema) {
+    public static <T> List<T> extractRowsRemoved(Class<T> klazz,TableUpdates updates,DatabaseSchema dbSchema) {
         Preconditions.checkNotNull(klazz);
         Preconditions.checkNotNull(updates);
         Preconditions.checkNotNull(dbSchema);
-        List<TypedBaseTable<?>> result = new ArrayList<TypedBaseTable<?>>();
+        List<T> result = new ArrayList<T>();
 
         List<TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> rowUpdates = extractRowUpdates(klazz,updates,dbSchema);
         for (TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema> rowUpdate : rowUpdates) {
@@ -53,7 +53,7 @@ public class TransactionUtils {
         return result;
     }
 
-    public static List<TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> extractRowUpdates(Class<? extends TypedBaseTable<?>> klazz,TableUpdates updates,DatabaseSchema dbSchema) {
+    public static List<TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> extractRowUpdates(Class<?> klazz,TableUpdates updates,DatabaseSchema dbSchema) {
         Preconditions.checkNotNull(klazz);
         Preconditions.checkNotNull(updates);
         Preconditions.checkNotNull(dbSchema);

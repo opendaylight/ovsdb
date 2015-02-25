@@ -5,6 +5,7 @@
     <repository>mvn:org.opendaylight.controller/features-nsf/${nsf.version}/xml/features</repository>
     <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin-extension/${openflowplugin.version}/xml/features</repository>
     <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin/${openflowplugin.version}/xml/features</repository>
+    <repository>mvn:org.opendaylight.neutron/features-neutron/${networkconfig.neutron.version}/xml/features</repository>
 
 
     <feature name="odl-ovsdb-all" description="OpenDaylight :: OVSDB :: all" version='${project.version}'>
@@ -49,7 +50,8 @@
         <feature version="${openflowplugin.version}">odl-openflowplugin-nxm-extensions</feature>
         <feature version="${openflowplugin.version}">odl-openflowplugin-southbound</feature>
         <feature version="${openflowplugin.version}">odl-openflowplugin-flow-services</feature>
-        <feature version="${nsf.version}">odl-nsf-all</feature>
+        <feature version="${nsf.version}">odl-nsf-service</feature>
+        <feature version="${networkconfig.neutron.version}">odl-neutron-service</feature>
         <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt/${openstack.netvirt.version}</bundle>
         <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt-providers/${openstack.netvirt.providers.version}</bundle>
     </feature>

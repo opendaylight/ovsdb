@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_e8145845",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/AbstractTransactionCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-25T12:37:03Z",
+      "side": 1,
+      "message": "nitpick: space inconsistency",
+      "range": {
+        "startLine": 29,
+        "startChar": 56,
+        "endLine": 29,
+        "endChar": 57
+      },
+      "revId": "add5f3eda4c16696030c652b5262fc6370f1674c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

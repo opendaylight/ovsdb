@@ -10,8 +10,8 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt;
 
-import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetAware;
-import org.opendaylight.controller.networkconfig.neutron.NeutronSubnet;
+import org.opendaylight.neutron.spi.INeutronSubnetAware;
+import org.opendaylight.neutron.spi.NeutronSubnet;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 

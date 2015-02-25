@@ -10,7 +10,7 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
-import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
+import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;

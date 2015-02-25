@@ -9,7 +9,7 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
-import org.opendaylight.controller.networkconfig.neutron.NeutronSecurityGroup;
+import org.opendaylight.neutron.spi.NeutronSecurityGroup;
 import org.opendaylight.controller.sal.core.Node;
 
 /**

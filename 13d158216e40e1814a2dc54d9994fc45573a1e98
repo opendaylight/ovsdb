@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_a83170ee",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbBridgeRemovedCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-25T12:58:53Z",
+      "side": 1,
+      "message": "while I like the simplification, I wonder if the\noriginal code was written to handle cases when rows removed\ndo not include Bridge class. Did you verify this change will\nnot throw an exception on all cases?",
+      "range": {
+        "startLine": 31,
+        "startChar": 52,
+        "endLine": 31,
+        "endChar": 70
+      },
+      "revId": "13d158216e40e1814a2dc54d9994fc45573a1e98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_c82e3c8c",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbBridgeUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-25T12:58:53Z",
+      "side": 1,
+      "message": "while I like the simplification, I wonder if the original code was written to handle cases when rows removed do not include Bridge class. Did you verify this change will not throw an exception on all cases?",
+      "range": {
+        "startLine": 43,
+        "startChar": 12,
+        "endLine": 43,
+        "endChar": 18
+      },
+      "revId": "13d158216e40e1814a2dc54d9994fc45573a1e98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_285560f9",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/TransactionUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-25T12:58:53Z",
+      "side": 1,
+      "message": "by removing the type checking, aren\u0027t you making this code less safe? Why do need T to be something other than TypeBaseTable\u003c?\u003e  ?",
+      "range": {
+        "startLine": 20,
+        "startChar": 27,
+        "endLine": 20,
+        "endChar": 28
+      },
+      "revId": "13d158216e40e1814a2dc54d9994fc45573a1e98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

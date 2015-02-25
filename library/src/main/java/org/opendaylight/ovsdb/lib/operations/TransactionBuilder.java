@@ -15,6 +15,7 @@ package org.opendaylight.ovsdb.lib.operations;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.impl.OvsdbClientImpl;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 
@@ -24,10 +25,10 @@ import com.google.common.util.concurrent.ListenableFuture;
 public class TransactionBuilder {
 
     private DatabaseSchema eDatabaseSchema;
-    OvsdbClientImpl ovs;
+    OvsdbClient ovs;
     ArrayList<Operation> operations = Lists.newArrayList();
 
-    public TransactionBuilder(OvsdbClientImpl ovs, DatabaseSchema schema) {
+    public TransactionBuilder(OvsdbClient ovs, DatabaseSchema schema) {
         this.ovs = ovs;
         eDatabaseSchema = schema;
     }

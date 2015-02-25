@@ -9,10 +9,10 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
-import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
-import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
-import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
-import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
+import org.opendaylight.neutron.spi.INeutronNetworkCRUD;
+import org.opendaylight.neutron.spi.INeutronPortCRUD;
+import org.opendaylight.neutron.spi.NeutronNetwork;
+import org.opendaylight.neutron.spi.NeutronPort;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
 import org.opendaylight.ovsdb.lib.notation.Row;

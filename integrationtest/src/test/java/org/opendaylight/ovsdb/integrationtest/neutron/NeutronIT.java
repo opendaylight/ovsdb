@@ -18,9 +18,9 @@ import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperty;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
-import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.ovsdb.integrationtest.ConfigurationBundles;
 import org.opendaylight.ovsdb.integrationtest.OvsdbIntegrationTestBase;
 import org.opendaylight.ovsdb.lib.notation.Row;

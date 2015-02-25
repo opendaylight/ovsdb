@@ -10,7 +10,7 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
-import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
+import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 
@@ -58,7 +58,7 @@ public interface TenantNetworkManager {
     public String getNetworkId (String segmentationId);
 
     /**
-     * Get the {@link org.opendaylight.controller.networkconfig.neutron.NeutronNetwork} for a given Interface
+     * Get the {@link org.opendaylight.neutron.spi.NeutronNetwork} for a given Interface
      */
     public NeutronNetwork getTenantNetwork(Interface intf);
 

@@ -9,8 +9,8 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt;
 
-import org.opendaylight.controller.networkconfig.neutron.INeutronPortAware;
-import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
+import org.opendaylight.neutron.spi.INeutronPortAware;
+import org.opendaylight.neutron.spi.NeutronPort;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;

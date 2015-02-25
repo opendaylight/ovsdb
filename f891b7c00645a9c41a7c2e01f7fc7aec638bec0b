@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_838fb529",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbNodeDataChangeListener.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-25T23:09:29Z",
+      "side": 1,
+      "message": "We shouldn\u0027t *just* disconnect because a we got an update, we should only do a disconnect if we have a connection matching the old values for ip/port and the new values for ip/port are different.",
+      "range": {
+        "startLine": 89,
+        "startChar": 87,
+        "endLine": 89,
+        "endChar": 91
+      },
+      "revId": "f891b7c00645a9c41a7c2e01f7fc7aec638bec0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

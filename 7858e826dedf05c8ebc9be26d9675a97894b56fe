@@ -22,6 +22,30 @@
       "revId": "7858e826dedf05c8ebc9be26d9675a97894b56fe",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_6884c85d",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/schema/typed/TyperUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 465,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-25T13:27:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_68284886",
+      "range": {
+        "startLine": 465,
+        "startChar": 23,
+        "endLine": 465,
+        "endChar": 27
+      },
+      "revId": "7858e826dedf05c8ebc9be26d9675a97894b56fe",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

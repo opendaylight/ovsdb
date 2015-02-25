@@ -22,6 +22,53 @@
       "revId": "f891b7c00645a9c41a7c2e01f7fc7aec638bec0b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_c3be1dae",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbNodeDataChangeListener.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-25T23:47:28Z",
+      "side": 1,
+      "message": "I had misunderstood the code... this is handled above with the check for the client :)",
+      "parentUuid": "7a96c907_838fb529",
+      "range": {
+        "startLine": 89,
+        "startChar": 87,
+        "endLine": 89,
+        "endChar": 91
+      },
+      "revId": "f891b7c00645a9c41a7c2e01f7fc7aec638bec0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_63df090e",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbNodeDataChangeListener.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-25T23:47:28Z",
+      "side": 1,
+      "message": "Could we remove the commented out code?",
+      "range": {
+        "startLine": 110,
+        "startChar": 9,
+        "endLine": 110,
+        "endChar": 11
+      },
+      "revId": "f891b7c00645a9c41a7c2e01f7fc7aec638bec0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

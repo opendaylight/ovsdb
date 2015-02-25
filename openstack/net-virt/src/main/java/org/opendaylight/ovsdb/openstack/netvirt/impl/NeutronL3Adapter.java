@@ -10,16 +10,16 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
-import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
-import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
-import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
-import org.opendaylight.controller.networkconfig.neutron.NeutronFloatingIP;
-import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
-import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
-import org.opendaylight.controller.networkconfig.neutron.NeutronRouter;
-import org.opendaylight.controller.networkconfig.neutron.NeutronRouter_Interface;
-import org.opendaylight.controller.networkconfig.neutron.NeutronSubnet;
-import org.opendaylight.controller.networkconfig.neutron.Neutron_IPs;
+import org.opendaylight.neutron.neutron.spi.INeutronNetworkCRUD;
+import org.opendaylight.neutron.neutron.spi.INeutronPortCRUD;
+import org.opendaylight.neutron.neutron.spi.INeutronSubnetCRUD;
+import org.opendaylight.neutron.neutron.spi.NeutronFloatingIP;
+import org.opendaylight.neutron.neutron.spi.NeutronNetwork;
+import org.opendaylight.neutron.neutron.spi.NeutronPort;
+import org.opendaylight.neutron.neutron.spi.NeutronRouter;
+import org.opendaylight.neutron.neutron.spi.NeutronRouter_Interface;
+import org.opendaylight.neutron.neutron.spi.NeutronSubnet;
+import org.opendaylight.neutron.neutron.spi.Neutron_IPs;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.Status;

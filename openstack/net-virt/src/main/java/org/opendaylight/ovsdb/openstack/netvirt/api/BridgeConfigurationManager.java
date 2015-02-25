@@ -10,7 +10,7 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
-import org.opendaylight.controller.networkconfig.neutron.NeutronNetwork;
+import org.opendaylight.neutron.neutron.spi.NeutronNetwork;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 
@@ -75,7 +75,7 @@ public interface BridgeConfigurationManager {
      * Network Bridge are required.
      * For OpenFlow 1.3 the Integration Bridge is required and must have a physical device connected.
      * @param node the {@link org.opendaylight.controller.sal.core.Node} where the bridge is configured
-     * @param network the {@link org.opendaylight.controller.networkconfig.neutron.NeutronNetwork}
+     * @param network the {@link org.opendaylight.neutron.neutron.spi.NeutronNetwork}
      * @return True or False
      */
     public boolean isNodeVlanReady(Node node, NeutronNetwork network);
@@ -94,7 +94,7 @@ public interface BridgeConfigurationManager {
      * Returns true if the bridges required for the provider network type are created
      * If the bridges are not created, this method will attempt to create them
      * @param node the {@link org.opendaylight.controller.sal.core.Node} to query
-     * @param network the {@link org.opendaylight.controller.networkconfig.neutron.NeutronNetwork}
+     * @param network the {@link org.opendaylight.neutron.neutron.spi.NeutronNetwork}
      * @return True or False
      */
     public boolean createLocalNetwork(Node node, NeutronNetwork network);

@@ -8,9 +8,9 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
-import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
-import org.opendaylight.controller.networkconfig.neutron.NeutronPort;
-import org.opendaylight.controller.networkconfig.neutron.NeutronSecurityGroup;
+import org.opendaylight.neutron.neutron.spi.INeutronPortCRUD;
+import org.opendaylight.neutron.neutron.spi.NeutronPort;
+import org.opendaylight.neutron.neutron.spi.NeutronSecurityGroup;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;

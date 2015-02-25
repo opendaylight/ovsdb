@@ -9,9 +9,9 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt;
 
-import org.opendaylight.controller.networkconfig.neutron.INeutronRouterAware;
-import org.opendaylight.controller.networkconfig.neutron.NeutronRouter;
-import org.opendaylight.controller.networkconfig.neutron.NeutronRouter_Interface;
+import org.opendaylight.neutron.neutron.spi.INeutronRouterAware;
+import org.opendaylight.neutron.neutron.spi.NeutronRouter;
+import org.opendaylight.neutron.neutron.spi.NeutronRouter_Interface;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 

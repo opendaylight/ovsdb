@@ -199,8 +199,8 @@ public class ConfigurationBundles {
                 mavenBundle("org.opendaylight.controller", "switchmanager.implementation").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "statisticsmanager").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "topologymanager").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "networkconfig.neutron").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "forwardingrulesmanager").versionAsInProject(),
+                mavenBundle("org.opendaylight.neutron", "neutron-spi").versionAsInProject(),
                 mavenBundle("org.opendaylight.ovsdb", "openstack.net-virt").versionAsInProject()
         );
     }

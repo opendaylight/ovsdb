@@ -10,15 +10,15 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt;
 
-import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerCRUD;
-import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolCRUD;
-import org.opendaylight.controller.networkconfig.neutron.INeutronLoadBalancerPoolMemberAware;
-import org.opendaylight.controller.networkconfig.neutron.INeutronNetworkCRUD;
-import org.opendaylight.controller.networkconfig.neutron.INeutronPortCRUD;
-import org.opendaylight.controller.networkconfig.neutron.INeutronSubnetCRUD;
-import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancer;
-import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerPool;
-import org.opendaylight.controller.networkconfig.neutron.NeutronLoadBalancerPoolMember;
+import org.opendaylight.neutron.neutron.spi.INeutronLoadBalancerCRUD;
+import org.opendaylight.neutron.neutron.spi.INeutronLoadBalancerPoolCRUD;
+import org.opendaylight.neutron.neutron.spi.INeutronLoadBalancerPoolMemberAware;
+import org.opendaylight.neutron.neutron.spi.INeutronNetworkCRUD;
+import org.opendaylight.neutron.neutron.spi.INeutronPortCRUD;
+import org.opendaylight.neutron.neutron.spi.INeutronSubnetCRUD;
+import org.opendaylight.neutron.neutron.spi.NeutronLoadBalancer;
+import org.opendaylight.neutron.neutron.spi.NeutronLoadBalancerPool;
+import org.opendaylight.neutron.neutron.spi.NeutronLoadBalancerPoolMember;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;

@@ -9,8 +9,8 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt;
 
-import org.opendaylight.controller.networkconfig.neutron.INeutronFloatingIPAware;
-import org.opendaylight.controller.networkconfig.neutron.NeutronFloatingIP;
+import org.opendaylight.neutron.neutron.spi.INeutronFloatingIPAware;
+import org.opendaylight.neutron.neutron.spi.NeutronFloatingIP;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 

@@ -10,10 +10,10 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt;
 
-import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityGroupAware;
-import org.opendaylight.controller.networkconfig.neutron.INeutronSecurityRuleAware;
-import org.opendaylight.controller.networkconfig.neutron.NeutronSecurityGroup;
-import org.opendaylight.controller.networkconfig.neutron.NeutronSecurityRule;
+import org.opendaylight.neutron.neutron.spi.INeutronSecurityGroupAware;
+import org.opendaylight.neutron.neutron.spi.INeutronSecurityRuleAware;
+import org.opendaylight.neutron.neutron.spi.NeutronSecurityGroup;
+import org.opendaylight.neutron.neutron.spi.NeutronSecurityRule;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

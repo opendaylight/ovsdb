@@ -9,12 +9,12 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt;
 
-import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallAware;
-import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallPolicyAware;
-import org.opendaylight.controller.networkconfig.neutron.INeutronFirewallRuleAware;
-import org.opendaylight.controller.networkconfig.neutron.NeutronFirewall;
-import org.opendaylight.controller.networkconfig.neutron.NeutronFirewallPolicy;
-import org.opendaylight.controller.networkconfig.neutron.NeutronFirewallRule;
+import org.opendaylight.neutron.spi.INeutronFirewallAware;
+import org.opendaylight.neutron.spi.INeutronFirewallPolicyAware;
+import org.opendaylight.neutron.spi.INeutronFirewallRuleAware;
+import org.opendaylight.neutron.spi.NeutronFirewall;
+import org.opendaylight.neutron.spi.NeutronFirewallPolicy;
+import org.opendaylight.neutron.spi.NeutronFirewallRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

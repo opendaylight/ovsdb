@@ -35,8 +35,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>guava</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>networkconfig.neutron</artifactId>
+      <groupId>org.opendaylight.neutron</groupId>
+      <artifactId>neutron-spi</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>

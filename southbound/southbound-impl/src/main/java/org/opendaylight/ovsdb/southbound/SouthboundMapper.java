@@ -130,7 +130,7 @@ public class SouthboundMapper {
     }
 
     public static NodeId createManagedNodeId(IpAddress ip, PortNumber port, UUID managedModeId) {
-        return new NodeId(createNodeId(ip,port)
+        return new NodeId(createNodeId(ip,port).getValue()
                 + "/"+SouthboundConstants.BRIDGE_URI_PREFIX+":"+managedModeId.toString());
     }
 

@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_c065b01e",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/operations/TransactionBuilder.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-02-26T19:49:30Z",
+      "side": 1,
+      "message": "curious why this needs to be returned. This value is set when the clients call transactBuilder(dbSchema) so the client should know the schema. Also the clients can already call getSchema(db)",
+      "range": {
+        "startLine": 55,
+        "startChar": 4,
+        "endLine": 55,
+        "endChar": 5
+      },
+      "revId": "85a48be73df23ccf98a9065dfeda42e98f78b010",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -17,12 +17,16 @@ module ovsdb {
         description "A reference to an ovsdb bridge";
         type instance-identifier;
     }
-    
+
     typedef ovsdb-node-ref {
         description "A reference to an ovsdb node";
         type instance-identifier;
     }
-    
+
+    typedef ovsdb-bridge-name {
+        type string;
+    }
+
     grouping ovsdb-bridge-attributes {
         leaf bridge-uuid {
             description "The unique identifier of the bridge";
@@ -31,7 +35,7 @@ module ovsdb {
 
         leaf bridge-name {
             description "The name of the bridge";
-            type string;
+            type ovsdb-bridge-name;
         }
 
         leaf managed-by {

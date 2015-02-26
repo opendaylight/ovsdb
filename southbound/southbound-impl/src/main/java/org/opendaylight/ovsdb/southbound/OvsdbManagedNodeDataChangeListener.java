@@ -14,7 +14,8 @@ import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.ovsdb.lib.OvsdbClient;
+import org.opendaylight.ovsdb.southbound.ovsdb.transact.DataChangesManagedByOvsdbNodeEvent;
+import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactCommandAggregator;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbManagedNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
@@ -54,9 +55,13 @@ public class OvsdbManagedNodeDataChangeListener implements DataChangeListener, A
            // TODO validate we have the correct kind of InstanceIdentifier
            if(created.getValue() instanceof OvsdbManagedNodeAugmentation) {
                LOG.debug("Received request to create {}",created.getValue());
-               OvsdbClient client = cm.getClient((OvsdbManagedNodeAugmentation)created.getValue());
+               OvsdbConnectionInstance client = cm.getConnectionInstance((OvsdbManagedNodeAugmentation)created.getValue());
                if(client != null) {
                    LOG.debug("Found client for {}", created.getValue());
+                   client.transact(new TransactCommandAggregator(
+                           new DataChangesManagedByOvsdbNodeEvent(
+                                   SouthboundMapper.createInstanceIdentifier(client.getKey()),
+                                   changes)));
                } else {
                    LOG.debug("Did not find client for {}",created.getValue());
                }

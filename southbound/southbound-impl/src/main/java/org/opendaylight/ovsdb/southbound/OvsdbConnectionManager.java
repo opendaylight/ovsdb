@@ -27,9 +27,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 
@@ -97,34 +99,12 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     }
 
     public OvsdbConnectionInstance getConnectionInstance(OvsdbBridgeAttributes mn) {
-        Preconditions.checkNotNull(mn);
-        try {
-            OvsdbNodeRef ref = mn.getManagedBy();
-            if(ref != null) {
-                ReadOnlyTransaction transaction = db.newReadOnlyTransaction();
-                CheckedFuture<?, ReadFailedException> nf = transaction.read(LogicalDatastoreType.OPERATIONAL, ref.getValue());
-                transaction.close();
-                Object obj = nf.get();
-                if(obj instanceof Node) {
-                    OvsdbNodeAugmentation ovsdbNode = ((Node)obj).getAugmentation(OvsdbNodeAugmentation.class);
-                    if(ovsdbNode !=null) {
-                        return getConnectionInstance(ovsdbNode);
-                    } else {
-                        LOG.warn("OvsdbManagedNode {} claims to be managed by {} but that OvsdbNode does not exist",mn,ref.getValue());
-                        return null;
-                    }
-                } else {
-                    LOG.warn("Mysteriously got back a thing which is *not* a topology Node: {}",obj);
-                    return null;
-                }
-            } else {
-                LOG.warn("Cannot find client for OvsdbManagedNode without a specified ManagedBy {}",mn);
-                return null;
-            }
-         } catch (Exception e) {
-             LOG.warn("Failed to get OvsdbNode that manages OvsdbManagedNode {}",mn, e);
-             return null;
-         }
+        Optional<OvsdbNodeAugmentation> optional = SouthboundUtil.getManagingNode(db, mn);
+        if(optional.isPresent()) {
+            return getConnectionInstance(optional.get());
+        } else {
+            return null;
+        }
     }
 
     public OvsdbConnectionInstance getConnectionInstance(Node node) {

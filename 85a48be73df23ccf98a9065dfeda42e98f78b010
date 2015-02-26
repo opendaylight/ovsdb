@@ -22,6 +22,30 @@
       "revId": "85a48be73df23ccf98a9065dfeda42e98f78b010",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_039de265",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/operations/TransactionBuilder.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-02-26T22:47:55Z",
+      "side": 1,
+      "message": "Say I have been passed a TransactionBuilder, and I\u0027d like to know whether I can use it to do an operation for a particular Schema.  My options are:\n\na)  Pass the DatabaseSchema all along the path with the TransactionBuilder (which already has that information)\nb)  Allow access to this info from TransactionBuilder",
+      "parentUuid": "7a96c907_c065b01e",
+      "range": {
+        "startLine": 55,
+        "startChar": 4,
+        "endLine": 55,
+        "endChar": 5
+      },
+      "revId": "85a48be73df23ccf98a9065dfeda42e98f78b010",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

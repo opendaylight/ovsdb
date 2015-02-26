@@ -7,10 +7,13 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.EchoServiceCallbackFilters;
 import org.opendaylight.ovsdb.lib.LockAquisitionCallback;
 import org.opendaylight.ovsdb.lib.LockStolenCallback;
@@ -30,8 +33,14 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
+import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactCommand;
+import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactCommandAggregator;
+import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactInvoker;
+import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactInvokerImpl;
 import org.opendaylight.ovsdb.southbound.transactions.md.OvsdbNodeCreateCommand;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
+import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +52,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     private OvsdbClient client;
     private OvsdbClientKey key;
     private TransactionInvoker txInvoker;
+    private Map<DatabaseSchema,TransactInvoker> transactInvokers = new HashMap<DatabaseSchema,TransactInvoker>();
     private MonitorCallBack callback;
 
     OvsdbConnectionInstance(OvsdbClientKey key,OvsdbClient client,TransactionInvoker txInvoker) {
@@ -53,6 +63,12 @@ public class OvsdbConnectionInstance implements OvsdbClient {
         registerCallBack();
     }
 
+    public void transact(TransactCommand command) {
+        for(TransactInvoker transactInvoker: transactInvokers.values()) {
+            transactInvoker.invoke(command);
+        }
+    }
+
     private void registerCallBack() {
         this.callback = new OvsdbMonitorCallback(key,txInvoker);
         try {
@@ -61,6 +77,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
                 for (String database : databases) {
                     DatabaseSchema dbSchema = getSchema(database).get();
                     if(dbSchema != null) {
+                        transactInvokers.put(dbSchema, new TransactInvokerImpl(this,dbSchema));
                         monitorAllTables(database, dbSchema);
                     } else {
                         LOG.warn("No schema reported for database {} for key {}",database,key);

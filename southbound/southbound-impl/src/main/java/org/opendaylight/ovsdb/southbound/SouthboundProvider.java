@@ -35,6 +35,8 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
     private DataBroker db;
     private OvsdbConnectionManager cm;
     private OvsdbNodeDataChangeListener ovsdbNodeListener;
+    private OvsdbManagedNodeDataChangeListener ovsdbManagedNodeListener;
+    private OvsdbTerminationPointDataChangeListener ovsdbTerminationPointListener;
     private TransactionInvoker txInvoker;
 
 
@@ -45,6 +47,8 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
         this.txInvoker = new TransactionInvokerImpl(db);
         cm = new OvsdbConnectionManager(db,txInvoker);
         ovsdbNodeListener = new OvsdbNodeDataChangeListener(db, cm);
+        ovsdbManagedNodeListener = new OvsdbManagedNodeDataChangeListener(db, cm);
+        ovsdbTerminationPointListener = new OvsdbTerminationPointDataChangeListener(db, cm);
         initializeOvsdbTopology(LogicalDatastoreType.OPERATIONAL);
         initializeOvsdbTopology(LogicalDatastoreType.CONFIGURATION);
         OvsdbConnection ovsdbConnection = new OvsdbConnectionService();
@@ -57,6 +61,8 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
         LOG.info("SouthboundProvider Closed");
         cm.close();
         ovsdbNodeListener.close();
+        ovsdbManagedNodeListener.close();
+        ovsdbTerminationPointListener.close();
     }
 
     private void initializeOvsdbTopology(LogicalDatastoreType type) {

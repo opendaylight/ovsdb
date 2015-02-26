@@ -61,22 +61,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
                 for (String database : databases) {
                     DatabaseSchema dbSchema = getSchema(database).get();
                     if(dbSchema != null) {
-                        Set<String> tables = dbSchema.getTables();
-                        if(tables != null) {
-                            List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
-                            for (String tableName : tables) {
-                                GenericTableSchema tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
-                                Set<String> columns = tableSchema.getColumns();
-                                MonitorRequestBuilder<GenericTableSchema> monitorBuilder = MonitorRequestBuilder.builder(tableSchema);
-                                for (String column : columns) {
-                                    monitorBuilder.addColumn(column);
-                                }
-                                monitorRequests.add(monitorBuilder.with(new MonitorSelect(true, true, true, true)).build());
-                            }
-                            this.callback.update(monitor(dbSchema, monitorRequests, callback),dbSchema);
-                        } else {
-                            LOG.warn("No tables for schema {} for database {} for key {}",dbSchema,database,key);
-                        }
+                        monitorAllTables(database, dbSchema);
                     } else {
                         LOG.warn("No schema reported for database {} for key {}",database,key);
                     }
@@ -86,6 +71,25 @@ public class OvsdbConnectionInstance implements OvsdbClient {
             }
         } catch (InterruptedException | ExecutionException e) {
             LOG.warn("Exception attempting to initialize {}: {}",key,e);
+        }
+    }
+
+    private void monitorAllTables(String database, DatabaseSchema dbSchema) {
+        Set<String> tables = dbSchema.getTables();
+        if(tables != null) {
+            List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
+            for (String tableName : tables) {
+                GenericTableSchema tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
+                Set<String> columns = tableSchema.getColumns();
+                MonitorRequestBuilder<GenericTableSchema> monitorBuilder = MonitorRequestBuilder.builder(tableSchema);
+                for (String column : columns) {
+                    monitorBuilder.addColumn(column);
+                }
+                monitorRequests.add(monitorBuilder.with(new MonitorSelect(true, true, true, true)).build());
+            }
+            this.callback.update(monitor(dbSchema, monitorRequests, callback),dbSchema);
+        } else {
+            LOG.warn("No tables for schema {} for database {} for key {}",dbSchema,database,key);
         }
     }
 

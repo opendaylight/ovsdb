@@ -34,7 +34,7 @@ public class OvsdbManagedNodeDataChangeListener implements DataChangeListener, A
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbManagedNodeDataChangeListener.class);
 
     OvsdbManagedNodeDataChangeListener(DataBroker db, OvsdbConnectionManager cm) {
-        LOG.info("Registering OvsdbNodeDataChangeListener");
+        LOG.info("Registering OvsdbManagedNodeDataChangeListener");
         this.cm = cm;
         this.db = db;
         InstanceIdentifier<OvsdbManagedNodeAugmentation> path = InstanceIdentifier

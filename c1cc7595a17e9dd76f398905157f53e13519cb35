@@ -46,6 +46,30 @@
       "revId": "c1cc7595a17e9dd76f398905157f53e13519cb35",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_83f57558",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbNodeDataChangeListener.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-02-26T05:25:25Z",
+      "side": 1,
+      "message": "In the else case is there any change in values that could also cause a reconnect?\n\nOr any change in values that should do something? Maybe a TODO should be added to indicate that something needs to happen.",
+      "parentUuid": "7a96c907_43868ddc",
+      "range": {
+        "startLine": 86,
+        "startChar": 35,
+        "endLine": 86,
+        "endChar": 45
+      },
+      "revId": "c1cc7595a17e9dd76f398905157f53e13519cb35",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

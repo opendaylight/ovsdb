@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_033e4528",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbNodeDataChangeListener.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-02-26T01:12:13Z",
+      "side": 1,
+      "message": "why does an update on the node mean disconnect and connect?\n\nThe update should be checked to determine what needs to happen.",
+      "range": {
+        "startLine": 86,
+        "startChar": 35,
+        "endLine": 86,
+        "endChar": 45
+      },
+      "revId": "c1cc7595a17e9dd76f398905157f53e13519cb35",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

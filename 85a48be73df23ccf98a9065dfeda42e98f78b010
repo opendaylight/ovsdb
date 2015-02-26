@@ -46,6 +46,30 @@
       "revId": "85a48be73df23ccf98a9065dfeda42e98f78b010",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e3e476e2",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/operations/TransactionBuilder.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-02-26T23:14:07Z",
+      "side": 1,
+      "message": "Sounds good. I guess md-sal world might do something like this. Typical usage so far is to just issue the transaction and never look back.",
+      "parentUuid": "7a96c907_039de265",
+      "range": {
+        "startLine": 55,
+        "startChar": 4,
+        "endLine": 55,
+        "endChar": 5
+      },
+      "revId": "85a48be73df23ccf98a9065dfeda42e98f78b010",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

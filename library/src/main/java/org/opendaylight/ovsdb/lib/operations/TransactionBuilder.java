@@ -49,4 +49,8 @@ public class TransactionBuilder {
     public ListenableFuture<List<OperationResult>> execute() {
         return ovs.transact(eDatabaseSchema, operations);
     }
+
+    public DatabaseSchema getDatabaseSchema() {
+        return eDatabaseSchema;
+    }
 }

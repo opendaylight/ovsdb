@@ -87,16 +87,16 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         }
     }
 
-    public OvsdbClient getClient(OvsdbClientKey key) {
+    public OvsdbConnectionInstance getConnectionInstance(OvsdbClientKey key) {
         return clients.get(key);
     }
 
-    public OvsdbClient getClient(IpPortLocator loc) {
+    public OvsdbConnectionInstance getConnectionInstance(IpPortLocator loc) {
         Preconditions.checkNotNull(loc);
-        return getClient(new OvsdbClientKey(loc));
+        return getConnectionInstance(new OvsdbClientKey(loc));
     }
 
-    public OvsdbClient getClient(OvsdbBridgeAttributes mn) {
+    public OvsdbConnectionInstance getConnectionInstance(OvsdbBridgeAttributes mn) {
         Preconditions.checkNotNull(mn);
         try {
             OvsdbNodeRef ref = mn.getManagedBy();
@@ -108,7 +108,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 if(obj instanceof Node) {
                     OvsdbNodeAugmentation ovsdbNode = ((Node)obj).getAugmentation(OvsdbNodeAugmentation.class);
                     if(ovsdbNode !=null) {
-                        return getClient(ovsdbNode);
+                        return getConnectionInstance(ovsdbNode);
                     } else {
                         LOG.warn("OvsdbManagedNode {} claims to be managed by {} but that OvsdbNode does not exist",mn,ref.getValue());
                         return null;
@@ -127,17 +127,33 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
          }
     }
 
-    public OvsdbClient getClient(Node node) {
+    public OvsdbConnectionInstance getConnectionInstance(Node node) {
         Preconditions.checkNotNull(node);
         OvsdbNodeAugmentation ovsdbNode = node.getAugmentation(OvsdbNodeAugmentation.class);
         OvsdbManagedNodeAugmentation ovsdbManagedNode = node.getAugmentation(OvsdbManagedNodeAugmentation.class);
         if(ovsdbNode != null) {
-            return getClient(ovsdbNode);
+            return getConnectionInstance(ovsdbNode);
         } else if (ovsdbManagedNode != null) {
-            return getClient(ovsdbManagedNode);
+            return getConnectionInstance(ovsdbManagedNode);
         } else {
             LOG.warn("This is not a node that gives any hint how to find its OVSDB Manager: {}",node);
             return null;
         }
+    }
+
+    public OvsdbClient getClient(OvsdbClientKey key) {
+        return getConnectionInstance(key);
+    }
+
+    public OvsdbClient getClient(IpPortLocator loc) {
+        return getConnectionInstance(loc);
+    }
+
+    public OvsdbClient getClient(OvsdbBridgeAttributes mn) {
+        return getConnectionInstance(mn);
+    }
+
+    public OvsdbClient getClient(Node node) {
+        return getConnectionInstance(node);
     }
 }

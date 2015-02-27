@@ -54,7 +54,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
             if(node.isPresent()){
                 LOG.info("Node {} is present",node);
                 NodeBuilder managedNodeBuilder = new NodeBuilder();
-                NodeId manageNodeId = SouthboundMapper.createManagedNodeId(getKey(), bridge.getUuid());
+                NodeId manageNodeId = SouthboundMapper.createManagedNodeId(getKey(), new OvsdbBridgeName(bridge.getName()));
                 managedNodeBuilder.setNodeId(manageNodeId);
 
                 OvsdbManagedNodeAugmentationBuilder ovsdbManagedNodeBuilder = new OvsdbManagedNodeAugmentationBuilder();

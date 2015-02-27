@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OvsdbBridgeRemovedCommand extends AbstractTransactionCommand {
-    private static final Logger LOG = LoggerFactory.getLogger(OvsdbBridgeUpdateCommand.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OvsdbBridgeRemovedCommand.class);
 
     public OvsdbBridgeRemovedCommand(OvsdbClientKey key, TableUpdates updates,
             DatabaseSchema dbSchema) {

@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_c9607ba7",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbPortTerminationPointDataChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-27T17:51:09Z",
+      "side": 1,
+      "message": "unused import... remove",
+      "range": {
+        "startLine": 10,
+        "startChar": 16,
+        "endLine": 10,
+        "endChar": 36
+      },
+      "revId": "0a0d2a0d382bd49640f6105cbdabd8798a01ac22",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e96537b5",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbPortTerminationPointDataChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-27T17:51:09Z",
+      "side": 1,
+      "message": "same",
+      "range": {
+        "startLine": 11,
+        "startChar": 12,
+        "endLine": 11,
+        "endChar": 16
+      },
+      "revId": "0a0d2a0d382bd49640f6105cbdabd8798a01ac22",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_8956f3cc",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbPortTerminationPointDataChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-27T17:51:09Z",
+      "side": 1,
+      "message": "same",
+      "range": {
+        "startLine": 12,
+        "startChar": 16,
+        "endLine": 12,
+        "endChar": 17
+      },
+      "revId": "0a0d2a0d382bd49640f6105cbdabd8798a01ac22",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_a95baff4",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbPortTerminationPointDataChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-27T17:51:09Z",
+      "side": 1,
+      "message": "same",
+      "range": {
+        "startLine": 13,
+        "startChar": 12,
+        "endLine": 13,
+        "endChar": 16
+      },
+      "revId": "0a0d2a0d382bd49640f6105cbdabd8798a01ac22",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_096ae380",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbPortTerminationPointDataChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-02-27T17:51:09Z",
+      "side": 1,
+      "message": "same",
+      "range": {
+        "startLine": 20,
+        "startChar": 88,
+        "endLine": 20,
+        "endChar": 125
+      },
+      "revId": "0a0d2a0d382bd49640f6105cbdabd8798a01ac22",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

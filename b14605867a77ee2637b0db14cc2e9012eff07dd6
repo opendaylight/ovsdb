@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_a3b98e7a",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-02-27T01:32:38Z",
+      "side": 1,
+      "message": "Why do you have \u0027uuid\u0027 for port and interface but \u0027 name\u0027 and \u0027type\u0027 are only for port or interface?",
+      "revId": "b14605867a77ee2637b0db14cc2e9012eff07dd6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

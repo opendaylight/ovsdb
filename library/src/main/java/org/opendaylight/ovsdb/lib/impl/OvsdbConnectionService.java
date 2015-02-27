@@ -289,8 +289,7 @@ public class OvsdbConnectionService implements OvsdbConnection {
                         try {
                             Thread.sleep(100);
                         } catch (InterruptedException e) {
-                            logger.error("Exception : {}", e.toString());
-                            e.printStackTrace();
+                            logger.error("Exception while checking if ssl handshake is done", e);
                         }
                         count++;
                     }

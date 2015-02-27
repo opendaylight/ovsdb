@@ -51,6 +51,55 @@ module ovsdb {
         }
     }
 
+
+    identity interface-type-base {
+        description "Base identity for all OVSDB interface types";
+    }
+
+    identity interface-type-system {
+        description "Interface type for system interfaces";
+        base interface-type-base;
+    }
+
+    identity interface-type-internal {
+        description "Interface type for internal interfaces";
+        base interface-type-base;
+    }
+
+    identity interface-type-vxlan {
+        description "Interface type for vxlan interfaces";
+        base interface-type-base;
+    }
+
+    identity interface-type-patch {
+        description "Interface type for patch interfaces";
+        base interface-type-base;
+    }
+
+    grouping ovsdb-port-interface-attributes {
+        leaf port-uuid {
+            description "The unique identifier of the OVSDB port";
+            type yang:uuid;
+        }
+
+        leaf interface-uuid {
+            description "The unique identifier of the OVSDB interface";
+            type yang:uuid;
+        }
+
+        leaf name {
+            description "The name of the OVSDB port/interface";
+            type string;
+        }
+
+        leaf interface-type {
+            description "The type of the OVSDB interface";
+            type identityref {
+                base interface-type-base;
+            }
+        }
+    }
+
     augment "/topo:network-topology/topo:topology/topo:node" {
         description "Augmentation for bridge nodes managed by ovsdb";
         ext:augment-identifier "ovsdb-managed-node-augmentation";
@@ -61,5 +110,11 @@ module ovsdb {
         description "Augment topology node for an ovsdb node";
         ext:augment-identifier "ovsdb-node-augmentation";
         uses ovsdb-node-attributes;
+    }
+
+    augment "/topo:network-topology/topo:topology/topo:node/topo:termination-point" {
+        description "Augment topology node termination-point for an ovsdb port/interface";
+        ext:augment-identifier "ovsdb-termination-point-augmentation";
+        uses ovsdb-port-interface-attributes;
     }
 }

@@ -38,7 +38,7 @@ public class Version implements Comparable<Version> {
 
     public static Version fromString(String version){
         final Matcher matcher = Version.PATTERN.matcher(version);
-        if (!matcher.matches()) {
+        if (!matcher.find()) {
             throw new IllegalArgumentException("<"+version+"> does not match format "+Version.FORMAT);
         }
         int major = Integer.valueOf(matcher.group(1));

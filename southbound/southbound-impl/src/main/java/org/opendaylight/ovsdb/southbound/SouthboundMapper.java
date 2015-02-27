@@ -20,6 +20,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv6Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
@@ -93,8 +94,8 @@ public class SouthboundMapper {
         return nodePath;
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(OvsdbClientKey key,UUID uuid) {
-        return createInstanceIdentifier(createManagedNodeId(key, uuid));
+    public static InstanceIdentifier<Node> createInstanceIdentifier(OvsdbClientKey key,OvsdbBridgeName bridgeName) {
+        return createInstanceIdentifier(createManagedNodeId(key, bridgeName));
     }
 
     public static InstanceIdentifier<Node> createInstanceIndentifier(OvsdbClientKey key) {
@@ -119,23 +120,23 @@ public class SouthboundMapper {
                 new PortNumber(connectionInfo.getRemotePort()));
     }
 
-    public static NodeId createManagedNodeId(OvsdbConnectionInfo connectionInfo, UUID managedNodeId) {
+    public static NodeId createManagedNodeId(OvsdbConnectionInfo connectionInfo, OvsdbBridgeName bridgeName) {
         return createManagedNodeId(createIpAddress(connectionInfo.getRemoteAddress()),
                 new PortNumber(connectionInfo.getRemotePort()),
-                managedNodeId);
+                bridgeName);
     }
 
-    public static NodeId createManagedNodeId(OvsdbClientKey key, UUID managedModeId) {
-        return createManagedNodeId(key.getIp(),key.getPort(),managedModeId);
+    public static NodeId createManagedNodeId(OvsdbClientKey key, OvsdbBridgeName bridgeName) {
+        return createManagedNodeId(key.getIp(),key.getPort(),bridgeName);
     }
 
-    public static NodeId createManagedNodeId(IpAddress ip, PortNumber port, UUID managedModeId) {
+    public static NodeId createManagedNodeId(IpAddress ip, PortNumber port, OvsdbBridgeName bridgeName) {
         return new NodeId(createNodeId(ip,port).getValue()
-                + "/"+SouthboundConstants.BRIDGE_URI_PREFIX+":"+managedModeId.toString());
+                + "/"+SouthboundConstants.BRIDGE_URI_PREFIX+"/"+ bridgeName.getValue());
     }
 
     public static NodeId createNodeId(IpAddress ip, PortNumber port) {
-        String uriString = SouthboundConstants.OVSDB_URI_PREFIX + ":/" + new String(ip.getValue()) +
+        String uriString = SouthboundConstants.OVSDB_URI_PREFIX + "://" + new String(ip.getValue()) +
                    ":" + port.getValue();
         Uri uri = new Uri(uriString);
         NodeId nodeId = new NodeId(uri);

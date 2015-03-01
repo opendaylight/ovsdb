@@ -30,8 +30,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <properties>
     <checkstyle.rules.version>0.1.0-SNAPSHOT</checkstyle.rules.version>
     <lifecycle.mapping.version>1.0.0</lifecycle.mapping.version>
-    <!-- ODL repository / plugin repository -->
-    <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
     <!-- Surefire/Failsafe Arguments -->
     <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
     <!-- OVSDB Component Versions -->
@@ -610,46 +608,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <tag>HEAD</tag>
     <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
   </scm>
-
-  <pluginRepositories>
-    <!-- Opendaylight public group -->
-    <pluginRepository>
-      <id>opendaylight-public</id>
-      <name>opendaylight-public</name>
-      <url>${nexusproxy}/groups/public/</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <releases>
-        <enabled>true</enabled>
-        <updatePolicy>never</updatePolicy>
-      </releases>
-    </pluginRepository>
-    <!-- OpenDayLight Released artifact -->
-    <pluginRepository>
-      <id>opendaylight-release</id>
-      <name>opendaylight-release</name>
-      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.release/</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-    </pluginRepository>
-    <!-- OpenDayLight Snapshot artifact -->
-    <pluginRepository>
-      <id>opendaylight-snapshot</id>
-      <name>opendaylight-snapshot</name>
-      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </pluginRepository>
-  </pluginRepositories>
 
   <profiles>
     <profile>

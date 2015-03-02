@@ -14,11 +14,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.opendaylight.controller.northbound.commons.RestMessages;
 import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
+import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
-import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
 import org.opendaylight.ovsdb.plugin.api.Connection;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 
@@ -37,17 +38,48 @@ public class NodeResource {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
-    public static OvsdbClient getOvsdbConnection(String nodeId, Object bundleClassRef) {
-        Node node = Node.fromString(nodeId);
+    public static Node getOvsdbNode(String nodeId, Object bundleClassRef) {
+        OvsdbConnectionService connectionService =
+                (OvsdbConnectionService)ServiceHelper.
+                        getGlobalInstance(OvsdbConnectionService.class, bundleClassRef);
+        if (connectionService == null) {
+            throw new ServiceUnavailableException("Ovsdb ConnectionService "
+                    + RestMessages.SERVICEUNAVAILABLE.toString());
+        }
+
+        Node node = connectionService.getNode(nodeId);
         if (node == null) {
             throw new ResourceNotFoundException("Node "+nodeId+" not found");
         }
-        OvsdbConnectionService connectionService = (OvsdbConnectionService)ServiceHelper.getGlobalInstance(OvsdbConnectionService.class, bundleClassRef);
+
+        return node;
+    }
+
+    public static Connection getOvsdbConnection(String nodeId, Object bundleClassRef) {
+        OvsdbConnectionService connectionService =
+                (OvsdbConnectionService)ServiceHelper.
+                        getGlobalInstance(OvsdbConnectionService.class, bundleClassRef);
+        if (connectionService == null) {
+            throw new ServiceUnavailableException("Ovsdb ConnectionService "
+                    + RestMessages.SERVICEUNAVAILABLE.toString());
+        }
+
+        Node node = connectionService.getNode(nodeId);
+        if (node == null) {
+            throw new ResourceNotFoundException("Node "+nodeId+" not found");
+        }
+
         Connection connection = connectionService.getConnection(node);
         if (connection == null) {
             throw new ResourceNotFoundException("Connection for "+nodeId+" not available");
         }
-        OvsdbClient client = connectionService.getConnection(node).getClient();
+
+        return connection;
+    }
+
+    public static OvsdbClient getOvsdbClient(String nodeId, Object bundleClassRef) {
+        Connection connection = NodeResource.getOvsdbConnection(nodeId, bundleClassRef);
+        OvsdbClient client = connection.getClient();
         if (client == null) {
             throw new ResourceNotFoundException("No Ovsdb Client to handle Node "+nodeId);
         }
@@ -83,13 +115,8 @@ public class NodeResource {
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getNode(@PathParam("id") String id) throws JsonProcessingException {
-        OvsdbConnectionService connectionService = (OvsdbConnectionService)ServiceHelper.getGlobalInstance(OvsdbConnectionService.class, this);
-        OvsdbClient client = NodeResource.getOvsdbConnection(id, this);
-        if (client == null) {
-            throw new ResourceNotFoundException("Node "+id+" not found");
-        }
-        OvsdbConnectionInfo connectionInfo = client.getConnectionInfo();
-        String response = objectMapper.writeValueAsString(connectionInfo);
+        OvsdbClient client = NodeResource.getOvsdbClient(id, this);
+        String response = objectMapper.writeValueAsString(client.getConnectionInfo());
         return Response.status(Response.Status.OK)
                 .entity(response)
                 .build();

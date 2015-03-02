@@ -35,7 +35,7 @@ public class TableResource {
     }
 
     private DatabaseSchema getDatabaseSchema (String databaseName) {
-        OvsdbClient client = NodeResource.getOvsdbConnection(nodeId, this);
+        OvsdbClient client = NodeResource.getOvsdbClient(nodeId, this);
         return client.getDatabaseSchema(databaseName);
     }
 

@@ -35,14 +35,14 @@ public class DatabaseResource {
 
     private DatabaseSchema getDatabaseSchema (String databaseName) {
         String csDatabaseName = this.caseSensitiveDatabaseName(databaseName);
-        OvsdbClient client = NodeResource.getOvsdbConnection(nodeId, this);
+        OvsdbClient client = NodeResource.getOvsdbClient(nodeId, this);
         return client.getDatabaseSchema(csDatabaseName);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getDatabases(){
-        OvsdbClient client = NodeResource.getOvsdbConnection(nodeId, this);
+        OvsdbClient client = NodeResource.getOvsdbClient(nodeId, this);
         try {
             List<String> databases = client.getDatabases().get();
             if (databases == null) {
@@ -75,10 +75,7 @@ public class DatabaseResource {
     }
 
     private String caseSensitiveDatabaseName (String ciDatabaseName) {
-        Node node = Node.fromString(nodeId);
-        OvsdbConnectionService connectionService = (OvsdbConnectionService)ServiceHelper.getGlobalInstance(OvsdbConnectionService.class, this);
-        OvsdbClient client = connectionService.getConnection(node).getClient();
-
+        OvsdbClient client = NodeResource.getOvsdbClient(nodeId, this);
         try {
             List<String> databases = client.getDatabases().get();
             if (databases == null) return ciDatabaseName;

@@ -61,7 +61,7 @@ public class RowResource {
             rowNodeStrBuilder.append(line);
         }
         JsonNode jsonNode = objectMapper.readTree(rowNodeStrBuilder.toString());
-        OvsdbClient client = NodeResource.getOvsdbConnection(nodeId, this);
+        OvsdbClient client = NodeResource.getOvsdbClient(nodeId, this);
         return OvsdbRow.fromJsonNode(client, OvsVswitchdSchemaConstants.DATABASE_NAME, jsonNode);
     }
 
@@ -75,7 +75,7 @@ public class RowResource {
             throw new ServiceUnavailableException("Ovsdb ConfigurationService " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
-        Node node = Node.fromString(nodeId);
+        Node node = NodeResource.getOvsdbNode(nodeId, this);
         Map<UUID,Row<GenericTableSchema>> rows = null;
         try {
             rows = ovsdbTable.getRows(node, databaseName, tableName);
@@ -92,7 +92,6 @@ public class RowResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createRow(InputStream stream) throws IOException {
-        Node node = Node.fromString(nodeId);
         OvsdbRow localRow = this.getOvsdbRow(stream);
         if (localRow == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -104,6 +103,7 @@ public class RowResource {
             throw new ServiceUnavailableException("OVS Configuration Service " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
+        Node node = NodeResource.getOvsdbNode(nodeId, this);
         Row row = ovsdbTable.insertTree(node, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName,
                 localRow.getParentTable(), new UUID(localRow.getParentUuid()), localRow.getParentColumn(),
                 localRow.getRow());
@@ -124,7 +124,7 @@ public class RowResource {
             throw new ServiceUnavailableException("Ovsdb ConfigurationService " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
-        Node node = Node.fromString(nodeId);
+        Node node = NodeResource.getOvsdbNode(nodeId, this);
         Row<GenericTableSchema> row = null;
         try {
             row = ovsdbTable.getRow(node, databaseName, tableName, new UUID(id));
@@ -142,7 +142,6 @@ public class RowResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateRow(@PathParam("id") String id, InputStream stream) throws IOException{
-        Node node = Node.fromString(nodeId);
         OvsdbRow localRow = this.getOvsdbRow(stream);
         if (localRow == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -153,6 +152,7 @@ public class RowResource {
             throw new ServiceUnavailableException("OVS Configuration Service " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
+        Node node = NodeResource.getOvsdbNode(nodeId, this);
         Row<GenericTableSchema> row = ovsdbTable.updateRow(node, databaseName, tableName, new UUID(id), localRow.getRow(), true);
         String response = objectMapper.writeValueAsString(row);
         return Response.status(Response.Status.OK)
@@ -171,7 +171,7 @@ public class RowResource {
             throw new ServiceUnavailableException("Ovsdb ConfigurationService " + RestMessages.SERVICEUNAVAILABLE.toString());
         }
 
-        Node node = Node.fromString(nodeId);
+        Node node = NodeResource.getOvsdbNode(nodeId, this);
         try {
             ovsdbTable.deleteRow(node, databaseName, tableName, new UUID(id));
         } catch (Exception e) {

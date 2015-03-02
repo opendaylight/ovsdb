@@ -65,6 +65,10 @@ public class ConnectionServiceImpl implements OvsdbConnectionService,
     private static final String OVSDB_LISTENPORT = "ovsdb.listenPort";
 
 
+    public void putOvsdbConnection (String identifier, Connection connection) {
+        ovsdbConnections.put(identifier, connection);
+    }
+
     private ConcurrentMap<String, Connection> ovsdbConnections = new ConcurrentHashMap<String, Connection>();
     private List<ChannelHandler> handlers = null;
 
@@ -185,7 +189,7 @@ public class ConnectionServiceImpl implements OvsdbConnectionService,
     public Node getNode (String identifier) {
         String id = identifier;
 
-        String[] pair = identifier.split("[|,:]+");
+        String[] pair = identifier.split("\\|");
         if (pair[0].equals("OVS")) {
             id = pair[1];
         }

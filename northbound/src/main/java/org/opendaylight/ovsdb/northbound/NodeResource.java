@@ -1,5 +1,6 @@
 package org.opendaylight.ovsdb.northbound;
 
+import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.InputStream;
 import java.util.List;
 
@@ -36,6 +37,7 @@ public class NodeResource {
     public NodeResource () {
         objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
     }
 
     public static Node getOvsdbNode(String nodeId, Object bundleClassRef) {

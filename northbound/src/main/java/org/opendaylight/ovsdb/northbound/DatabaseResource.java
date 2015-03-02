@@ -1,5 +1,6 @@
 package org.opendaylight.ovsdb.northbound;
 
+import com.fasterxml.jackson.databind.SerializationFeature;
 import java.util.List;
 
 import javax.ws.rs.GET;
@@ -10,11 +11,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.opendaylight.controller.northbound.commons.exception.InternalServerErrorException;
-import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -31,6 +29,7 @@ public class DatabaseResource {
         this.nodeId = id;
         objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
     }
 
     private DatabaseSchema getDatabaseSchema (String databaseName) {

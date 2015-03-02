@@ -1,5 +1,6 @@
 package org.opendaylight.ovsdb.northbound;
 
+import com.fasterxml.jackson.databind.SerializationFeature;
 import java.util.Set;
 
 import javax.ws.rs.GET;
@@ -31,7 +32,7 @@ public class TableResource {
         this.databaseName = databaseName;
         objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
+        objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
     }
 
     private DatabaseSchema getDatabaseSchema (String databaseName) {

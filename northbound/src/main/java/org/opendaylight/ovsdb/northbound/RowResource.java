@@ -1,5 +1,6 @@
 package org.opendaylight.ovsdb.northbound;
 
+import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,7 +51,7 @@ public class RowResource {
         this.tableName = tableName;
         objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
+        objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
     }
 
     private OvsdbRow getOvsdbRow (InputStream stream) throws IOException {

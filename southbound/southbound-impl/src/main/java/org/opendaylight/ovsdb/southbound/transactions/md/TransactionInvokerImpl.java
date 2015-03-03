@@ -143,6 +143,6 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
 
     @Override
     public void close() throws Exception {
-        // TODO Auto-generated method stub
+      this.executor.shutdown();
     }
 }

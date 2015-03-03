@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_60f13100",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-03T14:46:57Z",
+      "side": 1,
+      "message": "unwanted space; pls remove.",
+      "revId": "699d08a10f9142170efbd623920e298154b969e2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -33,6 +33,7 @@
 
     <feature name="odl-ovsdb-plugin" description="OpenDaylight :: OVSDB :: Plugin" version='${ovsdb.plugin.version}'>
         <feature version="${sal.version}">odl-adsal-all</feature>
+        <feature version="${openflowplugin.version}">odl-openflowplugin-nsf-services</feature>
         <feature version="${ovsdb.library.version}">odl-ovsdb-library</feature>
         <feature version="${schema.openvswitch.version}">odl-ovsdb-schema-openvswitch</feature>
         <feature version="${schema.hardwarevtep.version}">odl-ovsdb-schema-hardwarevtep</feature>
@@ -43,10 +44,12 @@
     <feature name="odl-ovsdb-northbound" description="OpenDaylight :: OVSDB :: Northbound" version='${ovsdb.northbound.version}'>
         <feature version="${ovsdb.plugin.version}">odl-ovsdb-plugin</feature>
         <feature version="${nsf.version}">odl-adsal-northbound</feature>
+        <feature version="${openflowplugin.version}">odl-openflowplugin-nsf-services</feature>
         <bundle>mvn:org.opendaylight.ovsdb/northbound/${ovsdb.northbound.version}</bundle>
     </feature>
 
     <feature name="odl-ovsdb-compatibility-layer" description="OpenDaylight :: OVSDB :: Plugin Compatibility Layer" version='${ovsdb.plugin.compatibility.layer.version}'>
+        <feature version="${openflowplugin.version}">odl-openflowplugin-nsf-services</feature>
         <feature version="${ovsdb.plugin.version}">odl-ovsdb-plugin</feature>
         <bundle>mvn:org.opendaylight.ovsdb/ovsdb-plugin-compatibility-layer/${ovsdb.plugin.compatibility.layer.version}</bundle>
     </feature>

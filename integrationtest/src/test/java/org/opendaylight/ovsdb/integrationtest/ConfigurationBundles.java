@@ -14,6 +14,7 @@ import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
+import org.opendaylight.controller.test.sal.binding.it.TestHelper;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.options.DefaultCompositeOption;
 
@@ -206,4 +207,14 @@ public class ConfigurationBundles {
         );
     }
 
+    public static Option mdsalBundles() {
+        return new DefaultCompositeOption(
+                //TestHelper.mdSalCoreBundles(),
+                //TestHelper.bindingAwareSalBundles(),
+                TestHelper.configMinumumBundles(),
+                TestHelper.baseModelBundles(),
+                TestHelper.flowCapableModelBundles(),
+                TestHelper.junitAndMockitoBundles()
+        );
+    }
 }

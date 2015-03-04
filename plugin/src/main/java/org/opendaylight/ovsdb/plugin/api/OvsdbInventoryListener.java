@@ -9,8 +9,8 @@
  */
 package org.opendaylight.ovsdb.plugin.api;
 
-import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.lib.notation.Row;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 
 import java.net.InetAddress;
 

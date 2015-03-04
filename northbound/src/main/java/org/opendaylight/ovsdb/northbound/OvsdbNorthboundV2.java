@@ -37,7 +37,6 @@ import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailab
 import org.opendaylight.controller.northbound.commons.exception.UnauthorizedException;
 import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
 import org.opendaylight.controller.sal.authorization.Privilege;
-import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.ovsdb.plugin.api.Status;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
@@ -48,6 +47,7 @@ import org.opendaylight.ovsdb.plugin.api.OvsVswitchdSchemaConstants;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.plugin.api.StatusWithUuid;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

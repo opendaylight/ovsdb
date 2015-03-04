@@ -11,8 +11,6 @@ package org.opendaylight.ovsdb.plugin.internal;
 
 import org.apache.felix.dm.DependencyActivatorBase;
 import org.apache.felix.dm.DependencyManager;
-import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
@@ -38,9 +36,6 @@ public class Activator extends DependencyActivatorBase {
 
     @Override
     public void init(BundleContext context, DependencyManager manager) throws Exception {
-        Node.NodeIDType.registerIDType("OVS", String.class);
-        NodeConnector.NodeConnectorIDType.registerIDType("OVS", String.class, "OVS");
-
         manager.add(createComponent()
                         .setInterface(OvsdbConfigurationService.class.getName(), null)
                         .setImplementation(ConfigurationServiceImpl.class)
@@ -77,7 +72,5 @@ public class Activator extends DependencyActivatorBase {
 
     @Override
     public void destroy(BundleContext context, DependencyManager manager) throws Exception {
-        Node.NodeIDType.unRegisterIDType("OVS");
-        NodeConnector.NodeConnectorIDType.unRegisterIDType("OVS");
     }
 }

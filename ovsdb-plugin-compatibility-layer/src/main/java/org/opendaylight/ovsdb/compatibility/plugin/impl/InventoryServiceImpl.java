@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.UpdateType;
+import org.opendaylight.ovsdb.compatibility.plugin.api.NodeUtils;
 import org.opendaylight.ovsdb.compatibility.plugin.api.OvsdbInventoryListener;
 import org.opendaylight.ovsdb.compatibility.plugin.api.OvsdbInventoryService;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
@@ -31,8 +32,9 @@ import com.google.common.collect.Sets;
  * @author Anil Vishnoi (vishnoianil@gmail.com)
  *
  */
-public class InventoryServiceImpl implements OvsdbInventoryService, org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener {
-    org.opendaylight.ovsdb.plugin.api.OvsdbInventoryService pluginOvsdbInventoryService;
+public class InventoryServiceImpl implements OvsdbInventoryService,
+        org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener {
+    private volatile org.opendaylight.ovsdb.plugin.api.OvsdbInventoryService pluginOvsdbInventoryService;
 
     private Set<OvsdbInventoryListener> ovsdbInventoryListeners = Sets.newCopyOnWriteArraySet();
 
@@ -91,94 +93,98 @@ public class InventoryServiceImpl implements OvsdbInventoryService, org.opendayl
 
     @Override
     public ConcurrentMap<String, ConcurrentMap<String, Row>> getCache(Node n, String databaseName) {
-        return pluginOvsdbInventoryService.getCache(n, databaseName);
+        return pluginOvsdbInventoryService.getCache(NodeUtils.getMdsalNode(n), databaseName);
     }
 
 
     @Override
     public ConcurrentMap<String, Row> getTableCache(Node n, String databaseName, String tableName) {
-        return pluginOvsdbInventoryService.getTableCache(n, databaseName, tableName);
+        return pluginOvsdbInventoryService.getTableCache(NodeUtils.getMdsalNode(n), databaseName, tableName);
     }
 
 
     @Override
     public Row getRow(Node n, String databaseName, String tableName, String uuid) {
-        return pluginOvsdbInventoryService.getRow(n, databaseName, tableName, uuid);
+        return pluginOvsdbInventoryService.getRow(NodeUtils.getMdsalNode(n), databaseName, tableName, uuid);
     }
 
     @Override
     public void updateRow(Node n, String databaseName, String tableName, String uuid, Row row) {
-        pluginOvsdbInventoryService.updateRow(n, databaseName, tableName, uuid, row);
+        pluginOvsdbInventoryService.updateRow(NodeUtils.getMdsalNode(n), databaseName, tableName, uuid, row);
     }
 
     @Override
     public void removeRow(Node n, String databaseName, String tableName, String uuid) {
-        pluginOvsdbInventoryService.removeRow(n, databaseName, tableName, uuid);
+        pluginOvsdbInventoryService.removeRow(NodeUtils.getMdsalNode(n), databaseName, tableName, uuid);
     }
 
     @Override
     public void processTableUpdates(Node n, String databaseName, TableUpdates tableUpdates) {
-        pluginOvsdbInventoryService.processTableUpdates(n, databaseName, tableUpdates);
+        pluginOvsdbInventoryService.processTableUpdates(NodeUtils.getMdsalNode(n), databaseName, tableUpdates);
     }
 
     @Override
     public void printCache(Node n) {
-        pluginOvsdbInventoryService.printCache(n);
+        pluginOvsdbInventoryService.printCache(NodeUtils.getMdsalNode(n));
     }
 
     @Override
     public void addNode(Node node, Set<Property> props) {
-        pluginOvsdbInventoryService.addNode(node, props);
+        pluginOvsdbInventoryService.addNode(NodeUtils.getMdsalNode(node), props);
     }
 
     @Override
     public void notifyNodeAdded(Node node, InetAddress address, int port) {
-        pluginOvsdbInventoryService.notifyNodeAdded(node, address, port);
+        pluginOvsdbInventoryService.notifyNodeAdded(NodeUtils.getMdsalNode(node), address, port);
     }
 
     @Override
     public void addNodeProperty(Node node, UpdateType type, Set<Property> props) {
-        pluginOvsdbInventoryService.addNodeProperty(node, type, props);
+        pluginOvsdbInventoryService.addNodeProperty(NodeUtils.getMdsalNode(node), type, props);
     }
 
     @Override
     public void removeNode(Node node) {
-        pluginOvsdbInventoryService.removeNode(node);
+        pluginOvsdbInventoryService.removeNode(NodeUtils.getMdsalNode(node));
     }
 
     @Override
-    public void nodeAdded(Node node, InetAddress address, int port) {
+    public void nodeAdded(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node node,
+                          InetAddress address, int port) {
         for(OvsdbInventoryListener listener : this.ovsdbInventoryListeners)
-            listener.nodeAdded(node, address, port);
+            listener.nodeAdded(NodeUtils.getSalNode(node), address, port);
 
     }
 
     @Override
-    public void nodeRemoved(Node node) {
+    public void nodeRemoved(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node node) {
         for(OvsdbInventoryListener listener : this.ovsdbInventoryListeners)
-            listener.nodeRemoved(node);
+            listener.nodeRemoved(NodeUtils.getSalNode(node));
 
     }
 
     @Override
-    public void rowAdded(Node node, String tableName, String uuid, Row row) {
+    public void rowAdded(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node node,
+                         String tableName, String uuid, Row row) {
         for(OvsdbInventoryListener listener : this.ovsdbInventoryListeners)
-            listener.rowAdded(node, tableName, uuid, row);
+            listener.rowAdded(NodeUtils.getSalNode(node), tableName, uuid, row);
 
     }
 
     @Override
-    public void rowUpdated(Node node, String tableName, String uuid, Row old,
+    public void rowUpdated(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node node,
+                           String tableName, String uuid, Row old,
             Row row) {
         for(OvsdbInventoryListener listener : this.ovsdbInventoryListeners)
-            listener.rowUpdated(node, tableName, uuid, old, row);
+            listener.rowUpdated(NodeUtils.getSalNode(node), tableName, uuid, old, row);
 
     }
 
     @Override
-    public void rowRemoved(Node node, String tableName, String uuid, Row row,
+    public void rowRemoved(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node node,
+                           String tableName, String uuid, Row row,
             Object context) {
         for(OvsdbInventoryListener listener : this.ovsdbInventoryListeners)
-            listener.rowRemoved(node, tableName, uuid, row, context);
+            listener.rowRemoved(NodeUtils.getSalNode(node), tableName, uuid, row, context);
     }
 }

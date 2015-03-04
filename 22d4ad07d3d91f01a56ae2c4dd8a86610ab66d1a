@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_a0e4d4ac",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbInterfaceRemovedCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-03-04T21:18:20Z",
+      "side": 1,
+      "message": "constructor should be the first call.",
+      "revId": "22d4ad07d3d91f01a56ae2c4dd8a86610ab66d1a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_60eecc8d",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbInterfaceRemovedCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-03-04T21:18:20Z",
+      "side": 1,
+      "message": "\u0027interface\u0027 is a key word in java. use something else like \u0027portInterface\u0027.",
+      "revId": "22d4ad07d3d91f01a56ae2c4dd8a86610ab66d1a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_80f3d872",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbInterfaceRemovedCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-03-04T21:18:20Z",
+      "side": 1,
+      "message": "typo - use \u0027InterfaceIid\u0027",
+      "revId": "22d4ad07d3d91f01a56ae2c4dd8a86610ab66d1a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_c0f8004c",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbInterfaceUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-03-04T21:18:20Z",
+      "side": 1,
+      "message": "remove extra space",
+      "revId": "22d4ad07d3d91f01a56ae2c4dd8a86610ab66d1a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_a0fb7446",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbOperationalCommandAggregator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-03-04T21:18:20Z",
+      "side": 1,
+      "message": "type - OvsdbIn...",
+      "revId": "22d4ad07d3d91f01a56ae2c4dd8a86610ab66d1a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -12,7 +12,7 @@ package org.opendaylight.ovsdb.plugin.api;
 import java.util.List;
 import java.util.Map;
 
-import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 
 public interface OvsdbConnectionService {
     public Connection getConnection(Node node);

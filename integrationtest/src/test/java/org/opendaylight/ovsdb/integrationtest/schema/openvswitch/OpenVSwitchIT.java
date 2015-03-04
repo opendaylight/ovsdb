@@ -151,10 +151,10 @@ public class OpenVSwitchIT extends OvsdbIntegrationTestBase {
                 propagateSystemProperty("ovsdbserver.ipaddress"),
                 propagateSystemProperty("ovsdbserver.port"),
 
+                ConfigurationBundles.mdsalBundles(),
                 ConfigurationBundles.controllerBundles(),
                 ConfigurationBundles.ovsdbLibraryBundles(),
-                ConfigurationBundles.ovsdbDefaultSchemaBundles(),
-                junitBundles()
+                ConfigurationBundles.ovsdbDefaultSchemaBundles()
         );
     }
 

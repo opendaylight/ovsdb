@@ -23,7 +23,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 
-import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.ovsdb.lib.MonitorCallBack;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
@@ -46,6 +45,7 @@ import org.opendaylight.ovsdb.plugin.internal.L4PortProperty;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryService;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,10 +130,9 @@ public class ConnectionServiceImpl implements OvsdbConnectionService,
     }
 
     public Status disconnect(Node node) {
-        String identifier = (String) node.getID();
-        Connection connection = ovsdbConnections.get(identifier);
+        Connection connection = getConnection(node);
         if (connection != null) {
-            ovsdbConnections.remove(identifier);
+            ovsdbConnections.remove(normalizeId(node.getId().getValue()));
             connection.disconnect();
             ovsdbInventoryService.removeNode(node);
             return new Status(StatusCode.SUCCESS);
@@ -179,14 +178,7 @@ public class ConnectionServiceImpl implements OvsdbConnectionService,
         this.handlers = handlers;
     }
 
-    @Override
-    public Connection getConnection(Node node) {
-        String identifier = (String) node.getID();
-        return ovsdbConnections.get(identifier);
-    }
-
-    @Override
-    public Node getNode (String identifier) {
+    private String normalizeId (String identifier) {
         String id = identifier;
 
         String[] pair = identifier.split("\\|");
@@ -194,7 +186,17 @@ public class ConnectionServiceImpl implements OvsdbConnectionService,
             id = pair[1];
         }
 
-        Connection connection = ovsdbConnections.get(id);
+        return id;
+    }
+
+    @Override
+    public Connection getConnection(Node node) {
+        return ovsdbConnections.get(normalizeId(node.getId().getValue()));
+    }
+
+    @Override
+    public Node getNode (String identifier) {
+        Connection connection = ovsdbConnections.get(normalizeId(identifier));
         if (connection != null) {
             return connection.getNode();
         } else {
@@ -276,8 +278,7 @@ public class ConnectionServiceImpl implements OvsdbConnectionService,
     }
 
     public TableUpdates monitorTables(Node node, DatabaseSchema dbSchema) throws ExecutionException, InterruptedException, IOException {
-        String identifier = (String) node.getID();
-        Connection connection = ovsdbConnections.get(identifier);
+        Connection connection = getConnection(node);
         OvsdbClient client = connection.getClient();
         if (dbSchema == null) {
             logger.error("Unable to get Database Schema for the ovsdb connection : {}", client.getConnectionInfo());

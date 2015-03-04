@@ -20,12 +20,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.northbound.commons.exception.ResourceNotFoundException;
 import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
-import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.ovsdb.plugin.api.Connection;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.plugin.impl.ConnectionServiceImpl;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -40,8 +39,6 @@ public class NodeResourceTest {
 
     @Test
     public void testGetOvsdbNode () {
-        Node.NodeIDType.registerIDType(OVS, String.class);
-        NodeConnector.NodeConnectorIDType.registerIDType(OVS, String.class, OVS);
         ConnectionServiceImpl connectionService = new ConnectionServiceImpl();
         Connection connection = new Connection(IDENTIFIER, null);
         connectionService.putOvsdbConnection(IDENTIFIER, connection);
@@ -73,8 +70,6 @@ public class NodeResourceTest {
 
     @Test
     public void testGetOvsdbConnection () {
-        Node.NodeIDType.registerIDType(OVS, String.class);
-        NodeConnector.NodeConnectorIDType.registerIDType(OVS, String.class, OVS);
         ConnectionServiceImpl connectionService = new ConnectionServiceImpl();
         Connection connection = new Connection(IDENTIFIER, null);
         connectionService.putOvsdbConnection(IDENTIFIER, connection);

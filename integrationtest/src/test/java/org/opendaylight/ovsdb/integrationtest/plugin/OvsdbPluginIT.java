@@ -21,7 +21,6 @@ import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperty;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
 import org.junit.After;
-import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.ovsdb.integrationtest.ConfigurationBundles;
 import org.opendaylight.ovsdb.integrationtest.OvsdbIntegrationTestBase;
@@ -37,6 +36,8 @@ import org.opendaylight.ovsdb.plugin.api.Status;
 import org.opendaylight.ovsdb.plugin.api.StatusWithUuid;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
@@ -47,6 +48,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -92,11 +95,11 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
             propagateSystemProperty("ovsdbserver.ipaddress"),
             propagateSystemProperty("ovsdbserver.port"),
 
+            ConfigurationBundles.mdsalBundles(),
             ConfigurationBundles.controllerBundles(),
             ConfigurationBundles.ovsdbLibraryBundles(),
             ConfigurationBundles.ovsdbDefaultSchemaBundles(),
-            ConfigurationBundles.ovsdbPluginBundles(),
-            junitBundles()
+            ConfigurationBundles.ovsdbPluginBundles()
         );
     }
 
@@ -179,15 +182,20 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
         componentB.setImplementation(listenerB);
         dm.add(componentB);
 
-        Node newNode = Node.fromString("OVS|10.10.10.10:65342");
+        NodeId nodeId = new NodeId("OVS|10.10.10.10:65342");
+        NodeKey nodeKey = new NodeKey(nodeId);
+        node = new NodeBuilder()
+                .setId(nodeId)
+                .setKey(nodeKey)
+                .build();
         InetAddress address = InetAddress.getByName("10.10.10.10");
         int port = 65342;
 
         // Trigger event
-        ovsdbInventoryService.notifyNodeAdded(newNode, address, port);
+        ovsdbInventoryService.notifyNodeAdded(node, address, port);
 
-        Mockito.verify(listenerA, Mockito.times(1)).nodeAdded(newNode, address, port);
-        Mockito.verify(listenerB, Mockito.times(1)).nodeAdded(newNode, address, port);
+        Mockito.verify(listenerA, Mockito.times(1)).nodeAdded(node, address, port);
+        Mockito.verify(listenerB, Mockito.times(1)).nodeAdded(node, address, port);
 
         dm.remove(componentA);
         dm.remove(componentB);

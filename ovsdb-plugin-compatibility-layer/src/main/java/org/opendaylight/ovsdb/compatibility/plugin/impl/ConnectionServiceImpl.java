@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.ovsdb.compatibility.plugin.api.NodeUtils;
 import org.opendaylight.ovsdb.compatibility.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.plugin.api.Connection;
 import org.opendaylight.ovsdb.plugin.api.ConnectionConstants;
@@ -28,7 +29,7 @@ import org.slf4j.LoggerFactory;
 public class ConnectionServiceImpl implements OvsdbConnectionService{
     protected static final Logger logger = LoggerFactory.getLogger(ConnectionServiceImpl.class);
 
-    org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService pluginOvsdbConnectionService;
+    private volatile org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService pluginOvsdbConnectionService;
 
     public void init() {
     }
@@ -66,22 +67,22 @@ public class ConnectionServiceImpl implements OvsdbConnectionService{
     }
     @Override
     public Connection getConnection(Node node) {
-        return pluginOvsdbConnectionService.getConnection(node);
+        return pluginOvsdbConnectionService.getConnection(NodeUtils.getMdsalNode(node));
     }
 
     @Override
     public Node getNode (String identifier) {
-        return pluginOvsdbConnectionService.getNode(identifier);
+        return NodeUtils.getSalNode(pluginOvsdbConnectionService.getNode(identifier));
     }
 
     @Override
     public List<Node> getNodes() {
-        return pluginOvsdbConnectionService.getNodes();
+        return NodeUtils.getSalNodes(pluginOvsdbConnectionService.getNodes());
     }
 
     @Override
     public Node connect(String identifier, Map<ConnectionConstants, String> params) {
-        return pluginOvsdbConnectionService.connect(identifier, params);
+        return NodeUtils.getSalNode(pluginOvsdbConnectionService.connect(identifier, params));
     }
 
 }

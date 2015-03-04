@@ -18,42 +18,40 @@ import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperty;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
-
 import javax.inject.Inject;
-
 import org.apache.felix.dm.Component;
 import org.apache.felix.dm.DependencyManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.opendaylight.controller.sal.core.ConstructionException;
+import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.ServiceHelper;
+import org.opendaylight.ovsdb.integrationtest.CompatOvsdbIntegrationTestBase;
 import org.opendaylight.ovsdb.integrationtest.ConfigurationBundles;
-import org.opendaylight.ovsdb.integrationtest.OvsdbIntegrationTestBase;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.plugin.api.Connection;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
-import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
-import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryService;
-import org.opendaylight.ovsdb.plugin.api.StatusCode;
-import org.opendaylight.ovsdb.plugin.api.StatusWithUuid;
+import org.opendaylight.ovsdb.compatibility.plugin.api.OvsdbConfigurationService;
+import org.opendaylight.ovsdb.compatibility.plugin.api.OvsdbConnectionService;
+import org.opendaylight.ovsdb.compatibility.plugin.api.OvsdbInventoryListener;
+import org.opendaylight.ovsdb.compatibility.plugin.api.OvsdbInventoryService;
+import org.opendaylight.controller.sal.utils.StatusCode;
+import org.opendaylight.ovsdb.compatibility.plugin.api.StatusWithUuid;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -64,20 +62,14 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
-
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerSuite.class)
-public class OvsdbPluginV3IT extends OvsdbIntegrationTestBase {
-    private Logger log = LoggerFactory.getLogger(OvsdbPluginV3IT.class);
+public class OvsdbPluginV3CompatIT extends CompatOvsdbIntegrationTestBase {
+    private Logger log = LoggerFactory.getLogger(OvsdbPluginV3CompatIT.class);
     @Inject
     private BundleContext bc;
     private OvsdbConfigurationService ovsdbConfigurationService = null;
     private String databaseName = "Open_vSwitch";
-
-    @Inject
-    private OvsdbInventoryService ovsdbInventoryService;
 
     private Node node = null;
     private OvsdbClient client = null;
@@ -112,7 +104,7 @@ public class OvsdbPluginV3IT extends OvsdbIntegrationTestBase {
 
     public void getConnection () throws InterruptedException {
         try {
-            node = getPluginTestConnection();
+            node = getCompatPluginTestConnection();
         } catch (Exception e) {
             fail("Exception : "+e.getMessage());
         }
@@ -170,17 +162,18 @@ public class OvsdbPluginV3IT extends OvsdbIntegrationTestBase {
         componentB.setImplementation(listenerB);
         dm.add(componentB);
 
-        NodeId nodeId = new NodeId("OVS|10.10.10.10:65342");
-        NodeKey nodeKey = new NodeKey(nodeId);
-        node = new NodeBuilder()
-                .setId(nodeId)
-                .setKey(nodeKey)
-                .build();
-
+        try {
+            node = new Node("OVS", "10.10.10.10:65342");
+        } catch (ConstructionException e) {
+            log.error("Failed to allocate sal Node", e);
+        }
         InetAddress address = InetAddress.getByName("10.10.10.10");
         int port = 65342;
 
         // Trigger event
+        OvsdbInventoryService
+               ovsdbInventoryService = (OvsdbInventoryService)ServiceHelper
+                .getGlobalInstance(OvsdbInventoryService.class, this);
         ovsdbInventoryService.notifyNodeAdded(node, address, port);
 
         Mockito.verify(listenerA, Mockito.times(1)).nodeAdded(node, address, port);
@@ -188,6 +181,7 @@ public class OvsdbPluginV3IT extends OvsdbIntegrationTestBase {
 
         dm.remove(componentA);
         dm.remove(componentB);
+
     }
 
     public void endToEndApiTest(Connection connection, String parentUuid) throws Exception {

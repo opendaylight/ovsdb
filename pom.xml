@@ -42,7 +42,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <module>plugin</module>
     <module>ovsdb-plugin-compatibility-layer</module>
     <module>plugin-shell</module>
-    <module>plugin-mdsal-adapter</module>
     <module>schemas/hardwarevtep</module>
     <module>schemas/openvswitch</module>
     <module>southbound</module>

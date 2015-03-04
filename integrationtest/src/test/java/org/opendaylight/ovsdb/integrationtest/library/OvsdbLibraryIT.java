@@ -15,7 +15,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperty;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
@@ -75,10 +74,10 @@ public class OvsdbLibraryIT extends OvsdbIntegrationTestBase {
             propagateSystemProperty("ovsdbserver.ipaddress"),
             propagateSystemProperty("ovsdbserver.port"),
 
+            ConfigurationBundles.mdsalBundles(),
             ConfigurationBundles.controllerBundles(),
             ConfigurationBundles.ovsdbLibraryBundles(),
-            ConfigurationBundles.ovsdbDefaultSchemaBundles(),
-            junitBundles()
+            ConfigurationBundles.ovsdbDefaultSchemaBundles()
         );
     }
 

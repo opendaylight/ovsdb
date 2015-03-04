@@ -7,7 +7,7 @@
  *
  *  Authors : Sam Hague
  */
-package org.opendaylight.ovsdb.plugin.impl;
+package org.opendaylight.ovsdb.compatibility.plugin.impl;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -16,7 +16,9 @@ import static org.junit.Assert.fail;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.controller.sal.core.ConstructionException;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.ovsdb.plugin.api.Connection;
 
 public class ConnectionServiceImplTest {
@@ -24,13 +26,19 @@ public class ConnectionServiceImplTest {
     private static final String IDENTIFIER = "192.168.120.31:45001";
     private static final String OVS_IDENTIFIER = OVS + "|" + IDENTIFIER;
     private static final String BAD_IDENTIFIER = "BAD" + "|" + IDENTIFIER;
+    private static org.opendaylight.ovsdb.plugin.impl.ConnectionServiceImpl pluginConnectionService;
     private static ConnectionServiceImpl connectionService;
 
     @BeforeClass
     public static void setUp () {
-        connectionService = new ConnectionServiceImpl();
+        Node.NodeIDType.registerIDType(OVS, String.class);
+        NodeConnector.NodeConnectorIDType.registerIDType(OVS, String.class, OVS);
+        pluginConnectionService = new org.opendaylight.ovsdb.plugin.impl.ConnectionServiceImpl();
         Connection connection = new Connection(IDENTIFIER, null);
-        connectionService.putOvsdbConnection(IDENTIFIER, connection);
+        pluginConnectionService.putOvsdbConnection(IDENTIFIER, connection);
+
+        connectionService = new ConnectionServiceImpl();
+        connectionService.setOvsdbConnectionService(pluginConnectionService);
     }
 
     @Test
@@ -41,8 +49,12 @@ public class ConnectionServiceImplTest {
         node = connectionService.getNode(OVS_IDENTIFIER);
         assertNotNull("Node " + OVS_IDENTIFIER + " is null", node);
 
-        node = connectionService.getNode(IDENTIFIER + "extra");
-        assertNull("Node " + BAD_IDENTIFIER + " is not null", node);
+        try {
+            node = connectionService.getNode(BAD_IDENTIFIER);
+            fail("Expected a NullPointerException to be thrown");
+        } catch (NullPointerException e) {
+            assertSame(NullPointerException.class, e.getClass());
+        }
     }
 
     @Test
@@ -59,5 +71,13 @@ public class ConnectionServiceImplTest {
         } catch (NullPointerException e) {
             assertSame(NullPointerException.class, e.getClass());
         }
+
+        try {
+            node = new Node("OVS", BAD_IDENTIFIER);
+        } catch (ConstructionException e) {
+            fail("Exception should not have occurred" + e);
+        }
+        connection = connectionService.getConnection(node);
+        assertNull("Connection " + BAD_IDENTIFIER + " is not null", connection);
     }
 }

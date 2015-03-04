@@ -15,7 +15,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperty;
@@ -36,7 +35,7 @@ import org.junit.runners.Parameterized;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.usermanager.IUserManager;
 import org.opendaylight.ovsdb.integrationtest.ConfigurationBundles;
-import org.opendaylight.ovsdb.integrationtest.OvsdbIntegrationTestBase;
+import org.opendaylight.ovsdb.integrationtest.CompatOvsdbIntegrationTestBase;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExamParameterized;
@@ -60,7 +59,7 @@ import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 
 @RunWith(PaxExamParameterized.class)
 @ExamReactorStrategy(PerClass.class)
-public class OvsdbNorthboundV2IT extends OvsdbIntegrationTestBase {
+public class OvsdbNorthboundV2IT extends CompatOvsdbIntegrationTestBase {
 
     private Logger log = LoggerFactory.getLogger(OvsdbNorthboundV2IT.class);
     public static final String USERNAME = "admin";
@@ -90,6 +89,7 @@ public class OvsdbNorthboundV2IT extends OvsdbIntegrationTestBase {
         for (Map<String, Object> o : object){
             Object[] l = o.values().toArray();
             parameters.add(l);
+            break;
         }
 
         return parameters;
@@ -245,7 +245,7 @@ public class OvsdbNorthboundV2IT extends OvsdbIntegrationTestBase {
         assertTrue(this.userManager != null);
 
         try {
-            node = getPluginTestConnection();
+            node = getCompatPluginTestConnection();
         } catch (Exception e) {
             fail("Exception : "+e.getMessage());
         }
@@ -272,13 +272,13 @@ public class OvsdbNorthboundV2IT extends OvsdbIntegrationTestBase {
                 propagateSystemProperty("ovsdbserver.ipaddress"),
                 propagateSystemProperty("ovsdbserver.port"),
 
+                ConfigurationBundles.mdsalBundles(),
                 ConfigurationBundles.controllerBundles(),
                 ConfigurationBundles.controllerNorthboundBundles(),
                 ConfigurationBundles.ovsdbLibraryBundles(),
                 ConfigurationBundles.ovsdbDefaultSchemaBundles(),
-                mavenBundle("org.opendaylight.ovsdb", "plugin").versionAsInProject(),
-                mavenBundle("org.opendaylight.ovsdb", "northbound").versionAsInProject(),
-                junitBundles()
+                ConfigurationBundles.ovsdbPluginBundles(),
+                mavenBundle("org.opendaylight.ovsdb", "northbound").versionAsInProject()
         );
     }
 }

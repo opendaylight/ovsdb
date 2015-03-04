@@ -12,6 +12,7 @@ import java.util.Hashtable;
 
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
+import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.compatibility.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.compatibility.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.compatibility.plugin.api.OvsdbInventoryListener;
@@ -39,6 +40,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      */
     @Override
     public void init() {
+        Node.NodeIDType.registerIDType("OVS", String.class);
     }
 
     /**
@@ -48,6 +50,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      */
     @Override
     public void destroy() {
+        Node.NodeIDType.unRegisterIDType("OVS");
     }
     @Override
     public Object[] getGlobalImplementations() {

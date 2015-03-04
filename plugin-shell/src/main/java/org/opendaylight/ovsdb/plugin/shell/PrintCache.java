@@ -12,8 +12,11 @@ package org.opendaylight.ovsdb.plugin.shell;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 
 @Command(scope = "ovs", name = "printCache", description="Prints OVSDB Cache")
 public class PrintCache extends OsgiCommandSupport{
@@ -24,7 +27,12 @@ public class PrintCache extends OsgiCommandSupport{
 
     @Override
     protected Object doExecute() throws Exception {
-        Node node = Node.fromString(nodeName);
+        NodeId nodeId = new NodeId(nodeName);
+        NodeKey nodeKey = new NodeKey(nodeId);
+        Node node = new NodeBuilder()
+                .setId(nodeId)
+                .setKey(nodeKey)
+                .build();
         ovsdbInventory.printCache(node);
         return null;
     }

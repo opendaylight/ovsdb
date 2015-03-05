@@ -86,7 +86,8 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
             logger.debug("Noop with LB pool member {} creation because no nodes available.", neutronLBPoolMember.getPoolMemberID());
         } else {
             for (Node node: this.switchManager.getNodes())
-                loadBalancerProvider.programLoadBalancerPoolMemberRules(node, lbConfig,
+                loadBalancerProvider.programLoadBalancerPoolMemberRules(node,
+                        lbConfig,
                         lbConfig.getMembers().get(neutronLBPoolMember.getPoolMemberID()), Action.ADD);
         }
     }

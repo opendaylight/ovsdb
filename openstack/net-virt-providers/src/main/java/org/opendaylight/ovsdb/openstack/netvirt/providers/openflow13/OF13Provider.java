@@ -23,10 +23,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.neutron.spi.NeutronSecurityGroup;
-import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.HexEncode;
-import org.opendaylight.controller.sal.utils.Status;
-import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
@@ -40,11 +37,11 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.L2ForwardingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
-import org.opendaylight.ovsdb.compatibility.plugin.api.OvsdbConfigurationService;
-import org.opendaylight.ovsdb.compatibility.plugin.api.OvsdbConnectionService;
-import org.opendaylight.controller.sal.utils.Status;
-import org.opendaylight.controller.sal.utils.StatusCode;
-import org.opendaylight.ovsdb.compatibility.plugin.api.StatusWithUuid;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
+import org.opendaylight.ovsdb.plugin.api.Status;
+import org.opendaylight.ovsdb.plugin.api.StatusCode;
+import org.opendaylight.ovsdb.plugin.api.StatusWithUuid;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
@@ -88,6 +85,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -997,7 +995,8 @@ public class OF13Provider implements NetworkingProvider {
                         if (!local) {
                             programRemoteEgressTunnelBridgeRules(node, dpid, segmentationId, attachedMac, tunnelOFPort, localPort);
                         }
-                        logger.trace("program local ingress tunnel rules: node" + node.getNodeIDString() + " intf " + intf.getName());
+                        logger.trace("program local ingress tunnel rules: node"
+                                + node.getId().getValue() + " intf " + intf.getName());
                         if (local) {
                             programLocalIngressTunnelBridgeRules(node, dpid, segmentationId, attachedMac, tunnelOFPort, localPort);
                         }
@@ -1315,10 +1314,12 @@ public class OF13Provider implements NetworkingProvider {
                     InetAddress src = configurationService.getTunnelEndPoint(srcNode);
                     InetAddress dst = configurationService.getTunnelEndPoint(dstNode);
                     if ((src != null) && (dst != null)) {
-                        logger.info("Remove tunnel rules for interface " + intf.getName() + " on srcNode " + srcNode.getNodeIDString());
+                        logger.info("Remove tunnel rules for interface "
+                                + intf.getName() + " on srcNode " + srcNode.getId().getValue());
                         this.removeTunnelRules(tunnelType, network.getProviderSegmentationID(),
                                 dst, srcNode, intf, true, isLastInstanceOnNode);
-                        logger.info("Remove tunnel rules for interface " + intf.getName() + " on dstNode " + dstNode.getNodeIDString());
+                        logger.info("Remove tunnel rules for interface "
+                                + intf.getName() + " on dstNode " + dstNode.getId().getValue());
                         this.removeTunnelRules(tunnelType, network.getProviderSegmentationID(),
                                 src, dstNode, intf, false, isLastInstanceOnNode);
                     } else {
@@ -2110,7 +2111,7 @@ public class OF13Provider implements NetworkingProvider {
     }
 
     @Override
-    public void initializeOFFlowRules(Node openflowNode) {
+    public void initializeOFFlowRules(org.opendaylight.controller.sal.core.Node openflowNode) {
         Preconditions.checkNotNull(connectionService);
         List<Node> ovsNodes = connectionService.getNodes();
         if (ovsNodes == null) return;

@@ -23,8 +23,8 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFaile
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.compatibility.plugin.api.OvsdbConfigurationService;
-import org.opendaylight.ovsdb.compatibility.plugin.api.OvsdbConnectionService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
@@ -41,6 +41,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -87,9 +88,9 @@ public abstract class AbstractServiceInstance {
     }
 
     private String getBridgeName(String nodeId){
-        List<org.opendaylight.controller.sal.core.Node> ovsNodes = connectionService.getNodes();
+        List<Node> ovsNodes = connectionService.getNodes();
 
-        for (org.opendaylight.controller.sal.core.Node ovsNode : ovsNodes) {
+        for (Node ovsNode : ovsNodes) {
             Map<String, Row> bridges = ovsdbConfigService.getRows(ovsNode, ovsdbConfigService.getTableName(ovsNode, Bridge.class));
             if (bridges == null) continue;
             for (String brUuid : bridges.keySet()) {
@@ -101,7 +102,8 @@ public abstract class AbstractServiceInstance {
                 logger.debug("getBridgeName: bridgeDpid {} ofNodeDpid {}", bridge.getDatapathIdColumn().getData().toArray()[0], nodeId);
                 if (dpid.equals(Long.parseLong(nodeId))){
                     // Found the bridge
-                    logger.debug("getOvsNode: found ovsNode {} bridge {} for ofNode {}", ovsNode.getNodeIDString(), bridge.getName(), nodeId);
+                    logger.debug("getOvsNode: found ovsNode {} bridge {} for ofNode {}",
+                            ovsNode.getId().getValue(), bridge.getName(), nodeId);
                     return bridge.getName();
                 }
             }

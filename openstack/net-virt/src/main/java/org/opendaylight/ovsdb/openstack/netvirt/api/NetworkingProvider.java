@@ -11,9 +11,9 @@
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
 import org.opendaylight.neutron.spi.NeutronNetwork;
-import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.ovsdb.plugin.api.Status;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 
 /**
  * The NetworkingProvider interface is implemented by Neutron Networking Providers
@@ -61,6 +61,6 @@ public interface NetworkingProvider {
     /**
      * Initialize the Flow rules for a given OpenFlow node
      */
-    public void initializeOFFlowRules(Node openflowNode);
+    public void initializeOFFlowRules(org.opendaylight.controller.sal.core.Node openflowNode);
 
 }

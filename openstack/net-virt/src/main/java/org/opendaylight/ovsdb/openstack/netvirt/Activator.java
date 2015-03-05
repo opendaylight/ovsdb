@@ -60,9 +60,9 @@ import org.opendaylight.ovsdb.openstack.netvirt.impl.ProviderNetworkManagerImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.SecurityServicesImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.TenantNetworkManagerImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.VlanConfigurationCacheImpl;
-import org.opendaylight.ovsdb.compatibility.plugin.api.OvsdbConfigurationService;
-import org.opendaylight.ovsdb.compatibility.plugin.api.OvsdbConnectionService;
-import org.opendaylight.ovsdb.compatibility.plugin.api.OvsdbInventoryListener;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
 
 import org.osgi.framework.BundleContext;
 

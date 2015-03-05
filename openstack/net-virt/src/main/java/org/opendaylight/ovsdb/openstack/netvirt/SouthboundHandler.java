@@ -9,12 +9,11 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt;
 
-import org.opendaylight.neutron.spi.NeutronNetwork;
-import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.switchmanager.IInventoryListener;
+import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
@@ -23,12 +22,13 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
-import org.opendaylight.ovsdb.compatibility.plugin.api.OvsdbConfigurationService;
-import org.opendaylight.ovsdb.compatibility.plugin.api.OvsdbConnectionService;
-import org.opendaylight.ovsdb.compatibility.plugin.api.OvsdbInventoryListener;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
@@ -44,7 +44,7 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
                                                                   IInventoryListener {
     static final Logger logger = LoggerFactory.getLogger(SouthboundHandler.class);
     //private Thread eventThread;
-    List<Node> nodeCache;
+    List<org.opendaylight.controller.sal.core.Node> nodeCache;
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile ConfigurationService configurationService;
@@ -296,15 +296,17 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
     }
 
     @Override
-    public void notifyNode(Node node, UpdateType type, Map<String, Property> propMap) {
-        logger.debug("notifyNode: Node {} update {} from Controller's inventory Service", node, type);
+    public void notifyNode(org.opendaylight.controller.sal.core.Node openFlowNode,
+                           UpdateType type, Map<String, Property> propMap) {
+        logger.debug("notifyNode: Node {} update {} from Controller's inventory Service", openFlowNode, type);
 
         // Add the Node Type check back once the Consistency issue is resolved between MD-SAL and AD-SAL
-        if (!type.equals(UpdateType.REMOVED) && !nodeCache.contains(node)) {
-            nodeCache.add(node);
-            networkingProviderManager.getProvider(node).initializeOFFlowRules(node);
+        if (!type.equals(UpdateType.REMOVED) && !nodeCache.contains(openFlowNode)) {
+            nodeCache.add(openFlowNode);
+            networkingProviderManager.getProvider(NodeUtils.getMdsalNode(openFlowNode))
+                    .initializeOFFlowRules(openFlowNode);
         } else if (type.equals(UpdateType.REMOVED)){
-            nodeCache.remove(node);
+            nodeCache.remove(openFlowNode);
         }
     }
 

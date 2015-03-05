@@ -15,8 +15,6 @@ import java.util.Map;
 
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.Node.NodeIDType;
-import org.opendaylight.controller.sal.utils.Status;
-import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration;
@@ -24,6 +22,8 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration.Lo
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
+import org.opendaylight.ovsdb.plugin.api.Status;
+import org.opendaylight.ovsdb.plugin.api.StatusCode;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.ActionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
@@ -57,6 +57,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
+
 public class LoadBalancerService extends AbstractServiceInstance implements LoadBalancerProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(LoadBalancerProvider.class);
@@ -100,7 +101,8 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
                 action, member.getIP(), member.getIndex(), lbConfig.getVip(), lbConfig.getMembers().size());
 
         NodeBuilder nodeBuilder = new NodeBuilder();
-        nodeBuilder.setId(new NodeId(Constants.OPENFLOW_NODE_PREFIX + String.valueOf(node.getID())));
+        nodeBuilder.setId(new NodeId(Constants.OPENFLOW_NODE_PREFIX
+                + String.valueOf(node.getID())));
         nodeBuilder.setKey(new NodeKey(nodeBuilder.getId()));
 
         //Update the multipath rule

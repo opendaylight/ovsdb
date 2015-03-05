@@ -310,6 +310,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       </dependency>
       <dependency>
         <groupId>org.opendaylight.ovsdb</groupId>
+        <artifactId>ovsdb-plugin-compatibility-layer</artifactId>
+        <version>${ovsdb.plugin.compatibility.layer.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.ovsdb</groupId>
         <artifactId>plugin</artifactId>
         <version>${ovsdb.plugin.version}</version>
       </dependency>
@@ -357,11 +362,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <groupId>org.powermock</groupId>
         <artifactId>powermock-core</artifactId>
         <version>${powermock.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.ovsdb</groupId>
-        <artifactId>ovsdb-plugin-compatibility-layer</artifactId>
-        <version>${ovsdb.plugin.compatibility.layer.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

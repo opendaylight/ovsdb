@@ -11,8 +11,8 @@
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
 import org.opendaylight.neutron.spi.NeutronNetwork;
-import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 
 import java.util.List;
 

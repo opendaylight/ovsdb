@@ -84,7 +84,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>ovsdb-plugin-compatibility-layer</artifactId>
+      <artifactId>plugin</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
@@ -126,7 +126,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Import-Package>
+            <!--<Import-Package>
               org.opendaylight.controller.sal.core,
               org.opendaylight.controller.sal.utils,
               org.opendaylight.controller.sal.action,
@@ -142,7 +142,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
               org.slf4j,
               org.osgi.framework,
               *
-            </Import-Package>
+            </Import-Package>-->
             <Embed-Dependency>utils.config,utils.mdsal-openflow;type=!pom;inline=false</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Bundle-Activator>org.opendaylight.ovsdb.openstack.netvirt.providers.Activator</Bundle-Activator>

@@ -17,9 +17,8 @@ import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperty;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
-import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.ovsdb.plugin.api.Status;
 import org.opendaylight.neutron.spi.NeutronNetwork;
-import org.opendaylight.ovsdb.compatibility.plugin.api.NodeUtils;
 import org.opendaylight.ovsdb.integrationtest.ConfigurationBundles;
 import org.opendaylight.ovsdb.integrationtest.OvsdbIntegrationTestBase;
 import org.opendaylight.ovsdb.lib.notation.Row;
@@ -156,7 +155,7 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
         Thread.sleep(5000);
 
         // Create the integration bridge
-        bridgeConfigurationManager.prepareNode(NodeUtils.getSalNode(node));
+        bridgeConfigurationManager.prepareNode(node);
 
         Map<String, Row>
                 bridgeRows =
@@ -166,7 +165,7 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
         Bridge bridgeRow = ovsdbConfigurationService.getTypedRow(node, Bridge.class, bridgeRows.values().iterator().next());
         Assert.assertEquals(netVirtConfigurationService.getIntegrationBridgeName(), bridgeRow.getName());
 
-        String uuid = bridgeConfigurationManager.getBridgeUuid(NodeUtils.getSalNode(node),
+        String uuid = bridgeConfigurationManager.getBridgeUuid(node,
                 netVirtConfigurationService.getIntegrationBridgeName());
         Assert.assertEquals(uuid, bridgeRow.getUuid().toString());
 
@@ -185,7 +184,7 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
                                                             OpenVSwitch.class,
                                                             ovsRows.values().iterator().next());
 
-        Assert.assertEquals(null, netVirtConfigurationService.getTunnelEndPoint(NodeUtils.getSalNode(node)));
+        Assert.assertEquals(null, netVirtConfigurationService.getTunnelEndPoint(node));
         final UUID originalVersion = ovsRow.getVersion();
 
         OpenVSwitch updateOvsRow = ovsdbConfigurationService.createTypedRow(node, OpenVSwitch.class);
@@ -205,7 +204,7 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
 
         // Make sure tunnel end point was set
         Assert.assertEquals(InetAddress.getByName(endpointAddress),
-                netVirtConfigurationService.getTunnelEndPoint(NodeUtils.getSalNode(node)));
+                netVirtConfigurationService.getTunnelEndPoint(node));
 
         // Fetch rows again, and compare tunnel end point values
         ovsRows = ovsdbConfigurationService.getRows(node,
@@ -228,7 +227,7 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
         Version ovsVersion = this.getOvsVersion();
         if (ovsVersion.compareTo(Constants.OPENFLOW13_SUPPORTED) >= 0) {
             Assert.assertEquals(Constants.OPENFLOW13,
-                    netVirtConfigurationService.getOpenflowVersion(NodeUtils.getSalNode(node)));
+                    netVirtConfigurationService.getOpenflowVersion(node));
         }
     }
 
@@ -236,7 +235,7 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
     public void testGetDefaultGatewayMacAddress() throws Exception {
         // Thread.sleep(5000);
         String defaultGatewayMacAddress = netVirtConfigurationService.
-                getDefaultGatewayMacAddress(NodeUtils.getSalNode(node));
+                getDefaultGatewayMacAddress(node);
 
         if (defaultGatewayMacAddress != null) {
             String[] splits = defaultGatewayMacAddress.split(":");
@@ -251,7 +250,7 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
 
         if (tearDownBridge) {
             try {
-                String uuid = bridgeConfigurationManager.getBridgeUuid(NodeUtils.getSalNode(node),
+                String uuid = bridgeConfigurationManager.getBridgeUuid(node,
                         netVirtConfigurationService.getIntegrationBridgeName());
                 ovsdbConfigurationService.deleteRow(node, ovsdbConfigurationService.getTableName(node, Bridge.class), uuid);
             } catch (Exception e) {
@@ -312,19 +311,19 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
 
         @Override
         public Status handleInterfaceUpdate(NeutronNetwork network,
-                                            org.opendaylight.controller.sal.core.Node source, Interface intf) {
+                                            Node source, Interface intf) {
             return null;
         }
 
         @Override
         public Status handleInterfaceDelete(String tunnelType, NeutronNetwork network,
-                                            org.opendaylight.controller.sal.core.Node source, Interface intf,
+                                            Node source, Interface intf,
                                             boolean isLastInstanceOnNode) {
             return null;
         }
 
         @Override
-        public void initializeFlowRules(org.opendaylight.controller.sal.core.Node node) {
+        public void initializeFlowRules(Node node) {
 
         }
 

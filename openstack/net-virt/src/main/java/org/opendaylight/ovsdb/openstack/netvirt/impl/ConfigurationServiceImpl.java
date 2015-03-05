@@ -14,13 +14,13 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.compatibility.plugin.api.OvsdbConfigurationService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -178,7 +178,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     public String getDefaultGatewayMacAddress(Node node) {
         final String l3gatewayForNode =
             node != null ?
-            ConfigProperties.getProperty(this.getClass(), "ovsdb.l3gateway.mac." + node.getNodeIDString()) : null;
+            ConfigProperties.getProperty(this.getClass(), "ovsdb.l3gateway.mac." + node.getId().getValue()) : null;
         return l3gatewayForNode != null ?
                l3gatewayForNode : ConfigProperties.getProperty(this.getClass(), "ovsdb.l3gateway.mac");
     }

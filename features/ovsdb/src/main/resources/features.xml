@@ -12,7 +12,6 @@
         <feature version="${ovsdb.library.version}">odl-ovsdb-library</feature>
         <feature version="${ovsdb.plugin.version}">odl-ovsdb-plugin</feature>
         <feature version="${ovsdb.northbound.version}">odl-ovsdb-northbound</feature>
-        <feature version="${ovsdb.plugin.compatibility.layer.version}">odl-ovsdb-compatibility-layer</feature>
     </feature>
 
     <feature name="odl-ovsdb-library" description="OVSDB :: Library" version='${ovsdb.library.version}'>
@@ -61,7 +60,6 @@
         <feature version="${openflowplugin.version}">odl-openflowplugin-flow-services</feature>
         <feature version="${networkconfig.neutron.version}">odl-neutron-service</feature>
         <feature version="${nsf.version}">odl-nsf-service</feature>
-        <feature version="${ovsdb.plugin.compatibility.layer.version}">odl-ovsdb-compatibility-layer</feature>
         <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt/${openstack.netvirt.version}</bundle>
         <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt-providers/${openstack.netvirt.providers.version}</bundle>
     </feature>

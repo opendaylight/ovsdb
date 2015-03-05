@@ -20,18 +20,17 @@ import org.opendaylight.neutron.spi.NeutronRouter;
 import org.opendaylight.neutron.spi.NeutronRouter_Interface;
 import org.opendaylight.neutron.spi.NeutronSubnet;
 import org.opendaylight.neutron.spi.Neutron_IPs;
-import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.utils.HexEncode;
-import org.opendaylight.controller.sal.utils.Status;
-import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.MultiTenantAwareRouter;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
-import org.opendaylight.ovsdb.compatibility.plugin.api.OvsdbConfigurationService;
-import org.opendaylight.ovsdb.compatibility.plugin.api.OvsdbConnectionService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
+import org.opendaylight.ovsdb.plugin.api.Status;
+import org.opendaylight.ovsdb.plugin.api.StatusCode;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
@@ -41,6 +40,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.OutboundNatProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 
 import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
@@ -313,12 +313,12 @@ public class NeutronL3Adapter {
 
         if (actionForNode == Action.DELETE && isProgrammed == Boolean.FALSE) {
             logger.trace("programL3ForwardingStage1 for node {} providerId {} mac {} ip {} action {} is already done",
-                         node.getNodeIDString(), providerSegmentationId, macAddress, ipStr, actionForNode);
+                         node.getId().getValue(), providerSegmentationId, macAddress, ipStr, actionForNode);
             return;
         }
         if (actionForNode == Action.ADD && isProgrammed == Boolean.TRUE) {
             logger.trace("programL3ForwardingStage1 for node {} providerId {} mac {} ip {} action {} is already done",
-                         node.getNodeIDString(), providerSegmentationId, macAddress, ipStr, actionForNode);
+                    node.getId().getValue(), providerSegmentationId, macAddress, ipStr, actionForNode);
             return;
         }
 
@@ -414,7 +414,7 @@ public class NeutronL3Adapter {
                 final String ipStr = neutronIP.getIpAddress();
                 if (ipStr.isEmpty()) {
                     logger.debug("programFlowsForNeutronRouterInterface is skipping node {} ip {}",
-                                 node.getID(), ipStr);
+                            node.getId().getValue(), ipStr);
                     continue;
                 }
 
@@ -556,14 +556,14 @@ public class NeutronL3Adapter {
         if (actionForNode == Action.DELETE && isProgrammed == Boolean.FALSE) {
             logger.trace("programRouterInterfaceStage1 for node {} sourceSegId {} destSegId {} mac {} ip {} mask {}" +
                          "action {} is already done",
-                         node.getNodeIDString(), sourceSegmentationId, destinationSegmentationId,
+                         node.getId().getValue(), sourceSegmentationId, destinationSegmentationId,
                          ipStr, mask, actionForNode);
             return;
         }
         if (actionForNode == Action.ADD && isProgrammed == Boolean.TRUE) {
             logger.trace("programRouterInterfaceStage1 for node {} sourceSegId {} destSegId {} mac {} ip {} mask {}" +
                          "action {} is already done",
-                         node.getNodeIDString(), sourceSegmentationId, destinationSegmentationId,
+                         node.getId().getValue(), sourceSegmentationId, destinationSegmentationId,
                          ipStr, mask, actionForNode);
             return;
         }
@@ -620,12 +620,12 @@ public class NeutronL3Adapter {
 
         if (actionForNode == Action.DELETE && isProgrammed == Boolean.FALSE) {
             logger.trace("programStaticArpStage1 node {} providerId {} mac {} ip {} action {} is already done",
-                         node.getNodeIDString(), providerSegmentationId, macAddress, ipStr, actionForNode);
+                    node.getId().getValue(), providerSegmentationId, macAddress, ipStr, actionForNode);
             return;
         }
         if (actionForNode == Action.ADD && isProgrammed == Boolean.TRUE) {
             logger.trace("programStaticArpStage1 node {} providerId {} mac {} ip {} action {} is already done",
-                         node.getNodeIDString(), providerSegmentationId, macAddress, ipStr, actionForNode);
+                    node.getId().getValue(), providerSegmentationId, macAddress, ipStr, actionForNode);
             return;
         }
 
@@ -680,13 +680,13 @@ public class NeutronL3Adapter {
 
         if (actionForRewriteExclusion == Action.DELETE && isProgrammed == Boolean.FALSE) {
             logger.trace("programIpRewriteExclusionStage1 node {} providerId {} {} cidr {} action {} is already done",
-                         node.getNodeIDString(), providerSegmentationId, isInbound ? "inbound" : "outbound", cidr,
+                         node.getId().getValue(), providerSegmentationId, isInbound ? "inbound" : "outbound", cidr,
                          actionForRewriteExclusion);
             return;
         }
         if (actionForRewriteExclusion == Action.ADD && isProgrammed == Boolean.TRUE) {
             logger.trace("programIpRewriteExclusionStage1 node {} providerId {} {} cidr {} action {} is already done",
-                         node.getNodeIDString(), providerSegmentationId, isInbound ? "inbound" : "outbound", cidr,
+                         node.getId().getValue(), providerSegmentationId, isInbound ? "inbound" : "outbound", cidr,
                          actionForRewriteExclusion);
             return;
         }
@@ -747,13 +747,13 @@ public class NeutronL3Adapter {
 
         if (actionForNodeDefaultRoute == Action.DELETE && isProgrammed == Boolean.FALSE) {
             logger.trace("programDefaultRouteStage1 node {} providerId {} mac {} gw {} action {} is already done",
-                         node.getNodeIDString(), providerSegmentationId, defaultGatewayMacAddress, gatewayIp,
+                         node.getId().getValue(), providerSegmentationId, defaultGatewayMacAddress, gatewayIp,
                          actionForNodeDefaultRoute);
             return;
         }
         if (actionForNodeDefaultRoute == Action.ADD && isProgrammed == Boolean.TRUE) {
             logger.trace("programDefaultRouteStage1 node {} providerId {} mac {} gw {} action {} is already done",
-                         node.getNodeIDString(), providerSegmentationId, defaultGatewayMacAddress, gatewayIp,
+                         node.getId().getValue(), providerSegmentationId, defaultGatewayMacAddress, gatewayIp,
                          actionForNodeDefaultRoute);
             return;
         }
@@ -869,14 +869,14 @@ public class NeutronL3Adapter {
         if (actionForNode == Action.DELETE && isProgrammed == Boolean.FALSE) {
             logger.trace("programIpRewriteStage1 node {} providerId {} {} matchAddr {} rewriteAddr {} action {}" +
                          " is already done",
-                         node.getNodeIDString(), providerSegmentationId, isInbound ? "inbound": "outbound",
+                         node.getId().getValue(), providerSegmentationId, isInbound ? "inbound": "outbound",
                          matchAddress, rewriteAddress, actionForNode);
             return;
         }
         if (actionForNode == Action.ADD && isProgrammed == Boolean.TRUE) {
             logger.trace("programIpRewriteStage1 node {} providerId {} {} matchAddr {} rewriteAddr {} action {}" +
                          " is already done",
-                         node.getNodeIDString(), providerSegmentationId, isInbound ? "inbound": "outbound",
+                         node.getId().getValue(), providerSegmentationId, isInbound ? "inbound": "outbound",
                          matchAddress, rewriteAddress, actionForNode);
             return;
         }

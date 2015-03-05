@@ -47,8 +47,8 @@ import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.L3
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.LoadBalancerService;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.OutboundNatService;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.RoutingService;
-import org.opendaylight.ovsdb.compatibility.plugin.api.OvsdbConfigurationService;
-import org.opendaylight.ovsdb.compatibility.plugin.api.OvsdbConnectionService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
+import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 
 import org.osgi.framework.BundleContext;
 

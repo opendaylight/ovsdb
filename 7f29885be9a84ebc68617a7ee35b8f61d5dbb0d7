@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_2cb67b8b",
+        "filename": "utils/servicehelper/src/main/java/org/opendaylight/ovsdb/utils/servicehelper/ServiceHelper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-06T13:06:13Z",
+      "side": 1,
+      "message": "All the code in this file was copied exactly from the sal.utils bundle which had the copyright. I did add \"and others\" to the copyright.",
+      "parentUuid": "5a93c517_4ced078b",
+      "range": {
+        "startLine": 2,
+        "startChar": 22,
+        "endLine": 2,
+        "endChar": 27
+      },
+      "revId": "7f29885be9a84ebc68617a7ee35b8f61d5dbb0d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_0cffff35",
         "filename": "utils/servicehelper/src/main/java/org/opendaylight/ovsdb/utils/servicehelper/ServiceHelper.java",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_ecaf332a",
+        "filename": "utils/servicehelper/src/main/java/org/opendaylight/ovsdb/utils/servicehelper/ServiceHelper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-06T13:06:13Z",
+      "side": 1,
+      "message": "The exception catches the null.",
+      "parentUuid": "5a93c517_0cffff35",
+      "range": {
+        "startLine": 72,
+        "startChar": 45,
+        "endLine": 72,
+        "endChar": 49
+      },
+      "revId": "7f29885be9a84ebc68617a7ee35b8f61d5dbb0d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_ec01733a",
         "filename": "utils/servicehelper/src/test/java/org/opendaylight/ovsdb/utils/servicehelper/ServiceHelperTest.java",
         "patchSetId": 1
@@ -59,6 +107,24 @@
       "writtenOn": "2015-03-06T12:33:49Z",
       "side": 1,
       "message": "Copyright header ?",
+      "revId": "7f29885be9a84ebc68617a7ee35b8f61d5dbb0d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_4cbbc772",
+        "filename": "utils/servicehelper/src/test/java/org/opendaylight/ovsdb/utils/servicehelper/ServiceHelperTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-06T13:06:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_ec01733a",
       "revId": "7f29885be9a84ebc68617a7ee35b8f61d5dbb0d7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

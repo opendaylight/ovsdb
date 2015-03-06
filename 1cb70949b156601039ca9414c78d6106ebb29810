@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_b775f833",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-03-06T18:55:04Z",
+      "side": 1,
+      "message": "This is the instance identifier of the ovsdb-node... you want to construct the instanceidentifier of the termination point for the ovsdb-bridge node...",
+      "range": {
+        "startLine": 55,
+        "startChar": 63,
+        "endLine": 55,
+        "endChar": 84
+      },
+      "revId": "1cb70949b156601039ca9414c78d6106ebb29810",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

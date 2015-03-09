@@ -11,7 +11,6 @@ package org.opendaylight.ovsdb.openstack.netvirt.impl;
 import org.opendaylight.neutron.spi.INeutronPortCRUD;
 import org.opendaylight.neutron.spi.NeutronPort;
 import org.opendaylight.neutron.spi.NeutronSecurityGroup;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
 
@@ -25,6 +24,7 @@ import java.util.Map;
 public class SecurityServicesImpl implements SecurityServicesManager {
 
     static final Logger logger = LoggerFactory.getLogger(TenantNetworkManagerImpl.class);
+    private volatile INeutronPortCRUD neutronPortService;
 
     public SecurityServicesImpl() {
     }
@@ -43,8 +43,6 @@ public class SecurityServicesImpl implements SecurityServicesManager {
         if (externalIds == null) return false;
         String neutronPortId = externalIds.get(Constants.EXTERNAL_ID_INTERFACE_ID);
         if (neutronPortId == null) return false;
-        INeutronPortCRUD neutronPortService = (INeutronPortCRUD) ServiceHelper.getGlobalInstance(INeutronPortCRUD.class,
-                this);
         NeutronPort neutronPort = neutronPortService.getPort(neutronPortId);
         String deviceOwner = neutronPort.getDeviceOwner();
         if (!deviceOwner.contains("compute")) {
@@ -80,8 +78,6 @@ public class SecurityServicesImpl implements SecurityServicesManager {
         if (externalIds == null) return null;
         String neutronPortId = externalIds.get(Constants.EXTERNAL_ID_INTERFACE_ID);
         if (neutronPortId == null) return null;
-        INeutronPortCRUD neutronPortService = (INeutronPortCRUD)
-                ServiceHelper.getGlobalInstance(INeutronPortCRUD.class, this);
         NeutronPort neutronPort = neutronPortService.getPort(neutronPortId);
         List<NeutronSecurityGroup> neutronSecurityGroups = neutronPort.getSecurityGroups();
         NeutronSecurityGroup neutronSecurityGroup = (NeutronSecurityGroup) neutronSecurityGroups.toArray()[0];

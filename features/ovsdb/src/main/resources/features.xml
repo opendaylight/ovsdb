@@ -44,7 +44,6 @@
         <feature version="${ovsdb.plugin.version}">odl-ovsdb-plugin</feature>
         <feature version="${nsf.version}">odl-adsal-northbound</feature>
         <feature version="${openflowplugin.version}">odl-openflowplugin-nsf-services</feature>
-        <bundle>mvn:org.opendaylight.ovsdb/utils.servicehelper/${ovsdb.utils.servicehelper.version}</bundle>
         <bundle>mvn:org.opendaylight.ovsdb/northbound/${ovsdb.northbound.version}</bundle>
     </feature>
 
@@ -61,7 +60,6 @@
         <feature version="${openflowplugin.version}">odl-openflowplugin-flow-services</feature>
         <feature version="${networkconfig.neutron.version}">odl-neutron-service</feature>
         <feature version="${nsf.version}">odl-nsf-service</feature>
-        <bundle>mvn:org.opendaylight.ovsdb/utils.servicehelper/${ovsdb.utils.servicehelper.version}</bundle>
         <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt/${openstack.netvirt.version}</bundle>
         <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt-providers/${openstack.netvirt.providers.version}</bundle>
     </feature>

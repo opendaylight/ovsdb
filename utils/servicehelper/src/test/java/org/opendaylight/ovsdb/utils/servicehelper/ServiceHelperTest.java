@@ -24,7 +24,7 @@ import org.springframework.osgi.mock.MockBundle;
 
 /**
  * JUnit test for
- * {@link ServiceHelper}
+ * {@link org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper}
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(FrameworkUtil.class)

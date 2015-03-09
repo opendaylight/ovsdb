@@ -73,6 +73,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <type>xml</type>
       <scope>runtime</scope>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>features-ovsdb</artifactId>
+    </dependency>
   </dependencies>
 
   <build>

@@ -245,7 +245,8 @@ public class Activator extends DependencyActivatorBase {
 
         manager.add(createComponent()
                 .setInterface(new String[]{SecurityServicesManager.class.getName()}, null)
-                .setImplementation(SecurityServicesImpl.class));
+                .setImplementation(SecurityServicesImpl.class)
+                .add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true)));
 
         Dictionary<String, Object> fWaasHandlerProperties = new Hashtable<>();
         fWaasHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.NEUTRON_FWAAS);

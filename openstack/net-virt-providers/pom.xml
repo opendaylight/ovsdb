@@ -99,6 +99,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>utils.mdsal-openflow</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>utils.servicehelper</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.openflowplugin</groupId>
       <artifactId>openflowjava-extension-nicira</artifactId>
     </dependency>

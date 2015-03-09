@@ -22,7 +22,7 @@ import org.osgi.framework.ServiceReference;
 /**
  * The class helps to register and retrieve OSGi service registry
  */
-public class ServiceHelper {
+public final class ServiceHelper {
     private static final Logger LOG = LoggerFactory.getLogger(ServiceHelper.class);
     /**
      * Retrieve global instance of a class via OSGI registry, if

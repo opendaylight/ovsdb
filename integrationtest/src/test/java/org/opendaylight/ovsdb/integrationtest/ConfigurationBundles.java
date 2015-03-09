@@ -171,6 +171,7 @@ public class ConfigurationBundles {
                 mavenBundle("com.fasterxml.jackson.core", "jackson-databind").versionAsInProject(),
                 mavenBundle("javax.portlet", "portlet-api").versionAsInProject(),
                 mavenBundle("com.google.guava", "guava").versionAsInProject(),
+                mavenBundle("org.opendaylight.ovsdb", "utils.servicehelper").versionAsInProject(),
                 mavenBundle("org.opendaylight.ovsdb", "library").versionAsInProject()
         );
     }

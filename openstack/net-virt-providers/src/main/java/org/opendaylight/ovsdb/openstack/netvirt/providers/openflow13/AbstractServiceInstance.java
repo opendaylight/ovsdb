@@ -9,6 +9,7 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
 
+import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,7 +51,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.CheckedFuture;
 
 /**
@@ -65,6 +65,9 @@ public abstract class AbstractServiceInstance {
     public static final String SERVICE_PROPERTY ="serviceProperty";
     private static final Logger logger = LoggerFactory.getLogger(AbstractServiceInstance.class);
     public static final String OPENFLOW = "openflow:";
+
+    private final static InstanceIdentifier<Nodes> nodesIid = InstanceIdentifier.builder(Nodes.class).build();
+
     // OSGi Services that we are dependent on.
     private volatile MdsalConsumer mdsalConsumer;
     private volatile PipelineOrchestrator orchestrator;

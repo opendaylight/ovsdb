@@ -48,6 +48,10 @@ public class PortHandler extends AbstractHandler
     private volatile OvsdbInventoryListener ovsdbInventoryListener;
     private volatile NeutronL3Adapter neutronL3Adapter;
 
+    @Override
+    protected void processSessionInitialized() {
+    }
+
     /**
      * Invoked when a port creation is requested
      * to indicate if the specified port can be created.

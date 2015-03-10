@@ -51,6 +51,10 @@ public class Operations {
         return new Mutate<>(schema);
     }
 
+    public <E extends TableSchema<E>> Mutate<E> mutate(TypedBaseTable<E> typedTable) {
+        return new Mutate<>(typedTable.getSchema());
+    }
+
     public Commit commit(Boolean durable) {
         return new Commit(durable);
     }

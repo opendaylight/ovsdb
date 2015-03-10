@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_15029f3e",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/schema/typed/TyperUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-10T14:30:19Z",
+      "side": 1,
+      "message": "why is this method needed when the client already has a method:\n\nOvsdbClientImpl:\n\n@Override\n    public \u003cT extends TypedBaseTable\u003c?\u003e\u003e T createTypedRowWrapper(DatabaseSchema dbSchema, Class\u003cT\u003e klazz) {\n        return TyperUtils.getTypedRowWrapper(dbSchema, klazz, new Row\u003cGenericTableSchema\u003e());\n    }",
+      "revId": "4ea4221ec1a14c9e781b7f70a98884b9ffc388d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_55e8277c",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/schema/typed/TyperUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-10T14:30:19Z",
+      "side": 1,
+      "message": "This part of the javadoc isn\u0027t applicable anymore.",
+      "range": {
+        "startLine": 232,
+        "startChar": 55,
+        "endLine": 232,
+        "endChar": 58
+      },
+      "revId": "4ea4221ec1a14c9e781b7f70a98884b9ffc388d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

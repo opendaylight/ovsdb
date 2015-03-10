@@ -9,6 +9,7 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -65,6 +66,9 @@ public abstract class AbstractServiceInstance {
     public static final String SERVICE_PROPERTY ="serviceProperty";
     private static final Logger logger = LoggerFactory.getLogger(AbstractServiceInstance.class);
     public static final String OPENFLOW = "openflow:";
+
+    private final static InstanceIdentifier<Nodes> nodesIid = InstanceIdentifier.builder(Nodes.class).build();
+
     // OSGi Services that we are dependent on.
     private volatile MdsalConsumer mdsalConsumer;
     private volatile PipelineOrchestrator orchestrator;
@@ -128,6 +132,41 @@ public abstract class AbstractServiceInstance {
         builder.setId(new NodeId(nodeId));
         builder.setKey(new NodeKey(builder.getId()));
         return builder;
+    }
+
+    /**
+     * This method returns a list of all flowCapableNodes in LogicalDatastoreType.OPERATIONAL.
+     *
+     * @return list of flow capable nodes found in the operational data store
+     */
+    public List<FlowCapableNode> getFlowCapableNodes() {
+        List<FlowCapableNode> result = new LinkedList<>();
+
+        DataBroker dataBroker = mdsalConsumer.getDataBroker();
+        if (dataBroker == null) {
+            logger.error("ERROR finding reference for DataBroker. Please check MD-SAL support on the Controller.");
+            return result;
+        }
+
+        Optional<Nodes> nodesOptional;
+        try {
+            nodesOptional = dataBroker.newReadOnlyTransaction().read(LogicalDatastoreType.OPERATIONAL, nodesIid).get();
+        } catch (Exception e) {
+            logger.warn("Unable to get nodes from operational data store", e);
+            return result;
+        }
+
+        if (nodesOptional.isPresent() && nodesOptional.get() instanceof Nodes) {
+            Nodes nodes = nodesOptional.get();
+            for (Node node : nodes.getNode()) {
+                FlowCapableNode fcn = node.getAugmentation(FlowCapableNode.class);
+                if (fcn != null) {
+                    result.add(fcn);
+                }
+            }
+        }
+
+        return result;
     }
 
     /**

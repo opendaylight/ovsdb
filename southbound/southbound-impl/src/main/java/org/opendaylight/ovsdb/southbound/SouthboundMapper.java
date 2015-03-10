@@ -14,7 +14,6 @@ import java.net.UnknownHostException;
 
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
-import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv6Address;
@@ -98,7 +97,7 @@ public class SouthboundMapper {
         return createInstanceIdentifier(createManagedNodeId(key, bridgeName));
     }
 
-    public static InstanceIdentifier<Node> createInstanceIndentifier(OvsdbClientKey key) {
+    public static InstanceIdentifier<Node> createInstanceIdentifier(OvsdbClientKey key) {
         return createInstanceIdentifier(key.getIp(), key.getPort());
     }
 

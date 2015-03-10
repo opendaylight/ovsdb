@@ -106,7 +106,7 @@ module ovsdb {
 
     augment "/topo:network-topology/topo:topology/topo:node" {
         description "Augmentation for bridge nodes managed by ovsdb";
-        ext:augment-identifier "ovsdb-managed-node-augmentation";
+        ext:augment-identifier "ovsdb-bridge-augmentation";
         uses ovsdb-bridge-attributes;
     }
 

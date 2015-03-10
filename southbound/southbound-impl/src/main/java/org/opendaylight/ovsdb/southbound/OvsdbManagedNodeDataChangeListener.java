@@ -15,7 +15,7 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataCh
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbManagedNodeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
@@ -37,11 +37,11 @@ public class OvsdbManagedNodeDataChangeListener implements DataChangeListener, A
         LOG.info("Registering OvsdbManagedNodeDataChangeListener");
         this.cm = cm;
         this.db = db;
-        InstanceIdentifier<OvsdbManagedNodeAugmentation> path = InstanceIdentifier
+        InstanceIdentifier<OvsdbBridgeAugmentation> path = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
                 .child(Node.class)
-                .augmentation(OvsdbManagedNodeAugmentation.class);
+                .augmentation(OvsdbBridgeAugmentation.class);
         registration = db.registerDataChangeListener(LogicalDatastoreType.CONFIGURATION, path, this, DataChangeScope.ONE);
 
     }
@@ -52,15 +52,15 @@ public class OvsdbManagedNodeDataChangeListener implements DataChangeListener, A
        LOG.info("Received change to ovsdbManagedNode: {}", changes);
        for( Entry<InstanceIdentifier<?>, DataObject> created : changes.getCreatedData().entrySet()) {
            // TODO validate we have the correct kind of InstanceIdentifier
-           if(created.getValue() instanceof OvsdbManagedNodeAugmentation) {
+           if(created.getValue() instanceof OvsdbBridgeAugmentation) {
                LOG.debug("Received request to create {}",created.getValue());
-               OvsdbClient client = cm.getClient((OvsdbManagedNodeAugmentation)created.getValue());
+               OvsdbClient client = cm.getClient((OvsdbBridgeAugmentation)created.getValue());
                if(client != null) {
                    LOG.debug("Found client for {}", created.getValue());
                } else {
                    LOG.debug("Did not find client for {}",created.getValue());
                }
-               // TODO - translate the OvsdbManagedNodeAugmentation to libary/ transacts to create the node
+               // TODO - translate the OvsdbBridgeAugmentation to libary/ transacts to create the node
            }
        }
        // TODO handle case of updates to ovsdb managed nodes as needed

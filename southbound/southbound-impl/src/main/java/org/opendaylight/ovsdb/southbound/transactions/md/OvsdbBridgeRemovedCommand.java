@@ -33,7 +33,7 @@ public class OvsdbBridgeRemovedCommand extends AbstractTransactionCommand {
         Collection<Bridge> removedRows = TyperUtils.extractRowsRemoved(Bridge.class, getUpdates(), getDbSchema()).values();
         for(Bridge bridge : removedRows) {
             InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getKey(), new OvsdbBridgeName(bridge.getName()));
-            InstanceIdentifier<ManagedNodeEntry> mnIid = SouthboundMapper.createInstanceIndentifier(getKey())
+            InstanceIdentifier<ManagedNodeEntry> mnIid = SouthboundMapper.createInstanceIdentifier(getKey())
                     .augmentation(OvsdbNodeAugmentation.class)
                     .child(ManagedNodeEntry.class, new ManagedNodeEntryKey(new OvsdbBridgeRef(bridgeIid)));
             // TODO handle removal of reference to managed node from model

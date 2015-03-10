@@ -19,17 +19,17 @@ import org.opendaylight.neutron.spi.INeutronSubnetCRUD;
 import org.opendaylight.neutron.spi.NeutronLoadBalancer;
 import org.opendaylight.neutron.spi.NeutronLoadBalancerPool;
 import org.opendaylight.neutron.spi.NeutronLoadBalancerPoolMember;
-import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerProvider;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
 import java.net.HttpURLConnection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -49,7 +49,10 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
     private volatile INeutronNetworkCRUD neutronNetworkCache;
     private volatile INeutronSubnetCRUD neutronSubnetCache;
     private volatile LoadBalancerProvider loadBalancerProvider;
-    private volatile ISwitchManager switchManager;
+
+    @Override
+    protected void processSessionInitialized() {
+    }
 
     @Override
     public int canCreateNeutronLoadBalancerPoolMember(NeutronLoadBalancerPoolMember neutronLBPoolMember) {
@@ -76,16 +79,17 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
     private void doNeutronLoadBalancerPoolMemberCreate(NeutronLoadBalancerPoolMember neutronLBPoolMember) {
         Preconditions.checkNotNull(loadBalancerProvider);
         LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLBPoolMember);
+        List<Node> nodes = loadBalancerProvider.getFlowCapableNodes();
         if (lbConfig == null) {
             logger.debug("Neutron LB configuration invalid for member {} ", neutronLBPoolMember.getPoolMemberAddress());
         } else if (lbConfig.getVip() == null) {
             logger.debug("Neutron LB VIP not created yet for member {} ", neutronLBPoolMember.getPoolMemberID());
         } else if (!lbConfig.isValid()) {
             logger.debug("Neutron LB pool configuration invalid for {} ", lbConfig.getName());
-        } else if (this.switchManager.getNodes().size() == 0) {
+        } else if (nodes == null || nodes.isEmpty()) {
             logger.debug("Noop with LB pool member {} creation because no nodes available.", neutronLBPoolMember.getPoolMemberID());
         } else {
-            for (Node node: this.switchManager.getNodes())
+            for (Node node: nodes)
                 loadBalancerProvider.programLoadBalancerPoolMemberRules(node,
                         lbConfig,
                         lbConfig.getMembers().get(neutronLBPoolMember.getPoolMemberID()), Action.ADD);
@@ -124,13 +128,14 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
         Preconditions.checkNotNull(loadBalancerProvider);
 
         LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLBPoolMember);
+        List<Node> nodes = loadBalancerProvider.getFlowCapableNodes();
         if (lbConfig == null) {
             logger.debug("Neutron LB configuration invalid for member {} ", neutronLBPoolMember.getPoolMemberAddress());
         } else if (lbConfig.getVip() == null) {
             logger.debug("Neutron LB VIP not created yet for member {} ", neutronLBPoolMember.getPoolMemberID());
         } else if (!lbConfig.isValid()) {
             logger.debug("Neutron LB pool configuration invalid for {} ", lbConfig.getName());
-        } else if (this.switchManager.getNodes().size() == 0) {
+        } else if (nodes == null || nodes.isEmpty()) {
             logger.debug("Noop with LB pool member {} deletion because no nodes available.", neutronLBPoolMember.getPoolMemberID());
         } else {
             /* As of now, deleting a member involves recomputing member indices.
@@ -139,7 +144,7 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
             LoadBalancerConfiguration newLBConfig = new LoadBalancerConfiguration(lbConfig);
             newLBConfig.removeMember(neutronLBPoolMember.getPoolMemberID());
 
-            for (Node node: this.switchManager.getNodes()) {
+            for (Node node: nodes) {
                 loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.DELETE);
                 loadBalancerProvider.programLoadBalancerRules(node, newLBConfig, Action.ADD);
             }

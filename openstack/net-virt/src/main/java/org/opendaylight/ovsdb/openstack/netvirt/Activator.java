@@ -167,7 +167,7 @@ public class Activator extends DependencyActivatorBase {
         southboundHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.SOUTHBOUND);
 
         manager.add(createComponent()
-                .setInterface(new String[]{OvsdbInventoryListener.class.getName(), IInventoryListener.class.getName(),
+                .setInterface(new String[]{OvsdbInventoryListener.class.getName(),
                                 AbstractHandler.class.getName()},
                         southboundHandlerProperties)
                 .setImplementation(SouthboundHandler.class)

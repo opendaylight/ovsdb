@@ -7,7 +7,7 @@
  *
  * Authors : Sam Hague
  */
-package org.opendaylight.ovsdb.openstack.netvirt;
+package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +30,17 @@ public class NodeUtils {
             id = pair[1];
         }
         return id;
+    }
+
+    public static Node getOpenFlowNode (String identifier) {
+        NodeId nodeId = new NodeId(identifier);
+        NodeKey nodeKey = new NodeKey(nodeId);
+        Node node = new NodeBuilder()
+                .setId(nodeId)
+                .setKey(nodeKey)
+                .build();
+
+        return node;
     }
 
     public static Node getMdsalNode (org.opendaylight.controller.sal.core.Node salNode) {

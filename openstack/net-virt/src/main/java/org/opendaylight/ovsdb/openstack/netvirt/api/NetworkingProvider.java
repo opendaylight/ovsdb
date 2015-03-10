@@ -61,6 +61,6 @@ public interface NetworkingProvider {
     /**
      * Initialize the Flow rules for a given OpenFlow node
      */
-    public void initializeOFFlowRules(org.opendaylight.controller.sal.core.Node openflowNode);
+    public void initializeOFFlowRules(Node openflowNode);
 
 }

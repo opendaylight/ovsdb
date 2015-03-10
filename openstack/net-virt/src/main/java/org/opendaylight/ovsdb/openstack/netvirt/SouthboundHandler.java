@@ -9,10 +9,6 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt;
 
-import org.opendaylight.controller.sal.core.NodeConnector;
-import org.opendaylight.controller.sal.core.Property;
-import org.opendaylight.controller.sal.core.UpdateType;
-import org.opendaylight.controller.switchmanager.IInventoryListener;
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -30,7 +26,6 @@ import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 
-import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,11 +35,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
-public class SouthboundHandler extends AbstractHandler implements OvsdbInventoryListener,
-                                                                  IInventoryListener {
+public class SouthboundHandler extends AbstractHandler implements OvsdbInventoryListener {
     static final Logger logger = LoggerFactory.getLogger(SouthboundHandler.class);
     //private Thread eventThread;
-    List<org.opendaylight.controller.sal.core.Node> nodeCache;
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile ConfigurationService configurationService;
@@ -56,7 +49,6 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
     private volatile NeutronL3Adapter neutronL3Adapter;
 
     void init() {
-        nodeCache = Lists.newArrayList();
     }
 
     void start() {
@@ -293,26 +285,6 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
             logger.debug("Failed to get Port tag for for Intf " + intf, e);
         }
         return null;
-    }
-
-    @Override
-    public void notifyNode(org.opendaylight.controller.sal.core.Node openFlowNode,
-                           UpdateType type, Map<String, Property> propMap) {
-        logger.debug("notifyNode: Node {} update {} from Controller's inventory Service", openFlowNode, type);
-
-        // Add the Node Type check back once the Consistency issue is resolved between MD-SAL and AD-SAL
-        if (!type.equals(UpdateType.REMOVED) && !nodeCache.contains(openFlowNode)) {
-            nodeCache.add(openFlowNode);
-            networkingProviderManager.getProvider(NodeUtils.getMdsalNode(openFlowNode))
-                    .initializeOFFlowRules(openFlowNode);
-        } else if (type.equals(UpdateType.REMOVED)){
-            nodeCache.remove(openFlowNode);
-        }
-    }
-
-    @Override
-    public void notifyNodeConnector(NodeConnector nodeConnector, UpdateType type, Map<String, Property> propMap) {
-        //We are not interested in the nodeConnectors at this moment
     }
 
     private void triggerUpdates() {

@@ -2111,15 +2111,16 @@ public class OF13Provider implements NetworkingProvider {
     }
 
     @Override
-    public void initializeOFFlowRules(org.opendaylight.controller.sal.core.Node openflowNode) {
+    public void initializeOFFlowRules(Node openflowNode) {
         Preconditions.checkNotNull(connectionService);
         List<Node> ovsNodes = connectionService.getNodes();
         if (ovsNodes == null) return;
         for (Node ovsNode : ovsNodes) {
             Long brIntDpid = this.getIntegrationBridgeOFDPID(ovsNode);
             Long brExDpid = this.getExternalBridgeDpid(ovsNode);
-            logger.debug("Compare openflowNode to OVS node {} vs {} and {}", openflowNode.getID(), brIntDpid, brExDpid);
-            String openflowID = openflowNode.getID().toString();
+            logger.debug("Compare openflowNode to OVS node {} vs {} and {}",
+                    openflowNode.getId().getValue(), brIntDpid, brExDpid);
+            String openflowID = openflowNode.getId().getValue();
             if (openflowID.contains(brExDpid.toString())) {
                 this.initializeFlowRules(ovsNode, configurationService.getExternalBridgeName());
                 this.triggerInterfaceUpdates(ovsNode);

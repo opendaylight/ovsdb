@@ -328,7 +328,7 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
         }
 
         @Override
-        public void initializeOFFlowRules(org.opendaylight.controller.sal.core.Node openflowNode) {
+        public void initializeOFFlowRules(Node openflowNode) {
 
         }
     }

@@ -15,6 +15,8 @@ import java.util.Hashtable;
 
 import org.apache.felix.dm.DependencyActivatorBase;
 import org.apache.felix.dm.DependencyManager;
+import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
+import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
 import org.opendaylight.neutron.spi.INeutronFirewallAware;
 import org.opendaylight.neutron.spi.INeutronFirewallPolicyAware;
 import org.opendaylight.neutron.spi.INeutronFirewallRuleAware;
@@ -33,8 +35,6 @@ import org.opendaylight.neutron.spi.INeutronSecurityGroupAware;
 import org.opendaylight.neutron.spi.INeutronSecurityRuleAware;
 import org.opendaylight.neutron.spi.INeutronSubnetAware;
 import org.opendaylight.neutron.spi.INeutronSubnetCRUD;
-import org.opendaylight.controller.switchmanager.IInventoryListener;
-import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
@@ -107,7 +107,8 @@ public class Activator extends DependencyActivatorBase {
                 AbstractEvent.HandlerType.NEUTRON_FLOATING_IP);
 
         manager.add(createComponent()
-                .setInterface(new String[]{INeutronFloatingIPAware.class.getName(), AbstractHandler.class.getName()},
+                .setInterface(new String[]{INeutronFloatingIPAware.class.getName(), AbstractHandler.class.getName(),
+                                BindingAwareConsumer.class.getName()},
                         floatingIPHandlerPorperties)
                 .setImplementation(FloatingIPHandler.class)
                 .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
@@ -117,7 +118,8 @@ public class Activator extends DependencyActivatorBase {
         networkHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.NEUTRON_NETWORK);
 
         manager.add(createComponent()
-                .setInterface(new String[]{INeutronNetworkAware.class.getName(), AbstractHandler.class.getName()},
+                .setInterface(new String[]{INeutronNetworkAware.class.getName(), AbstractHandler.class.getName(),
+                                BindingAwareConsumer.class.getName()},
                         networkHandlerProperties)
                 .setImplementation(NetworkHandler.class)
                 .add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true))
@@ -134,7 +136,8 @@ public class Activator extends DependencyActivatorBase {
         subnetHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.NEUTRON_SUBNET);
 
         manager.add(createComponent()
-                .setInterface(new String[]{INeutronSubnetAware.class.getName(), AbstractHandler.class.getName()},
+                .setInterface(new String[]{INeutronSubnetAware.class.getName(), AbstractHandler.class.getName(),
+                                BindingAwareConsumer.class.getName()},
                         subnetHandlerProperties)
                 .setImplementation(SubnetHandler.class)
                 .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
@@ -144,7 +147,8 @@ public class Activator extends DependencyActivatorBase {
         portHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.NEUTRON_PORT);
 
         manager.add(createComponent()
-                .setInterface(new String[]{INeutronPortAware.class.getName(), AbstractHandler.class.getName()},
+                .setInterface(new String[]{INeutronPortAware.class.getName(), AbstractHandler.class.getName(),
+                                BindingAwareConsumer.class.getName()},
                         portHandlerProperties)
                 .setImplementation(PortHandler.class)
                 .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
@@ -157,7 +161,8 @@ public class Activator extends DependencyActivatorBase {
         routerHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.NEUTRON_ROUTER);
 
         manager.add(createComponent()
-                .setInterface(new String[]{INeutronRouterAware.class.getName(), AbstractHandler.class.getName()},
+                .setInterface(new String[]{INeutronRouterAware.class.getName(), AbstractHandler.class.getName(),
+                                BindingAwareConsumer.class.getName()},
                         routerHandlerProperties)
                 .setImplementation(RouterHandler.class)
                 .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
@@ -168,7 +173,7 @@ public class Activator extends DependencyActivatorBase {
 
         manager.add(createComponent()
                 .setInterface(new String[]{OvsdbInventoryListener.class.getName(),
-                                AbstractHandler.class.getName()},
+                                AbstractHandler.class.getName(), BindingAwareConsumer.class.getName()},
                         southboundHandlerProperties)
                 .setImplementation(SouthboundHandler.class)
                 .add(createServiceDependency().setService(ConfigurationService.class).setRequired(true))
@@ -186,7 +191,8 @@ public class Activator extends DependencyActivatorBase {
 
         manager.add(createComponent()
                 .setInterface(new String[]{INeutronLoadBalancerAware.class.getName(),
-                                IInventoryListener.class.getName(), AbstractHandler.class.getName()},
+                                DataChangeListener.class.getName(), AutoCloseable.class.getName(),
+                                AbstractHandler.class.getName(), BindingAwareConsumer.class.getName()},
                         lbaasHandlerProperties)
                 .setImplementation(LBaaSHandler.class)
                 .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
@@ -194,7 +200,6 @@ public class Activator extends DependencyActivatorBase {
                 .add(createServiceDependency().setService(INeutronLoadBalancerCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronLoadBalancerPoolCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(LoadBalancerProvider.class).setRequired(true))
-                .add(createServiceDependency().setService(ISwitchManager.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true)));
 
@@ -204,13 +209,13 @@ public class Activator extends DependencyActivatorBase {
 
         manager.add(createComponent()
                 .setInterface(new String[]{INeutronLoadBalancerPoolAware.class.getName(),
-                        AbstractHandler.class.getName()}, lbaasPoolHandlerProperties)
+                        AbstractHandler.class.getName(), BindingAwareConsumer.class.getName()},
+                        lbaasPoolHandlerProperties)
                 .setImplementation(LBaaSPoolHandler.class)
                 .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronLoadBalancerCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(LoadBalancerProvider.class).setRequired(true))
-                .add(createServiceDependency().setService(ISwitchManager.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true)));
 
@@ -220,14 +225,14 @@ public class Activator extends DependencyActivatorBase {
 
         manager.add(createComponent()
                 .setInterface(new String[] {INeutronLoadBalancerPoolMemberAware.class.getName(),
-                        AbstractHandler.class.getName()}, lbaasPoolMemberHandlerProperties)
+                        AbstractHandler.class.getName(), BindingAwareConsumer.class.getName()},
+                        lbaasPoolMemberHandlerProperties)
                 .setImplementation(LBaaSPoolMemberHandler.class)
                 .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronLoadBalancerCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronLoadBalancerPoolCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(LoadBalancerProvider.class).setRequired(true))
-                .add(createServiceDependency().setService(ISwitchManager.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true)));
 
@@ -237,7 +242,8 @@ public class Activator extends DependencyActivatorBase {
 
         manager.add(createComponent()
                 .setInterface(new String[]{INeutronSecurityRuleAware.class.getName(),
-                                INeutronSecurityGroupAware.class.getName(), AbstractHandler.class.getName()},
+                                INeutronSecurityGroupAware.class.getName(), AbstractHandler.class.getName(),
+                                BindingAwareConsumer.class.getName()},
                         portSecurityHandlerProperties)
                 .setImplementation(PortSecurityHandler.class)
                 .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
@@ -254,7 +260,8 @@ public class Activator extends DependencyActivatorBase {
         manager.add(createComponent()
                 .setInterface(new String[] {INeutronFirewallAware.class.getName(),
                                 INeutronFirewallRuleAware.class.getName(), INeutronFirewallPolicyAware.class.getName(),
-                                AbstractHandler.class.getName()}, fWaasHandlerProperties)
+                                AbstractHandler.class.getName(), BindingAwareConsumer.class.getName()},
+                        fWaasHandlerProperties)
                 .setImplementation(FWaasHandler.class)
                 .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true)));
 

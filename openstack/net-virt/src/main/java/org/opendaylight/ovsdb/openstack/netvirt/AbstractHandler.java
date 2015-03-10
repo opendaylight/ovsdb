@@ -9,11 +9,19 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt;
 
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
+import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
 import org.opendaylight.ovsdb.plugin.api.Status;
 import org.opendaylight.ovsdb.plugin.api.StatusCode;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 
 import com.google.common.base.Preconditions;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,15 +32,30 @@ import java.net.HttpURLConnection;
  * This interface provides a layer of abstraction between the event dispatcher and the
  * handlers.
  */
-public abstract class AbstractHandler {
+public abstract class AbstractHandler implements BindingAwareConsumer {
 
     /**
      * Logger instance.
      */
     static final Logger logger = LoggerFactory.getLogger(AbstractHandler.class);
 
+    private DataBroker dataBroker;
+
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile EventDispatcher eventDispatcher;
+
+    @Override
+    public void onSessionInitialized(BindingAwareBroker.ConsumerContext session) {
+        dataBroker = session.getSALService(DataBroker.class);
+        logger.info("AbstractHandler Initialized with CONSUMER CONTEXT {}", session.toString());
+        processSessionInitialized();
+    }
+
+    protected abstract void processSessionInitialized();
+
+    protected DataBroker getDataBroker() {
+        return dataBroker;
+    }
 
     /**
      * Convert failure status returned by the  manager into

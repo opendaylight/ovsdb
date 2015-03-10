@@ -29,6 +29,11 @@ public class FWaasHandler extends AbstractHandler
                                      INeutronFirewallPolicyAware {
 
     static final Logger logger = LoggerFactory.getLogger(FWaasHandler.class);
+
+    @Override
+    protected void processSessionInitialized() {
+    }
+
     /**
      * Invoked when a Firewall Rules creation is requested
      * to indicate if the specified Rule can be created.

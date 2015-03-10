@@ -29,6 +29,10 @@ public class PortSecurityHandler extends AbstractHandler
     static final Logger logger = LoggerFactory.getLogger(PortSecurityHandler.class);
 
     @Override
+    protected void processSessionInitialized() {
+    }
+
+    @Override
     public int canCreateNeutronSecurityGroup(NeutronSecurityGroup neutronSecurityGroup) {
         return HttpURLConnection.HTTP_CREATED;
     }

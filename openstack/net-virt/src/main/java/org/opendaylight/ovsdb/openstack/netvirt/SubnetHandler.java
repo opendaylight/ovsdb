@@ -29,6 +29,10 @@ public class SubnetHandler extends AbstractHandler implements INeutronSubnetAwar
     private volatile NeutronL3Adapter neutronL3Adapter;
 
     @Override
+    protected void processSessionInitialized() {
+    }
+
+    @Override
     public int canCreateSubnet(NeutronSubnet subnet) {
         return HttpURLConnection.HTTP_CREATED;
     }

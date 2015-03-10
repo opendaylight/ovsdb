@@ -194,7 +194,6 @@ public class Activator extends DependencyActivatorBase {
                 .add(createServiceDependency().setService(INeutronLoadBalancerCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronLoadBalancerPoolCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(LoadBalancerProvider.class).setRequired(true))
-                .add(createServiceDependency().setService(ISwitchManager.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true)));
 
@@ -210,7 +209,6 @@ public class Activator extends DependencyActivatorBase {
                 .add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronLoadBalancerCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(LoadBalancerProvider.class).setRequired(true))
-                .add(createServiceDependency().setService(ISwitchManager.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true)));
 
@@ -227,7 +225,6 @@ public class Activator extends DependencyActivatorBase {
                 .add(createServiceDependency().setService(INeutronLoadBalancerCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronLoadBalancerPoolCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(LoadBalancerProvider.class).setRequired(true))
-                .add(createServiceDependency().setService(ISwitchManager.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true)));
 

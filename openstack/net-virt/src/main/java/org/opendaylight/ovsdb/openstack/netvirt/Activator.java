@@ -33,8 +33,6 @@ import org.opendaylight.neutron.spi.INeutronSecurityGroupAware;
 import org.opendaylight.neutron.spi.INeutronSecurityRuleAware;
 import org.opendaylight.neutron.spi.INeutronSubnetAware;
 import org.opendaylight.neutron.spi.INeutronSubnetCRUD;
-import org.opendaylight.controller.switchmanager.IInventoryListener;
-import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
@@ -185,8 +183,7 @@ public class Activator extends DependencyActivatorBase {
                 AbstractEvent.HandlerType.NEUTRON_LOAD_BALANCER);
 
         manager.add(createComponent()
-                .setInterface(new String[]{INeutronLoadBalancerAware.class.getName(),
-                                IInventoryListener.class.getName(), AbstractHandler.class.getName()},
+                .setInterface(new String[]{INeutronLoadBalancerAware.class.getName(), AbstractHandler.class.getName()},
                         lbaasHandlerProperties)
                 .setImplementation(LBaaSHandler.class)
                 .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
@@ -194,7 +191,6 @@ public class Activator extends DependencyActivatorBase {
                 .add(createServiceDependency().setService(INeutronLoadBalancerCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronLoadBalancerPoolCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(LoadBalancerProvider.class).setRequired(true))
-                .add(createServiceDependency().setService(ISwitchManager.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true)));
 
@@ -210,7 +206,6 @@ public class Activator extends DependencyActivatorBase {
                 .add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronLoadBalancerCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(LoadBalancerProvider.class).setRequired(true))
-                .add(createServiceDependency().setService(ISwitchManager.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true)));
 
@@ -227,7 +222,6 @@ public class Activator extends DependencyActivatorBase {
                 .add(createServiceDependency().setService(INeutronLoadBalancerCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronLoadBalancerPoolCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(LoadBalancerProvider.class).setRequired(true))
-                .add(createServiceDependency().setService(ISwitchManager.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true)));
 

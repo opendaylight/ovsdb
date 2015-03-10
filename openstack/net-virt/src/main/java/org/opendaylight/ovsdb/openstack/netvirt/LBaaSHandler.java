@@ -10,6 +10,12 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt;
 
+import com.google.common.collect.Lists;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.neutron.spi.INeutronLoadBalancerAware;
 import org.opendaylight.neutron.spi.INeutronLoadBalancerCRUD;
 import org.opendaylight.neutron.spi.INeutronLoadBalancerPoolCRUD;
@@ -19,15 +25,15 @@ import org.opendaylight.neutron.spi.INeutronSubnetCRUD;
 import org.opendaylight.neutron.spi.NeutronLoadBalancer;
 import org.opendaylight.neutron.spi.NeutronLoadBalancerPool;
 import org.opendaylight.neutron.spi.NeutronLoadBalancerPoolMember;
-import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.core.NodeConnector;
-import org.opendaylight.controller.sal.core.Property;
-import org.opendaylight.controller.sal.core.UpdateType;
-import org.opendaylight.controller.switchmanager.IInventoryListener;
-import org.opendaylight.controller.switchmanager.ISwitchManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerProvider;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,9 +50,10 @@ import java.util.Map;
 //TODO: Implement INeutronLoadBalancerHealthMonitorAware, INeutronLoadBalancerListenerAware, INeutronLoadBalancerPoolMemberAware,
 
 public class LBaaSHandler extends AbstractHandler
-        implements INeutronLoadBalancerAware, IInventoryListener {
+        implements INeutronLoadBalancerAware, DataChangeListener, AutoCloseable {
 
     private static final Logger logger = LoggerFactory.getLogger(LBaaSHandler.class);
+    private ListenerRegistration<DataChangeListener> registration;
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile INeutronLoadBalancerCRUD neutronLBCache;
@@ -55,7 +62,21 @@ public class LBaaSHandler extends AbstractHandler
     private volatile INeutronNetworkCRUD neutronNetworkCache;
     private volatile INeutronSubnetCRUD neutronSubnetCache;
     private volatile LoadBalancerProvider loadBalancerProvider;
-    private volatile ISwitchManager switchManager;
+
+    public static final InstanceIdentifier<FlowCapableNode> createFlowCapableNodePath() {
+        return InstanceIdentifier.builder(Nodes.class)
+                .child(Node.class)
+                .augmentation(FlowCapableNode.class)
+                .build();
+    }
+
+    @Override
+    protected void processSessionInitialized() {
+        logger.info("Registering FlowCapableNodeChangeListener");
+        Preconditions.checkArgument(registration == null, "processSessionInitialized called more than once");
+        registration = getDataBroker().registerDataChangeListener(LogicalDatastoreType.OPERATIONAL,
+                createFlowCapableNodePath(), this, AsyncDataBroker.DataChangeScope.ONE);
+    }
 
     @Override
     public int canCreateNeutronLoadBalancer(NeutronLoadBalancer neutronLB) {
@@ -77,13 +98,14 @@ public class LBaaSHandler extends AbstractHandler
     private void doNeutronLoadBalancerCreate(NeutronLoadBalancer neutronLB) {
         Preconditions.checkNotNull(loadBalancerProvider);
         LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLB);
+        List<Node> nodes = loadBalancerProvider.getFlowCapableNodes();
 
         if (!lbConfig.isValid()) {
             logger.debug("Neutron LB pool configuration invalid for {} ", lbConfig.getName());
-        } else if (this.switchManager.getNodes().size() == 0) {
+        } else if (nodes == null || nodes.isEmpty()) {
             logger.debug("Noop with LB {} creation because no nodes available.", lbConfig.getName());
         } else {
-            for (Node node: this.switchManager.getNodes()) {
+            for (Node node: nodes) {
                 loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.ADD);
             }
         }
@@ -116,13 +138,14 @@ public class LBaaSHandler extends AbstractHandler
     private void doNeutronLoadBalancerDelete(NeutronLoadBalancer neutronLB) {
         Preconditions.checkNotNull(loadBalancerProvider);
         LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLB);
+        List<Node> nodes = loadBalancerProvider.getFlowCapableNodes();
 
         if (!lbConfig.isValid()) {
             logger.debug("Neutron LB pool configuration invalid for {} ", lbConfig.getName());
-        } else if (this.switchManager.getNodes().size() == 0) {
+        } else if (nodes == null || nodes.isEmpty()) {
             logger.debug("Noop with LB {} deletion because no nodes available.", lbConfig.getName());
         } else {
-            for (Node node: this.switchManager.getNodes()) {
+            for (Node node: nodes) {
                 loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.DELETE);
             }
         }
@@ -221,11 +244,24 @@ public class LBaaSHandler extends AbstractHandler
         return lbConfig;
     }
 
+    @Override
+    public void close() throws Exception {
+        if (registration != null) {
+            registration.close();
+        }
+    }
+
+    @Override
+    public void onDataChanged(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> asyncDataChangeEvent) {
+        logger.error("XXX got an event YAY {} ", asyncDataChangeEvent);
+    }
+
     /**
+     FIXME TODO
+
      * On the addition of a new node, we iterate through all existing loadbalancer
      * instances and program the node for all of them. It is sufficient to do that only
      * when a node is added, and only for the LB instances (and not individual members).
-     */
     @Override
     public void notifyNode(Node node, UpdateType type, Map<String, Property> propMap) {
         logger.debug("notifyNode: Node {} update {} from Controller's inventory Service", node, type);
@@ -239,11 +275,11 @@ public class LBaaSHandler extends AbstractHandler
                if (type.equals(UpdateType.ADDED)) {
                    loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.ADD);
 
-               /* When node disappears, we do nothing for now. Making a call to
+                * When node disappears, we do nothing for now. Making a call to
                 * loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.DELETE)
                 * can lead to TransactionCommitFailedException. Similarly when node is changed,
                 * because of remove followed by add, we do nothing.
-                */
+                *
 
                  //(type.equals(UpdateType.REMOVED) || type.equals(UpdateType.CHANGED))
                } else {
@@ -252,10 +288,6 @@ public class LBaaSHandler extends AbstractHandler
             }
         }
     }
+     */
 
-    @Override
-    public void notifyNodeConnector(NodeConnector arg0, UpdateType arg1,
-            Map<String, Property> arg2) {
-        //NOOP
-    }
 }

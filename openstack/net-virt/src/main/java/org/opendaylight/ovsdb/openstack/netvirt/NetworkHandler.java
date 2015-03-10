@@ -58,6 +58,10 @@ public class NetworkHandler extends AbstractHandler
     private volatile OvsdbInventoryListener ovsdbInventoryListener;
     private volatile NeutronL3Adapter neutronL3Adapter;
 
+    @Override
+    protected void processSessionInitialized() {
+    }
+
     /**
      * Invoked when a network creation is requested
      * to indicate if the specified network can be created.

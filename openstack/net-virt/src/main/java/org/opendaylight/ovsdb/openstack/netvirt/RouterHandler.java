@@ -34,6 +34,10 @@ public class RouterHandler extends AbstractHandler
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile NeutronL3Adapter neutronL3Adapter;
 
+    @Override
+    protected void processSessionInitialized() {
+    }
+
     /**
      * Services provide this interface method to indicate if the specified router can be created
      *

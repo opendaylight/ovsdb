@@ -19,6 +19,47 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_f77e0de4",
+        "filename": "commons/parent/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-13T18:04:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_d782f151",
+      "revId": "cc2d682593406b28c9d7d71a9a7cb7fd06e4a510",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_776afd1b",
+        "filename": "openstack/net-virt-providers/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-13T18:04:34Z",
+      "side": 1,
+      "message": "leaving this as a jar for now; as talked with Sam.",
+      "range": {
+        "startLine": 154,
+        "startChar": 60,
+        "endLine": 154,
+        "endChar": 65
+      },
+      "revId": "cc2d682593406b28c9d7d71a9a7cb7fd06e4a510",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_f7ee0d22",
         "filename": "openstack/net-virt/pom.xml",
         "patchSetId": 1
@@ -30,6 +71,30 @@
       "writtenOn": "2015-03-13T15:42:09Z",
       "side": 1,
       "message": "embedding caused issues for the it unless the bundle doing the embedded was pulled in as a configurationBundle. So if these utils are needed outside of the net-virt bundle we will have issues. That is the reason we made sevicehelper a bundle so it could be pulled in anywhere.",
+      "range": {
+        "startLine": 97,
+        "startChar": 49,
+        "endLine": 97,
+        "endChar": 54
+      },
+      "revId": "cc2d682593406b28c9d7d71a9a7cb7fd06e4a510",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_d760b137",
+        "filename": "openstack/net-virt/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-13T18:04:34Z",
+      "side": 1,
+      "message": "understood. for now we decided to leave it as a jar... may be converting it to bundle if the need comes.",
+      "parentUuid": "5a93c517_f7ee0d22",
       "range": {
         "startLine": 97,
         "startChar": 49,
@@ -59,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_5754a153",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NodeCacheManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-13T18:04:34Z",
+      "side": 1,
+      "message": "yeah, we should avoid doing any real work in the context of the mdsal callback thread. By not doing it that way, we would need to worry about synchronization issues when adding/removing to the nodecache.",
+      "parentUuid": "5a93c517_d73751af",
+      "revId": "cc2d682593406b28c9d7d71a9a7cb7fd06e4a510",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_37bb1510",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NodeCacheManagerImpl.java",
         "patchSetId": 1
@@ -76,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_77519d61",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NodeCacheManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-13T18:04:34Z",
+      "side": 1,
+      "message": "yeah, no strong reason here. only thought of doing it that way to make it more explicit. We need to enqueue the action in the event, so by having separate methods makes it easier to d the mapping below.",
+      "parentUuid": "5a93c517_37bb1510",
+      "revId": "cc2d682593406b28c9d7d71a9a7cb7fd06e4a510",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_77c19d7f",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NodeCacheManagerImpl.java",
         "patchSetId": 1
@@ -87,6 +188,24 @@
       "writtenOn": "2015-03-13T15:42:09Z",
       "side": 1,
       "message": "can you add private to make it explicit?",
+      "revId": "cc2d682593406b28c9d7d71a9a7cb7fd06e4a510",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_374b15b2",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NodeCacheManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-13T18:04:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_77c19d7f",
       "revId": "cc2d682593406b28c9d7d71a9a7cb7fd06e4a510",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -116,6 +235,30 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_97d1c9cf",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NodeCacheManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-13T18:04:34Z",
+      "side": 1,
+      "message": "hm... I could use \"_\" to show that this is the work done after event is in the context of the \u0027internal\u0027 thread.\nLet me do that.",
+      "parentUuid": "5a93c517_77dafd79",
+      "range": {
+        "startLine": 38,
+        "startChar": 9,
+        "endLine": 38,
+        "endChar": 20
+      },
+      "revId": "cc2d682593406b28c9d7d71a9a7cb7fd06e4a510",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_37e4753a",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NodeCacheManagerImpl.java",
         "patchSetId": 1
@@ -133,6 +276,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_b7d645c4",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NodeCacheManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-13T18:04:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_37e4753a",
+      "revId": "cc2d682593406b28c9d7d71a9a7cb7fd06e4a510",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_1755b9c5",
         "filename": "utils/mdsal-node/pom.xml",
         "patchSetId": 1
@@ -144,6 +305,30 @@
       "writtenOn": "2015-03-13T15:42:09Z",
       "side": 1,
       "message": "sal still required? Or with the other IInventory changes will the sal node finally be deprecated so that the sal stuff in NodeUtils can be removed?",
+      "range": {
+        "startLine": 40,
+        "startChar": 19,
+        "endLine": 40,
+        "endChar": 31
+      },
+      "revId": "cc2d682593406b28c9d7d71a9a7cb7fd06e4a510",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_57db41ed",
+        "filename": "utils/mdsal-node/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-13T18:04:34Z",
+      "side": 1,
+      "message": "will be gone soon, but not before this gerrit. ;)\n\nbut yes, once its gone, we can safely remove this dependency!",
+      "parentUuid": "5a93c517_1755b9c5",
       "range": {
         "startLine": 40,
         "startChar": 19,

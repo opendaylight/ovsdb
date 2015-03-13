@@ -46,6 +46,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.MultiTenantAwareRouter;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OutboundNatProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
@@ -55,6 +56,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.impl.BridgeConfigurationManagerI
 import org.opendaylight.ovsdb.openstack.netvirt.impl.ConfigurationServiceImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.EventDispatcherImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.NodeCacheManagerImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.OpenstackRouter;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.ProviderNetworkManagerImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.SecurityServicesImpl;
@@ -298,6 +300,14 @@ public class Activator extends DependencyActivatorBase {
         manager.add(createComponent()
                 .setInterface(MultiTenantAwareRouter.class.getName(), null)
                 .setImplementation(OpenstackRouter.class));
+
+        Dictionary<String, Object> nodeCacheManagerProperties = new Hashtable<>();
+        nodeCacheManagerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.NODE);
+        manager.add(createComponent()
+                .setInterface(new String[]{NodeCacheManager.class.getName(), AbstractHandler.class.getName()},
+                        nodeCacheManagerProperties)
+                .setImplementation(NodeCacheManagerImpl.class)
+                .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true)));
     }
 
     @Override

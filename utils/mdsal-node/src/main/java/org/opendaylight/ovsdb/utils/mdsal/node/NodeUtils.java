@@ -7,7 +7,7 @@
  *
  * Authors : Sam Hague
  */
-package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
+package org.opendaylight.ovsdb.utils.mdsal.node;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +18,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-// TODO: Move this to org.opendaylight.ovsdb.utils
 
 public class NodeUtils {
     protected static final Logger LOG = LoggerFactory.getLogger(NodeUtils.class);

@@ -96,6 +96,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>utils.mdsal-node</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>utils.mdsal-openflow</artifactId>
     </dependency>
     <dependency>
@@ -147,7 +151,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
               org.osgi.framework,
               *
             </Import-Package>-->
-            <Embed-Dependency>utils.config,utils.mdsal-openflow;type=!pom;inline=false</Embed-Dependency>
+            <Embed-Dependency>utils.config,utils.mdsal-node,utils.mdsal-openflow;type=!pom;inline=false</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Bundle-Activator>org.opendaylight.ovsdb.openstack.netvirt.providers.Activator</Bundle-Activator>
           </instructions>

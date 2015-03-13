@@ -51,7 +51,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <skip.coverage>true</skip.coverage>
     <skip.distribution>false</skip.distribution>
     <skip.integrationtest>true</skip.integrationtest>
-    <skip.karaf>false</skip.karaf>
+    <skip.karaf.featureTest>false</skip.karaf.featureTest>
     <!-- The directory where maven was executed TODO see if this can be removed -->
     <root.directory>${env.PWD}</root.directory>
     <!-- IT report is aggregated to enable PAX Exam coverage to be logged -->
@@ -656,7 +656,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <activeByDefault>false</activeByDefault>
       </activation>
       <properties>
-        <skip.karaf>false</skip.karaf>
+        <skip.karaf.featureTest>false</skip.karaf.featureTest>
       </properties>
     </profile>
   </profiles>

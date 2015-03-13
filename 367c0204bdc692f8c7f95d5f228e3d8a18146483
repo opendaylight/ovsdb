@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_6a6530e0",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/AbstractHandler.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-03-13T20:37:54Z",
+      "side": 1,
+      "message": "just a suggestion, the intent of this method is to register the dataChangeListener on specific path. can we define a method here that takes instancesIdentifier and AbstractHandler object and do the registration login.\nMethodX(InstanceIdentifier\u003c?\u003e path, AbstractHandler thisObject){\ndataBroker.registerChangeListner (path, thisObject)\n}\n\nAnd all the handler can call this method from their constructor. So every handler don\u0027t have to implement this abstract method. Thoughts?",
+      "revId": "367c0204bdc692f8c7f95d5f228e3d8a18146483",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

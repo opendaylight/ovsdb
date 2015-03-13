@@ -20,6 +20,7 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 //import org.opendaylight.ovsdb.openstack.netvirt.NodeUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
@@ -35,6 +36,8 @@ public class FlowCapableNodeDataChangeListener implements DataChangeListener, Au
     private static final Logger LOG = LoggerFactory.getLogger(FlowCapableNodeDataChangeListener.class);
     private ListenerRegistration<DataChangeListener> registration;
     private List<Node> nodeCache = Lists.newArrayList();
+    private PipelineOrchestrator pipelineOrchestrator = null;
+    private NodeCacheManager nodeCacheManager = null;
 
     public static final InstanceIdentifier<FlowCapableNode> createFlowCapableNodePath () {
         return InstanceIdentifier.builder(Nodes.class)
@@ -59,6 +62,15 @@ public class FlowCapableNodeDataChangeListener implements DataChangeListener, Au
             DataObject> changes) {
 
         LOG.debug("onDataChanged: {}", changes);
+
+        if (pipelineOrchestrator == null) {
+            pipelineOrchestrator =
+                    (PipelineOrchestrator) ServiceHelper.getGlobalInstance(PipelineOrchestrator.class, this);
+        }
+        if (nodeCacheManager == null) {
+            nodeCacheManager = (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
+        }
+
         for( Map.Entry<InstanceIdentifier<?>, DataObject> created : changes.getCreatedData().entrySet()) {
             InstanceIdentifier<?> iID = created.getKey();
             String openflowId = iID.firstKeyOf(Node.class, NodeKey.class).getId().getValue();
@@ -67,18 +79,19 @@ public class FlowCapableNodeDataChangeListener implements DataChangeListener, Au
                     iID.firstIdentifierOf(Node.class),
                     openflowId);
 
-            PipelineOrchestrator pipelineOrchestrator =
-                    (PipelineOrchestrator) ServiceHelper.getGlobalInstance(PipelineOrchestrator.class, this);
-            pipelineOrchestrator.enqueue(openflowId);
+            if (pipelineOrchestrator != null) {
+                pipelineOrchestrator.enqueue(openflowId);
+            }
 
             notifyNodeUpdated(NodeUtils.getOpenFlowNode(openflowId));
         }
 
-        //TODO: how to get the removed node id
-        Map<InstanceIdentifier<?>, DataObject> originalDataObject = changes.getOriginalData();
-        Set<InstanceIdentifier<?>> iID = changes.getRemovedPaths();
-        for (InstanceIdentifier instanceIdentifier : iID) {
-            notifyNodeUpdated(NodeUtils.getOpenFlowNode(null));
+        for (InstanceIdentifier instanceIdentifier : changes.getRemovedPaths()) {
+            DataObject originalDataObject = changes.getOriginalData().get(instanceIdentifier);
+            if (originalDataObject != null && originalDataObject instanceof Node){
+                Node node = (Node) originalDataObject;
+                notifyNodeRemoved(NodeUtils.getOpenFlowNode(node.getId().getValue()));
+            }
         }
     }
 
@@ -93,6 +106,10 @@ public class FlowCapableNodeDataChangeListener implements DataChangeListener, Au
                     (NetworkingProviderManager) ServiceHelper.getGlobalInstance(NetworkingProviderManager.class,
                             this);
             networkingProviderManager.getProvider(openFlowNode).initializeOFFlowRules(openFlowNode);
+
+            if (nodeCacheManager != null) {
+                nodeCacheManager.nodeAdded(openFlowNode.getId().getValue());
+            }
         }
     }
 
@@ -100,6 +117,10 @@ public class FlowCapableNodeDataChangeListener implements DataChangeListener, Au
         LOG.debug("notifyNodeRemoved: Node {} update from Controller's inventory Service",
                 openFlowNode.getId().getValue());
 
-        nodeCache.remove(null);//openFlowNode);
+        nodeCache.remove(openFlowNode);
+
+        if (nodeCacheManager != null) {
+            nodeCacheManager.nodeRemoved(openFlowNode.getId().getValue());
+        }
     }
 }

@@ -27,7 +27,8 @@ public abstract class AbstractEvent {
         NEUTRON_FWAAS,
         NEUTRON_LOAD_BALANCER,
         NEUTRON_LOAD_BALANCER_POOL,
-        NEUTRON_LOAD_BALANCER_POOL_MEMBER;
+        NEUTRON_LOAD_BALANCER_POOL_MEMBER,
+        NODE;
 
         public static final int size = HandlerType.values().length;
     }

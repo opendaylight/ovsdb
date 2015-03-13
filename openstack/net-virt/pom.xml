@@ -72,6 +72,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>utils.config</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>utils.mdsal-node</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
     </dependency>
@@ -90,7 +94,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Embed-Dependency>utils.config;type=!pom;inline=false</Embed-Dependency>
+            <Embed-Dependency>utils.config,utils.mdsal-node;type=!pom;inline=false</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Export-Package>
                   org.opendaylight.ovsdb.openstack.netvirt.api

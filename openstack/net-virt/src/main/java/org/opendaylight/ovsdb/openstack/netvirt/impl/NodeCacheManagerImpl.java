@@ -15,6 +15,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.AbstractHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.NodeCacheManagerEvent;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
+import org.opendaylight.ovsdb.utils.mdsal.node.NodeUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,13 +31,11 @@ public class NodeCacheManagerImpl extends AbstractHandler
 
     @Override
     public void nodeAdded(String nodeIdentifier) {
-        logger.info("XXX >>>>> enqueue: Node added : {}", nodeIdentifier);
         logger.debug(">>>>> enqueue: Node added : {}", nodeIdentifier);
         enqueueEvent(new NodeCacheManagerEvent(nodeIdentifier, Action.ADD));
     }
     @Override
     public void nodeRemoved(String nodeIdentifier) {
-        logger.info("XXX >>>>> enqueue: Node removed : {}", nodeIdentifier);
         logger.debug(">>>>> enqueue: Node removed : {}", nodeIdentifier);
         enqueueEvent(new NodeCacheManagerEvent(nodeIdentifier, Action.DELETE));
     }
@@ -45,13 +44,13 @@ public class NodeCacheManagerImpl extends AbstractHandler
         return nodeCache;
     }
 
-    void doNodeAdded(Node node) {
+    private void _processNodeAdded(Node node) {
         nodeCache.add(node);
-        logger.info("XXXX added node {}. cache is now {}", node, nodeCache);
+        logger.info("XXXX added node {}. cache is now {}", node, nodeCache);  // TODO: debug, remove
     }
-    void doNodeRemoved(Node node) {
+    private void _processNodeRemoved(Node node) {
         nodeCache.remove(node);
-        logger.info("XXXX removed node {}. cache is now {}", node, nodeCache);
+        logger.info("XXXX removed node {}. cache is now {}", node, nodeCache);  // TODO: debug, remove
     }
 
     /**
@@ -70,10 +69,10 @@ public class NodeCacheManagerImpl extends AbstractHandler
         logger.debug(">>>>> dequeue: {}", ev);
         switch (ev.getAction()) {
             case ADD:
-                doNodeAdded(NodeUtils.getOpenFlowNode(ev.getNodeIdentifier()));
+                _processNodeAdded(NodeUtils.getOpenFlowNode(ev.getNodeIdentifier()));
                 break;
             case DELETE:
-                doNodeRemoved(NodeUtils.getOpenFlowNode(ev.getNodeIdentifier()));
+                _processNodeRemoved(NodeUtils.getOpenFlowNode(ev.getNodeIdentifier()));
                 break;
             case UPDATE:
                 break;

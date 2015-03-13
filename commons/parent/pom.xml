@@ -42,11 +42,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <ovsdb.plugin.compatibility.layer.version>1.1.0-SNAPSHOT</ovsdb.plugin.compatibility.layer.version>
     <ovsdb.ovssfc.version>0.1.0-SNAPSHOT</ovsdb.ovssfc.version>
     <ovsdb.utils.config.version>1.1.0-SNAPSHOT</ovsdb.utils.config.version>
+    <ovsdb.utils.mdsal.node.version>1.1.0-SNAPSHOT</ovsdb.utils.mdsal.node.version>
+    <ovsdb.utils.mdsal.openflow.version>1.1.0-SNAPSHOT</ovsdb.utils.mdsal.openflow.version>
     <ovsdb.utils.servicehelper.version>1.1.0-SNAPSHOT</ovsdb.utils.servicehelper.version>
     <plugin.shell.version>1.1.0-SNAPSHOT</plugin.shell.version>
     <schema.hardwarevtep.version>1.1.0-SNAPSHOT</schema.hardwarevtep.version>
     <schema.openvswitch.version>1.1.0-SNAPSHOT</schema.openvswitch.version>
-    <utils.mdsal.openflow.version>1.1.0-SNAPSHOT</utils.mdsal.openflow.version>
     <!-- Skip Coverage and IT by default -->
     <skip.coverage>true</skip.coverage>
     <skip.distribution>false</skip.distribution>
@@ -352,8 +353,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       </dependency>
       <dependency>
         <groupId>org.opendaylight.ovsdb</groupId>
+        <artifactId>utils.mdsal-node</artifactId>
+        <version>${ovsdb.utils.mdsal.node.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.ovsdb</groupId>
         <artifactId>utils.mdsal-openflow</artifactId>
-        <version>${utils.mdsal.openflow.version}</version>
+        <version>${ovsdb.utils.mdsal.openflow.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.ovsdb</groupId>

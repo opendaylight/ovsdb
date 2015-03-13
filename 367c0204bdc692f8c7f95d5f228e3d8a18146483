@@ -16,6 +16,24 @@
       "revId": "367c0204bdc692f8c7f95d5f228e3d8a18146483",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_ca0564c3",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/AbstractHandler.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-13T21:30:32Z",
+      "side": 1,
+      "message": "Yeah, good point. I ended up taking a better route in listening for node add/remove events.\n\nWill submit a patch set or start a new gerrit.",
+      "parentUuid": "5a93c517_6a6530e0",
+      "revId": "367c0204bdc692f8c7f95d5f228e3d8a18146483",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

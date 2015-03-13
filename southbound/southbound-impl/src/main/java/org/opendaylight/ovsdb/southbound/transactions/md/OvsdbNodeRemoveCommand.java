@@ -31,8 +31,10 @@ public class OvsdbNodeRemoveCommand extends AbstractTransactionCommand {
             if(ovsdbNodeOptional.isPresent()) {
                 Node ovsdbNode = ovsdbNodeOptional.get();
                 OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
-                for(ManagedNodeEntry managedNode: ovsdbNodeAugmentation.getManagedNodeEntry()) {
-                    transaction.delete(LogicalDatastoreType.OPERATIONAL, managedNode.getBridgeRef().getValue());
+                if (ovsdbNodeAugmentation.getManagedNodeEntry() != null) {
+                    for (ManagedNodeEntry managedNode : ovsdbNodeAugmentation.getManagedNodeEntry()) {
+                        transaction.delete(LogicalDatastoreType.OPERATIONAL, managedNode.getBridgeRef().getValue());
+                    }
                 }
                 transaction.delete(LogicalDatastoreType.OPERATIONAL, getKey().toInstanceIndentifier());
             }

@@ -1,0 +1,158 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_d782f151",
+        "filename": "commons/parent/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-13T15:42:09Z",
+      "side": 1,
+      "message": "Move it up above servicehelper to keep the alphabetical order.",
+      "revId": "cc2d682593406b28c9d7d71a9a7cb7fd06e4a510",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_f7ee0d22",
+        "filename": "openstack/net-virt/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-13T15:42:09Z",
+      "side": 1,
+      "message": "embedding caused issues for the it unless the bundle doing the embedded was pulled in as a configurationBundle. So if these utils are needed outside of the net-virt bundle we will have issues. That is the reason we made sevicehelper a bundle so it could be pulled in anywhere.",
+      "range": {
+        "startLine": 97,
+        "startChar": 49,
+        "endLine": 97,
+        "endChar": 54
+      },
+      "revId": "cc2d682593406b28c9d7d71a9a7cb7fd06e4a510",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_d73751af",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NodeCacheManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-13T15:42:09Z",
+      "side": 1,
+      "message": "is there any way to do this without having to do the whole event processing? Seems like a lot of overhead to carry.\n\nBut if it is needed for synchronizing events that is fine.\n\nI then wonder if all the node stuff should go through like this",
+      "revId": "cc2d682593406b28c9d7d71a9a7cb7fd06e4a510",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_37bb1510",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NodeCacheManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-13T15:42:09Z",
+      "side": 1,
+      "message": "are the Actions exposed to the caller? Wonder if we could then have a single interface to call and let the user pass in the action. Though keeping the separate apis might be cleaner and not push anythinn more to the caller.",
+      "revId": "cc2d682593406b28c9d7d71a9a7cb7fd06e4a510",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_77c19d7f",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NodeCacheManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-13T15:42:09Z",
+      "side": 1,
+      "message": "can you add private to make it explicit?",
+      "revId": "cc2d682593406b28c9d7d71a9a7cb7fd06e4a510",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_77dafd79",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NodeCacheManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-13T15:42:09Z",
+      "side": 1,
+      "message": "is there a more intuitive name for nodeAdded and doNodeAdded? The separation for the queueing and processing doesn\u0027t make it easy.",
+      "range": {
+        "startLine": 38,
+        "startChar": 9,
+        "endLine": 38,
+        "endChar": 20
+      },
+      "revId": "cc2d682593406b28c9d7d71a9a7cb7fd06e4a510",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_37e4753a",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NodeCacheManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-13T15:42:09Z",
+      "side": 1,
+      "message": "same as above comment",
+      "revId": "cc2d682593406b28c9d7d71a9a7cb7fd06e4a510",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_1755b9c5",
+        "filename": "utils/mdsal-node/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-13T15:42:09Z",
+      "side": 1,
+      "message": "sal still required? Or with the other IInventory changes will the sal node finally be deprecated so that the sal stuff in NodeUtils can be removed?",
+      "range": {
+        "startLine": 40,
+        "startChar": 19,
+        "endLine": 40,
+        "endChar": 31
+      },
+      "revId": "cc2d682593406b28c9d7d71a9a7cb7fd06e4a510",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -10,9 +10,9 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
-import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.ovsdb.plugin.api.Status;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration.LoadBalancerPoolMember;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 
 /**
  * This interface allows load-balancer flows to be written to nodes

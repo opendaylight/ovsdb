@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_ad46f221",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/FlowCapableNodeDataChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-03-14T15:29:25Z",
+      "side": 1,
+      "message": "Just a suggestion : Although it\u0027s private method, but it\u0027s name suggest that it\u0027s checking something and will return whether it\u0027s there or not. So ideally it should return boolean or Node, and then we should call notifyNodeCreated() in caller method based on the result.",
+      "revId": "0ca440cd3b7a53dc1e02b4ea801781d94495f2d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_8d41b60d",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/FlowCapableNodeDataChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-03-14T15:29:25Z",
+      "side": 1,
+      "message": "nit-pick : remove --\u003e \"removed\"? don\u0027t kill me please ;)",
+      "revId": "0ca440cd3b7a53dc1e02b4ea801781d94495f2d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

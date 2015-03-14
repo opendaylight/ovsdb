@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_cd37beaf",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/NodeCacheListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-14T15:30:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_adcfd2af",
+      "revId": "8a6d622512074d63884d175cefd1d3a5e0eacfa4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_4dc40e92",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NodeCacheManagerImpl.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-03-14T15:10:02Z",
       "side": 1,
       "message": "I think this can create issue if more then one handler subscribe for notification. Any handler that doesn\u0027t properly override notifyNode() can kill the main thread that\u0027s sending the notifications to listeners, and rest of the handler won\u0027t get notification. Also it\u0027s sequential and blocking, so it will add some latency to the process.",
+      "revId": "8a6d622512074d63884d175cefd1d3a5e0eacfa4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_ed3cfa95",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NodeCacheManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-14T15:30:51Z",
+      "side": 1,
+      "message": "Yes, let me wrap this call with a try {} to make it a bit more resilient.\n\nAs far as sequential/blocking, I think that is okay. This is executed within the private executor thread; so it can\ntake as long as it needs w/out blocking any critical ovsdb handler.",
+      "parentUuid": "5a93c517_4dc40e92",
       "revId": "8a6d622512074d63884d175cefd1d3a5e0eacfa4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

@@ -34,6 +34,24 @@
       "revId": "800e21a2a34b3cfca23d533e08b76587e83139e2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_ed0abad1",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NodeCacheManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-03-14T17:27:35Z",
+      "side": 1,
+      "message": "can we make it bit more verbose? IMO \"dequeue\" doesn\u0027t give any sensible message.",
+      "parentUuid": "5a93c517_ad5d92eb",
+      "revId": "800e21a2a34b3cfca23d533e08b76587e83139e2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -69,6 +69,24 @@
       "revId": "8a6d622512074d63884d175cefd1d3a5e0eacfa4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_ad14b2f5",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NodeCacheManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-03-14T17:41:34Z",
+      "side": 1,
+      "message": "Try block : cool\nprocessEvent() is executed in private executor thread, which is fine. But processNodeXX() method is executing in single thread and last handler will get notified when rest all handlers will be done with their job, which can be a issue. But i think as of now it\u0027s looks okay to me.",
+      "parentUuid": "5a93c517_ed3cfa95",
+      "revId": "8a6d622512074d63884d175cefd1d3a5e0eacfa4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

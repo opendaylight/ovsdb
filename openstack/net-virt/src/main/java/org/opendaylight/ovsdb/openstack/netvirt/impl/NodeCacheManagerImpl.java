@@ -46,11 +46,9 @@ public class NodeCacheManagerImpl extends AbstractHandler
 
     private void _processNodeAdded(Node node) {
         nodeCache.add(node);
-        logger.info("XXXX added node {}. cache is now {}", node, nodeCache);  // TODO: debug, remove
     }
     private void _processNodeRemoved(Node node) {
         nodeCache.remove(node);
-        logger.info("XXXX removed node {}. cache is now {}", node, nodeCache);  // TODO: debug, remove
     }
 
     /**

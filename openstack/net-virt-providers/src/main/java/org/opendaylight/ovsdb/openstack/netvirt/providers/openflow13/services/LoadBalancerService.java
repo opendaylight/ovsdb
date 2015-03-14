@@ -13,8 +13,6 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
-import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration;
@@ -26,7 +24,6 @@ import org.opendaylight.ovsdb.plugin.api.Status;
 import org.opendaylight.ovsdb.plugin.api.StatusCode;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.ActionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
@@ -43,6 +40,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
@@ -93,16 +91,11 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
             logger.error("LB config is invalid: {}", lbConfig);
             return new Status(StatusCode.BADREQUEST);
         }
-        if (!node.getType().equals(NodeIDType.OPENFLOW)) {
-            logger.trace("Ignoring non-OpenFlow node {} from flow programming", node);
-            return new Status(StatusCode.BADREQUEST);
-        }
         logger.debug("Performing {} rules for member {} with index {} on LB with VIP {} and total members {}",
                 action, member.getIP(), member.getIndex(), lbConfig.getVip(), lbConfig.getMembers().size());
 
         NodeBuilder nodeBuilder = new NodeBuilder();
-        nodeBuilder.setId(new NodeId(Constants.OPENFLOW_NODE_PREFIX
-                + String.valueOf(node.getID())));
+        nodeBuilder.setId(new NodeId(Constants.OPENFLOW_NODE_PREFIX + node.getId().getValue()));
         nodeBuilder.setKey(new NodeKey(nodeBuilder.getId()));
 
         //Update the multipath rule
@@ -135,14 +128,10 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
             logger.error("LB config is invalid: {}", lbConfig);
             return new Status(StatusCode.BADREQUEST);
         }
-        if (!node.getType().equals(NodeIDType.OPENFLOW)) {
-            logger.trace("Ignoring non-OpenFlow node {} from flow programming", node);
-            return new Status(StatusCode.BADREQUEST);
-        }
         logger.debug("Performing {} rules for VIP {} and {} members", action, lbConfig.getVip(), lbConfig.getMembers().size());
 
         NodeBuilder nodeBuilder = new NodeBuilder();
-        nodeBuilder.setId(new NodeId(Constants.OPENFLOW_NODE_PREFIX + String.valueOf(node.getID())));
+        nodeBuilder.setId(new NodeId(Constants.OPENFLOW_NODE_PREFIX + node.getId().getValue()));
         nodeBuilder.setKey(new NodeKey(nodeBuilder.getId()));
 
         if (action.equals(org.opendaylight.ovsdb.openstack.netvirt.api.Action.ADD)) {

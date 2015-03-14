@@ -23,6 +23,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,7 @@ import java.util.Map;
 //TODO: Implement INeutronLoadBalancerHealthMonitorAware, INeutronLoadBalancerListenerAware, INeutronLoadBalancerPoolMemberAware,
 
 public class LBaaSHandler extends AbstractHandler
-        implements INeutronLoadBalancerAware {
+        implements INeutronLoadBalancerAware, NodeCacheListener {
 
     private static final Logger logger = LoggerFactory.getLogger(LBaaSHandler.class);
 
@@ -220,14 +221,12 @@ public class LBaaSHandler extends AbstractHandler
     }
 
     /**
-     FIXME!
-
      * On the addition of a new node, we iterate through all existing loadbalancer
      * instances and program the node for all of them. It is sufficient to do that only
      * when a node is added, and only for the LB instances (and not individual members).
-     *
+     */
     @Override
-    public void notifyNode(Node node, UpdateType type, Map<String, Property> propMap) {
+    public void notifyNode(Node node, Action type) {
         logger.debug("notifyNode: Node {} update {} from Controller's inventory Service", node, type);
         Preconditions.checkNotNull(loadBalancerProvider);
 
@@ -236,14 +235,14 @@ public class LBaaSHandler extends AbstractHandler
             if (!lbConfig.isValid()) {
                 logger.debug("Neutron LB configuration invalid for {} ", lbConfig.getName());
             } else {
-               if (type.equals(UpdateType.ADDED)) {
+               if (type.equals(Action.ADD)) {
                    loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.ADD);
 
-               * When node disappears, we do nothing for now. Making a call to
+               /* When node disappears, we do nothing for now. Making a call to
                 * loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.DELETE)
                 * can lead to TransactionCommitFailedException. Similarly when node is changed,
                 * because of remove followed by add, we do nothing.
-                *
+                */
 
                  //(type.equals(UpdateType.REMOVED) || type.equals(UpdateType.CHANGED))
                } else {
@@ -252,6 +251,4 @@ public class LBaaSHandler extends AbstractHandler
             }
         }
     }
-    */
-
 }

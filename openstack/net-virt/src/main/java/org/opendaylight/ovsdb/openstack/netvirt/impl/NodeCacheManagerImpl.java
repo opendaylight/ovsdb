@@ -10,24 +10,28 @@
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent;
 import org.opendaylight.ovsdb.openstack.netvirt.AbstractHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.NodeCacheManagerEvent;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.utils.mdsal.node.NodeUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
 
 public class NodeCacheManagerImpl extends AbstractHandler
         implements NodeCacheManager {
 
     private static final Logger logger = LoggerFactory.getLogger(NodeCacheManagerImpl.class);
     private List<Node> nodeCache = Lists.newArrayList();
-
+    private Map<Long, NodeCacheListener> handlers = Maps.newHashMap();
 
     @Override
     public void nodeAdded(String nodeIdentifier) {
@@ -46,9 +50,23 @@ public class NodeCacheManagerImpl extends AbstractHandler
 
     private void _processNodeAdded(Node node) {
         nodeCache.add(node);
+        for (NodeCacheListener handler : handlers.values()) {
+            try {
+                handler.notifyNode(node, Action.ADD);
+            } catch (Exception e) {
+                logger.error("Failed notifying node add event", e);
+            }
+        }
     }
     private void _processNodeRemoved(Node node) {
         nodeCache.remove(node);
+        for (NodeCacheListener handler : handlers.values()) {
+            try {
+                handler.notifyNode(node, Action.DELETE);
+            } catch (Exception e) {
+                logger.error("Failed notifying node remove event", e);
+            }
+        }
     }
 
     /**
@@ -78,5 +96,17 @@ public class NodeCacheManagerImpl extends AbstractHandler
                 logger.warn("Unable to process event action " + ev.getAction());
                 break;
         }
+    }
+
+    public void cacheListenerAdded(final ServiceReference ref, NodeCacheListener handler){
+        Long pid = (Long) ref.getProperty(org.osgi.framework.Constants.SERVICE_ID);
+        handlers.put(pid, handler);
+        logger.debug("Node cache listener registered, pid {}", pid);
+    }
+
+    public void cacheListenerRemoved(final ServiceReference ref){
+        Long pid = (Long) ref.getProperty(org.osgi.framework.Constants.SERVICE_ID);
+        handlers.remove(pid);
+        logger.debug("Node cache listener unregistered, pid {}", pid);
     }
 }

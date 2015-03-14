@@ -44,6 +44,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.MultiTenantAwareRouter;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OutboundNatProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
@@ -186,7 +187,7 @@ public class Activator extends DependencyActivatorBase {
 
         manager.add(createComponent()
                 .setInterface(new String[]{INeutronLoadBalancerAware.class.getName(),
-                                AbstractHandler.class.getName()},
+                                NodeCacheListener.class.getName(), AbstractHandler.class.getName()},
                         lbaasHandlerProperties)
                 .setImplementation(LBaaSHandler.class)
                 .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
@@ -305,7 +306,9 @@ public class Activator extends DependencyActivatorBase {
                 .setInterface(new String[]{NodeCacheManager.class.getName(), AbstractHandler.class.getName()},
                         nodeCacheManagerProperties)
                 .setImplementation(NodeCacheManagerImpl.class)
-                .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true)));
+                .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
+                .add(createServiceDependency().setService(NodeCacheListener.class)
+                        .setCallbacks("cacheListenerAdded", "cacheListenerRemoved")));
     }
 
     @Override

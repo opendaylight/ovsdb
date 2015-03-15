@@ -12,13 +12,19 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
+import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
+import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv6Address;
@@ -30,6 +36,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentationBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
@@ -217,10 +225,10 @@ public class SouthboundMapper {
         return datapath;
     }
 
-    public static Set<String> createOvsdbBridgeProtocols(OvsdbBridgeAugmentation omn) {
+    public static Set<String> createOvsdbBridgeProtocols(OvsdbBridgeAugmentation ovsdbBridgeNode) {
         Set<String> protocols = new HashSet<String>();
-        if(omn.getProtocolEntry() != null && omn.getProtocolEntry().size() > 0) {
-            for(ProtocolEntry protocol : omn.getProtocolEntry()) {
+        if(ovsdbBridgeNode.getProtocolEntry() != null && ovsdbBridgeNode.getProtocolEntry().size() > 0) {
+            for(ProtocolEntry protocol : ovsdbBridgeNode.getProtocolEntry()) {
                 if(SouthboundConstants.OVSDB_PROTOCOL_MAP.get(protocol.getProtocol()) != null) {
                     protocols.add(SouthboundConstants.OVSDB_PROTOCOL_MAP.get(protocol.getProtocol()));
                 } else {
@@ -243,5 +251,35 @@ public class SouthboundMapper {
             }
         }
         return protocolList;
+    }
+
+    public static List<ControllerEntry> createControllerEntries(Bridge bridge,Map<UUID,Controller> updatedControllerRows) {
+        LOG.info("Bridge: {}, updatedControllerRows: {}",bridge,updatedControllerRows);
+        Set<UUID> controllerUUIDs = bridge.getControllerColumn().getData();
+        List<ControllerEntry> controllerEntries = new ArrayList<ControllerEntry>();
+        for(UUID controllerUUID : controllerUUIDs ) {
+            Controller controller = updatedControllerRows.get(controllerUUID);
+            if(controller != null && controller.getTargetColumn() != null
+                    && controller.getTargetColumn() != null) {
+                String targetString = controller.getTargetColumn().getData();
+                controllerEntries.add(new ControllerEntryBuilder().setTarget(new Uri(targetString)).build());
+            }
+        }
+        return controllerEntries;
+    }
+
+    public static Map<UUID, Controller> createOvsdbController(OvsdbBridgeAugmentation omn,DatabaseSchema dbSchema) {
+        List<ControllerEntry> controllerEntries = omn.getControllerEntry();
+        Map<UUID,Controller> controllerMap = new HashMap<UUID,Controller>();
+        if(controllerEntries != null && !controllerEntries.isEmpty()) {
+            int index = 0;
+            for(ControllerEntry controllerEntry : controllerEntries) {
+                String controllerNamedUUID = "Controller_" + omn.getBridgeName().getValue() + index++;
+                Controller controller = TyperUtils.getTypedRowWrapper(dbSchema, Controller.class);
+                controller.setTarget(controllerEntry.getTarget().getValue());
+                controllerMap.put(new UUID(controllerNamedUUID), controller);
+            }
+        }
+        return controllerMap;
     }
 }

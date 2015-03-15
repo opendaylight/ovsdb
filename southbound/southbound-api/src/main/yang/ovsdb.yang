@@ -105,6 +105,15 @@ module ovsdb {
             }
         }
 
+        list controller-entry {
+            description "Bridge controller info";
+            key "target";
+            leaf target {
+                description "Uri telling bridge how to connect to controller";
+                type inet:uri;
+            }
+        }
+
         leaf datapath-id {
             description "Datapath-id of the bridge";
             type datapath-id;

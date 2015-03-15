@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
@@ -17,6 +18,7 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
+import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
@@ -52,11 +54,20 @@ public class BridgeCreateCommand implements TransactCommand {
                     && SouthboundMapper.createOvsdbBridgeProtocols(ovsdbManagedNode).size() > 0){
                 bridge.setProtocols(SouthboundMapper.createOvsdbBridgeProtocols(ovsdbManagedNode));
             }
-            transaction.add(op.insert(bridge).withId(namedUuid));
+            Map<UUID,Controller> controllerMap = SouthboundMapper.createOvsdbController(ovsdbManagedNode, transaction.getDatabaseSchema());
+            for(Entry<UUID,Controller >entry: controllerMap.entrySet()) {
+                transaction.add(op.insert(entry.getValue()).withId(entry.getKey().toString()));
+            }
+            if(!controllerMap.isEmpty()) {
+                bridge.setController(controllerMap.keySet());
+            }
+
+            String bridgeNamedUuid = "Bridge_" + ovsdbManagedNode.getBridgeName().getValue();
+            transaction.add(op.insert(bridge).withId(bridgeNamedUuid));
 
             // OpenVSwitchPart
             OpenVSwitch ovs = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), OpenVSwitch.class);
-            ovs.setBridges(Sets.newHashSet(new UUID(namedUuid)));
+            ovs.setBridges(Sets.newHashSet(new UUID(bridgeNamedUuid)));
             transaction.add(op.mutate(ovs).addMutation(ovs.getBridgesColumn().getSchema(),
                     Mutator.INSERT,
                     ovs.getBridgesColumn().getData())

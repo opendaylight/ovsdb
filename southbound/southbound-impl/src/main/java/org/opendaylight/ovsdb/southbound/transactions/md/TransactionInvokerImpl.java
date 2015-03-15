@@ -16,6 +16,9 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
+import org.opendaylight.ovsdb.southbound.SouthboundMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -23,6 +26,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 
 public class TransactionInvokerImpl implements TransactionInvoker,TransactionChainListener, Runnable, AutoCloseable {
+    private static final Logger LOG = LoggerFactory.getLogger(TransactionInvokerImpl.class);
     private static final int QUEUE_SIZE = 10000;
     private BindingTransactionChain chain;
     private DataBroker db;
@@ -82,7 +86,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
                     });
                 }
             } catch (Exception e) {
-
+                LOG.warn("Exception invoking Transaction: {}",e);
             }
         }
     }

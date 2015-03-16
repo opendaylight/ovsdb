@@ -20,9 +20,9 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.util.StringConvertor;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
@@ -98,7 +98,7 @@ public abstract class AbstractServiceInstance {
 
                 Set<String> dpids = bridge.getDatapathIdColumn().getData();
                 if (dpids == null || dpids.size() == 0) return null;
-                Long dpid = HexEncode.stringToLong((String) dpids.toArray()[0]);
+                Long dpid = StringConvertor.dpidStringToLong((String) dpids.toArray()[0]);
                 logger.debug("getBridgeName: bridgeDpid {} ofNodeDpid {}", bridge.getDatapathIdColumn().getData().toArray()[0], nodeId);
                 if (dpid.equals(Long.parseLong(nodeId))){
                     // Found the bridge

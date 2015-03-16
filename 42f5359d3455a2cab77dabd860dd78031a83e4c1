@@ -1,0 +1,282 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_de1766a2",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundUtil.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-16T14:37:32Z",
+      "side": 1,
+      "message": "Would this be better as a ManagedNode class and not a generic util?",
+      "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_be04da7e",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundUtil.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-16T14:37:32Z",
+      "side": 1,
+      "message": "Add copyright",
+      "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_7e0c1295",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeCreateCommand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-16T14:37:32Z",
+      "side": 1,
+      "message": "copyright",
+      "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_1e1dcebd",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeCreateCommand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-16T14:37:32Z",
+      "side": 1,
+      "message": "Is omn easy to read? I like the log here, but sometimes the yang toStrings end up as a huge string that requires a decoder ring to understand. useful info I would like to be easy to see is bridge name, maybe ip:port is there, openflow protocol version",
+      "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_7e83b2cc",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeCreateCommand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-16T14:37:32Z",
+      "side": 1,
+      "message": "in a later commit we should add a helper method getNamedUuid() or NamedUuid.fromString() so that we can make sure there is a consistent naming. Maybe even add it to the typer util.",
+      "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_5e6a761b",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/DataChangesManagedByOvsdbNodeEvent.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-16T14:37:32Z",
+      "side": 1,
+      "message": "copyright",
+      "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_1e4b8eb1",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactCommand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-16T14:37:32Z",
+      "side": 1,
+      "message": "copyright",
+      "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_decc4638",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactCommandAggregator.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-16T14:37:32Z",
+      "side": 1,
+      "message": "copyright",
+      "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_3edbeaee",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactInvoker.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-16T14:37:32Z",
+      "side": 1,
+      "message": "copyright",
+      "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_9eed5e8e",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactInvoker.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-16T14:37:32Z",
+      "side": 1,
+      "message": "Is this interface used more than once? I am torn at having an interface if there is only one implementation of it. But no problem if that is your preference.",
+      "range": {
+        "startLine": 3,
+        "startChar": 17,
+        "endLine": 3,
+        "endChar": 32
+      },
+      "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_fefb4245",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactInvokerImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-16T14:37:32Z",
+      "side": 1,
+      "message": "copyright",
+      "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_de9a0614",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactInvokerImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-16T14:37:32Z",
+      "side": 1,
+      "message": "elaborating on the ci might be more readable, though using ci brings the C smile to my face...",
+      "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_7e9f3204",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactInvokerImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-16T14:37:32Z",
+      "side": 1,
+      "message": "same here, being a public method using a more readable name would be easier to read. since we don\u0027t have any javadocs anywhere...",
+      "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_9ea47e58",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactInvokerImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-16T14:37:32Z",
+      "side": 1,
+      "message": "do we have a concrete list of exceptions to catch? sonar complains about catching all.",
+      "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_5e86f6ba",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-16T14:37:32Z",
+      "side": 1,
+      "message": "copyright",
+      "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_bebcda6d",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-16T14:37:32Z",
+      "side": 1,
+      "message": "what exactly is the warning?",
+      "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_febd8203",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/FlowCapableNodeDataChangeListener.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-16T13:38:39Z",
+      "side": 1,
+      "message": "Let\u0027s put this at info for now also just so we can see it happening and be consistent with the other logs here.",
+      "revId": "89724a981032ccb1a7fac28b921614e0b52f185d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_9ecf9eb0",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/FlowCapableNodeDataChangeListener.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-16T13:38:39Z",
+      "side": 1,
+      "message": "I *think* these services can technically come and go so you may not want to store the value. But, since these services are in classes that are required in the Activator they have to exist when the other dependency injections happen so probably not a problem. We can clean this up with a later commit since we will be going to config subsystem and this will all change.",
+      "revId": "89724a981032ccb1a7fac28b921614e0b52f185d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

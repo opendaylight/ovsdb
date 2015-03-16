@@ -11,14 +11,17 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Set;
 
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
+import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv6Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentationBuilder;
@@ -32,6 +35,10 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 
 public class SouthboundMapper {
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundMapper.class);
@@ -150,5 +157,35 @@ public class SouthboundMapper {
         } else {
             throw new UnknownHostException("IP Address has no value");
         }
+    }
+
+    public static DatapathId createDatapathId(Bridge bridge) {
+        LOG.info("Bridge: {}",bridge);
+        Preconditions.checkNotNull(bridge);
+        LOG.info("Bridge.getDatapathIdColumn(): {}",bridge.getDatapathIdColumn());
+        Preconditions.checkNotNull(bridge.getDatapathIdColumn());
+        LOG.info("Bridge.getDatapathIdColumn().getData(): {}",bridge.getDatapathIdColumn().getData());
+        return createDatapathId(bridge.getDatapathIdColumn().getData());
+    }
+
+    public static DatapathId createDatapathId(Set<String> dpids) {
+        Preconditions.checkNotNull(dpids);
+        Preconditions.checkArgument(dpids.size() > 0);
+        String[] dpidArray = new String[dpids.size()];
+        dpids.toArray(dpidArray);
+        return createDatapathId(dpidArray[0]);
+    }
+
+    public static DatapathId createDatapathId(String dpid) {
+        Preconditions.checkNotNull(dpid);
+        DatapathId datapath;
+        if(dpid.matches("^[0-9a-fA-F]{16}")) {
+            Splitter splitter = Splitter.fixedLength(2);
+            Joiner joiner = Joiner.on(":");
+            datapath = new DatapathId(joiner.join(splitter.split(dpid)));
+        } else {
+            datapath = new DatapathId(dpid);
+        }
+        return datapath;
     }
 }

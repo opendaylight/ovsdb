@@ -18,6 +18,7 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
+import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -46,6 +47,11 @@ public class BridgeCreateCommand implements TransactCommand {
             Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
             bridge.setName(ovsdbManagedNode.getBridgeName().getValue());
             String namedUuid = "Bridge_" + ovsdbManagedNode.getBridgeName().getValue();
+            bridge.setName(ovsdbManagedNode.getBridgeName().getValue());
+            if(SouthboundMapper.createOvsdbBridgeProtocols(ovsdbManagedNode) != null
+                    && SouthboundMapper.createOvsdbBridgeProtocols(ovsdbManagedNode).size() > 0){
+                bridge.setProtocols(SouthboundMapper.createOvsdbBridgeProtocols(ovsdbManagedNode));
+            }
             transaction.add(op.insert(bridge).withId(namedUuid));
 
             // OpenVSwitchPart

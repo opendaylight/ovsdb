@@ -1,0 +1,112 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_c34a2f83",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-16T11:49:07Z",
+      "side": 1,
+      "message": "uneded spaces, remove",
+      "revId": "68f052fdf576af94161dacf5649487e227d7c32d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_e34f2b91",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-16T11:49:07Z",
+      "side": 1,
+      "message": "same",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 4
+      },
+      "revId": "68f052fdf576af94161dacf5649487e227d7c32d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_83442775",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-16T11:49:07Z",
+      "side": 1,
+      "message": "same",
+      "revId": "68f052fdf576af94161dacf5649487e227d7c32d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_a349238d",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-16T11:49:07Z",
+      "side": 1,
+      "message": "same",
+      "revId": "68f052fdf576af94161dacf5649487e227d7c32d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_435e1f47",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-16T11:49:07Z",
+      "side": 1,
+      "message": "same",
+      "revId": "68f052fdf576af94161dacf5649487e227d7c32d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_635b1b55",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-16T11:49:07Z",
+      "side": 1,
+      "message": "same",
+      "revId": "68f052fdf576af94161dacf5649487e227d7c32d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

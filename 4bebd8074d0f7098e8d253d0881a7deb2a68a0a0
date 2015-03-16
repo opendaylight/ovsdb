@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_3ef8ca7b",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/NodeCacheListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-16T14:22:37Z",
+      "side": 1,
+      "message": "absolutely. Anything that cares about node create/remove can leverage this interface.",
+      "parentUuid": "5a93c517_be37faaf",
+      "revId": "4bebd8074d0f7098e8d253d0881a7deb2a68a0a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_fe54a2cb",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NodeCacheManagerImpl.java",
         "patchSetId": 2
@@ -34,6 +52,53 @@
         "startLine": 56,
         "startChar": 21,
         "endLine": 56,
+        "endChar": 30
+      },
+      "revId": "4bebd8074d0f7098e8d253d0881a7deb2a68a0a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_7e35f244",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NodeCacheManagerImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-16T14:22:37Z",
+      "side": 1,
+      "message": "hmmm... probably. Let me see if I can catch some more specific exceptions here.",
+      "parentUuid": "5a93c517_fe54a2cb",
+      "range": {
+        "startLine": 56,
+        "startChar": 21,
+        "endLine": 56,
+        "endChar": 30
+      },
+      "revId": "4bebd8074d0f7098e8d253d0881a7deb2a68a0a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_5e3cb62f",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NodeCacheManagerImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-16T14:22:37Z",
+      "side": 1,
+      "message": "same as above.",
+      "range": {
+        "startLine": 66,
+        "startChar": 21,
+        "endLine": 66,
         "endChar": 30
       },
       "revId": "4bebd8074d0f7098e8d253d0881a7deb2a68a0a0",

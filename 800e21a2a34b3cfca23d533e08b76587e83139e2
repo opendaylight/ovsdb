@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "5a93c517_deee8622",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/LBaaSHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-16T13:33:05Z",
+      "side": 1,
+      "message": "is this covered in the other commit or is this an issue we need to understand?",
+      "revId": "800e21a2a34b3cfca23d533e08b76587e83139e2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_7ef3b20a",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/LBaaSPoolHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-16T13:33:05Z",
+      "side": 1,
+      "message": "This is the piece we decided we would change in another commit to just using a String type or create our own local type since we just need the ID right?",
+      "revId": "800e21a2a34b3cfca23d533e08b76587e83139e2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_edd5da43",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NodeCacheManagerImpl.java",
         "patchSetId": 1

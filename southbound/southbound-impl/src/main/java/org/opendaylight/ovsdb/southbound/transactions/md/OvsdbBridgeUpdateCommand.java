@@ -14,10 +14,11 @@ import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.southbound.OvsdbClientKey;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeRef;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentationBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
@@ -56,10 +57,13 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                 NodeBuilder managedNodeBuilder = new NodeBuilder();
                 NodeId manageNodeId = SouthboundMapper.createManagedNodeId(getKey(), new OvsdbBridgeName(bridge.getName()));
                 managedNodeBuilder.setNodeId(manageNodeId);
-
                 OvsdbBridgeAugmentationBuilder ovsdbManagedNodeBuilder = new OvsdbBridgeAugmentationBuilder();
                 ovsdbManagedNodeBuilder.setBridgeName(new OvsdbBridgeName(bridge.getName()));
                 ovsdbManagedNodeBuilder.setBridgeUuid(new Uuid(bridge.getUuid().toString()));
+                DatapathId dpid= SouthboundMapper.createDatapathId(bridge);
+                if(dpid != null) {
+                    ovsdbManagedNodeBuilder.setDatapathId(dpid);
+                }
                 ovsdbManagedNodeBuilder.setManagedBy(new OvsdbNodeRef(nodePath));
                 managedNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbManagedNodeBuilder.build());
 

@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_81417e3b",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-16T20:56:48Z",
+      "side": 1,
+      "message": "the name is a little confusing.... how about createOvsdbBridgeProtocols() ?",
+      "range": {
+        "startLine": 200,
+        "startChar": 30,
+        "endLine": 200,
+        "endChar": 50
+      },
+      "revId": "c0cc2a333c5e977be3c0215a596e6efdd747992d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

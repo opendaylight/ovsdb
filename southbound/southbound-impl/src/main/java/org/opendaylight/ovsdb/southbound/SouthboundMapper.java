@@ -11,6 +11,9 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.opendaylight.ovsdb.lib.OvsdbClient;
@@ -22,9 +25,13 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentationBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
@@ -39,6 +46,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableBiMap;
 
 public class SouthboundMapper {
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundMapper.class);
@@ -190,5 +198,33 @@ public class SouthboundMapper {
             datapath = new DatapathId(dpid);
         }
         return datapath;
+    }
+
+    public static Set<String> createOvsdbBridgeProtocols(OvsdbBridgeAugmentation omn) {
+        Set<String> protocols = new HashSet<String>();
+        if(omn.getProtocolEntry() != null && omn.getProtocolEntry().size() > 0) {
+            for(ProtocolEntry protocol : omn.getProtocolEntry()) {
+                if(SouthboundConstants.OVSDB_PROTOCOL_MAP.get(protocol.getProtocol()) != null) {
+                    protocols.add(SouthboundConstants.OVSDB_PROTOCOL_MAP.get(protocol.getProtocol()));
+                } else {
+                    throw new IllegalArgumentException("Unknown protocol " + protocol.getProtocol());
+                }
+            }
+        }
+        return protocols;
+    }
+
+    public static List<ProtocolEntry> createMdsalProtocols(Bridge bridge) {
+        Set<String> protocols = bridge.getProtocolsColumn().getData();
+        List<ProtocolEntry> protocolList = new ArrayList<ProtocolEntry>();
+        if(protocols != null && protocols.size() >0) {
+            ImmutableBiMap<String, Class<? extends OvsdbBridgeProtocolBase>> mapper = SouthboundConstants.OVSDB_PROTOCOL_MAP.inverse();
+            for(String protocol : protocols) {
+                if(protocol != null && mapper.get(protocol) != null) {
+                    protocolList.add(new ProtocolEntryBuilder().setProtocol((Class<? extends OvsdbBridgeProtocolBase>) mapper.get(protocol)).build());
+                }
+            }
+        }
+        return protocolList;
     }
 }

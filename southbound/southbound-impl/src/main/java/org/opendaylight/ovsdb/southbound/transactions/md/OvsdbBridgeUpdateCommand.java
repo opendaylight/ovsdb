@@ -64,6 +64,10 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                 } catch (Exception e){
                     LOG.debug("Failed to set datapathId: {}",e);
                 }
+                if(SouthboundMapper.createMdsalProtocols(bridge) != null
+                        && SouthboundMapper.createMdsalProtocols(bridge).size() > 0) {
+                    ovsdbManagedNodeBuilder.setProtocolEntry(SouthboundMapper.createMdsalProtocols(bridge));
+                }
                 ovsdbManagedNodeBuilder.setManagedBy(new OvsdbNodeRef(nodePath));
                 managedNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbManagedNodeBuilder.build());
 

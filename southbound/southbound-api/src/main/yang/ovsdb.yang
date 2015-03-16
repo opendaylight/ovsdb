@@ -51,6 +51,40 @@ module ovsdb {
            RFC 2579: Textual Conventions for SMIv2";
     }
 
+    identity ovsdb-bridge-protocol-base {
+        description "Base identity for all ovsdb-bridge-protocols";
+    }
+
+    identity ovsdb-bridge-protocol-openflow-10 {
+        description "Ovsdb bridge protocol OpenFlow 1.0";
+        base ovsdb-bridge-protocol-base;
+    }
+
+    identity ovsdb-bridge-protocol-openflow-11 {
+        description "Ovsdb bridge protocol OpenFlow 1.1";
+        base ovsdb-bridge-protocol-base;
+    }
+
+    identity ovsdb-bridge-protocol-openflow-12 {
+        description "Ovsdb bridge protocol OpenFlow 1.2";
+        base ovsdb-bridge-protocol-base;
+    }
+
+    identity ovsdb-bridge-protocol-openflow-13 {
+        description "Ovsdb bridge protocol OpenFlow 1.3";
+        base ovsdb-bridge-protocol-base;
+    }
+
+    identity ovsdb-bridge-protocol-openflow-14 {
+        description "Ovsdb bridge protocol OpenFlow 1.4";
+        base ovsdb-bridge-protocol-base;
+    }
+
+    identity ovsdb-bridge-protocol-openflow-15 {
+        description "Ovsdb bridge protocol OpenFlow 1.5";
+        base ovsdb-bridge-protocol-base;
+    }
+
     grouping ovsdb-bridge-attributes {
         leaf bridge-uuid {
             description "The unique identifier of the bridge";
@@ -60,6 +94,15 @@ module ovsdb {
         leaf bridge-name {
             description "The name of the bridge";
             type ovsdb-bridge-name;
+        }
+        list protocol-entry {
+            key "protocol";
+            leaf protocol {
+                description "Protocol bridge should seek to speak to its controller";
+                type identityref {
+                    base ovsdb-bridge-protocol-base;
+                }
+            }
         }
 
         leaf datapath-id {

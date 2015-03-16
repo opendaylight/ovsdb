@@ -84,6 +84,30 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_be605a36",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NodeCacheManagerImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-16T14:29:59Z",
+      "side": 1,
+      "message": "heh, interesting. Because handler.notifyNode() can be implemented differently by anything that uses the NodeCacheListener interface, there is no way we can predict what kind of exception we would hit here. What would Sonar propose we should do in this case?",
+      "parentUuid": "5a93c517_7e35f244",
+      "range": {
+        "startLine": 56,
+        "startChar": 21,
+        "endLine": 56,
+        "endChar": 30
+      },
+      "revId": "4bebd8074d0f7098e8d253d0881a7deb2a68a0a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_5e3cb62f",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NodeCacheManagerImpl.java",
         "patchSetId": 2

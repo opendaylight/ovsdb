@@ -23,7 +23,6 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.neutron.spi.NeutronSecurityGroup;
-import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
@@ -45,6 +44,7 @@ import org.opendaylight.ovsdb.plugin.api.StatusWithUuid;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
+import org.opendaylight.ovsdb.utils.mdsal.node.StringConvertor;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.GroupActionCase;
@@ -807,7 +807,7 @@ public class OF13Provider implements NetworkingProvider {
             Bridge bridge = ovsdbConfigurationService.getTypedRow(node, Bridge.class, bridgeRow);
             Set<String> dpids = bridge.getDatapathIdColumn().getData();
             if (dpids == null || dpids.size() == 0) return 0L;
-            return HexEncode.stringToLong((String) dpids.toArray()[0]);
+            return StringConvertor.dpidStringToLong((String) dpids.toArray()[0]);
         } catch (Exception e) {
             logger.error("Error finding Bridge's OF DPID", e);
             return 0L;

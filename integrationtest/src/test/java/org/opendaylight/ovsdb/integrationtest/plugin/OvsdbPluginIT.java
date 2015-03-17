@@ -20,7 +20,6 @@ import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperty;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
 import org.junit.After;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
 import org.opendaylight.ovsdb.integrationtest.ConfigurationBundles;
 import org.opendaylight.ovsdb.integrationtest.OvsdbIntegrationTestBase;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
@@ -35,8 +34,11 @@ import org.opendaylight.ovsdb.plugin.api.Status;
 import org.opendaylight.ovsdb.plugin.api.StatusWithUuid;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
@@ -47,8 +49,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;

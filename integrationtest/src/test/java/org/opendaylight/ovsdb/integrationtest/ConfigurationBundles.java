@@ -23,8 +23,6 @@ public class ConfigurationBundles {
 
     public static Option controllerBundles() {
         return new DefaultCompositeOption(
-
-                // Set the systemPackages (used by clustering)
                 systemPackages("sun.reflect", "sun.reflect.misc", "sun.misc"),
                 mavenBundle("ch.qos.logback", "logback-classic").versionAsInProject(),
                 mavenBundle("ch.qos.logback", "logback-core").versionAsInProject(),
@@ -42,22 +40,14 @@ public class ConfigurationBundles {
                 mavenBundle("org.apache.commons", "commons-lang3").versionAsInProject(),
                 mavenBundle("org.apache.felix", "org.apache.felix.dependencymanager").versionAsInProject(),
                 mavenBundle("org.apache.felix", "org.apache.felix.dependencymanager.shell").versionAsInProject(),
-                mavenBundle("org.jboss.spec.javax.transaction", "jboss-transaction-api_1.1_spec").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "clustering.services").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "clustering.services-implementation").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "configuration").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "containermanager").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "containermanager.it.implementation").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "sal").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "sal.implementation").versionAsInProject(),
-                mavenBundle("org.slf4j", "log4j-over-slf4j").versionAsInProject(),
                 mavenBundle("org.slf4j", "slf4j-api").versionAsInProject()
-
-                );
+        );
     }
 
     public static Option controllerNorthboundBundles() {
         return new DefaultCompositeOption(
+                mavenBundle("org.slf4j", "log4j-over-slf4j").versionAsInProject(),
+
                 // setting default level. Jersey bundles will need to be started
                 // earlier.
                 systemProperty("osgi.bundles.defaultStartLevel").value("4"),
@@ -106,6 +96,14 @@ public class ConfigurationBundles {
                 mavenBundle("org.aopalliance", "com.springsource.org.aopalliance").versionAsInProject(),
                 mavenBundle("org.apache.felix", "org.apache.felix.fileinstall").versionAsInProject(),
                 mavenBundle("org.codehaus.jettison", "jettison").versionAsInProject(),
+                mavenBundle("org.jboss.spec.javax.transaction", "jboss-transaction-api_1.1_spec").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "clustering.services").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "clustering.services-implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "configuration").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "containermanager").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "containermanager.it.implementation").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "sal").versionAsInProject(),
+                mavenBundle("org.opendaylight.controller", "sal.implementation").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "bundlescanner").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "bundlescanner.implementation").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller", "commons.httpclient").versionAsInProject(),
@@ -159,8 +157,6 @@ public class ConfigurationBundles {
 
     public static Option ovsdbLibraryBundles() {
         return new DefaultCompositeOption(
-
-                //ovsdb
                 mavenBundle("io.netty", "netty-buffer").versionAsInProject(),
                 mavenBundle("io.netty", "netty-codec").versionAsInProject(),
                 mavenBundle("io.netty", "netty-common").versionAsInProject(),
@@ -178,7 +174,6 @@ public class ConfigurationBundles {
 
     public static Option ovsdbPluginBundles() {
         return new DefaultCompositeOption(
-                mavenBundle("org.opendaylight.ovsdb", "ovsdb-plugin-compatibility-layer").versionAsInProject(),
                 mavenBundle("org.opendaylight.ovsdb", "plugin").versionAsInProject(),
                 mavenBundle("org.mockito", "mockito-all").versionAsInProject()
         );
@@ -194,15 +189,6 @@ public class ConfigurationBundles {
     public static Option ovsdbNeutronBundles() {
         return new DefaultCompositeOption(
                 mavenBundle("commons-net", "commons-net").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "configuration").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "configuration.implementation").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "hosttracker").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "hosttracker.implementation").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "switchmanager").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "switchmanager.implementation").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "statisticsmanager").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "topologymanager").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller", "forwardingrulesmanager").versionAsInProject(),
                 mavenBundle("org.opendaylight.neutron", "neutron-spi").versionAsInProject(),
                 mavenBundle("org.opendaylight.ovsdb", "openstack.net-virt").versionAsInProject()
         );
@@ -210,8 +196,6 @@ public class ConfigurationBundles {
 
     public static Option mdsalBundles() {
         return new DefaultCompositeOption(
-                //TestHelper.mdSalCoreBundles(),
-                //TestHelper.bindingAwareSalBundles(),
                 TestHelper.configMinumumBundles(),
                 TestHelper.baseModelBundles(),
                 TestHelper.flowCapableModelBundles(),

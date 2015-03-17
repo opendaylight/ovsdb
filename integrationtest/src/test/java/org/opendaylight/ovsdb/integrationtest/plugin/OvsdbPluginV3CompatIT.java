@@ -14,6 +14,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperty;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
@@ -93,7 +94,9 @@ public class OvsdbPluginV3CompatIT extends CompatOvsdbIntegrationTestBase {
             ConfigurationBundles.controllerBundles(),
             ConfigurationBundles.ovsdbLibraryBundles(),
             ConfigurationBundles.ovsdbDefaultSchemaBundles(),
-            ConfigurationBundles.ovsdbPluginBundles()
+            ConfigurationBundles.ovsdbPluginBundles(),
+            mavenBundle("org.opendaylight.controller", "sal").versionAsInProject(),
+            mavenBundle("org.opendaylight.ovsdb", "ovsdb-plugin-compatibility-layer").versionAsInProject()
         );
     }
 

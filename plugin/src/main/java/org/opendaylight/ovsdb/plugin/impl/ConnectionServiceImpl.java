@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,7 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 
-import org.opendaylight.controller.sal.core.Property;
 import org.opendaylight.ovsdb.lib.MonitorCallBack;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
@@ -40,8 +38,6 @@ import org.opendaylight.ovsdb.plugin.api.Connection;
 import org.opendaylight.ovsdb.plugin.api.ConnectionConstants;
 import org.opendaylight.ovsdb.plugin.api.Status;
 import org.opendaylight.ovsdb.plugin.api.StatusCode;
-import org.opendaylight.ovsdb.plugin.internal.IPAddressProperty;
-import org.opendaylight.ovsdb.plugin.internal.L4PortProperty;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryService;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
@@ -255,13 +251,6 @@ public class ConnectionServiceImpl implements OvsdbConnectionService,
         OvsdbClient client = connection.getClient();
         InetAddress address = client.getConnectionInfo().getRemoteAddress();
         int port = client.getConnectionInfo().getRemotePort();
-        IPAddressProperty addressProp = new IPAddressProperty(address);
-        L4PortProperty l4Port = new L4PortProperty(port);
-        Set<Property> props = new HashSet<Property>();
-        props.add(addressProp);
-        props.add(l4Port);
-        logger.info("Add node to ovsdb inventory service {}", connection.getNode().toString());
-        ovsdbInventoryService.addNode(connection.getNode(), props);
 
         List<String> databases = client.getDatabases().get();
         if (databases == null) {

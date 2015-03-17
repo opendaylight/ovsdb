@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_0ad10357",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-17T16:09:14Z",
+      "side": 1,
+      "message": "would this be better as an enum rather than separate identities? granted maybe that is what this is since I have a lack of yang-fu",
+      "range": {
+        "startLine": 58,
+        "startChar": 26,
+        "endLine": 58,
+        "endChar": 34
+      },
+      "revId": "4da3e7adb4c843234baefd22c0946ed66dc5c9fb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

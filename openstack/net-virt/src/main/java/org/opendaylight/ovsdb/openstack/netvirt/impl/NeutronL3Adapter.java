@@ -20,7 +20,6 @@ import org.opendaylight.neutron.spi.NeutronRouter;
 import org.opendaylight.neutron.spi.NeutronRouter_Interface;
 import org.opendaylight.neutron.spi.NeutronSubnet;
 import org.opendaylight.neutron.spi.Neutron_IPs;
-import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
@@ -40,6 +39,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.OutboundNatProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
+import org.opendaylight.ovsdb.utils.mdsal.node.StringConvertor;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 
 import com.google.common.base.Preconditions;
@@ -973,7 +973,7 @@ public class NeutronL3Adapter {
             Bridge bridge = ovsdbConfigurationService.getTypedRow(node, Bridge.class, bridgeRow);
             Set<String> dpids = bridge.getDatapathIdColumn().getData();
             if (dpids == null || dpids.size() == 0) return 0L;
-            return HexEncode.stringToLong((String) dpids.toArray()[0]);
+            return StringConvertor.dpidStringToLong((String) dpids.toArray()[0]);
         } catch (Exception e) {
             logger.error("Error finding Bridge's OF DPID", e);
             return 0L;
@@ -997,5 +997,3 @@ public class NeutronL3Adapter {
         return null;
     }
 }
-
-

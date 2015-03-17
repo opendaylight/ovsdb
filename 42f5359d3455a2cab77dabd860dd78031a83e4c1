@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_c741d60c",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundUtil.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-03-17T12:38:56Z",
+      "side": 1,
+      "message": "I was thinking of putting other convenience methods here, not necessarily all managed node related.",
+      "parentUuid": "5a93c517_de1766a2",
+      "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_be04da7e",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundUtil.java",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_e7465223",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundUtil.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-03-17T12:38:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_be04da7e",
+      "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_7e0c1295",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeCreateCommand.java",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2015-03-16T14:37:32Z",
       "side": 1,
       "message": "copyright",
+      "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_874bce2a",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeCreateCommand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-03-17T12:38:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_7e0c1295",
       "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -104,6 +158,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_a7484a2e",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/DataChangesManagedByOvsdbNodeEvent.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-03-17T12:38:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_5e6a761b",
+      "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_1e4b8eb1",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactCommand.java",
         "patchSetId": 3
@@ -115,6 +187,24 @@
       "writtenOn": "2015-03-16T14:37:32Z",
       "side": 1,
       "message": "copyright",
+      "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_4755c6c4",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactCommand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-03-17T12:38:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_1e4b8eb1",
       "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -138,6 +228,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_675242df",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactCommandAggregator.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-03-17T12:38:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_decc4638",
+      "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_3edbeaee",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactInvoker.java",
         "patchSetId": 3
@@ -149,6 +257,24 @@
       "writtenOn": "2015-03-16T14:37:32Z",
       "side": 1,
       "message": "copyright",
+      "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_c758f6fc",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactInvoker.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-03-17T12:38:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_3edbeaee",
       "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -178,6 +304,30 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_e75df2ea",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactInvoker.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-03-17T12:38:56Z",
+      "side": 1,
+      "message": "My thinking was that one might at some point want a TransactionInvoker with a different strategy (this is the usual reason why one makes this an interface when implementing the command pattern).",
+      "parentUuid": "5a93c517_9eed5e8e",
+      "range": {
+        "startLine": 3,
+        "startChar": 17,
+        "endLine": 3,
+        "endChar": 32
+      },
+      "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_fefb4245",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactInvokerImpl.java",
         "patchSetId": 3
@@ -189,6 +339,24 @@
       "writtenOn": "2015-03-16T14:37:32Z",
       "side": 1,
       "message": "copyright",
+      "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_8772ee7a",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactInvokerImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-03-17T12:38:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_fefb4245",
       "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -257,6 +425,24 @@
       "writtenOn": "2015-03-16T14:37:32Z",
       "side": 1,
       "message": "copyright",
+      "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_a76fea91",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-03-17T12:38:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_5e86f6ba",
       "revId": "42f5359d3455a2cab77dabd860dd78031a83e4c1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

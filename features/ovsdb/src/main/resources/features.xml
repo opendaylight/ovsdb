@@ -31,7 +31,6 @@
     </feature>
 
     <feature name="odl-ovsdb-plugin" description="OpenDaylight :: OVSDB :: Plugin" version='${ovsdb.plugin.version}'>
-        <feature version="${sal.version}">odl-adsal-all</feature>
         <feature version="${openflowplugin.version}">odl-openflowplugin-nsf-services</feature>
         <feature version="${ovsdb.library.version}">odl-ovsdb-library</feature>
         <feature version="${schema.openvswitch.version}">odl-ovsdb-schema-openvswitch</feature>
@@ -49,6 +48,7 @@
     </feature>
 
     <feature name="odl-ovsdb-compatibility-layer" description="OpenDaylight :: OVSDB :: Plugin Compatibility Layer" version='${ovsdb.plugin.compatibility.layer.version}'>
+        <feature version="${sal.version}">odl-adsal-core</feature>
         <feature version="${openflowplugin.version}">odl-openflowplugin-nsf-services</feature>
         <feature version="${ovsdb.plugin.version}">odl-ovsdb-plugin</feature>
         <bundle>mvn:org.opendaylight.ovsdb/ovsdb-plugin-compatibility-layer/${ovsdb.plugin.compatibility.layer.version}</bundle>
@@ -60,7 +60,6 @@
         <feature version="${openflowplugin.version}">odl-openflowplugin-southbound</feature>
         <feature version="${openflowplugin.version}">odl-openflowplugin-flow-services</feature>
         <feature version="${networkconfig.neutron.version}">odl-neutron-service</feature>
-        <feature version="${nsf.version}">odl-nsf-service</feature>
         <bundle>mvn:org.opendaylight.ovsdb/utils.servicehelper/${ovsdb.utils.servicehelper.version}</bundle>
         <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt/${openstack.netvirt.version}</bundle>
         <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt-providers/${openstack.netvirt.providers.version}</bundle>

@@ -130,22 +130,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <!--<Import-Package>
-              org.opendaylight.controller.sal.core,
-              org.opendaylight.ovsdb.compatibility.plugin.api,
-              org.opendaylight.ovsdb.lib.notation,
-              org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.*;resolution:="optional",
-              org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.*;resolution:="optional",
-              org.opendaylight.controller.sal.binding.api,
-              org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819,
-              org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes,
-              org.opendaylight.yangtools.yang.binding,
-              org.apache.felix.dm,
-              org.slf4j,
-              org.osgi.framework,
-              *
-            </Import-Package>-->
-            <Embed-Dependency>utils.config,utils.mdsal-node,utils.mdsal-openflow;type=!pom;inline=false</Embed-Dependency>
+            <Embed-Dependency>
+              utils.config,utils.mdsal-node,utils.mdsal-openflow;type=!pom;inline=false
+            </Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Bundle-Activator>org.opendaylight.ovsdb.openstack.netvirt.providers.Activator</Bundle-Activator>
           </instructions>

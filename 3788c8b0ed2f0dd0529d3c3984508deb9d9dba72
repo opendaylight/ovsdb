@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_9520d84a",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundConstants.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-17T21:07:03Z",
+      "side": 1,
+      "message": "curious why prefix is uppercase when the other prefixes are lowercase?",
+      "range": {
+        "startLine": 17,
+        "startChar": 31,
+        "endLine": 17,
+        "endChar": 44
+      },
+      "revId": "3788c8b0ed2f0dd0529d3c3984508deb9d9dba72",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_d5266068",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-17T21:07:03Z",
+      "side": 1,
+      "message": "would it be easier to use a ConcurrentMap\u003cString, Row\u003e since extractRowsUpdated already returns a Map\u003cUUID,T\u003e? Then you could reference the UUID directly instead of going into the iterator stuff below.",
+      "range": {
+        "startLine": 57,
+        "startChar": 16,
+        "endLine": 57,
+        "endChar": 20
+      },
+      "revId": "3788c8b0ed2f0dd0529d3c3984508deb9d9dba72",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_95f9b8ca",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-17T21:07:03Z",
+      "side": 1,
+      "message": "delete this I guess",
+      "range": {
+        "startLine": 67,
+        "startChar": 28,
+        "endLine": 67,
+        "endChar": 32
+      },
+      "revId": "3788c8b0ed2f0dd0529d3c3984508deb9d9dba72",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_150608cf",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-17T21:07:03Z",
+      "side": 1,
+      "message": "make this an error or warning?",
+      "range": {
+        "startLine": 79,
+        "startChar": 37,
+        "endLine": 79,
+        "endChar": 39
+      },
+      "revId": "3788c8b0ed2f0dd0529d3c3984508deb9d9dba72",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_f52b5c2e",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-17T21:07:03Z",
+      "side": 1,
+      "message": "does this get added to operational or config?",
+      "range": {
+        "startLine": 108,
+        "startChar": 46,
+        "endLine": 108,
+        "endChar": 66
+      },
+      "revId": "3788c8b0ed2f0dd0529d3c3984508deb9d9dba72",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

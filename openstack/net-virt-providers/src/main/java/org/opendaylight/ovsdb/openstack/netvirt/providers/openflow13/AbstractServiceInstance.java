@@ -161,14 +161,14 @@ public abstract class AbstractServiceInstance {
         }
 
         ReadWriteTransaction modification = dataBroker.newReadWriteTransaction();
-        InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node> nodePath = InstanceIdentifier.builder(Nodes.class)
-                .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class, nodeBuilder.getKey()).toInstance();
-
+        InstanceIdentifier<Node> nodePath = InstanceIdentifier.builder(Nodes.class)
+                .child(Node.class, nodeBuilder.getKey()).build();
         modification.put(LogicalDatastoreType.CONFIGURATION, nodePath, nodeBuilder.build(), true);
-        InstanceIdentifier<Flow> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
-                .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Table.class,
-                new TableKey(flowBuilder.getTableId())).child(Flow.class, flowBuilder.getKey()).build();
 
+        InstanceIdentifier<Flow> path1 = InstanceIdentifier.builder(Nodes.class)
+                .child(Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class)
+                .child(Table.class, new TableKey(flowBuilder.getTableId())).child(Flow.class, flowBuilder.getKey())
+                .build();
         modification.put(LogicalDatastoreType.CONFIGURATION, path1, flowBuilder.build(), true /*createMissingParents*/);
 
         CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
@@ -197,10 +197,10 @@ public abstract class AbstractServiceInstance {
 
         WriteTransaction modification = dataBroker.newWriteOnlyTransaction();
         InstanceIdentifier<Flow> path1 = InstanceIdentifier.builder(Nodes.class)
-                .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
-                               .rev130819.nodes.Node.class, nodeBuilder.getKey())
-                .augmentation(FlowCapableNode.class).child(Table.class,
-                                                           new TableKey(flowBuilder.getTableId())).child(Flow.class, flowBuilder.getKey()).build();
+                .child(Node.class, nodeBuilder.getKey())
+                .augmentation(FlowCapableNode.class)
+                .child(Table.class, new TableKey(flowBuilder.getTableId()))
+                .child(Flow.class, flowBuilder.getKey()).build();
         //modification.delete(LogicalDatastoreType.OPERATIONAL, nodeBuilderToInstanceId(nodeBuilder));
         //modification.delete(LogicalDatastoreType.OPERATIONAL, path1);
         //modification.delete(LogicalDatastoreType.CONFIGURATION, nodeBuilderToInstanceId(nodeBuilder));
@@ -229,9 +229,11 @@ public abstract class AbstractServiceInstance {
             return null;
         }
 
-        InstanceIdentifier<Flow> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
-                .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Table.class,
-                new TableKey(flowBuilder.getTableId())).child(Flow.class, flowBuilder.getKey()).build();
+        InstanceIdentifier<Flow> path1 = InstanceIdentifier.builder(Nodes.class)
+                .child(Node.class, nodeBuilder.getKey())
+                .augmentation(FlowCapableNode.class)
+                .child(Table.class, new TableKey(flowBuilder.getTableId()))
+                .child(Flow.class, flowBuilder.getKey()).build();
 
         ReadOnlyTransaction readTx = dataBroker.newReadOnlyTransaction();
         try {

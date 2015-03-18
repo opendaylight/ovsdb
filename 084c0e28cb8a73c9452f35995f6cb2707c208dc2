@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_cdf810e8",
+        "filename": "resources/commons/OVSDB_Southbound.json",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-18T19:57:49Z",
+      "side": 1,
+      "message": "can you redo the formatting so it isn\u0027t a single line?",
+      "range": {
+        "startLine": 1,
+        "startChar": 7,
+        "endLine": 1,
+        "endChar": 15
+      },
+      "revId": "084c0e28cb8a73c9452f35995f6cb2707c208dc2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

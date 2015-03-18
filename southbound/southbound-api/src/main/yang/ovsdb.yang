@@ -162,7 +162,6 @@ module ovsdb {
         }
     }
 
-
     identity interface-type-base {
         description "Base identity for all OVSDB interface types";
     }

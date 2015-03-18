@@ -2,12 +2,17 @@
  * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,jump
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 package org.opendaylight.ovsdb.southbound;
 
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeBase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeInternal;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypePatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeSystem;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeVxlan;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolOpenflow10;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolOpenflow11;
@@ -36,9 +41,17 @@ public class SouthboundConstants {
             .put(OvsdbBridgeProtocolOpenflow14.class,"OpenFlow14")
             .put(OvsdbBridgeProtocolOpenflow15.class,"OpenFlow15")
             .build();
+
     public static final ImmutableBiMap<Class<? extends OvsdbFailModeBase>,String> OVSDB_FAIL_MODE_MAP = new ImmutableBiMap.Builder<Class<? extends OvsdbFailModeBase>,String>()
             .put(OvsdbFailModeStandalone.class,"standalone")
             .put(OvsdbFailModeSecure.class,"secure")
+            .build();
+
+    public static final ImmutableBiMap<String, Class<? extends InterfaceTypeBase>> OVSDB_INTERFACE_TYPE_MAP = new ImmutableBiMap.Builder<String, Class<? extends InterfaceTypeBase>>()
+            .put("internal", InterfaceTypeInternal.class)
+            .put("vxlan", InterfaceTypeVxlan.class)
+            .put("patch", InterfaceTypePatch.class)
+            .put("system", InterfaceTypeSystem.class)
             .build();
 
 }

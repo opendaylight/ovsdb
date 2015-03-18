@@ -12,14 +12,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
+import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
+import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.OvsdbClientKey;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
@@ -94,6 +99,19 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                                     .setName(port.getName());
                             ovsdbTerminationPointBuilder.setPortUuid(new Uuid(
                                     port.getUuid().toString()));
+                            Column<GenericTableSchema, Set<UUID>> iface = port.getInterfacesColumn();
+                            Set<UUID> ifUuid = iface.getData();
+                            Collection<Interface> ifUpdateRows = TyperUtils.extractRowsUpdated(Interface.class, getUpdates(),  getDbSchema()).values();
+                            for (UUID ifIter : ifUuid) {
+                                for (Interface interfIter : ifUpdateRows) {
+                                    Column<GenericTableSchema, String> typeColumn = interfIter.getTypeColumn();
+                                    String type = typeColumn.getData();
+                                    ovsdbTerminationPointBuilder.setInterfaceType(SouthboundMapper.createInterfaceType(type));
+                                    if ((interfIter.getUuid()).equals(ifIter)) {
+                                        ovsdbTerminationPointBuilder.setInterfaceUuid(new Uuid(interfIter.getUuid().toString()));
+                                    }
+                                }
+                            }
                             entry.addAugmentation(
                                     (Class<? extends Augmentation<TerminationPoint>>) OvsdbTerminationPointAugmentation.class,
                                     ovsdbTerminationPointBuilder.build());

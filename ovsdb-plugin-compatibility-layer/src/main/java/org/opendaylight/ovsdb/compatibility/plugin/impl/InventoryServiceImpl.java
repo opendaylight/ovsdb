@@ -130,7 +130,6 @@ public class InventoryServiceImpl implements OvsdbInventoryService,
 
     @Override
     public void addNode(Node node, Set<Property> props) {
-        pluginOvsdbInventoryService.addNode(NodeUtils.getMdsalNode(node), props);
     }
 
     @Override
@@ -140,7 +139,6 @@ public class InventoryServiceImpl implements OvsdbInventoryService,
 
     @Override
     public void addNodeProperty(Node node, UpdateType type, Set<Property> props) {
-        pluginOvsdbInventoryService.addNodeProperty(NodeUtils.getMdsalNode(node), type, props);
     }
 
     @Override

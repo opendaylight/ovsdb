@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_4a4626c1",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-03-18T18:42:42Z",
+      "side": 1,
+      "message": "Sam, tcp:ip:port or ptcp:ip:port would be URIs yes.",
+      "parentUuid": "5a93c517_95e77812",
+      "range": {
+        "startLine": 113,
+        "startChar": 26,
+        "endLine": 113,
+        "endChar": 29
+      },
+      "revId": "8c16a9753e077d2551e6a42d9e646ec08f580a84",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_f5e27c02",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
         "patchSetId": 3
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_8a518e64",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-03-18T18:42:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_f5e27c02",
+      "range": {
+        "startLine": 254,
+        "startChar": 86,
+        "endLine": 254,
+        "endChar": 89
+      },
+      "revId": "8c16a9753e077d2551e6a42d9e646ec08f580a84",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_55f1f0cb",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbBridgeUpdateCommand.java",
         "patchSetId": 3
@@ -59,6 +107,30 @@
       "writtenOn": "2015-03-17T22:03:34Z",
       "side": 1,
       "message": "why not also use the Map\u003cUUID,T\u003e form here to keep things consistent?",
+      "range": {
+        "startLine": 53,
+        "startChar": 26,
+        "endLine": 53,
+        "endChar": 27
+      },
+      "revId": "8c16a9753e077d2551e6a42d9e646ec08f580a84",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_ca5f9671",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbBridgeUpdateCommand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-03-18T18:42:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_55f1f0cb",
       "range": {
         "startLine": 53,
         "startChar": 26,

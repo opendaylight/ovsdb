@@ -16,6 +16,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
@@ -35,7 +36,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
-public class SouthboundHandler extends AbstractHandler implements OvsdbInventoryListener {
+public class SouthboundHandler extends AbstractHandler
+        implements NodeCacheListener, OvsdbInventoryListener {
     static final Logger logger = LoggerFactory.getLogger(SouthboundHandler.class);
     //private Thread eventThread;
 
@@ -321,6 +323,7 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
             return;
         }
         SouthboundEvent ev = (SouthboundEvent) abstractEvent;
+        //logger.info("processEvent: {}", ev);
         switch (ev.getType()) {
             case NODE:
                 try {
@@ -341,6 +344,23 @@ public class SouthboundHandler extends AbstractHandler implements OvsdbInventory
                 logger.warn("Unable to process type " + ev.getType() +
                             " action " + ev.getAction() + " for node " + ev.getNode());
                 break;
+        }
+    }
+
+    /**
+     * Notification about an OpenFlow Node
+     *
+     * @param openFlowNode the {@link org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node Node} of interest in the notification
+     * @param action the {@link Action}
+     * @see NodeCacheListener#notifyNode
+     */
+    @Override
+    public void notifyNode (Node openFlowNode, Action action) {
+        logger.info("notifyNode: Node {} update {} from Controller's inventory Service",
+                openFlowNode, action);
+
+        if (action.equals(Action.ADD)) {
+            networkingProviderManager.getProvider(openFlowNode).initializeOFFlowRules(openFlowNode);
         }
     }
 }

@@ -53,6 +53,8 @@ public class BridgeCreateCommand implements TransactCommand {
                     SouthboundConstants.OVSDB_FAIL_MODE_MAP.get(ovsdbManagedNode.getFailMode()) != null ) {
                 bridge.setFailMode(Sets.newHashSet(SouthboundConstants.OVSDB_FAIL_MODE_MAP.get(ovsdbManagedNode.getFailMode())));
             }
+            String namedUuid = "Bridge_" + ovsdbManagedNode.getBridgeName().getValue();
+            bridge.setDatapathType(SouthboundMapper.createDatapathType(ovsdbManagedNode));
             if(SouthboundMapper.createOvsdbBridgeProtocols(ovsdbManagedNode) != null
                     && SouthboundMapper.createOvsdbBridgeProtocols(ovsdbManagedNode).size() > 0){
                 bridge.setProtocols(SouthboundMapper.createOvsdbBridgeProtocols(ovsdbManagedNode));

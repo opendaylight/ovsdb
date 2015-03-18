@@ -51,6 +51,20 @@ module ovsdb {
            RFC 2579: Textual Conventions for SMIv2";
     }
 
+    identity datapath-type-base {
+        description "Base identity for all OVSDB datapath types";
+    }
+
+    identity datapath-type-system {
+        description "Datapath type for the kernel datapath";
+        base datapath-type-base;
+    }
+
+    identity datapath-type-netdev {
+        description "Datapath type for the userspace datapath";
+        base datapath-type-base;
+    }
+
     identity ovsdb-bridge-protocol-base {
         description "Base identity for all ovsdb-bridge-protocols";
     }
@@ -131,6 +145,13 @@ module ovsdb {
         leaf datapath-id {
             description "Datapath-id of the bridge";
             type datapath-id;
+        }
+
+        leaf datapath-type {
+            description "The datapath type of the bridge";
+            type identityref {
+                base datapath-type-base;
+            }
         }
 
         leaf fail-mode {

@@ -101,7 +101,7 @@ public class NodeCacheManagerImpl extends AbstractHandler
     public void cacheListenerAdded(final ServiceReference ref, NodeCacheListener handler){
         Long pid = (Long) ref.getProperty(org.osgi.framework.Constants.SERVICE_ID);
         handlers.put(pid, handler);
-        logger.debug("Node cache listener registered, pid {}", pid);
+        logger.info("Node cache listener registered, pid {} {}", pid, handler.getClass().getName());
     }
 
     public void cacheListenerRemoved(final ServiceReference ref){

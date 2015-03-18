@@ -25,6 +25,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_10905642",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundConstants.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-03-18T05:27:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_9520d84a",
+      "revId": "3788c8b0ed2f0dd0529d3c3984508deb9d9dba72",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_d5266068",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
         "patchSetId": 4
@@ -42,6 +60,24 @@
         "endLine": 57,
         "endChar": 20
       },
+      "revId": "3788c8b0ed2f0dd0529d3c3984508deb9d9dba72",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_102cd601",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-03-18T05:27:21Z",
+      "side": 1,
+      "message": "We are not iterating over bridge UUID. Rather we get the portColumn of bridge and get that portColumn\u0027s UUID.",
+      "parentUuid": "5a93c517_d5266068",
       "revId": "3788c8b0ed2f0dd0529d3c3984508deb9d9dba72",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -71,6 +107,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_30955233",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-03-18T05:27:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_95f9b8ca",
+      "revId": "3788c8b0ed2f0dd0529d3c3984508deb9d9dba72",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_150608cf",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
         "patchSetId": 4
@@ -94,6 +148,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_90a3069e",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-03-18T05:27:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_150608cf",
+      "revId": "3788c8b0ed2f0dd0529d3c3984508deb9d9dba72",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_f52b5c2e",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
         "patchSetId": 4
@@ -111,6 +183,24 @@
         "endLine": 108,
         "endChar": 66
       },
+      "revId": "3788c8b0ed2f0dd0529d3c3984508deb9d9dba72",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_b0a08291",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-03-18T05:27:21Z",
+      "side": 1,
+      "message": "operational",
+      "parentUuid": "5a93c517_f52b5c2e",
       "revId": "3788c8b0ed2f0dd0529d3c3984508deb9d9dba72",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

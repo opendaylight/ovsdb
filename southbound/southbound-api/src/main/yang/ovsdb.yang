@@ -85,6 +85,20 @@ module ovsdb {
         base ovsdb-bridge-protocol-base;
     }
 
+    identity ovsdb-fail-mode-base {
+        description "Base identity for ovsdb-failmode";
+    }
+
+    identity ovsdb-fail-mode-standalone {
+        description "Identity for ovsdb-failmode standalone";
+        base ovsdb-fail-mode-base;
+    }
+
+    identity ovsdb-fail-mode-secure {
+        definition "Identity for ovsdb-failmode standalone";
+        base ovsdb-fail-mode-base;
+    }
+
     grouping ovsdb-bridge-attributes {
         leaf bridge-uuid {
             description "The unique identifier of the bridge";
@@ -117,6 +131,13 @@ module ovsdb {
         leaf datapath-id {
             description "Datapath-id of the bridge";
             type datapath-id;
+        }
+
+        leaf fail-mode {
+            description "Failmode of the bridge";
+            type identityref {
+                base ovsdb-fail-mode-base;
+            }
         }
 
         leaf flow-node {

@@ -34,6 +34,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -155,6 +156,22 @@ public class SouthboundMapper {
         Uri uri = new Uri(uriString);
         NodeId nodeId = new NodeId(uri);
         return nodeId;
+    }
+
+    public static TpId createTerminationPointId(OvsdbConnectionInfo connectionInfo, OvsdbBridgeName bridgeName, String tpName) {
+        return createTerminationPointId(createIpAddress(connectionInfo.getRemoteAddress()),
+                new PortNumber(connectionInfo.getRemotePort()),
+                bridgeName, tpName);
+    }
+
+    public static TpId createTerminationPointId(OvsdbClientKey key, OvsdbBridgeName bridgeName, String tpName) {
+        return createTerminationPointId(key.getIp(),key.getPort(),bridgeName, tpName);
+    }
+
+    public static TpId createTerminationPointId(IpAddress ip, PortNumber port, OvsdbBridgeName bridgeName, String tpName) {
+        return new TpId(createNodeId(ip,port).getValue()
+                + "/"+SouthboundConstants.BRIDGE_URI_PREFIX+"/"+ bridgeName.getValue()
+                + "/"+SouthboundConstants.TP_URI_PREFIX+"/"+ tpName);
     }
 
     public static InetAddress createInetAddress(IpAddress ip) throws UnknownHostException {

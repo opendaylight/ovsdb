@@ -23,6 +23,7 @@ public class SouthboundConstants {
     public static final TopologyId OVSDB_TOPOLOGY_ID = new TopologyId(new Uri("ovsdb:1"));
     public static final String OVSDB_URI_PREFIX = "ovsdb";
     public static final String BRIDGE_URI_PREFIX = "bridge";
+    public static final String TP_URI_PREFIX = "tp";
     public static final Integer DEFAULT_OVSDB_PORT = 6640;
     public static final ImmutableBiMap<Class<? extends OvsdbBridgeProtocolBase>,String> OVSDB_PROTOCOL_MAP = new ImmutableBiMap.Builder<Class<? extends OvsdbBridgeProtocolBase>,String>()
             .put(OvsdbBridgeProtocolOpenflow10.class,"OpenFlow10")

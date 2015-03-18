@@ -169,6 +169,7 @@ public class Activator extends DependencyActivatorBase {
 
         manager.add(createComponent()
                 .setInterface(new String[]{OvsdbInventoryListener.class.getName(),
+                                NodeCacheListener.class.getName(),
                                 AbstractHandler.class.getName()},
                         southboundHandlerProperties)
                 .setImplementation(SouthboundHandler.class)
@@ -179,7 +180,8 @@ public class Activator extends DependencyActivatorBase {
                 .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
                 .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
                 .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
-                .add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true)));
+                .add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true))
+                .add(createServiceDependency().setService(NodeCacheManager.class).setRequired(true)));
 
         Dictionary<String, Object> lbaasHandlerProperties = new Hashtable<>();
         lbaasHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY,

@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_6d721c7e",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/AbstractServiceInstance.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-18T20:16:54Z",
+      "side": 1,
+      "message": "I\u0027m not sure if I understand what you asked here, but I think that by moving the Instances into their own function will address it. To be seen... ;)",
+      "parentUuid": "5a93c517_ad6ee4c7",
+      "revId": "5af867a379624a62ddecdbaf38d60aa90bf56a3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_8d6528e3",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/AbstractServiceInstance.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2015-03-18T19:37:57Z",
       "side": 1,
       "message": "Maybe create a single method to do this? Similar to what we have in FlowCapableNodeDataChangeListener.",
+      "revId": "5af867a379624a62ddecdbaf38d60aa90bf56a3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_ad5824fb",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/AbstractServiceInstance.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-18T20:16:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_8d6528e3",
       "revId": "5af867a379624a62ddecdbaf38d60aa90bf56a3e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

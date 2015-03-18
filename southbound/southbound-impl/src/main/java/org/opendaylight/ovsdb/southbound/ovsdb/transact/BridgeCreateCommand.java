@@ -20,6 +20,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
+import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -48,8 +49,10 @@ public class BridgeCreateCommand implements TransactCommand {
             // Bridge part
             Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
             bridge.setName(ovsdbManagedNode.getBridgeName().getValue());
-            String namedUuid = "Bridge_" + ovsdbManagedNode.getBridgeName().getValue();
-            bridge.setName(ovsdbManagedNode.getBridgeName().getValue());
+            if(ovsdbManagedNode.getFailMode() != null &&
+                    SouthboundConstants.OVSDB_FAIL_MODE_MAP.get(ovsdbManagedNode.getFailMode()) != null ) {
+                bridge.setFailMode(Sets.newHashSet(SouthboundConstants.OVSDB_FAIL_MODE_MAP.get(ovsdbManagedNode.getFailMode())));
+            }
             if(SouthboundMapper.createOvsdbBridgeProtocols(ovsdbManagedNode) != null
                     && SouthboundMapper.createOvsdbBridgeProtocols(ovsdbManagedNode).size() > 0){
                 bridge.setProtocols(SouthboundMapper.createOvsdbBridgeProtocols(ovsdbManagedNode));

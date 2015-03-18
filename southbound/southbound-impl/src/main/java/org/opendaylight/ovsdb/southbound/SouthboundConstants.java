@@ -15,6 +15,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolOpenflow13;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolOpenflow14;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolOpenflow15;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbFailModeBase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbFailModeSecure;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbFailModeStandalone;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 
 import com.google.common.collect.ImmutableBiMap;
@@ -33,4 +36,9 @@ public class SouthboundConstants {
             .put(OvsdbBridgeProtocolOpenflow14.class,"OpenFlow14")
             .put(OvsdbBridgeProtocolOpenflow15.class,"OpenFlow15")
             .build();
+    public static final ImmutableBiMap<Class<? extends OvsdbFailModeBase>,String> OVSDB_FAIL_MODE_MAP = new ImmutableBiMap.Builder<Class<? extends OvsdbFailModeBase>,String>()
+            .put(OvsdbFailModeStandalone.class,"standalone")
+            .put(OvsdbFailModeSecure.class,"secure")
+            .build();
+
 }

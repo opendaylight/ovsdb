@@ -63,9 +63,23 @@ public class SouthboundEvent extends AbstractEvent {
     }
     @Override
     public String toString() {
-        return "SouthboundEvent [type=" + type + ", action=" + super.getAction() + ", node=" + node + ", tableName=" + tableName
-                + ", uuid=" + uuid + ", row=" + row + ", context=" + context.toString() + "]";
+        if (type == Type.NODE) {
+            return "SouthboundEvent [type=" + type
+                    + ", action=" + super.getAction()
+                    + ", node=" + node + "]";
+        } else if (type == Type.ROW) {
+            return "SouthboundEvent [type=" + type
+                    + ", action=" + super.getAction()
+                    + ", node=" + node
+                    + ", tableName=" + tableName
+                    + ", uuid=" + uuid
+                    + ", row=" + row
+                    + ", context=" + context + "]";
+        } else {
+            return "SouthboundEvent [type=" + type + "]";
+        }
     }
+
     @Override
     public int hashCode() {
         final int prime = 31;

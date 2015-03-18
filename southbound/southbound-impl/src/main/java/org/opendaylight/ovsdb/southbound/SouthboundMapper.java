@@ -211,6 +211,19 @@ public class SouthboundMapper {
             return createDatapathId(dpidArray[0]);
         }
     }
+    
+    public static String createDatapathType(OvsdbBridgeAugmentation omn) {
+    	String datapathtype = new String();
+    	
+    	if (omn.getDatapathType() != null) {
+    		if (SouthboundConstants.DATAPATH_TYPE_MAP.get(omn.getDatapathType()) != null) {
+    			datapathtype = SouthboundConstants.DATAPATH_TYPE_MAP.get(omn.getDatapathType());
+    		} else {
+    			throw new IllegalArgumentException("Unknown datapath type " + SouthboundConstants.DATAPATH_TYPE_MAP.get(omn.getDatapathType()));
+    		}
+    	}
+    	return datapathtype;
+    }
 
     public static DatapathId createDatapathId(String dpid) {
         Preconditions.checkNotNull(dpid);

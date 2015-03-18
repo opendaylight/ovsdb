@@ -50,6 +50,9 @@ public class BridgeCreateCommand implements TransactCommand {
             bridge.setName(ovsdbManagedNode.getBridgeName().getValue());
             String namedUuid = "Bridge_" + ovsdbManagedNode.getBridgeName().getValue();
             bridge.setName(ovsdbManagedNode.getBridgeName().getValue());
+            if (SouthboundMapper.createDatapathType(ovsdbManagedNode) != null) {
+            	bridge.setDatapathType(SouthboundMapper.createDatapathType(ovsdbManagedNode));
+            }
             if(SouthboundMapper.createOvsdbBridgeProtocols(ovsdbManagedNode) != null
                     && SouthboundMapper.createOvsdbBridgeProtocols(ovsdbManagedNode).size() > 0){
                 bridge.setProtocols(SouthboundMapper.createOvsdbBridgeProtocols(ovsdbManagedNode));

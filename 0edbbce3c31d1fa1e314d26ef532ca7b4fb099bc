@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_8dc76845",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-18T22:58:59Z",
+      "side": 1,
+      "message": "prefer to use something more descriptive than omn so that that the method signature is self documenting",
+      "range": {
+        "startLine": 215,
+        "startChar": 67,
+        "endLine": 215,
+        "endChar": 68
+      },
+      "revId": "0edbbce3c31d1fa1e314d26ef532ca7b4fb099bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_2dc4143f",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-18T22:58:59Z",
+      "side": 1,
+      "message": "I see checking for dataPathType but what about omn itself? Is is guaranteed to not be null?",
+      "revId": "0edbbce3c31d1fa1e314d26ef532ca7b4fb099bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_4dc1602d",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeCreateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-18T22:58:59Z",
+      "side": 1,
+      "message": "should this check be !null \u0026\u0026 string.notempty? The createDatapathType returns a string and will never return null as it is coded",
+      "revId": "0edbbce3c31d1fa1e314d26ef532ca7b4fb099bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

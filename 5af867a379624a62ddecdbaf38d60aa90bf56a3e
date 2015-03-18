@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_ad6ee4c7",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/AbstractServiceInstance.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-18T19:37:57Z",
+      "side": 1,
+      "message": "How about making this one look like the next two as far as formatting?",
+      "revId": "5af867a379624a62ddecdbaf38d60aa90bf56a3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_8d6528e3",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/AbstractServiceInstance.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-18T19:37:57Z",
+      "side": 1,
+      "message": "Maybe create a single method to do this? Similar to what we have in FlowCapableNodeDataChangeListener.",
+      "revId": "5af867a379624a62ddecdbaf38d60aa90bf56a3e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

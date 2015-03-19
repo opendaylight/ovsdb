@@ -97,7 +97,7 @@ public class NodeResource {
 
         List<String> nodeIds = Lists.newArrayList();
         for (Node node : nodes) {
-            nodeIds.add(node.toString());
+            nodeIds.add(node.getId().getValue());
         }
 
         String response = objectMapper.writeValueAsString(nodeIds);

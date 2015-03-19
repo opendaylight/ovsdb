@@ -1,0 +1,68 @@
+module ovsdbrpcmodel {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:ovsdbrpcmodel";
+    prefix "ovsdbrpcmodel";
+
+    revision "2015-03-24" {
+        description "Initial revision of southbound model";
+    }
+
+    typedef table-name {
+        description "The name of the table.";
+        type string;
+    }
+
+    typedef table-column {
+        description "A table column.";
+        type string;
+    }
+
+    typedef table-row {
+        description "A table row.";
+        type string;
+    }
+
+    grouping row {
+        list element {
+            leaf entry {
+                type string;
+            }
+        }
+    }
+
+    grouping table {
+        leaf name {
+            type table-name;
+        }
+    }
+
+    grouping tables {
+    	list ovs-tables {
+            container table{
+                uses table;
+                list table-columns {
+                    leaf column {
+                        type table-column;
+                    }
+                }
+                list table-row {
+                    leaf row {
+                        type table-row;
+                    }
+                }
+            }
+        }
+    }
+
+    container ovs-tables {
+        uses tables;
+    }
+
+    container ovs-table-rows {
+        list table-rows {
+            leaf table-row {
+                type table-row;
+            }
+        }
+    }
+}

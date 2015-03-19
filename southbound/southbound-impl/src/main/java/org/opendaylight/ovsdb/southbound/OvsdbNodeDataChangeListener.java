@@ -51,7 +51,7 @@ public class OvsdbNodeDataChangeListener implements DataChangeListener, AutoClos
     @Override
     public void onDataChanged(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        LOG.info("Received change to ovsdbNode: {}", changes);
+        LOG.debug("Received change to ovsdbNode: {}", changes);
         for (Entry<InstanceIdentifier<?>, DataObject> created : changes.getCreatedData().entrySet()) {
             // TODO validate we have the correct kind of InstanceIdentifier
             if (created.getValue() instanceof OvsdbNodeAugmentation) {

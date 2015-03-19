@@ -59,7 +59,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                 LOG.debug("Read Operational/DS for Node fail! {}", nodePath, e);
             }
             if(node.isPresent()){
-                LOG.info("Node {} is present",node);
+                LOG.debug("Node {} is present",node);
                 NodeBuilder managedNodeBuilder = new NodeBuilder();
                 NodeId manageNodeId = SouthboundMapper.createManagedNodeId(getKey(), new OvsdbBridgeName(bridge.getName()));
                 managedNodeBuilder.setNodeId(manageNodeId);

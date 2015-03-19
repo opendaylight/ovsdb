@@ -254,7 +254,7 @@ public class SouthboundMapper {
     }
 
     public static List<ControllerEntry> createControllerEntries(Bridge bridge,Map<UUID,Controller> updatedControllerRows) {
-        LOG.info("Bridge: {}, updatedControllerRows: {}",bridge,updatedControllerRows);
+        LOG.debug("Bridge: {}, updatedControllerRows: {}",bridge,updatedControllerRows);
         Set<UUID> controllerUUIDs = bridge.getControllerColumn().getData();
         List<ControllerEntry> controllerEntries = new ArrayList<ControllerEntry>();
         for(UUID controllerUUID : controllerUUIDs ) {

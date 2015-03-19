@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_7ec40492",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2015-03-19T18:06:07Z",
+      "side": 1,
+      "message": "new patch coming up ...",
+      "parentUuid": "5a93c517_4317f1ed",
+      "revId": "c60ddb0e8a302e62c8c7944fd73ed1251462d524",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_63e78d13",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeCreateCommand.java",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2015-03-19T14:24:15Z",
       "side": 1,
       "message": "so is not empty string checking needed? As the createDataPath method is today an empty string could be returned.",
+      "revId": "c60ddb0e8a302e62c8c7944fd73ed1251462d524",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_fe37b4ae",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeCreateCommand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2015-03-19T18:06:07Z",
+      "side": 1,
+      "message": "I changed it in this patch to default to \"system\", so it should only return either \"system\" or \"netdev\" (as it is today)",
+      "parentUuid": "5a93c517_63e78d13",
       "revId": "c60ddb0e8a302e62c8c7944fd73ed1251462d524",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

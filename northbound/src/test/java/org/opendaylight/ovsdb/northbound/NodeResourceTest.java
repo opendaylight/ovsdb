@@ -18,6 +18,8 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.collect.Lists;
+import java.util.List;
 import javax.ws.rs.core.Response;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,7 +42,9 @@ public class NodeResourceTest {
     static final Logger LOG = LoggerFactory.getLogger(NodeResourceTest.class);
     private static final String OVS = "OVS";
     private static final String IDENTIFIER = "192.168.120.31:45001";
+    private static final String IDENTIFIER2 = "192.168.120.31:45002";
     private static final String OVS_IDENTIFIER = OVS + "|" + IDENTIFIER;
+    private static final String OVS_IDENTIFIER2 = OVS + "|" + IDENTIFIER2;
     private static final String BAD_IDENTIFIER = "BAD" + "|" + IDENTIFIER;
 
     @Test
@@ -112,6 +116,7 @@ public class NodeResourceTest {
         PowerMockito.mockStatic(ServiceHelper.class);
         when(ServiceHelper.getGlobalInstance(eq(OvsdbConnectionService.class), anyObject()))
                 .thenReturn(connectionService)
+                .thenReturn(connectionService)
                 .thenReturn(connectionService);
 
         NodeResource nodeResource = new NodeResource();
@@ -121,11 +126,10 @@ public class NodeResourceTest {
             Response response = nodeResource.getNodes();
             assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
             assertNotNull("entity should not be null", response.getEntity());
-            // TODO find way to extract entity as a string. using the below fails with:
-            // org.junit.ComparisonFailure: expected:<[OVS|192.168.120.31:45001]> but was:<[["OVS|192.168.120.31:45001"]]>
-            //assertEquals("", response.getEntity());
-            // In its place the 200, not null and println are sufficient
-            LOG.info("null response entity: " + response.getEntity());
+            String id = new String();
+            List<String> ids = Lists.newArrayList();
+            ids.add(id);
+            assertEquals("there should be no nodes", ids.toString(), response.getEntity());
         } catch (JsonProcessingException ex) {
             fail("Exception should not have been caught");
         }
@@ -138,11 +142,29 @@ public class NodeResourceTest {
             Response response = nodeResource.getNodes();
             assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
             assertNotNull("entity should not be null", response.getEntity());
-            // TODO find way to extract entity as a string. using the below fails with:
-            // org.junit.ComparisonFailure: expected:<[OVS|192.168.120.31:45001]> but was:<[["OVS|192.168.120.31:45001"]]>
-            // In its place the 200, not null and println are sufficient
-            //assertEquals(OVS_IDENTIFIER, response.getEntity());
-            LOG.info(OVS_IDENTIFIER + " response entity: " + response.getEntity());
+            String id = new String("\"" + OVS_IDENTIFIER + "\"");
+            List<String> ids = Lists.newArrayList();
+            ids.add(id);
+            assertEquals(OVS_IDENTIFIER + " should be found", ids.toString(), response.getEntity());
+        } catch (JsonProcessingException ex) {
+            fail("Exception should not have been caught");
+        }
+
+        // Check getNodes when there are multiple nodes
+        connection = new Connection(IDENTIFIER2, null);
+        connectionService.putOvsdbConnection(IDENTIFIER2, connection);
+
+        try {
+            Response response = nodeResource.getNodes();
+            assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+            assertNotNull("entity should not be null", response.getEntity());
+            String id = new String("\"" + OVS_IDENTIFIER + "\"");
+            String id2 = new String("\"" + OVS_IDENTIFIER2 + "\"");
+            List<String> ids = Lists.newArrayList();
+            ids.add(id);
+            ids.add(id2);
+            assertEquals(OVS_IDENTIFIER + " and " + OVS_IDENTIFIER2 + " should be found",
+                    ids.toString().replaceAll("\\s",""), response.getEntity());
         } catch (JsonProcessingException ex) {
             fail("Exception should not have been caught");
         }

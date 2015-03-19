@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_1eef0020",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-19T17:56:11Z",
+      "side": 1,
+      "message": "this (setInterfaceType) should be moved to inside fe if { } block.",
+      "range": {
+        "startLine": 109,
+        "startChar": 36,
+        "endLine": 109,
+        "endChar": 64
+      },
+      "revId": "15fda306d2728fb18f1b6de93ed2251b8eb62510",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_def8b8e7",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-19T17:56:11Z",
+      "side": 1,
+      "message": "add break; as there is no point in iterating in the inner for loop after finding the match.",
+      "range": {
+        "startLine": 111,
+        "startChar": 40,
+        "endLine": 111,
+        "endChar": 68
+      },
+      "revId": "15fda306d2728fb18f1b6de93ed2251b8eb62510",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

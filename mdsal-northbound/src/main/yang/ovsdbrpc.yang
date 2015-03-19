@@ -1,0 +1,17 @@
+module ovsdbrpc {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:ovsdbrpcs";
+    prefix "ovsdbrpcs";
+
+    import ovsdbrpcmodel {prefix "ovsdbrpcmodel"; revision-date "2015-03-24"; }
+
+    revision "2015-03-24" {
+        description "Initial revision of southbound model";
+    }
+
+    rpc get-databases {
+        output {
+            uses ovsdbrpcmodel:table;
+        }
+    }
+}

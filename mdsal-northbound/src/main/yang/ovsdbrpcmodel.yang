@@ -1,0 +1,20 @@
+module ovsdbrpcmodel {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:ovsdbrpcmodel";
+    prefix "ovsdbrpcmodel";
+
+    revision "2015-03-24" {
+        description "Initial revision of southbound model";
+    }
+
+    typedef tablename{
+        description "The name of the table.";
+        type string;
+    }
+
+    grouping table {
+        leaf name{
+            type tablename;
+        }
+    }
+}

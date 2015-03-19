@@ -208,6 +208,51 @@ module ovsdb {
         base interface-type-base;
     }
 
+    identity interface-type-tap {
+        description "Interface type for tun/tap interfaces";
+        base interface-type-base;
+    }
+
+    identity interface-type-geneve {
+        description "Interface type for geneve interfaces";
+        base interface-type-base;
+    }
+
+    identity interface-type-gre {
+        description "Interface type for gre interfaces";
+        base interface-type-base;
+    }
+
+    identity interface-type-ipsec-gre {
+        description "Interface type for ipsec-gre interfaces";
+        base interface-type-base;
+    }
+
+    identity interface-type-gre64 {
+        description "Interface type for gre64 interfaces";
+        base interface-type-base;
+    }
+
+    identity interface-type-ipsec-gre64 {
+        description "Interface type for ipsec-gre64 interfaces";
+        base interface-type-base;
+    }
+
+    identity interface-type-lisp {
+        description "Interface type for lisp interfaces";
+        base interface-type-base;
+    }
+
+    identity interface-type-dpdk {
+        description "Interface type for dpdk interfaces";
+        base interface-type-base;
+    }
+
+    identity interface-type-dpdkr {
+        description "Interface type for dpdk ring interfaces";
+        base interface-type-base;
+    }
+
     grouping ovsdb-port-interface-attributes {
         leaf port-uuid {
             description "The unique identifier of the OVSDB port";

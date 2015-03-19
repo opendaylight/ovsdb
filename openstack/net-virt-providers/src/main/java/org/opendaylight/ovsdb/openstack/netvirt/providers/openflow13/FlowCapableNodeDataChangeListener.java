@@ -49,8 +49,8 @@ public class FlowCapableNodeDataChangeListener implements DataChangeListener, Au
 
     public FlowCapableNodeDataChangeListener (DataBroker dataBroker) {
         LOG.info("Registering FlowCapableNodeChangeListener");
-        registration = dataBroker.registerDataChangeListener(LogicalDatastoreType.CONFIGURATION,
-                createFlowCapableNodePath(), this, AsyncDataBroker.DataChangeScope.ONE);
+        registration = dataBroker.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL,
+                createFlowCapableNodePath(), this, AsyncDataBroker.DataChangeScope.BASE);
     }
 
     @Override
@@ -88,7 +88,7 @@ public class FlowCapableNodeDataChangeListener implements DataChangeListener, Au
         for (Map.Entry<InstanceIdentifier<?>, DataObject> updated : changes.getUpdatedData().entrySet()) {
             InstanceIdentifier<?> iID = updated.getKey();
             String openflowId = iID.firstKeyOf(Node.class, NodeKey.class).getId().getValue();
-            LOG.trace(">>>>> updated iiD: {} - first: {} - NodeKey: {}",
+            LOG.info(">>>>> updated iiD: {} - first: {} - NodeKey: {}",
                     iID, iID.firstIdentifierOf(Node.class), openflowId);
             Node openFlowNode = NodeUtils.getOpenFlowNode(openflowId);
             if (nodeCache.contains(openFlowNode)) {
@@ -101,7 +101,7 @@ public class FlowCapableNodeDataChangeListener implements DataChangeListener, Au
 
     private void notifyNodeUpdated (Node openFlowNode) {
         final String openflowId = openFlowNode.getId().getValue();
-        LOG.trace("notifyNodeUpdated: Node {} from Controller's inventory Service", openflowId);
+        LOG.info("notifyNodeUpdated: Node {} from Controller's inventory Service", openflowId);
 
         // TODO: will do something amazing here, someday
     }

@@ -181,7 +181,28 @@ module ovsdb {
                 type ovsdb-bridge-ref;
             }
         }
-    }
+
+        list datapath-type-entry {
+            key "datapath-type";
+            leaf datapath-type {
+                description "Datapath types supported by OVSDB node";
+                type identityref {
+                    base datapath-type-base;
+                }
+            }
+        }
+
+        list interface-type-entry {
+            key "interface-type";
+            leaf interface-type {
+                description "Interface types supported by OVSDB node";
+                type identityref {
+                    base interface-type-base;
+                }
+            }
+        }
+
+     }
 
 
     identity interface-type-base {

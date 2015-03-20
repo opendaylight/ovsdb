@@ -46,7 +46,7 @@ public class OvsdbInventoryManager implements OvsdbInventoryListener {
     static final String OVS_NODE_PREFIX = "openvswitch:";
     static final String OPENFLOW_NODE_PREFIX = "openflow:";
 
-    static final Logger logger = LoggerFactory.getLogger(OvsdbInventoryManager.class);
+    static final Logger LOGGER = LoggerFactory.getLogger(OvsdbInventoryManager.class);
 
 
     /**
@@ -94,9 +94,9 @@ public class OvsdbInventoryManager implements OvsdbInventoryListener {
         tx.put(LogicalDatastoreType.CONFIGURATION, path, newNode, true);
         try {
             tx.submit().get();
-            logger.debug("Removed Node {}", path.toString());
+            LOGGER.debug("Removed Node {}", path.toString());
         } catch (InterruptedException | ExecutionException e) {
-            logger.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         }
     }
 
@@ -121,9 +121,9 @@ public class OvsdbInventoryManager implements OvsdbInventoryListener {
         tx.delete(LogicalDatastoreType.CONFIGURATION, path);
         try {
             tx.submit().get();
-            logger.debug("Removed Node {}", path.toString());
+            LOGGER.debug("Removed Node {}", path.toString());
         } catch (InterruptedException | ExecutionException e) {
-            logger.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         }
     }
 
@@ -143,7 +143,7 @@ public class OvsdbInventoryManager implements OvsdbInventoryListener {
                                         Row row,
                                         Object context) {
         if (tableName.equalsIgnoreCase(ovsdbConfigurationService.getTableName(node, Bridge.class))) {
-            logger.debug("OVSDB Bridge Row removed on node {}", node.toString());
+            LOGGER.debug("OVSDB Bridge Row removed on node {}", node.toString());
             DataBroker dataBroker = provider.getDataBroker();
             Preconditions.checkNotNull(dataBroker);
 
@@ -172,12 +172,12 @@ public class OvsdbInventoryManager implements OvsdbInventoryListener {
             try {
                 Optional<OvsdbCapableNode> data = tx.read(LogicalDatastoreType.CONFIGURATION, ovsdbNodePath).get();
                 if (!data.isPresent()) {
-                    logger.error("OVSDB node not updated. Parent node for {} does not exist", ovsdbNodePath.toString());
+                    LOGGER.error("OVSDB node not updated. Parent node for {} does not exist", ovsdbNodePath.toString());
                     return;
                 }
                 ovsdbNode = data.get();
             } catch (InterruptedException | ExecutionException e) {
-                logger.error("OVSDB node not updated. Parent node for {} does not exist", ovsdbNodePath.toString());
+                LOGGER.error("OVSDB node not updated. Parent node for {} does not exist", ovsdbNodePath.toString());
                 return;
             }
 
@@ -194,11 +194,11 @@ public class OvsdbInventoryManager implements OvsdbInventoryListener {
 
             try {
                 tx.submit().get();
-                logger.debug("Transaction success for delete of {} and update of {}",
+                LOGGER.debug("Transaction success for delete of {} and update of {}",
                              openflowNodePath.toString(),
                              ovsdbNodePath.toString());
             } catch (InterruptedException | ExecutionException e) {
-                logger.error(e.getMessage(), e);
+                LOGGER.error(e.getMessage(), e);
             }
         }
     }
@@ -219,7 +219,7 @@ public class OvsdbInventoryManager implements OvsdbInventoryListener {
                                         String uuid,
                                         Row old,
                                         Row row) {
-        logger.debug("OVSDB Bridge Row updated on node {}", node.toString());
+        LOGGER.debug("OVSDB Bridge Row updated on node {}", node.toString());
         if (tableName.equalsIgnoreCase(ovsdbConfigurationService.getTableName(node, Bridge.class))) {
             DataBroker dataBroker = provider.getDataBroker();
             Bridge bridge = ovsdbConfigurationService.getTypedRow(node, Bridge.class, row);
@@ -266,7 +266,7 @@ public class OvsdbInventoryManager implements OvsdbInventoryListener {
             try {
                 Optional<OvsdbCapableNode> data = tx.read(LogicalDatastoreType.CONFIGURATION, ovsdbNodePath).get();
                 if (!data.isPresent()) {
-                    logger.error("OVSDB node not updated. Parent node for {} does not exist", ovsdbNodePath.toString());
+                    LOGGER.error("OVSDB node not updated. Parent node for {} does not exist", ovsdbNodePath.toString());
                     return;
                 }
                 ovsdbNode = data.get();
@@ -289,11 +289,11 @@ public class OvsdbInventoryManager implements OvsdbInventoryListener {
 
             try {
                 tx.submit().get();
-                logger.debug("Transaction success for addition of {} and update of {}",
+                LOGGER.debug("Transaction success for addition of {} and update of {}",
                              openflowNodepath.toString(),
                              ovsdbNodePath.toString());
             } catch (InterruptedException | ExecutionException e) {
-                logger.error(e.getMessage(), e);
+                LOGGER.error(e.getMessage(), e);
             }
         }
     }

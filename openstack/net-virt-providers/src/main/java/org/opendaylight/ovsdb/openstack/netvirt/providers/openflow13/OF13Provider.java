@@ -107,7 +107,6 @@ public class OF13Provider implements NetworkingProvider {
     private static final short TABLE_0_DEFAULT_INGRESS = 0;
     private static final short TABLE_1_ISOLATE_TENANT = 10;
     private static final short TABLE_2_LOCAL_FORWARD = 20;
-    private static final String OPENFLOW = "openflow:";
     private static Long groupId = 1L;
 
     private volatile ConfigurationService configurationService;
@@ -835,7 +834,8 @@ public class OF13Provider implements NetworkingProvider {
             String bridgeName = configurationService.getExternalBridgeName();
             String brUuid = this.getInternalBridgeUUID(node, bridgeName);
             if (brUuid == null) {
-                logger.error("Unable to spot Bridge Identifier for {} in {}", bridgeName, node);
+                // Note: it is okay for certain nodes to not have br-ex configured; not an error
+                logger.info("Unable to spot Bridge Identifier for {} in {}", bridgeName, node);
                 return 0L;
             }
 
@@ -1387,7 +1387,7 @@ public class OF13Provider implements NetworkingProvider {
 
     private void writeNormalRule(Long dpidLong) {
 
-        String nodeName = OPENFLOW + dpidLong;
+        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
 
         MatchBuilder matchBuilder = new MatchBuilder();
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
@@ -1844,7 +1844,7 @@ public class OF13Provider implements NetworkingProvider {
             InstructionBuilder ib,
             Long dpidLong, Long port ,
             List<Instruction> instructions) {
-        NodeConnectorId ncid = new NodeConnectorId(OPENFLOW + dpidLong + ":" + port);
+        NodeConnectorId ncid = new NodeConnectorId(Constants.OPENFLOW_NODE_PREFIX + dpidLong + ":" + port);
         logger.debug("createOutputGroupInstructions() Node Connector ID is - Type=openflow: DPID={} port={} existingInstructions={}", dpidLong, port, instructions);
 
         List<Action> actionList = Lists.newArrayList();
@@ -2000,7 +2000,7 @@ public class OF13Provider implements NetworkingProvider {
     protected boolean removeOutputPortFromGroup(NodeBuilder nodeBuilder, InstructionBuilder ib,
             Long dpidLong, Long port , List<Instruction> instructions) {
 
-        NodeConnectorId ncid = new NodeConnectorId(OPENFLOW + dpidLong + ":" + port);
+        NodeConnectorId ncid = new NodeConnectorId(Constants.OPENFLOW_NODE_PREFIX + dpidLong + ":" + port);
         logger.debug("removeOutputPortFromGroup() Node Connector ID is - Type=openflow: DPID={} port={} existingInstructions={}", dpidLong, port, instructions);
 
         List<Action> actionList = Lists.newArrayList();
@@ -2130,6 +2130,11 @@ public class OF13Provider implements NetworkingProvider {
                 this.triggerInterfaceUpdates(ovsNode);
             }
         }
+    }
+
+    @Override
+    public void notifyFlowCapableNodeEvent(Long dpid, org.opendaylight.ovsdb.openstack.netvirt.api.Action action) {
+        mdsalConsumer.notifyFlowCapableNodeCreateEvent(Constants.OPENFLOW_NODE_PREFIX + dpid, action);
     }
 
     public static NodeBuilder createNodeBuilder(String nodeId) {

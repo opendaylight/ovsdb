@@ -24,6 +24,7 @@ import org.opendaylight.ovsdb.integrationtest.OvsdbIntegrationTestBase;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.notation.Version;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
@@ -329,6 +330,11 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
 
         @Override
         public void initializeOFFlowRules(Node openflowNode) {
+
+        }
+
+        @Override
+        public void notifyFlowCapableNodeEvent(Long dpid, Action action) {
 
         }
     }

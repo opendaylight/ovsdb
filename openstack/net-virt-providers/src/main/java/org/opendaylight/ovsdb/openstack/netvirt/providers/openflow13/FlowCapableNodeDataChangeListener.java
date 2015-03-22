@@ -18,9 +18,10 @@ import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.ovsdb.utils.mdsal.node.NodeUtils;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
+import org.opendaylight.ovsdb.utils.mdsal.node.NodeUtils;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
@@ -35,8 +36,8 @@ import org.slf4j.LoggerFactory;
 public class FlowCapableNodeDataChangeListener implements DataChangeListener, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(FlowCapableNodeDataChangeListener.class);
     private ListenerRegistration<DataChangeListener> registration;
+    private final Object nodeCacheLock = new Object();
     private List<Node> nodeCache = Lists.newArrayList();
-    private NetworkingProviderManager networkingProviderManager = null;
     private PipelineOrchestrator pipelineOrchestrator = null;
     private NodeCacheManager nodeCacheManager = null;
 
@@ -65,10 +66,14 @@ public class FlowCapableNodeDataChangeListener implements DataChangeListener, Au
 
         for (InstanceIdentifier instanceIdentifier : changes.getRemovedPaths()) {
             DataObject originalDataObject = changes.getOriginalData().get(instanceIdentifier);
-            LOG.info(">>>>> removed iiD: {} - dataObject {}", instanceIdentifier, originalDataObject);
             if (originalDataObject != null && originalDataObject instanceof Node){
                 Node node = (Node) originalDataObject;
-                notifyNodeRemoved(NodeUtils.getOpenFlowNode(node.getId().getValue()));
+                String openflowId = node.getId().getValue();
+                LOG.info(">>>>> removed iiD: {} - NodeKey: {}", instanceIdentifier, openflowId);
+                Node openFlowNode = NodeUtils.getOpenFlowNode(openflowId);
+                if (removeNodeFromCache(openFlowNode)) {
+                    notifyNodeRemoved(openFlowNode);
+                }
             }
         }
 
@@ -78,10 +83,10 @@ public class FlowCapableNodeDataChangeListener implements DataChangeListener, Au
             LOG.info(">>>>> created iiD: {} - first: {} - NodeKey: {}",
                     iID, iID.firstIdentifierOf(Node.class), openflowId);
             Node openFlowNode = NodeUtils.getOpenFlowNode(openflowId);
-            if (nodeCache.contains(openFlowNode)) {
-                notifyNodeUpdated(openFlowNode);
-            } else {
+            if (addNodeToCache(openFlowNode)) {
                 notifyNodeCreated(openFlowNode);
+            } else {
+                notifyNodeUpdated(openFlowNode);
             }
         }
 
@@ -91,17 +96,62 @@ public class FlowCapableNodeDataChangeListener implements DataChangeListener, Au
             LOG.info(">>>>> updated iiD: {} - first: {} - NodeKey: {}",
                     iID, iID.firstIdentifierOf(Node.class), openflowId);
             Node openFlowNode = NodeUtils.getOpenFlowNode(openflowId);
-            if (nodeCache.contains(openFlowNode)) {
-                notifyNodeUpdated(openFlowNode);
-            } else {
+            if (addNodeToCache(openFlowNode)) {
                 notifyNodeCreated(openFlowNode);
+            } else {
+                notifyNodeUpdated(openFlowNode);
             }
+        }
+    }
+
+    public void notifyFlowCapableNodeEvent (String openFlowId, Action action) {
+        LOG.debug("Notification of flow capable node {}, action {}", openFlowId, action);
+        checkMemberInitialization();
+
+        Node openFlowNode = NodeUtils.getOpenFlowNode(openFlowId);
+        if (action == Action.DELETE) {
+            notifyNodeRemoved(openFlowNode);
+        } else {
+            if (addNodeToCache(openFlowNode)) {
+                notifyNodeCreated(openFlowNode);
+            } else {
+                notifyNodeUpdated(openFlowNode);
+            }
+        }
+    }
+
+    /**
+     * This method returns the true if node was added to the nodeCache. If param node
+     * is already in the cache, this method is expected to return false.
+     *
+     * @param openFlowNode the node to be added to the cache, if needed
+     * @return whether new node entry was added to cache
+     */
+    private Boolean addNodeToCache (Node openFlowNode) {
+        synchronized (nodeCacheLock) {
+            if (nodeCache.contains(openFlowNode)) {
+                return false;
+            }
+            return nodeCache.add(openFlowNode);
+        }
+    }
+
+    /**
+     * This method returns the true if node was removed from the nodeCache. If param node
+     * is not in the cache, this method is expected to return false.
+     *
+     * @param openFlowNode the node to be removed from the cache, if needed
+     * @return whether new node entry was removed from cache
+     */
+    private Boolean removeNodeFromCache (Node openFlowNode) {
+        synchronized (nodeCacheLock) {
+            return nodeCache.remove(openFlowNode);
         }
     }
 
     private void notifyNodeUpdated (Node openFlowNode) {
         final String openflowId = openFlowNode.getId().getValue();
-        LOG.info("notifyNodeUpdated: Node {} from Controller's inventory Service", openflowId);
+        LOG.debug("notifyNodeUpdated: Node {} from Controller's inventory Service", openflowId);
 
         // TODO: will do something amazing here, someday
     }
@@ -109,8 +159,6 @@ public class FlowCapableNodeDataChangeListener implements DataChangeListener, Au
     private void notifyNodeCreated (Node openFlowNode) {
         final String openflowId = openFlowNode.getId().getValue();
         LOG.info("notifyNodeCreated: Node {} from Controller's inventory Service", openflowId);
-
-        nodeCache.add(openFlowNode);
 
         if (pipelineOrchestrator != null) {
             pipelineOrchestrator.enqueue(openflowId);
@@ -124,14 +172,12 @@ public class FlowCapableNodeDataChangeListener implements DataChangeListener, Au
         LOG.info("notifyNodeRemoved: Node {} from Controller's inventory Service",
                 openFlowNode.getId().getValue());
 
-        nodeCache.remove(openFlowNode);
-
         if (nodeCacheManager != null) {
             nodeCacheManager.nodeRemoved(openFlowNode.getId().getValue());
         }
     }
 
-    private void checkMemberInitialization() {
+    private void checkMemberInitialization () {
         /**
          * Obtain local ref to members, if needed. Having these local saves us from calling getGlobalInstance
          * upon every event.

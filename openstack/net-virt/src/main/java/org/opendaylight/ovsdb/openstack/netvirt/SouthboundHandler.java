@@ -15,6 +15,7 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
@@ -22,9 +23,11 @@ import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
+import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
+import org.opendaylight.ovsdb.utils.mdsal.node.StringConvertor;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 
 import org.slf4j.Logger;
@@ -226,6 +229,18 @@ public class SouthboundHandler extends AbstractHandler
                 }
             } catch (Exception e) {
                 logger.error("Error fetching Interface Rows for node " + node, e);
+            }
+        } else if (tableName.equalsIgnoreCase(ovsdbConfigurationService.getTableName(node, Bridge.class))) {
+            logger.debug("Processing update of {}:{} node: {}, bridge uuid: {}, row: {}", tableName, action, node, uuid, row);
+            Bridge bridge = ovsdbConfigurationService.getTypedRow(node, Bridge.class, row);
+            final Set<String> dpids = bridge.getDatapathIdColumn().getData();
+            if (dpids != null &&
+                    (bridge.getName().equals(configurationService.getIntegrationBridgeName()) ||
+                            bridge.getName().equals(configurationService.getExternalBridgeName()))) {
+                NetworkingProvider networkingProvider = networkingProviderManager.getProvider(node);
+                for (String dpid : dpids) {
+                    networkingProvider.notifyFlowCapableNodeEvent(StringConvertor.dpidStringToLong(dpid), action);
+                }
             }
         }
     }

@@ -835,7 +835,8 @@ public class OF13Provider implements NetworkingProvider {
             String bridgeName = configurationService.getExternalBridgeName();
             String brUuid = this.getInternalBridgeUUID(node, bridgeName);
             if (brUuid == null) {
-                logger.error("Unable to spot Bridge Identifier for {} in {}", bridgeName, node);
+                // Note: it is okay for certain nodes to not have br-ex configured; not an error
+                logger.warn("Unable to spot Bridge Identifier for {} in {}", bridgeName, node);
                 return 0L;
             }
 
@@ -2129,6 +2130,13 @@ public class OF13Provider implements NetworkingProvider {
                 this.initializeFlowRules(ovsNode, configurationService.getIntegrationBridgeName());
                 this.triggerInterfaceUpdates(ovsNode);
             }
+        }
+    }
+
+    @Override
+    public void notifyFlowCapableNodeEvent(Long dpid, org.opendaylight.ovsdb.openstack.netvirt.api.Action action) {
+        if (dpid != 0L) {
+            mdsalConsumer.notifyFlowCapableNodeCreateEvent(OPENFLOW + dpid, action);
         }
     }
 

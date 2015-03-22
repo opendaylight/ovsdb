@@ -18,6 +18,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderCo
 import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,5 +79,12 @@ public class MdsalConsumerImpl implements BindingAwareConsumer, MdsalConsumer, B
     @Override
     public void onSessionInitiated(ProviderContext session) {
         notificationService = session.getSALService(NotificationProviderService.class);
+    }
+
+    @Override
+    public void notifyFlowCapableNodeCreateEvent(String openFlowId, Action action) {
+        if (flowCapableNodeChangeListener != null) {
+            flowCapableNodeChangeListener.notifyFlowCapableNodeEvent(openFlowId, action);
+        }
     }
 }

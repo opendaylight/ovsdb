@@ -36,6 +36,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolBase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
@@ -158,6 +159,15 @@ public class SouthboundMapper {
     public static NodeId createManagedNodeId(IpAddress ip, PortNumber port, OvsdbBridgeName bridgeName) {
         return new NodeId(createNodeId(ip,port).getValue()
                 + "/"+SouthboundConstants.BRIDGE_URI_PREFIX+"/"+ bridgeName.getValue());
+    }
+
+    public static NodeId createManagedNodeId(OvsdbClientKey key, OvsdbBridgeRef bridgeRef) {
+        return createManagedNodeId(key.getIp(),key.getPort(),bridgeRef);
+    }
+
+    public static NodeId createManagedNodeId(IpAddress ip, PortNumber port, OvsdbBridgeRef bridgeRef) {
+        return new NodeId(createNodeId(ip,port).getValue()
+                + "/"+SouthboundConstants.BRIDGE_URI_PREFIX+"/"+ bridgeRef.getValue());
     }
 
     public static NodeId createNodeId(IpAddress ip, PortNumber port) {

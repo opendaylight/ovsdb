@@ -175,6 +175,10 @@ module ovsdb {
     grouping ovsdb-node-attributes {
         uses overlay:ip-port-locator;
 
+        leaf version {
+            type yang:uuid;
+        }
+
         list managed-node-entry {
             key "bridge-ref";
             leaf bridge-ref {

@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_150a7a21",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/FlowCapableNodeDataChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-23T02:07:44Z",
+      "side": 1,
+      "message": "Seems weird that there is a wrapper around the add but not the remove. For remove it then forces the synchronize into the notify method.",
+      "revId": "2ed0cda793bfd29c266b4f8ca80fb833733e6300",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_350f7632",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/MdsalConsumerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-23T02:07:44Z",
+      "side": 1,
+      "message": "should we have an assert if null",
+      "revId": "2ed0cda793bfd29c266b4f8ca80fb833733e6300",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_d513b25a",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 839,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-23T02:07:44Z",
+      "side": 1,
+      "message": "Good idea to bump it down. Wonder if it should really be info since it isn\u0027t really bad as you mentioned",
+      "range": {
+        "startLine": 839,
+        "startChar": 23,
+        "endLine": 839,
+        "endChar": 27
+      },
+      "revId": "2ed0cda793bfd29c266b4f8ca80fb833733e6300",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_f5102e50",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2138,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-23T02:07:44Z",
+      "side": 1,
+      "message": "Do you really need to check for 0 here? Seems like a fragile thing that should be caught earlier",
+      "revId": "2ed0cda793bfd29c266b4f8ca80fb833733e6300",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

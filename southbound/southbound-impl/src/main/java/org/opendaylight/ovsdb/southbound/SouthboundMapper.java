@@ -259,6 +259,12 @@ public class SouthboundMapper {
         return SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP.get(type);
     }
 
+    public static String createOvsdbInterfaceType(Class<? extends InterfaceTypeBase> mdsaltype) {
+        Preconditions.checkNotNull(mdsaltype);
+        ImmutableBiMap<Class<? extends InterfaceTypeBase>, String> mapper = SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP.inverse();
+        return mapper.get(mdsaltype);
+    }
+
     public static List<ProtocolEntry> createMdsalProtocols(Bridge bridge) {
         Set<String> protocols = bridge.getProtocolsColumn().getData();
         List<ProtocolEntry> protocolList = new ArrayList<ProtocolEntry>();

@@ -20,10 +20,13 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
+import org.opendaylight.ovsdb.schema.openvswitch.Port;
+import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeInternal;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +49,24 @@ public class BridgeCreateCommand implements TransactCommand {
             LOG.debug("Received request to create ovsdb bridge name: {} uuid: {}",
                         ovsdbManagedNode.getBridgeName(),
                         ovsdbManagedNode.getBridgeUuid());
+
+            // Named UUIDs
+            String bridgeNamedUuid = "Bridge_" + ovsdbManagedNode.getBridgeName().getValue();
+            String interfaceNamedUuid = "Interface_" + ovsdbManagedNode.getBridgeName().getValue();
+            String portNamedUuid = "Port_" + ovsdbManagedNode.getBridgeName().getValue();
+
+            // Interface part
+            Interface interfaceOvs = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Interface.class);
+            interfaceOvs.setName(ovsdbManagedNode.getBridgeName().getValue());
+            interfaceOvs.setType(SouthboundMapper.createOvsdbInterfaceType(InterfaceTypeInternal.class));
+            transaction.add(op.insert(interfaceOvs).withId(interfaceNamedUuid));
+
+            // Port part
+            Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
+            port.setName(ovsdbManagedNode.getBridgeName().getValue());
+            port.setInterfaces(Sets.newHashSet(new UUID(interfaceNamedUuid)));
+            transaction.add(op.insert(port).withId(portNamedUuid));
+
             // Bridge part
             Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
             bridge.setName(ovsdbManagedNode.getBridgeName().getValue());
@@ -53,7 +74,6 @@ public class BridgeCreateCommand implements TransactCommand {
                     SouthboundConstants.OVSDB_FAIL_MODE_MAP.get(ovsdbManagedNode.getFailMode()) != null ) {
                 bridge.setFailMode(Sets.newHashSet(SouthboundConstants.OVSDB_FAIL_MODE_MAP.get(ovsdbManagedNode.getFailMode())));
             }
-            String namedUuid = "Bridge_" + ovsdbManagedNode.getBridgeName().getValue();
             bridge.setDatapathType(SouthboundMapper.createDatapathType(ovsdbManagedNode));
             if(SouthboundMapper.createOvsdbBridgeProtocols(ovsdbManagedNode) != null
                     && SouthboundMapper.createOvsdbBridgeProtocols(ovsdbManagedNode).size() > 0){
@@ -66,8 +86,8 @@ public class BridgeCreateCommand implements TransactCommand {
             if(!controllerMap.isEmpty()) {
                 bridge.setController(controllerMap.keySet());
             }
+            bridge.setPorts(Sets.newHashSet(new UUID(portNamedUuid)));
 
-            String bridgeNamedUuid = "Bridge_" + ovsdbManagedNode.getBridgeName().getValue();
             transaction.add(op.insert(bridge).withId(bridgeNamedUuid));
 
             // OpenVSwitchPart

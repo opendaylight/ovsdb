@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_b8c5bb5c",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/FlowCapableNodeDataChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-23T14:03:14Z",
+      "side": 1,
+      "message": "understood; it is not consistent. I did that to avoid\nadding a functiong that is only used here, but making it consistent may have been a better choice here. Will change it.",
+      "parentUuid": "5a93c517_150a7a21",
+      "revId": "2ed0cda793bfd29c266b4f8ca80fb833733e6300",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_350f7632",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/MdsalConsumerImpl.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-03-23T02:07:44Z",
       "side": 1,
       "message": "should we have an assert if null",
+      "revId": "2ed0cda793bfd29c266b4f8ca80fb833733e6300",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_f8926356",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/MdsalConsumerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-23T14:03:14Z",
+      "side": 1,
+      "message": "i think not, because this member (flowCapableNodeChangeListener) is only set via a callback\nhere called onSessionInitialized.\nIf that happens late, or never happens, I do not want to assert.",
+      "parentUuid": "5a93c517_350f7632",
       "revId": "2ed0cda793bfd29c266b4f8ca80fb833733e6300",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -59,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_58891725",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 839,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-23T14:03:14Z",
+      "side": 1,
+      "message": "that is true. let\u0027s make it info.",
+      "parentUuid": "5a93c517_d513b25a",
+      "range": {
+        "startLine": 839,
+        "startChar": 23,
+        "endLine": 839,
+        "endChar": 27
+      },
+      "revId": "2ed0cda793bfd29c266b4f8ca80fb833733e6300",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_f5102e50",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
         "patchSetId": 1
@@ -70,6 +130,24 @@
       "writtenOn": "2015-03-23T02:07:44Z",
       "side": 1,
       "message": "Do you really need to check for 0 here? Seems like a fragile thing that should be caught earlier",
+      "revId": "2ed0cda793bfd29c266b4f8ca80fb833733e6300",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_389f6b54",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2138,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-23T14:03:14Z",
+      "side": 1,
+      "message": "heh, I was asking myself the same question. :)\nThe code to find dpid will reuturn 0 if I cannot find one. \nBut that is a different code path, so I\u0027m good with removing that here.",
+      "parentUuid": "5a93c517_f5102e50",
       "revId": "2ed0cda793bfd29c266b4f8ca80fb833733e6300",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

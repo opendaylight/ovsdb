@@ -13,6 +13,11 @@ module ovsdb {
         description "Initial revision of southbound model";
     }
 
+    typedef ovsdb-termination-point-ref {
+        description "A reference to an ovsdb termination point";
+        type instance-identifier;
+    }
+
     typedef ovsdb-bridge-ref {
         description "A reference to an ovsdb bridge";
         type instance-identifier;
@@ -166,6 +171,13 @@ module ovsdb {
             type flow-node-ref;
         }
 
+        list managed-termination-point-entry {
+            key "termination-point-ref";
+            leaf termination-point-ref {
+                type ovsdb-termination-point-ref;
+            }
+        }
+
         leaf managed-by {
             description "The OVSDB which this bridge belongs to";
             type ovsdb-node-ref;
@@ -290,12 +302,32 @@ module ovsdb {
             type string;
         }
 
+        leaf bridge-name {
+            description "Create termination point on this bridge";
+            type string;
+        }
+        
         leaf interface-type {
             description "The type of the OVSDB interface";
             type identityref {
                 base interface-type-base;
             }
         }
+
+        list options {
+            description "Port/Interface related optional input values";
+            key "option";
+            leaf option {
+                description "Optional input string";
+                type string;
+            }
+        }
+
+        leaf attached-to {
+            description "Reference to the bridge where terminiation point is attached.";
+            type ovsdb-bridge-ref;
+        }
+        
     }
 
     augment "/topo:network-topology/topo:topology/topo:node" {

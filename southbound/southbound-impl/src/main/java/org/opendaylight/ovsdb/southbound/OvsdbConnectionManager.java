@@ -26,6 +26,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -121,6 +122,24 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         }
     }
 
+    public OvsdbConnectionInstance getConnectionInstance(InstanceIdentifier<Node> nodePath) {
+        try{
+            ReadOnlyTransaction transaction = db.newReadOnlyTransaction();
+            CheckedFuture<Optional<Node>, ReadFailedException> nodeFuture = transaction.read(LogicalDatastoreType.OPERATIONAL, nodePath);
+            transaction.close();
+            Optional<Node> optional = nodeFuture.get();
+            if(optional != null && optional.isPresent() && optional.get() instanceof Node) {
+                return this.getConnectionInstance(optional.get());
+            } else {
+                LOG.warn("Found non-topological node {} on path {}",optional);
+                return null;
+            }
+        }catch (Exception e) {
+            LOG.warn("Failed to get Ovsdb Node {}",nodePath, e);
+            return null;
+        }
+    }
+
     public OvsdbClient getClient(OvsdbClientKey key) {
         return getConnectionInstance(key);
     }
@@ -136,4 +155,5 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     public OvsdbClient getClient(Node node) {
         return getConnectionInstance(node);
     }
+
 }

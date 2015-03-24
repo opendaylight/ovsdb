@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_dbce7c5a",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-03-24T19:51:13Z",
+      "side": 1,
+      "message": "Intention is to have a collection of reference so that we can do o(1) operation on iid\u0027s to check if port belongs to the bridge, rather then looping through all the augmentation and comparing based on port details. But now i am re-thinking that we can do that by just making one readOnleTransaction with the full iid path. I will remove it.",
+      "parentUuid": "5a93c517_9beeb4eb",
+      "range": {
+        "startLine": 179,
+        "startChar": 8,
+        "endLine": 179,
+        "endChar": 9
+      },
+      "revId": "70ae3a6cf86c50a56f2b54ae097e406753a48041",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_3bbbe0e6",
         "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
         "patchSetId": 3
@@ -42,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_3b05207a",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-03-24T19:51:13Z",
+      "side": 1,
+      "message": "Bridge name is required to configure port/interface. Having bridge name in the model reduces one readonlytransaction to fetch the bridge name from data store. I feel it\u0027s bit more convenient as well, to understand the huge dump of restconf output for bridge and it\u0027s termination points :).",
+      "parentUuid": "5a93c517_3bbbe0e6",
+      "revId": "70ae3a6cf86c50a56f2b54ae097e406753a48041",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_7bf168cc",
         "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
         "patchSetId": 3
@@ -53,6 +95,24 @@
       "writtenOn": "2015-03-24T18:43:17Z",
       "side": 1,
       "message": "Is this supposed to make to the options field in the interface table?  If so... could we enumerate them and appropriately capture type?",
+      "revId": "70ae3a6cf86c50a56f2b54ae097e406753a48041",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_dbf51c84",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-03-24T19:51:13Z",
+      "side": 1,
+      "message": "I thought of this as well, but it\u0027s looks bit complex to implement. E.g remote_ip\u003d can have ip address as a value or a word \"flow\" as value of remote_ip. Snippet from one reference doc\n\"\noptions : remote_ip: optional string\n\nRequired. The remote tunnel endpoint, one of:\n• An IPv4 address (not a DNS name), e.g. 192.168.0.123. Only unicast endpoints are supported.\n• The word flow. The tunnel accepts packets from any remote tunnel endpoint. To process\nonly packets from a specific remote tunnel endpoint, the flow entries may match on the\ntun_src field. When sending packets to a remote_ip\u003dflow tunnel, the flow actions must\nexplicitly set the tun_dst field to the IP address of the desired remote tunnel endpoint,\ne.g. with a set_field action.\"\n\nApart from that i believe these options are used for vendor specific options as well, so just passing the optional string will be more convenient for them rather then augmenting enum and bumping up the yang file version :).",
+      "parentUuid": "5a93c517_7bf168cc",
       "revId": "70ae3a6cf86c50a56f2b54ae097e406753a48041",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

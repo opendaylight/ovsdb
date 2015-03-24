@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_7b6c089d",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 4
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2015-03-24T18:08:34Z",
+      "side": 1,
+      "message": "Looks ok to me, are versions governed by any Regex? Ed?",
+      "revId": "3d2dcd337211d84f46fc41990643c1b43a63cba5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_db6f5c91",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2015-03-24T18:08:34Z",
+      "side": 1,
+      "message": "Is that line still required? You probably don\u0027t need it anymore.",
+      "revId": "3d2dcd337211d84f46fc41990643c1b43a63cba5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_fb5818fc",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OpenVSwitchUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2015-03-24T18:08:34Z",
+      "side": 1,
+      "message": "Add some Javadoc here please",
+      "revId": "3d2dcd337211d84f46fc41990643c1b43a63cba5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_bb72907a",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OpenVSwitchUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2015-03-24T18:08:34Z",
+      "side": 1,
+      "message": "Looks good",
+      "revId": "3d2dcd337211d84f46fc41990643c1b43a63cba5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_1b5e24e7",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OpenVSwitchUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2015-03-24T18:08:34Z",
+      "side": 1,
+      "message": "Remove trailing whitespace",
+      "revId": "3d2dcd337211d84f46fc41990643c1b43a63cba5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

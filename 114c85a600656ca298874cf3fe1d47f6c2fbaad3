@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_78f2ce9b",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-03-24T15:32:18Z",
+      "side": 1,
+      "message": "I thought we were capturing the version info, not the ovsdb-node uuid...",
+      "revId": "114c85a600656ca298874cf3fe1d47f6c2fbaad3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_b8f8567d",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-03-24T15:32:18Z",
+      "side": 1,
+      "message": "Why do you need these when ovs_version data gets written to the ovsdb-node, not the ovsdb-bridge node?",
+      "revId": "114c85a600656ca298874cf3fe1d47f6c2fbaad3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_1804ea79",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OpenVSwitchUpdateCommand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-03-24T15:32:18Z",
+      "side": 1,
+      "message": "Why are you putting this on the managed node (aka the bridge) rather than on the OvsdbNode (I which is where the version info makes sense)?",
+      "range": {
+        "startLine": 66,
+        "startChar": 41,
+        "endLine": 66,
+        "endChar": 56
+      },
+      "revId": "114c85a600656ca298874cf3fe1d47f6c2fbaad3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_9beeb4eb",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-03-24T18:43:17Z",
+      "side": 1,
+      "message": "Why are we keeping a list of managed-termination points in ovsdb-bridge-node... its an augmentation applied to a node, which *contains* the terminations points it owns...",
+      "range": {
+        "startLine": 179,
+        "startChar": 8,
+        "endLine": 179,
+        "endChar": 9
+      },
+      "revId": "70ae3a6cf86c50a56f2b54ae097e406753a48041",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_3bbbe0e6",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-03-24T18:43:17Z",
+      "side": 1,
+      "message": "The ovsdb-port-interface-attributes should be augmented onto a node which it definitionally the ovsdb-bridge-node that should contain the port/interface... why do we need to name it here?",
+      "revId": "70ae3a6cf86c50a56f2b54ae097e406753a48041",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_7bf168cc",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-03-24T18:43:17Z",
+      "side": 1,
+      "message": "Is this supposed to make to the options field in the interface table?  If so... could we enumerate them and appropriately capture type?",
+      "revId": "70ae3a6cf86c50a56f2b54ae097e406753a48041",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

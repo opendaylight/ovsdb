@@ -70,6 +70,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                 if(dpid != null) {
                     ovsdbManagedNodeBuilder.setDatapathId(dpid);
                 }
+                ovsdbManagedNodeBuilder.setDatapathType(SouthboundMapper.createDatapathType(bridge.getDatapathTypeColumn().getData()));
                 if(SouthboundMapper.createMdsalProtocols(bridge) != null
                         && SouthboundMapper.createMdsalProtocols(bridge).size() > 0) {
                     ovsdbManagedNodeBuilder.setProtocolEntry(SouthboundMapper.createMdsalProtocols(bridge));

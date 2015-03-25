@@ -54,12 +54,14 @@ public class TerminationPointCreateCommand implements TransactCommand {
             ovsInterface.setType(SouthboundMapper.createOvsdbInterfaceType(terminationPoint.getInterfaceType()));
 
             //Configure optional input
-            for(Options option : terminationPoint.getOptions()){
-                StringTokenizer tokens = new StringTokenizer(option.getOption(),"=");
-                if(tokens.countTokens() == 2){
-                    ovsInterface.setOptions(ImmutableMap.of(tokens.nextToken(),tokens.nextToken()));
-                }else{
-                    LOG.warn("Option input {} is not valid a valid option.",option.getOption());
+            if (terminationPoint.getOptions() != null) {
+                for(Options option : terminationPoint.getOptions()){
+                    StringTokenizer tokens = new StringTokenizer(option.getOption(),"=");
+                    if(tokens.countTokens() == 2){
+                        ovsInterface.setOptions(ImmutableMap.of(tokens.nextToken(),tokens.nextToken()));
+                    }else{
+                        LOG.warn("Option input {} is not valid a valid option.",option.getOption());
+                    }
                 }
             }
             transaction.add(op.insert(ovsInterface).withId(interfaceUuid));

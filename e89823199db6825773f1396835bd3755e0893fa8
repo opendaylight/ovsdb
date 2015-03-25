@@ -22,6 +22,24 @@
       "revId": "e89823199db6825773f1396835bd3755e0893fa8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_e75877fc",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OpenVSwitchUpdateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-03-25T14:32:38Z",
+      "side": 1,
+      "message": "An error, I checked in the other UpdateCommands, they all are on debug on this try catch.",
+      "parentUuid": "5a93c517_ee20549d",
+      "revId": "e89823199db6825773f1396835bd3755e0893fa8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

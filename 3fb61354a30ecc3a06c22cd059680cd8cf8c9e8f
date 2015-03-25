@@ -186,6 +186,30 @@
       "revId": "3fb61354a30ecc3a06c22cd059680cd8cf8c9e8f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_1dd13457",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeRemovedCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-25T23:05:22Z",
+      "side": 1,
+      "message": "yeah, I think the case I am thinking of you would also have the switch node. I recall from sfc there was a case where if given a switch return the ovsdb node. That is different than getbridge and more getovsdbnode. The other case was that the bridgename was really unique so you could find the ovsdb node with the bridge being uique to that node. I thought the openflow node in our model had a back pointer the managed node to allow this.\n\nI was thinking of ways to support Reinaldo\u0027s request for helper methods.",
+      "parentUuid": "5a93c517_c2d8c9f1",
+      "range": {
+        "startLine": 71,
+        "startChar": 27,
+        "endLine": 71,
+        "endChar": 40
+      },
+      "revId": "3fb61354a30ecc3a06c22cd059680cd8cf8c9e8f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

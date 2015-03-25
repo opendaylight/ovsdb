@@ -15,6 +15,7 @@ import java.util.Set;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
@@ -67,14 +68,20 @@ public class DataChangesManagedByOvsdbNodeEvent implements
 
     @Override
     public Set<InstanceIdentifier<?>> getRemovedPaths() {
-        if(this.removedPaths != null) {
+        if(this.removedPaths == null) {
             this.removedPaths = new HashSet<InstanceIdentifier<?>>();
             for(InstanceIdentifier<?> path: event.getRemovedPaths()) {
                 DataObject original = this.event.getOriginalData().get(path);
                 if(original != null
-                        && original instanceof OvsdbBridgeAugmentation
-                        && ((OvsdbBridgeAugmentation)original).getManagedBy().equals(this.iid)) {
-                    this.removedPaths.add(path);
+                        && original instanceof OvsdbBridgeAugmentation) {
+                    OvsdbBridgeAugmentation ovsdbBridgeNode = (OvsdbBridgeAugmentation)original;
+                    OvsdbNodeRef ovsdbNodeRef = ovsdbBridgeNode.getManagedBy();
+                    if(ovsdbNodeRef != null) {
+                        InstanceIdentifier<?> ovsdbNodeIid = ovsdbNodeRef.getValue();
+                        if(ovsdbNodeIid.equals(this.iid)){
+                            this.removedPaths.add(path);
+                        }
+                    }
                 }
             }
         }

@@ -7,7 +7,10 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
@@ -26,6 +29,12 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Maps;
 
 public class OvsdbManagedNodeDataChangeListener implements DataChangeListener, AutoCloseable {
 
@@ -51,25 +60,40 @@ public class OvsdbManagedNodeDataChangeListener implements DataChangeListener, A
     public void onDataChanged(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
        LOG.info("Received change to ovsdbManagedNode: {}", changes);
-       for( Entry<InstanceIdentifier<?>, DataObject> created : changes.getCreatedData().entrySet()) {
-           // TODO validate we have the correct kind of InstanceIdentifier
-           if(created.getValue() instanceof OvsdbBridgeAugmentation) {
-               LOG.debug("Received request to create {}",created.getValue());
-               OvsdbConnectionInstance client = cm.getConnectionInstance((OvsdbBridgeAugmentation)created.getValue());
-               if(client != null) {
-                   LOG.debug("Found client for {}", created.getValue());
-                   client.transact(new TransactCommandAggregator(
-                           new DataChangesManagedByOvsdbNodeEvent(
-                                   SouthboundMapper.createInstanceIdentifier(client.getKey()),
-                                   changes)));
-               } else {
-                   LOG.debug("Did not find client for {}",created.getValue());
-               }
-               // TODO - translate the OvsdbBridgeAugmentation to libary/ transacts to create the node
-           }
+       for(OvsdbConnectionInstance connectionInstance: connectionInstancesFromChanges(changes)) {
+           connectionInstance.transact(new TransactCommandAggregator(
+                   db,
+                   new DataChangesManagedByOvsdbNodeEvent(
+                           SouthboundMapper.createInstanceIdentifier(connectionInstance.getKey()),
+                           changes)));
        }
-       // TODO handle case of updates to ovsdb managed nodes as needed
-       // TODO handle case of delete to ovsdb managed nodes as needed
+    }
+
+    public Set<OvsdbConnectionInstance> connectionInstancesFromChanges(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
+        Set<OvsdbConnectionInstance> result = new HashSet<OvsdbConnectionInstance>();
+        result.addAll(connectionInstancesFromMap(changes.getCreatedData()));
+        result.addAll(connectionInstancesFromMap(changes.getUpdatedData()));
+        result.addAll(connectionInstancesFromMap(
+                Maps.filterKeys(changes.getOriginalData(), Predicates.in(changes.getRemovedPaths()))));
+        return result;
+    }
+
+    public Set<OvsdbConnectionInstance> connectionInstancesFromMap(Map<InstanceIdentifier<?>, DataObject> map) {
+        Preconditions.checkNotNull(map);
+        Set<OvsdbConnectionInstance> result = new HashSet<OvsdbConnectionInstance>();
+        for( Entry<InstanceIdentifier<?>, DataObject> created : map.entrySet()) {
+            if(created.getValue() instanceof OvsdbBridgeAugmentation) {
+                LOG.debug("Received request to create {}",created.getValue());
+                OvsdbConnectionInstance client = cm.getConnectionInstance((OvsdbBridgeAugmentation)created.getValue());
+                if(client != null) {
+                    LOG.debug("Found client for {}", created.getValue());
+                    result.add(client);
+                } else {
+                    LOG.debug("Did not find client for {}",created.getValue());
+                }
+            }
+        }
+        return result;
     }
 
     @Override

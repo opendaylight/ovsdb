@@ -151,6 +151,9 @@ public class VlanConfigurationCacheImpl implements VlanConfigurationCache {
     public Integer reclaimInternalVlan (Node node, String networkId) {
         NodeConfiguration nodeConfiguration = getNodeConfiguration(node);
         Integer mappedVlan = nodeConfiguration.getTenantVlanMap().get(networkId);
+        if(mappedVlan == null) {
+            mappedVlan = nodeConfiguration.getInternalVlans().poll();
+        }
         if (mappedVlan != null) {
             nodeConfiguration.getTenantVlanMap().remove(networkId);
             nodeConfiguration.getInternalVlans().add(mappedVlan);

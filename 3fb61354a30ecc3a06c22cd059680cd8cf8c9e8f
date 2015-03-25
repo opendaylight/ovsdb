@@ -2,6 +2,57 @@
   "comments": [
     {
       "key": {
+        "uuid": "5a93c517_8703b30e",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbManagedNodeDataChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-03-25T17:30:35Z",
+      "side": 1,
+      "message": "As per my understanding it looks buggy to me. Assume a scenario where one bridge is created and another got deleted from the same node and you get those changes in one change notification. Using TransactCommandAggregator, you will end up executing create and delete bridge operation twice, because you are building list of connection instances individually for each change.",
+      "revId": "3fb61354a30ecc3a06c22cd059680cd8cf8c9e8f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_8755f31e",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeRemovedCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-03-25T17:30:35Z",
+      "side": 1,
+      "message": "Just wondering can\u0027t we delete using the named-uuid ? If we can then i think we can avoid readOnlyTransaction, by getting this data from getOriginalData().",
+      "revId": "3fb61354a30ecc3a06c22cd059680cd8cf8c9e8f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_2732df10",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeRemovedCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-03-25T17:30:35Z",
+      "side": 1,
+      "message": "I think you need to mutate the Open_vSwitch table to remote the bridge from bridge column.",
+      "revId": "3fb61354a30ecc3a06c22cd059680cd8cf8c9e8f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_e7fe376b",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeRemovedCommand.java",
         "patchSetId": 2

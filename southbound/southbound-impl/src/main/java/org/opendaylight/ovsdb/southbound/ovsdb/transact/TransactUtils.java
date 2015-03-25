@@ -45,6 +45,10 @@ public class TransactUtils {
         return result;
     }
 
+    public static Map<InstanceIdentifier<Node>,OvsdbBridgeAugmentation> extractOvsdbManagedNodeOriginal(AsyncDataChangeEvent<InstanceIdentifier<?>, OvsdbBridgeAugmentation> changes)  {
+        return extractOvsdbManagedNode(changes.getOriginalData());
+    }
+
 
     public static Map<InstanceIdentifier<Node>,OvsdbBridgeAugmentation> extractOvsdbManagedNode(
             Map<InstanceIdentifier<?>, OvsdbBridgeAugmentation> changes) {

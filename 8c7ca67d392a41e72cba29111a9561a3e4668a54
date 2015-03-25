@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_0789e3ea",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/impl/TenantNetworkManagerImplTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-25T16:01:03Z",
+      "side": 1,
+      "message": "probably should remove all the verifynoMore... calls from all the test methods since I don\u0027t think they are doing anything since we don\u0027t ever verify anything previously.",
+      "range": {
+        "startLine": 76,
+        "startChar": 8,
+        "endLine": 76,
+        "endChar": 32
+      },
+      "revId": "8c7ca67d392a41e72cba29111a9561a3e4668a54",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_67778703",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/impl/TenantNetworkManagerImplTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-25T16:01:03Z",
+      "side": 1,
+      "message": "the preconditions comment was that all the methods under test have a preconditions check in them. I was curious if we wanted to check the condition and catch the expected assert. I don\u0027t really know if it adds value so wanted opinions.",
+      "revId": "8c7ca67d392a41e72cba29111a9561a3e4668a54",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

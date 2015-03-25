@@ -73,9 +73,9 @@ public interface Interface extends TypedBaseTable<GenericTableSchema> {
     public void setExternalIds(Map<String, String> externalIds);
 
     @TypedColumn(name="ofport", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Long>> getOpenFlowPortColumn();
+    public Column<GenericTableSchema, Set<Integer>> getOpenFlowPortColumn();
     @TypedColumn(name="ofport", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setOpenFlowPort(Set<Long> openFlowPort);
+    public void setOpenFlowPort(Set<Integer> openFlowPort);
 
     @TypedColumn(name="ofport_request", method=MethodType.GETCOLUMN, fromVersion="6.2.0")
     public Column<GenericTableSchema, Set<Integer>> getOpenFlowPortRequestColumn();

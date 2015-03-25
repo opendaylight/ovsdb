@@ -171,13 +171,6 @@ module ovsdb {
             type flow-node-ref;
         }
 
-        list managed-termination-point-entry {
-            key "termination-point-ref";
-            leaf termination-point-ref {
-                type ovsdb-termination-point-ref;
-            }
-        }
-
         leaf managed-by {
             description "The OVSDB which this bridge belongs to";
             type ovsdb-node-ref;

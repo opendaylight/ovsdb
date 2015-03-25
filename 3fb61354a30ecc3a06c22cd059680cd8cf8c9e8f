@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "5a93c517_821ac16c",
+        "filename": "resources/commons/OVSDB_Southbound.postman_collection",
+        "patchSetId": 2
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-03-25T17:36:46Z",
+      "side": 1,
+      "message": "I updated this collection with port/interface related restconf request. So you might have to rebase this file.",
+      "revId": "3fb61354a30ecc3a06c22cd059680cd8cf8c9e8f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_8703b30e",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbManagedNodeDataChangeListener.java",
         "patchSetId": 2

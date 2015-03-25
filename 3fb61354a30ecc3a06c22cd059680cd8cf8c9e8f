@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_e7fe376b",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeRemovedCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-25T15:39:56Z",
+      "side": 1,
+      "message": "related to what we discussed the other day about the shim layer, this looks like a type of api to add to the shim. What do you think? The APi would be more like getBridgeUUID(STring bridgeName) to be more friendly.",
+      "range": {
+        "startLine": 71,
+        "startChar": 27,
+        "endLine": 71,
+        "endChar": 40
+      },
+      "revId": "3fb61354a30ecc3a06c22cd059680cd8cf8c9e8f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

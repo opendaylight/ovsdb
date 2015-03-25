@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_42535917",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/VlanConfigurationCacheImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-25T17:51:04Z",
+      "side": 1,
+      "message": "why was this needed? I thought is this was null then that meant the vlan had already been returned so we were safe. This looks like we are just artificially allocating a vlan and then returning it to the pool",
+      "range": {
+        "startLine": 154,
+        "startChar": 11,
+        "endLine": 154,
+        "endChar": 21
+      },
+      "revId": "6e7e146dcb449996b2430854d37e996cc8207588",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_e2570501",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/impl/VlanConfigurationCacheImplTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-25T17:51:04Z",
+      "side": 1,
+      "message": "remove the //",
+      "range": {
+        "startLine": 64,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 2
+      },
+      "revId": "6e7e146dcb449996b2430854d37e996cc8207588",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_a241fd3a",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/impl/VlanConfigurationCacheImplTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-25T17:51:04Z",
+      "side": 1,
+      "message": "more of these verifyNoMoreInteractions",
+      "range": {
+        "startLine": 65,
+        "startChar": 8,
+        "endLine": 65,
+        "endChar": 32
+      },
+      "revId": "6e7e146dcb449996b2430854d37e996cc8207588",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

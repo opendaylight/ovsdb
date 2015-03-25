@@ -25,6 +25,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_825f210e",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/VlanConfigurationCacheImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-03-25T18:06:13Z",
+      "side": 1,
+      "message": "While testing, I setup a configuration and added vlan. So when I called this function I thought it should have returned the mappedVlan value. But it was actually returning 0. So I thought that was because the vlan wasn\u0027t pooled yet.\nI didn\u0027t really get the purpose that\u0027s why I was confused.",
+      "parentUuid": "5a93c517_42535917",
+      "revId": "6e7e146dcb449996b2430854d37e996cc8207588",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_e2570501",
         "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/impl/VlanConfigurationCacheImplTest.java",
         "patchSetId": 1
@@ -48,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_42a119f7",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/impl/VlanConfigurationCacheImplTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-03-25T18:06:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_e2570501",
+      "revId": "6e7e146dcb449996b2430854d37e996cc8207588",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_a241fd3a",
         "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/impl/VlanConfigurationCacheImplTest.java",
         "patchSetId": 1
@@ -65,6 +101,24 @@
         "endLine": 65,
         "endChar": 32
       },
+      "revId": "6e7e146dcb449996b2430854d37e996cc8207588",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_e2a5c504",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/impl/VlanConfigurationCacheImplTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-03-25T18:06:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_a241fd3a",
       "revId": "6e7e146dcb449996b2430854d37e996cc8207588",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

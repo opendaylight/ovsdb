@@ -12,6 +12,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
@@ -42,6 +43,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
+import org.opendaylight.ovsdb.plugin.api.Status;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
@@ -59,22 +61,24 @@ public class TenantNetworkManagerImplTest {
     @InjectMocks private INeutronPortCRUD neutronPortCache = mock(INeutronPortCRUD.class);
     @InjectMocks private INeutronNetworkCRUD neutronNetworkCache = mock(INeutronNetworkCRUD.class);
 
+    private static final String networkId= "networkId";
+
     @Test
     public void testGetInternalVlan() {
-        verifyNoMoreInteractions(vlanConfigurationCache);
+        when(vlanConfigurationCache.getInternalVlan(any(Node.class), eq(networkId))).thenReturn(10);
 
-        when(vlanConfigurationCache.getInternalVlan(any(Node.class), anyString())).thenReturn(10);
-
-        assertEquals(10, tenantNetworkManagerImpl.getInternalVlan(mock(Node.class), "networkId"));
+        assertEquals(10, tenantNetworkManagerImpl.getInternalVlan(mock(Node.class), networkId));
+        assertEquals(0, tenantNetworkManagerImpl.getInternalVlan(mock(Node.class), "unexistingNetwork"));
     }
 
     @Test
     public void testReclaimInternalVlan() {
         verifyNoMoreInteractions(vlanConfigurationCache);
 
-        when(vlanConfigurationCache.reclaimInternalVlan(any(Node.class), anyString())).thenReturn(10);
+        when(vlanConfigurationCache.reclaimInternalVlan(any(Node.class), eq(networkId))).thenReturn(10);
 
-        tenantNetworkManagerImpl.reclaimInternalVlan(mock(Node.class), "networkId", mock(NeutronNetwork.class));
+        tenantNetworkManagerImpl.reclaimInternalVlan(mock(Node.class), networkId, mock(NeutronNetwork.class));
+        tenantNetworkManagerImpl.reclaimInternalVlan(mock(Node.class), "unexistingNetwork", mock(NeutronNetwork.class));
     }
 
     @Test
@@ -82,7 +86,7 @@ public class TenantNetworkManagerImplTest {
         Port port = mock(Port.class);
         Row row = mock(Row.class);
         GenericTableSchema tableSchema = mock(GenericTableSchema.class);
-        org.opendaylight.ovsdb.plugin.api.Status status = mock(org.opendaylight.ovsdb.plugin.api.Status.class);
+        Status status = mock(Status.class);
 
         verifyNoMoreInteractions(vlanConfigurationCache);
         verifyNoMoreInteractions(ovsdbConfigurationService);
@@ -94,7 +98,7 @@ public class TenantNetworkManagerImplTest {
         when(ovsdbConfigurationService.createTypedRow(any(Node.class), same(Port.class))).thenReturn(port);
         when(ovsdbConfigurationService.updateRow(any(Node.class), anyString(), anyString(), anyString(), any(Row.class))).thenReturn(status);
 
-        tenantNetworkManagerImpl.programInternalVlan(mock(Node.class), "networkId", mock(NeutronNetwork.class));
+        tenantNetworkManagerImpl.programInternalVlan(mock(Node.class), networkId, mock(NeutronNetwork.class));
     }
 
     @Test
@@ -194,6 +198,6 @@ public class TenantNetworkManagerImplTest {
 
         when(vlanConfigurationCache.assignInternalVlan(any(Node.class), anyString())).thenReturn(10);
 
-        assertEquals(10,tenantNetworkManagerImpl.networkCreated(mock(Node.class), "networkId"));
+        assertEquals(10,tenantNetworkManagerImpl.networkCreated(mock(Node.class), networkId));
     }
 }

@@ -90,6 +90,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_dd418c0c",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbManagedNodeDataChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-03-25T23:25:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_021231b1",
+      "revId": "3fb61354a30ecc3a06c22cd059680cd8cf8c9e8f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_8755f31e",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeRemovedCommand.java",
         "patchSetId": 2
@@ -125,6 +143,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_fd46c822",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeRemovedCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-03-25T23:25:12Z",
+      "side": 1,
+      "message": "yeah agree for uuid you have to read from operational data store.",
+      "parentUuid": "5a93c517_42cd9930",
+      "revId": "3fb61354a30ecc3a06c22cd059680cd8cf8c9e8f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_2732df10",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeRemovedCommand.java",
         "patchSetId": 2
@@ -154,6 +190,24 @@
       "side": 1,
       "message": "Line 60-62 mutate the Open_Vswitch table... the attempt at delete fails otherwise (this is one of the things I discovered looking for ways not to do the read ;) ).",
       "parentUuid": "5a93c517_2732df10",
+      "revId": "3fb61354a30ecc3a06c22cd059680cd8cf8c9e8f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_7d52b8de",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeRemovedCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-03-25T23:25:12Z",
+      "side": 1,
+      "message": "oh boy, i am really sleepy :)",
+      "parentUuid": "5a93c517_e2d145ce",
       "revId": "3fb61354a30ecc3a06c22cd059680cd8cf8c9e8f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

@@ -34,6 +34,24 @@
       "revId": "e77b373be6f1562ceb04cefd39d3086c5589235d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_78a965de",
+        "filename": "schemas/openvswitch/src/main/java/org/opendaylight/ovsdb/schema/openvswitch/Interface.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-03-26T14:14:08Z",
+      "side": 1,
+      "message": "Yes, i think Integer should work here, given it\u0027s max range is 2^31. Ryan can you change the return type getOpenFlowPortRequestColumn to Set\u003cInteger\u003e as well and see if anything breaks.Ideally whatever getOpenFlowPortRequestColumn is returning should be the input type of setOpenFlowPortRequest().",
+      "parentUuid": "5a93c517_556eb402",
+      "revId": "e77b373be6f1562ceb04cefd39d3086c5589235d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

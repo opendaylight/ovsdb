@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_7e806d46",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/impl/EventDispatcherImplTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-26T20:59:47Z",
+      "side": 1,
+      "message": "there isn\u0027t a need to over document the code with obvious comments. The code could be self documenting by adding a log string to the assert. That might be cleaner.",
+      "range": {
+        "startLine": 64,
+        "startChar": 16,
+        "endLine": 64,
+        "endChar": 20
+      },
+      "revId": "14eee0353df762660cc4ed97fde8e501ba1fdc48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

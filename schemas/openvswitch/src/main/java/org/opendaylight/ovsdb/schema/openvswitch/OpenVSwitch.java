@@ -96,5 +96,15 @@ public interface OpenVSwitch extends TypedBaseTable<GenericTableSchema> {
     public Column<GenericTableSchema, Set<String>> getSystemVersionColumn();
     @TypedColumn(name="system_version", method=MethodType.SETDATA, fromVersion="1.0.0")
     public void setSystemVersion(Set<String> systemVersion);
+    
+    @TypedColumn(name="datapath_types", method=MethodType.GETCOLUMN, fromVersion="7.12.1")
+    public Column<GenericTableSchema, Set<String>> getDatapathTypesColumn();
+    @TypedColumn(name="datapath_types", method=MethodType.SETDATA, fromVersion="7.12.1")
+    public void setDatapathTypes(Set<String> datapath_types);
+    
+    @TypedColumn(name="iface_types", method=MethodType.GETCOLUMN, fromVersion="7.12.1")
+    public Column<GenericTableSchema, Set<String>> getIfaceTypesColumn();
+    @TypedColumn(name="iface_types", method=MethodType.SETDATA, fromVersion="7.12.1")
+    public void setIfaceTypes(Set<String> iface_types);
 
 }

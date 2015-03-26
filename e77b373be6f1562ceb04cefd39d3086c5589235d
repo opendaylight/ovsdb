@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_75bad06f",
+        "filename": "schemas/openvswitch/src/main/java/org/opendaylight/ovsdb/schema/openvswitch/Interface.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-26T13:35:24Z",
+      "side": 1,
+      "message": "The type in the spec is integer with rang 1 to 65279 so we really only need 4bits. I guess they chop the range to 65279 because things like 0xffff are special ports.\n\nCould we find a way to use a smaller size and cap the range? I don\u0027t have any idea what that means, but at a minimum something smaller than a Long is good.",
+      "revId": "e77b373be6f1562ceb04cefd39d3086c5589235d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

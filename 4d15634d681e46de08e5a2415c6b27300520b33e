@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_35ac4835",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 334,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-26T13:37:27Z",
+      "side": 1,
+      "message": "Is it possible to use a smaller value here to type it closer to signed 4 bits? Ask Ed what is possible or if we should even worry about it.",
+      "revId": "4d15634d681e46de08e5a2415c6b27300520b33e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -29,6 +29,7 @@ import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.OvsdbClientKey;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
@@ -69,6 +70,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                 UUID portUUID = bridgePorts.next();
                 for (Port port : portUpdatedRows) {
                     if (portUUID.equals(port.getUuid())) {
+                        Collection<Long> vlanId = port.getTagColumn().getData();
                         bridgeName = bridge.getName();
                         NodeId bridgeId = SouthboundMapper.createManagedNodeId(
                                 getKey(), new OvsdbBridgeName(bridgeName));
@@ -97,6 +99,11 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                             entry.setTpId(tpId);
                             ovsdbTerminationPointBuilder
                                     .setName(port.getName());
+                            // Not sure if it's safe to extract the first value
+                            // The yang model expect 1 value (leaf) maybe if should be a list ?
+                            Iterator<Long> itr = vlanId.iterator();
+                            int id = itr.next().intValue();
+                            ovsdbTerminationPointBuilder.setVlanTag(new VlanId(id));
                             ovsdbTerminationPointBuilder.setPortUuid(new Uuid(
                                     port.getUuid().toString()));
                             Column<GenericTableSchema, Set<UUID>> iface = port.getInterfacesColumn();

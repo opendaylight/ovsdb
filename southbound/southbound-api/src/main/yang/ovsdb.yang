@@ -114,7 +114,7 @@ module ovsdb {
     }
 
     identity ovsdb-fail-mode-secure {
-        definition "Identity for ovsdb-failmode standalone";
+        description "Identity for ovsdb-failmode standalone";
         base ovsdb-fail-mode-base;
     }
 

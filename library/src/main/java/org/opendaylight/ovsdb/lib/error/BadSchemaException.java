@@ -14,11 +14,11 @@ package org.opendaylight.ovsdb.lib.error;
  * BadSchema exception is thrown when the received schema is invalid
  */
 public class BadSchemaException extends RuntimeException {
-    public BadSchemaException(String message){
+    public BadSchemaException(String message) {
         super(message);
     }
 
-    public BadSchemaException(String message, Throwable cause){
+    public BadSchemaException(String message, Throwable cause) {
         super(message, cause);
     }
 

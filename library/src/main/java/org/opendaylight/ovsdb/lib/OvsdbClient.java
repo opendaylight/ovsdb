@@ -68,8 +68,9 @@ public interface OvsdbClient {
      *                       handle is used to later cancel ({@link #cancelMonitor(MonitorHandle)}) the monitor.
      * @param callback receives the monitor response
      */
-    public <E extends TableSchema<E>> TableUpdates monitor(DatabaseSchema schema, List<MonitorRequest<E>> monitorRequests,
-                                 MonitorCallBack callback);
+    public <E extends TableSchema<E>> TableUpdates monitor(DatabaseSchema schema,
+                                                           List<MonitorRequest<E>> monitorRequests,
+                                                           MonitorCallBack callback);
 
     /**
      * Cancels an existing monitor method.
@@ -118,7 +119,7 @@ public interface OvsdbClient {
 
     public void disconnect();
 
-    public DatabaseSchema getDatabaseSchema (String dbName);
+    public DatabaseSchema getDatabaseSchema(String dbName);
 
     /**
      * User friendly convenient methods that make use of TyperUtils.getTypedRowWrapper to create a Typed Row Proxy
@@ -142,9 +143,11 @@ public interface OvsdbClient {
      * User friendly convenient method to get a Typed Row Proxy given a Typed Table Class and the Row to be wrapped.
      *
      * @param klazz Typed Interface
-     * @param row The actual Row that the wrapper is operating on. It can be null if the caller is just interested in getting ColumnSchema.
+     * @param row The actual Row that the wrapper is operating on. It can be null if the caller
+     *            is just interested in getting ColumnSchema.
      * @return Proxy wrapper for the actual raw Row class.
      */
-    public <T extends TypedBaseTable<?>> T getTypedRowWrapper(final Class<T> klazz, final Row<GenericTableSchema> row);
+    public <T extends TypedBaseTable<?>> T getTypedRowWrapper(final Class<T> klazz,
+                                                              final Row<GenericTableSchema> row);
 
 }

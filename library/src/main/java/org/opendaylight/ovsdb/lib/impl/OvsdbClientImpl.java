@@ -97,7 +97,8 @@ public class OvsdbClientImpl implements OvsdbClient {
                         logger.info("callback received with context {}, but no known handler. Ignoring!", key);
                         return;
                     }
-                    TableUpdates updates = _transformingCallback(updateNotification.getUpdates(), callbackContext.schema);
+                    TableUpdates updates = transformingCallback(updateNotification.getUpdates(),
+                            callbackContext.schema);
                     monitorCallBack.update(updates, callbackContext.schema);
                 }
 
@@ -117,12 +118,12 @@ public class OvsdbClientImpl implements OvsdbClient {
     }
 
 
-    protected TableUpdates _transformingCallback(JsonNode tableUpdatesJson, DatabaseSchema dbSchema) {
+    protected TableUpdates transformingCallback(JsonNode tableUpdatesJson, DatabaseSchema dbSchema) {
         //todo(ashwin): we should move all the JSON parsing logic to a utility class
         if (tableUpdatesJson instanceof ObjectNode) {
             Map<String, TableUpdate> tableUpdateMap = Maps.newHashMap();
             ObjectNode updatesJson = (ObjectNode) tableUpdatesJson;
-            for (Iterator<Map.Entry<String,JsonNode>> itr = updatesJson.fields(); itr.hasNext();){
+            for (Iterator<Map.Entry<String,JsonNode>> itr = updatesJson.fields(); itr.hasNext();) {
                 Map.Entry<String, JsonNode> entry = itr.next();
 
                 DatabaseSchema databaseSchema = this.schema.get(dbSchema.getName());
@@ -140,8 +141,8 @@ public class OvsdbClientImpl implements OvsdbClient {
 
         //todo, we may not need transactionbuilder if we can have JSON objects
         TransactBuilder builder = new TransactBuilder(dbSchema);
-        for (Operation o : operations) {
-            builder.addOperation(o);
+        for (Operation operation : operations) {
+            builder.addOperation(operation);
         }
 
         return FutureTransformUtils.transformTransactResponse(rpc.transact(builder), operations);
@@ -175,7 +176,7 @@ public class OvsdbClientImpl implements OvsdbClient {
         } catch (InterruptedException | ExecutionException e) {
             return null;
         }
-        TableUpdates updates = _transformingCallback(result, dbSchema);
+        TableUpdates updates = transformingCallback(result, dbSchema);
         return updates;
     }
 
@@ -248,10 +249,10 @@ public class OvsdbClientImpl implements OvsdbClient {
                         @Override
                         public DatabaseSchema apply(Map<String, DatabaseSchema> result) {
                             if (result.containsKey(database)) {
-                                DatabaseSchema s = result.get(database);
-                                s.populateInternallyGeneratedColumns();
-                                OvsdbClientImpl.this.schema.put(database, s);
-                                return s;
+                                DatabaseSchema dbSchema = result.get(database);
+                                dbSchema.populateInternallyGeneratedColumns();
+                                OvsdbClientImpl.this.schema.put(database, dbSchema);
+                                return dbSchema;
                             } else {
                                 return null;
                             }
@@ -265,11 +266,11 @@ public class OvsdbClientImpl implements OvsdbClient {
     private ListenableFuture<Map<String, DatabaseSchema>> getSchemaFromDevice(final List<String> dbNames) {
         Map<String, DatabaseSchema> schema = Maps.newHashMap();
         SettableFuture<Map<String, DatabaseSchema>> future = SettableFuture.create();
-        _populateSchema(dbNames, schema, future);
+        populateSchema(dbNames, schema, future);
         return future;
     }
 
-    private void _populateSchema(final List<String> dbNames,
+    private void populateSchema(final List<String> dbNames,
                                  final Map<String, DatabaseSchema> schema,
                                  final SettableFuture<Map<String, DatabaseSchema>> sfuture) {
 
@@ -284,7 +285,7 @@ public class OvsdbClientImpl implements OvsdbClient {
                         try {
                             schema.put(dbNames.get(0), DatabaseSchema.fromJson(dbNames.get(0), jsonNode));
                             if (schema.size() > 1 && !sfuture.isCancelled()) {
-                                _populateSchema(dbNames.subList(1, dbNames.size()), schema, sfuture);
+                                populateSchema(dbNames.subList(1, dbNames.size()), schema, sfuture);
                             } else if (schema.size() == 1) {
                                 sfuture.set(schema);
                             }
@@ -315,7 +316,7 @@ public class OvsdbClientImpl implements OvsdbClient {
     }
 
     @Override
-    public DatabaseSchema getDatabaseSchema (String dbName) {
+    public DatabaseSchema getDatabaseSchema(String dbName) {
         return schema.get(dbName);
     }
 
@@ -327,7 +328,7 @@ public class OvsdbClientImpl implements OvsdbClient {
      * @param klazz Typed Class that represents a Table
      * @return DatabaseSchema that matches a Typed Table Class
      */
-    private <T> DatabaseSchema getDatabaseSchemaForTypedTable (Class <T> klazz) {
+    private <T> DatabaseSchema getDatabaseSchemaForTypedTable(Class<T> klazz) {
         TypedTable typedTable = klazz.getAnnotation(TypedTable.class);
         if (typedTable != null) {
             return this.getDatabaseSchema(typedTable.database());
@@ -365,7 +366,8 @@ public class OvsdbClientImpl implements OvsdbClient {
      * User friendly convenient method to get a Typed Row Proxy given a Typed Table Class and the Row to be wrapped.
      *
      * @param klazz Typed Interface
-     * @param row The actual Row that the wrapper is operating on. It can be null if the caller is just interested in getting ColumnSchema.
+     * @param row The actual Row that the wrapper is operating on.
+     *            It can be null if the caller is just interested in getting ColumnSchema.
      * @return Proxy wrapper for the actual raw Row class.
      */
     @Override

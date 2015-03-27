@@ -94,18 +94,23 @@ public class Row<E extends TableSchema<E>> {
      */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Row other = (Row) obj;
         if (columns == null) {
-            if (other.columns != null)
+            if (other.columns != null) {
                 return false;
-        } else if (!columns.equals(other.columns))
+            }
+        } else if (!columns.equals(other.columns)) {
             return false;
+        }
         return true;
     }
 }

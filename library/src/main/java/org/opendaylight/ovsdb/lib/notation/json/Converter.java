@@ -128,6 +128,8 @@ public class Converter {
                         }
                     case STRING:
                         return node.asText();
+                    default:
+                        break;
                 }
             }
 

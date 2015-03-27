@@ -36,10 +36,10 @@ public class Version implements Comparable<Version> {
     public static final Version NULL = new Version(0,0,0);
     public static final String NULL_VERSION_STRING = "0.0.0";
 
-    public static Version fromString(String version){
+    public static Version fromString(String version) {
         final Matcher matcher = Version.PATTERN.matcher(version);
         if (!matcher.find()) {
-            throw new IllegalArgumentException("<"+version+"> does not match format "+Version.FORMAT);
+            throw new IllegalArgumentException("<" + version + "> does not match format " + Version.FORMAT);
         }
         int major = Integer.valueOf(matcher.group(1));
         int minor = Integer.valueOf(matcher.group(2));
@@ -47,7 +47,7 @@ public class Version implements Comparable<Version> {
         return new Version(major, minor, patch);
     }
 
-    public String toString(){
+    public String toString() {
         return "" + major + "." + minor + "." + patch;
     }
 
@@ -79,15 +79,25 @@ public class Version implements Comparable<Version> {
     // ToDo: While format is X.X.X semantics are schema dependent.
     // Therefore we should allow equals to be overridden by the schema
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
 
-        Version version = (Version) o;
+        Version version = (Version) object;
 
-        if (major != version.major) return false;
-        if (minor != version.minor) return false;
-        if (patch != version.patch) return false;
+        if (major != version.major) {
+            return false;
+        }
+        if (minor != version.minor) {
+            return false;
+        }
+        if (patch != version.patch) {
+            return false;
+        }
 
         return true;
     }
@@ -103,15 +113,27 @@ public class Version implements Comparable<Version> {
     // ToDo: While format is X.X.X semantics are schema dependent
     // Therefore we should allow compareTo to be overridden by the schema
     @Override
-    public int compareTo(Version o) {
-        if (this.equals(o)) return 0;
-        if (this.major > o.major) return 1;
-        if (this.major < o.major) return -1;
+    public int compareTo(Version version) {
+        if (this.equals(version)) {
+            return 0;
+        }
+        if (this.major > version.major) {
+            return 1;
+        }
+        if (this.major < version.major) {
+            return -1;
+        }
         // major is equal
-        if (this.minor > o.minor) return 1;
-        if (this.minor < o.minor) return -1;
+        if (this.minor > version.minor) {
+            return 1;
+        }
+        if (this.minor < version.minor) {
+            return -1;
+        }
         // minor is equal
-        if (this.patch > o.patch) return 1;
+        if (this.patch > version.patch) {
+            return 1;
+        }
         // must be less than
         return -1;
     }

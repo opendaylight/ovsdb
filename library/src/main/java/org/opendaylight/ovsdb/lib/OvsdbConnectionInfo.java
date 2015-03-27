@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-@XmlRootElement(name="Connection")
+@XmlRootElement(name = "Connection")
 public class OvsdbConnectionInfo {
     public enum ConnectionType {
         ACTIVE, PASSIVE
@@ -38,27 +38,27 @@ public class OvsdbConnectionInfo {
         this.type = type;
     }
 
-    @XmlElement(name="remoteAddress")
+    @XmlElement(name = "remoteAddress")
     public InetAddress getRemoteAddress() {
         return ((InetSocketAddress)channel.remoteAddress()).getAddress();
     }
-    @XmlElement(name="remotePort")
+    @XmlElement(name = "remotePort")
     public int getRemotePort() {
         return ((InetSocketAddress)channel.remoteAddress()).getPort();
     }
-    @XmlElement(name="localAddress")
+    @XmlElement(name = "localAddress")
     public InetAddress getLocalAddress() {
         return ((InetSocketAddress)channel.localAddress()).getAddress();
     }
-    @XmlElement(name="localPort")
+    @XmlElement(name = "localPort")
     public int getLocalPort() {
         return ((InetSocketAddress)channel.localAddress()).getPort();
     }
-    @XmlElement(name="connectionType")
+    @XmlElement(name = "connectionType")
     public ConnectionType getType() {
         return type;
     }
-    @XmlElement(name="clientCertificate")
+    @XmlElement(name = "clientCertificate")
     public Certificate getCertificate() throws SSLPeerUnverifiedException {
         SslHandler sslHandler = (SslHandler) channel.pipeline().get("ssl");
         if (sslHandler != null) {
@@ -80,16 +80,20 @@ public class OvsdbConnectionInfo {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         OvsdbConnectionInfo other = (OvsdbConnectionInfo) obj;
         if (channel == null) {
-            if (other.channel != null)
+            if (other.channel != null) {
                 return false;
+            }
         } else if (!getRemoteAddress().equals(other.getRemoteAddress())) {
             return false;
         } else if (!getLocalAddress().equals(other.getLocalAddress())) {
@@ -99,17 +103,18 @@ public class OvsdbConnectionInfo {
         } else if (getLocalPort() != other.getLocalPort()) {
             return false;
         }
-        if (type != other.type)
+        if (type != other.type) {
             return false;
+        }
         return true;
     }
 
     @Override
     public String toString() {
-        return "ConnectionInfo [Remote-address=" + this.getRemoteAddress().getHostAddress() +
-                             ", Remote-port=" + this.getRemotePort() +
-                             ", Local-address" + this.getLocalAddress().getHostAddress() +
-                             ", Local-port=" + this.getLocalPort() +
-                             ", type=" + type + "]";
+        return "ConnectionInfo [Remote-address=" + this.getRemoteAddress().getHostAddress()
+                + ", Remote-port=" + this.getRemotePort()
+                + ", Local-address" + this.getLocalAddress().getHostAddress()
+                + ", Local-port=" + this.getLocalPort()
+                + ", type=" + type + "]";
     }
 }

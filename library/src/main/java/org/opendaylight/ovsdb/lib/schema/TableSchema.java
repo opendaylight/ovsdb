@@ -70,8 +70,8 @@ public abstract class TableSchema<E extends TableSchema<E>> {
 
     public <E extends TableSchema<E>> E as(Class<E> clazz) {
         try {
-            Constructor<E> e = clazz.getConstructor(TableSchema.class);
-            return e.newInstance(this);
+            Constructor<E> instance = clazz.getConstructor(TableSchema.class);
+            return instance.newInstance(this);
         } catch (Exception e) {
             throw new RuntimeException("exception constructing instance of clazz " + clazz, e);
         }
@@ -131,11 +131,11 @@ public abstract class TableSchema<E extends TableSchema<E>> {
             Map.Entry<String, JsonNode> idOldNew = fields.next();
             String uuid = idOldNew.getKey();
 
-            ObjectNode new_ = (ObjectNode) idOldNew.getValue().get("new");
-            ObjectNode old = (ObjectNode) idOldNew.getValue().get("old");
+            ObjectNode newObjectNode = (ObjectNode) idOldNew.getValue().get("new");
+            ObjectNode oldObjectNode = (ObjectNode) idOldNew.getValue().get("old");
 
-            Row<E> newRow = new_ != null ? createRow(new_) : null;
-            Row<E> oldRow = old != null ? createRow(old) : null;
+            Row<E> newRow = newObjectNode != null ? createRow(newObjectNode) : null;
+            Row<E> oldRow = oldObjectNode != null ? createRow(oldObjectNode) : null;
 
             tableUpdate.addRow(new UUID(uuid), oldRow, newRow);
         }
@@ -154,8 +154,8 @@ public abstract class TableSchema<E extends TableSchema<E>> {
              * Hence adding some safety checks around that.
              */
             if (schema != null) {
-                Object o = schema.valueFromJson(next.getValue());
-                columns.add(new Column<>(schema, o));
+                Object value = schema.valueFromJson(next.getValue());
+                columns.add(new Column<>(schema, value));
             }
         }
         return new Row<>(this, columns);

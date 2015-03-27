@@ -74,13 +74,13 @@ import com.google.common.collect.Sets;
  */
 public class OvsdbConnectionService implements OvsdbConnection {
     private static final Logger logger = LoggerFactory.getLogger(OvsdbConnectionService.class);
-    private final static int NUM_THREADS = 3;
+    private static final int NUM_THREADS = 3;
 
     // Singleton Service object that can be used in Non-OSGi environment
     private static Set<OvsdbConnectionListener> connectionListeners = Sets.newHashSet();
     private static Map<OvsdbClient, Channel> connections = Maps.newHashMap();
     private static OvsdbConnection connectionService;
-    private volatile static boolean singletonCreated = false;
+    private static volatile boolean singletonCreated = false;
 
     public static OvsdbConnection getService() {
         if (connectionService == null) {
@@ -108,7 +108,7 @@ public class OvsdbConnectionService implements OvsdbConnection {
                     if (sslContext != null) {
                         /* First add ssl handler if ssl context is given */
                         SSLEngine engine =
-                           sslContext.createSSLEngine(address.toString(), port);
+                            sslContext.createSSLEngine(address.toString(), port);
                         engine.setUseClientMode(true);
                         channel.pipeline().addLast("ssl", new SslHandler(engine));
                     }
@@ -122,7 +122,8 @@ public class OvsdbConnectionService implements OvsdbConnection {
 
             ChannelFuture future = bootstrap.connect(address, port).sync();
             Channel channel = future.channel();
-            OvsdbClient client = getChannelClient(channel, ConnectionType.ACTIVE, Executors.newFixedThreadPool(NUM_THREADS));
+            OvsdbClient client = getChannelClient(channel, ConnectionType.ACTIVE,
+                    Executors.newFixedThreadPool(NUM_THREADS));
             return client;
         } catch (InterruptedException e) {
             System.out.println("Thread was interrupted during connect");
@@ -132,7 +133,9 @@ public class OvsdbConnectionService implements OvsdbConnection {
 
     @Override
     public void disconnect(OvsdbClient client) {
-        if (client == null) return;
+        if (client == null) {
+            return;
+        }
         Channel channel = connections.get(client);
         if (channel != null) {
             channel.disconnect();
@@ -175,8 +178,7 @@ public class OvsdbConnectionService implements OvsdbConnection {
      * be overridden using the ovsdb.listenPort system property.
      */
     @Override
-    synchronized
-    public boolean startOvsdbManager(final int ovsdbListenPort) {
+    public synchronized boolean startOvsdbManager(final int ovsdbListenPort) {
         if (!singletonCreated) {
             new Thread() {
                 @Override
@@ -197,8 +199,7 @@ public class OvsdbConnectionService implements OvsdbConnection {
      * 6640 which can be overridden using the ovsdb.listenPort system property.
      */
     @Override
-    synchronized
-    public boolean startOvsdbManagerWithSsl(final int ovsdbListenPort,
+    public synchronized boolean startOvsdbManagerWithSsl(final int ovsdbListenPort,
                                      final SSLContext sslContext) {
         if (!singletonCreated) {
             new Thread() {
@@ -230,36 +231,37 @@ public class OvsdbConnectionService implements OvsdbConnection {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
-            ServerBootstrap b = new ServerBootstrap();
-            b.group(bossGroup, workerGroup)
-             .channel(NioServerSocketChannel.class)
-             .option(ChannelOption.SO_BACKLOG, 100)
-             .handler(new LoggingHandler(LogLevel.INFO))
-             .childHandler(new ChannelInitializer<SocketChannel>() {
-                 @Override
-                 public void initChannel(SocketChannel channel) throws Exception {
-                     logger.debug("New Passive channel created : "+ channel.toString());
-                     if (sslContext != null) {
-                         /* Add SSL handler first if SSL context is provided */
-                         SSLEngine engine = sslContext.createSSLEngine();
-                         engine.setUseClientMode(false); // work in a server mode
-                         engine.setNeedClientAuth(true); // need client authentication
-                         channel.pipeline().addLast("ssl", new SslHandler(engine));
-                     }
+            ServerBootstrap serverBootstrap = new ServerBootstrap();
+            serverBootstrap.group(bossGroup, workerGroup)
+                    .channel(NioServerSocketChannel.class)
+                    .option(ChannelOption.SO_BACKLOG, 100)
+                    .handler(new LoggingHandler(LogLevel.INFO))
+                    .childHandler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        public void initChannel(SocketChannel channel) throws Exception {
+                            logger.debug("New Passive channel created : {}", channel);
+                            if (sslContext != null) {
+                                /* Add SSL handler first if SSL context is provided */
+                                SSLEngine engine = sslContext.createSSLEngine();
+                                engine.setUseClientMode(false); // work in a server mode
+                                engine.setNeedClientAuth(true); // need client authentication
+                                channel.pipeline().addLast("ssl", new SslHandler(engine));
+                            }
 
-                     channel.pipeline().addLast(
-                             new JsonRpcDecoder(100000),
-                             new StringEncoder(CharsetUtil.UTF_8),
-                             new ExceptionHandler());
+                            channel.pipeline().addLast(
+                                 new JsonRpcDecoder(100000),
+                                 new StringEncoder(CharsetUtil.UTF_8),
+                                 new ExceptionHandler());
 
-                     handleNewPassiveConnection(channel);
-                 }
-             });
-            b.option(ChannelOption.TCP_NODELAY, true);
-            b.option(ChannelOption.RCVBUF_ALLOCATOR, new AdaptiveRecvByteBufAllocator(65535, 65535, 65535));
+                            handleNewPassiveConnection(channel);
+                        }
+                    });
+            serverBootstrap.option(ChannelOption.TCP_NODELAY, true);
+            serverBootstrap.option(ChannelOption.RCVBUF_ALLOCATOR,
+                    new AdaptiveRecvByteBufAllocator(65535, 65535, 65535));
             // Start the server.
-            ChannelFuture f = b.bind(port).sync();
-            Channel serverListenChannel =  f.channel();
+            ChannelFuture channelFuture = serverBootstrap.bind(port).sync();
+            Channel serverListenChannel = channelFuture.channel();
             // Wait until the server socket is closed.
             serverListenChannel.closeFuture().sync();
         } catch (InterruptedException e) {
@@ -276,7 +278,8 @@ public class OvsdbConnectionService implements OvsdbConnection {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
-                OvsdbClient client = getChannelClient(channel, ConnectionType.PASSIVE, Executors.newFixedThreadPool(NUM_THREADS));
+                OvsdbClient client = getChannelClient(channel, ConnectionType.PASSIVE,
+                        Executors.newFixedThreadPool(NUM_THREADS));
 
                 SslHandler sslHandler = (SslHandler) channel.pipeline().get("ssl");
                 if (sslHandler != null) {

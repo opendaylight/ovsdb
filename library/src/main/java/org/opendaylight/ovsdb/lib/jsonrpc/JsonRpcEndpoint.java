@@ -80,7 +80,9 @@ public class JsonRpcEndpoint {
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                 if (method.getName().equals(OvsdbRPC.REGISTER_CALLBACK_METHOD)) {
-                    if ((args == null) || args.length != 1 || !(args[0] instanceof OvsdbRPC.Callback)) return false;
+                    if ((args == null) || args.length != 1 || !(args[0] instanceof OvsdbRPC.Callback)) {
+                        return false;
+                    }
                     requestCallbacks.put(context, (OvsdbRPC.Callback)args[0]);
                     return true;
                 }
@@ -105,13 +107,13 @@ public class JsonRpcEndpoint {
                     }
                 }
 
-                String s = objectMapper.writeValueAsString(request);
-                logger.trace("getClient Request : {}", s);
+                String requestString = objectMapper.writeValueAsString(request);
+                logger.trace("getClient Request : {}", requestString);
 
                 SettableFuture<Object> sf = SettableFuture.create();
                 methodContext.put(request.getId(), new CallContext(request, method, sf));
 
-                nettyChannel.writeAndFlush(s);
+                nettyChannel.writeAndFlush(requestString);
 
                 return sf;
             }
@@ -123,13 +125,15 @@ public class JsonRpcEndpoint {
 
         logger.trace("Response : {}", response.toString());
         CallContext returnCtxt = methodContext.get(response.get("id").asText());
-        if (returnCtxt == null) return;
+        if (returnCtxt == null) {
+            return;
+        }
 
         if (ListenableFuture.class == returnCtxt.getMethod().getReturnType()) {
             TypeToken<?> retType = TypeToken.of(
                     returnCtxt.getMethod().getGenericReturnType())
                     .resolveType(ListenableFuture.class.getMethod("get").getGenericReturnType());
-            JavaType javaType =  TypeFactory.defaultInstance().constructType (retType.getType());
+            JavaType javaType =  TypeFactory.defaultInstance().constructType(retType.getType());
 
             JsonNode result = response.get("result");
             Object result1 = objectMapper.convertValue(result, javaType);
@@ -152,17 +156,17 @@ public class JsonRpcEndpoint {
         OvsdbRPC.Callback callback = requestCallbacks.get(context);
         if (callback != null) {
             Method[] methods = callback.getClass().getDeclaredMethods();
-            for (Method m : methods) {
-                if (m.getName().equals(request.getMethod())) {
-                    Class<?>[] parameters = m.getParameterTypes();
+            for (Method method : methods) {
+                if (method.getName().equals(request.getMethod())) {
+                    Class<?>[] parameters = method.getParameterTypes();
                     JsonNode params = requestJson.get("params");
                     Object param = objectMapper.convertValue(params, parameters[1]);
                     try {
-                        Invokable from = Invokable.from(m);
+                        Invokable from = Invokable.from(method);
                         from.setAccessible(true);
                         from.invoke(callback, context, param);
                     } catch (IllegalAccessException | InvocationTargetException e) {
-                        logger.error("Unable to invoke callback " + m.getName(), e);
+                        logger.error("Unable to invoke callback " + method.getName(), e);
                     }
                     return;
                 }
@@ -174,12 +178,12 @@ public class JsonRpcEndpoint {
         if (request.getMethod().equals("echo")) {
             JsonRpc10Response response = new JsonRpc10Response(request.getId());
             response.setError(null);
-            String s = null;
+            String jsonString = null;
             try {
-                s = objectMapper.writeValueAsString(response);
-                nettyChannel.writeAndFlush(s);
+                jsonString = objectMapper.writeValueAsString(response);
+                nettyChannel.writeAndFlush(jsonString);
             } catch (JsonProcessingException e) {
-                logger.error("Exception while processing JSON string " + s, e );
+                logger.error("Exception while processing JSON string " + jsonString, e );
             }
             return;
         }

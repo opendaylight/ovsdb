@@ -28,8 +28,8 @@ public class OvsdbSetSerializer extends JsonSerializer<OvsdbSet<?>> {
         generator.writeString("set");
         generator.writeStartArray();
         Set<?> javaSet = set.delegate();
-        for (Object t : javaSet) {
-            generator.writeObject(t);
+        for (Object setObject : javaSet) {
+            generator.writeObject(setObject);
         }
         generator.writeEndArray();
         generator.writeEndArray();

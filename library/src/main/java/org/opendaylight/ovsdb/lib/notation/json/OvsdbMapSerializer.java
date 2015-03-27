@@ -27,10 +27,10 @@ public class OvsdbMapSerializer extends JsonSerializer<OvsdbMap<?,?>> {
         generator.writeString("map");
         generator.writeStartArray();
         Map<?,?> javaMap = map.delegate();
-        for (Object t : javaMap.keySet()) {
+        for (Object set : javaMap.keySet()) {
             generator.writeStartArray();
-            generator.writeObject(t);
-            generator.writeObject(javaMap.get(t));
+            generator.writeObject(set);
+            generator.writeObject(javaMap.get(set));
             generator.writeEndArray();
         }
         generator.writeEndArray();

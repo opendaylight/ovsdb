@@ -19,40 +19,40 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 
 public  class OvsdbTypesIdResolver implements TypeIdResolver {
 
-        private JavaType baseType;
+    private JavaType baseType;
 
-        @Override
-        public void init(JavaType bt) {
-            this.baseType = bt;
-        }
-
-        @Override
-        public String idFromValue(Object value) {
-            throw new UnsupportedOperationException("not yet done");
-        }
-
-        @Override
-        public String idFromValueAndType(Object value, Class<?> suggestedType) {
-            throw new UnsupportedOperationException("not yet done");
-        }
-
-        @Override
-        public String idFromBaseType() {
-            throw new UnsupportedOperationException("not yet done");
-        }
-
-        @Override
-        public JavaType typeFromId(String id) {
-            if ("set".equals(id)) {
-                return TypeFactory.defaultInstance().constructCollectionType(OvsdbSet.class, Object.class);
-            } else if ("uuid".equals(id) || "named-uuid".equals(id)) {
-                return TypeFactory.defaultInstance().constructType(UUID.class);
-            }
-            return null;
-        }
-
-        @Override
-        public JsonTypeInfo.Id getMechanism() {
-            throw new UnsupportedOperationException("not yet done");
-        }
+    @Override
+    public void init(JavaType bt) {
+        this.baseType = bt;
     }
+
+    @Override
+    public String idFromValue(Object value) {
+        throw new UnsupportedOperationException("not yet done");
+    }
+
+    @Override
+    public String idFromValueAndType(Object value, Class<?> suggestedType) {
+        throw new UnsupportedOperationException("not yet done");
+    }
+
+    @Override
+    public String idFromBaseType() {
+        throw new UnsupportedOperationException("not yet done");
+    }
+
+    @Override
+    public JavaType typeFromId(String id) {
+        if ("set".equals(id)) {
+            return TypeFactory.defaultInstance().constructCollectionType(OvsdbSet.class, Object.class);
+        } else if ("uuid".equals(id) || "named-uuid".equals(id)) {
+            return TypeFactory.defaultInstance().constructType(UUID.class);
+        }
+        return null;
+    }
+
+    @Override
+    public JsonTypeInfo.Id getMechanism() {
+        throw new UnsupportedOperationException("not yet done");
+    }
+}

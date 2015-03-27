@@ -39,9 +39,9 @@ public abstract class ColumnType {
         this.max = max;
     }
 
-    private static ColumnType columns[] = new ColumnType[]{
-            new AtomicColumnType(),
-            new KeyValuedColumnType()
+    private static ColumnType[] columns = new ColumnType[] {
+        new AtomicColumnType(),
+        new KeyValuedColumnType()
     };
 
 
@@ -98,8 +98,9 @@ public abstract class ColumnType {
 
     /*
      * Per RFC 7047, Section 3.2 <type> :
-     * If "min" or "max" is not specified, each defaults to 1.  If "max" is specified as "unlimited", then there is no specified maximum
-     * number of elements, although the implementation will enforce some limit.  After considering defaults, "min" must be exactly 0 or
+     * If "min" or "max" is not specified, each defaults to 1.  If "max" is specified as "unlimited",
+     * then there is no specified maximum number of elements, although the implementation will
+     * enforce some limit.  After considering defaults, "min" must be exactly 0 or
      * exactly 1, "max" must be at least 1, and "max" must be greater than or equal to "min".
      *
      * If "min" and "max" are both 1 and "value" is not specified, the
@@ -115,11 +116,11 @@ public abstract class ColumnType {
 
     @Override
     public String toString() {
-        return "ColumnType{" +
-                "baseType=" + baseType +
-                ", min=" + min +
-                ", max=" + max +
-                '}';
+        return "ColumnType{"
+                + "baseType=" + baseType
+                + ", min=" + min
+                + ", max=" + max
+                + '}';
     }
 
     @Override
@@ -135,22 +136,29 @@ public abstract class ColumnType {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ColumnType other = (ColumnType) obj;
         if (baseType == null) {
-            if (other.baseType != null)
+            if (other.baseType != null) {
                 return false;
-        } else if (!baseType.equals(other.baseType))
+            }
+        } else if (!baseType.equals(other.baseType)) {
             return false;
-        if (max != other.max)
+        }
+        if (max != other.max) {
             return false;
-        if (min != other.min)
+        }
+        if (min != other.min) {
             return false;
+        }
         return true;
     }
 
@@ -180,7 +188,7 @@ public abstract class ColumnType {
                 }
 
                 if ((node = json.get("max")) != null) {
-                    if (node.isNumber()){
+                    if (node.isNumber()) {
                         atomicColumnType.setMax(node.asLong());
                     } else if ("unlimited".equals(node.asText())) {
                         atomicColumnType.setMax(Long.MAX_VALUE);
@@ -196,10 +204,10 @@ public abstract class ColumnType {
         public Object valueFromJson(JsonNode value) {
             if (isMultiValued()) {
                 OvsdbSet<Object> result = new OvsdbSet<Object>();
-                if(value.isArray()) {
+                if (value.isArray()) {
                     if (value.size() == 2) {
                         if (value.get(0).isTextual() && "set".equals(value.get(0).asText())) {
-                            for(JsonNode node: value.get(1)) {
+                            for (JsonNode node: value.get(1)) {
                                 result.add(getBaseType().toValue(node));
                             }
                         } else {
@@ -252,7 +260,7 @@ public abstract class ColumnType {
             }
 
             if ((node = json.get("max")) != null) {
-                if (node.isLong()){
+                if (node.isLong()) {
                     keyValueColumnType.setMax(node.asLong());
                 } else if (node.isTextual() && "unlimited".equals(node.asText())) {
                     keyValueColumnType.setMax(Long.MAX_VALUE);
@@ -291,7 +299,7 @@ public abstract class ColumnType {
 
         @Override
         public String toString() {
-            return "KeyValuedColumnType [keyType=" + keyType + " "+ super.toString() +"]";
+            return "KeyValuedColumnType [keyType=" + keyType + " " + super.toString() + "]";
         }
 
         @Override
@@ -305,18 +313,23 @@ public abstract class ColumnType {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (!super.equals(obj))
+            }
+            if (!super.equals(obj)) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             KeyValuedColumnType other = (KeyValuedColumnType) obj;
             if (keyType == null) {
-                if (other.keyType != null)
+                if (other.keyType != null) {
                     return false;
-            } else if (!keyType.equals(other.keyType))
+                }
+            } else if (!keyType.equals(other.keyType)) {
                 return false;
+            }
             return true;
         }
     }

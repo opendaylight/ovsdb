@@ -29,7 +29,7 @@ public class GenericTableSchema extends TableSchema<GenericTableSchema> {
         super(tableName);
     }
 
-    public GenericTableSchema (TableSchema tableSchema) {
+    public GenericTableSchema(TableSchema tableSchema) {
         super(tableSchema.getName(), tableSchema.getColumnSchemas());
     }
 

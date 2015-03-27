@@ -23,7 +23,7 @@ public class Select<E extends TableSchema<E>> extends Operation<E> implements Co
     List<Condition> where = Lists.newArrayList();
     private List<String> columns = Lists.newArrayList();
 
-    public Select on(TableSchema schema){
+    public Select on(TableSchema schema) {
         this.setTableSchema(schema);
         return this;
     }

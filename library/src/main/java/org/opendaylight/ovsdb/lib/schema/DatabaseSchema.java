@@ -76,8 +76,8 @@ public class DatabaseSchema {
         try {
             return invokable.invoke(null, table);
         } catch (Exception e) {
-            String message = String.format("Not able to create instance of class %s using public constructor " +
-                    "that accepts TableSchema object", clazz);
+            String message = String.format("Not able to create instance of class %s using public constructor "
+                    + "that accepts TableSchema object", clazz);
             throw new IllegalArgumentException(message, e);
         }
     }
@@ -113,9 +113,13 @@ public class DatabaseSchema {
         this.name = name;
     }
 
-    public Version getVersion() { return version; }
+    public Version getVersion() {
+        return version;
+    }
 
-    public void setVersion(Version version) { this.version = version; }
+    public void setVersion(Version version) {
+        this.version = version;
+    }
 
     public void populateInternallyGeneratedColumns() {
         for (TableSchema tableSchema : tables.values()) {

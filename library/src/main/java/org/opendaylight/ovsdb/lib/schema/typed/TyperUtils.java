@@ -35,12 +35,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.reflect.Reflection;
 
 public class TyperUtils {
-    private static final String GET_STARTS_WITH="get";
-    private static final String SET_STARTS_WITH="set";
-    private static final String GETCOLUMN_ENDS_WITH="Column";
-    private static final String GETROW_ENDS_WITH="Row";
+    private static final String GET_STARTS_WITH = "get";
+    private static final String SET_STARTS_WITH = "set";
+    private static final String GETCOLUMN_ENDS_WITH = "Column";
+    private static final String GETROW_ENDS_WITH = "Row";
 
-    private static <T> String getTableName (Class<T> klazz) {
+    private static <T> String getTableName(Class<T> klazz) {
         TypedTable typedTable = klazz.getAnnotation(TypedTable.class);
         if (typedTable != null) {
             return typedTable.name();
@@ -53,11 +53,12 @@ public class TyperUtils {
         return dbSchema.table(tableName, GenericTableSchema.class);
     }
 
-    public static ColumnSchema<GenericTableSchema, Object> getColumnSchema(GenericTableSchema tableSchema, String columnName, Class<Object> metaClass) {
+    public static ColumnSchema<GenericTableSchema, Object>
+    getColumnSchema(GenericTableSchema tableSchema, String columnName, Class<Object> metaClass) {
         return tableSchema.column(columnName, metaClass);
     }
 
-    private static String getColumnName (Method method) {
+    private static String getColumnName(Method method) {
         TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
         if (typedColumn != null) {
             return typedColumn.name();
@@ -74,13 +75,14 @@ public class TyperUtils {
         if (isGetData(method) || isSetData(method)) {
             return method.getName().substring(index, method.getName().length()).toLowerCase();
         } else if (isGetColumn(method)) {
-            return method.getName().substring(index, method.getName().indexOf(GETCOLUMN_ENDS_WITH, index)).toLowerCase();
+            return method.getName().substring(index, method.getName().indexOf(GETCOLUMN_ENDS_WITH,
+                    index)).toLowerCase();
         }
 
         return null;
     }
 
-    private static boolean isGetTableSchema (Method method) {
+    private static boolean isGetTableSchema(Method method) {
         TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
         if (typedColumn != null) {
             return typedColumn.method().equals(MethodType.GETTABLESCHEMA) ? true : false;
@@ -88,7 +90,7 @@ public class TyperUtils {
         return false;
     }
 
-    private static boolean isGetRow (Method method) {
+    private static boolean isGetRow(Method method) {
         TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
         if (typedColumn != null) {
             return typedColumn.method().equals(MethodType.GETROW) ? true : false;
@@ -100,7 +102,7 @@ public class TyperUtils {
         return false;
     }
 
-    private static boolean isGetColumn (Method method) {
+    private static boolean isGetColumn(Method method) {
         TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
         if (typedColumn != null) {
             return typedColumn.method().equals(MethodType.GETCOLUMN) ? true : false;
@@ -112,7 +114,7 @@ public class TyperUtils {
         return false;
     }
 
-    private static boolean isGetData (Method method) {
+    private static boolean isGetData(Method method) {
         TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
         if (typedColumn != null) {
             return typedColumn.method().equals(MethodType.GETDATA) ? true : false;
@@ -124,7 +126,7 @@ public class TyperUtils {
         return false;
     }
 
-    private static boolean isSetData (Method method) {
+    private static boolean isSetData(Method method) {
         TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
         if (typedColumn != null) {
             return typedColumn.method().equals(MethodType.SETDATA) ? true : false;
@@ -177,7 +179,7 @@ public class TyperUtils {
      * @param klazz Typed Class that represents a Table
      * @return true if valid, false otherwise
      */
-    private static <T> boolean isValid (DatabaseSchema dbSchema, final Class<T> klazz) {
+    private static <T> boolean isValid(DatabaseSchema dbSchema, final Class<T> klazz) {
         if (dbSchema == null) {
             return false;
         }
@@ -208,7 +210,7 @@ public class TyperUtils {
         checkVersion(schemaVersion, fromVersion, untilVersion);
     }
 
-    private static void checkVersion(Version schemaVersion, Version fromVersion, Version untilVersion){
+    private static void checkVersion(Version schemaVersion, Version fromVersion, Version untilVersion) {
         if (!fromVersion.equals(Version.NULL)) {
             if (schemaVersion.compareTo(fromVersion) < 0) {
                 String message = SchemaVersionMismatchException.createMessage(schemaVersion, fromVersion);
@@ -225,13 +227,16 @@ public class TyperUtils {
 
     /**
      * This method returns a Typed Proxy implementation for the klazz passed as a parameter.
-     * Per design choice, the Typed Proxy implementation is just a Wrapper on top of the actual Row which is untyped.
-     * Being just a wrapper, it is state-less and more of a convenience functionality to provide a type-safe infrastructure
-     * for the applications to built on top of. And this Typed infra is completely optional.
+     * Per design choice, the Typed Proxy implementation is just a Wrapper on top of the actual
+     * Row which is untyped.
+     * Being just a wrapper, it is state-less and more of a convenience functionality to
+     * provide a type-safe infrastructure for the applications to built on top of.
+     * And this Typed infra is completely optional.
      *
-     * It is the applications responsibilty to pass on the raw Row parameter & this method will return the appropriate
-     * Proxy wrapper for the passed klazz Type. The raw Row parameter may be null if the caller is interested in just the
-     * ColumnSchema. But that is not a very common use-case.
+     * It is the applications responsibility to pass on the raw Row parameter & this method will
+     * return the appropriate Proxy wrapper for the passed klazz Type.
+     * The raw Row parameter may be null if the caller is interested in just the ColumnSchema.
+     * But that is not a very common use-case.
      *
      * @param dbSchema DatabaseSchema as learnt from a OVSDB connection
      * @param klazz Typed Class that represents a Table
@@ -243,37 +248,46 @@ public class TyperUtils {
 
     /**
      * This method returns a Typed Proxy implementation for the klazz passed as a parameter.
-     * Per design choice, the Typed Proxy implementation is just a Wrapper on top of the actual Row which is untyped.
-     * Being just a wrapper, it is state-less and more of a convenience functionality to provide a type-safe infrastructure
-     * for the applications to built on top of. And this Typed infra is completely optional.
+     * Per design choice, the Typed Proxy implementation is just a Wrapper on top of the actual
+     * Row which is untyped.
+     * Being just a wrapper, it is state-less and more of a convenience functionality
+     * to provide a type-safe infrastructure for the applications to built on top of.
+     * And this Typed infra is completely optional.
      *
-     * It is the applications responsibilty to pass on the raw Row parameter & this method will return the appropriate
-     * Proxy wrapper for the passed klazz Type. The raw Row parameter may be null if the caller is interested in just the
+     * It is the applications responsibility to pass on the raw Row parameter & this method
+     * will return the appropriate Proxy wrapper for the passed klazz Type.
+     * The raw Row parameter may be null if the caller is interested in just the
      * ColumnSchema. But that is not a very common use-case.
      *
      * @param dbSchema DatabaseSchema as learnt from a OVSDB connection
      * @param klazz Typed Class that represents a Table
-     * @param row The actual Row that the wrapper is operating on. It can be null if the caller is just interested in getting ColumnSchema.
+     * @param row The actual Row that the wrapper is operating on. It can be null if the caller
+     *            is just interested in getting ColumnSchema.
      * @return
      */
-    public static <T> T getTypedRowWrapper(final DatabaseSchema dbSchema, final Class<T> klazz, final Row<GenericTableSchema> row) {
+    public static <T> T getTypedRowWrapper(final DatabaseSchema dbSchema, final Class<T> klazz,
+                                           final Row<GenericTableSchema> row) {
         if (!isValid(dbSchema, klazz)) {
             return null;
         }
-        if (row != null) row.setTableSchema(getTableSchema(dbSchema, klazz));
+        if (row != null) {
+            row.setTableSchema(getTableSchema(dbSchema, klazz));
+        }
         return Reflection.newProxy(klazz, new InvocationHandler() {
             private Object processGetData(Method method) throws Throwable {
                 String columnName = getColumnName(method);
                 checkColumnSchemaVersion(dbSchema, method);
                 if (columnName == null) {
-                    throw new TyperException("Error processing Getter : "+ method.getName());
+                    throw new TyperException("Error processing Getter : " + method.getName());
                 }
                 GenericTableSchema tableSchema = getTableSchema(dbSchema, klazz);
                 if (tableSchema == null) {
-                    String message = TableSchemaNotFoundException.createMessage(getTableName(klazz), dbSchema.getName());
+                    String message =
+                            TableSchemaNotFoundException.createMessage(getTableName(klazz), dbSchema.getName());
                     throw new TableSchemaNotFoundException(message);
                 }
-                ColumnSchema<GenericTableSchema, Object> columnSchema = getColumnSchema(tableSchema, columnName, (Class<Object>) method.getReturnType());
+                ColumnSchema<GenericTableSchema, Object> columnSchema =
+                        getColumnSchema(tableSchema, columnName, (Class<Object>) method.getReturnType());
                 if (columnSchema == null) {
                     String message = ColumnSchemaNotFoundException.createMessage(columnName, tableSchema.getName());
                     throw new ColumnSchemaNotFoundException(message);
@@ -292,19 +306,22 @@ public class TyperUtils {
                 String columnName = getColumnName(method);
                 checkColumnSchemaVersion(dbSchema, method);
                 if (columnName == null) {
-                    throw new TyperException("Error processing GetColumn : "+ method.getName());
+                    throw new TyperException("Error processing GetColumn : " + method.getName());
                 }
                 GenericTableSchema tableSchema = getTableSchema(dbSchema, klazz);
                 if (tableSchema == null) {
-                    String message = TableSchemaNotFoundException.createMessage(getTableName(klazz), dbSchema.getName());
+                    String message =
+                            TableSchemaNotFoundException.createMessage(getTableName(klazz), dbSchema.getName());
                     throw new TableSchemaNotFoundException(message);
                 }
-                ColumnSchema<GenericTableSchema, Object> columnSchema = getColumnSchema(tableSchema, columnName, (Class<Object>) method.getReturnType());
+                ColumnSchema<GenericTableSchema, Object> columnSchema =
+                        getColumnSchema(tableSchema, columnName, (Class<Object>) method.getReturnType());
                 if (columnSchema == null) {
                     String message = ColumnSchemaNotFoundException.createMessage(columnName, tableSchema.getName());
                     throw new ColumnSchemaNotFoundException(message);
                 }
-                // When the row is null, that might indicate that the user maybe interested only in the ColumnSchema and not on the Data.
+                // When the row is null, that might indicate that the user maybe interested
+                // only in the ColumnSchema and not on the Data.
                 if (row == null) {
                     return new Column<GenericTableSchema, Object>(columnSchema, null);
                 }
@@ -313,23 +330,26 @@ public class TyperUtils {
 
             private Object processSetData(Object proxy, Method method, Object[] args) throws Throwable {
                 if (args == null || args.length != 1) {
-                    throw new TyperException("Setter method : "+method.getName() + " requires 1 argument");
+                    throw new TyperException("Setter method : " + method.getName() + " requires 1 argument");
                 }
                 checkColumnSchemaVersion(dbSchema, method);
                 String columnName = getColumnName(method);
                 if (columnName == null) {
-                    throw new TyperException("Unable to locate Column Name for "+method.getName());
+                    throw new TyperException("Unable to locate Column Name for " + method.getName());
                 }
                 GenericTableSchema tableSchema = getTableSchema(dbSchema, klazz);
-                ColumnSchema<GenericTableSchema, Object> columnSchema = getColumnSchema(tableSchema, columnName,
-                                                                                        (Class<Object>) args[0].getClass());
-                Column<GenericTableSchema, Object> column = new Column<GenericTableSchema, Object>(columnSchema, args[0]);
+                ColumnSchema<GenericTableSchema, Object> columnSchema =
+                        getColumnSchema(tableSchema, columnName, (Class<Object>) args[0].getClass());
+                Column<GenericTableSchema, Object> column =
+                        new Column<GenericTableSchema, Object>(columnSchema, args[0]);
                 row.addColumn(columnName, column);
                 return proxy;
             }
 
             private Object processGetTableSchema() {
-                if (dbSchema == null) return null;
+                if (dbSchema == null) {
+                    return null;
+                }
                 return getTableSchema(dbSchema, klazz);
             }
 
@@ -353,9 +373,9 @@ public class TyperUtils {
                     return processGetRow();
                 } else if (isSetData(method)) {
                     return processSetData(proxy, method, args);
-                } else if(isGetData(method)) {
+                } else if (isGetData(method)) {
                     return processGetData(method);
-                } else if(isGetColumn(method)) {
+                } else if (isGetColumn(method)) {
                     return processGetColumn(method);
                 } else if (isHashCodeMethod(method, args)) {
                     return hashCode();
@@ -364,20 +384,28 @@ public class TyperUtils {
                 } else if (isToStringMethod(method, args)) {
                     return this.toString();
                 }
-                throw new UnsupportedMethodException("Method not supported "+method.toString());
+                throw new UnsupportedMethodException("Method not supported " + method.toString());
             }
 
             @Override
             public boolean equals(Object obj) {
-                if (obj == null) return false;
+                if (obj == null) {
+                    return false;
+                }
                 TypedBaseTable<?> typedRowObj = (TypedBaseTable<?>)obj;
-                if (row == null && typedRowObj.getRow() == null) return true;
-                if (row.equals(typedRowObj.getRow())) return true;
+                if (row == null && typedRowObj.getRow() == null) {
+                    return true;
+                }
+                if (row.equals(typedRowObj.getRow())) {
+                    return true;
+                }
                 return false;
             }
 
             @Override public int hashCode() {
-                if (row == null) return 0;
+                if (row == null) {
+                    return 0;
+                }
                 return row.hashCode();
             }
 
@@ -389,8 +417,10 @@ public class TyperUtils {
                 } catch (Exception e) {
                     tableName = "";
                 }
-                if (row == null) return tableName;
-                return tableName+" : "+row.toString();
+                if (row == null) {
+                    return tableName;
+                }
+                return tableName + " : " + row.toString();
             }
         }
         );
@@ -414,11 +444,12 @@ public class TyperUtils {
         Preconditions.checkNotNull(updates);
         Preconditions.checkNotNull(dbSchema);
         Map<UUID,T> result = new HashMap<UUID,T>();
-
-        Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> rowUpdates = extractRowUpdates(klazz,updates,dbSchema);
+        @SuppressWarnings("checkstyle:genericwhitespace")
+        Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> rowUpdates =
+                extractRowUpdates(klazz,updates,dbSchema);
         for (TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema> rowUpdate : rowUpdates.values()) {
-            if(rowUpdate != null) {
-                if(rowUpdate.getNew() != null) {
+            if (rowUpdate != null) {
+                if (rowUpdate.getNew() != null) {
                     Row<GenericTableSchema> row = rowUpdate.getNew();
                     result.put(rowUpdate.getUuid(),TyperUtils.getTypedRowWrapper(dbSchema,klazz,row));
                 }
@@ -445,11 +476,12 @@ public class TyperUtils {
         Preconditions.checkNotNull(updates);
         Preconditions.checkNotNull(dbSchema);
         Map<UUID,T> result = new HashMap<UUID,T>();
-
-        Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> rowUpdates = extractRowUpdates(klazz,updates,dbSchema);
+        @SuppressWarnings("checkstyle:genericwhitespace")
+        Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> rowUpdates =
+                extractRowUpdates(klazz,updates,dbSchema);
         for (TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema> rowUpdate : rowUpdates.values()) {
-            if(rowUpdate != null) {
-                if(rowUpdate.getNew() == null && rowUpdate.getOld() != null) {
+            if (rowUpdate != null) {
+                if (rowUpdate.getNew() == null && rowUpdate.getOld() != null) {
                     Row<GenericTableSchema> row = rowUpdate.getOld();
                     result.put(rowUpdate.getUuid(),TyperUtils.getTypedRowWrapper(dbSchema,klazz,row));
                 }
@@ -463,23 +495,28 @@ public class TyperUtils {
      * that correspond to rows of type klazz.
      * Example:
      * <code>
-     * Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> updatedBridges = extractRowsUpdates(Bridge.class,updates,dbSchema)
+     * Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> updatedBridges =
+     *     extractRowsUpdates(Bridge.class,updates,dbSchema)
      * </code>
      *
      * @param klazz Class for row type to be extracted
      * @param updates TableUpdates from which to extract rowUpdates
      * @param dbSchema Dbschema for the TableUpdates
-     * @return Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> for the type of things being sought
+     * @return Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>>
+     *     for the type of things being sought
      */
-    public static Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> extractRowUpdates(Class<?> klazz,TableUpdates updates,DatabaseSchema dbSchema) {
+    @SuppressWarnings("checkstyle:genericwhitespace")
+    public static Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>>
+    extractRowUpdates(Class<?> klazz,TableUpdates updates,DatabaseSchema dbSchema) {
         Preconditions.checkNotNull(klazz);
         Preconditions.checkNotNull(updates);
         Preconditions.checkNotNull(dbSchema);
-        Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> result = new HashMap<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>>();
+        Map<UUID, TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> result =
+                new HashMap<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>>();
         TableUpdate<GenericTableSchema> update = updates.getUpdate(TyperUtils.getTableSchema(dbSchema, klazz));
-        if(update != null) {
+        if (update != null) {
             Map<UUID, TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> rows = update.getRows();
-            if(rows != null) {
+            if (rows != null) {
                 result = rows;
             }
         }

@@ -33,7 +33,7 @@ public class Insert<E extends TableSchema<E>> extends Operation<E> {
 
     private Map<String, Object> row = Maps.newHashMap();
 
-    public Insert<E> on(TableSchema<E> schema){
+    public Insert<E> on(TableSchema<E> schema) {
         this.setTableSchema(schema);
         return this;
     }

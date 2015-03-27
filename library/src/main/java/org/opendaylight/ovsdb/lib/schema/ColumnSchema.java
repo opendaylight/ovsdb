@@ -44,7 +44,9 @@ public class ColumnSchema<E extends TableSchema<E>, D> {
         return name;
     }
 
-    public ColumnType getType() { return type; }
+    public ColumnType getType() {
+        return type;
+    }
 
     // --- Operations on the column ----------//
 
@@ -77,10 +79,10 @@ public class ColumnSchema<E extends TableSchema<E>, D> {
 
     @Override
     public String toString() {
-        return "ColumnSchema{" +
-                "name='" + name + '\'' +
-                ", type=" + type +
-                '}';
+        return "ColumnSchema{"
+                + "name='" + name + '\''
+                + ", type=" + type
+                + '}';
     }
 
     @Override
@@ -94,23 +96,30 @@ public class ColumnSchema<E extends TableSchema<E>, D> {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ColumnSchema other = (ColumnSchema) obj;
         if (name == null) {
-            if (other.name != null)
+            if (other.name != null) {
                 return false;
-        } else if (!name.equals(other.name))
+            }
+        } else if (!name.equals(other.name)) {
             return false;
+        }
         if (type == null) {
-            if (other.type != null)
+            if (other.type != null) {
                 return false;
-        } else if (!type.equals(other.type))
+            }
+        } else if (!type.equals(other.type)) {
             return false;
+        }
         return true;
     }
 
@@ -134,7 +143,7 @@ public class ColumnSchema<E extends TableSchema<E>, D> {
     }
 
     public D valueFromJson(JsonNode value) {
-      return (D) this.getType().valueFromJson(value);
+        return (D) this.getType().valueFromJson(value);
     }
 
     public Object getNormalizeData(D value) {

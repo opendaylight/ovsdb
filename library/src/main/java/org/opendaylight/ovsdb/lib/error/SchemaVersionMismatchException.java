@@ -22,13 +22,14 @@ public class SchemaVersionMismatchException extends RuntimeException {
         super(message);
     }
 
-    public SchemaVersionMismatchException(String message, Throwable cause){
+    public SchemaVersionMismatchException(String message, Throwable cause) {
         super(message, cause);
     }
 
     public static String createMessage(Version currentVersion, Version requiredVersion) {
-        String message = "The schema version used to access this Table/Column does not match the required version.\n" +
-                "Current Version: " + currentVersion.toString() + "\n";
+        String message =
+                "The schema version used to access this Table/Column does not match the required version.\n"
+                + "Current Version: " + currentVersion.toString() + "\n";
 
         if (currentVersion.compareTo(requiredVersion) > 1) {
             message += "Removed in Version: " + requiredVersion.toString();

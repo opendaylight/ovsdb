@@ -15,7 +15,7 @@ package org.opendaylight.ovsdb.lib.error;
  */
 public class ColumnSchemaNotFoundException extends RuntimeException {
 
-    public ColumnSchemaNotFoundException(String message){
+    public ColumnSchemaNotFoundException(String message) {
         super(message);
     }
 
@@ -23,8 +23,8 @@ public class ColumnSchemaNotFoundException extends RuntimeException {
         super(message, cause);
     }
 
-    public static String createMessage(String columnName, String tableName){
-        String message = "Unable to locate ColumnSchema for "+  columnName + " in "+ tableName;
+    public static String createMessage(String columnName, String tableName) {
+        String message = "Unable to locate ColumnSchema for " +  columnName + " in " + tableName;
         return message;
     }
 

@@ -15,7 +15,7 @@ package org.opendaylight.ovsdb.lib.error;
  */
 public class TyperException extends RuntimeException {
 
-    public TyperException(String message){
+    public TyperException(String message) {
         super(message);
     }
 

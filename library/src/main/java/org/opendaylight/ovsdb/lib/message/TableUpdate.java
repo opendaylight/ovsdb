@@ -27,15 +27,15 @@ public class TableUpdate<E extends TableSchema<E>> {
         return rows;
     }
 
-    public class RowUpdate <E extends TableSchema<E>> {
+    public class RowUpdate<E extends TableSchema<E>> {
         private UUID uuid;
-        private Row<E> old;
-        private Row<E> new_;
+        private Row<E> oldRow;
+        private Row<E> newRow;
 
-        public RowUpdate (UUID uuid, Row<E> old, Row<E> new_) {
+        public RowUpdate(UUID uuid, Row<E> oldRow, Row<E> newRow) {
             this.uuid = uuid;
-            this.old = old;
-            this.new_ = new_;
+            this.oldRow = oldRow;
+            this.newRow = newRow;
         }
 
         public UUID getUuid() {
@@ -43,24 +43,24 @@ public class TableUpdate<E extends TableSchema<E>> {
         }
 
         public Row<E> getOld() {
-            return old;
+            return oldRow;
         }
 
-        public void setOld(Row<E> old) {
-            this.old = old;
+        public void setOld(Row<E> oldRow) {
+            this.oldRow = oldRow;
         }
 
         public Row<E> getNew() {
-            return new_;
+            return newRow;
         }
 
-        public void setNew(Row<E> new_) {
-            this.new_ = new_;
+        public void setNew(Row<E> newRow) {
+            this.newRow = newRow;
         }
 
         @Override
         public String toString() {
-            return "RowUpdate [uuid=" + uuid + ", old=" + old + ", new_=" + new_
+            return "RowUpdate [uuid=" + uuid + ", oldRow=" + oldRow + ", newRow=" + newRow
                     + "]";
         }
     }
@@ -70,19 +70,23 @@ public class TableUpdate<E extends TableSchema<E>> {
         rows = Maps.newHashMap();
     }
 
-    public void addRow(UUID uuid, Row<E> old, Row<E> new_) {
-        rows.put(uuid, new RowUpdate<E>(uuid, old, new_));
+    public void addRow(UUID uuid, Row<E> oldRow, Row<E> newRow) {
+        rows.put(uuid, new RowUpdate<E>(uuid, oldRow, newRow));
     }
 
     public Row<E> getOld(UUID uuid) {
         RowUpdate<E> rowUpdate = rows.get(uuid);
-        if (rowUpdate == null) return null;
+        if (rowUpdate == null) {
+            return null;
+        }
         return rowUpdate.getOld();
     }
 
     public Row<E> getNew(UUID uuid) {
         RowUpdate<E> rowUpdate = rows.get(uuid);
-        if (rowUpdate == null) return null;
+        if (rowUpdate == null) {
+            return null;
+        }
         return rowUpdate.getNew();
     }
 

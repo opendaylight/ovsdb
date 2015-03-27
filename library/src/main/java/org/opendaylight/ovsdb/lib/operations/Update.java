@@ -41,7 +41,7 @@ public class Update<E extends TableSchema<E>> extends Operation<E> implements Co
         super(schema, UPDATE);
     }
 
-    public Update<E> on(TableSchema schema){
+    public Update<E> on(TableSchema schema) {
         return this;
     }
 

@@ -26,15 +26,15 @@ import com.google.common.util.concurrent.ListenableFuture;
 public class FutureTransformUtils {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public final static ListenableFuture<List<OperationResult>> transformTransactResponse
-            (ListenableFuture<List<JsonNode>> transactResponseFuture, final List<Operation> operations) {
+    public static final ListenableFuture<List<OperationResult>> transformTransactResponse(
+            ListenableFuture<List<JsonNode>> transactResponseFuture, final List<Operation> operations) {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return Futures.transform(transactResponseFuture, new Function<List<JsonNode>, List<OperationResult>>() {
             @Override
             public List<OperationResult> apply(List<JsonNode> jsonNodes) {
                 final List<OperationResult> operationResults = new ArrayList<>();
-                for (int i = 0; i < jsonNodes.size(); i++) {
-                    JsonNode jsonNode = jsonNodes.get(i);
+                for (int index = 0; index < jsonNodes.size(); index++) {
+                    JsonNode jsonNode = jsonNodes.get(index);
                     OperationResult or;
                     if (jsonNode != null && jsonNode.size() > 0) {
                         /*
@@ -50,18 +50,18 @@ public class FutureTransformUtils {
                          * json elements than the transaction operation request.
                          * Also handle that case by checking for i < operations.size().
                          */
-                        if (i < operations.size()) {
-                            Operation op = operations.get(i);
+                        if (index < operations.size()) {
+                            Operation op = operations.get(index);
                             switch (op.getOp()) {
-                            case "select":
-                                or = new OperationResult();
-                                or.setRows(op.getTableSchema().createRows(jsonNode));
-                                break;
+                                case "select":
+                                    or = new OperationResult();
+                                    or.setRows(op.getTableSchema().createRows(jsonNode));
+                                    break;
 
-                            default:
-                                or = objectMapper.convertValue(jsonNode, OperationResult.class);
+                                default:
+                                    or = objectMapper.convertValue(jsonNode, OperationResult.class);
 
-                                break;
+                                    break;
                             }
                         } else {
                             or = objectMapper.convertValue(jsonNode, OperationResult.class);

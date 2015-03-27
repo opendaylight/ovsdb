@@ -12,11 +12,11 @@ package org.opendaylight.ovsdb.lib.error;
 
 public class UnsupportedArgumentException extends RuntimeException {
 
-    public UnsupportedArgumentException(String message){
+    public UnsupportedArgumentException(String message) {
         super(message);
     }
 
-   public UnsupportedArgumentException(String message, Throwable cause){
-       super(message, cause);
-   }
+    public UnsupportedArgumentException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

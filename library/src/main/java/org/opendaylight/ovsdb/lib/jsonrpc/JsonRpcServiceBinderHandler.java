@@ -55,7 +55,7 @@ public class JsonRpcServiceBinderHandler extends ChannelInboundHandlerAdapter {
                        ChannelRead is a method invoked during Netty message receive event.
                        The only sane thing we can do is to print a meaningful error message.
                      */
-                    logger.error("NoSuchMethodException when handling "+msg.toString(), e);
+                    logger.error("NoSuchMethodException when handling {}", msg, e);
                 }
             } else if (jsonNode.hasNonNull("method")) {
                 if (jsonNode.has("id") && !Strings.isNullOrEmpty(jsonNode.get("id").asText())) {

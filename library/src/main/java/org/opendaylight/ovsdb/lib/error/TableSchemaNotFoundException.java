@@ -15,7 +15,7 @@ package org.opendaylight.ovsdb.lib.error;
  */
 public class TableSchemaNotFoundException extends RuntimeException {
 
-    public TableSchemaNotFoundException(String message){
+    public TableSchemaNotFoundException(String message) {
         super(message);
     }
 
@@ -23,8 +23,8 @@ public class TableSchemaNotFoundException extends RuntimeException {
         super(message, cause);
     }
 
-    public static String createMessage(String tableName, String schemaName){
-        String message = "Unable to locate TableSchema for "+  tableName + " in "+ schemaName;
+    public static String createMessage(String tableName, String schemaName) {
+        String message = "Unable to locate TableSchema for " +  tableName + " in " + schemaName;
         return message;
     }
 

@@ -86,24 +86,31 @@ public class JsonRpcDecoder extends ByteToMessageDecoder {
             }
         }
 
-        int i = lastRecordBytes + buf.readerIndex();
+        int index = lastRecordBytes + buf.readerIndex();
 
-        for (; i < buf.writerIndex(); i++) {
-            switch (buf.getByte(i)) {
+        for (; index < buf.writerIndex(); index++) {
+            switch (buf.getByte(index)) {
                 case '{':
-                    if (!inS) leftCurlies++;
+                    if (!inS) {
+                        leftCurlies++;
+                    }
                     break;
                 case '}':
-                    if (!inS) rightCurlies++;
+                    if (!inS) {
+                        rightCurlies++;
+                    }
                     break;
-                case '"': {
-                    if (buf.getByte(i - 1) != '\\') inS = !inS;
+                case '"':
+                    if (buf.getByte(index - 1) != '\\') {
+                        inS = !inS;
+                    }
                     break;
-                }
+                default:
+                    break;
             }
 
             if (leftCurlies != 0 && leftCurlies == rightCurlies && !inS) {
-                ByteBuf slice = buf.readSlice(1 + i - buf.readerIndex());
+                ByteBuf slice = buf.readSlice(1 + index - buf.readerIndex());
                 JsonParser jp = jacksonJsonFactory.createParser(new ByteBufInputStream(slice));
                 JsonNode root = jp.readValueAsTree();
                 out.add(root);
@@ -112,13 +119,13 @@ public class JsonRpcDecoder extends ByteToMessageDecoder {
                 break;
             }
 
-            if (i - buf.readerIndex() >= maxFrameLength) {
-                fail(ctx, i - buf.readerIndex());
+            if (index - buf.readerIndex() >= maxFrameLength) {
+                fail(ctx, index - buf.readerIndex());
             }
         }
 
         // end of stream, save the incomplete record index to avoid reexamining the whole on next run
-        if (i >= buf.writerIndex()) {
+        if (index >= buf.writerIndex()) {
             lastRecordBytes = buf.readableBytes();
             return;
         }
@@ -128,13 +135,13 @@ public class JsonRpcDecoder extends ByteToMessageDecoder {
         return recordsRead;
     }
 
-    private static void skipSpaces(ByteBuf b) throws IOException {
-        while (b.isReadable()) {
-            int ch = b.getByte(b.readerIndex()) & 0xFF;
+    private static void skipSpaces(ByteBuf byteBuf) throws IOException {
+        while (byteBuf.isReadable()) {
+            int ch = byteBuf.getByte(byteBuf.readerIndex()) & 0xFF;
             if (!(ch == ' ' || ch == '\r' || ch == '\n' || ch == '\t')) {
                 return;
             } else {
-                b.readByte(); //move the read index
+                byteBuf.readByte(); //move the read index
             }
         }
     }
@@ -145,13 +152,15 @@ public class JsonRpcDecoder extends ByteToMessageDecoder {
     }
 
     private void print(ByteBuf buf, int startPos, int chars, String message) {
-        if (null == message) message = "";
+        if (null == message) {
+            message = "";
+        }
         if (startPos > buf.writerIndex()) {
             logger.trace("startPos out of bounds");
         }
-        byte[] b = new byte[startPos + chars <= buf.writerIndex() ? chars : buf.writerIndex() - startPos];
-        buf.getBytes(startPos, b);
-        logger.trace("{} ={}", message, new String(b));
+        byte[] bytes = new byte[startPos + chars <= buf.writerIndex() ? chars : buf.writerIndex() - startPos];
+        buf.getBytes(startPos, bytes);
+        logger.trace("{} ={}", message, new String(bytes));
     }
 
     // copied from Netty decoder
@@ -159,13 +168,11 @@ public class JsonRpcDecoder extends ByteToMessageDecoder {
         if (frameLength > 0) {
             ctx.fireExceptionCaught(
                     new TooLongFrameException(
-                            "frame length exceeds " + maxFrameLength +
-                                    ": " + frameLength + " - discarded"));
+                            "frame length exceeds " + maxFrameLength + ": " + frameLength + " - discarded"));
         } else {
             ctx.fireExceptionCaught(
                     new TooLongFrameException(
-                            "frame length exceeds " + maxFrameLength +
-                                    " - discarding"));
+                            "frame length exceeds " + maxFrameLength + " - discarding"));
         }
     }
 }

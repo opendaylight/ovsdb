@@ -20,12 +20,12 @@ import com.google.common.collect.Sets;
 
 public abstract class BaseType<E extends BaseType<E>> {
 
-    private static BaseType[] types = new BaseType[]{
-            new StringBaseType(),
-            new IntegerBaseType(),
-            new RealBaseType(),
-            new BooleanBaseType(),
-            new UuidBaseType(),
+    private static BaseType[] types = new BaseType[] {
+        new StringBaseType(),
+        new IntegerBaseType(),
+        new RealBaseType(),
+        new BooleanBaseType(),
+        new UuidBaseType(),
     };
 
     public static BaseType fromJson(JsonNode json, String keyorval) {
@@ -122,10 +122,10 @@ public abstract class BaseType<E extends BaseType<E>> {
 
         private void populateEnum(JsonNode node) {
             if (node.has("enum")) {
-                Set<Long> s = Sets.newHashSet();
+                Set<Long> enums = Sets.newHashSet();
                 JsonNode anEnum = node.get("enum").get(1);
-                for (JsonNode n : anEnum) {
-                    s.add(n.asLong());
+                for (JsonNode enm : anEnum) {
+                    enums.add(enm.asLong());
                 }
             }
         }
@@ -172,22 +172,29 @@ public abstract class BaseType<E extends BaseType<E>> {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             IntegerBaseType other = (IntegerBaseType) obj;
             if (enums == null) {
-                if (other.enums != null)
+                if (other.enums != null) {
                     return false;
-            } else if (!enums.equals(other.enums))
+                }
+            } else if (!enums.equals(other.enums)) {
                 return false;
-            if (max != other.max)
+            }
+            if (max != other.max) {
                 return false;
-            if (min != other.min)
+            }
+            if (min != other.min) {
                 return false;
+            }
             return true;
         }
     }
@@ -230,10 +237,10 @@ public abstract class BaseType<E extends BaseType<E>> {
 
         private void populateEnum(JsonNode node) {
             if (node.has("enum")) {
-                Set<Double> s = Sets.newHashSet();
+                Set<Double> enums = Sets.newHashSet();
                 JsonNode anEnum = node.get("enum").get(1);
-                for (JsonNode n : anEnum) {
-                    s.add(n.asDouble());
+                for (JsonNode enm : anEnum) {
+                    enums.add(enm.asDouble());
                 }
             }
         }
@@ -282,24 +289,29 @@ public abstract class BaseType<E extends BaseType<E>> {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             RealBaseType other = (RealBaseType) obj;
             if (enums == null) {
-                if (other.enums != null)
+                if (other.enums != null) {
                     return false;
-            } else if (!enums.equals(other.enums))
+                }
+            } else if (!enums.equals(other.enums)) {
                 return false;
-            if (Double.doubleToLongBits(max) != Double
-                    .doubleToLongBits(other.max))
+            }
+            if (Double.doubleToLongBits(max) != Double.doubleToLongBits(other.max)) {
                 return false;
-            if (Double.doubleToLongBits(min) != Double
-                    .doubleToLongBits(other.min))
+            }
+            if (Double.doubleToLongBits(min) != Double.doubleToLongBits(other.min)) {
                 return false;
+            }
             return true;
         }
     }
@@ -371,17 +383,17 @@ public abstract class BaseType<E extends BaseType<E>> {
 
         private void populateEnum(StringBaseType baseType, JsonNode node) {
             if (node.has("enum")) {
-                Set<String> s = Sets.newHashSet();
+                Set<String> enums = Sets.newHashSet();
                 JsonNode enumVal = node.get("enum");
                 if (enumVal.isArray()) {
                     JsonNode anEnum = enumVal.get(1);
-                    for (JsonNode n : anEnum) {
-                        s.add(n.asText());
+                    for (JsonNode enm : anEnum) {
+                        enums.add(enm.asText());
                     }
                 } else if (enumVal.isTextual()) {
-                    s.add(enumVal.asText());
+                    enums.add(enumVal.asText());
                 }
-                baseType.setEnums(s);
+                baseType.setEnums(enums);
             }
         }
 
@@ -426,22 +438,29 @@ public abstract class BaseType<E extends BaseType<E>> {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             StringBaseType other = (StringBaseType) obj;
             if (enums == null) {
-                if (other.enums != null)
+                if (other.enums != null) {
                     return false;
-            } else if (!enums.equals(other.enums))
+                }
+            } else if (!enums.equals(other.enums)) {
                 return false;
-            if (maxLength != other.maxLength)
+            }
+            if (maxLength != other.maxLength) {
                 return false;
-            if (minLength != other.minLength)
+            }
+            if (minLength != other.minLength) {
                 return false;
+            }
             return true;
         }
 
@@ -449,7 +468,7 @@ public abstract class BaseType<E extends BaseType<E>> {
 
 
     public static class UuidBaseType extends BaseType<UuidBaseType> {
-        public static enum RefType {strong, weak}
+        public static enum RefType { strong, weak }
 
         String refTable;
         RefType refType;
@@ -473,7 +492,7 @@ public abstract class BaseType<E extends BaseType<E>> {
 
         @Override
         public Object toValue(JsonNode value) {
-            if(value.isArray()) {
+            if (value.isArray()) {
                 if (value.size() == 2) {
                     if (value.get(0).isTextual() && "uuid".equals(value.get(0).asText())) {
                         return new UUID(value.get(1).asText());
@@ -530,20 +549,26 @@ public abstract class BaseType<E extends BaseType<E>> {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             UuidBaseType other = (UuidBaseType) obj;
             if (refTable == null) {
-                if (other.refTable != null)
+                if (other.refTable != null) {
                     return false;
-            } else if (!refTable.equals(other.refTable))
+                }
+            } else if (!refTable.equals(other.refTable)) {
                 return false;
-            if (refType != other.refType)
+            }
+            if (refType != other.refType) {
                 return false;
+            }
             return true;
         }
     }

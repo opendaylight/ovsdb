@@ -17,7 +17,7 @@ import org.opendaylight.ovsdb.lib.OvsdbClient;
 
 public class ChannelConnectionHandler implements ChannelFutureListener {
     OvsdbClient client;
-    public ChannelConnectionHandler (OvsdbClient client) {
+    public ChannelConnectionHandler(OvsdbClient client) {
         this.client = client;
     }
     @Override

@@ -19,7 +19,7 @@ public interface OvsdbRPC {
     public static final String REGISTER_CALLBACK_METHOD = "registerCallback";
 
     //public ListenableFuture<DatabaseSchema> get_schema(List<String> db_names);
-    public ListenableFuture<JsonNode> get_schema(List<String> db_names);
+    public ListenableFuture<JsonNode> get_schema(List<String> dbNames);
 
     public ListenableFuture<List<String>> echo();
 
@@ -31,7 +31,7 @@ public interface OvsdbRPC {
 
     public ListenableFuture<Response> cancel(String id);
 
-    public ListenableFuture<Object> monitor_cancel(Object json_value);
+    public ListenableFuture<Object> monitor_cancel(Object jsonValue);
 
     public ListenableFuture<Object> lock(List<String> id);
 

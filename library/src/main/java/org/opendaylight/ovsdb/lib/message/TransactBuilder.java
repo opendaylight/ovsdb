@@ -21,7 +21,7 @@ public class TransactBuilder implements Params {
 
     List<Operation> requests = Lists.newArrayList();
     DatabaseSchema dbSchema;
-    public TransactBuilder (DatabaseSchema dbSchema) {
+    public TransactBuilder(DatabaseSchema dbSchema) {
         this.dbSchema = dbSchema;
     }
 
@@ -36,11 +36,11 @@ public class TransactBuilder implements Params {
         return lists;
     }
 
-    public void addOperations (List<Operation> o) {
-        requests.addAll(o);
+    public void addOperations(List<Operation> operation) {
+        requests.addAll(operation);
     }
 
-    public void addOperation (Operation o) {
-        requests.add(o);
+    public void addOperation(Operation operation) {
+        requests.add(operation);
     }
 }

@@ -30,7 +30,7 @@ public class OvsdbSet<T> extends ForwardingSet<T> {
     }
 
     public OvsdbSet(Set<T> backing) {
-       this.target = backing;
+        this.target = backing;
     }
 
     @Override
@@ -38,7 +38,7 @@ public class OvsdbSet<T> extends ForwardingSet<T> {
         return target;
     }
 
-    public static<D> OvsdbSet<D> fromSet(Set<D> value) {
+    public static <D> OvsdbSet<D> fromSet(Set<D> value) {
         return new OvsdbSet<>(value);
     }
 }

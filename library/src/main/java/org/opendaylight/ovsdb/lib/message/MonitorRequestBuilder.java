@@ -46,7 +46,7 @@ public class MonitorRequestBuilder<E extends TableSchema<E>> {
     }
 
     public MonitorRequestBuilder<E> addColumns(List<ColumnSchema<E, ?>> columns) {
-        for(ColumnSchema<E, ?> schema : columns) {
+        for (ColumnSchema<E, ?> schema : columns) {
             this.addColumn(schema);
         }
         return this;

@@ -24,13 +24,13 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 public class TransactionBuilder {
 
-    private DatabaseSchema eDatabaseSchema;
+    private DatabaseSchema databaseSchema;
     OvsdbClient ovs;
     ArrayList<Operation> operations = Lists.newArrayList();
 
     public TransactionBuilder(OvsdbClient ovs, DatabaseSchema schema) {
         this.ovs = ovs;
-        eDatabaseSchema = schema;
+        databaseSchema = schema;
     }
 
     public ArrayList<Operation> getOperations() {
@@ -47,10 +47,10 @@ public class TransactionBuilder {
     }
 
     public ListenableFuture<List<OperationResult>> execute() {
-        return ovs.transact(eDatabaseSchema, operations);
+        return ovs.transact(databaseSchema, operations);
     }
 
     public DatabaseSchema getDatabaseSchema() {
-        return eDatabaseSchema;
+        return databaseSchema;
     }
 }

@@ -19,5 +19,5 @@ public interface MonitorCallBack {
 
     void update(TableUpdates result, DatabaseSchema dbSchema);
 
-    void exception(Throwable t);
+    void exception(Throwable throwable);
 }

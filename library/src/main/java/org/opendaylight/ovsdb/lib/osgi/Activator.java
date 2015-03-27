@@ -31,9 +31,9 @@ public class Activator extends DependencyActivatorBase {
             .setInterface(OvsdbConnection.class.getName(), null)
             .setImplementation(OvsdbConnectionService.class)
             .add(createServiceDependency()
-               .setService(OvsdbConnectionListener.class)
-               .setCallbacks("registerConnectionListener", "unregisterConnectionListener")
-               .setRequired(false)
+                            .setService(OvsdbConnectionListener.class)
+                            .setCallbacks("registerConnectionListener", "unregisterConnectionListener")
+                            .setRequired(false)
             )
         );
     }

@@ -20,7 +20,7 @@ public class JsonUtils {
 
     static ObjectWriter prettyWriter = mapper.writerWithDefaultPrettyPrinter();
 
-    public static String prettyString(Object jsonNode){
+    public static String prettyString(Object jsonNode) {
         try {
             return prettyWriter.writeValueAsString(jsonNode);
         } catch (JsonProcessingException e) {

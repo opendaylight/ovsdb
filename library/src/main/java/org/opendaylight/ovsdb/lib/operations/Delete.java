@@ -28,7 +28,7 @@ public class Delete<E extends TableSchema<E>> extends Operation<E> implements Co
         super(schema, DELETE);
     }
 
-    public Delete<E> on(TableSchema schema){
+    public Delete<E> on(TableSchema schema) {
         return this;
     }
 

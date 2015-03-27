@@ -26,7 +26,7 @@ public class Mutate<E extends TableSchema<E>> extends Operation<E> implements Co
     List<Condition> where = Lists.newArrayList();
     private List<Mutation> mutations = Lists.newArrayList();
 
-    public Mutate on(TableSchema schema){
+    public Mutate on(TableSchema schema) {
         this.setTableSchema(schema);
         return this;
     }
@@ -35,7 +35,8 @@ public class Mutate<E extends TableSchema<E>> extends Operation<E> implements Co
         super(schema, MUTATE);
     }
 
-    public <T extends TableSchema<T>, D> Mutate<E> addMutation(ColumnSchema<T, D> columnSchema, Mutator mutator, D value) {
+    public <T extends TableSchema<T>, D> Mutate<E> addMutation(ColumnSchema<T, D> columnSchema,
+                                                               Mutator mutator, D value) {
         columnSchema.validate(value);
         Object untypedValue = columnSchema.getNormalizeData(value);
         mutations.add(new Mutation(columnSchema.getName(), mutator, untypedValue));

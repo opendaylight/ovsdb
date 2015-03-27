@@ -24,9 +24,9 @@ public class Column<E extends TableSchema<E>, D> {
     private ColumnSchema<E, D> schema;
     private D data;
 
-    public Column(ColumnSchema<E, D> schema, D d) {
+    public Column(ColumnSchema<E, D> schema, D data) {
         this.schema = schema;
-        this.data = d;
+        this.data = data;
     }
 
     public <E extends TableSchema<E>, T> T getData(ColumnSchema<E, T> schema) {
@@ -51,7 +51,7 @@ public class Column<E extends TableSchema<E>, D> {
 
     @Override
     public String toString() {
-        return "["+schema.getName() + "=" + data + "]";
+        return "[" + schema.getName() + "=" + data + "]";
     }
 
     @Override
@@ -65,23 +65,30 @@ public class Column<E extends TableSchema<E>, D> {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Column other = (Column) obj;
         if (data == null) {
-            if (other.data != null)
+            if (other.data != null) {
                 return false;
-        } else if (!data.equals(other.data))
+            }
+        } else if (!data.equals(other.data)) {
             return false;
+        }
         if (schema == null) {
-            if (other.schema != null)
+            if (other.schema != null) {
                 return false;
-        } else if (!schema.equals(other.schema))
+            }
+        } else if (!schema.equals(other.schema)) {
             return false;
+        }
         return true;
     }
 }

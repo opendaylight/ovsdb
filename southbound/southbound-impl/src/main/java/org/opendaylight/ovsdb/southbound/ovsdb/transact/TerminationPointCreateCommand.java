@@ -9,6 +9,9 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -72,6 +75,9 @@ public class TerminationPointCreateCommand implements TransactCommand {
             Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
             port.setName(terminationPoint.getName());
             port.setInterfaces(Sets.newHashSet(new UUID(interfaceUuid)));
+            Set<Long> vlanTag = new HashSet<Long>();
+            vlanTag.add(terminationPoint.getVlanTag().getValue().longValue());
+            port.setTag(vlanTag);
             transaction.add(op.insert(port).withId(portUuid));
 
             //Configure bridge with the above port details

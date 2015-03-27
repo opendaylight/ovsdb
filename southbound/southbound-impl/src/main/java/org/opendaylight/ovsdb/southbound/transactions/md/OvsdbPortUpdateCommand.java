@@ -29,6 +29,7 @@ import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.OvsdbClientKey;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
@@ -69,6 +70,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                 UUID portUUID = bridgePorts.next();
                 for (Port port : portUpdatedRows) {
                     if (portUUID.equals(port.getUuid())) {
+                        Collection<Long> vlanId = port.getTagColumn().getData();
                         bridgeName = bridge.getName();
                         NodeId bridgeId = SouthboundMapper.createManagedNodeId(
                                 getKey(), new OvsdbBridgeName(bridgeName));
@@ -99,6 +101,13 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                                     .setName(port.getName());
                             ovsdbTerminationPointBuilder.setPortUuid(new Uuid(
                                     port.getUuid().toString()));
+                            if (vlanId.size() > 0){
+                                Iterator<Long> itr = vlanId.iterator();
+                                if (itr.next() != null){
+                                    int id = itr.next().intValue();
+                                    ovsdbTerminationPointBuilder.setVlanTag(new VlanId(id));
+                                }
+                            }
                             Column<GenericTableSchema, Set<UUID>> iface = port.getInterfacesColumn();
                             Set<UUID> ifUuid = iface.getData();
                             Collection<Interface> ifUpdateRows = TyperUtils.extractRowsUpdated(Interface.class, getUpdates(),  getDbSchema()).values();

@@ -8,6 +8,7 @@ module ovsdb {
     import ietf-inet-types { prefix inet; }
     import overlay { prefix overlay; }
     import ietf-yang-types { prefix yang; revision-date "2013-07-15";}
+    import opendaylight-l2-types { prefix ethertype; revision-date "2013-08-27";}
 
     revision "2015-01-05" {
         description "Initial revision of southbound model";
@@ -343,6 +344,11 @@ module ovsdb {
         leaf attached-to {
             description "Reference to the bridge where terminiation point is attached.";
             type ovsdb-bridge-ref;
+        }
+
+        leaf vlan-tag {
+            description "The VLAN tag of the termination point.";
+            type ethertype:vlan-id;
         }
     }
 

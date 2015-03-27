@@ -48,7 +48,6 @@ public class EventDispatcherImplTest {
         eventDispatcherImpl.init();
         eventDispatcherImpl.start();
 
-        // configure serviceReference
         when(ref.getProperty(org.osgi.framework.Constants.SERVICE_ID)).thenReturn(r.nextLong());
         when(ref.getProperty(Constants.EVENT_HANDLER_TYPE_PROPERTY)).thenReturn(handlerTypeObject);
     }
@@ -58,17 +57,13 @@ public class EventDispatcherImplTest {
      */
     @Test
     public void testeventHandlerAdded() throws Exception{
-        // get handlers from EventDispatcherImpl for test purposes
         AbstractHandler[] handlers = ( AbstractHandler[]) getClassField("handlers");
 
-        // test when should be null
-        assertNotEquals(handlers[handlerTypeObject.ordinal()], handler);
+        assertNotEquals("Error, handler should be null", handlers[handlerTypeObject.ordinal()], handler);
 
-        // add handler
         eventDispatcherImpl.eventHandlerAdded(ref, handler);
 
-        // test when handler added
-        assertEquals(handlers[handlerTypeObject.ordinal()], handler);
+        assertEquals("Error, did not return the added handler", handlers[handlerTypeObject.ordinal()], handler);
     }
 
     /**
@@ -76,20 +71,15 @@ public class EventDispatcherImplTest {
      */
     @Test
     public void testHandlerRemoved() throws Exception{
-        // get handlers from EventDispatcherImpl for test purposes
         AbstractHandler[] handlers = ( AbstractHandler[]) getClassField("handlers");
 
-        // add a handler
         eventDispatcherImpl.eventHandlerAdded(ref, handler);
 
-        // test when handler added
-        assertEquals(handlers[handlerTypeObject.ordinal()], handler);
+        assertEquals("Error, did not return the added handler", handlers[handlerTypeObject.ordinal()], handler);
 
-        // remove handler
         eventDispatcherImpl.eventHandlerRemoved(ref);
 
-        // test once handler removed
-        assertNull(handlers[handlerTypeObject.ordinal()]);
+        assertNull("Error, handler should be null as it has just been removed", handlers[handlerTypeObject.ordinal()]);
     }
 
     /**
@@ -97,16 +87,12 @@ public class EventDispatcherImplTest {
      */
     @Test
     public void testEnqueueEvent() throws Exception{
-        // get events from EventDispatcherImpl for test purposes
         BlockingQueue<AbstractEvent> events = (BlockingQueue<AbstractEvent>) getClassField("events");
 
-        // test before enqueue event
         assertEquals("Error, did not return the expected size, nothing has been added yet", 0, events.size());
 
-        // enqueue event
         eventDispatcherImpl.enqueueEvent(mock(AbstractEvent.class));
 
-        // test after enqueue event
         assertEquals("Error, did not return the expected size", 1, events.size());
     }
 

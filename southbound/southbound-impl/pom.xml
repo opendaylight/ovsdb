@@ -53,6 +53,17 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           </instructions>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <configuration>
+          <configLocation>
+            ${project.basedir}/../../commons/parent/src/main/resources/ovsdb_checks.xml
+          </configLocation>
+          <includes>**/*.java,**/*.xml,**/*.ini,**/*.sh,**/*.bat</includes>
+          <excludes>**/yang/,**/southbound/</excludes>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 

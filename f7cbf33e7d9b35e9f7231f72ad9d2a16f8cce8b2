@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_ea34b3df",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-03-27T21:39:56Z",
+      "side": 1,
+      "message": "please add description. It can be used for java docs.",
+      "revId": "f7cbf33e7d9b35e9f7231f72ad9d2a16f8cce8b2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

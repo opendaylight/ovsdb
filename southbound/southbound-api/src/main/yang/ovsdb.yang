@@ -319,7 +319,11 @@ module ovsdb {
             description "Port/Interface related optional input values";
             key "option";
             leaf option {
-                description "Optional input string";
+                description "Option name";
+                type string;
+            }
+            leaf value {
+                description "Option value";
                 type string;
             }
         }

@@ -54,7 +54,7 @@ public class TyperUtils {
     }
 
     public static ColumnSchema<GenericTableSchema, Object>
-    getColumnSchema(GenericTableSchema tableSchema, String columnName, Class<Object> metaClass) {
+        getColumnSchema(GenericTableSchema tableSchema, String columnName, Class<Object> metaClass) {
         return tableSchema.column(columnName, metaClass);
     }
 
@@ -444,7 +444,6 @@ public class TyperUtils {
         Preconditions.checkNotNull(updates);
         Preconditions.checkNotNull(dbSchema);
         Map<UUID,T> result = new HashMap<UUID,T>();
-        @SuppressWarnings("checkstyle:genericwhitespace")
         Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> rowUpdates =
                 extractRowUpdates(klazz,updates,dbSchema);
         for (TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema> rowUpdate : rowUpdates.values()) {
@@ -476,7 +475,6 @@ public class TyperUtils {
         Preconditions.checkNotNull(updates);
         Preconditions.checkNotNull(dbSchema);
         Map<UUID,T> result = new HashMap<UUID,T>();
-        @SuppressWarnings("checkstyle:genericwhitespace")
         Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> rowUpdates =
                 extractRowUpdates(klazz,updates,dbSchema);
         for (TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema> rowUpdate : rowUpdates.values()) {
@@ -505,9 +503,8 @@ public class TyperUtils {
      * @return Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>>
      *     for the type of things being sought
      */
-    @SuppressWarnings("checkstyle:genericwhitespace")
     public static Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>>
-    extractRowUpdates(Class<?> klazz,TableUpdates updates,DatabaseSchema dbSchema) {
+        extractRowUpdates(Class<?> klazz,TableUpdates updates,DatabaseSchema dbSchema) {
         Preconditions.checkNotNull(klazz);
         Preconditions.checkNotNull(updates);
         Preconditions.checkNotNull(dbSchema);

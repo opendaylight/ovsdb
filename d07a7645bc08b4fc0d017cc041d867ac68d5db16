@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_9e13f40c",
+        "filename": "mdsal-northbound/api/pom.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-28T20:23:21Z",
+      "side": 1,
+      "message": "What is this parent?\n\nCan we make this look like the southbound-api where the parent in the binding-parent?",
+      "range": {
+        "startLine": 16,
+        "startChar": 22,
+        "endLine": 16,
+        "endChar": 32
+      },
+      "revId": "d07a7645bc08b4fc0d017cc041d867ac68d5db16",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_3efae0bd",
+        "filename": "mdsal-northbound/api/src/main/yang/ovsdbrpc.yang",
+        "patchSetId": 7
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-28T20:23:21Z",
+      "side": 1,
+      "message": "do we really want to call it rpc or just ovsdb-northbound? Maybe don\u0027t even need ovsdb if somehow ovsdb already ends up in the path.",
+      "revId": "d07a7645bc08b4fc0d017cc041d867ac68d5db16",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_1effe4ab",
+        "filename": "mdsal-northbound/pom.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-28T20:23:21Z",
+      "side": 1,
+      "message": "here you could pull in the ovsdb parent",
+      "range": {
+        "startLine": 15,
+        "startChar": 29,
+        "endLine": 15,
+        "endChar": 30
+      },
+      "revId": "d07a7645bc08b4fc0d017cc041d867ac68d5db16",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_be2d9048",
+        "filename": "mdsal-northbound/pom.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-28T20:23:21Z",
+      "side": 1,
+      "message": "is the aggregator name better to be consistent with the southbound.",
+      "range": {
+        "startLine": 21,
+        "startChar": 20,
+        "endLine": 21,
+        "endChar": 30
+      },
+      "revId": "d07a7645bc08b4fc0d017cc041d867ac68d5db16",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

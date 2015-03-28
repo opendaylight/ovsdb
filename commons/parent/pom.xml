@@ -452,13 +452,20 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
+          <dependencies>
+            <dependency>
+              <groupId>com.puppycrawl.tools</groupId>
+              <artifactId>checkstyle</artifactId>
+              <version>6.4.1</version>
+            </dependency>
+          </dependencies>
           <configuration>
             <configLocation>src/main/resources/ovsdb_checks.xml</configLocation>
             <includes>**/*.java,**/*.xml,**/*.ini,**/*.sh,**/*.bat</includes>
             <excludes>**/yang/,**/features/,**/integrationtest/,**/northbound/,
               **/openstack/,**/ovs-sfc/,
               **/ovsdb-plugin-compatibility-layer/,
-              **/plugin/,**/plugin-shell/,**/schema/,**/southbound/,**/utils/
+              **/plugin/,**/plugin-shell/,**/schemas/,**/southbound/,**/utils/
             </excludes>
           </configuration>
         </plugin>

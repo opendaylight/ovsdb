@@ -30,7 +30,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <branding.version>1.1.0-SNAPSHOT</branding.version>
     <karaf.resources.version>1.5.0-SNAPSHOT</karaf.resources.version>
     <karaf.branding.version>1.1.0-SNAPSHOT</karaf.branding.version>
-    <feature.ovsdb.version>1.1.0-SNAPSHOT</feature.ovsdb.version>
   </properties>
 
   <dependencies>

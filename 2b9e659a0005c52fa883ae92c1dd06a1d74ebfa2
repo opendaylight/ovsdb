@@ -40,6 +40,24 @@
       "revId": "2b9e659a0005c52fa883ae92c1dd06a1d74ebfa2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_d4eddd26",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-30T14:50:14Z",
+      "side": 1,
+      "message": "yes, trunks is a set of tags. Look at http://openvswitch.org/ovs-vswitchd.conf.db.5.pdf on page 16. tag is single integer 0-4095 and trunks is a set of up to 4096 tags.",
+      "parentUuid": "5a93c517_0107851d",
+      "revId": "2b9e659a0005c52fa883ae92c1dd06a1d74ebfa2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -9,6 +9,7 @@
  */
 package org.opendaylight.ovsdb.schema.openvswitch;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -40,14 +41,21 @@ public interface Port extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name="trunks", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Set<Long>> getTrunksColumn();
+    @TypedColumn(name="trunks", method=MethodType.GETDATA, fromVersion="1.0.0")
+    public Set<Integer> getTrunks();
     @TypedColumn(name="trunks", method=MethodType.SETDATA, fromVersion="1.0.0")
     public void setTrunks(Set<Long> trunks);
+    @TypedColumn(name="trunks", method=MethodType.SETDATA, fromVersion="1.0.0")
+    public void setTrunks(List<Integer> trunks);
 
     @TypedColumn(name="tag", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Set<Long>> getTagColumn();
-
+    @TypedColumn(name="tag", method=MethodType.GETDATA, fromVersion="1.0.0")
+    public int getTag();
     @TypedColumn(name="tag", method=MethodType.SETDATA, fromVersion="1.0.0")
     public void setTag(Set<Long> tag);
+    @TypedColumn(name="tag", method=MethodType.SETDATA, fromVersion="1.0.0")
+    public void setTag(int tag);
 
     @TypedColumn(name="vlan_mode", method=MethodType.GETCOLUMN, fromVersion="6.1.0")
     public Column<GenericTableSchema, Set<String>> getVlanModeColumn();

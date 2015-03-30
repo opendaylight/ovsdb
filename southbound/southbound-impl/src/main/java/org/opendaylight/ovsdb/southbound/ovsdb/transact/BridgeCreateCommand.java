@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -19,14 +20,15 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
+import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
-import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
+import org.opendaylight.ovsdb.southbound.SouthboundUtil;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeInternal;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeInternal;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,9 +46,11 @@ public class BridgeCreateCommand implements TransactCommand {
 
     @Override
     public void execute(TransactionBuilder transaction) {
-        Map<InstanceIdentifier<Node>, OvsdbBridgeAugmentation> created
-            = TransactUtils.extractOvsdbManagedNodeCreate(changes);
-        for (OvsdbBridgeAugmentation ovsdbManagedNode: created.values()) {
+        Map<InstanceIdentifier<Node>, OvsdbBridgeAugmentation> created =
+                TransactUtils.extractOvsdbManagedNodeCreate(changes);
+        for (Entry<InstanceIdentifier<Node>, OvsdbBridgeAugmentation> ovsdbManagedNodeEntry:
+            created.entrySet()) {
+            OvsdbBridgeAugmentation ovsdbManagedNode = ovsdbManagedNodeEntry.getValue();
             LOG.debug("Received request to create ovsdb bridge name: {} uuid: {}",
                         ovsdbManagedNode.getBridgeName(),
                         ovsdbManagedNode.getBridgeUuid());
@@ -90,6 +94,12 @@ public class BridgeCreateCommand implements TransactCommand {
                 bridge.setController(controllerMap.keySet());
             }
             bridge.setPorts(Sets.newHashSet(new UUID(portNamedUuid)));
+
+            // Set the iid external_id
+            Map<String,String> externalIds = new HashMap<String,String>();
+            externalIds.put(SouthboundConstants.IID_EXTERNAL_ID_KEY,
+                    SouthboundUtil.serializeInstanceIdentifier(ovsdbManagedNodeEntry.getKey()));
+            bridge.setExternalIds(externalIds);
 
             transaction.add(op.insert(bridge).withId(bridgeNamedUuid));
 

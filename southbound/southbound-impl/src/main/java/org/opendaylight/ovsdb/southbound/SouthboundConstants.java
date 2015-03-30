@@ -85,4 +85,5 @@ public class SouthboundConstants {
             .put(DatapathTypeSystem.class,"system")
             .put(DatapathTypeNetdev.class,"netdev")
             .build();
+    public static final String IID_EXTERNAL_ID_KEY = "opendaylight-iid";
 }

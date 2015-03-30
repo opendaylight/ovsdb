@@ -67,6 +67,30 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_340d213f",
+        "filename": "schemas/openvswitch/src/main/java/org/opendaylight/ovsdb/schema/openvswitch/Port.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-30T16:21:30Z",
+      "side": 1,
+      "message": "you only need 12 bits for vlans so a short should be fine right?\n\nAs for the pick first, this is pretty clearly a single integer in the ovsdb spec for the tag so I can\u0027t see a set here.",
+      "parentUuid": "5a93c517_f44ed9c0",
+      "range": {
+        "startLine": 46,
+        "startChar": 23,
+        "endLine": 46,
+        "endChar": 26
+      },
+      "revId": "1e9af497d2920655a7e046e6ffc3da403aaed0f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_5e6ecc97",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointCreateCommand.java",
         "patchSetId": 2
@@ -190,6 +214,24 @@
       "side": 1,
       "message": "Sam, lots of things in library/ that are single valued come/go from library/ as sets.  The \u0027pick the first one\u0027 strategy seems to be used.",
       "parentUuid": "5a93c517_be06f0cc",
+      "revId": "1e9af497d2920655a7e046e6ffc3da403aaed0f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_b727f3b5",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-30T16:21:30Z",
+      "side": 1,
+      "message": "Again, I don\u0027t see were this could ever be more than one tag based on the spec.",
+      "parentUuid": "5a93c517_948755d7",
       "revId": "1e9af497d2920655a7e046e6ffc3da403aaed0f5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

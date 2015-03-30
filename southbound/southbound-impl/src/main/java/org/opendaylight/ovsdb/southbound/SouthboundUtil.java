@@ -27,6 +27,7 @@ public class SouthboundUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundUtil.class);
 
+    public static InstanceIdentifierCodec instanceIdentifierCodec;
 
     public static Optional<OvsdbNodeAugmentation> getManagingNode(DataBroker db,OvsdbBridgeAttributes mn) {
         Preconditions.checkNotNull(mn);

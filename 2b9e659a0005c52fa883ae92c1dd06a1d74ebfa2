@@ -58,6 +58,24 @@
       "revId": "2b9e659a0005c52fa883ae92c1dd06a1d74ebfa2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_f41a5916",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-03-30T15:15:33Z",
+      "side": 1,
+      "message": "I think we might misunderstand eachother, the typedef is in opendaylight-l2-types (ethertype). The name of the typedef is vlan-id. I could create a typedef name vlan-tag in ovsdb.yang with type ethertype:vlan-id ?\n\nHere is the sample opendaylight-l2-types:vlan-id:\n\ttypedef vlan-id {\n\t\ttype uint16 {\n\t\t\trange \"0..4095\";\n\t\t}\n\t}",
+      "parentUuid": "5a93c517_d4eddd26",
+      "revId": "2b9e659a0005c52fa883ae92c1dd06a1d74ebfa2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

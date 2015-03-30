@@ -32,8 +32,8 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeBase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeSystem;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolBase;
@@ -122,6 +122,27 @@ public class SouthboundMapper {
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(OvsdbClientKey key,OvsdbBridgeName bridgeName) {
         return createInstanceIdentifier(createManagedNodeId(key, bridgeName));
+    }
+
+    public static InstanceIdentifier<Node> createInstanceIdentifier(OvsdbClientKey key,Bridge bridge) {
+        String managedNodePathString = bridge
+                .getExternalIdsColumn()
+                .getData()
+                .get(SouthboundConstants.IID_EXTERNAL_ID_KEY);
+        InstanceIdentifier<Node> managedNodePath = null;
+        if (managedNodePathString != null) {
+            managedNodePath = (InstanceIdentifier<Node>) SouthboundUtil
+                    .deserializeInstanceIdentifier(managedNodePathString);
+        }
+        if (managedNodePath == null) {
+            managedNodePath = SouthboundMapper.createInstanceIdentifier(key,new OvsdbBridgeName(bridge.getName()));
+        }
+        return managedNodePath;
+    }
+
+    public static NodeId createManagedNodeId(InstanceIdentifier<Node> iid) {
+        NodeKey nodeKey = iid.firstKeyOf(Node.class, NodeKey.class);
+        return nodeKey.getNodeId();
     }
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(OvsdbClientKey key) {

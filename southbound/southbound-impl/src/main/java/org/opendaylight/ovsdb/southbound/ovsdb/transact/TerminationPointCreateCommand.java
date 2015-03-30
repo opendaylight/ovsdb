@@ -75,9 +75,11 @@ public class TerminationPointCreateCommand implements TransactCommand {
             Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
             port.setName(terminationPoint.getName());
             port.setInterfaces(Sets.newHashSet(new UUID(interfaceUuid)));
-            Set<Long> vlanTag = new HashSet<Long>();
-            vlanTag.add(terminationPoint.getVlanTag().getValue().longValue());
-            port.setTag(vlanTag);
+            if (terminationPoint.getVlanTag() != null) {
+                Set<Long> vlanTag = new HashSet<Long>();
+                vlanTag.add(terminationPoint.getVlanTag().getValue().longValue());
+                port.setTag(vlanTag);
+            }
             transaction.add(op.insert(port).withId(portUuid));
 
             //Configure bridge with the above port details

@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_12bfd5fc",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeCreateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-03-30T20:38:59Z",
+      "side": 1,
+      "message": "I am pleased you think the code is clear.  I *do* like breaking up what we are doing though visually with the comments, thoughts?",
+      "parentUuid": "5a93c517_32e3f134",
+      "range": {
+        "startLine": 98,
+        "startChar": 15,
+        "endLine": 98,
+        "endChar": 18
+      },
+      "revId": "9b4690bbf4e0eb957ed6756267997661ae82a21c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_d2d16d58",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeCreateCommand.java",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2015-03-30T20:34:20Z",
       "side": 1,
       "message": "Any idea if this code leaves the existing external_ids in place or does it overwrite them? I know for other_config we had to add values in a certain way, otherwise the last write would overwrite everything else.",
+      "range": {
+        "startLine": 102,
+        "startChar": 19,
+        "endLine": 102,
+        "endChar": 33
+      },
+      "revId": "9b4690bbf4e0eb957ed6756267997661ae82a21c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_52c55d8c",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeCreateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-03-30T20:38:59Z",
+      "side": 1,
+      "message": "This is for \u0027Creating\u0027 new Bridiges (thus the insert, which stomps the whole bridge object in question), I fully expect to have to use Mutate when we do update :)  Because I agree existing external_ids should be respected.",
+      "parentUuid": "5a93c517_d2d16d58",
       "range": {
         "startLine": 102,
         "startChar": 19,

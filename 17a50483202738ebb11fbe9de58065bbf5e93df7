@@ -40,6 +40,24 @@
       "revId": "17a50483202738ebb11fbe9de58065bbf5e93df7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_6108c92d",
+        "filename": "openstack/net-virt/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2015-03-30T14:26:22Z",
+      "side": 1,
+      "message": "Can you correct the indentation a bit :)",
+      "parentUuid": "5a93c517_e1f2996e",
+      "revId": "17a50483202738ebb11fbe9de58065bbf5e93df7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -33,8 +33,8 @@ public class OvsdbMonitorCallback implements MonitorCallBack {
     }
 
     @Override
-    public void exception(Throwable t) {
-        LOG.warn("exception {}",t);
+    public void exception(Throwable exception) {
+        LOG.warn("exception {}", exception);
     }
 
 }

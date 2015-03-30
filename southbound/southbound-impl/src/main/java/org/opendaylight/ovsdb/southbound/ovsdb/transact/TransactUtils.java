@@ -33,10 +33,11 @@ public class TransactUtils {
         return extractOvsdbManagedNode(changes.getUpdatedData());
     }
 
-    public static Set<InstanceIdentifier<Node>> extractOvsdbManagedNodeRemoved(AsyncDataChangeEvent<InstanceIdentifier<?>, OvsdbBridgeAugmentation> changes) {
+    public static Set<InstanceIdentifier<Node>> extractOvsdbManagedNodeRemoved(
+            AsyncDataChangeEvent<InstanceIdentifier<?>, OvsdbBridgeAugmentation> changes) {
         Set<InstanceIdentifier<Node>> result = new HashSet<InstanceIdentifier<Node>>();
-        for(InstanceIdentifier<?> iid : changes.getRemovedPaths()) {
-            if(iid.getTargetType().equals(OvsdbBridgeAugmentation.class)) {
+        for (InstanceIdentifier<?> iid : changes.getRemovedPaths()) {
+            if (iid.getTargetType().equals(OvsdbBridgeAugmentation.class)) {
                 @SuppressWarnings("unchecked") // Actually checked above
                 InstanceIdentifier<Node> iidn = (InstanceIdentifier<Node>)iid;
                 result.add(iidn);
@@ -45,18 +46,20 @@ public class TransactUtils {
         return result;
     }
 
-    public static Map<InstanceIdentifier<Node>,OvsdbBridgeAugmentation> extractOvsdbManagedNodeOriginal(AsyncDataChangeEvent<InstanceIdentifier<?>, OvsdbBridgeAugmentation> changes)  {
+    public static Map<InstanceIdentifier<Node>,OvsdbBridgeAugmentation> extractOvsdbManagedNodeOriginal(
+            AsyncDataChangeEvent<InstanceIdentifier<?>, OvsdbBridgeAugmentation> changes)  {
         return extractOvsdbManagedNode(changes.getOriginalData());
     }
 
 
     public static Map<InstanceIdentifier<Node>,OvsdbBridgeAugmentation> extractOvsdbManagedNode(
             Map<InstanceIdentifier<?>, OvsdbBridgeAugmentation> changes) {
-        Map<InstanceIdentifier<Node>,OvsdbBridgeAugmentation> result = new HashMap<InstanceIdentifier<Node>,OvsdbBridgeAugmentation>();
-        for( Entry<InstanceIdentifier<?>, OvsdbBridgeAugmentation> created : changes.entrySet()) {
+        Map<InstanceIdentifier<Node>,OvsdbBridgeAugmentation> result
+            = new HashMap<InstanceIdentifier<Node>,OvsdbBridgeAugmentation>();
+        for (Entry<InstanceIdentifier<?>, OvsdbBridgeAugmentation> created : changes.entrySet()) {
             OvsdbBridgeAugmentation value = created.getValue();
             Class<?> type = created.getKey().getTargetType();
-            if(type.equals(OvsdbBridgeAugmentation.class)) {
+            if (type.equals(OvsdbBridgeAugmentation.class)) {
                 @SuppressWarnings("unchecked") // Actually checked above
                 InstanceIdentifier<Node> iid = (InstanceIdentifier<Node>) created.getKey();
                 OvsdbBridgeAugmentation ovsdbManagedNode = (OvsdbBridgeAugmentation) value;

@@ -23,7 +23,7 @@ public class OvsdbOperationalCommandAggregator implements TransactionCommand {
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        for(TransactionCommand command: commands) {
+        for (TransactionCommand command: commands) {
             command.execute(transaction);
         }
     }

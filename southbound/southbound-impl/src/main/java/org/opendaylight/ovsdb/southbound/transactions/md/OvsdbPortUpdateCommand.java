@@ -39,7 +39,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
-import org.opendaylight.yangtools.yang.binding.Augmentation;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,8 +46,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 
 public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
-    private static final Logger LOG = LoggerFactory
-            .getLogger(OvsdbPortUpdateCommand.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OvsdbPortUpdateCommand.class);
 
     public OvsdbPortUpdateCommand(OvsdbClientKey key, TableUpdates updates,
             DatabaseSchema dbSchema) {
@@ -87,7 +85,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                             NodeBuilder nodeBuilder = new NodeBuilder();
                             nodeBuilder.setNodeId(bridgeId);
 
-                            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = new OvsdbTerminationPointAugmentationBuilder();
+                            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder
+                                = new OvsdbTerminationPointAugmentationBuilder();
                             List<TerminationPoint> tpList = new ArrayList<TerminationPoint>();
                             TerminationPointBuilder entry = new TerminationPointBuilder();
                             TpId tpId = SouthboundMapper
@@ -101,20 +100,23 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                                     port.getUuid().toString()));
                             Column<GenericTableSchema, Set<UUID>> iface = port.getInterfacesColumn();
                             Set<UUID> ifUuid = iface.getData();
-                            Collection<Interface> ifUpdateRows = TyperUtils.extractRowsUpdated(Interface.class, getUpdates(),  getDbSchema()).values();
+                            Collection<Interface> ifUpdateRows = TyperUtils.extractRowsUpdated(
+                                    Interface.class, getUpdates(),  getDbSchema()).values();
                             for (UUID ifIter : ifUuid) {
                                 for (Interface interfIter : ifUpdateRows) {
                                     Column<GenericTableSchema, String> typeColumn = interfIter.getTypeColumn();
                                     String type = typeColumn.getData();
                                     if ((interfIter.getUuid()).equals(ifIter)) {
-                                        ovsdbTerminationPointBuilder.setInterfaceUuid(new Uuid(interfIter.getUuid().toString()));
-                                        ovsdbTerminationPointBuilder.setInterfaceType(SouthboundMapper.createInterfaceType(type));
+                                        ovsdbTerminationPointBuilder.setInterfaceUuid(
+                                                new Uuid(interfIter.getUuid().toString()));
+                                        ovsdbTerminationPointBuilder.setInterfaceType(
+                                                SouthboundMapper.createInterfaceType(type));
                                         break;
                                     }
                                 }
                             }
                             entry.addAugmentation(
-                                    (Class<? extends Augmentation<TerminationPoint>>) OvsdbTerminationPointAugmentation.class,
+                                    OvsdbTerminationPointAugmentation.class,
                                     ovsdbTerminationPointBuilder.build());
 
                             tpList.add(entry.build());

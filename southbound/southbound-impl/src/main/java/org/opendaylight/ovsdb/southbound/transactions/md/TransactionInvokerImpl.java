@@ -30,10 +30,13 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     private BindingTransactionChain chain;
     private DataBroker db;
     private BlockingQueue<TransactionCommand> inputQueue = new LinkedBlockingQueue<TransactionCommand>(QUEUE_SIZE);
-    private BlockingQueue<ReadWriteTransaction> successfulTransactionQueue = new LinkedBlockingQueue<ReadWriteTransaction>(QUEUE_SIZE);
-    private BlockingQueue<AsyncTransaction<?, ?>> failedTransactionQueue = new LinkedBlockingQueue<AsyncTransaction<?, ?>>(QUEUE_SIZE);
+    private BlockingQueue<ReadWriteTransaction> successfulTransactionQueue
+        = new LinkedBlockingQueue<ReadWriteTransaction>(QUEUE_SIZE);
+    private BlockingQueue<AsyncTransaction<?, ?>> failedTransactionQueue
+        = new LinkedBlockingQueue<AsyncTransaction<?, ?>>(QUEUE_SIZE);
     private ExecutorService executor;
-    private Map<ReadWriteTransaction,TransactionCommand> transactionToCommand = new HashMap<ReadWriteTransaction,TransactionCommand>();
+    private Map<ReadWriteTransaction,TransactionCommand> transactionToCommand
+        = new HashMap<ReadWriteTransaction,TransactionCommand>();
     private List<ReadWriteTransaction> pendingTransactions = new ArrayList<ReadWriteTransaction>();
 
     public TransactionInvokerImpl(DataBroker db) {
@@ -64,11 +67,11 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
 
     @Override
     public void run() {
-        while(true) {
+        while (true) {
             forgetSuccessfulTransactions();
             try {
                 List<TransactionCommand> commands = extractCommands();
-                for(TransactionCommand command: commands) {
+                for (TransactionCommand command: commands) {
                     final ReadWriteTransaction transaction = chain.newReadWriteTransaction();
                     recordPendingTransaction(command, transaction);
                     command.execute(transaction);
@@ -79,13 +82,13 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
                         }
 
                         @Override
-                        public void onFailure(final Throwable t) {
+                        public void onFailure(final Throwable throwable) {
                             // NOOP - handled by failure of transaction chain
                         }
                     });
                 }
             } catch (Exception e) {
-                LOG.warn("Exception invoking Transaction: ",e);
+                LOG.warn("Exception invoking Transaction: ", e);
             }
         }
     }
@@ -93,10 +96,11 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     private List<TransactionCommand> extractResubmitCommands() {
         AsyncTransaction<?, ?> transaction = failedTransactionQueue.poll();
         List<TransactionCommand> commands = new ArrayList<TransactionCommand>();
-        if(transaction != null) {
+        if (transaction != null) {
             int index = pendingTransactions.lastIndexOf(transaction);
-            List<ReadWriteTransaction> transactions = pendingTransactions.subList(index, pendingTransactions.size()-1);
-            for(ReadWriteTransaction tx: transactions) {
+            List<ReadWriteTransaction> transactions =
+                    pendingTransactions.subList(index, pendingTransactions.size() - 1);
+            for (ReadWriteTransaction tx: transactions) {
                 commands.add(transactionToCommand.get(tx));
             }
             resetTransactionQueue();
@@ -128,7 +132,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     private List<TransactionCommand> extractCommandsFromQueue() throws InterruptedException {
         List<TransactionCommand> result = new ArrayList<TransactionCommand>();
         TransactionCommand command = inputQueue.take();
-        while(command != null) {
+        while (command != null) {
             result.add(command);
             command = inputQueue.poll();
         }
@@ -137,7 +141,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
 
     private void forgetSuccessfulTransactions() {
         ReadWriteTransaction transaction = successfulTransactionQueue.poll();
-        while(transaction != null) {
+        while (transaction != null) {
             pendingTransactions.remove(transaction);
             transactionToCommand.remove(transaction);
             transaction = successfulTransactionQueue.poll();
@@ -146,6 +150,6 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
 
     @Override
     public void close() throws Exception {
-      this.executor.shutdown();
+        this.executor.shutdown();
     }
 }

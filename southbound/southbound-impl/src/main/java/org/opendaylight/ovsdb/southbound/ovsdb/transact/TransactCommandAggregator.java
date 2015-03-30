@@ -22,16 +22,17 @@ public class TransactCommandAggregator implements TransactCommand {
     private AsyncDataChangeEvent<InstanceIdentifier<?>, OvsdbBridgeAugmentation> changes;
     private DataBroker db;
 
-    public TransactCommandAggregator(DataBroker db,AsyncDataChangeEvent<InstanceIdentifier<?>, OvsdbBridgeAugmentation> changes) {
+    public TransactCommandAggregator(DataBroker db,AsyncDataChangeEvent<InstanceIdentifier<?>,
+            OvsdbBridgeAugmentation> changes) {
         this.db = db;
-        this.changes=changes;
+        this.changes = changes;
         commands.add(new BridgeCreateCommand(changes));
         commands.add(new BridgeRemovedCommand(db,changes));
     }
 
     @Override
     public void execute(TransactionBuilder transaction) {
-        for(TransactCommand command:commands) {
+        for (TransactCommand command:commands) {
             command.execute(transaction);
         }
     }

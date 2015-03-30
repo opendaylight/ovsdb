@@ -46,7 +46,8 @@ public class SouthboundConstants {
     public static final String BRIDGE_URI_PREFIX = "bridge";
     public static final String TP_URI_PREFIX = "terminationpoint";
     public static final Integer DEFAULT_OVSDB_PORT = 6640;
-    public static final ImmutableBiMap<Class<? extends OvsdbBridgeProtocolBase>,String> OVSDB_PROTOCOL_MAP = new ImmutableBiMap.Builder<Class<? extends OvsdbBridgeProtocolBase>,String>()
+    public static final ImmutableBiMap<Class<? extends OvsdbBridgeProtocolBase>,String> OVSDB_PROTOCOL_MAP
+        = new ImmutableBiMap.Builder<Class<? extends OvsdbBridgeProtocolBase>,String>()
             .put(OvsdbBridgeProtocolOpenflow10.class,"OpenFlow10")
             .put(OvsdbBridgeProtocolOpenflow11.class,"OpenFlow11")
             .put(OvsdbBridgeProtocolOpenflow12.class,"OpenFlow12")
@@ -55,12 +56,14 @@ public class SouthboundConstants {
             .put(OvsdbBridgeProtocolOpenflow15.class,"OpenFlow15")
             .build();
 
-    public static final ImmutableBiMap<Class<? extends OvsdbFailModeBase>,String> OVSDB_FAIL_MODE_MAP = new ImmutableBiMap.Builder<Class<? extends OvsdbFailModeBase>,String>()
+    public static final ImmutableBiMap<Class<? extends OvsdbFailModeBase>,String> OVSDB_FAIL_MODE_MAP
+        = new ImmutableBiMap.Builder<Class<? extends OvsdbFailModeBase>,String>()
             .put(OvsdbFailModeStandalone.class,"standalone")
             .put(OvsdbFailModeSecure.class,"secure")
             .build();
 
-    public static final ImmutableBiMap<String, Class<? extends InterfaceTypeBase>> OVSDB_INTERFACE_TYPE_MAP = new ImmutableBiMap.Builder<String, Class<? extends InterfaceTypeBase>>()
+    public static final ImmutableBiMap<String, Class<? extends InterfaceTypeBase>> OVSDB_INTERFACE_TYPE_MAP
+        = new ImmutableBiMap.Builder<String, Class<? extends InterfaceTypeBase>>()
             .put("internal", InterfaceTypeInternal.class)
             .put("vxlan", InterfaceTypeVxlan.class)
             .put("patch", InterfaceTypePatch.class)
@@ -77,7 +80,8 @@ public class SouthboundConstants {
             .put("dpdkvhost", InterfaceTypeDpdkvhost.class)
             .build();
 
-    public static final ImmutableBiMap<Class<? extends DatapathTypeBase>,String> DATAPATH_TYPE_MAP = new ImmutableBiMap.Builder<Class<? extends DatapathTypeBase>,String>()
+    public static final ImmutableBiMap<Class<? extends DatapathTypeBase>,String> DATAPATH_TYPE_MAP
+        = new ImmutableBiMap.Builder<Class<? extends DatapathTypeBase>,String>()
             .put(DatapathTypeSystem.class,"system")
             .put(DatapathTypeNetdev.class,"netdev")
             .build();

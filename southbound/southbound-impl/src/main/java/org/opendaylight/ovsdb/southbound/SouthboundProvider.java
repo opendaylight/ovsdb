@@ -73,7 +73,7 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
         initializeTopology(transaction,type);
         CheckedFuture<Optional<Topology>, ReadFailedException> ovsdbTp = transaction.read(type, path);
         try {
-            if(!ovsdbTp.get().isPresent()) {
+            if (!ovsdbTp.get().isPresent()) {
                 TopologyBuilder tpb = new TopologyBuilder();
                 tpb.setTopologyId(SouthboundConstants.OVSDB_TOPOLOGY_ID);
                 transaction.put(type, path, tpb.build());
@@ -86,17 +86,16 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
         }
     }
 
-    private void initializeTopology(ReadWriteTransaction t, LogicalDatastoreType type) {
-        InstanceIdentifier<NetworkTopology> path = InstanceIdentifier
-                .create(NetworkTopology.class);
-       CheckedFuture<Optional<NetworkTopology>, ReadFailedException> tp = t.read(type,path);
-       try {
-           if(!tp.get().isPresent()) {
-               NetworkTopologyBuilder ntb = new NetworkTopologyBuilder();
-               t.put(type,path,ntb.build());
-           }
-       } catch (Exception e) {
-           LOG.error("Error initializing ovsdb topology {}",e);
-       }
+    private void initializeTopology(ReadWriteTransaction transaction, LogicalDatastoreType type) {
+        InstanceIdentifier<NetworkTopology> path = InstanceIdentifier.create(NetworkTopology.class);
+        CheckedFuture<Optional<NetworkTopology>, ReadFailedException> topology = transaction.read(type,path);
+        try {
+            if (!topology.get().isPresent()) {
+                NetworkTopologyBuilder ntb = new NetworkTopologyBuilder();
+                transaction.put(type,path,ntb.build());
+            }
+        } catch (Exception e) {
+            LOG.error("Error initializing ovsdb topology {}",e);
+        }
     }
 }

@@ -25,8 +25,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.overlay.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -37,7 +35,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 
 public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoCloseable {
-    Map<OvsdbClientKey,OvsdbConnectionInstance> clients = new ConcurrentHashMap<OvsdbClientKey,OvsdbConnectionInstance>();
+    Map<OvsdbClientKey,OvsdbConnectionInstance> clients
+        = new ConcurrentHashMap<OvsdbClientKey,OvsdbConnectionInstance>();
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionManager.class);
 
     private DataBroker db;
@@ -68,10 +67,14 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     public OvsdbClient connect(OvsdbNodeAugmentation ovsdbNode) throws UnknownHostException {
         // TODO handle case where we already have a connection
-        // TODO use transaction chains to handle ordering issues between disconnected and connected when writing to the operational store
+        // TODO use transaction chains to handle ordering issues between disconnected
+        // and connected when writing to the operational store
         InetAddress ip = SouthboundMapper.createInetAddress(ovsdbNode.getIp());
-        OvsdbClient client = OvsdbConnectionService.getService().connect(ip, ovsdbNode.getPort().getValue().intValue());
-        connected(client); // For connections from the controller to the ovs instance, the library doesn't call this method for us
+        OvsdbClient client = OvsdbConnectionService.getService().connect(ip,
+                ovsdbNode.getPort().getValue().intValue());
+        // For connections from the controller to the ovs instance, the library doesn't call
+        // this method for us
+        connected(client);
         return client;
     }
 
@@ -85,7 +88,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     @Override
     public void close() throws Exception {
-        for(OvsdbClient client: clients.values()) {
+        for (OvsdbClient client: clients.values()) {
             client.disconnect();
         }
     }
@@ -101,7 +104,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     public OvsdbConnectionInstance getConnectionInstance(OvsdbBridgeAttributes mn) {
         Optional<OvsdbNodeAugmentation> optional = SouthboundUtil.getManagingNode(db, mn);
-        if(optional.isPresent()) {
+        if (optional.isPresent()) {
             return getConnectionInstance(optional.get());
         } else {
             return null;
@@ -112,7 +115,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         Preconditions.checkNotNull(node);
         OvsdbNodeAugmentation ovsdbNode = node.getAugmentation(OvsdbNodeAugmentation.class);
         OvsdbBridgeAugmentation ovsdbManagedNode = node.getAugmentation(OvsdbBridgeAugmentation.class);
-        if(ovsdbNode != null) {
+        if (ovsdbNode != null) {
             return getConnectionInstance(ovsdbNode);
         } else if (ovsdbManagedNode != null) {
             return getConnectionInstance(ovsdbManagedNode);
@@ -123,18 +126,19 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     }
 
     public OvsdbConnectionInstance getConnectionInstance(InstanceIdentifier<Node> nodePath) {
-        try{
+        try {
             ReadOnlyTransaction transaction = db.newReadOnlyTransaction();
-            CheckedFuture<Optional<Node>, ReadFailedException> nodeFuture = transaction.read(LogicalDatastoreType.OPERATIONAL, nodePath);
+            CheckedFuture<Optional<Node>, ReadFailedException> nodeFuture = transaction.read(
+                    LogicalDatastoreType.OPERATIONAL, nodePath);
             transaction.close();
             Optional<Node> optional = nodeFuture.get();
-            if(optional != null && optional.isPresent() && optional.get() instanceof Node) {
+            if (optional != null && optional.isPresent() && optional.get() instanceof Node) {
                 return this.getConnectionInstance(optional.get());
             } else {
                 LOG.warn("Found non-topological node {} on path {}",optional);
                 return null;
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             LOG.warn("Failed to get Ovsdb Node {}",nodePath, e);
             return null;
         }

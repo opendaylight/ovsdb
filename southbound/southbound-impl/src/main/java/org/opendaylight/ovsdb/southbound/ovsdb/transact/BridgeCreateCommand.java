@@ -44,8 +44,9 @@ public class BridgeCreateCommand implements TransactCommand {
 
     @Override
     public void execute(TransactionBuilder transaction) {
-        Map<InstanceIdentifier<Node>, OvsdbBridgeAugmentation> created = TransactUtils.extractOvsdbManagedNodeCreate(changes);
-        for(OvsdbBridgeAugmentation ovsdbManagedNode: created.values()) {
+        Map<InstanceIdentifier<Node>, OvsdbBridgeAugmentation> created
+            = TransactUtils.extractOvsdbManagedNodeCreate(changes);
+        for (OvsdbBridgeAugmentation ovsdbManagedNode: created.values()) {
             LOG.debug("Received request to create ovsdb bridge name: {} uuid: {}",
                         ovsdbManagedNode.getBridgeName(),
                         ovsdbManagedNode.getBridgeUuid());
@@ -70,20 +71,22 @@ public class BridgeCreateCommand implements TransactCommand {
             // Bridge part
             Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
             bridge.setName(ovsdbManagedNode.getBridgeName().getValue());
-            if(ovsdbManagedNode.getFailMode() != null &&
-                    SouthboundConstants.OVSDB_FAIL_MODE_MAP.get(ovsdbManagedNode.getFailMode()) != null ) {
-                bridge.setFailMode(Sets.newHashSet(SouthboundConstants.OVSDB_FAIL_MODE_MAP.get(ovsdbManagedNode.getFailMode())));
+            if (ovsdbManagedNode.getFailMode() != null
+                    && SouthboundConstants.OVSDB_FAIL_MODE_MAP.get(ovsdbManagedNode.getFailMode()) != null ) {
+                bridge.setFailMode(Sets.newHashSet(
+                        SouthboundConstants.OVSDB_FAIL_MODE_MAP.get(ovsdbManagedNode.getFailMode())));
             }
             bridge.setDatapathType(SouthboundMapper.createDatapathType(ovsdbManagedNode));
-            if(SouthboundMapper.createOvsdbBridgeProtocols(ovsdbManagedNode) != null
-                    && SouthboundMapper.createOvsdbBridgeProtocols(ovsdbManagedNode).size() > 0){
+            if (SouthboundMapper.createOvsdbBridgeProtocols(ovsdbManagedNode) != null
+                    && SouthboundMapper.createOvsdbBridgeProtocols(ovsdbManagedNode).size() > 0) {
                 bridge.setProtocols(SouthboundMapper.createOvsdbBridgeProtocols(ovsdbManagedNode));
             }
-            Map<UUID,Controller> controllerMap = SouthboundMapper.createOvsdbController(ovsdbManagedNode, transaction.getDatabaseSchema());
-            for(Entry<UUID,Controller >entry: controllerMap.entrySet()) {
+            Map<UUID,Controller> controllerMap = SouthboundMapper.createOvsdbController(
+                    ovsdbManagedNode, transaction.getDatabaseSchema());
+            for (Entry<UUID,Controller> entry: controllerMap.entrySet()) {
                 transaction.add(op.insert(entry.getValue()).withId(entry.getKey().toString()));
             }
-            if(!controllerMap.isEmpty()) {
+            if (!controllerMap.isEmpty()) {
                 bridge.setController(controllerMap.keySet());
             }
             bridge.setPorts(Sets.newHashSet(new UUID(portNamedUuid)));
@@ -95,8 +98,7 @@ public class BridgeCreateCommand implements TransactCommand {
             ovs.setBridges(Sets.newHashSet(new UUID(bridgeNamedUuid)));
             transaction.add(op.mutate(ovs).addMutation(ovs.getBridgesColumn().getSchema(),
                     Mutator.INSERT,
-                    ovs.getBridgesColumn().getData())
-                    );
+                    ovs.getBridgesColumn().getData()));
         }
     }
 

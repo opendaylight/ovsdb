@@ -32,19 +32,21 @@ public class SouthboundUtil {
         Preconditions.checkNotNull(mn);
         try {
             OvsdbNodeRef ref = mn.getManagedBy();
-            if(ref != null && ref.getValue() != null) {
+            if (ref != null && ref.getValue() != null) {
                 ReadOnlyTransaction transaction = db.newReadOnlyTransaction();
                 @SuppressWarnings("unchecked") // Note: erasure makes this safe in combination with the typecheck below
                 InstanceIdentifier<Node> path = (InstanceIdentifier<Node>) ref.getValue();
-                CheckedFuture<Optional<Node>, ReadFailedException> nf = transaction.read(LogicalDatastoreType.OPERATIONAL, path);
+                CheckedFuture<Optional<Node>, ReadFailedException> nf = transaction.read(
+                        LogicalDatastoreType.OPERATIONAL, path);
                 transaction.close();
                 Optional<Node> optional = nf.get();
-                if(optional != null && optional.isPresent() && optional.get() instanceof Node) {
+                if (optional != null && optional.isPresent() && optional.get() instanceof Node) {
                     OvsdbNodeAugmentation ovsdbNode = optional.get().getAugmentation(OvsdbNodeAugmentation.class);
-                    if(ovsdbNode !=null) {
+                    if (ovsdbNode != null) {
                         return Optional.of(ovsdbNode);
                     } else {
-                        LOG.warn("OvsdbManagedNode {} claims to be managed by {} but that OvsdbNode does not exist",mn,ref.getValue());
+                        LOG.warn("OvsdbManagedNode {} claims to be managed by {} but "
+                                + "that OvsdbNode does not exist", mn,ref.getValue());
                         return Optional.absent();
                     }
                 } else {
@@ -55,9 +57,9 @@ public class SouthboundUtil {
                 LOG.warn("Cannot find client for OvsdbManagedNode without a specified ManagedBy {}",mn);
                 return Optional.absent();
             }
-         } catch (Exception e) {
-             LOG.warn("Failed to get OvsdbNode that manages OvsdbManagedNode {}",mn, e);
-             return Optional.absent();
-         }
+        } catch (Exception e) {
+            LOG.warn("Failed to get OvsdbNode that manages OvsdbManagedNode {}", mn, e);
+            return Optional.absent();
+        }
     }
 }

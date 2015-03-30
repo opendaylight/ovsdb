@@ -18,7 +18,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-public class DataChangesTerminationPointEvent implements AsyncDataChangeEvent<InstanceIdentifier<?>, OvsdbTerminationPointAugmentation>{
+public class DataChangesTerminationPointEvent implements AsyncDataChangeEvent<InstanceIdentifier<?>,
+        OvsdbTerminationPointAugmentation> {
 
     private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event;
     private InstanceIdentifier<?> iid;
@@ -29,15 +30,18 @@ public class DataChangesTerminationPointEvent implements AsyncDataChangeEvent<In
     private Set<InstanceIdentifier<?>> removedPaths = null;
     private Map<InstanceIdentifier<?>, OvsdbTerminationPointAugmentation> originalData;
 
-    public DataChangesTerminationPointEvent(InstanceIdentifier<?> iid, AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event) {
+    public DataChangesTerminationPointEvent(InstanceIdentifier<?> iid,
+                                            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event) {
         this.iid = iid;
         this.event = event;
     }
 
-    private Map<InstanceIdentifier<?>, OvsdbTerminationPointAugmentation> filter(Map<InstanceIdentifier<?>, DataObject> data) {
-        Map<InstanceIdentifier<?>, OvsdbTerminationPointAugmentation> result = new HashMap<InstanceIdentifier<?>, OvsdbTerminationPointAugmentation>();
-        for(Entry<InstanceIdentifier<?>, DataObject> created: data.entrySet()) {
-            if(created.getValue() != null
+    private Map<InstanceIdentifier<?>, OvsdbTerminationPointAugmentation> filter(Map<InstanceIdentifier<?>,
+            DataObject> data) {
+        Map<InstanceIdentifier<?>, OvsdbTerminationPointAugmentation> result
+            = new HashMap<InstanceIdentifier<?>, OvsdbTerminationPointAugmentation>();
+        for (Entry<InstanceIdentifier<?>, DataObject> created: data.entrySet()) {
+            if (created.getValue() != null
                     && created.getValue() instanceof OvsdbTerminationPointAugmentation
                     && ((OvsdbTerminationPointAugmentation)created.getValue()).getAttachedTo() != null
                     && ((OvsdbTerminationPointAugmentation)created.getValue()).getAttachedTo().getValue() != null) {
@@ -49,7 +53,7 @@ public class DataChangesTerminationPointEvent implements AsyncDataChangeEvent<In
 
     @Override
     public Map<InstanceIdentifier<?>, OvsdbTerminationPointAugmentation> getCreatedData() {
-        if(this.createdData == null) {
+        if (this.createdData == null) {
             this.createdData = filter(event.getCreatedData());
         }
         return this.createdData;
@@ -57,7 +61,7 @@ public class DataChangesTerminationPointEvent implements AsyncDataChangeEvent<In
 
     @Override
     public Map<InstanceIdentifier<?>, OvsdbTerminationPointAugmentation> getUpdatedData() {
-        if(this.updatedData == null) {
+        if (this.updatedData == null) {
             this.updatedData = filter(event.getUpdatedData());
         }
         return this.updatedData;
@@ -65,11 +69,11 @@ public class DataChangesTerminationPointEvent implements AsyncDataChangeEvent<In
 
     @Override
     public Set<InstanceIdentifier<?>> getRemovedPaths() {
-        if(this.removedPaths != null) {
+        if (this.removedPaths != null) {
             this.removedPaths = new HashSet<InstanceIdentifier<?>>();
-            for(InstanceIdentifier<?> path: event.getRemovedPaths()) {
+            for (InstanceIdentifier<?> path: event.getRemovedPaths()) {
                 DataObject original = this.event.getOriginalData().get(path);
-                if(original != null
+                if (original != null
                         && original instanceof OvsdbTerminationPointAugmentation) {
                     this.removedPaths.add(path);
                 }
@@ -80,7 +84,7 @@ public class DataChangesTerminationPointEvent implements AsyncDataChangeEvent<In
 
     @Override
     public Map<InstanceIdentifier<?>, OvsdbTerminationPointAugmentation> getOriginalData() {
-        if(this.originalData == null) {
+        if (this.originalData == null) {
             this.originalData = filter(event.getOriginalData());
         }
         return this.originalData;
@@ -88,7 +92,7 @@ public class DataChangesTerminationPointEvent implements AsyncDataChangeEvent<In
 
     @Override
     public OvsdbTerminationPointAugmentation getOriginalSubtree() {
-        if(this.event.getOriginalSubtree() instanceof OvsdbTerminationPointAugmentation) {
+        if (this.event.getOriginalSubtree() instanceof OvsdbTerminationPointAugmentation) {
             return (OvsdbTerminationPointAugmentation)this.event.getOriginalSubtree();
         } else {
             return null;
@@ -97,7 +101,7 @@ public class DataChangesTerminationPointEvent implements AsyncDataChangeEvent<In
 
     @Override
     public OvsdbTerminationPointAugmentation getUpdatedSubtree() {
-        if(this.event.getUpdatedSubtree() instanceof OvsdbTerminationPointAugmentation) {
+        if (this.event.getUpdatedSubtree() instanceof OvsdbTerminationPointAugmentation) {
             return (OvsdbTerminationPointAugmentation)this.event.getUpdatedSubtree();
         } else {
             return null;

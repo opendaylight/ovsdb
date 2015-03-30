@@ -24,11 +24,12 @@ public class OvsdbNodeRemoveCommand extends AbstractTransactionCommand {
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        CheckedFuture<Optional<Node>, ReadFailedException> ovsdbNodeFuture = transaction.read(LogicalDatastoreType.OPERATIONAL, getKey().toInstanceIndentifier());
+        CheckedFuture<Optional<Node>, ReadFailedException> ovsdbNodeFuture = transaction.read(
+                LogicalDatastoreType.OPERATIONAL, getKey().toInstanceIndentifier());
         Optional<Node> ovsdbNodeOptional;
         try {
             ovsdbNodeOptional = ovsdbNodeFuture.get();
-            if(ovsdbNodeOptional.isPresent()) {
+            if (ovsdbNodeOptional.isPresent()) {
                 Node ovsdbNode = ovsdbNodeOptional.get();
                 OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
                 if (ovsdbNodeAugmentation.getManagedNodeEntry() != null) {

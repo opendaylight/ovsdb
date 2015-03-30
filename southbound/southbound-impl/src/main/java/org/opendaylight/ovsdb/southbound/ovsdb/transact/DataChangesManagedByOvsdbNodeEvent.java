@@ -31,15 +31,18 @@ public class DataChangesManagedByOvsdbNodeEvent implements
     private Set<InstanceIdentifier<?>> removedPaths = null;
     private Map<InstanceIdentifier<?>, OvsdbBridgeAugmentation> originalData;
 
-    public DataChangesManagedByOvsdbNodeEvent(InstanceIdentifier<?> iid, AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event) {
+    public DataChangesManagedByOvsdbNodeEvent(InstanceIdentifier<?> iid,
+                                              AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event) {
         this.iid = iid;
         this.event = event;
     }
 
-    private Map<InstanceIdentifier<?>, OvsdbBridgeAugmentation> filter(Map<InstanceIdentifier<?>, DataObject> data) {
-        Map<InstanceIdentifier<?>, OvsdbBridgeAugmentation> result = new HashMap<InstanceIdentifier<?>, OvsdbBridgeAugmentation>();
-        for(Entry<InstanceIdentifier<?>, DataObject> created: data.entrySet()) {
-            if(created.getValue() != null
+    private Map<InstanceIdentifier<?>, OvsdbBridgeAugmentation> filter(Map<InstanceIdentifier<?>,
+            DataObject> data) {
+        Map<InstanceIdentifier<?>, OvsdbBridgeAugmentation> result
+            = new HashMap<InstanceIdentifier<?>, OvsdbBridgeAugmentation>();
+        for (Entry<InstanceIdentifier<?>, DataObject> created: data.entrySet()) {
+            if (created.getValue() != null
                     && created.getValue() instanceof OvsdbBridgeAugmentation
                     && ((OvsdbBridgeAugmentation)created.getValue()).getManagedBy() != null
                     && ((OvsdbBridgeAugmentation)created.getValue()).getManagedBy().getValue() != null
@@ -52,7 +55,7 @@ public class DataChangesManagedByOvsdbNodeEvent implements
 
     @Override
     public Map<InstanceIdentifier<?>, OvsdbBridgeAugmentation> getCreatedData() {
-        if(this.createdData == null) {
+        if (this.createdData == null) {
             this.createdData = filter(event.getCreatedData());
         }
         return this.createdData;
@@ -60,7 +63,7 @@ public class DataChangesManagedByOvsdbNodeEvent implements
 
     @Override
     public Map<InstanceIdentifier<?>, OvsdbBridgeAugmentation> getUpdatedData() {
-        if(this.updatedData == null) {
+        if (this.updatedData == null) {
             this.updatedData = filter(event.getUpdatedData());
         }
         return this.updatedData;
@@ -68,17 +71,17 @@ public class DataChangesManagedByOvsdbNodeEvent implements
 
     @Override
     public Set<InstanceIdentifier<?>> getRemovedPaths() {
-        if(this.removedPaths == null) {
+        if (this.removedPaths == null) {
             this.removedPaths = new HashSet<InstanceIdentifier<?>>();
-            for(InstanceIdentifier<?> path: event.getRemovedPaths()) {
+            for (InstanceIdentifier<?> path: event.getRemovedPaths()) {
                 DataObject original = this.event.getOriginalData().get(path);
-                if(original != null
+                if (original != null
                         && original instanceof OvsdbBridgeAugmentation) {
                     OvsdbBridgeAugmentation ovsdbBridgeNode = (OvsdbBridgeAugmentation)original;
                     OvsdbNodeRef ovsdbNodeRef = ovsdbBridgeNode.getManagedBy();
-                    if(ovsdbNodeRef != null) {
+                    if (ovsdbNodeRef != null) {
                         InstanceIdentifier<?> ovsdbNodeIid = ovsdbNodeRef.getValue();
-                        if(ovsdbNodeIid.equals(this.iid)){
+                        if (ovsdbNodeIid.equals(this.iid)) {
                             this.removedPaths.add(path);
                         }
                     }
@@ -90,7 +93,7 @@ public class DataChangesManagedByOvsdbNodeEvent implements
 
     @Override
     public Map<InstanceIdentifier<?>, OvsdbBridgeAugmentation> getOriginalData() {
-        if(this.originalData == null) {
+        if (this.originalData == null) {
             this.originalData = filter(event.getOriginalData());
         }
         return this.originalData;
@@ -98,7 +101,7 @@ public class DataChangesManagedByOvsdbNodeEvent implements
 
     @Override
     public OvsdbBridgeAugmentation getOriginalSubtree() {
-        if(this.event.getOriginalSubtree() instanceof OvsdbBridgeAugmentation) {
+        if (this.event.getOriginalSubtree() instanceof OvsdbBridgeAugmentation) {
             return (OvsdbBridgeAugmentation)this.event.getOriginalSubtree();
         } else {
             return null;
@@ -107,7 +110,7 @@ public class DataChangesManagedByOvsdbNodeEvent implements
 
     @Override
     public OvsdbBridgeAugmentation getUpdatedSubtree() {
-        if(this.event.getUpdatedSubtree() instanceof OvsdbBridgeAugmentation) {
+        if (this.event.getUpdatedSubtree() instanceof OvsdbBridgeAugmentation) {
             return (OvsdbBridgeAugmentation)this.event.getUpdatedSubtree();
         } else {
             return null;

@@ -57,23 +57,30 @@ public class OvsdbClientKey {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         OvsdbClientKey other = (OvsdbClientKey) obj;
         if (ipaddress == null) {
-            if (other.ipaddress != null)
+            if (other.ipaddress != null) {
                 return false;
-        } else if (!ipaddress.equals(other.ipaddress))
+            }
+        } else if (!ipaddress.equals(other.ipaddress)) {
             return false;
+        }
         if (port == null) {
-            if (other.port != null)
+            if (other.port != null) {
                 return false;
-        } else if (!port.equals(other.port))
+            }
+        } else if (!port.equals(other.port)) {
             return false;
+        }
         return true;
     }
 

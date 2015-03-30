@@ -34,21 +34,22 @@ public class OvsdbSchemaContants {
         private final String parentTableName;
         private final String columnNameInParentTable;
 
-        private OVSDBSCHEMATABLES(final String tableName, final String parentTableName, final String columnNameInParentTable){
+        private OVSDBSCHEMATABLES(final String tableName, final String parentTableName,
+                                  final String columnNameInParentTable) {
             this.tableName = tableName;
             this.parentTableName = parentTableName;
             this.columnNameInParentTable = columnNameInParentTable;
         }
 
-        public String getTableName(){
+        public String getTableName() {
             return this.tableName;
         }
 
-        public String getParentTableName(){
+        public String getParentTableName() {
             return this.parentTableName;
         }
 
-        public String getColumnNameInParentTable(){
+        public String getColumnNameInParentTable() {
             return this.columnNameInParentTable;
         }
     }

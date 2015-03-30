@@ -461,11 +461,14 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           </dependencies>
           <configuration>
             <configLocation>src/main/resources/ovsdb_checks.xml</configLocation>
+            <failsOnError>true</failsOnError>
             <includes>**/*.java,**/*.xml,**/*.ini,**/*.sh,**/*.bat</includes>
             <excludes>**/yang/,**/features/,**/integrationtest/,**/northbound/,
               **/openstack/,**/ovs-sfc/,
               **/ovsdb-plugin-compatibility-layer/,
-              **/plugin/,**/plugin-shell/,**/schemas/,**/southbound/,**/utils/
+              **/plugin/,**/plugin-shell/,
+              **/schema/hardwarevtep/,**/schema/openvswitch/,
+              **/southbound/,**/utils/
             </excludes>
           </configuration>
         </plugin>

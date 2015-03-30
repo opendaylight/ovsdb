@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.EchoServiceCallbackFilters;
 import org.opendaylight.ovsdb.lib.LockAquisitionCallback;
 import org.opendaylight.ovsdb.lib.LockStolenCallback;
@@ -34,13 +33,10 @@ import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactCommand;
-import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactCommandAggregator;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactInvoker;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactInvokerImpl;
 import org.opendaylight.ovsdb.southbound.transactions.md.OvsdbNodeCreateCommand;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
-import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +60,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     }
 
     public void transact(TransactCommand command) {
-        for(TransactInvoker transactInvoker: transactInvokers.values()) {
+        for (TransactInvoker transactInvoker: transactInvokers.values()) {
             transactInvoker.invoke(command);
         }
     }
@@ -73,10 +69,10 @@ public class OvsdbConnectionInstance implements OvsdbClient {
         this.callback = new OvsdbMonitorCallback(key,txInvoker);
         try {
             List<String> databases = getDatabases().get();
-            if(databases != null) {
+            if (databases != null) {
                 for (String database : databases) {
                     DatabaseSchema dbSchema = getSchema(database).get();
-                    if(dbSchema != null) {
+                    if (dbSchema != null) {
                         transactInvokers.put(dbSchema, new TransactInvokerImpl(this,dbSchema));
                         monitorAllTables(database, dbSchema);
                     } else {
@@ -93,7 +89,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
 
     private void monitorAllTables(String database, DatabaseSchema dbSchema) {
         Set<String> tables = dbSchema.getTables();
-        if(tables != null) {
+        if (tables != null) {
             List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
             for (String tableName : tables) {
                 GenericTableSchema tableSchema = dbSchema.table(tableName, GenericTableSchema.class);

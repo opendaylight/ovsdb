@@ -46,8 +46,14 @@ public interface Port extends TypedBaseTable<GenericTableSchema> {
     @TypedColumn(name="tag", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Set<Long>> getTagColumn();
 
+    @TypedColumn(name="tag", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
+    public Column<GenericTableSchema, Short> getTag();
+
     @TypedColumn(name="tag", method=MethodType.SETDATA, fromVersion="1.0.0")
     public void setTag(Set<Long> tag);
+
+    @TypedColumn(name="tag", method=MethodType.SETDATA, fromVersion="1.0.0")
+    public void setTag(Short tag);
 
     @TypedColumn(name="vlan_mode", method=MethodType.GETCOLUMN, fromVersion="6.1.0")
     public Column<GenericTableSchema, Set<String>> getVlanModeColumn();

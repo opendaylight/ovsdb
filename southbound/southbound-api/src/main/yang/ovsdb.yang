@@ -350,6 +350,13 @@ module ovsdb {
             description "The VLAN tag of the termination point.";
             type ethertype:vlan-id;
         }
+
+        list trunks {
+            description "Represents the trunks of a termination point.";
+            leaf trunk {
+                type ethertype:vlan-id;
+            }
+        }
     }
 
     augment "/topo:network-topology/topo:topology/topo:node" {

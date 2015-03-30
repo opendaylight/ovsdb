@@ -58,6 +58,24 @@
       "revId": "17a50483202738ebb11fbe9de58065bbf5e93df7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_3469a1be",
+        "filename": "openstack/net-virt/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-03-30T14:43:00Z",
+      "side": 1,
+      "message": "ok sorry I didn\u0027t get it the first time Sam. Indentation corrected",
+      "parentUuid": "5a93c517_6108c92d",
+      "revId": "17a50483202738ebb11fbe9de58065bbf5e93df7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

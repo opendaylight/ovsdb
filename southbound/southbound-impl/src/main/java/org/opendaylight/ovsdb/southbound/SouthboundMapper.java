@@ -89,7 +89,7 @@ public class SouthboundMapper {
 
     public static IpAddress createIpAddress(InetAddress address) {
         IpAddress ip = null;
-        if(address instanceof Inet4Address) {
+        if (address instanceof Inet4Address) {
             ip = createIpAddress((Inet4Address)address);
         } else if (address instanceof Inet6Address) {
             ip = createIpAddress((Inet6Address)address);
@@ -158,18 +158,19 @@ public class SouthboundMapper {
 
     public static NodeId createManagedNodeId(IpAddress ip, PortNumber port, OvsdbBridgeName bridgeName) {
         return new NodeId(createNodeId(ip,port).getValue()
-                + "/"+SouthboundConstants.BRIDGE_URI_PREFIX+"/"+ bridgeName.getValue());
+                + "/" + SouthboundConstants.BRIDGE_URI_PREFIX + "/" + bridgeName.getValue());
     }
 
     public static NodeId createNodeId(IpAddress ip, PortNumber port) {
-        String uriString = SouthboundConstants.OVSDB_URI_PREFIX + "://" + new String(ip.getValue()) +
-                   ":" + port.getValue();
+        String uriString = SouthboundConstants.OVSDB_URI_PREFIX + "://"
+                + new String(ip.getValue()) + ":" + port.getValue();
         Uri uri = new Uri(uriString);
         NodeId nodeId = new NodeId(uri);
         return nodeId;
     }
 
-    public static TpId createTerminationPointId(OvsdbConnectionInfo connectionInfo, OvsdbBridgeName bridgeName, String tpName) {
+    public static TpId createTerminationPointId(OvsdbConnectionInfo connectionInfo,
+                                                OvsdbBridgeName bridgeName, String tpName) {
         return createTerminationPointId(createIpAddress(connectionInfo.getRemoteAddress()),
                 new PortNumber(connectionInfo.getRemotePort()),
                 bridgeName, tpName);
@@ -179,16 +180,17 @@ public class SouthboundMapper {
         return createTerminationPointId(key.getIp(),key.getPort(),bridgeName, tpName);
     }
 
-    public static TpId createTerminationPointId(IpAddress ip, PortNumber port, OvsdbBridgeName bridgeName, String tpName) {
+    public static TpId createTerminationPointId(IpAddress ip, PortNumber port,
+                                                OvsdbBridgeName bridgeName, String tpName) {
         return new TpId(createNodeId(ip,port).getValue()
-                + "/"+SouthboundConstants.BRIDGE_URI_PREFIX+"/"+ bridgeName.getValue()
-                + "/"+SouthboundConstants.TP_URI_PREFIX+"/"+ tpName);
+                + "/" + SouthboundConstants.BRIDGE_URI_PREFIX + "/" + bridgeName.getValue()
+                + "/" + SouthboundConstants.TP_URI_PREFIX + "/" + tpName);
     }
 
     public static InetAddress createInetAddress(IpAddress ip) throws UnknownHostException {
-        if(ip.getIpv4Address() != null) {
+        if (ip.getIpv4Address() != null) {
             return InetAddress.getByName(ip.getIpv4Address().getValue());
-        } else if(ip.getIpv6Address() != null) {
+        } else if (ip.getIpv6Address() != null) {
             return InetAddress.getByName(ip.getIpv6Address().getValue());
         } else {
             throw new UnknownHostException("IP Address has no value");
@@ -197,7 +199,7 @@ public class SouthboundMapper {
 
     public static DatapathId createDatapathId(Bridge bridge) {
         Preconditions.checkNotNull(bridge);
-        if(bridge.getDatapathIdColumn() == null) {
+        if (bridge.getDatapathIdColumn() == null) {
             return null;
         } else {
             return createDatapathId(bridge.getDatapathIdColumn().getData());
@@ -206,7 +208,7 @@ public class SouthboundMapper {
 
     public static DatapathId createDatapathId(Set<String> dpids) {
         Preconditions.checkNotNull(dpids);
-        if(dpids.isEmpty()) {
+        if (dpids.isEmpty()) {
             return null;
         } else {
             String[] dpidArray = new String[dpids.size()];
@@ -222,7 +224,8 @@ public class SouthboundMapper {
             if (SouthboundConstants.DATAPATH_TYPE_MAP.get(mdsalbridge.getDatapathType()) != null) {
                 datapathtype = SouthboundConstants.DATAPATH_TYPE_MAP.get(mdsalbridge.getDatapathType());
             } else {
-                throw new IllegalArgumentException("Unknown datapath type " + SouthboundConstants.DATAPATH_TYPE_MAP.get(mdsalbridge.getDatapathType()));
+                throw new IllegalArgumentException("Unknown datapath type "
+                        + SouthboundConstants.DATAPATH_TYPE_MAP.get(mdsalbridge.getDatapathType()));
             }
         }
         return datapathtype;
@@ -231,9 +234,10 @@ public class SouthboundMapper {
     public static  Class<? extends DatapathTypeBase> createDatapathType(String type) {
         Preconditions.checkNotNull(type);
         if (type.isEmpty()) {
-        	return DatapathTypeSystem.class;
+            return DatapathTypeSystem.class;
         } else {
-            ImmutableBiMap<String, Class<? extends DatapathTypeBase>> mapper = SouthboundConstants.DATAPATH_TYPE_MAP.inverse();
+            ImmutableBiMap<String, Class<? extends DatapathTypeBase>> mapper =
+                    SouthboundConstants.DATAPATH_TYPE_MAP.inverse();
             return mapper.get(type);
         }
     }
@@ -241,7 +245,7 @@ public class SouthboundMapper {
     public static DatapathId createDatapathId(String dpid) {
         Preconditions.checkNotNull(dpid);
         DatapathId datapath;
-        if(dpid.matches("^[0-9a-fA-F]{16}")) {
+        if (dpid.matches("^[0-9a-fA-F]{16}")) {
             Splitter splitter = Splitter.fixedLength(2);
             Joiner joiner = Joiner.on(":");
             datapath = new DatapathId(joiner.join(splitter.split(dpid)));
@@ -253,9 +257,9 @@ public class SouthboundMapper {
 
     public static Set<String> createOvsdbBridgeProtocols(OvsdbBridgeAugmentation ovsdbBridgeNode) {
         Set<String> protocols = new HashSet<String>();
-        if(ovsdbBridgeNode.getProtocolEntry() != null && ovsdbBridgeNode.getProtocolEntry().size() > 0) {
-            for(ProtocolEntry protocol : ovsdbBridgeNode.getProtocolEntry()) {
-                if(SouthboundConstants.OVSDB_PROTOCOL_MAP.get(protocol.getProtocol()) != null) {
+        if (ovsdbBridgeNode.getProtocolEntry() != null && ovsdbBridgeNode.getProtocolEntry().size() > 0) {
+            for (ProtocolEntry protocol : ovsdbBridgeNode.getProtocolEntry()) {
+                if (SouthboundConstants.OVSDB_PROTOCOL_MAP.get(protocol.getProtocol()) != null) {
                     protocols.add(SouthboundConstants.OVSDB_PROTOCOL_MAP.get(protocol.getProtocol()));
                 } else {
                     throw new IllegalArgumentException("Unknown protocol " + protocol.getProtocol());
@@ -272,31 +276,35 @@ public class SouthboundMapper {
 
     public static String createOvsdbInterfaceType(Class<? extends InterfaceTypeBase> mdsaltype) {
         Preconditions.checkNotNull(mdsaltype);
-        ImmutableBiMap<Class<? extends InterfaceTypeBase>, String> mapper = SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP.inverse();
+        ImmutableBiMap<Class<? extends InterfaceTypeBase>, String> mapper =
+                SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP.inverse();
         return mapper.get(mdsaltype);
     }
 
     public static List<ProtocolEntry> createMdsalProtocols(Bridge bridge) {
         Set<String> protocols = bridge.getProtocolsColumn().getData();
         List<ProtocolEntry> protocolList = new ArrayList<ProtocolEntry>();
-        if(protocols != null && protocols.size() >0) {
-            ImmutableBiMap<String, Class<? extends OvsdbBridgeProtocolBase>> mapper = SouthboundConstants.OVSDB_PROTOCOL_MAP.inverse();
-            for(String protocol : protocols) {
-                if(protocol != null && mapper.get(protocol) != null) {
-                    protocolList.add(new ProtocolEntryBuilder().setProtocol((Class<? extends OvsdbBridgeProtocolBase>) mapper.get(protocol)).build());
+        if (protocols != null && protocols.size() > 0) {
+            ImmutableBiMap<String, Class<? extends OvsdbBridgeProtocolBase>> mapper =
+                    SouthboundConstants.OVSDB_PROTOCOL_MAP.inverse();
+            for (String protocol : protocols) {
+                if (protocol != null && mapper.get(protocol) != null) {
+                    protocolList.add(new ProtocolEntryBuilder().
+                            setProtocol((Class<? extends OvsdbBridgeProtocolBase>) mapper.get(protocol)).build());
                 }
             }
         }
         return protocolList;
     }
 
-    public static List<ControllerEntry> createControllerEntries(Bridge bridge,Map<UUID,Controller> updatedControllerRows) {
+    public static List<ControllerEntry> createControllerEntries(Bridge bridge,Map<UUID,
+            Controller> updatedControllerRows) {
         LOG.debug("Bridge: {}, updatedControllerRows: {}",bridge,updatedControllerRows);
         Set<UUID> controllerUUIDs = bridge.getControllerColumn().getData();
         List<ControllerEntry> controllerEntries = new ArrayList<ControllerEntry>();
-        for(UUID controllerUUID : controllerUUIDs ) {
+        for (UUID controllerUUID : controllerUUIDs ) {
             Controller controller = updatedControllerRows.get(controllerUUID);
-            if(controller != null && controller.getTargetColumn() != null
+            if (controller != null && controller.getTargetColumn() != null
                     && controller.getTargetColumn() != null) {
                 String targetString = controller.getTargetColumn().getData();
                 controllerEntries.add(new ControllerEntryBuilder().setTarget(new Uri(targetString)).build());
@@ -308,9 +316,9 @@ public class SouthboundMapper {
     public static Map<UUID, Controller> createOvsdbController(OvsdbBridgeAugmentation omn,DatabaseSchema dbSchema) {
         List<ControllerEntry> controllerEntries = omn.getControllerEntry();
         Map<UUID,Controller> controllerMap = new HashMap<UUID,Controller>();
-        if(controllerEntries != null && !controllerEntries.isEmpty()) {
+        if (controllerEntries != null && !controllerEntries.isEmpty()) {
             int index = 0;
-            for(ControllerEntry controllerEntry : controllerEntries) {
+            for (ControllerEntry controllerEntry : controllerEntries) {
                 String controllerNamedUUID = "Controller_" + omn.getBridgeName().getValue() + index++;
                 Controller controller = TyperUtils.getTypedRowWrapper(dbSchema, Controller.class);
                 controller.setTarget(controllerEntry.getTarget().getValue());

@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.opendaylight.ovsdb.lib.OvsdbClient;
-import org.opendaylight.ovsdb.lib.impl.OvsdbClientImpl;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 
 import com.google.common.collect.Lists;

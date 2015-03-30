@@ -9,8 +9,6 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
-import java.util.StringTokenizer;
-
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -18,7 +16,6 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
-import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
@@ -35,13 +32,14 @@ public class TerminationPointCreateCommand implements TransactCommand {
     private AsyncDataChangeEvent<InstanceIdentifier<?>, OvsdbTerminationPointAugmentation> changes;
     private static final Logger LOG = LoggerFactory.getLogger(TerminationPointCreateCommand.class);
 
-    public TerminationPointCreateCommand(AsyncDataChangeEvent<InstanceIdentifier<?>, OvsdbTerminationPointAugmentation> changes){
+    public TerminationPointCreateCommand(AsyncDataChangeEvent<InstanceIdentifier<?>,
+            OvsdbTerminationPointAugmentation> changes) {
         this.changes = changes;
     }
 
     @Override
     public void execute(TransactionBuilder transaction) {
-        for(OvsdbTerminationPointAugmentation terminationPoint: changes.getCreatedData().values()){
+        for (OvsdbTerminationPointAugmentation terminationPoint: changes.getCreatedData().values()) {
             LOG.debug("Received request to create termination point {} at managed node {}",
                     terminationPoint.getName(),
                     terminationPoint.getAttachedTo().getValue().firstIdentifierOf(Node.class));
@@ -53,17 +51,17 @@ public class TerminationPointCreateCommand implements TransactCommand {
             ovsInterface.setName(terminationPoint.getName());
             ovsInterface.setType(SouthboundMapper.createOvsdbInterfaceType(terminationPoint.getInterfaceType()));
             Integer ofPort = terminationPoint.getOfport();
-            if(ofPort != null) {
+            if (ofPort != null) {
                 ovsInterface.setOpenFlowPort(Sets.newHashSet(ofPort));
             }
             Integer ofPortRequest = terminationPoint.getOfportRequest();
-            if(ofPortRequest != null) {
+            if (ofPortRequest != null) {
                 ovsInterface.setOpenFlowPortRequest(Sets.newHashSet(ofPortRequest));
             }
 
             //Configure optional input
             if (terminationPoint.getOptions() != null) {
-                for(Options option : terminationPoint.getOptions()){
+                for (Options option : terminationPoint.getOptions()) {
                     ovsInterface.setOptions(ImmutableMap.of(option.getOption(),option.getValue()));
                 }
             }

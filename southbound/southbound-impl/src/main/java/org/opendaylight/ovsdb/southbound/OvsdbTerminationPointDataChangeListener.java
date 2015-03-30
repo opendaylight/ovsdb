@@ -14,11 +14,8 @@ import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.ovsdb.southbound.ovsdb.transact.DataChangesManagedByOvsdbNodeEvent;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.DataChangesTerminationPointEvent;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TerminationPointCreateCommand;
-import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactCommandAggregator;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
@@ -46,30 +43,31 @@ public class OvsdbTerminationPointDataChangeListener implements DataChangeListen
                 .child(Node.class)
                 .child(TerminationPoint.class)
                 .augmentation(OvsdbTerminationPointAugmentation.class);
-        registration = db.registerDataChangeListener(LogicalDatastoreType.CONFIGURATION, path, this, DataChangeScope.ONE);
+        registration = db.registerDataChangeListener(LogicalDatastoreType.CONFIGURATION,
+                path, this, DataChangeScope.ONE);
 
     }
 
     @Override
     public void onDataChanged(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-       LOG.info("Received change to ovsdbTerminationPoint: {}", changes);
-       for( Entry<InstanceIdentifier<?>, DataObject> created : changes.getCreatedData().entrySet()) {
-           // TODO validate we have the correct kind of InstanceIdentifier
-           if(created.getValue() instanceof OvsdbTerminationPointAugmentation) {
-               InstanceIdentifier<Node> nodePath = created.getKey().firstIdentifierOf(Node.class);
-               LOG.debug("Received request to create {}",created.getValue());
-               OvsdbConnectionInstance client = cm.getConnectionInstance(nodePath);
-               if(client != null) {
-                   LOG.debug("Found client for {}", created.getValue());
-                   client.transact(new TerminationPointCreateCommand(
-                           new DataChangesTerminationPointEvent(
-                                   SouthboundMapper.createInstanceIdentifier(client.getKey()),changes)));
-               } else {
-                   LOG.debug("Did not find client for {}",created.getValue());
-               }
-           }
-       }
+        LOG.info("Received change to ovsdbTerminationPoint: {}", changes);
+        for (Entry<InstanceIdentifier<?>, DataObject> created : changes.getCreatedData().entrySet()) {
+            // TODO validate we have the correct kind of InstanceIdentifier
+            if (created.getValue() instanceof OvsdbTerminationPointAugmentation) {
+                InstanceIdentifier<Node> nodePath = created.getKey().firstIdentifierOf(Node.class);
+                LOG.debug("Received request to create {}",created.getValue());
+                OvsdbConnectionInstance client = cm.getConnectionInstance(nodePath);
+                if (client != null) {
+                    LOG.debug("Found client for {}", created.getValue());
+                    client.transact(new TerminationPointCreateCommand(
+                        new DataChangesTerminationPointEvent(
+                                SouthboundMapper.createInstanceIdentifier(client.getKey()),changes)));
+                } else {
+                    LOG.debug("Did not find client for {}",created.getValue());
+                }
+            }
+        }
 
        // TODO validate we have the correct kind of InstanceIdentifier
        // TODO handle case of updates to ovsdb ports as needed

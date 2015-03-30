@@ -64,8 +64,8 @@ public class OvsdbNodeDataChangeListener implements DataChangeListener, AutoClos
         }
 
         Map<InstanceIdentifier<?>, DataObject> originalDataObject = changes.getOriginalData();
-        Set<InstanceIdentifier<?>> iID = changes.getRemovedPaths();
-        for (InstanceIdentifier instanceIdentifier : iID) {
+        Set<InstanceIdentifier<?>> iiD = changes.getRemovedPaths();
+        for (InstanceIdentifier instanceIdentifier : iiD) {
             if (originalDataObject.get(instanceIdentifier) instanceof OvsdbNodeAugmentation) {
                 try {
                     cm.disconnect((OvsdbNodeAugmentation) originalDataObject.get(instanceIdentifier));

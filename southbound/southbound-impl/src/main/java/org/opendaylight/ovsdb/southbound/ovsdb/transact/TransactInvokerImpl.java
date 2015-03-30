@@ -24,7 +24,7 @@ public class TransactInvokerImpl implements TransactInvoker {
     private DatabaseSchema dbSchema;
 
     public TransactInvokerImpl(OvsdbConnectionInstance connectionInstance, DatabaseSchema dbSchema) {
-        this.connectionInstance =connectionInstance;
+        this.connectionInstance = connectionInstance;
         this.dbSchema = dbSchema;
     }
 
@@ -36,7 +36,7 @@ public class TransactInvokerImpl implements TransactInvoker {
         try {
             List<OperationResult> got = result.get();
             LOG.debug("Results of create bridge request",got);
-        } catch (Exception e){
+        } catch (Exception e) {
             LOG.warn("Transact execution exception: ",e);
         }
     }

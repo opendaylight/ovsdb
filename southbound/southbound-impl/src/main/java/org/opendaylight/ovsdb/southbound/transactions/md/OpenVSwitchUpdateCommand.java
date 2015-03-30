@@ -30,12 +30,12 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 
-public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand{
+public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
 
     private static final Logger LOG = LoggerFactory.getLogger(OpenVSwitchUpdateCommand.class);
 
     public OpenVSwitchUpdateCommand(OvsdbClientKey key, TableUpdates updates,
-            DatabaseSchema dbSchema){
+            DatabaseSchema dbSchema) {
         super(key,updates,dbSchema);
     }
 
@@ -44,7 +44,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand{
         Map<UUID,OpenVSwitch> updatedOpenVSwitchRows =
                 TyperUtils.extractRowsUpdated(OpenVSwitch.class, getUpdates(), getDbSchema());
 
-        for (Entry<UUID, OpenVSwitch> entry : updatedOpenVSwitchRows.entrySet()){
+        for (Entry<UUID, OpenVSwitch> entry : updatedOpenVSwitchRows.entrySet()) {
             OpenVSwitch openVSwitch = entry.getValue();
             final InstanceIdentifier<Node> nodePath = getKey().toInstanceIndentifier();
             Optional<Node> node = Optional.absent();
@@ -53,7 +53,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand{
             } catch (final ReadFailedException e) {
                 LOG.debug("Read Operational/DS for Node fail! {}", nodePath, e);
             }
-            if (node.isPresent()){
+            if (node.isPresent()) {
                 LOG.debug("Node {} is present",node);
                 OvsdbNodeAugmentation ovsdbNode = SouthboundMapper.createOvsdbAugmentation(getKey());
                 OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = new OvsdbNodeAugmentationBuilder();

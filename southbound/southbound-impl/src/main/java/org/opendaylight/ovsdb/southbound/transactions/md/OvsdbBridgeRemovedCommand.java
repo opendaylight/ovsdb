@@ -30,9 +30,11 @@ public class OvsdbBridgeRemovedCommand extends AbstractTransactionCommand {
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        Collection<Bridge> removedRows = TyperUtils.extractRowsRemoved(Bridge.class, getUpdates(), getDbSchema()).values();
-        for(Bridge bridge : removedRows) {
-            InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getKey(), new OvsdbBridgeName(bridge.getName()));
+        Collection<Bridge> removedRows = TyperUtils.extractRowsRemoved(Bridge.class,
+                getUpdates(), getDbSchema()).values();
+        for (Bridge bridge : removedRows) {
+            InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getKey(),
+                    new OvsdbBridgeName(bridge.getName()));
             InstanceIdentifier<ManagedNodeEntry> mnIid = SouthboundMapper.createInstanceIdentifier(getKey())
                     .augmentation(OvsdbNodeAugmentation.class)
                     .child(ManagedNodeEntry.class, new ManagedNodeEntryKey(new OvsdbBridgeRef(bridgeIid)));

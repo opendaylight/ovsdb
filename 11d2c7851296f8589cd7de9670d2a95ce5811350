@@ -54,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_928445d5",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointCreateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-03-30T23:27:35Z",
+      "side": 1,
+      "message": "You\u0027re right, I think I borked something while rebasing.",
+      "parentUuid": "5a93c517_d22c0d05",
+      "revId": "11d2c7851296f8589cd7de9670d2a95ce5811350",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_d2de4d11",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
         "patchSetId": 4

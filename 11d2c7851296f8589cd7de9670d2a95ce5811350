@@ -78,6 +78,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_52f9dd7e",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-03-30T22:02:56Z",
+      "side": 1,
+      "message": "Just trying this to see if you guys prefer short over long.",
+      "parentUuid": "5a93c517_f2082993",
+      "revId": "11d2c7851296f8589cd7de9670d2a95ce5811350",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_f2e109d1",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
         "patchSetId": 4

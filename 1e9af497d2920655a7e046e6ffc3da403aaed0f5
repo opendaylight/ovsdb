@@ -25,6 +25,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_14a9057b",
+        "filename": "schemas/openvswitch/src/main/java/org/opendaylight/ovsdb/schema/openvswitch/Port.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-03-30T15:33:56Z",
+      "side": 1,
+      "message": "I agree, looking into it.",
+      "parentUuid": "5a93c517_fe6c789e",
+      "revId": "1e9af497d2920655a7e046e6ffc3da403aaed0f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_5e6ecc97",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointCreateCommand.java",
         "patchSetId": 2
@@ -42,6 +60,24 @@
         "endLine": 80,
         "endChar": 43
       },
+      "revId": "1e9af497d2920655a7e046e6ffc3da403aaed0f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_74ff2968",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointCreateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-03-30T15:33:56Z",
+      "side": 1,
+      "message": "I agree, let me look into it.",
+      "parentUuid": "5a93c517_5e6ecc97",
       "revId": "1e9af497d2920655a7e046e6ffc3da403aaed0f5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -76,6 +112,24 @@
       "writtenOn": "2015-03-28T20:14:34Z",
       "side": 1,
       "message": "how does the map to ovsdb schema where the tag is a single value? The trunks can be a set.",
+      "revId": "1e9af497d2920655a7e046e6ffc3da403aaed0f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_9402f56d",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-03-30T15:33:56Z",
+      "side": 1,
+      "message": "I agree with this as well.",
+      "parentUuid": "5a93c517_be06f0cc",
       "revId": "1e9af497d2920655a7e046e6ffc3da403aaed0f5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

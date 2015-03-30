@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_7247391e",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/yang/gen/v1/urn/opendaylight/params/xml/ns/yang/southbound/impl/rev141210/SouthboundImplModule.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-03-30T20:42:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_d2eacd0e",
+      "range": {
+        "startLine": 32,
+        "startChar": 23,
+        "endLine": 32,
+        "endChar": 46
+      },
+      "revId": "2bd3f4864e2d6b4016cce67274dfff3ed5f5a712",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_92f445f3",
         "filename": "southbound/southbound-impl/src/main/yang/southbound-impl.yang",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2015-03-30T20:29:36Z",
       "side": 1,
       "message": "can this be removed?",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 9,
+        "endChar": 2
+      },
+      "revId": "2bd3f4864e2d6b4016cce67274dfff3ed5f5a712",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_1256f5d2",
+        "filename": "southbound/southbound-impl/src/main/yang/southbound-impl.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-03-30T20:42:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_92f445f3",
       "range": {
         "startLine": 9,
         "startChar": 0,

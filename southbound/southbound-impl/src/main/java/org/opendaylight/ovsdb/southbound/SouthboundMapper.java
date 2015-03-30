@@ -52,6 +52,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,6 +123,32 @@ public class SouthboundMapper {
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(OvsdbClientKey key,OvsdbBridgeName bridgeName) {
         return createInstanceIdentifier(createManagedNodeId(key, bridgeName));
+    }
+
+    public static InstanceIdentifier<Node> createInstanceIdentifier(OvsdbClientKey key,Bridge bridge) {
+        String managedNodePathString = bridge
+                .getExternalIdsColumn()
+                .getData()
+                .get(SouthboundConstants.IID_EXTERNAL_ID_KEY);
+        InstanceIdentifier<Node> managedNodePath = null;
+        if (managedNodePathString != null) {
+            try {
+                managedNodePath = (InstanceIdentifier<Node>) SouthboundUtil
+                        .instanceIdentifierCodec
+                        .bindingDeserializer(managedNodePathString);
+            } catch (DeserializationException e) {
+                LOG.warn("Error deserializing InstanceIdentifier",e);
+            }
+        }
+        if (managedNodePath == null) {
+            managedNodePath = SouthboundMapper.createInstanceIdentifier(key,new OvsdbBridgeName(bridge.getName()));
+        }
+        return managedNodePath;
+    }
+
+    public static NodeId createManagedNodeId(InstanceIdentifier<Node> iid) {
+        NodeKey nodeKey = iid.firstKeyOf(Node.class, NodeKey.class);
+        return nodeKey.getNodeId();
     }
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(OvsdbClientKey key) {

@@ -62,8 +62,8 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
             if (node.isPresent()) {
                 LOG.debug("Node {} is present",node);
                 NodeBuilder managedNodeBuilder = new NodeBuilder();
-                NodeId manageNodeId = SouthboundMapper.createManagedNodeId(getKey(),
-                        new OvsdbBridgeName(bridge.getName()));
+                InstanceIdentifier<Node> managedNodePath = SouthboundMapper.createInstanceIdentifier(getKey(),bridge);
+                NodeId manageNodeId = SouthboundMapper.createManagedNodeId(managedNodePath);
                 managedNodeBuilder.setNodeId(manageNodeId);
                 OvsdbBridgeAugmentationBuilder ovsdbManagedNodeBuilder = new OvsdbBridgeAugmentationBuilder();
                 ovsdbManagedNodeBuilder.setBridgeName(new OvsdbBridgeName(bridge.getName()));
@@ -94,8 +94,6 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                 }
                 ovsdbManagedNodeBuilder.setManagedBy(new OvsdbNodeRef(nodePath));
                 managedNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbManagedNodeBuilder.build());
-
-                InstanceIdentifier<Node> managedNodePath = SouthboundMapper.createInstanceIdentifier(manageNodeId);
 
                 LOG.debug("Store managed node augmentation data {}",ovsdbManagedNodeBuilder.toString());
                 transaction.merge(LogicalDatastoreType.OPERATIONAL, managedNodePath, managedNodeBuilder.build());

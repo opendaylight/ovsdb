@@ -70,7 +70,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                 UUID portUUID = bridgePorts.next();
                 for (Port port : portUpdatedRows) {
                     if (portUUID.equals(port.getUuid())) {
-                        Collection<Long> vlanId = port.getTagColumn().getData();
+                        short vlanId = port.getTag().getData();
                         bridgeName = bridge.getName();
                         NodeId bridgeId = SouthboundMapper.createManagedNodeId(
                                 getKey(), new OvsdbBridgeName(bridgeName));
@@ -101,13 +101,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                                     .setName(port.getName());
                             ovsdbTerminationPointBuilder.setPortUuid(new Uuid(
                                     port.getUuid().toString()));
-                            if (vlanId.size() > 0){
-                                Iterator<Long> itr = vlanId.iterator();
-                                if (itr.next() != null){
-                                    int id = itr.next().intValue();
-                                    ovsdbTerminationPointBuilder.setVlanTag(new VlanId(id));
-                                }
-                            }
+                            Integer vlanIntValue = new Integer(vlanId);
+                            ovsdbTerminationPointBuilder.setVlanTag(new VlanId(vlanIntValue.intValue()));
                             Column<GenericTableSchema, Set<UUID>> iface = port.getInterfacesColumn();
                             Set<UUID> ifUuid = iface.getData();
                             Collection<Interface> ifUpdateRows = TyperUtils.extractRowsUpdated(Interface.class, getUpdates(),  getDbSchema()).values();

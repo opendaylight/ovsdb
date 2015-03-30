@@ -9,10 +9,8 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
@@ -21,7 +19,6 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
-import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
@@ -77,8 +74,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
             Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
             port.setName(terminationPoint.getName());
             port.setInterfaces(Sets.newHashSet(new UUID(interfaceUuid)));
-            Set<Long> vlanTag = new HashSet<Long>();
-            vlanTag.add(terminationPoint.getVlanTag().getValue().longValue());
+            short vlanTag = terminationPoint.getVlanTag().getValue().shortValue();
             port.setTag(vlanTag);
             transaction.add(op.insert(port).withId(portUuid));
 

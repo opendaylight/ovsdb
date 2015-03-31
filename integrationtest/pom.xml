@@ -169,12 +169,40 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>
+      <properties>
+        <skip.integrationtest>false</skip.integrationtest>
+      </properties>
       <dependencies>
         <dependency>
           <groupId>org.ops4j.pax.exam</groupId>
           <artifactId>pax-exam-container-karaf</artifactId>
         </dependency>
       </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <version>${failsafe.version}</version>
+            <configuration>
+            </configuration>
+            <executions>
+              <execution>
+                <id>failsafe-integration-tests</id>
+                <phase>integration-test</phase>
+                <goals>
+                  <goal>integration-test</goal>
+                </goals>
+                <configuration>
+                  <classpathDependencyExcludes>
+                    <classpathDependencyExcludes>org.ops4j.pax.exam:pax-exam-container-native</classpathDependencyExcludes>
+                  </classpathDependencyExcludes>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
   <scm>

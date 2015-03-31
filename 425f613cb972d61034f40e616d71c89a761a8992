@@ -64,6 +64,24 @@
       "revId": "425f613cb972d61034f40e616d71c89a761a8992",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_036ea496",
+        "filename": "schemas/openvswitch/src/main/java/org/opendaylight/ovsdb/schema/openvswitch/Port.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-03-31T16:11:27Z",
+      "side": 1,
+      "message": "I think using Integer is good. In yang model, you can use range keyword to limit the range with uint16. I would say just make the changes and try to build it, if it build successfully we are safe, but please build the whole ovsdb code and not just southbound plugin.",
+      "parentUuid": "5a93c517_43458c15",
+      "revId": "425f613cb972d61034f40e616d71c89a761a8992",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

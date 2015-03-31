@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -64,8 +65,14 @@ public class TerminationPointCreateCommand implements TransactCommand {
 
             //Configure optional input
             if (terminationPoint.getOptions() != null) {
+                HashMap<String, String> optionsMap = new HashMap<String, String>();
                 for (Options option : terminationPoint.getOptions()) {
-                    ovsInterface.setOptions(ImmutableMap.of(option.getOption(),option.getValue()));
+                    optionsMap.put(option.getOption(), option.getValue());
+                }
+                try {
+                    ovsInterface.setOptions(ImmutableMap.copyOf(optionsMap));
+                } catch (NullPointerException e) {
+                    LOG.warn("Incomplete OVSDB interface options");
                 }
             }
             transaction.add(op.insert(ovsInterface).withId(interfaceUuid));

@@ -16,6 +16,23 @@
       "revId": "e2a9e0ce9cf6ad39e099854813d25cb7346ab02c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_e393794d",
+        "filename": "southbound/southbound-features/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-31T14:21:26Z",
+      "side": 1,
+      "message": "Ed, could you add more explanation on what this change does?\n\ndoes it matter that there is already a southbound-impl dependency listed above? Does this second one overwrite the previous?",
+      "revId": "e2a9e0ce9cf6ad39e099854813d25cb7346ab02c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

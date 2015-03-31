@@ -16,6 +16,24 @@
       "revId": "7e62a9c7b021b9d7b9cfa4857edca9166818216d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_639209a1",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/api/OvsVswitchdSchemaConstants.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-03-31T13:57:21Z",
+      "side": 1,
+      "message": "Yes, we need to think through this case. Relying on the ovs state being clean and no bridges at all might be a stretch, which as you noted is what this code is trying to catch.\n\nCan we localize the setController to just the net-virt layer so that we could serialize the action? If it can\u0027t be fixed we could also query the db to see if two rows exist and delete one of the rows.",
+      "parentUuid": "5a93c517_88b73286",
+      "revId": "7e62a9c7b021b9d7b9cfa4857edca9166818216d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

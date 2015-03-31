@@ -379,10 +379,27 @@ module ovsdb {
          }
     }
 
+    grouping ovsdb-other-config-attributes {
+        list other-configs {
+            description "Other config attributes for OVSDB tables";
+            key "other-config-key";
+            leaf other-config-key {
+                description "other-config name/key";
+                type string;
+            }
+            leaf other-config-value {
+                description "other-config value";
+                type string;
+            }
+         }
+    }
+
     augment "/topo:network-topology/topo:topology/topo:node" {
         description "Augmentation for bridge nodes managed by ovsdb";
         ext:augment-identifier "ovsdb-bridge-augmentation";
         uses ovsdb-bridge-attributes;
+        uses ovsdb-external-ids-attributes;
+        uses ovsdb-other-config-attributes;
     }
 
     augment "/topo:network-topology/topo:topology/topo:node" {

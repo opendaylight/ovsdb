@@ -34,6 +34,42 @@
       "revId": "7e62a9c7b021b9d7b9cfa4857edca9166818216d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_e3c059e2",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/api/OvsVswitchdSchemaConstants.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-03-31T15:24:14Z",
+      "side": 1,
+      "message": "@Sam, As i mentioned in above comment, IMO asking clean slate ovsdb node is not a big task, given that most of the networking solution for openstack requires the same. And this is just for the first time when ovsdb node connects to controller. I thought of localizing the setOFController to net-virt, but setOFCOntroller is public api and i think we can\u0027t really change this, until and unless we duplicate the API (or new API) in net-virt.",
+      "parentUuid": "5a93c517_639209a1",
+      "revId": "7e62a9c7b021b9d7b9cfa4857edca9166818216d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_23f88148",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/api/OvsVswitchdSchemaConstants.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-03-31T15:24:14Z",
+      "side": 1,
+      "message": "@Flavio.. when we say existing bridge, are we talking about the bridges that are created by the controller or any random bridge?\n1)Bridges created by controller : If bridges are created by controller, then controller will set it\u0027s of controller, so even if controller restarts, that\u0027s won\u0027t get effected \n\n2) Random Bridge : I am not sure we should even care about that, because there can be many existing bridge created by user, also not sure if we want them to really connect to controller. \nMost of the Openstack networking solution (e.g openswitch based networking) assume certain configuration of ovs switches on the end host, so IMO similarly assuming the clean slate ovsdb at the *first connect is not a big ask.\nWhy i changed the default value from true to false is because this stack is mainly used for openstack integration and IMO we need this change for it. If any other application is consuming plugin and want to enable it, they should override it.",
+      "parentUuid": "5a93c517_88b73286",
+      "revId": "7e62a9c7b021b9d7b9cfa4857edca9166818216d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -22,6 +22,24 @@
       "revId": "425f613cb972d61034f40e616d71c89a761a8992",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_43458c15",
+        "filename": "schemas/openvswitch/src/main/java/org/opendaylight/ovsdb/schema/openvswitch/Port.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-03-31T16:05:58Z",
+      "side": 1,
+      "message": "I added a setTrunks with a List as I cannot overload the Set\u003cLong\u003e\nI don\u0027t want to remove anything here as to not break anything else.\nAlso, it would have to be something we all agree on because the yang model translate the uint16 to an Integer, do we want to stay close to the model or close to the spec ?",
+      "parentUuid": "5a93c517_e3ddb871",
+      "revId": "425f613cb972d61034f40e616d71c89a761a8992",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

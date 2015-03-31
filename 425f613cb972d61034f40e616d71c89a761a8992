@@ -40,6 +40,30 @@
       "revId": "425f613cb972d61034f40e616d71c89a761a8992",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_c3b99c16",
+        "filename": "schemas/openvswitch/src/main/java/org/opendaylight/ovsdb/schema/openvswitch/Port.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-03-31T16:07:32Z",
+      "side": 1,
+      "message": "Yes, gabrial, can you please remove the setTrunks(Set\u003cLong\u003e trunks) method, because you already have version with Integer, also change getTrynksColumn return type to set\u003cinteger\u003e as well.",
+      "parentUuid": "5a93c517_e3ddb871",
+      "range": {
+        "startLine": 47,
+        "startChar": 30,
+        "endLine": 47,
+        "endChar": 34
+      },
+      "revId": "425f613cb972d61034f40e616d71c89a761a8992",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

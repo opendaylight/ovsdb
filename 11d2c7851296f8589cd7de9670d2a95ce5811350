@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_68c0a67c",
+        "filename": "schemas/openvswitch/src/main/java/org/opendaylight/ovsdb/schema/openvswitch/Port.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-03-31T10:35:24Z",
+      "side": 1,
+      "message": "Gabriel, I believe we should change the return type to Integer (or Short, although i would recommend Integer, please see my other comments) for GetTrunksColumn(),setTrunks() and GetTrunks() methods. Max trunk value will be 4096, so there is no point in using Long for that. Also i believe the method you defined is to get the existing trunk data, sp you need to change the method to MethodType.GETDATA from MethodType.GETCOLUMN.",
+      "parentUuid": "5a93c517_72cdf95c",
+      "revId": "11d2c7851296f8589cd7de9670d2a95ce5811350",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_d22c0d05",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointCreateCommand.java",
         "patchSetId": 4
@@ -108,6 +126,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_08bfa2fc",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointCreateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-03-31T10:35:24Z",
+      "side": 1,
+      "message": "Gabriel, please look at my other comments on this.",
+      "parentUuid": "5a93c517_b27141e2",
+      "revId": "11d2c7851296f8589cd7de9670d2a95ce5811350",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_d2de4d11",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
         "patchSetId": 4
@@ -167,6 +203,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_28ba9e0a",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-03-31T10:35:24Z",
+      "side": 1,
+      "message": "It should be Integer/Short (preferred is Integer). Please look at my below comment.",
+      "parentUuid": "5a93c517_52f9dd7e",
+      "revId": "11d2c7851296f8589cd7de9670d2a95ce5811350",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_92368551",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
         "patchSetId": 4
@@ -196,6 +250,24 @@
       "side": 1,
       "message": "I defined a function in Port:\nhttps://git.opendaylight.org/gerrit/#/c/17375/4/schemas/openvswitch/src/main/java/org/opendaylight/ovsdb/schema/openvswitch/Port.java\nusing Short\ngetTrunksColumn returns a Column\u003cGenericTableSchema, Set\u003cLong\u003e\u003e while getTrunks returns a Column\u003cGenericTableSchema, Set\u003cShort\u003e\u003e. Actually I haven\u0027t looked how the port information gets parsed, so I\u0027m not sure it\u0027s going to cast it correctly to a Column\u003cGenericTableSchema, Set\u003cShort\u003e\u003e.\n\nThere is something else that I found a little funny, the yang models specifies a uint",
       "parentUuid": "5a93c517_92368551",
+      "revId": "11d2c7851296f8589cd7de9670d2a95ce5811350",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_a8454e18",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-03-31T10:35:24Z",
+      "side": 1,
+      "message": "Yang model should limit it to 4096, by using uint8/uint16 and range 1..4096 . Yangtool will convert uint8 and uint16 both to Integer while converting the yang model to java classes. So i believe changing set\u003cLong\u003e to Set\u003cInteger\u003e in library code (Port.java) make sense to me.Changing it to Set\u003cShort\u003e will require the conversion from Integer to Short and reverse direction.",
+      "parentUuid": "5a93c517_7250995e",
       "revId": "11d2c7851296f8589cd7de9670d2a95ce5811350",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

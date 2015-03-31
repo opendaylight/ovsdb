@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_88b73286",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/api/OvsVswitchdSchemaConstants.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-31T12:56:38Z",
+      "side": 1,
+      "message": "before we rush this change in, I\u0027d like to\nunderstand how controller of existing bridges will\nbe set upon connecting to ODL. Having redundant controller may be less severe than having no controllers.\n\nAlso, this setting can be changed from etc/custom.properties\nvia ovsdb.autoconfigurecontroller; so user can change the default behavior there.",
+      "revId": "7e62a9c7b021b9d7b9cfa4857edca9166818216d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

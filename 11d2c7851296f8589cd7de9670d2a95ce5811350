@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_03f225d2",
+        "filename": "schemas/openvswitch/src/main/java/org/opendaylight/ovsdb/schema/openvswitch/Port.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-03-31T14:18:32Z",
+      "side": 1,
+      "message": "Thanks Anil, that\u0027s really good input. Will make changes as per your comments.",
+      "parentUuid": "5a93c517_68c0a67c",
+      "revId": "11d2c7851296f8589cd7de9670d2a95ce5811350",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_d22c0d05",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointCreateCommand.java",
         "patchSetId": 4
@@ -268,6 +286,24 @@
       "side": 1,
       "message": "Yang model should limit it to 4096, by using uint8/uint16 and range 1..4096 . Yangtool will convert uint8 and uint16 both to Integer while converting the yang model to java classes. So i believe changing set\u003cLong\u003e to Set\u003cInteger\u003e in library code (Port.java) make sense to me.Changing it to Set\u003cShort\u003e will require the conversion from Integer to Short and reverse direction.",
       "parentUuid": "5a93c517_7250995e",
+      "revId": "11d2c7851296f8589cd7de9670d2a95ce5811350",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_63ca0970",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-03-31T14:18:32Z",
+      "side": 1,
+      "message": "Thanks Anil, that\u0027s really good input. Will make changes as per your comments.",
+      "parentUuid": "5a93c517_a8454e18",
       "revId": "11d2c7851296f8589cd7de9670d2a95ce5811350",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

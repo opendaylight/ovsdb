@@ -20,7 +20,7 @@ public final class OvsVswitchdSchemaConstants {
     public static String DATABASE_NAME = "Open_vSwitch";
 
     private static final String OVSDB_AUTOCONFIGURECONTROLLER = "ovsdb.autoconfigurecontroller";
-    private static final boolean defaultAutoConfigureController = true;
+    private static final boolean defaultAutoConfigureController = false;
     private static boolean autoConfigureController = defaultAutoConfigureController;
 
     private static Map<String, String[]> columnToMutate = Maps.newHashMap();

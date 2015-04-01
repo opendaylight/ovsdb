@@ -39,18 +39,15 @@ public interface Port extends TypedBaseTable<GenericTableSchema> {
     public void setInterfaces(Set<UUID> interfaces);
 
     @TypedColumn(name="trunks", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Integer>> getTrunksColumn();
-    @TypedColumn(name="trunks", method=MethodType.GETDATA, fromVersion="1.0.0")
-    public Set<Integer> getTrunks();
+    public Column<GenericTableSchema, Set<Long>> getTrunksColumn();
     @TypedColumn(name="trunks", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setTrunks(Set<Integer> trunks);
+    public void setTrunks(Set<Long> trunks);
 
     @TypedColumn(name="tag", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
     public Column<GenericTableSchema, Set<Long>> getTagColumn();
-    @TypedColumn(name="tag", method=MethodType.GETDATA, fromVersion="1.0.0")
-    public int getTag();
+
     @TypedColumn(name="tag", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setTag(int tag);
+    public void setTag(Set<Long> tag);
 
     @TypedColumn(name="vlan_mode", method=MethodType.GETCOLUMN, fromVersion="6.1.0")
     public Column<GenericTableSchema, Set<String>> getVlanModeColumn();

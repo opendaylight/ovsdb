@@ -329,6 +329,19 @@ module ovsdb {
             }
         }
 
+        list externalIDs {
+            description "Port/Interface external id";
+            key "external-id";
+            leaf external-id {
+                description "external-id name";
+                type string;
+            }
+            leaf value {
+                description "external-id value";
+                type string;
+            }
+        }
+
         leaf ofport {
             description "Port/Interface related optional ofport";
             type uint16;

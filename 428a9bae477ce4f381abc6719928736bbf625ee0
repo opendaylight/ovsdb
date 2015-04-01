@@ -34,6 +34,41 @@
       "revId": "428a9bae477ce4f381abc6719928736bbf625ee0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_5d4ec570",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 332,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-04-01T19:30:30Z",
+      "side": 1,
+      "message": "+1 for external-ids",
+      "parentUuid": "5a93c517_3d2419ae",
+      "revId": "428a9bae477ce4f381abc6719928736bbf625ee0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_1d583d31",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 335,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-04-01T19:30:30Z",
+      "side": 1,
+      "message": "I would suggest calling the leaf \u0027key\u0027 instead of external-ids here to avoid replication of class names.\n\nIn fact, as we are going to repeat this pattern, I\u0027d suggest a grouping be used for things like this",
+      "revId": "428a9bae477ce4f381abc6719928736bbf625ee0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

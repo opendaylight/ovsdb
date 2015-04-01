@@ -359,6 +359,21 @@ module ovsdb {
         }
     }
 
+    grouping ovsdb-external-ids-attributes {
+        list external-ids {
+            description "Port/Interface external id";
+            key "external-id-key";
+            leaf external-id-key {
+                description "external-id name/key";
+                type string;
+            }
+            leaf external-id-value {
+                description "external-id value";
+                type string;
+            }
+         }
+    }
+
     augment "/topo:network-topology/topo:topology/topo:node" {
         description "Augmentation for bridge nodes managed by ovsdb";
         ext:augment-identifier "ovsdb-bridge-augmentation";
@@ -375,5 +390,6 @@ module ovsdb {
         description "Augment topology node termination-point for an ovsdb port/interface";
         ext:augment-identifier "ovsdb-termination-point-augmentation";
         uses ovsdb-port-interface-attributes;
+        uses ovsdb-external-ids-attributes;
     }
 }

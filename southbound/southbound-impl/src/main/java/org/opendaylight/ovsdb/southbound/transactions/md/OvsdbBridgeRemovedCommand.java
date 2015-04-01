@@ -10,7 +10,6 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.southbound.OvsdbClientKey;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
@@ -34,7 +33,7 @@ public class OvsdbBridgeRemovedCommand extends AbstractTransactionCommand {
                 getUpdates(), getDbSchema()).values();
         for (Bridge bridge : removedRows) {
             InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getKey(),
-                    new OvsdbBridgeName(bridge.getName()));
+                    bridge);
             InstanceIdentifier<ManagedNodeEntry> mnIid = SouthboundMapper.createInstanceIdentifier(getKey())
                     .augmentation(OvsdbNodeAugmentation.class)
                     .child(ManagedNodeEntry.class, new ManagedNodeEntryKey(new OvsdbBridgeRef(bridgeIid)));

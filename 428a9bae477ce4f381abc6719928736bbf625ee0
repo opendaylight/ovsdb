@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_fd0eb131",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 332,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2015-04-01T19:23:20Z",
+      "side": 1,
+      "message": "I\u0027m working on a similar patch for the open_vswitch table (ovsdb node).  I called my list \u0027external-ids\u0027.  I\u0027ll change to this name if that\u0027s what is preferred",
+      "revId": "428a9bae477ce4f381abc6719928736bbf625ee0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

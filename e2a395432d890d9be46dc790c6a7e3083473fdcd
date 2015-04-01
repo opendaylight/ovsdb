@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_d7db96eb",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OpenVSwitchUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-04-01T17:04:30Z",
+      "side": 1,
+      "message": "With the code this was is there always an exception for cases where the schema has not been updated to support the datapath type?\n\nalso is the source of the SchemaVersionMismatchExcpetion that is coming out when a node is connected?",
+      "range": {
+        "startLine": 75,
+        "startChar": 20,
+        "endLine": 75,
+        "endChar": 21
+      },
+      "revId": "e2a395432d890d9be46dc790c6a7e3083473fdcd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

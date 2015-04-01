@@ -75,9 +75,7 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
         }
 
         Port port = ovsdbConfigurationService.createTypedRow(node, Port.class);
-        OvsdbSet<Long> tags = new OvsdbSet<>();
-        tags.add((long) vlan);
-        port.setTag(tags);
+        port.setTag(vlan);
         ovsdbConfigurationService.updateRow(node, port.getSchema().getName(), null, portUUID, port.getRow());
     }
 

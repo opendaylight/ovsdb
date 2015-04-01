@@ -288,6 +288,11 @@ module ovsdb {
         base interface-type-base;
     }
 
+    identity interface-type-dpdkvhostuser {
+        description "Interface type for dpdkvhostuser interfaces";
+        base interface-type-base;
+    }
+
     grouping ovsdb-port-interface-attributes {
         leaf port-uuid {
             description "The unique identifier of the OVSDB port";

@@ -340,12 +340,16 @@ public class SouthboundMapper {
         if (controllerEntries != null && !controllerEntries.isEmpty()) {
             int index = 0;
             for (ControllerEntry controllerEntry : controllerEntries) {
-                String controllerNamedUUID = "Controller_" + omn.getBridgeName().getValue() + index++;
+                String controllerNamedUUID = "Controller_" + getRandomUUID();
                 Controller controller = TyperUtils.getTypedRowWrapper(dbSchema, Controller.class);
                 controller.setTarget(controllerEntry.getTarget().getValue());
                 controllerMap.put(new UUID(controllerNamedUUID), controller);
             }
         }
         return controllerMap;
+    }
+
+    public static String getRandomUUID() {
+        return java.util.UUID.randomUUID().toString().replace("-", "");
     }
 }

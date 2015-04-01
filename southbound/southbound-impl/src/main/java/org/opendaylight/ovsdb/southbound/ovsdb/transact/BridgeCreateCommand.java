@@ -56,9 +56,9 @@ public class BridgeCreateCommand implements TransactCommand {
                         ovsdbManagedNode.getBridgeUuid());
 
             // Named UUIDs
-            String bridgeNamedUuid = "Bridge_" + ovsdbManagedNode.getBridgeName().getValue();
-            String interfaceNamedUuid = "Interface_" + ovsdbManagedNode.getBridgeName().getValue();
-            String portNamedUuid = "Port_" + ovsdbManagedNode.getBridgeName().getValue();
+            String bridgeNamedUuid = "Bridge_" + SouthboundMapper.getRandomUUID();
+            String interfaceNamedUuid = "Interface_" + SouthboundMapper.getRandomUUID();
+            String portNamedUuid = "Port_" + SouthboundMapper.getRandomUUID();
 
             // Interface part
             Interface interfaceOvs = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Interface.class);

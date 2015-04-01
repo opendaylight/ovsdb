@@ -16,6 +16,7 @@ import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
@@ -71,27 +72,35 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
                 OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = new OvsdbNodeAugmentationBuilder();
                 ovsdbNodeBuilder.setOvsVersion(openVSwitch.getVersion()
                         .toString());
-                Set<String> dptypes = openVSwitch.getDatapathTypesColumn()
-                        .getData();
-                List<DatapathTypeEntry> dpEntryList = new ArrayList<DatapathTypeEntry>();
-                for (String dpType : dptypes) {
-                    DatapathTypeEntry dpEntry = new DatapathTypeEntryBuilder()
-                            .setDatapathType(
-                                    SouthboundMapper.createDatapathType(dpType))
-                            .build();
-                    dpEntryList.add(dpEntry);
+                try {
+                    Set<String> dptypes = openVSwitch.getDatapathTypesColumn()
+                            .getData();
+                    List<DatapathTypeEntry> dpEntryList = new ArrayList<DatapathTypeEntry>();
+                    for (String dpType : dptypes) {
+                        DatapathTypeEntry dpEntry = new DatapathTypeEntryBuilder()
+                                .setDatapathType(
+                                        SouthboundMapper.createDatapathType(dpType))
+                                .build();
+                        dpEntryList.add(dpEntry);
+                    }
+                    ovsdbNodeBuilder.setDatapathTypeEntry(dpEntryList);
+                } catch (SchemaVersionMismatchException e) {
+                    LOG.debug("Datapath types not supported by this version of ovsdb",e);;
                 }
-                ovsdbNodeBuilder.setDatapathTypeEntry(dpEntryList);
-                Set<String> iftypes = openVSwitch.getIfaceTypesColumn().getData();
-                List<InterfaceTypeEntry> ifEntryList = new ArrayList<InterfaceTypeEntry>();
-                for (String ifType : iftypes) {
-                    InterfaceTypeEntry ifEntry = new InterfaceTypeEntryBuilder()
-                            .setInterfaceType(
-                                    SouthboundMapper.createInterfaceType(ifType))
-                            .build();
-                    ifEntryList.add(ifEntry);
+                try {
+                    Set<String> iftypes = openVSwitch.getIfaceTypesColumn().getData();
+                    List<InterfaceTypeEntry> ifEntryList = new ArrayList<InterfaceTypeEntry>();
+                    for (String ifType : iftypes) {
+                        InterfaceTypeEntry ifEntry = new InterfaceTypeEntryBuilder()
+                                .setInterfaceType(
+                                        SouthboundMapper.createInterfaceType(ifType))
+                                .build();
+                        ifEntryList.add(ifEntry);
+                    }
+                    ovsdbNodeBuilder.setInterfaceTypeEntry(ifEntryList);
+                } catch (SchemaVersionMismatchException e) {
+                    LOG.debug("Iface types  not supported by this version of ovsdb",e);;
                 }
-                ovsdbNodeBuilder.setInterfaceTypeEntry(ifEntryList);
                 NodeBuilder nodeBuilder = new NodeBuilder();
                 nodeBuilder.setNodeId(SouthboundMapper.createNodeId(
                         ovsdbNode.getIp(), ovsdbNode.getPort()));

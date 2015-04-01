@@ -16,6 +16,24 @@
       "revId": "428a9bae477ce4f381abc6719928736bbf625ee0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_3d2419ae",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 332,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-01T19:26:35Z",
+      "side": 1,
+      "message": "+1 for external-ids . Eventually both with generate similar java classes ExternalIDs (for externalIDs) and ExternalIds(for external-ids). But i would prefer external-ids, as ovsdb uses the same string.",
+      "parentUuid": "5a93c517_fd0eb131",
+      "revId": "428a9bae477ce4f381abc6719928736bbf625ee0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

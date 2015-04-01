@@ -933,10 +933,9 @@ public class OpenVSwitchIT extends OvsdbIntegrationTestBase {
         String portUuidStr = "testPort";
         String intfUuidStr = "testIntf";
         String tunnelEncap = "vxlan";
-        int tag = 10;
         Port port = getClient().createTypedRowWrapper(Port.class);
         port.setName("testPort");
-        port.setTag(tag);
+        port.setTag(ImmutableSet.of(1L));
         port.setMac(ImmutableSet.of("00:00:00:00:00:01"));
         port.setInterfaces(ImmutableSet.of(new UUID(intfUuidStr)));
 

@@ -34,6 +34,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Trunks;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.TrunksBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -69,6 +71,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                 for (Port port : portUpdatedRows) {
                     if (portUUID.equals(port.getUuid())) {
                         Collection<Long> vlanId = port.getTagColumn().getData();
+                        Set<Long> portTrunks = port.getTrunksColumn().getData();
                         bridgeName = bridge.getName();
                         NodeId bridgeId = SouthboundMapper.createManagedNodeId(
                                 getKey(), new OvsdbBridgeName(bridgeName));
@@ -107,6 +110,13 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                                     ovsdbTerminationPointBuilder.setVlanTag(new VlanId(id));
                                 }
                             }
+                            List<Trunks> modelTrunks = new ArrayList<Trunks>();
+                            for (Long trunk: portTrunks) {
+                                if (trunk != null) {
+                                    modelTrunks.add(new TrunksBuilder().setTrunk(new VlanId(trunk.intValue())).build());
+                                }
+                            }
+                            ovsdbTerminationPointBuilder.setTrunks(modelTrunks);
                             Column<GenericTableSchema, Set<UUID>> iface = port.getInterfacesColumn();
                             Set<UUID> ifUuid = iface.getData();
                             Collection<Interface> ifUpdateRows = TyperUtils.extractRowsUpdated(

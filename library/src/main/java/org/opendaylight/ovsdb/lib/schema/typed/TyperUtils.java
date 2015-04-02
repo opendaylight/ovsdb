@@ -13,10 +13,10 @@ package org.opendaylight.ovsdb.lib.schema.typed;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import org.opendaylight.ovsdb.lib.error.ColumnSchemaNotFoundException;
-import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.error.TableSchemaNotFoundException;
 import org.opendaylight.ovsdb.lib.error.TyperException;
 import org.opendaylight.ovsdb.lib.error.UnsupportedMethodException;
@@ -39,6 +39,7 @@ public class TyperUtils {
     private static final String SET_STARTS_WITH = "set";
     private static final String GETCOLUMN_ENDS_WITH = "Column";
     private static final String GETROW_ENDS_WITH = "Row";
+    private static Column UNKNOWN_COLUMN = null;
 
     private static <T> String getTableName(Class<T> klazz) {
         TypedTable typedTable = klazz.getAnnotation(TypedTable.class);
@@ -211,6 +212,11 @@ public class TyperUtils {
     }
 
     private static void checkVersion(Version schemaVersion, Version fromVersion, Version untilVersion) {
+        //We want some backward compatability so disabling this method, dead code i know...
+        //The backward competability mitigation is when encountering an unknown column, we use the
+        //Bridges Column with an empty Set<String> data so the unknwon column data would not appear
+        //in the json and the current code will keep working for older OVSDB schemas
+        /* FIXME - Remove this method in the future
         if (!fromVersion.equals(Version.NULL)) {
             if (schemaVersion.compareTo(fromVersion) < 0) {
                 String message = SchemaVersionMismatchException.createMessage(schemaVersion, fromVersion);
@@ -222,7 +228,7 @@ public class TyperUtils {
                 String message = SchemaVersionMismatchException.createMessage(schemaVersion, untilVersion);
                 throw new SchemaVersionMismatchException(message);
             }
-        }
+        }*/
     }
 
     /**
@@ -317,6 +323,30 @@ public class TyperUtils {
                 ColumnSchema<GenericTableSchema, Object> columnSchema =
                         getColumnSchema(tableSchema, columnName, (Class<Object>) method.getReturnType());
                 if (columnSchema == null) {
+                    //try to mitigate by returning a generic column that has an empty Set<String> as data
+                    //if the UNKNOWN_COLUMN is null, it means this is the first time we hit this condition
+                    //hence instantiate using the getBridgesColumn method.
+                    if (UNKNOWN_COLUMN == null) {
+                        try {
+                            Method getBridgesColumnMethod = method.getDeclaringClass()
+                                    .getMethod("getBridgesColumn",null);
+                            columnName = getColumnName(getBridgesColumnMethod);
+                            columnSchema = getColumnSchema(tableSchema, columnName,
+                                    (Class<Object>) getBridgesColumnMethod.getReturnType());
+                            UNKNOWN_COLUMN = new Column(columnSchema, new HashSet<>());
+                        } catch (NoSuchMethodException nsme) {
+                            //If we get here it means that the very basic method of ovsdb, the
+                            //get bridges method, does not exist. In that case, this ovsdb is almost
+                            //completely out of sync with the schema we expect, hence continue to
+                            //the original implementation of throwing an exception about the
+                            //unknown column.
+                        }
+                    }
+                    //If the UNKNOWN_COLUMN is not null, we may be able to mitigate the missing column
+                    //from the current schema.
+                    if (UNKNOWN_COLUMN != null) {
+                        return UNKNOWN_COLUMN;
+                    }
                     String message = ColumnSchemaNotFoundException.createMessage(columnName, tableSchema.getName());
                     throw new ColumnSchemaNotFoundException(message);
                 }

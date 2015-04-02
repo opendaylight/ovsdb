@@ -72,6 +72,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                 for (Port port : portUpdatedRows) {
                     if (portUUID.equals(port.getUuid())) {
                         Collection<Long> vlanId = port.getTagColumn().getData();
+                        Set<Long> portTrunks = port.getTrunksColumn().getData();
                         bridgeName = bridge.getName();
                         NodeId bridgeId = SouthboundMapper.createManagedNodeId(
                                 getKey(), new OvsdbBridgeName(bridgeName));
@@ -105,11 +106,17 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                                     port.getUuid().toString()));
                             if (vlanId.size() > 0) {
                                 Iterator<Long> itr = vlanId.iterator();
-                                if (itr.next() != null) {
-                                    int id = itr.next().intValue();
-                                    ovsdbTerminationPointBuilder.setVlanTag(new VlanId(id));
+                                // There are no loops here, just get the first element.
+                                int id = itr.next().intValue();
+                                ovsdbTerminationPointBuilder.setVlanTag(new VlanId(id));
+                            }
+                            List<Trunks> modelTrunks = new ArrayList<Trunks>();
+                            for (Long trunk: portTrunks) {
+                                if (trunk != null) {
+                                    modelTrunks.add(new TrunksBuilder().setTrunk(new VlanId(trunk.intValue())).build());
                                 }
                             }
+                            ovsdbTerminationPointBuilder.setTrunks(modelTrunks);
                             Column<GenericTableSchema, Set<UUID>> iface = port.getInterfacesColumn();
                             Set<UUID> ifUuid = iface.getData();
                             Collection<Interface> ifUpdateRows = TyperUtils.extractRowsUpdated(

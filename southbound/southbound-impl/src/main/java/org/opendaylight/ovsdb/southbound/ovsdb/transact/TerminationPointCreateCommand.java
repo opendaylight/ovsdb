@@ -56,11 +56,11 @@ public class TerminationPointCreateCommand implements TransactCommand {
             ovsInterface.setType(SouthboundMapper.createOvsdbInterfaceType(terminationPoint.getInterfaceType()));
             Integer ofPort = terminationPoint.getOfport();
             if (ofPort != null) {
-                ovsInterface.setOpenFlowPort(Sets.newHashSet(ofPort));
+                ovsInterface.setOpenFlowPort(Sets.newHashSet(ofPort.longValue()));
             }
             Integer ofPortRequest = terminationPoint.getOfportRequest();
             if (ofPortRequest != null) {
-                ovsInterface.setOpenFlowPortRequest(Sets.newHashSet(ofPortRequest));
+                ovsInterface.setOpenFlowPortRequest(Sets.newHashSet(ofPortRequest.longValue()));
             }
 
             //Configure optional input

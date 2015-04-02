@@ -102,7 +102,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                                     port.getUuid().toString()));
                             if (vlanId.size() > 0) {
                                 Iterator<Long> itr = vlanId.iterator();
-                                if (itr.next() != null) {
+                                if (itr.hasNext()) {
                                     int id = itr.next().intValue();
                                     ovsdbTerminationPointBuilder.setVlanTag(new VlanId(id));
                                 }

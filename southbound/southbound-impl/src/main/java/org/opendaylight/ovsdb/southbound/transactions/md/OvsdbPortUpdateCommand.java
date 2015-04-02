@@ -105,9 +105,6 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                                 if (itr.next() != null) {
                                     int id = itr.next().intValue();
                                     ovsdbTerminationPointBuilder.setVlanTag(new VlanId(id));
-                                    // TODO: re-visit this iteration when expecting more than 1 vlan tag
-                                    //       per ovsdb termination point.
-                                    break;
                                 }
                             }
                             Column<GenericTableSchema, Set<UUID>> iface = port.getInterfacesColumn();

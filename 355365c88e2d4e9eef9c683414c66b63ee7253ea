@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_62a3d94f",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-02T17:10:41Z",
+      "side": 1,
+      "message": "Ryan, i think we need to revert the return type of getOpenFlowPortColumn() and setOFFlowPort() to Set\u003cLong\u003e. Keeping Set\u003cInteger\u003e will confuse others and lead to the similar iteration class cast exception issue. So please revert the return type and that will require some fixing in TerminationPointCreation command as well.",
+      "revId": "355365c88e2d4e9eef9c683414c66b63ee7253ea",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

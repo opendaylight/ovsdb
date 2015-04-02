@@ -1,0 +1,84 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_4f0da68f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-04-02T14:26:11Z",
+      "side": 1,
+      "message": "nitpick: compatibility",
+      "revId": "c755258641ba9153ecd2024826ced7289c0e4d24",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_6f10a2a8",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/schema/typed/TyperUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-04-02T14:26:11Z",
+      "side": 1,
+      "message": "compatibility ;)",
+      "range": {
+        "startLine": 216,
+        "startChar": 32,
+        "endLine": 216,
+        "endChar": 45
+      },
+      "revId": "c755258641ba9153ecd2024826ced7289c0e4d24",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_2f229a01",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/schema/typed/TyperUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-04-02T14:26:11Z",
+      "side": 1,
+      "message": "I think checkstyle will not allow dead code...\nIn either case, please add a big and bold FIXME here.",
+      "range": {
+        "startLine": 221,
+        "startChar": 18,
+        "endLine": 221,
+        "endChar": 19
+      },
+      "revId": "c755258641ba9153ecd2024826ced7289c0e4d24",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_8f13aeb7",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/schema/typed/TyperUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-04-02T14:26:11Z",
+      "side": 1,
+      "message": "Throwable.printStackTrace(...) should never be called. \n\nUse LOG. See: https://wiki.opendaylight.org/view/BestPractices/Logging_Best_Practices",
+      "revId": "c755258641ba9153ecd2024826ced7289c0e4d24",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

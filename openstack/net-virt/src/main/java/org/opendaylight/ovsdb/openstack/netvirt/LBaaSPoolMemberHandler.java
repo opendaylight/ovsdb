@@ -55,12 +55,13 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
     @Override
     public int canCreateNeutronLoadBalancerPoolMember(NeutronLoadBalancerPoolMember neutronLBPoolMember) {
         LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLBPoolMember);
-        if (lbConfig == null)
+        if (lbConfig == null) {
             return HttpURLConnection.HTTP_BAD_REQUEST;
-        else if (!lbConfig.isValid())
+        } else if (!lbConfig.isValid()) {
             return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
-        else
+        } else {
             return HttpURLConnection.HTTP_OK;
+        }
     }
 
     @Override
@@ -87,10 +88,11 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
         } else if (nodes.isEmpty()) {
             logger.debug("Noop with LB pool member {} creation because no nodes available.", neutronLBPoolMember.getPoolMemberID());
         } else {
-            for (Node node : nodes)
+            for (Node node : nodes) {
                 loadBalancerProvider.programLoadBalancerPoolMemberRules(node,
                         lbConfig,
                         lbConfig.getMembers().get(neutronLBPoolMember.getPoolMemberID()), Action.ADD);
+            }
         }
     }
 
@@ -108,12 +110,13 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
     @Override
     public int canDeleteNeutronLoadBalancerPoolMember(NeutronLoadBalancerPoolMember neutronLBPoolMember) {
         LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLBPoolMember);
-        if (lbConfig == null)
+        if (lbConfig == null) {
             return HttpURLConnection.HTTP_BAD_REQUEST;
-        else if (!lbConfig.isValid())
+        } else if (!lbConfig.isValid()) {
             return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
-        else
+        } else {
             return HttpURLConnection.HTTP_OK;
+        }
     }
 
     @Override
@@ -209,8 +212,9 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
         memberProtocol = neutronLBPool.getLoadBalancerPoolProtocol();
         if (!(memberProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_TCP) ||
                 memberProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTP) ||
-                memberProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTPS)))
+                memberProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTPS))) {
             return null;
+        }
 
         String loadBalancerSubnetID=null, loadBalancerVip=null, loadBalancerName=null;
         for (NeutronLoadBalancer neutronLB: neutronLBCache.getAllNeutronLoadBalancers()) {
@@ -242,8 +246,9 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
 
         for (NeutronLoadBalancerPoolMember otherMember: neutronLBPool.getLoadBalancerPoolMembers()) {
             otherMemberID = otherMember.getPoolMemberID();
-            if (otherMemberID.equals(memberID))
+            if (otherMemberID.equals(memberID)) {
                 continue; //skip
+            }
 
             otherMemberIP = otherMember.getPoolMemberAddress();
             otherMemberAdminStateIsUp = otherMember.getPoolMemberAdminStateIsUp();
@@ -251,12 +256,13 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
             otherMemberPort = otherMember.getPoolMemberProtoPort();
             otherMemberProtocol = memberProtocol;
 
-            if (otherMemberIP == null || otherMemberSubnetID == null || otherMemberAdminStateIsUp == null)
+            if (otherMemberIP == null || otherMemberSubnetID == null || otherMemberAdminStateIsUp == null) {
                 continue;
-            else if (otherMemberAdminStateIsUp.booleanValue()) {
+            } else if (otherMemberAdminStateIsUp.booleanValue()) {
                 otherMemberMAC = NeutronCacheUtils.getMacAddress(neutronPortsCache, otherMemberSubnetID, otherMemberIP);
-                if (otherMemberMAC == null)
+                if (otherMemberMAC == null) {
                     continue;
+                }
                 lbConfig.addMember(otherMemberID, otherMemberIP, otherMemberMAC, otherMemberProtocol, otherMemberPort);
             }
         }

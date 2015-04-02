@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_20c0697b",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/schema/typed/TyperUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 335,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-04-02T23:38:30Z",
+      "side": 1,
+      "message": "can you be more specific on the exception\nyou want to handle? I think that being as specific as possible, we don\u0027t fall for traps where other unexpected issues take place unnoticed.",
+      "range": {
+        "startLine": 335,
+        "startChar": 33,
+        "endLine": 335,
+        "endChar": 42
+      },
+      "revId": "7622f0248f4bfb73c62976f682c4b335395bf3c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_c0be65ff",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/schema/typed/TyperUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 336,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-04-02T23:38:30Z",
+      "side": 1,
+      "message": "nitpick: trim space",
+      "range": {
+        "startLine": 336,
+        "startChar": 82,
+        "endLine": 336,
+        "endChar": 83
+      },
+      "revId": "7622f0248f4bfb73c62976f682c4b335395bf3c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -123,6 +123,17 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                                                 new Uuid(interfIter.getUuid().toString()));
                                         ovsdbTerminationPointBuilder.setInterfaceType(
                                                 SouthboundMapper.createInterfaceType(type));
+                                        Set<Integer> ofPorts = interfIter.getOpenFlowPortColumn().getData();
+                                        if (ofPorts != null && !ofPorts.isEmpty()) {
+                                            ovsdbTerminationPointBuilder
+                                                .setOfport(((Long)ofPorts.toArray()[0]).intValue());
+                                        }
+                                        Set<Integer> ofPortRequests = interfIter
+                                                .getOpenFlowPortRequestColumn().getData();
+                                        if (ofPortRequests != null && !ofPortRequests.isEmpty()) {
+                                            ovsdbTerminationPointBuilder
+                                                .setOfportRequest(((Long)ofPortRequests.toArray()[0]).intValue());
+                                        }
                                         break;
                                     }
                                 }

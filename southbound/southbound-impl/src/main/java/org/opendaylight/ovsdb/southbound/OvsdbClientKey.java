@@ -27,7 +27,7 @@ public class OvsdbClientKey {
         port = locator.getPort();
     }
 
-    OvsdbClientKey(IpAddress ip, PortNumber port) {
+    public OvsdbClientKey(IpAddress ip, PortNumber port) {
         this.ipaddress = ip;
         this.port = port;
     }

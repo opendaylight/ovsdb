@@ -371,10 +371,12 @@ module ovsdb {
             leaf external-id-key {
                 description "external-id name/key";
                 type string;
+                mandatory true;
             }
             leaf external-id-value {
                 description "external-id value";
                 type string;
+                mandatory true;
             }
          }
     }

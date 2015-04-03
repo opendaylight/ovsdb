@@ -11,6 +11,7 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
@@ -23,6 +24,7 @@ import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.external.ids.attributes.ExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -73,6 +75,19 @@ public class TerminationPointCreateCommand implements TransactCommand {
                     ovsInterface.setOptions(ImmutableMap.copyOf(optionsMap));
                 } catch (NullPointerException e) {
                     LOG.warn("Incomplete OVSDB interface options");
+                }
+            }
+
+            List<ExternalIds> externalIds = terminationPoint.getExternalIds();
+            if (externalIds != null && !externalIds.isEmpty()) {
+                HashMap<String, String> externalIdsMap = new HashMap<String, String>();
+                for (ExternalIds externalId: externalIds) {
+                    externalIdsMap.put(externalId.getExternalIdKey(), externalId.getExternalIdValue());
+                }
+                try {
+                    ovsInterface.setExternalIds(ImmutableMap.copyOf(externalIdsMap));
+                } catch (NullPointerException e) {
+                    LOG.warn("Incomplete OVSDB external_ids options");
                 }
             }
             transaction.add(op.insert(ovsInterface).withId(interfaceUuid));

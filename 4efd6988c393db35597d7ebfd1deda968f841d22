@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_602af12d",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/schema/typed/TyperUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-04-03T00:38:00Z",
+      "side": 1,
+      "message": "Returning a column that has nothing to do with what is expected seems like a disaster waiting to happen.",
+      "range": {
+        "startLine": 326,
+        "startChar": 29,
+        "endLine": 326,
+        "endChar": 37
+      },
+      "revId": "4efd6988c393db35597d7ebfd1deda968f841d22",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_4027b564",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/schema/typed/TyperUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 337,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-04-03T00:38:00Z",
+      "side": 1,
+      "message": "this should still be changed since uppercase is purely for constants and making it uppercase confuses that fact. I also don\u0027t think the optimization to make it a static is all that important.",
+      "range": {
+        "startLine": 337,
+        "startChar": 28,
+        "endLine": 337,
+        "endChar": 42
+      },
+      "revId": "4efd6988c393db35597d7ebfd1deda968f841d22",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -88,7 +88,6 @@ public class InboundNatService extends AbstractServiceInstance implements Inboun
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
-        writeFlow(flowBuilder, nodeBuilder);
 
         if (action.equals(Action.ADD)) {
             writeFlow(flowBuilder, nodeBuilder);
@@ -136,7 +135,6 @@ public class InboundNatService extends AbstractServiceInstance implements Inboun
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
-        writeFlow(flowBuilder, nodeBuilder);
 
         if (action.equals(Action.ADD)) {
             writeFlow(flowBuilder, nodeBuilder);

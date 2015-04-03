@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_d68e2fd0",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointCreateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2015-04-03T20:21:53Z",
+      "side": 1,
+      "message": "The code just above handling Options is doing the same job for the options.  If it\u0027s not buggy, it would be shorter.\n\nAlso, I think we should use same logging level for similar kinds of errors (i.e. \u0027warn\u0027 vs. \u0027error\u0027).",
+      "revId": "9e84684aa1bde0c98fed5080920d69ce239463c2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

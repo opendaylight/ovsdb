@@ -1,17 +1,17 @@
 {
-    "id":"9d3bb95f-cc13-1529-85c3-d19cddd482c2",
+    "id":"b4b95581-3526-51da-d64b-acbe6898b0d6",
     "name":"Ovsdb Southbound Collection",
     "timestamp":1424977469540,
     "order":[
-        "7863f083-4b68-18db-a4d9-321429f23fc3",
-        "8f1131d7-5bbe-6d5a-b1e9-46334cdc41d8",
-        "0fc1bfb4-9bad-6713-a6fe-517fec8388b5",
-        "6521810a-4a1e-3064-375c-fed8a00ac668",
-        "3f1bbc0d-6cf2-2fb8-ef09-38fe32e718f0",
-        "c354f7a2-e958-97f0-2952-5709e73cdbb9",
-        "7cd793fe-2d7c-9bff-ce15-75f085d20cae",
-        "2b957b83-f047-ca7c-2b62-a7d14dbd4361",
-        "dcb71737-405b-8f7d-e76a-9305c9d0bfd2"
+        "357527e4-8aad-ef4f-9418-7426751259b0",
+        "65c61c9f-e252-b31b-95dd-043c63035e74",
+        "9cba6492-4dda-2b57-7ecd-960223be78e9",
+        "34929a73-dde0-c0bd-bc40-9886615eb45a",
+        "a727be75-0242-38c2-6ffb-cf77cdf05633",
+        "6915ff02-3bc4-8c60-a1b1-06ac126440ce",
+        "c9d51032-d903-15be-8758-3dcb3476dfb4",
+        "b3f3e5ad-2fd7-9792-19e5-e81997ddeed0",
+        "319390fe-cec7-6b65-fc49-7ae9cb863964"
     ],
     "owner":0,
     "sharedWithTeam":false,
@@ -20,40 +20,11 @@
     "hasRequests":true,
     "requests":[
         {
-            "collectionId":"9d3bb95f-cc13-1529-85c3-d19cddd482c2",
-            "id":"0fc1bfb4-9bad-6713-a6fe-517fec8388b5",
-            "name":"Create Specific Config Bridge",
-            "description":"This restconf request creates bridge on the specified ovsdb node.   Restconf URI contains node-id and this node-id has ip address and port. To determine the ip address and port information, fire \"Get Operational Topology\" restconf request and search for node where you want to create a bridge and then use the ip-address / port details from that output. Once you find out the ip-address/port, update the node-id and ovsdb:managed-by element in the restconf body.\n\n       Note: these %2F ('/') in the url are not there by mistake, those are there intentionally because node-id can contain '/'.\n\n    Note:Bridge name should not contain '-' in it, If you bridge name will contain '-', bridge creation will fail. It's know bug and under investigation.",
-            "url":"http://localhost:8080/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:%2F%2F10.10.10.10:22222%2Fbridge%2Fbrtest",
-            "method":"PUT",
-            "headers":"Authorization: Basic YWRtaW46YWRtaW4=\nContent-Type: application/json\n",
-            "data":"{\n  \"network-topology:node\": [\n        {\n            \"node-id\": \"ovsdb://10.10.10.10:22222/bridge/brtest\",\n             \"ovsdb:bridge-name\": \"brtest\",\n             \"ovsdb:datapath-id\": \"00:00:b2:bf:48:25:f2:4b\",\n             \"ovsdb:protocol-entry\": [\n                {\n                  \"protocol\": \"ovsdb:ovsdb-bridge-protocol-openflow-13\"\n                }\n              ],\n              \"ovsdb:controller-entry\": [\n                {\n                  \"target\": \"tcp:11.11.11.11:6633\"\n                }\n              ],\n             \"ovsdb:managed-by\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='ovsdb:1']/network-topology:node[network-topology:node-id='ovsdb://10.10.10.10:22222']\"\n        }\n    ]\n}",
-            "dataMode":"raw",
-            "timestamp":0,
-            "version":2,
-            "time":1427458797126
-        },
-        {
-            "collectionId":"9d3bb95f-cc13-1529-85c3-d19cddd482c2",
-            "id":"2b957b83-f047-ca7c-2b62-a7d14dbd4361",
-            "name":"Delete Specific ConfigTermination Point",
-            "description":"Delete configuration of specified termination point of bridge. ",
+            "collectionId":"b4b95581-3526-51da-d64b-acbe6898b0d6",
+            "id":"319390fe-cec7-6b65-fc49-7ae9cb863964",
+            "name":"Get Specific Config Termination Point",
+            "description":"Fetch configuration for specific termination point of the bridge from config data store.",
             "url":"http://localhost:8080/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:%2F%2F10.10.10.10:22222%2Fbridge%2Fbrtest/termination-point/vxlanport/",
-            "method":"DELETE",
-            "headers":"Authorization: Basic YWRtaW46YWRtaW4=\n",
-            "data":[
-
-            ],
-            "dataMode":"params",
-            "timestamp":0,
-            "version":2
-        },
-        {
-            "collectionId":"9d3bb95f-cc13-1529-85c3-d19cddd482c2",
-            "id":"3f1bbc0d-6cf2-2fb8-ef09-38fe32e718f0",
-            "name":"Get Config Topology",
-            "description":"Fetch the config topology from configuration data store.",
-            "url":"http://localhost:8080/restconf/config/network-topology:network-topology/",
             "method":"GET",
             "headers":"Authorization: Basic YWRtaW46YWRtaW4=\n",
             "data":[
@@ -61,14 +32,11 @@
             ],
             "dataMode":"params",
             "timestamp":0,
-            "responses":[
-
-            ],
             "version":2
         },
         {
-            "collectionId":"9d3bb95f-cc13-1529-85c3-d19cddd482c2",
-            "id":"6521810a-4a1e-3064-375c-fed8a00ac668",
+            "collectionId":"b4b95581-3526-51da-d64b-acbe6898b0d6",
+            "id":"34929a73-dde0-c0bd-bc40-9886615eb45a",
             "name":"Delete Specific Config OvsdbNode",
             "description":"This restconf request delete any node (ovsdb node or bridge node) from the config data store. You can use the same request to delete the ovsdb node by using the following URI: http://localhost:8080/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:%2F%2F10.10.10.10:22222",
             "url":"http://localhost:8080/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:%2F%2F10.10.10.10:22222%2Fbridge%2Fbrtest",
@@ -82,8 +50,8 @@
             "version":2
         },
         {
-            "collectionId":"9d3bb95f-cc13-1529-85c3-d19cddd482c2",
-            "id":"7863f083-4b68-18db-a4d9-321429f23fc3",
+            "collectionId":"b4b95581-3526-51da-d64b-acbe6898b0d6",
+            "id":"357527e4-8aad-ef4f-9418-7426751259b0",
             "name":"Create Specific Config OvsdbNode",
             "description":"Fire this Restconf request if you want to initiate the connection to ovsdb node from controller. It assumes that ovsdb node is listening for tcp connection in passive mode. To configure the ovsdb node for listening incoming connection, please fire following command at ovsdb node machine\n\n\"ovs-vsctl set-manager tcp:16640\"",
             "url":"http://localhost:8080/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:%2F%2F10.10.10.10:16640",
@@ -95,22 +63,8 @@
             "version":2
         },
         {
-            "collectionId":"9d3bb95f-cc13-1529-85c3-d19cddd482c2",
-            "id":"7cd793fe-2d7c-9bff-ce15-75f085d20cae",
-            "name":"Create Specific Config Termination Point",
-            "description":"This restconf request creates port/interface and attach it to specific bridge. Using ovsdb:option, you can pass the optional input to port/interface create optional. E.g. remote_ip=xx.xx.xx.xx.",
-            "url":"http://localhost:8080/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:%2F%2F10.10.10.10:22222%2Fbridge%2Fbrtest/termination-point/vxlanport/",
-            "method":"PUT",
-            "headers":"Authorization: Basic YWRtaW46YWRtaW4=\nContent-Type: application/json\nAccept: application/json\n",
-            "data":"{\n  \"network-topology:termination-point\": [\n    \t{\n  \t\t\t\"ovsdb:options\": [\n    \t\t\t{\n                  \"ovsdb:option\": \"remote_ip\",\n                  \"ovsdb:value\" : \"10.10.11.11\"\n\t\t    \t}\n\t  \t\t],\n\t  \t\t\"ovsdb:name\": \"vxlanport\",\n\t  \t\t\"ovsdb:bridge-name\": \"brtest\",\n          \t\"ovsdb:interface-type\": \"ovsdb:interface-type-vxlan\",\n  \t\t\t\"tp-id\": \"vxlanport\",\n            \"ovsdb:attached-to\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='ovsdb:1']/network-topology:node[network-topology:node-id='ovsdb://10.10.10.10:22222/bridge/brtest']\"\n\n\t\t}\n    ]\n}",
-            "dataMode":"raw",
-            "timestamp":0,
-            "version":2,
-            "time":1427459046435
-        },
-        {
-            "collectionId":"9d3bb95f-cc13-1529-85c3-d19cddd482c2",
-            "id":"8f1131d7-5bbe-6d5a-b1e9-46334cdc41d8",
+            "collectionId":"b4b95581-3526-51da-d64b-acbe6898b0d6",
+            "id":"65c61c9f-e252-b31b-95dd-043c63035e74",
             "name":"Get Operational Topology",
             "description":"This restconf request will fetch the operational topology. Operational topology details are fetch by southbound plugin from all the connected ovsdb node.",
             "url":"http://localhost:8080/restconf/operational/network-topology:network-topology/",
@@ -127,8 +81,8 @@
             "version":2
         },
         {
-            "collectionId":"9d3bb95f-cc13-1529-85c3-d19cddd482c2",
-            "id":"c354f7a2-e958-97f0-2952-5709e73cdbb9",
+            "collectionId":"b4b95581-3526-51da-d64b-acbe6898b0d6",
+            "id":"6915ff02-3bc4-8c60-a1b1-06ac126440ce",
             "name":"Get Specific Config OvsdbNode",
             "description":"This restconf request fetch the configuration for specific node (ovsdb node or bridge node)",
             "url":"http://localhost:8080/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:%2F%2F10.10.10.10:22222%2Fbridge%2Fbrtest",
@@ -142,11 +96,25 @@
             "version":2
         },
         {
-            "collectionId":"9d3bb95f-cc13-1529-85c3-d19cddd482c2",
-            "id":"dcb71737-405b-8f7d-e76a-9305c9d0bfd2",
-            "name":"Get Specific Config Termination Point",
-            "description":"Fetch configuration for specific termination point of the bridge from config data store.",
-            "url":"http://localhost:8080/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:%2F%2F10.10.10.10:22222%2Fbridge%2Fbrtest/termination-point/vxlanport/",
+            "collectionId":"b4b95581-3526-51da-d64b-acbe6898b0d6",
+            "id":"9cba6492-4dda-2b57-7ecd-960223be78e9",
+            "name":"Create Specific Config Bridge",
+            "description":"This restconf request creates bridge on the specified ovsdb node.   Restconf URI contains node-id and this node-id has ip address and port. To determine the ip address and port information, fire \"Get Operational Topology\" restconf request and search for node where you want to create a bridge and then use the ip-address / port details from that output. Once you find out the ip-address/port, update the node-id and ovsdb:managed-by element in the restconf body.\n\n       Note: these %2F ('/') in the url are not there by mistake, those are there intentionally because node-id can contain '/'.\n\n    Note:Bridge name should not contain '-' in it, If you bridge name will contain '-', bridge creation will fail. It's know bug and under investigation.",
+            "url":"http://localhost:8080/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:%2F%2F127.0.0.1:49723%2Fbridge%2Fbrtest",
+            "method":"PUT",
+            "headers":"Authorization: Basic YWRtaW46YWRtaW4=\nContent-Type: application/json\n",
+            "data":"{\n  \"network-topology:node\": [\n        {\n            \"node-id\": \"ovsdb://127.0.0.1:49723/bridge/brtest\",\n             \"ovsdb:bridge-name\": \"brtest\",\n             \"ovsdb:datapath-id\": \"00:00:b2:bf:48:25:f2:4b\",\n             \"ovsdb:protocol-entry\": [\n                {\n                  \"protocol\": \"ovsdb:ovsdb-bridge-protocol-openflow-13\"\n                }\n              ],\n              \"ovsdb:controller-entry\": [\n                {\n                  \"target\": \"tcp:127.0.0.1:6633\"\n                }\n              ],\n             \"ovsdb:managed-by\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='ovsdb:1']/network-topology:node[network-topology:node-id='ovsdb://127.0.0.1:49723']\"\n        }\n    ]\n}",
+            "dataMode":"raw",
+            "timestamp":0,
+            "version":2,
+            "time":1428088744155
+        },
+        {
+            "collectionId":"b4b95581-3526-51da-d64b-acbe6898b0d6",
+            "id":"a727be75-0242-38c2-6ffb-cf77cdf05633",
+            "name":"Get Config Topology",
+            "description":"Fetch the config topology from configuration data store.",
+            "url":"http://localhost:8080/restconf/config/network-topology:network-topology/",
             "method":"GET",
             "headers":"Authorization: Basic YWRtaW46YWRtaW4=\n",
             "data":[
@@ -154,7 +122,39 @@
             ],
             "dataMode":"params",
             "timestamp":0,
+            "responses":[
+
+            ],
             "version":2
+        },
+        {
+            "collectionId":"b4b95581-3526-51da-d64b-acbe6898b0d6",
+            "id":"b3f3e5ad-2fd7-9792-19e5-e81997ddeed0",
+            "name":"Delete Specific ConfigTermination Point",
+            "description":"Delete configuration of specified termination point of bridge. ",
+            "url":"http://localhost:8080/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:%2F%2F10.10.10.10:22222%2Fbridge%2Fbrtest/termination-point/vxlanport/",
+            "method":"DELETE",
+            "headers":"Authorization: Basic YWRtaW46YWRtaW4=\n",
+            "data":[
+
+            ],
+            "dataMode":"params",
+            "timestamp":0,
+            "version":2
+        },
+        {
+            "collectionId":"b4b95581-3526-51da-d64b-acbe6898b0d6",
+            "id":"c9d51032-d903-15be-8758-3dcb3476dfb4",
+            "name":"Create Specific Config Termination Point",
+            "description":"This restconf request creates port/interface and attach it to specific bridge. Using ovsdb:option, you can pass the optional input to port/interface create optional. E.g. remote_ip=xx.xx.xx.xx.",
+            "url":"http://localhost:8080/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:%2F%2F127.0.0.1:49723%2Fbridge%2Fbrtest/termination-point/vx1/",
+            "method":"PUT",
+            "headers":"Authorization: Basic YWRtaW46YWRtaW4=\nContent-Type: application/json\nAccept: application/json\n",
+            "data":"{\n  \"network-topology:termination-point\": [\n    \t{\n  \t\t\t\"ovsdb:options\": [\n    \t\t\t{\n                  \"ovsdb:option\": \"remote_ip\",\n                  \"ovsdb:value\" : \"127.0.0.1\"\n\t\t    \t}\n\t  \t\t],\n            \"ovsdb:external-ids\": [\n                {\n                    \"ovsdb:external-id-key\": \"vm-id\",\n                    \"ovsdb:external-id-value\": \"vm-value\"\n                }\n            ],\n\t  \t\t\"ovsdb:name\": \"vx1\",\n\t  \t\t\"ovsdb:bridge-name\": \"brtest\",\n          \t\"ovsdb:interface-type\": \"ovsdb:interface-type-vxlan\",\n            \"ovsdb:ofport\": 30001,\n            \"ovsdb:ofport_request\": 30002,\n  \t\t\t\"tp-id\": \"vx1\",\n            \"ovsdb:attached-to\": \"/network-topology:network-topology/network-topology:topology[network-topology:topology-id='ovsdb:1']/network-topology:node[network-topology:node-id='ovsdb://127.0.0.1:49723/bridge/brtest']\"\n\n\t\t}\n    ]\n}",
+            "dataMode":"raw",
+            "timestamp":0,
+            "version":2,
+            "time":1428088783382
         }
     ]
 }

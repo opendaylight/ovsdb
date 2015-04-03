@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -34,6 +35,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.external.ids.attributes.ExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.external.ids.attributes.ExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -133,6 +136,35 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                                             ovsdbTerminationPointBuilder
                                                 .setOfportRequest(ofPortRequestsIter.next().intValue());
                                         }
+
+                                        Map<String, String> externalIds = interfIter.getExternalIdsColumn().getData();
+                                        if (externalIds != null && !externalIds.isEmpty()) {
+                                            Set<String> externalIdKeys = externalIds.keySet();
+                                            ArrayList<ExternalIds> externalIdsList = new ArrayList<ExternalIds>();
+                                            String externalIdValue;
+                                            for (String externalIdKey : externalIdKeys) {
+                                                externalIdValue = externalIds.get(externalIdKey);
+                                                if (externalIdKey != null && externalIdValue != null) {
+                                                    externalIdsList.add(new ExternalIdsBuilder()
+                                                            .setExternalIdKey(externalIdKey)
+                                                            .setExternalIdValue(externalIdValue).build());
+                                                } else {
+                                                    String errorMsg = "Skipping processing for external_ids entry";
+                                                    // first case should never happen
+                                                    if (externalIdKey == null && externalIdValue == null) {
+                                                        LOG.error(errorMsg);
+                                                    } else if (externalIdValue == null) {
+                                                        LOG.error(errorMsg + ", no value for key={}",
+                                                                externalIdKey);
+                                                    } else {
+                                                        LOG.error(errorMsg + ", no key for value={}",
+                                                                externalIdValue);
+                                                    }
+                                                }
+                                            }
+                                            ovsdbTerminationPointBuilder.setExternalIds(externalIdsList);
+                                        }
+
                                         break;
                                     }
                                 }

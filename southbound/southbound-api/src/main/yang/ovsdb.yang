@@ -400,6 +400,7 @@ module ovsdb {
         description "Augmentation for bridge nodes managed by ovsdb";
         ext:augment-identifier "ovsdb-bridge-augmentation";
         uses ovsdb-bridge-attributes;
+        uses ovsdb-external-ids-attributes;
     }
 
     augment "/topo:network-topology/topo:topology/topo:node" {

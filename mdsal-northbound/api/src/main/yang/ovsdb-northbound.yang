@@ -1,0 +1,65 @@
+/*
+ * Copyright (c) 2015 Inocybe and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+module ovsdb-northbound {
+    yang-version 1;
+    namespace "urn:opendaylight:ovsdb-northbound";
+    prefix "ovsdb-northbound";
+
+    import network-topology {prefix "topo"; revision-date "2013-10-21"; }
+    import yang-ext { prefix "ext"; }
+    description "This module is used to view and crud rows.";
+
+    revision 2015-04-06 {
+        description "Initial revision";
+    }
+
+    augment "/topo:network-topology/topo:topology/topo:node" {
+        description "Augmentation for tables nodes managed by ovsdb";
+        ext:augment-identifier "ovsdb-tables-augmentation";
+        uses ovsdb-tables;
+    }
+
+    typedef table-name {
+        description "The name of the table.";
+        type string;
+    }
+
+    typedef table-row {
+        description "A table row.";
+        type string;
+    }
+
+    typedef ovsdb-node-ref {
+        description "A reference to an ovsdb node";
+        type instance-identifier;
+    }
+
+    grouping ovsdb-tables {
+        description "The OVSDB tables.";
+        list tables {
+            container table {
+                leaf table-name {
+                    description "";
+                    type table-name;
+                }
+                list table-row {
+                    key "row";
+                    leaf row {
+                        type table-row;
+                    }
+                }
+            }
+        }
+        leaf managed-by {
+            description "The reference to the OVSDB node to which the tables belongs to";
+            type ovsdb-node-ref;
+        }
+        
+    }
+    
+}

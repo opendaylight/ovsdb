@@ -103,7 +103,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
                 vlanTag.add(terminationPoint.getVlanTag().getValue().longValue());
                 port.setTag(vlanTag);
             }
-            if (terminationPoint.getTrunks().size() > 0) {
+            if (terminationPoint.getTrunks() != null && terminationPoint.getTrunks().size() > 0) {
                 Set<Long> portTrunks = new HashSet<Long>();
                 List<Trunks> modelTrunks = terminationPoint.getTrunks();
                 for (Trunks trunk: modelTrunks) {

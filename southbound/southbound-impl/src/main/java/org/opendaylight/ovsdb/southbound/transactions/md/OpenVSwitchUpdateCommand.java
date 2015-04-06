@@ -32,6 +32,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.DatapathTypeEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.InterfaceTypeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.InterfaceTypeEntryBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.other.config.attributes.OtherConfigs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.other.config.attributes.OtherConfigsBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -119,6 +121,23 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
                         }
                     }
                     ovsdbNodeBuilder.setExternalIds(externalIdsList);
+                }
+
+                Map<String, String> otherConfigs = openVSwitch.getOtherConfigColumn().getData();
+                if (otherConfigs != null && !otherConfigs.isEmpty()) {
+                    Set<String> otherConfigKeys = otherConfigs.keySet();
+                    List<OtherConfigs> otherConfigsList = new ArrayList<OtherConfigs>();
+                    String otherConfigValue;
+                    for (String otherConfigKey : otherConfigKeys) {
+                        otherConfigValue = otherConfigs.get(otherConfigKey);
+                        if (otherConfigKey != null && otherConfigValue != null) {
+                            otherConfigsList.add(new OtherConfigsBuilder()
+                                    .setOtherConfigKey(otherConfigKey)
+                                    .setOtherConfigValue(otherConfigValue)
+                                    .build());
+                        }
+                    }
+                    ovsdbNodeBuilder.setOtherConfigs(otherConfigsList);
                 }
 
                 NodeBuilder nodeBuilder = new NodeBuilder();

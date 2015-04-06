@@ -21,6 +21,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.external.ids.attributes.ExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.other.config.attributes.OtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -64,6 +65,22 @@ public class OvsdbNodeUpdateCommand implements TransactCommand {
                         ovs.getExternalIdsColumn().getData()));
                 } catch (NullPointerException e) {
                     LOG.warn("Incomplete OVSDB Node external IDs");
+                }
+            }
+
+            List<OtherConfigs> otherConfigs = ovsdbNode.getOtherConfigs();
+            if (otherConfigs != null) {
+                HashMap<String, String> otherConfigsMap = new HashMap<String, String>();
+                for (OtherConfigs otherConfig : otherConfigs) {
+                    otherConfigsMap.put(otherConfig.getOtherConfigKey(), otherConfig.getOtherConfigValue());
+                }
+                try {
+                    ovs.setOtherConfig(ImmutableMap.copyOf(otherConfigsMap));
+                    transaction.add(op.mutate(ovs).addMutation(ovs.getOtherConfigColumn().getSchema(),
+                        Mutator.INSERT,
+                        ovs.getOtherConfigColumn().getData()));
+                } catch (NullPointerException e) {
+                    LOG.warn("Incomplete OVSDB Node other_config");
                 }
             }
         }

@@ -57,9 +57,9 @@ public class TerminationPointCreateCommand implements TransactCommand {
             Interface ovsInterface = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Interface.class);
             ovsInterface.setName(terminationPoint.getName());
             ovsInterface.setType(SouthboundMapper.createOvsdbInterfaceType(terminationPoint.getInterfaceType()));
-            Integer ofPort = terminationPoint.getOfport();
+            Long ofPort = terminationPoint.getOfport();
             if (ofPort != null) {
-                ovsInterface.setOpenFlowPort(Sets.newHashSet(ofPort.longValue()));
+                ovsInterface.setOpenFlowPort(Sets.newHashSet(ofPort));
             }
             Integer ofPortRequest = terminationPoint.getOfportRequest();
             if (ofPortRequest != null) {

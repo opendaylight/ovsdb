@@ -135,7 +135,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                                         Set<Long> ofPorts = interfIter.getOpenFlowPortColumn().getData();
                                         if (ofPorts != null && !ofPorts.isEmpty()) {
                                             Iterator<Long> ofPortsIter = ofPorts.iterator();
-                                            int ofPort = ofPortsIter.next().intValue();
+                                            long ofPort = ofPortsIter.next();
                                             if (ofPort >= 0) {
                                                 ovsdbTerminationPointBuilder
                                                     .setOfport(ofPort);

@@ -336,7 +336,7 @@ module ovsdb {
 
         leaf ofport {
             description "Port/Interface related optional ofport";
-            type uint16;
+            type uint32;
         }
 
         leaf ofport_request {

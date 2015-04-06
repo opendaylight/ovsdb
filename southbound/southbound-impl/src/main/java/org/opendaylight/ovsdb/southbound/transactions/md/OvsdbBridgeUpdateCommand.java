@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -26,6 +27,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
@@ -77,6 +80,24 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                 if (SouthboundMapper.createMdsalProtocols(bridge) != null
                         && SouthboundMapper.createMdsalProtocols(bridge).size() > 0) {
                     ovsdbManagedNodeBuilder.setProtocolEntry(SouthboundMapper.createMdsalProtocols(bridge));
+                }
+
+                Map<String, String> externalIds = bridge.getExternalIdsColumn()
+                        .getData();
+                if (externalIds != null && !externalIds.isEmpty()) {
+                    Set<String> externalIdKeys = externalIds.keySet();
+                    List<BridgeExternalIds> externalIdsList = new ArrayList<BridgeExternalIds>();
+                    String externalIdValue;
+                    for (String externalIdKey : externalIdKeys) {
+                        externalIdValue = externalIds.get(externalIdKey);
+                        if (externalIdKey != null && externalIdValue != null) {
+                            externalIdsList.add(new BridgeExternalIdsBuilder()
+                                    .setBrExternalIdKey(externalIdKey)
+                                    .setBrExternalIdValue(externalIdValue)
+                                    .build());
+                        }
+                    }
+                    ovsdbManagedNodeBuilder.setBridgeExternalIds(externalIdsList);
                 }
 
                 if (!SouthboundMapper.createControllerEntries(bridge, updatedControllerRows).isEmpty()) {

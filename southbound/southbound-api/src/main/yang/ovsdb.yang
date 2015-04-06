@@ -176,6 +176,21 @@ module ovsdb {
             description "The OVSDB which this bridge belongs to";
             type ovsdb-node-ref;
         }
+
+        list bridge-external-ids {
+            description "Bridge external id";
+            key "br-external-id-key";
+            leaf br-external-id-key {
+                description "external-id name/key";
+                type string;
+                mandatory true;
+            }
+            leaf br-external-id-value {
+                description "br-external-id value";
+                type string;
+                mandatory true;
+            }
+         }
     }
 
     grouping ovsdb-node-attributes {

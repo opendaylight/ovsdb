@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_9ce3e532",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointCreateCommand.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-06T14:56:18Z",
+      "side": 1,
+      "message": "modelTrunks contains a reference to empty array list, so this loop will never execute. You wanted to do \nList\u003cTrunks\u003e modelTrunks \u003d terminationPoint.getTrunks(); ??",
+      "revId": "60f6ec00257f9235d4c8746ff5b84de01f01f957",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

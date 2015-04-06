@@ -18,6 +18,8 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataCh
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
+import org.opendaylight.ovsdb.southbound.ovsdb.transact.DataChangesOvsdbNodeEvent;
+import org.opendaylight.ovsdb.southbound.ovsdb.transact.OvsdbNodeUpdateCommand;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
@@ -60,12 +62,13 @@ public class OvsdbNodeDataChangeListener implements DataChangeListener, AutoClos
                 } catch (UnknownHostException e) {
                     LOG.warn("Failed to connect to ovsdbNode", e);
                 }
+                // TODO - handled external-ids on creation
             }
         }
 
         Map<InstanceIdentifier<?>, DataObject> originalDataObject = changes.getOriginalData();
         Set<InstanceIdentifier<?>> iiD = changes.getRemovedPaths();
-        for (InstanceIdentifier instanceIdentifier : iiD) {
+        for (InstanceIdentifier<?> instanceIdentifier : iiD) {
             if (originalDataObject.get(instanceIdentifier) instanceof OvsdbNodeAugmentation) {
                 try {
                     cm.disconnect((OvsdbNodeAugmentation) originalDataObject.get(instanceIdentifier));
@@ -77,17 +80,32 @@ public class OvsdbNodeDataChangeListener implements DataChangeListener, AutoClos
 
         for (Entry<InstanceIdentifier<?>, DataObject> updated : changes.getUpdatedData().entrySet()) {
             if (updated.getValue() instanceof OvsdbNodeAugmentation) {
+                LOG.debug("Received updates to ovsdbNode: {}", updated);
                 OvsdbNodeAugmentation value = (OvsdbNodeAugmentation) updated.getValue();
                 OvsdbClient client = cm.getClient(value);
-                if (client == null) {
+                if (client != null) {
                     for (Entry<InstanceIdentifier<?>, DataObject> original : changes.getOriginalData().entrySet()) {
                         if (original.getValue() instanceof OvsdbNodeAugmentation) {
+                            OvsdbNodeAugmentation originalValue = (OvsdbNodeAugmentation) original.getValue();
+                            OvsdbClientKey key = null;
                             try {
-                                cm.disconnect((OvsdbNodeAugmentation) original.getValue());
-                                cm.connect(value);
+                                if ((originalValue.getIp() != null && !originalValue.getIp().equals(value.getIp()))
+                                        || (originalValue.getPort() != null
+                                        && !originalValue.getPort().equals(value.getPort()))) {
+                                    key = new OvsdbClientKey(value.getIp(), value.getPort());
+                                    cm.disconnect((OvsdbNodeAugmentation) original.getValue());
+                                    cm.connect(value);
+                                } else {
+                                    key = new OvsdbClientKey(originalValue.getIp(), originalValue.getPort());
+                                }
                             } catch (UnknownHostException e) {
-                                LOG.warn("Failed to disconnect to ovsdbNode", e);
+                                LOG.warn("Failed to disconnect from ovsdbNode", e);
                             }
+                            OvsdbConnectionInstance clientInstance = cm.getConnectionInstance(key);
+                            clientInstance.transact(new OvsdbNodeUpdateCommand(
+                                    new DataChangesOvsdbNodeEvent(
+                                        SouthboundMapper.createInstanceIdentifier(clientInstance.getKey()),
+                                        changes)));
                         }
                     }
                 }

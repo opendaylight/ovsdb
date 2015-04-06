@@ -37,6 +37,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.external.ids.attributes.ExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.external.ids.attributes.ExternalIdsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.OptionsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.OptionsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Trunks;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.TrunksBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
@@ -172,6 +175,23 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                                                 }
                                             }
                                             ovsdbTerminationPointBuilder.setExternalIds(externalIdsList);
+                                        }
+                                        
+                                        Map<String, String> optionsMap = interfIter.getOptionsColumn().getData();
+                                        if (optionsMap != null && !optionsMap.isEmpty()) {
+                                            List<Options> options = new ArrayList<Options>();
+                                            String optionsValueString;
+                                            OptionsKey optionsKey;
+                                            for (String optionsKeyString : optionsMap.keySet()) {
+                                                optionsValueString = optionsMap.get(optionsKeyString);
+                                                if (optionsKeyString != null && optionsValueString != null) {
+                                                    optionsKey = new OptionsKey(optionsKeyString);
+                                                    options.add(new OptionsBuilder()
+                                                        .setKey(optionsKey)
+                                                        .setValue(optionsValueString).build());
+                                                }
+                                            }
+                                            ovsdbTerminationPointBuilder.setOptions(options);
                                         }
 
                                         break;

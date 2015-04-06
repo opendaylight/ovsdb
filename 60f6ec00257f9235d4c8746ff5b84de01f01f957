@@ -16,6 +16,24 @@
       "revId": "60f6ec00257f9235d4c8746ff5b84de01f01f957",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_1ccfd5b1",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointCreateCommand.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-04-06T15:03:12Z",
+      "side": 1,
+      "message": "I\u0027m trying to rebase this patch on master and having the best time. Rechecking",
+      "parentUuid": "5a93c517_9ce3e532",
+      "revId": "60f6ec00257f9235d4c8746ff5b84de01f01f957",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

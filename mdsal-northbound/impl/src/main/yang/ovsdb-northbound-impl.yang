@@ -1,0 +1,58 @@
+/*
+ * Copyright (c) 2015 Inocybe and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+module ovsdb-northbound-impl {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:ovsdb-northbound:impl";
+    prefix "ovsdb-northbound-impl";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-md-sal-binding { prefix md-sal-binding; revision-date 2013-10-28;}
+    import opendaylight-md-sal-dom {prefix dom; revision-date 2013-10-28;}
+
+    description
+        "Northbound implementation for OVSDB.";
+
+    revision 2015-04-06 {
+        description "Initial revision";
+    }
+
+    identity ovsdb-northbound-impl {
+        base config:module-type;
+        config:java-name-prefix NorthboundImpl;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case ovsdb-northbound-impl {
+            when "/config:modules/config:module/config:type = 'ovsdb-northbound-impl'";
+            container broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity md-sal-binding:binding-broker-osgi-registry;
+                    }
+                }
+            }
+            container binding-normalized-node-serializer {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity md-sal-binding:binding-normalized-node-serializer;
+                    }
+                }
+            }
+            container schema-service {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity dom:schema-service;
+                    }
+                }
+            }
+        }
+    }
+}

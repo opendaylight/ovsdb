@@ -118,7 +118,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         if (ovsdbNode != null) {
             return getConnectionInstance(ovsdbNode);
         } else if (ovsdbManagedNode != null) {
-            return getConnectionInstance(ovsdbManagedNode);
+            return getConnectionInstance(ovsdbManagedNode.getOvsdbBridge());
         } else {
             LOG.warn("This is not a node that gives any hint how to find its OVSDB Manager: {}",node);
             return null;

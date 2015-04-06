@@ -84,7 +84,8 @@ public class OvsdbManagedNodeDataChangeListener implements DataChangeListener, A
         for ( Entry<InstanceIdentifier<?>, DataObject> created : map.entrySet()) {
             if (created.getValue() instanceof OvsdbBridgeAugmentation) {
                 LOG.debug("Received request to create {}",created.getValue());
-                OvsdbConnectionInstance client = cm.getConnectionInstance((OvsdbBridgeAugmentation)created.getValue());
+                OvsdbConnectionInstance client =
+                        cm.getConnectionInstance(((OvsdbBridgeAugmentation)created.getValue()).getOvsdbBridge());
                 if (client != null) {
                     LOG.debug("Found client for {}", created.getValue());
                     result.add(client);

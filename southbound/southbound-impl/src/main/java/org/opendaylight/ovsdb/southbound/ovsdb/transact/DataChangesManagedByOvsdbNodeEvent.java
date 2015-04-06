@@ -44,9 +44,11 @@ public class DataChangesManagedByOvsdbNodeEvent implements
         for (Entry<InstanceIdentifier<?>, DataObject> created: data.entrySet()) {
             if (created.getValue() != null
                     && created.getValue() instanceof OvsdbBridgeAugmentation
-                    && ((OvsdbBridgeAugmentation)created.getValue()).getManagedBy() != null
-                    && ((OvsdbBridgeAugmentation)created.getValue()).getManagedBy().getValue() != null
-                    && ((OvsdbBridgeAugmentation)created.getValue()).getManagedBy().getValue().equals(iid)) {
+                    && ((OvsdbBridgeAugmentation)created.getValue()).getOvsdbBridge() != null
+                    && ((OvsdbBridgeAugmentation)created.getValue()).getOvsdbBridge().getManagedBy() != null
+                    && ((OvsdbBridgeAugmentation)created.getValue()).getOvsdbBridge().getManagedBy().getValue() != null
+                    && ((OvsdbBridgeAugmentation)created.getValue()).getOvsdbBridge()
+                        .getManagedBy().getValue().equals(iid)) {
                 result.put(created.getKey(),((OvsdbBridgeAugmentation)created.getValue()));
             }
         }
@@ -78,7 +80,7 @@ public class DataChangesManagedByOvsdbNodeEvent implements
                 if (original != null
                         && original instanceof OvsdbBridgeAugmentation) {
                     OvsdbBridgeAugmentation ovsdbBridgeNode = (OvsdbBridgeAugmentation)original;
-                    OvsdbNodeRef ovsdbNodeRef = ovsdbBridgeNode.getManagedBy();
+                    OvsdbNodeRef ovsdbNodeRef = ovsdbBridgeNode.getOvsdbBridge().getManagedBy();
                     if (ovsdbNodeRef != null) {
                         InstanceIdentifier<?> ovsdbNodeIid = ovsdbNodeRef.getValue();
                         if (ovsdbNodeIid.equals(this.iid)) {

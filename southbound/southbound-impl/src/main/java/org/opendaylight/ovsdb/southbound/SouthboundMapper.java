@@ -34,11 +34,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeSystem;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeBase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentationBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.network.topology.topology.node.OvsdbBridge;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
@@ -238,7 +238,7 @@ public class SouthboundMapper {
         }
     }
 
-    public static String createDatapathType(OvsdbBridgeAugmentation mdsalbridge) {
+    public static String createDatapathType(OvsdbBridge mdsalbridge) {
         String datapathtype = new String(SouthboundConstants.DATAPATH_TYPE_MAP.get(DatapathTypeSystem.class));
 
         if (mdsalbridge.getDatapathType() != null) {
@@ -276,7 +276,7 @@ public class SouthboundMapper {
         return datapath;
     }
 
-    public static Set<String> createOvsdbBridgeProtocols(OvsdbBridgeAugmentation ovsdbBridgeNode) {
+    public static Set<String> createOvsdbBridgeProtocols(OvsdbBridge ovsdbBridgeNode) {
         Set<String> protocols = new HashSet<String>();
         if (ovsdbBridgeNode.getProtocolEntry() != null && ovsdbBridgeNode.getProtocolEntry().size() > 0) {
             for (ProtocolEntry protocol : ovsdbBridgeNode.getProtocolEntry()) {
@@ -334,7 +334,7 @@ public class SouthboundMapper {
         return controllerEntries;
     }
 
-    public static Map<UUID, Controller> createOvsdbController(OvsdbBridgeAugmentation omn,DatabaseSchema dbSchema) {
+    public static Map<UUID, Controller> createOvsdbController(OvsdbBridge omn,DatabaseSchema dbSchema) {
         List<ControllerEntry> controllerEntries = omn.getControllerEntry();
         Map<UUID,Controller> controllerMap = new HashMap<UUID,Controller>();
         if (controllerEntries != null && !controllerEntries.isEmpty()) {

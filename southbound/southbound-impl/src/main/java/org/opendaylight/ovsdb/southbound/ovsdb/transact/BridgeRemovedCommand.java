@@ -18,6 +18,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.network.topology.topology.node.OvsdbBridge;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -45,7 +46,7 @@ public class BridgeRemovedCommand implements TransactCommand {
             = TransactUtils.extractOvsdbManagedNodeOriginal(changes);
         for (InstanceIdentifier<Node> ovsdbManagedNodeIid: removed) {
             LOG.info("Received request to delete ovsdb node {}",ovsdbManagedNodeIid);
-            OvsdbBridgeAugmentation original = originals.get(ovsdbManagedNodeIid);
+            OvsdbBridge original = originals.get(ovsdbManagedNodeIid).getOvsdbBridge();
             Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class,null);
             Optional<UUID> bridgeUuidOptional = getBridgeUUID(ovsdbManagedNodeIid);
             if (bridgeUuidOptional.isPresent()) {
@@ -76,7 +77,7 @@ public class BridgeRemovedCommand implements TransactCommand {
         try {
             optional = future.get();
             if (optional.isPresent()) {
-                OvsdbBridgeAugmentation bridge = (OvsdbBridgeAugmentation) optional.get();
+                OvsdbBridge bridge = ((OvsdbBridgeAugmentation) optional.get()).getOvsdbBridge();
                 if (bridge != null && bridge.getBridgeUuid() != null) {
                     result = Optional.of(new UUID(bridge.getBridgeUuid().getValue()));
                 }

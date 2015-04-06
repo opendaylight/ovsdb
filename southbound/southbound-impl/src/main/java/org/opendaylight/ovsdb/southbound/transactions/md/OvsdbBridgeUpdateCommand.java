@@ -26,6 +26,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.network.topology.topology.node.OvsdbBridgeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
@@ -66,21 +67,22 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                 NodeId manageNodeId = SouthboundMapper.createManagedNodeId(managedNodePath);
                 managedNodeBuilder.setNodeId(manageNodeId);
                 OvsdbBridgeAugmentationBuilder ovsdbManagedNodeBuilder = new OvsdbBridgeAugmentationBuilder();
-                ovsdbManagedNodeBuilder.setBridgeName(new OvsdbBridgeName(bridge.getName()));
-                ovsdbManagedNodeBuilder.setBridgeUuid(new Uuid(bridge.getUuid().toString()));
+                OvsdbBridgeBuilder ovsdbBridgeBuilder = new OvsdbBridgeBuilder();
+                ovsdbBridgeBuilder.setBridgeName(new OvsdbBridgeName(bridge.getName()));
+                ovsdbBridgeBuilder.setBridgeUuid(new Uuid(bridge.getUuid().toString()));
                 DatapathId dpid = SouthboundMapper.createDatapathId(bridge);
                 if (dpid != null) {
-                    ovsdbManagedNodeBuilder.setDatapathId(dpid);
+                    ovsdbBridgeBuilder.setDatapathId(dpid);
                 }
-                ovsdbManagedNodeBuilder.setDatapathType(
+                ovsdbBridgeBuilder.setDatapathType(
                         SouthboundMapper.createDatapathType(bridge.getDatapathTypeColumn().getData()));
                 if (SouthboundMapper.createMdsalProtocols(bridge) != null
                         && SouthboundMapper.createMdsalProtocols(bridge).size() > 0) {
-                    ovsdbManagedNodeBuilder.setProtocolEntry(SouthboundMapper.createMdsalProtocols(bridge));
+                    ovsdbBridgeBuilder.setProtocolEntry(SouthboundMapper.createMdsalProtocols(bridge));
                 }
 
                 if (!SouthboundMapper.createControllerEntries(bridge, updatedControllerRows).isEmpty()) {
-                    ovsdbManagedNodeBuilder.setControllerEntry(
+                    ovsdbBridgeBuilder.setControllerEntry(
                             SouthboundMapper.createControllerEntries(bridge, updatedControllerRows));
                 }
 
@@ -89,10 +91,11 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                         && !bridge.getFailModeColumn().getData().isEmpty()) {
                     String[] failmodeArray = new String[bridge.getFailModeColumn().getData().size()];
                     bridge.getFailModeColumn().getData().toArray(failmodeArray);
-                    ovsdbManagedNodeBuilder.setFailMode(
+                    ovsdbBridgeBuilder.setFailMode(
                             SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get(failmodeArray[0]));
                 }
-                ovsdbManagedNodeBuilder.setManagedBy(new OvsdbNodeRef(nodePath));
+                ovsdbBridgeBuilder.setManagedBy(new OvsdbNodeRef(nodePath));
+                ovsdbManagedNodeBuilder.setOvsdbBridge(ovsdbBridgeBuilder.build());
                 managedNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbManagedNodeBuilder.build());
 
                 LOG.debug("Store managed node augmentation data {}",ovsdbManagedNodeBuilder.toString());

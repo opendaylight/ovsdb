@@ -176,6 +176,8 @@ module ovsdb {
             description "The OVSDB which this bridge belongs to";
             type ovsdb-node-ref;
         }
+        uses ovsdb-external-ids-attributes;
+        uses ovsdb-other-config-attributes;
     }
 
     grouping ovsdb-node-attributes {
@@ -211,7 +213,8 @@ module ovsdb {
                 }
             }
         }
-
+        uses ovsdb-external-ids-attributes;
+        uses ovsdb-other-config-attributes;
      }
 
     identity interface-type-base {
@@ -399,15 +402,15 @@ module ovsdb {
     augment "/topo:network-topology/topo:topology/topo:node" {
         description "Augmentation for bridge nodes managed by ovsdb";
         ext:augment-identifier "ovsdb-bridge-augmentation";
-        uses ovsdb-bridge-attributes;
+        container ovsdb-bridge {
+            uses ovsdb-bridge-attributes;
+        }
     }
 
     augment "/topo:network-topology/topo:topology/topo:node" {
         description "Augment topology node for an ovsdb node";
         ext:augment-identifier "ovsdb-node-augmentation";
         uses ovsdb-node-attributes;
-        uses ovsdb-external-ids-attributes;
-        uses ovsdb-other-config-attributes;
     }
 
     augment "/topo:network-topology/topo:topology/topo:node/topo:termination-point" {

@@ -32,6 +32,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.external.ids.attributes.ExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntryBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.other.config.attributes.OtherConfigs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.other.config.attributes.OtherConfigsBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
@@ -105,6 +107,24 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                         }
                     }
                     ovsdbBridgeBuilder.setExternalIds(externalIdsList);
+                }
+
+                Map<String, String> otherConfigs = bridge.getOtherConfigColumn()
+                        .getData();
+                if (otherConfigs != null && !otherConfigs.isEmpty()) {
+                    Set<String> otherConfigKeys = otherConfigs.keySet();
+                    List<OtherConfigs> otherConfigList = new ArrayList<OtherConfigs>();
+                    String otherConfigValue;
+                    for (String otherConfigKey : otherConfigKeys) {
+                        otherConfigValue = otherConfigs.get(otherConfigKey);
+                        if (otherConfigKey != null && otherConfigValue != null) {
+                            otherConfigList.add(new OtherConfigsBuilder()
+                                    .setOtherConfigKey(otherConfigKey)
+                                    .setOtherConfigValue(otherConfigValue)
+                                    .build());
+                        }
+                    }
+                    ovsdbBridgeBuilder.setOtherConfigs(otherConfigList);
                 }
 
                 if (bridge.getFailModeColumn() != null

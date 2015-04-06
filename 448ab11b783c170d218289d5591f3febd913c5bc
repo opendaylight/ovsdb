@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_1c3a7536",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-04-06T17:07:32Z",
+      "side": 1,
+      "message": "it is not illegal. Bridge\u0027s internal port will be -1 (65535).\nchange log to debug/trace.",
+      "range": {
+        "startLine": 143,
+        "startChar": 52,
+        "endLine": 143,
+        "endChar": 56
+      },
+      "revId": "448ab11b783c170d218289d5591f3febd913c5bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_bc4021a6",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-04-06T17:07:32Z",
+      "side": 1,
+      "message": "it is not illegal. Bridge\u0027s internal port will be -1 (65535).\nchange log to debug/trace.",
+      "revId": "448ab11b783c170d218289d5591f3febd913c5bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

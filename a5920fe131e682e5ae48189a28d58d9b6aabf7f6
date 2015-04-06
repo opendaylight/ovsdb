@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_3fb883c7",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/FWaasHandlerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-06T21:21:49Z",
+      "side": 1,
+      "message": "I would suggest use TODO or FIXME, so that it\u0027s easy to search all the pending TODO\u0027s and FIXME\u0027s through grep.",
+      "revId": "a5920fe131e682e5ae48189a28d58d9b6aabf7f6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

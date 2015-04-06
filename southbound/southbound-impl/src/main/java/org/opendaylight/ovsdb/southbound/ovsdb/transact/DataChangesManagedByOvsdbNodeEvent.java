@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -35,6 +36,11 @@ public class DataChangesManagedByOvsdbNodeEvent implements
         for (Entry<InstanceIdentifier<?>, DataObject> entry: data.entrySet()) {
             if (isManagedBy(entry.getKey())) {
                 result.put(entry.getKey(),entry.getValue());
+            } else {
+                Class<?> type = entry.getKey().getTargetType();
+                if (type.equals(OvsdbNodeAugmentation.class)) {
+                    result.put(entry.getKey(), entry.getValue());
+                }
             }
         }
         return result;
@@ -106,7 +112,7 @@ public class DataChangesManagedByOvsdbNodeEvent implements
         if (dataObject != null && dataObject instanceof Node) {
             Node node = (Node)dataObject;
             OvsdbBridgeAugmentation bridge = node.getAugmentation(OvsdbBridgeAugmentation.class);
-            if (bridge.getManagedBy() != null && bridge.getManagedBy().getValue().equals(this.iid)) {
+            if (bridge != null && bridge.getManagedBy() != null && bridge.getManagedBy().getValue().equals(this.iid)) {
                 return bridge.getManagedBy().getValue();
             }
         }

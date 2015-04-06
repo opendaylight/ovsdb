@@ -153,6 +153,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           <excludes>**/yang/</excludes>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+      </plugin>
     </plugins>
   </build>
 </project>

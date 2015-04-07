@@ -79,6 +79,7 @@ public class TransactUtils {
         if (changes != null && changes.entrySet() != null) {
             for (Entry<InstanceIdentifier<?>, DataObject> created : changes.entrySet()) {
                 if (klazz.isInstance(created.getValue())) {
+                    @SuppressWarnings("unchecked")
                     T value = (T) created.getValue();
                     Class<?> type = created.getKey().getTargetType();
                     if (type.equals(klazz)) {
@@ -91,5 +92,4 @@ public class TransactUtils {
         }
         return result;
     }
-
 }

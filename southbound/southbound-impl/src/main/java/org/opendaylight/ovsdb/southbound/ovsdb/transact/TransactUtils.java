@@ -15,6 +15,7 @@ import java.util.Set;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -63,6 +64,43 @@ public class TransactUtils {
                 @SuppressWarnings("unchecked") // Actually checked above
                 InstanceIdentifier<Node> iid = (InstanceIdentifier<Node>) created.getKey();
                 OvsdbBridgeAugmentation ovsdbManagedNode = (OvsdbBridgeAugmentation) value;
+                result.put(iid, ovsdbManagedNode);
+            }
+        }
+        return result;
+    }
+
+    public static Set<InstanceIdentifier<OvsdbTerminationPointAugmentation>> extractTerminationPointRemoved(
+            AsyncDataChangeEvent<InstanceIdentifier<?>, OvsdbTerminationPointAugmentation> changes) {
+        Set<InstanceIdentifier<OvsdbTerminationPointAugmentation>> result =
+                new HashSet<InstanceIdentifier<OvsdbTerminationPointAugmentation>>();
+        for (InstanceIdentifier<?> iid : changes.getRemovedPaths()) {
+            if (iid.getTargetType().equals(OvsdbTerminationPointAugmentation.class)) {
+                @SuppressWarnings("unchecked") // Actually checked above
+                InstanceIdentifier<OvsdbTerminationPointAugmentation> iidn =
+                    (InstanceIdentifier<OvsdbTerminationPointAugmentation>)iid;
+
+                result.add(iidn);
+            }
+        }
+        return result;
+    }
+
+    public static Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>,
+                        OvsdbTerminationPointAugmentation> extractTerminationPointOriginal(
+            AsyncDataChangeEvent<InstanceIdentifier<?>, OvsdbTerminationPointAugmentation> changes) {
+
+        Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>,OvsdbTerminationPointAugmentation> result
+            = new HashMap<InstanceIdentifier<OvsdbTerminationPointAugmentation>,OvsdbTerminationPointAugmentation>();
+        for (Entry<InstanceIdentifier<?>, OvsdbTerminationPointAugmentation> created
+                : changes.getOriginalData().entrySet()) {
+            OvsdbTerminationPointAugmentation value = created.getValue();
+            Class<?> type = created.getKey().getTargetType();
+            if (type.equals(OvsdbTerminationPointAugmentation.class)) {
+                @SuppressWarnings("unchecked") // Actually checked above
+                InstanceIdentifier<OvsdbTerminationPointAugmentation> iid
+                    = (InstanceIdentifier<OvsdbTerminationPointAugmentation>) created.getKey();
+                OvsdbTerminationPointAugmentation ovsdbManagedNode = (OvsdbTerminationPointAugmentation) value;
                 result.put(iid, ovsdbManagedNode);
             }
         }

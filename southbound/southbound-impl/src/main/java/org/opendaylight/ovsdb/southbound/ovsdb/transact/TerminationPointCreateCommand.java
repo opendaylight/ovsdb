@@ -28,6 +28,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Trunks;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,93 +37,99 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
 public class TerminationPointCreateCommand implements TransactCommand {
-    private AsyncDataChangeEvent<InstanceIdentifier<?>, OvsdbTerminationPointAugmentation> changes;
+    private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes;
     private static final Logger LOG = LoggerFactory.getLogger(TerminationPointCreateCommand.class);
 
     public TerminationPointCreateCommand(AsyncDataChangeEvent<InstanceIdentifier<?>,
-            OvsdbTerminationPointAugmentation> changes) {
+            DataObject> changes) {
         this.changes = changes;
     }
 
     @Override
     public void execute(TransactionBuilder transaction) {
-        for (OvsdbTerminationPointAugmentation terminationPoint: changes.getCreatedData().values()) {
-            LOG.debug("Received request to create termination point {} at managed node {}",
-                    terminationPoint.getName(),
-                    terminationPoint.getAttachedTo().getValue().firstIdentifierOf(Node.class));
+        for (DataObject dataObject: changes.getCreatedData().values()) {
+            if (dataObject instanceof OvsdbTerminationPointAugmentation) {
+                OvsdbTerminationPointAugmentation terminationPoint = (OvsdbTerminationPointAugmentation) dataObject;
+                LOG.debug("Received request to create termination point {} at managed node {}",
+                        terminationPoint.getName(),
+                        terminationPoint.getAttachedTo().getValue().firstIdentifierOf(Node.class));
 
 
-            // Configure interface
-            String interfaceUuid = "Interface_" + terminationPoint.getName();
-            Interface ovsInterface = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Interface.class);
-            ovsInterface.setName(terminationPoint.getName());
-            ovsInterface.setType(SouthboundMapper.createOvsdbInterfaceType(terminationPoint.getInterfaceType()));
-            Long ofPort = terminationPoint.getOfport();
-            if (ofPort != null) {
-                ovsInterface.setOpenFlowPort(Sets.newHashSet(ofPort));
-            }
-            Integer ofPortRequest = terminationPoint.getOfportRequest();
-            if (ofPortRequest != null) {
-                ovsInterface.setOpenFlowPortRequest(Sets.newHashSet(ofPortRequest.longValue()));
-            }
-
-            //Configure optional input
-            if (terminationPoint.getOptions() != null) {
-                HashMap<String, String> optionsMap = new HashMap<String, String>();
-                for (Options option : terminationPoint.getOptions()) {
-                    optionsMap.put(option.getOption(), option.getValue());
+                // Configure interface
+                String interfaceUuid = "Interface_" + terminationPoint.getName();
+                Interface ovsInterface =
+                        TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Interface.class);
+                ovsInterface.setName(terminationPoint.getName());
+                ovsInterface.setType(SouthboundMapper.createOvsdbInterfaceType(terminationPoint.getInterfaceType()));
+                Long ofPort = terminationPoint.getOfport();
+                if (ofPort != null) {
+                    ovsInterface.setOpenFlowPort(Sets.newHashSet(ofPort));
                 }
-                try {
-                    ovsInterface.setOptions(ImmutableMap.copyOf(optionsMap));
-                } catch (NullPointerException e) {
-                    LOG.warn("Incomplete OVSDB interface options");
+                Integer ofPortRequest = terminationPoint.getOfportRequest();
+                if (ofPortRequest != null) {
+                    ovsInterface.setOpenFlowPortRequest(Sets.newHashSet(ofPortRequest.longValue()));
                 }
-            }
 
-            List<ExternalIds> externalIds = terminationPoint.getExternalIds();
-            if (externalIds != null && !externalIds.isEmpty()) {
-                HashMap<String, String> externalIdsMap = new HashMap<String, String>();
-                for (ExternalIds externalId: externalIds) {
-                    externalIdsMap.put(externalId.getExternalIdKey(), externalId.getExternalIdValue());
-                }
-                try {
-                    ovsInterface.setExternalIds(ImmutableMap.copyOf(externalIdsMap));
-                } catch (NullPointerException e) {
-                    LOG.warn("Incomplete OVSDB interface external_ids");
-                }
-            }
-            transaction.add(op.insert(ovsInterface).withId(interfaceUuid));
-
-            // Configure port with the above interface details
-            String portUuid = "Port_" + terminationPoint.getName();
-            Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
-            port.setName(terminationPoint.getName());
-            port.setInterfaces(Sets.newHashSet(new UUID(interfaceUuid)));
-            if (terminationPoint.getVlanTag() != null) {
-                Set<Long> vlanTag = new HashSet<Long>();
-                vlanTag.add(terminationPoint.getVlanTag().getValue().longValue());
-                port.setTag(vlanTag);
-            }
-            if (terminationPoint.getTrunks() != null && terminationPoint.getTrunks().size() > 0) {
-                Set<Long> portTrunks = new HashSet<Long>();
-                List<Trunks> modelTrunks = terminationPoint.getTrunks();
-                for (Trunks trunk: modelTrunks) {
-                    if (trunk.getTrunk() != null) {
-                        portTrunks.add(trunk.getTrunk().getValue().longValue());
+                //Configure optional input
+                if (terminationPoint.getOptions() != null) {
+                    HashMap<String, String> optionsMap = new HashMap<String, String>();
+                    for (Options option : terminationPoint.getOptions()) {
+                        optionsMap.put(option.getOption(), option.getValue());
+                    }
+                    try {
+                        ovsInterface.setOptions(ImmutableMap.copyOf(optionsMap));
+                    } catch (NullPointerException e) {
+                        LOG.warn("Incomplete OVSDB interface options");
                     }
                 }
-                port.setTrunks(portTrunks);
+
+                List<ExternalIds> externalIds = terminationPoint.getExternalIds();
+                if (externalIds != null && !externalIds.isEmpty()) {
+                    HashMap<String, String> externalIdsMap = new HashMap<String, String>();
+                    for (ExternalIds externalId: externalIds) {
+                        externalIdsMap.put(externalId.getExternalIdKey(), externalId.getExternalIdValue());
+                    }
+                    try {
+                        ovsInterface.setExternalIds(ImmutableMap.copyOf(externalIdsMap));
+                    } catch (NullPointerException e) {
+                        LOG.warn("Incomplete OVSDB interface external_ids");
+                    }
+                }
+                transaction.add(op.insert(ovsInterface).withId(interfaceUuid));
+
+                // Configure port with the above interface details
+                String portUuid = "Port_" + terminationPoint.getName();
+                Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
+                port.setName(terminationPoint.getName());
+                port.setInterfaces(Sets.newHashSet(new UUID(interfaceUuid)));
+                if (terminationPoint.getVlanTag() != null) {
+                    Set<Long> vlanTag = new HashSet<Long>();
+                    vlanTag.add(terminationPoint.getVlanTag().getValue().longValue());
+                    port.setTag(vlanTag);
+                }
+                if (terminationPoint.getTrunks() != null && terminationPoint.getTrunks().size() > 0) {
+                    Set<Long> portTrunks = new HashSet<Long>();
+                    List<Trunks> modelTrunks = terminationPoint.getTrunks();
+                    for (Trunks trunk: modelTrunks) {
+                        if (trunk.getTrunk() != null) {
+                            portTrunks.add(trunk.getTrunk().getValue().longValue());
+                        }
+                    }
+                    port.setTrunks(portTrunks);
+                }
+                transaction.add(op.insert(port).withId(portUuid));
+
+                //Configure bridge with the above port details
+                Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
+                bridge.setName(terminationPoint.getBridgeName());
+                bridge.setPorts(Sets.newHashSet(new UUID(portUuid)));
+
+                transaction.add(op.mutate(bridge)
+                        .addMutation(bridge.getPortsColumn().getSchema(),
+                                Mutator.INSERT,bridge.getPortsColumn().getData())
+                        .where(bridge.getNameColumn().getSchema()
+                                .opEqual(bridge.getNameColumn().getData())).build());
             }
-            transaction.add(op.insert(port).withId(portUuid));
-
-            //Configure bridge with the above port details
-            Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
-            bridge.setName(terminationPoint.getBridgeName());
-            bridge.setPorts(Sets.newHashSet(new UUID(portUuid)));
-
-            transaction.add(op.mutate(bridge)
-                    .addMutation(bridge.getPortsColumn().getSchema(), Mutator.INSERT,bridge.getPortsColumn().getData())
-                    .where(bridge.getNameColumn().getSchema().opEqual(bridge.getNameColumn().getData())).build());
         }
 
     }

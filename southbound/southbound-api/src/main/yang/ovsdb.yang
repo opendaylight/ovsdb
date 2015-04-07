@@ -346,11 +346,6 @@ module ovsdb {
             }
         }
 
-        leaf attached-to {
-            description "Reference to the bridge where terminiation point is attached.";
-            type ovsdb-bridge-ref;
-        }
-
         leaf vlan-tag {
             description "The VLAN tag of the termination point.";
             type ethertype:vlan-id;

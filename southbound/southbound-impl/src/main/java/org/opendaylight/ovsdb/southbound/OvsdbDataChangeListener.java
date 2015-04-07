@@ -89,7 +89,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                 if (client != null) {
                     LOG.debug("Found client for {}", created.getValue());
                     client.transact(new TerminationPointCreateCommand(
-                        new DataChangesTerminationPointEvent(
+                        new DataChangesTerminationPointEvent(db,
                                 SouthboundMapper.createInstanceIdentifier(client.getKey()),changes)));
                 } else {
                     LOG.debug("Did not find client for {}",created.getValue());

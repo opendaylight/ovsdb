@@ -362,6 +362,32 @@ module ovsdb {
                 type ethertype:vlan-id;
             }
         }
+
+        leaf vlan-mode {
+            description "The VLAN mode of the termination point.";
+            type enumeration {
+                enum "access" {
+                    value 1;
+                    description
+                        "The VLAN mode access.";
+                }
+                enum "native-tagged" {
+                    value 2;
+                    description
+                        "The VLAN mode native-tagged.";
+                }
+                enum "native-untagged" {
+                    value 3;
+                    description
+                        "The VLAN mode native-untagged.";
+                }
+                enum "trunk" {
+                    value 4;
+                    description
+                        "The VLAN mode trunk.";
+                }
+            }
+        }
     }
 
     grouping ovsdb-external-ids-attributes {

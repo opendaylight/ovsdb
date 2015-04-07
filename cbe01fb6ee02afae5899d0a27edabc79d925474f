@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_a8d777ec",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/OvsdbNodeUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-04-07T18:00:17Z",
+      "side": 1,
+      "message": "remove {}. Exception params coming last do not ues that.\nRef: https://wiki.opendaylight.org/view/BestPractices/Logging_Best_Practices\nlook for \"logging an exception\"",
+      "range": {
+        "startLine": 83,
+        "startChar": 66,
+        "endLine": 83,
+        "endChar": 70
+      },
+      "revId": "cbe01fb6ee02afae5899d0a27edabc79d925474f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

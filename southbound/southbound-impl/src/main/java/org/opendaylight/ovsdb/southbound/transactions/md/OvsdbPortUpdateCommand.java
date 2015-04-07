@@ -100,11 +100,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                                 = new OvsdbTerminationPointAugmentationBuilder();
                             List<TerminationPoint> tpList = new ArrayList<TerminationPoint>();
                             TerminationPointBuilder entry = new TerminationPointBuilder();
-                            TpId tpId = SouthboundMapper
-                                    .createTerminationPointId(getKey(),
-                                            new OvsdbBridgeName(bridgeName),
-                                            port.getName());
-                            entry.setTpId(tpId);
+                            entry.setTpId(new TpId(port.getName()));
                             ovsdbTerminationPointBuilder
                                     .setName(port.getName());
                             ovsdbTerminationPointBuilder.setPortUuid(new Uuid(

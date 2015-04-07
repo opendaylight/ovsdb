@@ -12,17 +12,31 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
 
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
 
 public class DataChangesTerminationPointEvent implements AsyncDataChangeEvent<InstanceIdentifier<?>,
         OvsdbTerminationPointAugmentation> {
+    private static final Logger LOG = LoggerFactory.getLogger(DataChangesTerminationPointEvent.class);
 
     private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event;
     private InstanceIdentifier<?> iid;
+    private DataBroker db;
 
     // local caches of computed data
     private Map<InstanceIdentifier<?>, OvsdbTerminationPointAugmentation> createdData = null;
@@ -30,8 +44,10 @@ public class DataChangesTerminationPointEvent implements AsyncDataChangeEvent<In
     private Set<InstanceIdentifier<?>> removedPaths = null;
     private Map<InstanceIdentifier<?>, OvsdbTerminationPointAugmentation> originalData;
 
-    public DataChangesTerminationPointEvent(InstanceIdentifier<?> iid,
+    public DataChangesTerminationPointEvent(DataBroker db,
+                                            InstanceIdentifier<?> iid,
                                             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event) {
+        this.db = db;
         this.iid = iid;
         this.event = event;
     }
@@ -40,14 +56,20 @@ public class DataChangesTerminationPointEvent implements AsyncDataChangeEvent<In
             DataObject> data) {
         Map<InstanceIdentifier<?>, OvsdbTerminationPointAugmentation> result
             = new HashMap<InstanceIdentifier<?>, OvsdbTerminationPointAugmentation>();
+        ReadOnlyTransaction transaction = db.newReadOnlyTransaction();
         for (Entry<InstanceIdentifier<?>, DataObject> created: data.entrySet()) {
             if (created.getValue() != null
-                    && created.getValue() instanceof OvsdbTerminationPointAugmentation
-                    && ((OvsdbTerminationPointAugmentation)created.getValue()).getAttachedTo() != null
-                    && ((OvsdbTerminationPointAugmentation)created.getValue()).getAttachedTo().getValue() != null) {
-                result.put(created.getKey(),((OvsdbTerminationPointAugmentation)created.getValue()));
+                    && created.getValue() instanceof OvsdbTerminationPointAugmentation) {
+                OvsdbBridgeAugmentation tpBridgeAugmentation
+                    = getBridgeOfTerminationPoint(transaction,created.getKey()).get();
+                if (tpBridgeAugmentation.getManagedBy() != null
+                        && tpBridgeAugmentation.getManagedBy().getValue() != null
+                        && tpBridgeAugmentation.getManagedBy().getValue().equals(iid)) {
+                    result.put(created.getKey(),((OvsdbTerminationPointAugmentation)created.getValue()));
+                }
             }
         }
+        transaction.close();
         return result;
     }
 
@@ -106,6 +128,31 @@ public class DataChangesTerminationPointEvent implements AsyncDataChangeEvent<In
         } else {
             return null;
         }
+    }
+
+    private Optional<OvsdbBridgeAugmentation> getBridgeOfTerminationPoint(
+            ReadOnlyTransaction tx,InstanceIdentifier<?> terminationPointPath) {
+
+        Optional<OvsdbBridgeAugmentation> result = Optional.absent();
+
+        InstanceIdentifier<Node> nodePath = terminationPointPath.firstIdentifierOf(Node.class);
+        CheckedFuture<Optional<Node>, ReadFailedException> future
+            = tx.read(LogicalDatastoreType.OPERATIONAL, nodePath);
+        Optional<Node> optional;
+        try {
+            optional = future.get();
+            if (optional.isPresent()) {
+                OvsdbBridgeAugmentation bridge = optional.get().getAugmentation(OvsdbBridgeAugmentation.class);
+                if (bridge != null && bridge.getBridgeUuid() != null) {
+                    return Optional.of(bridge);
+                }
+            }
+        } catch (InterruptedException e) {
+            LOG.warn("Unable to retrieve bridge of termination poing from operational store",e);
+        } catch (ExecutionException e) {
+            LOG.warn("Unable to retrieve bridge of termination poing from operational store",e);
+        }
+        return result;
     }
 
 }

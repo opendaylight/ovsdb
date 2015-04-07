@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_82c5bc3d",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/OvsdbNodeUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-07T09:26:50Z",
+      "side": 1,
+      "message": "Please print NPE here using LOG\n\nLOG.warn(\"Incomplete OVSDB Node other_config : {}\",e)",
+      "revId": "feb134cce6c74a1b6f9d6de5605e7e162f207e59",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

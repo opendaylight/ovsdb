@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "5a93c517_68096f94",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/OvsdbNodeUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-04-07T18:01:01Z",
+      "side": 1,
+      "message": "should there be a check for null keys/values before putting it in Map?",
+      "revId": "cbe01fb6ee02afae5899d0a27edabc79d925474f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_a8d777ec",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/OvsdbNodeUpdateCommand.java",
         "patchSetId": 2

@@ -42,14 +42,13 @@ public class OvsdbPortRemoveCommand extends AbstractTransactionCommand {
             bridgeName = bridge.getName();
             for (Port port : portRemovedRows) {
                 portName = port.getName();
-                TpId portId = SouthboundMapper.createTerminationPointId(
-                        getKey(), new OvsdbBridgeName(bridgeName), portName);
                 final InstanceIdentifier<TerminationPoint> nodePath = SouthboundMapper
                         .createInstanceIdentifier(getKey(),
                                 new OvsdbBridgeName(bridgeName)).child(
                                 TerminationPoint.class,
-                                new TerminationPointKey(portId));
+                                new TerminationPointKey(new TpId(portName)));
                 transaction.delete(LogicalDatastoreType.OPERATIONAL, nodePath);
+                transaction.submit();
             }
         }
     }

@@ -39,7 +39,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <ovsdb.library.version>1.1.0-SNAPSHOT</ovsdb.library.version>
     <ovsdb.northbound.version>0.7.0-SNAPSHOT</ovsdb.northbound.version>
     <ovsdb.plugin.version>1.1.0-SNAPSHOT</ovsdb.plugin.version>
-    <ovsdb.plugin.compatibility.layer.version>1.1.0-SNAPSHOT</ovsdb.plugin.compatibility.layer.version>
+	<ovsdb.plugin.compatibility.layer.version>1.1.0-SNAPSHOT</ovsdb.plugin.compatibility.layer.version>
     <ovsdb.ovssfc.version>0.1.0-SNAPSHOT</ovsdb.ovssfc.version>
     <ovsdb.utils.config.version>1.1.0-SNAPSHOT</ovsdb.utils.config.version>
     <ovsdb.utils.mdsal.node.version>1.1.0-SNAPSHOT</ovsdb.utils.mdsal.node.version>
@@ -146,7 +146,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <artifactId>sal</artifactId>
         <version>${sal.version}</version>
       </dependency>
-
       <dependency>
         <groupId>org.opendaylight.yangtools</groupId>
         <artifactId>yangtools-artifacts</artifactId>
@@ -175,7 +174,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>switchmanager</artifactId>

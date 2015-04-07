@@ -34,10 +34,11 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundProvider.class);
     private DataBroker db;
     private OvsdbConnectionManager cm;
-    private OvsdbNodeDataChangeListener ovsdbNodeListener;
-    private OvsdbManagedNodeDataChangeListener ovsdbManagedNodeListener;
-    private OvsdbTerminationPointDataChangeListener ovsdbTerminationPointListener;
+//    private OvsdbNodeDataChangeListener ovsdbNodeListener;
+//    private OvsdbManagedNodeDataChangeListener ovsdbManagedNodeListener;
+//    private OvsdbTerminationPointDataChangeListener ovsdbTerminationPointListener;
     private TransactionInvoker txInvoker;
+    private OvsdbDataChangeListener ovsdbDataChangeListener;
 
 
     @Override
@@ -46,9 +47,10 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
         db = session.getSALService(DataBroker.class);
         this.txInvoker = new TransactionInvokerImpl(db);
         cm = new OvsdbConnectionManager(db,txInvoker);
-        ovsdbNodeListener = new OvsdbNodeDataChangeListener(db, cm);
-        ovsdbManagedNodeListener = new OvsdbManagedNodeDataChangeListener(db, cm);
-        ovsdbTerminationPointListener = new OvsdbTerminationPointDataChangeListener(db, cm);
+        ovsdbDataChangeListener = new OvsdbDataChangeListener(db,cm);
+//        ovsdbNodeListener = new OvsdbNodeDataChangeListener(db, cm);
+//        ovsdbManagedNodeListener = new OvsdbManagedNodeDataChangeListener(db, cm);
+//        ovsdbTerminationPointListener = new OvsdbTerminationPointDataChangeListener(db, cm);
         initializeOvsdbTopology(LogicalDatastoreType.OPERATIONAL);
         initializeOvsdbTopology(LogicalDatastoreType.CONFIGURATION);
         OvsdbConnection ovsdbConnection = new OvsdbConnectionService();
@@ -60,9 +62,10 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
     public void close() throws Exception {
         LOG.info("SouthboundProvider Closed");
         cm.close();
-        ovsdbNodeListener.close();
-        ovsdbManagedNodeListener.close();
-        ovsdbTerminationPointListener.close();
+        ovsdbDataChangeListener.close();
+//        ovsdbNodeListener.close();
+//        ovsdbManagedNodeListener.close();
+//        ovsdbTerminationPointListener.close();
     }
 
     private void initializeOvsdbTopology(LogicalDatastoreType type) {

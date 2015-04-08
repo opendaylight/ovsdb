@@ -33,6 +33,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.external.ids.attributes.ExternalIds;
@@ -78,6 +79,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                     if (portUUID.equals(port.getUuid())) {
                         Collection<Long> vlanId = port.getTagColumn().getData();
                         Set<Long> portTrunks = port.getTrunksColumn().getData();
+                        Collection<String> vlanMode = port.getVlanModeColumn().getData();
                         bridgeName = bridge.getName();
                         NodeId bridgeId = SouthboundMapper.createManagedNodeId(
                                 getKey(), new OvsdbBridgeName(bridgeName));
@@ -119,6 +121,31 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                             for (Long trunk: portTrunks) {
                                 if (trunk != null) {
                                     modelTrunks.add(new TrunksBuilder().setTrunk(new VlanId(trunk.intValue())).build());
+                                }
+                            }
+                            if (vlanMode.size() > 0) {
+                                Iterator<String> itr = vlanMode.iterator();
+                                String vlanType = itr.next();
+                                switch (vlanType) {
+                                    case "access":
+                                        ovsdbTerminationPointBuilder
+                                            .setVlanMode(OvsdbPortInterfaceAttributes.VlanMode.Access);
+                                        break;
+                                    case "native-tagged":
+                                        ovsdbTerminationPointBuilder
+                                            .setVlanMode(OvsdbPortInterfaceAttributes.VlanMode.NativeTagged);
+                                        break;
+                                    case "native-untagged":
+                                        ovsdbTerminationPointBuilder
+                                            .setVlanMode(OvsdbPortInterfaceAttributes.VlanMode.NativeUntagged);
+                                        break;
+                                    case "trunk":
+                                        ovsdbTerminationPointBuilder
+                                            .setVlanMode(OvsdbPortInterfaceAttributes.VlanMode.Trunk);
+                                        break;
+                                    default:
+                                        LOG.debug("Invalid VLAN Mode {}", vlanType);
+                                        break;
                                 }
                             }
                             ovsdbTerminationPointBuilder.setTrunks(modelTrunks);

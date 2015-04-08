@@ -26,6 +26,7 @@ import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes.VlanMode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.external.ids.attributes.ExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
@@ -119,6 +120,29 @@ public class TerminationPointCreateCommand implements TransactCommand {
                         }
                     }
                     port.setTrunks(portTrunks);
+                }
+                if (terminationPoint.getVlanMode() != null) {
+                    Set<String> portVlanMode = new HashSet<String>();
+                    VlanMode modelVlanMode = terminationPoint.getVlanMode();
+                    switch (modelVlanMode) {
+                        case Access:
+                            portVlanMode.add("access");
+                            break;
+                        case NativeTagged:
+                            portVlanMode.add("native-tagged");
+                            break;
+                        case NativeUntagged:
+                            portVlanMode.add("native-untagged");
+                            break;
+                        case Trunk:
+                            portVlanMode.add("trunk");
+                            break;
+                        default:
+                            // Just as a precaution
+                            LOG.debug("Invalid VLAN Mode {}", terminationPoint.getVlanMode());
+                            break;
+                    }
+                    port.setVlanMode(portVlanMode);
                 }
                 transaction.add(op.insert(port).withId(portUuid));
 

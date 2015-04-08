@@ -8,15 +8,20 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import java.net.HttpURLConnection;
 
 import org.junit.Test;
-import org.mockito.Mockito;
+import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.plugin.api.Status;
 import org.opendaylight.ovsdb.plugin.api.StatusCode;
-
 /**
  * Unit test for {@link AbstractHandler}
  */
@@ -24,9 +29,9 @@ public class AbstractHandlerTest {
 
     @Test
     public void testAbstractHandler() {
-        Status status = Mockito.mock(Status.class);
+        Status status = mock(Status.class);
 
-        Mockito.when(status.getCode())
+        when(status.getCode())
                 .thenReturn(StatusCode.BADREQUEST)
                 .thenReturn(StatusCode.CONFLICT)
                 .thenReturn(StatusCode.NOTACCEPTABLE)
@@ -53,5 +58,14 @@ public class AbstractHandlerTest {
                 "Error, getException() did not return the correct neutron API service error",
                 HttpURLConnection.HTTP_INTERNAL_ERROR,
                 AbstractHandler.getException(status));
+    }
+
+    @Test
+    public void testEnqueueEvent(){
+        EventDispatcher eventDispatcher = mock(EventDispatcher.class);
+
+        verifyNoMoreInteractions(eventDispatcher);
+        eventDispatcher.enqueueEvent(mock(AbstractEvent.class));
+        verify(eventDispatcher, times(1)).enqueueEvent(any(AbstractEvent.class));
     }
 }

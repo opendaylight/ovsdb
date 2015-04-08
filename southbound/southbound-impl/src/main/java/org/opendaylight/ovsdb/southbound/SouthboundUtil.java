@@ -7,6 +7,9 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.CheckedFuture;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -19,10 +22,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.CheckedFuture;
 
 public class SouthboundUtil {
 
@@ -41,15 +40,15 @@ public class SouthboundUtil {
     public static InstanceIdentifier<?> deserializeInstanceIdentifier(String iidString) {
         InstanceIdentifier<?> result = null;
         try {
-            result =  instanceIdentifierCodec.bindingDeserializer(iidString);
+            result = instanceIdentifierCodec.bindingDeserializer(iidString);
         } catch (DeserializationException e) {
-            LOG.warn("Unable to deserialize iidString",e);
+            LOG.warn("Unable to deserialize iidString", e);
         }
         return result;
     }
 
 
-    public static Optional<OvsdbNodeAugmentation> getManagingNode(DataBroker db,OvsdbBridgeAttributes mn) {
+    public static Optional<OvsdbNodeAugmentation> getManagingNode(DataBroker db, OvsdbBridgeAttributes mn) {
         Preconditions.checkNotNull(mn);
         try {
             OvsdbNodeRef ref = mn.getManagedBy();
@@ -57,25 +56,31 @@ public class SouthboundUtil {
                 ReadOnlyTransaction transaction = db.newReadOnlyTransaction();
                 @SuppressWarnings("unchecked") // Note: erasure makes this safe in combination with the typecheck below
                 InstanceIdentifier<Node> path = (InstanceIdentifier<Node>) ref.getValue();
+
                 CheckedFuture<Optional<Node>, ReadFailedException> nf = transaction.read(
                         LogicalDatastoreType.OPERATIONAL, path);
                 transaction.close();
                 Optional<Node> optional = nf.get();
-                if (optional != null && optional.isPresent() && optional.get() instanceof Node) {
-                    OvsdbNodeAugmentation ovsdbNode = optional.get().getAugmentation(OvsdbNodeAugmentation.class);
+                if (optional != null && optional.isPresent()) {
+                    OvsdbNodeAugmentation ovsdbNode = null;
+                    if (optional.get() instanceof Node) {
+                        ovsdbNode = optional.get().getAugmentation(OvsdbNodeAugmentation.class);
+                    } else if (optional.get() instanceof OvsdbNodeAugmentation) {
+                        ovsdbNode = (OvsdbNodeAugmentation) optional.get();
+                    }
                     if (ovsdbNode != null) {
                         return Optional.of(ovsdbNode);
                     } else {
                         LOG.warn("OvsdbManagedNode {} claims to be managed by {} but "
-                                + "that OvsdbNode does not exist", mn,ref.getValue());
+                                + "that OvsdbNode does not exist", mn, ref.getValue());
                         return Optional.absent();
                     }
                 } else {
-                    LOG.warn("Mysteriously got back a thing which is *not* a topology Node: {}",optional);
+                    LOG.warn("Mysteriously got back a thing which is *not* a topology Node: {}", optional);
                     return Optional.absent();
                 }
             } else {
-                LOG.warn("Cannot find client for OvsdbManagedNode without a specified ManagedBy {}",mn);
+                LOG.warn("Cannot find client for OvsdbManagedNode without a specified ManagedBy {}", mn);
                 return Optional.absent();
             }
         } catch (Exception e) {

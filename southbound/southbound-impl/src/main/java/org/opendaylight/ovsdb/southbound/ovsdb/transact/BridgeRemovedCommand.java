@@ -87,6 +87,7 @@ public class BridgeRemovedCommand implements TransactCommand {
         } catch (ExecutionException e) {
             LOG.warn("Unable to retrieve bridge from operational store",e);
         }
+        transaction.close();
         return result;
     }
 

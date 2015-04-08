@@ -37,10 +37,13 @@ import com.google.common.collect.Sets;
 
 public class BridgeCreateCommand implements TransactCommand {
     private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes;
+    private BridgeOperationalState operationalState;
     private static final Logger LOG = LoggerFactory.getLogger(BridgeCreateCommand.class);
 
 
-    public BridgeCreateCommand(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
+    public BridgeCreateCommand(BridgeOperationalState state, AsyncDataChangeEvent<InstanceIdentifier<?>,
+            DataObject> changes) {
+        this.operationalState = state;
         this.changes = changes;
     }
 

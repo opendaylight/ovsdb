@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -20,11 +19,11 @@ public class TransactCommandAggregator implements TransactCommand {
 
     private List<TransactCommand> commands = new ArrayList<TransactCommand>();
     private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes;
-    private DataBroker db;
+    private BridgeOperationalState operationalState;
 
-    public TransactCommandAggregator(DataBroker db,AsyncDataChangeEvent<InstanceIdentifier<?>,
+    public TransactCommandAggregator(BridgeOperationalState state,AsyncDataChangeEvent<InstanceIdentifier<?>,
             DataObject> changes) {
-        this.db = db;
+        this.operationalState = state;
         this.changes = changes;
         commands.add(new BridgeCreateCommand(changes));
         commands.add(new BridgeRemovedCommand(db,changes));

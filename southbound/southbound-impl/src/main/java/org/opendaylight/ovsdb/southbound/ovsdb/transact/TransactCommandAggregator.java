@@ -13,21 +13,22 @@ import java.util.List;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class TransactCommandAggregator implements TransactCommand {
 
     private List<TransactCommand> commands = new ArrayList<TransactCommand>();
-    private AsyncDataChangeEvent<InstanceIdentifier<?>, OvsdbBridgeAugmentation> changes;
+    private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes;
     private DataBroker db;
 
     public TransactCommandAggregator(DataBroker db,AsyncDataChangeEvent<InstanceIdentifier<?>,
-            OvsdbBridgeAugmentation> changes) {
+            DataObject> changes) {
         this.db = db;
         this.changes = changes;
         commands.add(new BridgeCreateCommand(changes));
         commands.add(new BridgeRemovedCommand(db,changes));
+        commands.add(new TerminationPointCreateCommand(changes));
     }
 
     @Override

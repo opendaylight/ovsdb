@@ -29,6 +29,7 @@ import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeInternal;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,11 +37,11 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Sets;
 
 public class BridgeCreateCommand implements TransactCommand {
-    private AsyncDataChangeEvent<InstanceIdentifier<?>, OvsdbBridgeAugmentation> changes;
+    private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes;
     private static final Logger LOG = LoggerFactory.getLogger(BridgeCreateCommand.class);
 
 
-    public BridgeCreateCommand(AsyncDataChangeEvent<InstanceIdentifier<?>, OvsdbBridgeAugmentation> changes) {
+    public BridgeCreateCommand(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
         this.changes = changes;
     }
 

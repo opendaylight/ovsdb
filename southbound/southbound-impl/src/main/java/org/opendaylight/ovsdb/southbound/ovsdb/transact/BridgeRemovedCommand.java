@@ -19,6 +19,7 @@ import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,11 +30,11 @@ import com.google.common.util.concurrent.CheckedFuture;
 
 public class BridgeRemovedCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(BridgeRemovedCommand.class);
-    private AsyncDataChangeEvent<InstanceIdentifier<?>, OvsdbBridgeAugmentation> changes;
+    private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes;
     private DataBroker db;
 
     public BridgeRemovedCommand(DataBroker db, AsyncDataChangeEvent<InstanceIdentifier<?>,
-            OvsdbBridgeAugmentation> changes) {
+            DataObject> changes) {
         this.db = db;
         this.changes = changes;
     }

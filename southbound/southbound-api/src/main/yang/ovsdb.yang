@@ -309,11 +309,6 @@ module ovsdb {
             type string;
         }
 
-        leaf bridge-name {
-            description "Create termination point on this bridge";
-            type string;
-        }
-
         leaf interface-type {
             description "The type of the OVSDB interface";
             type identityref {
@@ -344,11 +339,6 @@ module ovsdb {
             type uint16 {
                 range "1..65279";
             }
-        }
-
-        leaf attached-to {
-            description "Reference to the bridge where terminiation point is attached.";
-            type ovsdb-bridge-ref;
         }
 
         leaf vlan-tag {

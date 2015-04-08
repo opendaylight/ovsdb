@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_f6f47df3",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-08T20:19:49Z",
+      "side": 1,
+      "message": "please define it as an enum and expose getter/setter.",
+      "revId": "bbf54f3672d6ffe7f10e8d5dc5c7ef0014dd6a46",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_968c1981",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-08T20:19:49Z",
+      "side": 1,
+      "message": "Just a suggestion, please use isEmpty(), it\u0027s faster then integer comparison for collection. Also it\u0027s more readable.",
+      "revId": "bbf54f3672d6ffe7f10e8d5dc5c7ef0014dd6a46",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_b6def56b",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-08T20:19:49Z",
+      "side": 1,
+      "message": "It\u0027s bit confusing, once you define enum, please use it\u0027s getter/setters to set the value.",
+      "revId": "bbf54f3672d6ffe7f10e8d5dc5c7ef0014dd6a46",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -34,6 +34,24 @@
       "revId": "b4dbc83db257591c4b4d7b49bd4bdf03ee08eb23",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_b878242c",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointCreateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-04-08T15:00:31Z",
+      "side": 1,
+      "message": "So there are characters one puts in a name that are banned in the nameduuid... specifically \u0027-\u0027.  So if you use the name, you risk failure simply because your name contains a perfectly valid \u0027-\u0027 character.  But using a randomuuid, you insure uniqueness here *and* don\u0027t artificially restrict the name.  This is why the fix was done for BridgeCreateCommand, just propagating it here :)",
+      "parentUuid": "5a93c517_651bd51b",
+      "revId": "b4dbc83db257591c4b4d7b49bd4bdf03ee08eb23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

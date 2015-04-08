@@ -14,14 +14,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
-import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
-import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
@@ -105,13 +103,6 @@ public class BridgeCreateCommand implements TransactCommand {
             bridge.setExternalIds(externalIds);
 
             transaction.add(op.insert(bridge).withId(bridgeNamedUuid));
-
-            // OpenVSwitchPart
-            OpenVSwitch ovs = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), OpenVSwitch.class);
-            ovs.setBridges(Sets.newHashSet(new UUID(bridgeNamedUuid)));
-            transaction.add(op.mutate(ovs).addMutation(ovs.getBridgesColumn().getSchema(),
-                    Mutator.INSERT,
-                    ovs.getBridgesColumn().getData()));
         }
     }
 

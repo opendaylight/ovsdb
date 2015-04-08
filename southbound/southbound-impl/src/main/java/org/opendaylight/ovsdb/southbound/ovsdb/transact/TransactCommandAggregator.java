@@ -27,6 +27,7 @@ public class TransactCommandAggregator implements TransactCommand {
         this.changes = changes;
         commands.add(new BridgeCreateCommand(changes));
         commands.add(new BridgeRemovedCommand(db,changes));
+        commands.add(new OpenVSwitchBridgeAddCommand());
         commands.add(new TerminationPointCreateCommand(changes));
         commands.add(new TerminationPointDeleteCommand(db, changes));
         commands.add(new OvsdbNodeUpdateCommand(changes));

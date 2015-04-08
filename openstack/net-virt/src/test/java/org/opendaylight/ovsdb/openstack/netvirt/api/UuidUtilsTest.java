@@ -8,7 +8,7 @@
  * Authors : Dave Tucker
  */
 
-package org.opendaylight.ovsdb.openstack.netvirt;
+package org.opendaylight.ovsdb.openstack.netvirt.api;
 
 import org.opendaylight.ovsdb.openstack.netvirt.api.UuidUtils;
 

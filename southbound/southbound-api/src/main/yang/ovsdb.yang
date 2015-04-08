@@ -242,6 +242,19 @@ module ovsdb {
             }
         }
 
+        list openvswitch-other-configs {
+            description "Open_vSwitch table other configs";
+            key "other-config-key";
+            leaf other-config-key {
+                description "other-config name/key";
+                type string;
+            }
+            leaf other-config-value {
+                description "other-config value";
+                type string;
+            }
+         }
+
      }
 
     identity interface-type-base {
@@ -440,21 +453,6 @@ module ovsdb {
         }
     }
 
-    grouping ovsdb-other-config-attributes {
-        list other-configs {
-            description "Other config attributes for OVSDB tables";
-            key "other-config-key";
-            leaf other-config-key {
-                description "other-config name/key";
-                type string;
-            }
-            leaf other-config-value {
-                description "other-config value";
-                type string;
-            }
-         }
-    }
-
     augment "/topo:network-topology/topo:topology/topo:node" {
         description "Augmentation for bridge nodes managed by ovsdb";
         ext:augment-identifier "ovsdb-bridge-augmentation";
@@ -465,7 +463,6 @@ module ovsdb {
         description "Augment topology node for an ovsdb node";
         ext:augment-identifier "ovsdb-node-augmentation";
         uses ovsdb-node-attributes;
-        uses ovsdb-other-config-attributes;
     }
 
     augment "/topo:network-topology/topo:topology/topo:node/topo:termination-point" {

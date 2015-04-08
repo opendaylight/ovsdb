@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_b6c5958f",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-04-08T20:33:55Z",
+      "side": 1,
+      "message": "can you fix the indentation in the line above?",
+      "revId": "5e439ef67a6a5148763bbb3550b177fbc821908f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_363985a4",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataChangeListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-04-08T20:33:55Z",
+      "side": 1,
+      "message": "Do you want to keep the above debug statement?",
+      "revId": "5e439ef67a6a5148763bbb3550b177fbc821908f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

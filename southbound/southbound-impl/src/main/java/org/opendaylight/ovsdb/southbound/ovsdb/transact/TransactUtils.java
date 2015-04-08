@@ -53,6 +53,13 @@ public class TransactUtils {
         return extract(changes.getUpdatedData(),klazz);
     }
 
+    public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extractCreatedOrUpdated(
+            AsyncDataChangeEvent<InstanceIdentifier<?>,DataObject> changes,Class<T> klazz) {
+        Map<InstanceIdentifier<T>,T> result = extractUpdated(changes,klazz);
+        result.putAll(extractCreated(changes,klazz));
+        return result;
+    }
+
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extractOriginal(
             AsyncDataChangeEvent<InstanceIdentifier<?>,DataObject> changes,Class<T> klazz) {
         return extract(changes.getOriginalData(),klazz);

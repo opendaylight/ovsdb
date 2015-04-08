@@ -15,7 +15,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -36,7 +35,7 @@ import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 
 /**
- * Unit test for class VlanConfigurationCacheImpl
+ * Unit test for {@link VlanConfigurationCacheImpl}
  */
 @RunWith(MockitoJUnitRunner.class)
 public class VlanConfigurationCacheImplTest {
@@ -61,10 +60,8 @@ public class VlanConfigurationCacheImplTest {
         ovsTable = new ConcurrentHashMap<>();
         ovsTable.put(NODE_UUID, row);
 
-        ConcurrentHashMap<String, Row> portRows = ovsTable;
-
         Set<Long> tags = new HashSet<Long>();
-        tags.add(new Random().nextLong());
+        tags.add(Long.valueOf(1));
 
         UUID uuid = mock(UUID.class);
         Set<UUID> uuidSet = new HashSet<>();
@@ -76,24 +73,19 @@ public class VlanConfigurationCacheImplTest {
         Interface iface = mock(Interface.class);
         NeutronNetwork neutronNetwork = mock(NeutronNetwork.class);
 
-        // configure ovsdbConfigurationService
         when(ovsdbConfigurationService.getRows(any(Node.class), anyString())).thenReturn(ovsTable);
-        when(ovsdbConfigurationService.getRows(any(Node.class), anyString())).thenReturn(portRows);
         when(ovsdbConfigurationService.getTypedRow(any(Node.class), same(Port.class), any(Row.class))).thenReturn(port);
 
-        // configure port
         when(port.getTagColumn()).thenReturn(longColumnMock);
         when(longColumnMock.getData()).thenReturn(tags);
         when(port.getInterfacesColumn()).thenReturn(uuidColumnMock);
         when(uuidColumnMock.getData()).thenReturn(uuidSet);
 
-        // configure ovsdbConfigurationService
         when(ovsdbConfigurationService.getRow(any(Node.class), anyString(), anyString())).thenReturn(row);
         when(ovsdbConfigurationService.getTypedRow(any(Node.class), same(Interface.class), any(Row.class))).thenReturn(iface);
 
-        // configure neutronNetwork
         when(tenantNetworkManagerImpl.getTenantNetwork(any(Interface.class))).thenReturn(neutronNetwork);
-        when(neutronNetwork.getNetworkUUID()).thenReturn("networkUUID");
+        when(neutronNetwork.getNetworkUUID()).thenReturn(NETWORK_ID);
     }
 
     /**
@@ -101,17 +93,23 @@ public class VlanConfigurationCacheImplTest {
      */
     @Test
     public void testAssignInternalVlan() {
-        // test
-        assertEquals("Error, did not return the correct internalVlanId (first added)", 1, (int) vlanConfigurationCacheImpl.assignInternalVlan(mock(Node.class), NETWORK_ID));
-        assertEquals("Error, did not return the correct internalVlanId (second added)",2, (int) vlanConfigurationCacheImpl.assignInternalVlan(mock(Node.class), NETWORK_ID + "1"));
-        }
+        assertEquals("Error, did not return the correct internalVlanId (first added)", 1, (int) vlanConfigurationCacheImpl.assignInternalVlan(any(Node.class), NETWORK_ID));
+        assertEquals("Error, did not return the correct internalVlanId (second added)", 2, (int) vlanConfigurationCacheImpl.assignInternalVlan(any(Node.class), NETWORK_ID + "1"));
+    }
 
     /**
-     * Test method {@linkp VlanConfigurationCacheImpl#reclaimInternalVlan(Node, String)}
+     * Test method {@link VlanConfigurationCacheImpl#reclaimInternalVlan(Node, String)}
      */
     @Test
     public void testReclaimInternalVlan(){
-        // test
-        assertEquals("Error, did not return the correct internalVlanId",0, (int) vlanConfigurationCacheImpl.reclaimInternalVlan(any(Node.class), NETWORK_ID));
+        assertEquals("Error, did not return the correct internalVlanId", 1, (int) vlanConfigurationCacheImpl.reclaimInternalVlan(any(Node.class), NETWORK_ID));
+    }
+
+    /**
+     * Test method {@link VlanConfigurationCacheImpl#getInternalVlan(Node, String)}
+     */
+    @Test
+    public void testGetInternalVlan(){
+        assertEquals("Error, did not return the correct internalVlan", 1, (int) vlanConfigurationCacheImpl.getInternalVlan(any(Node.class), NETWORK_ID));
     }
 }

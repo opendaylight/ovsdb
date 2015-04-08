@@ -76,4 +76,34 @@ public class TransactUtils {
         return result;
     }
 
+    public static Map<InstanceIdentifier<Node>,Node> extractNodeUpdated(
+            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
+        return extractNode(changes.getUpdatedData());
+    }
+
+    public static Map<InstanceIdentifier<Node>,Node> extractNodeCreated(
+            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
+        return extractNode(changes.getCreatedData());
+    }
+
+    public static Map<InstanceIdentifier<Node>,Node> extractNode(
+            Map<InstanceIdentifier<?>, DataObject> changes) {
+        Map<InstanceIdentifier<Node>,Node> result
+            = new HashMap<InstanceIdentifier<Node>,Node>();
+        if (changes != null && changes.entrySet() != null) {
+            for (Entry<InstanceIdentifier<?>, DataObject> created : changes.entrySet()) {
+                if (created.getValue() instanceof Node) {
+                    Node value = (Node) created.getValue();
+                    Class<?> type = created.getKey().getTargetType();
+                    if (type.equals(Node.class)) {
+                        @SuppressWarnings("unchecked") // Actually checked above
+                        InstanceIdentifier<Node> iid = (InstanceIdentifier<Node>) created.getKey();
+                        result.put(iid, value);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
 }

@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_36d2e55c",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 383,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-08T20:23:51Z",
+      "side": 1,
+      "message": "Remove Interface from description, because Interface will have it\u0027s own list of external-ids.",
+      "revId": "ab4dcc7c47df5a871f8b10c3325563234623db51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_56d53141",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointCreateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-08T20:23:51Z",
+      "side": 1,
+      "message": "please remove these tabs,white spaces.",
+      "revId": "ab4dcc7c47df5a871f8b10c3325563234623db51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

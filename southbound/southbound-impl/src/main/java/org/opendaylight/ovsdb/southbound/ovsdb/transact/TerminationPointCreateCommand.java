@@ -39,20 +39,18 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
-public class TerminationPointCreateCommand implements TransactCommand {
-    private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes;
-    private BridgeOperationalState operationalState;
+public class TerminationPointCreateCommand extends AbstractTransactCommand {
+
     private static final Logger LOG = LoggerFactory.getLogger(TerminationPointCreateCommand.class);
 
-    public TerminationPointCreateCommand(BridgeOperationalState state, AsyncDataChangeEvent<InstanceIdentifier<?>,
-            DataObject> changes) {
-        this.operationalState = state;
-        this.changes = changes;
+    public TerminationPointCreateCommand(BridgeOperationalState state,
+            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
+        super(state, changes);
     }
 
     @Override
     public void execute(TransactionBuilder transaction) {
-        for (Entry<InstanceIdentifier<?>, DataObject> entry: changes.getCreatedData().entrySet()) {
+        for (Entry<InstanceIdentifier<?>, DataObject> entry: getChanges().getCreatedData().entrySet()) {
             DataObject dataObject = entry.getValue();
             if (dataObject instanceof OvsdbTerminationPointAugmentation) {
                 OvsdbTerminationPointAugmentation terminationPoint = (OvsdbTerminationPointAugmentation) dataObject;
@@ -142,7 +140,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
     private OvsdbBridgeAugmentation getBridge(InstanceIdentifier<?> key) {
         InstanceIdentifier<Node> nodeIid = key.firstIdentifierOf(Node.class);
         Map<InstanceIdentifier<Node>, Node> nodes =
-                TransactUtils.extractCreatedOrUpdated(changes,Node.class);
+                TransactUtils.extractCreatedOrUpdated(getChanges(),Node.class);
         if (nodes != null && nodes.get(nodeIid) != null) {
             Node node = nodes.get(nodeIid);
             OvsdbBridgeAugmentation bridge = node.getAugmentation(OvsdbBridgeAugmentation.class);

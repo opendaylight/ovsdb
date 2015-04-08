@@ -35,11 +35,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.external.ids.attributes.ExternalIds;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.external.ids.attributes.ExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.OptionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.OptionsKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Trunks;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.TrunksBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
@@ -164,17 +164,17 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                                         Map<String, String> externalIds = interfIter.getExternalIdsColumn().getData();
                                         if (externalIds != null && !externalIds.isEmpty()) {
                                             Set<String> externalIdKeys = externalIds.keySet();
-                                            ArrayList<ExternalIds> externalIdsList = new ArrayList<ExternalIds>();
+                                            List<PortExternalIds> externalIdsList = new ArrayList<PortExternalIds>();
                                             String externalIdValue;
                                             for (String externalIdKey : externalIdKeys) {
                                                 externalIdValue = externalIds.get(externalIdKey);
                                                 if (externalIdKey != null && externalIdValue != null) {
-                                                    externalIdsList.add(new ExternalIdsBuilder()
+                                                    externalIdsList.add(new PortExternalIdsBuilder()
                                                             .setExternalIdKey(externalIdKey)
                                                             .setExternalIdValue(externalIdValue).build());
                                                 }
                                             }
-                                            ovsdbTerminationPointBuilder.setExternalIds(externalIdsList);
+                                            ovsdbTerminationPointBuilder.setPortExternalIds(externalIdsList);
                                         }
 
                                         Map<String, String> optionsMap = interfIter.getOptionsColumn().getData();

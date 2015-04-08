@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_167329b2",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-08T19:51:49Z",
+      "side": 1,
+      "message": "I think you need to remove these methods, as i don\u0027t see you are using it anywhere. Also you don\u0027t need these method, as we now has generic methods to get these things done.",
+      "revId": "691da933d644b6799c41b3e0b9bf1cf73e34fa5e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

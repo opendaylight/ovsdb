@@ -52,6 +52,24 @@
       "revId": "b4dbc83db257591c4b4d7b49bd4bdf03ee08eb23",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_5859e058",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointCreateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-08T16:02:28Z",
+      "side": 1,
+      "message": "oh so that\u0027s the reason, why bridge that has \u0027-\u0027 in their name were not getting created ?",
+      "parentUuid": "5a93c517_b878242c",
+      "revId": "b4dbc83db257591c4b4d7b49bd4bdf03ee08eb23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

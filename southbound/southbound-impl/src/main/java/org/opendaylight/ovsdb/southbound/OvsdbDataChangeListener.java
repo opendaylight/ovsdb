@@ -12,6 +12,7 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataCh
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
+import org.opendaylight.ovsdb.southbound.ovsdb.transact.BridgeOperationalState;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.DataChangesManagedByOvsdbNodeEvent;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactCommandAggregator;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
@@ -76,7 +77,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
         for (OvsdbConnectionInstance connectionInstance : connectionInstancesFromChanges(changes)) {
             connectionInstance.transact(new TransactCommandAggregator(
-                    db,
+                    new BridgeOperationalState(db, changes),
                     new DataChangesManagedByOvsdbNodeEvent(
                             SouthboundMapper.createInstanceIdentifier(connectionInstance.getKey()),
                             changes)));

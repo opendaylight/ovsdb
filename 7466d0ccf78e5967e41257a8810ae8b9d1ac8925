@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_22d5c31b",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/DataChangesManagedByOvsdbNodeEvent.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-08T07:36:38Z",
+      "side": 1,
+      "message": "any reason for removing the copyright?",
+      "revId": "7466d0ccf78e5967e41257a8810ae8b9d1ac8925",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_42d80f53",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactCommandAggregator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-08T07:36:38Z",
+      "side": 1,
+      "message": "now it looks better. :)",
+      "revId": "7466d0ccf78e5967e41257a8810ae8b9d1ac8925",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

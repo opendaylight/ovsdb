@@ -59,7 +59,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
 
 
                 // Configure interface
-                String interfaceUuid = "Interface_" + terminationPoint.getName();
+                String interfaceUuid = "Interface_" + SouthboundMapper.getRandomUUID();;
                 Interface ovsInterface =
                         TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Interface.class);
                 ovsInterface.setName(terminationPoint.getName());
@@ -101,7 +101,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
                 transaction.add(op.insert(ovsInterface).withId(interfaceUuid));
 
                 // Configure port with the above interface details
-                String portUuid = "Port_" + terminationPoint.getName();
+                String portUuid = "Port_" + SouthboundMapper.getRandomUUID();;
                 Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
                 port.setName(terminationPoint.getName());
                 port.setInterfaces(Sets.newHashSet(new UUID(interfaceUuid)));

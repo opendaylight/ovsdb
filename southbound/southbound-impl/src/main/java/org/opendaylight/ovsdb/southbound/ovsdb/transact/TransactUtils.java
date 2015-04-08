@@ -20,6 +20,9 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Predicates;
+import com.google.common.collect.Maps;
+
 public class TransactUtils {
     private static final Logger LOG = LoggerFactory.getLogger(TransactUtils.class);
 
@@ -60,6 +63,14 @@ public class TransactUtils {
         return result;
     }
 
+    public static <T extends DataObject> Map<InstanceIdentifier<T>, T> extractCreatedOrUpdatedOrRemoved(
+            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
+            Class<T> klazz) {
+        Map<InstanceIdentifier<T>,T> result = extractCreatedOrUpdated(changes,klazz);
+        result.putAll(extractRemovedObjects(changes, klazz));
+        return result;
+    }
+
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extractOriginal(
             AsyncDataChangeEvent<InstanceIdentifier<?>,DataObject> changes,Class<T> klazz) {
         return extract(changes.getOriginalData(),klazz);
@@ -78,6 +89,13 @@ public class TransactUtils {
             }
         }
         return result;
+    }
+
+    public static <T extends DataObject> Map<InstanceIdentifier<T>, T> extractRemovedObjects(
+            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
+            Class<T> klazz) {
+        Set<InstanceIdentifier<T>> iids = extractRemoved(changes, klazz);
+        return Maps.filterKeys(extractOriginal(changes, klazz),Predicates.in(iids));
     }
 
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extract(

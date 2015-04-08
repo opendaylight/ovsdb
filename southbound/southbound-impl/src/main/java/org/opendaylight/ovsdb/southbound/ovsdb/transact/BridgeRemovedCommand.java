@@ -4,13 +4,8 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
@@ -25,16 +20,15 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.CheckedFuture;
 
 public class BridgeRemovedCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(BridgeRemovedCommand.class);
     private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes;
-    private DataBroker db;
+    private BridgeOperationalState operationalState;
 
-    public BridgeRemovedCommand(DataBroker db, AsyncDataChangeEvent<InstanceIdentifier<?>,
+    public BridgeRemovedCommand(BridgeOperationalState state, AsyncDataChangeEvent<InstanceIdentifier<?>,
             DataObject> changes) {
-        this.db = db;
+        this.operationalState = state;
         this.changes = changes;
     }
 
@@ -48,9 +42,10 @@ public class BridgeRemovedCommand implements TransactCommand {
             LOG.info("Received request to delete ovsdb node {}",ovsdbManagedNodeIid);
             OvsdbBridgeAugmentation original = originals.get(ovsdbManagedNodeIid);
             Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class,null);
-            Optional<UUID> bridgeUuidOptional = getBridgeUUID(ovsdbManagedNodeIid);
-            if (bridgeUuidOptional.isPresent()) {
-                UUID bridgeUuid = bridgeUuidOptional.get();
+            Optional<OvsdbBridgeAugmentation> ovsdbAugmentationOptional = this.operationalState
+                    .getOvsdbBridgeAugmentation(ovsdbManagedNodeIid);
+            if (ovsdbAugmentationOptional.isPresent() && ovsdbAugmentationOptional.get().getBridgeUuid() != null) {
+                UUID bridgeUuid = new UUID(ovsdbAugmentationOptional.get().getBridgeUuid().getValue());
                 OpenVSwitch ovs = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
                         OpenVSwitch.class,null);
                 transaction.add(op.delete(bridge.getSchema())
@@ -67,28 +62,4 @@ public class BridgeRemovedCommand implements TransactCommand {
 
         }
     }
-
-    private Optional<UUID> getBridgeUUID(InstanceIdentifier<OvsdbBridgeAugmentation> ovsdbManagedNodeIid) {
-        Optional<UUID> result = Optional.absent();
-        ReadOnlyTransaction transaction = db.newReadOnlyTransaction();
-        CheckedFuture<Optional<OvsdbBridgeAugmentation>, ReadFailedException> future
-            = transaction.read(LogicalDatastoreType.OPERATIONAL, ovsdbManagedNodeIid);
-        Optional<OvsdbBridgeAugmentation> optional;
-        try {
-            optional = future.get();
-            if (optional.isPresent()) {
-                OvsdbBridgeAugmentation bridge = (OvsdbBridgeAugmentation) optional.get();
-                if (bridge != null && bridge.getBridgeUuid() != null) {
-                    result = Optional.of(new UUID(bridge.getBridgeUuid().getValue()));
-                }
-            }
-        } catch (InterruptedException e) {
-            LOG.warn("Unable to retrieve bridge from operational store",e);
-        } catch (ExecutionException e) {
-            LOG.warn("Unable to retrieve bridge from operational store",e);
-        }
-        transaction.close();
-        return result;
-    }
-
 }

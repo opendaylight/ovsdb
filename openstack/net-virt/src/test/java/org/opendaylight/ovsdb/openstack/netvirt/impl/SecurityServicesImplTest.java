@@ -33,34 +33,34 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 
 /**
- * Unit test for class SecurityServicesImpl
+ * Unit test for {@link SecurityServicesImpl}
  */
 @RunWith(MockitoJUnitRunner.class)
 public class SecurityServicesImplTest {
 
-    @Mock private Interface intf;
-    @Mock private NeutronPort neutronPort;
-
     @InjectMocks private SecurityServicesImpl securityServicesImpl;
-    @InjectMocks private INeutronPortCRUD neutronPortCache = mock(INeutronPortCRUD.class);
+    @InjectMocks private INeutronPortCRUD neutronPortService = mock(INeutronPortCRUD.class);
+
+    @Mock Interface intf;
 
     private List<NeutronSecurityGroup> securityGroups = new ArrayList<NeutronSecurityGroup>();
 
     @Before
     public void setUp(){
+        NeutronPort neutronPort = mock(NeutronPort.class);
+
         Map<String, String> externalIds =new HashMap<String, String>();
         externalIds.put(Constants.EXTERNAL_ID_INTERFACE_ID, "mapValue");
         Column<GenericTableSchema, Map<String, String>> columnMock = mock(Column.class);
 
         securityGroups.add(mock(NeutronSecurityGroup.class));
 
-        // configure interface
         when(intf.getExternalIdsColumn()).thenReturn(columnMock);
         when(columnMock.getData()).thenReturn(externalIds);
 
-        // configure neutronPort
         when(neutronPort.getSecurityGroups()).thenReturn(securityGroups);
-        when(neutronPortCache.getPort(anyString())).thenReturn(neutronPort);
+        when(neutronPort.getDeviceOwner()).thenReturn("deviceOwner");
+        when(neutronPortService.getPort(anyString())).thenReturn(neutronPort);
     }
 
     /**
@@ -68,10 +68,6 @@ public class SecurityServicesImplTest {
      */
     @Test
     public void testIsPortSecurityReady(){
-        // configure neutronPort
-        when(neutronPort.getDeviceOwner()).thenReturn("deviceOwner");
-
-        //test
         assertTrue("Error, did not return expected boolean for isPortSecurityReady", securityServicesImpl.isPortSecurityReady(intf));
     }
 
@@ -80,7 +76,6 @@ public class SecurityServicesImplTest {
      */
     @Test
     public void testSecurityGroupInPort(){
-        // test
         assertEquals("Error, did not return the good neutronSecurityGroup of securityGroups", securityGroups.toArray()[0], securityServicesImpl.getSecurityGroupInPort(intf));
     }
 }

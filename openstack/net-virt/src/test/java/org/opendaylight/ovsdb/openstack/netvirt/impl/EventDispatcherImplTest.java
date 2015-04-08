@@ -30,7 +30,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.osgi.framework.ServiceReference;
 
 /**
- * Unit test for class EventDispatcherImpl
+ * Unit test for {@link EventDispatcherImpl}
  */
 @RunWith(MockitoJUnitRunner.class)
 public class EventDispatcherImplTest {
@@ -39,7 +39,7 @@ public class EventDispatcherImplTest {
     @InjectMocks EventDispatcherImpl eventDispatcherImpl;
 
     private AbstractEvent.HandlerType handlerTypeObject = AbstractEvent.HandlerType.NEUTRON_FLOATING_IP;
-    public ServiceReference ref = mock(ServiceReference.class);
+    private ServiceReference ref = mock(ServiceReference.class);
 
     @Before
     public void setUp() {
@@ -53,25 +53,14 @@ public class EventDispatcherImplTest {
     }
 
     /**
-     * Test method {@link EventDispatcherImpl#eventHandlerAdded(ServiceReference, AbstractHandler)}
+     * Test methods {@link EventDispatcherImpl#eventHandlerRemoved(ServiceReference)}
+     * and {@link EventDispatcherImpl#eventHandlerAdded(ServiceReference, AbstractHandler)}
      */
     @Test
-    public void testeventHandlerAdded() throws Exception{
+    public void testHandlerAddedAndRemoved() throws Exception{
         AbstractHandler[] handlers = ( AbstractHandler[]) getClassField("handlers");
 
         assertNotEquals("Error, handler should be null", handlers[handlerTypeObject.ordinal()], handler);
-
-        eventDispatcherImpl.eventHandlerAdded(ref, handler);
-
-        assertEquals("Error, did not return the added handler", handlers[handlerTypeObject.ordinal()], handler);
-    }
-
-    /**
-     * Test method {@link EventDispatcherImpl#eventHandlerRemoved(ServiceReference)}
-     */
-    @Test
-    public void testHandlerRemoved() throws Exception{
-        AbstractHandler[] handlers = ( AbstractHandler[]) getClassField("handlers");
 
         eventDispatcherImpl.eventHandlerAdded(ref, handler);
 

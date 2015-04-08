@@ -89,11 +89,11 @@
             "url":"http://localhost:8080/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:%2F%2F10.10.10.10:22222%2Fbridge%2Fbrtest/termination-point/vxlanport/",
             "method":"PUT",
             "headers":"Authorization: Basic YWRtaW46YWRtaW4=\nContent-Type: application/json\nAccept: application/json\n",
-            "data":"{\n  \"network-topology:termination-point\": [\n    \t{\n  \t\t\t\"ovsdb:options\": [\n    \t\t\t{\n                  \"ovsdb:option\": \"remote_ip\",\n                  \"ovsdb:value\" : \"10.10.11.11\"\n\t\t    \t}\n\t  \t\t],\n\t  \t\t\"ovsdb:name\": \"vxlanport\",\n\t  \t\t\"ovsdb:bridge-name\": \"brtest\",\n          \t\"ovsdb:interface-type\": \"ovsdb:interface-type-vxlan\",\n  \t\t\t\"tp-id\": \"vxlanport\",\n            \"vlan-tag\": \"1\",\n            \"trunks\": [\n                {\n                    \"trunk\": \"2\"\n                },\n                {\n                    \"trunk\": \"3\"\n                }\n            ],\n            \"vlan-mode\":\"access\"\n\t\t}\n    ]\n}",
+            "data":"{\n  \"network-topology:termination-point\": [\n    \t{\n  \t\t\t\"ovsdb:options\": [\n    \t\t\t{\n                  \"ovsdb:option\": \"remote_ip\",\n                  \"ovsdb:value\" : \"10.10.11.11\"\n\t\t    \t}\n\t  \t\t],\n\t  \t\t\"ovsdb:name\": \"vxlanport\",\n          \t\"ovsdb:interface-type\": \"ovsdb:interface-type-vxlan\",\n  \t\t\t\"tp-id\": \"vxlanport\",\n            \"vlan-tag\": \"1\",\n            \"trunks\": [\n                {\n                    \"trunk\": \"2\"\n                },\n                {\n                    \"trunk\": \"3\"\n                }\n            ],\n            \"vlan-mode\":\"access\"\n\t\t}\n    ]\n}",
             "dataMode":"raw",
             "timestamp":0,
             "version":2,
-            "time":1428520326628
+            "time":1428527877458
         },
         {            "collectionId":"7969e460-82a6-c628-3921-c8b2f833cf20",
             "id":"a01f6148-a8fd-e579-de7b-79fb490fa001",

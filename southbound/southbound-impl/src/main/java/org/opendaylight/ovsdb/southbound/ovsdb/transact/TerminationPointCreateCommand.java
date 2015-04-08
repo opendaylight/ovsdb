@@ -140,15 +140,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
     private OvsdbBridgeAugmentation getBridge(InstanceIdentifier<?> key) {
         InstanceIdentifier<Node> nodeIid = key.firstIdentifierOf(Node.class);
         Map<InstanceIdentifier<Node>, Node> nodes =
-                TransactUtils.extractCreated(changes,Node.class);
-        if (nodes != null && nodes.get(nodeIid) != null) {
-            Node node = nodes.get(nodeIid);
-            OvsdbBridgeAugmentation bridge = node.getAugmentation(OvsdbBridgeAugmentation.class);
-            if (bridge != null) {
-                return bridge;
-            }
-        }
-        nodes = TransactUtils.extractUpdated(changes,Node.class);
+                TransactUtils.extractCreatedOrUpdated(changes,Node.class);
         if (nodes != null && nodes.get(nodeIid) != null) {
             Node node = nodes.get(nodeIid);
             OvsdbBridgeAugmentation bridge = node.getAugmentation(OvsdbBridgeAugmentation.class);

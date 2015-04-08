@@ -21,28 +21,25 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 
-public class BridgeRemovedCommand implements TransactCommand {
+public class BridgeRemovedCommand extends AbstractTransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(BridgeRemovedCommand.class);
-    private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes;
-    private BridgeOperationalState operationalState;
 
-    public BridgeRemovedCommand(BridgeOperationalState state, AsyncDataChangeEvent<InstanceIdentifier<?>,
-            DataObject> changes) {
-        this.operationalState = state;
-        this.changes = changes;
+    public BridgeRemovedCommand(BridgeOperationalState state,
+            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
+        super(state, changes);
     }
 
     @Override
     public void execute(TransactionBuilder transaction) {
         Set<InstanceIdentifier<OvsdbBridgeAugmentation>> removed =
-                TransactUtils.extractRemoved(changes,OvsdbBridgeAugmentation.class);
+                TransactUtils.extractRemoved(getChanges(),OvsdbBridgeAugmentation.class);
         Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> originals
-            = TransactUtils.extractOriginal(changes,OvsdbBridgeAugmentation.class);
+            = TransactUtils.extractOriginal(getChanges(),OvsdbBridgeAugmentation.class);
         for (InstanceIdentifier<OvsdbBridgeAugmentation> ovsdbManagedNodeIid: removed) {
             LOG.info("Received request to delete ovsdb node {}",ovsdbManagedNodeIid);
             OvsdbBridgeAugmentation original = originals.get(ovsdbManagedNodeIid);
             Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class,null);
-            Optional<OvsdbBridgeAugmentation> ovsdbAugmentationOptional = this.operationalState
+            Optional<OvsdbBridgeAugmentation> ovsdbAugmentationOptional = getOperationalState()
                     .getOvsdbBridgeAugmentation(ovsdbManagedNodeIid);
             if (ovsdbAugmentationOptional.isPresent() && ovsdbAugmentationOptional.get().getBridgeUuid() != null) {
                 UUID bridgeUuid = new UUID(ovsdbAugmentationOptional.get().getBridgeUuid().getValue());

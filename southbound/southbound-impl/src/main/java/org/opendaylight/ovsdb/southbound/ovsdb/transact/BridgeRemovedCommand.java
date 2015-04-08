@@ -18,7 +18,6 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -41,10 +40,11 @@ public class BridgeRemovedCommand implements TransactCommand {
 
     @Override
     public void execute(TransactionBuilder transaction) {
-        Set<InstanceIdentifier<Node>> removed = TransactUtils.extractOvsdbManagedNodeRemoved(changes);
-        Map<InstanceIdentifier<Node>, OvsdbBridgeAugmentation> originals
-            = TransactUtils.extractOvsdbManagedNodeOriginal(changes);
-        for (InstanceIdentifier<Node> ovsdbManagedNodeIid: removed) {
+        Set<InstanceIdentifier<OvsdbBridgeAugmentation>> removed =
+                TransactUtils.extractRemoved(changes,OvsdbBridgeAugmentation.class);
+        Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> originals
+            = TransactUtils.extractOriginal(changes,OvsdbBridgeAugmentation.class);
+        for (InstanceIdentifier<OvsdbBridgeAugmentation> ovsdbManagedNodeIid: removed) {
             LOG.info("Received request to delete ovsdb node {}",ovsdbManagedNodeIid);
             OvsdbBridgeAugmentation original = originals.get(ovsdbManagedNodeIid);
             Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class,null);
@@ -68,12 +68,12 @@ public class BridgeRemovedCommand implements TransactCommand {
         }
     }
 
-    private Optional<UUID> getBridgeUUID(InstanceIdentifier<Node> ovsdbManagedNodeIid) {
+    private Optional<UUID> getBridgeUUID(InstanceIdentifier<OvsdbBridgeAugmentation> ovsdbManagedNodeIid) {
         Optional<UUID> result = Optional.absent();
         ReadOnlyTransaction transaction = db.newReadOnlyTransaction();
-        CheckedFuture<Optional<Node>, ReadFailedException> future
+        CheckedFuture<Optional<OvsdbBridgeAugmentation>, ReadFailedException> future
             = transaction.read(LogicalDatastoreType.OPERATIONAL, ovsdbManagedNodeIid);
-        Optional<Node> optional;
+        Optional<OvsdbBridgeAugmentation> optional;
         try {
             optional = future.get();
             if (optional.isPresent()) {

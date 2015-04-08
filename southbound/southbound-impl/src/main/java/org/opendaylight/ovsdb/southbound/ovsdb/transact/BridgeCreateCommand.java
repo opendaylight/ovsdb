@@ -33,22 +33,21 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 
-public class BridgeCreateCommand implements TransactCommand {
-    private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes;
-    private BridgeOperationalState operationalState;
+public class BridgeCreateCommand extends AbstractTransactCommand {
+
     private static final Logger LOG = LoggerFactory.getLogger(BridgeCreateCommand.class);
 
-
-    public BridgeCreateCommand(BridgeOperationalState state, AsyncDataChangeEvent<InstanceIdentifier<?>,
-            DataObject> changes) {
-        this.operationalState = state;
-        this.changes = changes;
+    public BridgeCreateCommand(BridgeOperationalState state,
+            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
+        super(state, changes);
     }
+
+
 
     @Override
     public void execute(TransactionBuilder transaction) {
         Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> created =
-                TransactUtils.extractCreated(changes,OvsdbBridgeAugmentation.class);
+                TransactUtils.extractCreated(getChanges(),OvsdbBridgeAugmentation.class);
         for (Entry<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> ovsdbManagedNodeEntry:
             created.entrySet()) {
             OvsdbBridgeAugmentation ovsdbManagedNode = ovsdbManagedNodeEntry.getValue();

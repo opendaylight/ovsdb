@@ -55,18 +55,17 @@ public class FloatingIPHandlerTest {
         NorthboundEvent ev = mock(NorthboundEvent.class);
 
         when(ev.getNeutronFloatingIP()).thenReturn(mock(NeutronFloatingIP.class));
+
         when(ev.getAction()).thenReturn(Action.UPDATE);
-
-        verifyNoMoreInteractions(neutronL3Adapter);
-
         floatingHandler.processEvent((AbstractEvent) ev);
-
         verify(neutronL3Adapter, times(1)).handleNeutronFloatingIPEvent(ev.getNeutronFloatingIP(), ev.getAction());;
 
         when(ev.getAction()).thenReturn(Action.ADD);
-        verify(neutronL3Adapter, times(0)).handleNeutronFloatingIPEvent(ev.getNeutronFloatingIP(), ev.getAction());;
+        floatingHandler.processEvent((AbstractEvent) ev);
+        verify(neutronL3Adapter, times(1)).handleNeutronFloatingIPEvent(ev.getNeutronFloatingIP(), ev.getAction());;
 
         when(ev.getAction()).thenReturn(Action.DELETE);
-        verify(neutronL3Adapter, times(0)).handleNeutronFloatingIPEvent(ev.getNeutronFloatingIP(), ev.getAction());;
+        floatingHandler.processEvent((AbstractEvent) ev);
+        verify(neutronL3Adapter, times(1)).handleNeutronFloatingIPEvent(ev.getNeutronFloatingIP(), ev.getAction());;
     }
 }

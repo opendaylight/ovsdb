@@ -42,14 +42,7 @@ import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
-import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
-import org.opendaylight.ovsdb.openstack.netvirt.api.InboundNatProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.MultiTenantAwareRouter;
-import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
-import org.opendaylight.ovsdb.openstack.netvirt.api.OutboundNatProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
@@ -69,6 +62,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 public class NeutronL3AdapterTest {
 
+    @InjectMocks NeutronL3Adapter neutronL3Adapter;
+
     @Mock private ConfigurationService configurationService;
     @Mock private TenantNetworkManager tenantNetworkManager;
     @Mock private OvsdbConfigurationService ovsdbConfigurationService;
@@ -76,19 +71,7 @@ public class NeutronL3AdapterTest {
     @Mock private INeutronNetworkCRUD neutronNetworkCache;
     @Mock private INeutronSubnetCRUD neutronSubnetCache;
     @Mock private INeutronPortCRUD neutronPortCache;
-
-    @Mock private NeutronPort neutronPort;
-    @Mock private Neutron_IPs neutronIP;
-    @Mock private NeutronRouter neutronRouter;
-    @Mock private NeutronRouter_Interface neutronRouterInterface;
-    @Mock private NeutronSubnet neutronSubnet;
-    @Mock private NeutronNetwork neutronNetwork;
-    @Mock private Node node;
-    @Mock private NodeId nodeID;
-    @Mock private Row row;
-    @Mock private Bridge bridge;
-    @Mock private Status status;
-    @InjectMocks NeutronL3Adapter neutronL3Adapter;
+    @Mock NeutronPort neutronPort;
 
     private Set<String> inboundIpRewriteCache;
     private Set<String> outboundIpRewriteCache;
@@ -134,6 +117,17 @@ public class NeutronL3AdapterTest {
     }
 
     private void setUpVar(){
+        Neutron_IPs neutronIP = mock(Neutron_IPs.class);
+        NeutronRouter neutronRouter = mock(NeutronRouter.class);
+
+        NeutronSubnet neutronSubnet = mock(NeutronSubnet.class);
+        NeutronNetwork neutronNetwork = mock(NeutronNetwork.class);
+        Node node = mock(Node.class);
+        NodeId nodeID = mock(NodeId.class);
+        Row row = mock(Row.class);
+        Bridge bridge = mock(Bridge.class);
+        Status status = mock(Status.class);
+
         List<Neutron_IPs> list_neutronIP = new ArrayList<Neutron_IPs>();
         list_neutronIP.add(neutronIP);
 
@@ -158,9 +152,6 @@ public class NeutronL3AdapterTest {
 
         when(neutronIP.getSubnetUUID()).thenReturn("subnetUUID");
         when(neutronIP.getIpAddress()).thenReturn(HOST_ADDRESS);
-
-        when(neutronRouterInterface.getPortUUID()).thenReturn("portUUID");
-        when(neutronRouterInterface.getSubnetUUID()).thenReturn("subnetUUID");
 
         when(neutronPortCache.getAllPorts()).thenReturn(list_neutronPort);
         when(neutronPortCache.getPort(anyString())).thenReturn(neutronPort);
@@ -252,6 +243,9 @@ public class NeutronL3AdapterTest {
 
         // populate subnetIdToRouterInterfaceCache to pass the
         // if (neutronRouterInterface != null)
+        NeutronRouter_Interface neutronRouterInterface = mock(NeutronRouter_Interface.class);
+        when(neutronRouterInterface.getPortUUID()).thenReturn("portUUID");
+        when(neutronRouterInterface.getSubnetUUID()).thenReturn("subnetUUID");
         subnetIdToRouterInterfaceCache.put("subnetUUID", neutronRouterInterface);
 
         /* device owner = "" */
@@ -325,7 +319,6 @@ public class NeutronL3AdapterTest {
         assertEquals("Error, did not return the correct subnetIdToRouterInterfaceCache size", 0, subnetIdToRouterInterfaceCache.size());
         assertEquals("Error, did not return the correct l3ForwardingCache size", 0, l3ForwardingCache.size());
         assertEquals("Error, did not return the correct defaultRouteCache size", 0, defaultRouteCache.size());
-
     }
 
 }

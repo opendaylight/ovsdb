@@ -10,6 +10,8 @@ package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +35,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.external.ids.attributes.ExternalIds;
@@ -56,6 +59,15 @@ import com.google.common.base.Optional;
 
 public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbPortUpdateCommand.class);
+    private static final Map<String, Integer> vlanModes;
+    static {
+        Map<String, Integer> modes = new HashMap<String, Integer>();
+        modes.put("access", 1);
+        modes.put("native-tagged", 2);
+        modes.put("native-untagged", 3);
+        modes.put("trunk", 4);
+        vlanModes = Collections.unmodifiableMap(modes);
+    }
 
     public OvsdbPortUpdateCommand(OvsdbClientKey key, TableUpdates updates,
             DatabaseSchema dbSchema) {
@@ -78,6 +90,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                     if (portUUID.equals(port.getUuid())) {
                         Collection<Long> vlanId = port.getTagColumn().getData();
                         Set<Long> portTrunks = port.getTrunksColumn().getData();
+                        Collection<String> vlanMode = port.getVlanModeColumn().getData();
                         bridgeName = bridge.getName();
                         NodeId bridgeId = SouthboundMapper.createManagedNodeId(
                                 getKey(), new OvsdbBridgeName(bridgeName));
@@ -119,6 +132,17 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                             for (Long trunk: portTrunks) {
                                 if (trunk != null) {
                                     modelTrunks.add(new TrunksBuilder().setTrunk(new VlanId(trunk.intValue())).build());
+                                }
+                            }
+                            if (vlanMode.size() > 0) {
+                                Iterator<String> itr = vlanMode.iterator();
+                                String vlanType = itr.next();
+                                if (vlanModes.containsKey(vlanType)) {
+                                    ovsdbTerminationPointBuilder
+                                        .setVlanMode(OvsdbPortInterfaceAttributes
+                                                        .VlanMode.values()[vlanModes.get(vlanType) - 1]);
+                                } else {
+                                    LOG.debug("Invalid VLAN Mode {}", vlanType);
                                 }
                             }
                             ovsdbTerminationPointBuilder.setTrunks(modelTrunks);

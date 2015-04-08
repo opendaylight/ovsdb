@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_3660a5a4",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2015-04-08T20:42:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_b6c5958f",
+      "revId": "5e439ef67a6a5148763bbb3550b177fbc821908f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_363985a4",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataChangeListener.java",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2015-04-08T20:33:55Z",
       "side": 1,
       "message": "Do you want to keep the above debug statement?",
+      "revId": "5e439ef67a6a5148763bbb3550b177fbc821908f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_965179da",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataChangeListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 856
+      },
+      "writtenOn": "2015-04-08T20:42:26Z",
+      "side": 1,
+      "message": "Yes - since it\u0027s a cut and paste from above.",
+      "parentUuid": "5a93c517_363985a4",
       "revId": "5e439ef67a6a5148763bbb3550b177fbc821908f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

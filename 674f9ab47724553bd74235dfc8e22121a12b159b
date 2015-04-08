@@ -22,6 +22,24 @@
       "revId": "674f9ab47724553bd74235dfc8e22121a12b159b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_58e6c0b5",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointCreateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-04-08T15:37:02Z",
+      "side": 1,
+      "message": "Yes, good idea",
+      "parentUuid": "5a93c517_b8690427",
+      "revId": "674f9ab47724553bd74235dfc8e22121a12b159b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

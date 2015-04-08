@@ -26,6 +26,7 @@ import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes.VlanMode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.external.ids.attributes.ExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
@@ -42,6 +43,22 @@ import com.google.common.collect.Sets;
 public class TerminationPointCreateCommand implements TransactCommand {
     private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes;
     private static final Logger LOG = LoggerFactory.getLogger(TerminationPointCreateCommand.class);
+    private static enum VlanModes {
+        ACCESS("access"),
+        NATIVE_TAGGED("native-tagged"),
+        NATIVE_UNTAGGED("native-untagged"),
+        TRUNK("trunk");
+
+        private final String mode;  
+
+        private VlanModes(String mode) {
+            this.mode = mode;
+        }
+        @Override
+        public String toString() {
+            return mode;
+        }
+    }
 
     public TerminationPointCreateCommand(AsyncDataChangeEvent<InstanceIdentifier<?>,
             DataObject> changes) {
@@ -119,6 +136,12 @@ public class TerminationPointCreateCommand implements TransactCommand {
                         }
                     }
                     port.setTrunks(portTrunks);
+                }
+                if (terminationPoint.getVlanMode() != null) {
+                    Set<String> portVlanMode = new HashSet<String>();
+                    VlanMode modelVlanMode = terminationPoint.getVlanMode();
+                    portVlanMode.add(VlanModes.values()[modelVlanMode.getIntValue() - 1].toString());
+                    port.setVlanMode(portVlanMode);
                 }
                 transaction.add(op.insert(port).withId(portUuid));
 

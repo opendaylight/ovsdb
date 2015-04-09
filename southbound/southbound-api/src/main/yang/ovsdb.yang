@@ -393,11 +393,9 @@ module ovsdb {
                 }
             }
         }
-    }
 
-    grouping ovsdb-external-ids-attributes {
-        list external-ids {
-            description "Port/Interface external id";
+        list port-external-ids {
+            description "Port external ids";
             key "external-id-key";
             leaf external-id-key {
                 description "external-id name/key";
@@ -409,7 +407,22 @@ module ovsdb {
                 type string;
                 mandatory true;
             }
-         }
+        }
+
+        list interface-external-ids {
+            description "Interface external ids";
+            key "external-id-key";
+            leaf external-id-key {
+                description "external-id name/key";
+                type string;
+                mandatory true;
+            }
+            leaf external-id-value {
+                description "external-id value";
+                type string;
+                mandatory true;
+            }
+        }
     }
 
     grouping ovsdb-other-config-attributes {
@@ -437,7 +450,6 @@ module ovsdb {
         description "Augment topology node for an ovsdb node";
         ext:augment-identifier "ovsdb-node-augmentation";
         uses ovsdb-node-attributes;
-        uses ovsdb-external-ids-attributes;
         uses ovsdb-other-config-attributes;
     }
 
@@ -445,6 +457,5 @@ module ovsdb {
         description "Augment topology node termination-point for an ovsdb port/interface";
         ext:augment-identifier "ovsdb-termination-point-augmentation";
         uses ovsdb-port-interface-attributes;
-        uses ovsdb-external-ids-attributes;
     }
 }

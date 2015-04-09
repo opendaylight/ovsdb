@@ -27,8 +27,9 @@ import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.external.ids.attributes.ExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Trunks;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -86,10 +87,11 @@ public class TerminationPointCreateCommand implements TransactCommand {
                     }
                 }
 
-                List<ExternalIds> externalIds = terminationPoint.getExternalIds();
-                if (externalIds != null && !externalIds.isEmpty()) {
+                List<InterfaceExternalIds> interfaceExternalIds =
+                        terminationPoint.getInterfaceExternalIds();
+                if (interfaceExternalIds != null && !interfaceExternalIds.isEmpty()) {
                     HashMap<String, String> externalIdsMap = new HashMap<String, String>();
-                    for (ExternalIds externalId: externalIds) {
+                    for (InterfaceExternalIds externalId: interfaceExternalIds) {
                         externalIdsMap.put(externalId.getExternalIdKey(), externalId.getExternalIdValue());
                     }
                     try {
@@ -119,6 +121,19 @@ public class TerminationPointCreateCommand implements TransactCommand {
                         }
                     }
                     port.setTrunks(portTrunks);
+                }
+
+                List<PortExternalIds> portExternalIds = terminationPoint.getPortExternalIds();
+                if (portExternalIds != null && !portExternalIds.isEmpty()) {
+                    HashMap<String, String> externalIdsMap = new HashMap<String, String>();
+                    for (PortExternalIds externalId: portExternalIds) {
+                        externalIdsMap.put(externalId.getExternalIdKey(), externalId.getExternalIdValue());
+                    }
+                    try {
+                        port.setExternalIds(ImmutableMap.copyOf(externalIdsMap));
+                    } catch (NullPointerException e) {
+                        LOG.warn("Incomplete OVSDB port external_ids");
+                    }
                 }
                 transaction.add(op.insert(port).withId(portUuid));
 

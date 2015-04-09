@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_874aa1aa",
+        "filename": "mdsal-northbound/impl/src/main/java/org/opendaylight/yang/gen/v1/urn/opendaylight/params/xml/ns/yang/ovsdb/northbound/impl/rev150406/NorthboundImplModule.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-04-09T14:18:35Z",
+      "side": 1,
+      "message": "This is auto-generated code so I don\u0027t think I can/should add this in the pom file.",
+      "parentUuid": "5a93c517_c70f492d",
+      "revId": "ed24b4936fc7ef567698699e2be4af935ee0b3f3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_8719417b",
         "filename": "mdsal-northbound/impl/src/main/java/org/opendaylight/yang/gen/v1/urn/opendaylight/params/xml/ns/yang/ovsdb/northbound/impl/rev150406/NorthboundImplModule.java",
         "patchSetId": 10
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_27c94d26",
+        "filename": "mdsal-northbound/impl/src/main/java/org/opendaylight/yang/gen/v1/urn/opendaylight/params/xml/ns/yang/ovsdb/northbound/impl/rev150406/NorthboundImplModule.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-04-09T14:18:35Z",
+      "side": 1,
+      "message": "see above",
+      "parentUuid": "5a93c517_8719417b",
+      "revId": "ed24b4936fc7ef567698699e2be4af935ee0b3f3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_472b3982",
         "filename": "mdsal-northbound/impl/src/main/java/org/opendaylight/yang/gen/v1/urn/opendaylight/params/xml/ns/yang/ovsdb/northbound/impl/rev150406/NorthboundImplModule.java",
         "patchSetId": 10
@@ -64,6 +100,24 @@
       "writtenOn": "2015-04-09T12:46:27Z",
       "side": 1,
       "message": "same here",
+      "revId": "ed24b4936fc7ef567698699e2be4af935ee0b3f3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_47cc9935",
+        "filename": "mdsal-northbound/impl/src/main/java/org/opendaylight/yang/gen/v1/urn/opendaylight/params/xml/ns/yang/ovsdb/northbound/impl/rev150406/NorthboundImplModule.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-04-09T14:18:35Z",
+      "side": 1,
+      "message": "see above",
+      "parentUuid": "5a93c517_472b3982",
       "revId": "ed24b4936fc7ef567698699e2be4af935ee0b3f3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

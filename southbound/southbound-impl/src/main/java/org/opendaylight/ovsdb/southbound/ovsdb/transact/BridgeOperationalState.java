@@ -12,6 +12,8 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
@@ -91,6 +93,21 @@ public class BridgeOperationalState {
         if (tpOptional.isPresent()
                 && tpOptional.get().getAugmentation(OvsdbTerminationPointAugmentation.class) != null) {
             return Optional.of(tpOptional.get().getAugmentation(OvsdbTerminationPointAugmentation.class));
+        }
+        return Optional.absent();
+    }
+
+    public Optional<ControllerEntry> getControllerEntry(InstanceIdentifier<?> iid) {
+        Optional<OvsdbBridgeAugmentation> ovsdbBridgeOptional = getOvsdbBridgeAugmentation(iid);
+        if (ovsdbBridgeOptional.isPresent()) {
+            ControllerEntryKey key = iid.firstKeyOf(ControllerEntry.class, ControllerEntryKey.class);
+            if (key != null) {
+                for (ControllerEntry entry: ovsdbBridgeOptional.get().getControllerEntry()) {
+                    if (entry.getKey().equals(key)) {
+                        return Optional.of(entry);
+                    }
+                }
+            }
         }
         return Optional.absent();
     }

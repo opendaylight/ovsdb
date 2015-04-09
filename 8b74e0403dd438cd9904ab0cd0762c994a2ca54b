@@ -22,6 +22,30 @@
       "revId": "8b74e0403dd438cd9904ab0cd0762c994a2ca54b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_4a357dd8",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-04-09T18:43:15Z",
+      "side": 1,
+      "message": "So... I\u0027m not quite sure how to rename it.\n\nIts *not* a classic setter, because you don\u0027t tell it what to set.\n\nIts *really* either *getting* the UUID if its set, *or* its *setting* it and returning it to you if its not.\n\nSo perhaps *extractNamedUUID* would be better?  It is extracting it, and if its not set, it sets it for you.\n\nThoughts?",
+      "parentUuid": "5a93c517_ccabeed4",
+      "range": {
+        "startLine": 142,
+        "startChar": 18,
+        "endLine": 142,
+        "endChar": 22
+      },
+      "revId": "8b74e0403dd438cd9904ab0cd0762c994a2ca54b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

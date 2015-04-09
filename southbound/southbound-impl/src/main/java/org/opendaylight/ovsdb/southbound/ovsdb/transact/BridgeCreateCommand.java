@@ -18,7 +18,6 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
-import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
@@ -84,14 +83,6 @@ public class BridgeCreateCommand extends AbstractTransactCommand {
             if (SouthboundMapper.createOvsdbBridgeProtocols(ovsdbManagedNode) != null
                     && SouthboundMapper.createOvsdbBridgeProtocols(ovsdbManagedNode).size() > 0) {
                 bridge.setProtocols(SouthboundMapper.createOvsdbBridgeProtocols(ovsdbManagedNode));
-            }
-            Map<UUID,Controller> controllerMap = SouthboundMapper.createOvsdbController(
-                    ovsdbManagedNode, transaction.getDatabaseSchema());
-            for (Entry<UUID,Controller> entry: controllerMap.entrySet()) {
-                transaction.add(op.insert(entry.getValue()).withId(entry.getKey().toString()));
-            }
-            if (!controllerMap.isEmpty()) {
-                bridge.setController(controllerMap.keySet());
             }
             bridge.setPorts(Sets.newHashSet(new UUID(portNamedUuid)));
 

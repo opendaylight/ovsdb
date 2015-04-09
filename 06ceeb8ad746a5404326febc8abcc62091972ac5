@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_ea02496e",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AbstractTransactCommand.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-04-09T23:10:30Z",
+      "side": 1,
+      "message": "this is confusing! At a minimum, we should rename \nTransactCommand to be Abstract. Better yet, can we\nmerge TransactCommand into AbstractTransactCommand? It seems\nthere are too many levels of inheritance then we really need here.",
+      "revId": "06ceeb8ad746a5404326febc8abcc62091972ac5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

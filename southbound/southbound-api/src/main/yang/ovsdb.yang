@@ -227,6 +227,21 @@ module ovsdb {
             }
         }
 
+        list openvswitch-external-ids {
+            description "Open_vSwitch table external ids";
+            key "external-id-key";
+            leaf external-id-key {
+                description "external-id name/key";
+                type string;
+                mandatory true;
+            }
+            leaf external-id-value {
+                description "external-id value";
+                type string;
+                mandatory true;
+            }
+        }
+
      }
 
     identity interface-type-base {

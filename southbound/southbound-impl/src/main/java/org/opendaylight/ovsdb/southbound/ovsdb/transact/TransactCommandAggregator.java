@@ -30,6 +30,7 @@ public class TransactCommandAggregator implements TransactCommand {
         commands.add(new BridgeRemovedCommand(db,changes));
         commands.add(new TerminationPointCreateCommand(changes));
         commands.add(new TerminationPointDeleteCommand(db, changes));
+        commands.add(new OvsdbNodeUpdateCommand(changes));
     }
 
     @Override

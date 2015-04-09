@@ -26,6 +26,8 @@ import org.opendaylight.ovsdb.southbound.OvsdbClientKey;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentationBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.DatapathTypeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.DatapathTypeEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.InterfaceTypeEntry;
@@ -101,6 +103,24 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
                 } catch (SchemaVersionMismatchException e) {
                     LOG.debug("Iface types  not supported by this version of ovsdb",e);;
                 }
+
+                Map<String, String> externalIds = openVSwitch.getExternalIdsColumn().getData();
+                if (externalIds != null && !externalIds.isEmpty()) {
+                    Set<String> externalIdKeys = externalIds.keySet();
+                    List<OpenvswitchExternalIds> externalIdsList = new ArrayList<OpenvswitchExternalIds>();
+                    String externalIdValue;
+                    for (String externalIdKey : externalIdKeys) {
+                        externalIdValue = externalIds.get(externalIdKey);
+                        if (externalIdKey != null && externalIdValue != null) {
+                            externalIdsList.add(new OpenvswitchExternalIdsBuilder()
+                                    .setExternalIdKey(externalIdKey)
+                                    .setExternalIdValue(externalIdValue)
+                                    .build());
+                        }
+                    }
+                    ovsdbNodeBuilder.setOpenvswitchExternalIds(externalIdsList);
+                }
+
                 NodeBuilder nodeBuilder = new NodeBuilder();
                 nodeBuilder.setNodeId(SouthboundMapper.createNodeId(
                         ovsdbNode.getIp(), ovsdbNode.getPort()));

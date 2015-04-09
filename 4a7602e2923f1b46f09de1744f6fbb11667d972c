@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_aac0c17c",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-04-09T19:38:27Z",
+      "side": 1,
+      "message": "Can you remove trailing space?",
+      "revId": "4a7602e2923f1b46f09de1744f6fbb11667d972c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

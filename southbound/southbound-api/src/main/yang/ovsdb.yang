@@ -190,7 +190,21 @@ module ovsdb {
                 type string;
                 mandatory true;
             }
-         }
+        }
+
+        list bridge-other-configs {
+            description "Other config attributes ior Bridges";
+            key "bridge-other-config-key";
+            leaf bridge-other-config-key {
+                description "bridge-other-config name/key";
+                type string;
+            }
+            leaf bridge-other-config-value {
+                description "bridge-other-config value";
+                type string;
+            }
+        }
+
     }
 
     grouping ovsdb-node-attributes {

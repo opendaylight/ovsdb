@@ -7,13 +7,21 @@
  */
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.operations.Insert;
+import org.opendaylight.ovsdb.lib.operations.Operation;
+import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
+import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -116,5 +124,34 @@ public class TransactUtils {
             }
         }
         return result;
+    }
+
+    public static List<Insert> extractInsert(TransactionBuilder transaction, GenericTableSchema schema) {
+        List<Operation> operations = transaction.getOperations();
+        List<Insert> inserts = new ArrayList<Insert>();
+        for (int count = 0;count < operations.size();count++) {
+            Operation operation = operations.get(count);
+            if (operation instanceof Insert && operation.getTableSchema().equals(schema)) {
+                Insert insert = (Insert)operation;
+                inserts.add(insert);
+            }
+        }
+        return inserts;
+    }
+
+    /**
+     * Extract the NamedUuid from the Insert.
+     * If the Insert does not have a NamedUuid set, a random one will be
+     * generated, set, and returned.
+     *
+     * @param insert - Insert from which to extract the NamedUuid
+     * @return UUID - NamedUUID of the Insert
+     */
+    public static UUID extractNamedUuid(Insert insert) {
+        String uuidString = insert.getUuidName() != null
+                ? insert.getUuidName() : SouthboundMapper.getRandomUUID();
+        insert.setUuidName(uuidString);
+        UUID uuid = new UUID(uuidString);
+        return uuid;
     }
 }

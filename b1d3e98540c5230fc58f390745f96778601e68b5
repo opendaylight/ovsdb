@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_56cc5135",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 382,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-04-09T00:53:54Z",
+      "side": 1,
+      "message": "does this list get added to some other grouping or augmentation?",
+      "range": {
+        "startLine": 382,
+        "startChar": 18,
+        "endLine": 382,
+        "endChar": 26
+      },
+      "revId": "b1d3e98540c5230fc58f390745f96778601e68b5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_36c98526",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 383,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-04-09T00:53:54Z",
+      "side": 1,
+      "message": "should this be plural - external id{s}",
+      "range": {
+        "startLine": 383,
+        "startChar": 51,
+        "endLine": 383,
+        "endChar": 53
+      },
+      "revId": "b1d3e98540c5230fc58f390745f96778601e68b5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

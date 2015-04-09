@@ -28,11 +28,13 @@ import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.OvsdbClientKey;
+import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
@@ -80,6 +82,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                     if (portUUID.equals(port.getUuid())) {
                         Collection<Long> vlanId = port.getTagColumn().getData();
                         Set<Long> portTrunks = port.getTrunksColumn().getData();
+                        Collection<String> vlanMode = port.getVlanModeColumn().getData();
                         bridgeName = bridge.getName();
                         NodeId bridgeId = SouthboundMapper.createManagedNodeId(
                                 getKey(), new OvsdbBridgeName(bridgeName));
@@ -114,12 +117,34 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                                 ovsdbTerminationPointBuilder.setVlanTag(new VlanId(id));
                             }
                             List<Trunks> modelTrunks = new ArrayList<Trunks>();
-                            for (Long trunk: portTrunks) {
-                                if (trunk != null) {
-                                    modelTrunks.add(new TrunksBuilder().setTrunk(new VlanId(trunk.intValue())).build());
+                            if (!portTrunks.isEmpty()) {
+                                for (Long trunk: portTrunks) {
+                                    if (trunk != null) {
+                                        modelTrunks.add(new TrunksBuilder()
+                                            .setTrunk(new VlanId(trunk.intValue())).build());
+                                    }
+                                }
+                                ovsdbTerminationPointBuilder.setTrunks(modelTrunks);
+                            }
+                            if (!vlanMode.isEmpty()) {
+                                Iterator<String> itr = vlanMode.iterator();
+                                String vlanType = itr.next();
+                                if (vlanType.equals(SouthboundConstants.VLANMODES.ACCESS.getMode())) {
+                                    ovsdbTerminationPointBuilder
+                                        .setVlanMode(OvsdbPortInterfaceAttributes.VlanMode.Access);
+                                } else if (vlanType.equals(SouthboundConstants.VLANMODES.NATIVE_TAGGED.getMode())) {
+                                    ovsdbTerminationPointBuilder
+                                        .setVlanMode(OvsdbPortInterfaceAttributes.VlanMode.NativeTagged);
+                                } else if (vlanType.equals(SouthboundConstants.VLANMODES.NATIVE_UNTAGGED.getMode())) {
+                                    ovsdbTerminationPointBuilder
+                                        .setVlanMode(OvsdbPortInterfaceAttributes.VlanMode.NativeUntagged);
+                                } else if (vlanType.equals(SouthboundConstants.VLANMODES.TRUNK.getMode())) {
+                                    ovsdbTerminationPointBuilder
+                                        .setVlanMode(OvsdbPortInterfaceAttributes.VlanMode.Trunk);
+                                } else {
+                                    LOG.debug("Invalid vlan mode {}.", vlanType);
                                 }
                             }
-                            ovsdbTerminationPointBuilder.setTrunks(modelTrunks);
 
                             Map<String, String> portExternalIds = port.getExternalIdsColumn().getData();
                             if (portExternalIds != null && !portExternalIds.isEmpty()) {

@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_2a091195",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-04-09T23:06:25Z",
+      "side": 1,
+      "message": "man, that is a mouthful for the uuid type. It is a shame we need to spell out the type here, but I can see you are trying to keep UUID type as the \u0027formal\u0027 one and keep the confusion to a minimum.",
+      "revId": "731dd66a807f87b6e9b5cf2888377c71abc9ab76",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

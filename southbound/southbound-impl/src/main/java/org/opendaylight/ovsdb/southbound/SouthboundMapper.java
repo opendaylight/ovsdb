@@ -309,7 +309,12 @@ public class SouthboundMapper {
             if (controller != null && controller.getTargetColumn() != null
                     && controller.getTargetColumn() != null) {
                 String targetString = controller.getTargetColumn().getData();
-                controllerEntries.add(new ControllerEntryBuilder().setTarget(new Uri(targetString)).build());
+                org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid uuid =
+                        new org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang
+                            .ietf.yang.types.rev130715.Uuid(controller.getUuid().toString());
+                controllerEntries.add(new ControllerEntryBuilder()
+                    .setTarget(new Uri(targetString))
+                    .setControllerUuid(uuid).build());
             }
         }
         return controllerEntries;

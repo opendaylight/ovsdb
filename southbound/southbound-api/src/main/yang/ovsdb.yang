@@ -146,6 +146,11 @@ module ovsdb {
                 description "Uri telling bridge how to connect to controller";
                 type inet:uri;
             }
+            leaf controller-uuid {
+                description "The unique identifier of the controller";
+                type yang:uuid;
+            }
+
         }
 
         leaf datapath-id {

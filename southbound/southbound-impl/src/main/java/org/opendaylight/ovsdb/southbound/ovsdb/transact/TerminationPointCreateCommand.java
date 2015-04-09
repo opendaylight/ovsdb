@@ -42,10 +42,12 @@ import com.google.common.collect.Sets;
 
 public class TerminationPointCreateCommand implements TransactCommand {
     private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes;
+    private BridgeOperationalState operationalState;
     private static final Logger LOG = LoggerFactory.getLogger(TerminationPointCreateCommand.class);
 
-    public TerminationPointCreateCommand(AsyncDataChangeEvent<InstanceIdentifier<?>,
+    public TerminationPointCreateCommand(BridgeOperationalState state, AsyncDataChangeEvent<InstanceIdentifier<?>,
             DataObject> changes) {
+        this.operationalState = state;
         this.changes = changes;
     }
 

@@ -153,7 +153,7 @@ public class SouthboundMapper {
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
                 .child(Node.class,createNodeKey(ip,port));
-        LOG.info("Created ovsdb path: {}",path);
+        LOG.debug("Created ovsdb path: {}",path);
         return path;
     }
 

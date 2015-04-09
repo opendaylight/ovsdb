@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_b6dcb5e5",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointCreateCommand.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-04-09T00:56:05Z",
+      "side": 1,
+      "message": "I think you can use the SouthboundConstants file. Looks like that one has these type of values in it.",
+      "parentUuid": "5a93c517_d6c62149",
+      "range": {
+        "startLine": 46,
+        "startChar": 24,
+        "endLine": 46,
+        "endChar": 33
+      },
+      "revId": "1a15404c3cd30131054da5786f81a3041dc82bde",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_b6cb5552",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
         "patchSetId": 5

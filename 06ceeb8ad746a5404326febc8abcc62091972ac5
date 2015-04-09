@@ -16,6 +16,24 @@
       "revId": "06ceeb8ad746a5404326febc8abcc62091972ac5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_4a21fdf9",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AbstractTransactCommand.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-04-09T23:21:20Z",
+      "side": 1,
+      "message": "TransactCommand is an interface... AbstractTransactCommand is a base class that provides some common (but not mandatory) conveniences.",
+      "parentUuid": "5a93c517_ea02496e",
+      "revId": "06ceeb8ad746a5404326febc8abcc62091972ac5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

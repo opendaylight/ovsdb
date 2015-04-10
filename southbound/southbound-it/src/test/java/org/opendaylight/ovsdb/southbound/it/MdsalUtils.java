@@ -51,7 +51,7 @@ public class MdsalUtils {
         CheckedFuture<Optional<D>, ReadFailedException> submitFuture = readTx.read(logicalDatastoreType, path);
         try {
             optionalDataObject = submitFuture.checkedGet();
-            if (optionalDataObject != null && optionalDataObject.isPresent()) {
+            if (optionalDataObject.isPresent()) {
                 ret = optionalDataObject.get();
             } else {
                 LOG.debug("{}: Failed to read {}",
@@ -60,6 +60,7 @@ public class MdsalUtils {
         } catch (ReadFailedException e) {
             LOG.warn("Failed to read {} ", path, e);
         }
+        readTx.close();
         return ret;
     }
 

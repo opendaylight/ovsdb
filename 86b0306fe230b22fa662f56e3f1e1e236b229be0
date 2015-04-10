@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_81a4c8a6",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointCreateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-10T16:36:29Z",
+      "side": 1,
+      "message": "please print the exception as well\nLOG.warn(\"Incomplete OVSDB interface other_config\",e);",
+      "revId": "86b0306fe230b22fa662f56e3f1e1e236b229be0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_61a97c7a",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointCreateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-10T16:36:29Z",
+      "side": 1,
+      "message": "same as above.",
+      "revId": "86b0306fe230b22fa662f56e3f1e1e236b229be0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_41c5603a",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 268,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-10T16:36:29Z",
+      "side": 1,
+      "message": "can you please rename the variable name, use port instead of interface.",
+      "revId": "86b0306fe230b22fa662f56e3f1e1e236b229be0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

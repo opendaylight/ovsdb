@@ -1,0 +1,28 @@
+/*
+ * Copyright (c) 2015 Intel Corp. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
+package org.opendaylight.overlay.transactions.md.config;
+
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+
+public class OverlayNodeRemoveCommand extends
+        org.opendaylight.overlay.transactions.md.utils.AbstractTransactionCommand {
+    public OverlayNodeRemoveCommand(AsyncDataChangeEvent<InstanceIdentifier<?>,
+            DataObject> changes) {
+        super(changes);
+    }
+
+
+    @Override
+    public void execute(ReadWriteTransaction transaction) {
+        // Todo write config execute
+    }
+}

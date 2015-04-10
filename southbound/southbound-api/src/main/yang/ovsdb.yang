@@ -441,6 +441,32 @@ module ovsdb {
             }
         }
 
+        list port-other-configs {
+            description "Other config attributes for Ports";
+            key "other-config-key";
+            leaf other-config-key {
+                description "port-other-config name/key";
+                type string;
+            }
+            leaf other-config-value {
+                description "port-other-config value";
+                type string;
+            }
+        }
+
+        list interface-other-configs {
+            description "Other config attributes for Interfaces";
+            key "other-config-key";
+            leaf other-config-key {
+                description "interface-other-config name/key";
+                type string;
+            }
+            leaf other-config-value {
+                description "interface-other-config value";
+                type string;
+            }
+        }
+
         list port-external-ids {
             description "Port external ids";
             key "external-id-key";

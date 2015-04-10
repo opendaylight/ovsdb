@@ -66,87 +66,13 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
                 String interfaceUuid = "Interface_" + SouthboundMapper.getRandomUUID();;
                 Interface ovsInterface =
                         TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Interface.class);
-                ovsInterface.setName(terminationPoint.getName());
-                ovsInterface.setType(SouthboundMapper.createOvsdbInterfaceType(terminationPoint.getInterfaceType()));
-                Long ofPort = terminationPoint.getOfport();
-                if (ofPort != null) {
-                    ovsInterface.setOpenFlowPort(Sets.newHashSet(ofPort));
-                }
-                Integer ofPortRequest = terminationPoint.getOfportRequest();
-                if (ofPortRequest != null) {
-                    ovsInterface.setOpenFlowPortRequest(Sets.newHashSet(ofPortRequest.longValue()));
-                }
-
-                //Configure optional input
-                if (terminationPoint.getOptions() != null) {
-                    HashMap<String, String> optionsMap = new HashMap<String, String>();
-                    for (Options option : terminationPoint.getOptions()) {
-                        optionsMap.put(option.getOption(), option.getValue());
-                    }
-                    try {
-                        ovsInterface.setOptions(ImmutableMap.copyOf(optionsMap));
-                    } catch (NullPointerException e) {
-                        LOG.warn("Incomplete OVSDB interface options");
-                    }
-                }
-
-                createInterfaceOtherConfig(terminationPoint, ovsInterface);
-
-                List<InterfaceExternalIds> interfaceExternalIds =
-                        terminationPoint.getInterfaceExternalIds();
-                if (interfaceExternalIds != null && !interfaceExternalIds.isEmpty()) {
-                    HashMap<String, String> externalIdsMap = new HashMap<String, String>();
-                    for (InterfaceExternalIds externalId: interfaceExternalIds) {
-                        externalIdsMap.put(externalId.getExternalIdKey(), externalId.getExternalIdValue());
-                    }
-                    try {
-                        ovsInterface.setExternalIds(ImmutableMap.copyOf(externalIdsMap));
-                    } catch (NullPointerException e) {
-                        LOG.warn("Incomplete OVSDB interface external_ids");
-                    }
-                }
+                createInterface(terminationPoint, ovsInterface);
                 transaction.add(op.insert(ovsInterface).withId(interfaceUuid));
 
                 // Configure port with the above interface details
-                String portUuid = "Port_" + SouthboundMapper.getRandomUUID();;
+                String portUuid = "Port_" + SouthboundMapper.getRandomUUID();
                 Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
-                port.setName(terminationPoint.getName());
-                port.setInterfaces(Sets.newHashSet(new UUID(interfaceUuid)));
-                createPortOtherConfig(terminationPoint, port);
-                if (terminationPoint.getVlanTag() != null) {
-                    Set<Long> vlanTag = new HashSet<Long>();
-                    vlanTag.add(terminationPoint.getVlanTag().getValue().longValue());
-                    port.setTag(vlanTag);
-                }
-                if (terminationPoint.getTrunks() != null && terminationPoint.getTrunks().size() > 0) {
-                    Set<Long> portTrunks = new HashSet<Long>();
-                    List<Trunks> modelTrunks = terminationPoint.getTrunks();
-                    for (Trunks trunk: modelTrunks) {
-                        if (trunk.getTrunk() != null) {
-                            portTrunks.add(trunk.getTrunk().getValue().longValue());
-                        }
-                    }
-                    port.setTrunks(portTrunks);
-                }
-                if (terminationPoint.getVlanMode() != null) {
-                    Set<String> portVlanMode = new HashSet<String>();
-                    VlanMode modelVlanMode = terminationPoint.getVlanMode();
-                    portVlanMode.add(SouthboundConstants.VLANMODES.values()[modelVlanMode.getIntValue() - 1].getMode());
-                    port.setVlanMode(portVlanMode);
-                }
-
-                List<PortExternalIds> portExternalIds = terminationPoint.getPortExternalIds();
-                if (portExternalIds != null && !portExternalIds.isEmpty()) {
-                    HashMap<String, String> externalIdsMap = new HashMap<String, String>();
-                    for (PortExternalIds externalId: portExternalIds) {
-                        externalIdsMap.put(externalId.getExternalIdKey(), externalId.getExternalIdValue());
-                    }
-                    try {
-                        port.setExternalIds(ImmutableMap.copyOf(externalIdsMap));
-                    } catch (NullPointerException e) {
-                        LOG.warn("Incomplete OVSDB port external_ids");
-                    }
-                }
+                createPort(terminationPoint, port, interfaceUuid);
                 transaction.add(op.insert(port).withId(portUuid));
 
                 //Configure bridge with the above port details
@@ -164,9 +90,93 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
 
     }
 
+    private void createInterface(
+            final OvsdbTerminationPointAugmentation terminationPoint,
+            final Interface ovsInterface) {
+        ovsInterface.setName(terminationPoint.getName());
+        ovsInterface.setType(SouthboundMapper.createOvsdbInterfaceType(terminationPoint.getInterfaceType()));
+
+        createOfPort(terminationPoint, ovsInterface);
+        createOfPortRequest(terminationPoint, ovsInterface);
+        createInterfaceOptions(terminationPoint, ovsInterface);
+        createInterfaceOtherConfig(terminationPoint, ovsInterface);
+        createInterfaceExternalIds(terminationPoint, ovsInterface);
+    }
+
+    private void createPort(
+            final OvsdbTerminationPointAugmentation terminationPoint,
+            final Port port, final String interfaceUuid) {
+
+        port.setName(terminationPoint.getName());
+        port.setInterfaces(Sets.newHashSet(new UUID(interfaceUuid)));
+        createPortOtherConfig(terminationPoint, port);
+        createPortVlanTag(terminationPoint, port);
+        createPortVlanTrunk(terminationPoint, port);
+        createPortVlanMode(terminationPoint, port);
+        createPortExternalIds(terminationPoint, port);
+    }
+
+    private void createOfPort(
+            final OvsdbTerminationPointAugmentation terminationPoint,
+            final Interface ovsInterface) {
+
+        Long ofPort = terminationPoint.getOfport();
+        if (ofPort != null) {
+            ovsInterface.setOpenFlowPort(Sets.newHashSet(ofPort));
+        }
+    }
+
+    private void createOfPortRequest(
+            final OvsdbTerminationPointAugmentation terminationPoint,
+            final Interface ovsInterface) {
+
+        Integer ofPortRequest = terminationPoint.getOfportRequest();
+        if (ofPortRequest != null) {
+            ovsInterface.setOpenFlowPortRequest(Sets.newHashSet(ofPortRequest.longValue()));
+        }
+    }
+
+    private void createInterfaceOptions(
+            final OvsdbTerminationPointAugmentation terminationPoint,
+            final Interface ovsInterface) {
+
+        //Configure optional input
+        if (terminationPoint.getOptions() != null) {
+            HashMap<String, String> optionsMap = new HashMap<String, String>();
+            for (Options option : terminationPoint.getOptions()) {
+                optionsMap.put(option.getOption(), option.getValue());
+            }
+            try {
+                ovsInterface.setOptions(ImmutableMap.copyOf(optionsMap));
+            } catch (NullPointerException e) {
+                LOG.warn("Incomplete OVSDB interface options");
+            }
+        }
+    }
+
+    private void createInterfaceExternalIds(
+            final OvsdbTerminationPointAugmentation terminationPoint,
+            final Interface ovsInterface) {
+
+        List<InterfaceExternalIds> interfaceExternalIds =
+                terminationPoint.getInterfaceExternalIds();
+        if (interfaceExternalIds != null && !interfaceExternalIds.isEmpty()) {
+            HashMap<String, String> externalIdsMap = new HashMap<String, String>();
+            for (InterfaceExternalIds externalId: interfaceExternalIds) {
+                externalIdsMap.put(externalId.getExternalIdKey(), externalId.getExternalIdValue());
+            }
+            try {
+                ovsInterface.setExternalIds(ImmutableMap.copyOf(externalIdsMap));
+            } catch (NullPointerException e) {
+                LOG.warn("Incomplete OVSDB interface external_ids");
+            }
+        }
+    }
+
     private void createInterfaceOtherConfig(
-            OvsdbTerminationPointAugmentation terminationPoint,
-            Interface ovsInterface) {
+            final OvsdbTerminationPointAugmentation terminationPoint,
+            final Interface ovsInterface) {
+
         List<InterfaceOtherConfigs> interfaceOtherConfigs =
                 terminationPoint.getInterfaceOtherConfigs();
         if (interfaceOtherConfigs != null && !interfaceOtherConfigs.isEmpty()) {
@@ -183,9 +193,65 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
         }
     }
 
+    private void createPortExternalIds(
+            final OvsdbTerminationPointAugmentation terminationPoint,
+            final Port port) {
+
+        List<PortExternalIds> portExternalIds = terminationPoint.getPortExternalIds();
+        if (portExternalIds != null && !portExternalIds.isEmpty()) {
+            HashMap<String, String> externalIdsMap = new HashMap<String, String>();
+            for (PortExternalIds externalId: portExternalIds) {
+                externalIdsMap.put(externalId.getExternalIdKey(), externalId.getExternalIdValue());
+            }
+            try {
+                port.setExternalIds(ImmutableMap.copyOf(externalIdsMap));
+            } catch (NullPointerException e) {
+                LOG.warn("Incomplete OVSDB port external_ids");
+            }
+        }
+    }
+
+    private void createPortVlanTag(
+            final OvsdbTerminationPointAugmentation terminationPoint,
+            final Port port) {
+
+        if (terminationPoint.getVlanTag() != null) {
+            Set<Long> vlanTag = new HashSet<Long>();
+            vlanTag.add(terminationPoint.getVlanTag().getValue().longValue());
+            port.setTag(vlanTag);
+        }
+    }
+
+    private void createPortVlanTrunk(
+            final OvsdbTerminationPointAugmentation terminationPoint,
+            final Port port) {
+
+        if (terminationPoint.getTrunks() != null && terminationPoint.getTrunks().size() > 0) {
+            Set<Long> portTrunks = new HashSet<Long>();
+            List<Trunks> modelTrunks = terminationPoint.getTrunks();
+            for (Trunks trunk: modelTrunks) {
+                if (trunk.getTrunk() != null) {
+                    portTrunks.add(trunk.getTrunk().getValue().longValue());
+                }
+            }
+            port.setTrunks(portTrunks);
+        }
+    }
+
+    private void createPortVlanMode(
+            final OvsdbTerminationPointAugmentation terminationPoint,
+            final Port port) {
+        if (terminationPoint.getVlanMode() != null) {
+            Set<String> portVlanMode = new HashSet<String>();
+            VlanMode modelVlanMode = terminationPoint.getVlanMode();
+            portVlanMode.add(SouthboundConstants.VLANMODES.values()[modelVlanMode.getIntValue() - 1].getMode());
+            port.setVlanMode(portVlanMode);
+        }
+    }
+
     private void createPortOtherConfig(
-            OvsdbTerminationPointAugmentation terminationPoint,
-            Port ovsPort) {
+            final OvsdbTerminationPointAugmentation terminationPoint,
+            final Port ovsPort) {
         List<PortOtherConfigs> portOtherConfigs =
                 terminationPoint.getPortOtherConfigs();
         if (portOtherConfigs != null && !portOtherConfigs.isEmpty()) {
@@ -201,6 +267,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
             }
         }
     }
+
     private OvsdbBridgeAugmentation getBridge(InstanceIdentifier<?> key) {
         InstanceIdentifier<Node> nodeIid = key.firstIdentifierOf(Node.class);
         Map<InstanceIdentifier<Node>, Node> nodes =

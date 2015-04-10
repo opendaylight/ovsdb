@@ -84,178 +84,14 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                 UUID portUUID = bridgePorts.next();
                 for (Port port : portUpdatedRows) {
                     if (portUUID.equals(port.getUuid())) {
-                        Collection<Long> vlanId = port.getTagColumn().getData();
-                        Set<Long> portTrunks = port.getTrunksColumn().getData();
-                        Collection<String> vlanMode = port.getVlanModeColumn().getData();
                         bridgeName = bridge.getName();
                         NodeId bridgeId = SouthboundMapper.createManagedNodeId(
                                 getKey(), new OvsdbBridgeName(bridgeName));
                         final InstanceIdentifier<Node> nodePath = SouthboundMapper
                                 .createInstanceIdentifier(bridgeId);
-                        Optional<Node> node = Optional.absent();
-                        try {
-                            node = transaction.read(
-                                    LogicalDatastoreType.OPERATIONAL, nodePath)
-                                    .checkedGet();
-                        } catch (final ReadFailedException e) {
-                            LOG.warn("Read Operational/DS for Node fail! {}",
-                                    nodePath, e);
-                        }
+                        Optional<Node> node = readNode(transaction, nodePath);
                         if (node.isPresent()) {
-                            NodeBuilder nodeBuilder = new NodeBuilder();
-                            nodeBuilder.setNodeId(bridgeId);
-
-                            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder
-                                = new OvsdbTerminationPointAugmentationBuilder();
-                            List<TerminationPoint> tpList = new ArrayList<TerminationPoint>();
-                            TerminationPointBuilder entry = new TerminationPointBuilder();
-                            entry.setTpId(new TpId(port.getName()));
-                            ovsdbTerminationPointBuilder
-                                    .setName(port.getName());
-                            ovsdbTerminationPointBuilder.setPortUuid(new Uuid(
-                                    port.getUuid().toString()));
-                            if (vlanId.size() > 0) {
-                                Iterator<Long> itr = vlanId.iterator();
-                                // There are no loops here, just get the first element.
-                                int id = itr.next().intValue();
-                                ovsdbTerminationPointBuilder.setVlanTag(new VlanId(id));
-                            }
-                            List<Trunks> modelTrunks = new ArrayList<Trunks>();
-                            if (!portTrunks.isEmpty()) {
-                                for (Long trunk: portTrunks) {
-                                    if (trunk != null) {
-                                        modelTrunks.add(new TrunksBuilder()
-                                            .setTrunk(new VlanId(trunk.intValue())).build());
-                                    }
-                                }
-                                ovsdbTerminationPointBuilder.setTrunks(modelTrunks);
-                            }
-                            if (!vlanMode.isEmpty()) {
-                                Iterator<String> itr = vlanMode.iterator();
-                                String vlanType = itr.next();
-                                if (vlanType.equals(SouthboundConstants.VLANMODES.ACCESS.getMode())) {
-                                    ovsdbTerminationPointBuilder
-                                        .setVlanMode(OvsdbPortInterfaceAttributes.VlanMode.Access);
-                                } else if (vlanType.equals(SouthboundConstants.VLANMODES.NATIVE_TAGGED.getMode())) {
-                                    ovsdbTerminationPointBuilder
-                                        .setVlanMode(OvsdbPortInterfaceAttributes.VlanMode.NativeTagged);
-                                } else if (vlanType.equals(SouthboundConstants.VLANMODES.NATIVE_UNTAGGED.getMode())) {
-                                    ovsdbTerminationPointBuilder
-                                        .setVlanMode(OvsdbPortInterfaceAttributes.VlanMode.NativeUntagged);
-                                } else if (vlanType.equals(SouthboundConstants.VLANMODES.TRUNK.getMode())) {
-                                    ovsdbTerminationPointBuilder
-                                        .setVlanMode(OvsdbPortInterfaceAttributes.VlanMode.Trunk);
-                                } else {
-                                    LOG.debug("Invalid vlan mode {}.", vlanType);
-                                }
-                            }
-
-                            Map<String, String> portExternalIds = port.getExternalIdsColumn().getData();
-                            if (portExternalIds != null && !portExternalIds.isEmpty()) {
-                                Set<String> externalIdKeys = portExternalIds.keySet();
-                                List<PortExternalIds> externalIdsList = new ArrayList<PortExternalIds>();
-                                String externalIdValue;
-                                for (String externalIdKey : externalIdKeys) {
-                                    externalIdValue = portExternalIds.get(externalIdKey);
-                                    if (externalIdKey != null && externalIdValue != null) {
-                                        externalIdsList.add(new PortExternalIdsBuilder()
-                                                .setExternalIdKey(externalIdKey)
-                                                .setExternalIdValue(externalIdValue).build());
-                                    }
-                                }
-                                ovsdbTerminationPointBuilder.setPortExternalIds(externalIdsList);
-                            }
-                            updatePortOtherConfig(port,ovsdbTerminationPointBuilder);
-
-                            Column<GenericTableSchema, Set<UUID>> iface = port.getInterfacesColumn();
-                            Set<UUID> ifUuid = iface.getData();
-                            Collection<Interface> ifUpdateRows = TyperUtils.extractRowsUpdated(
-                                    Interface.class, getUpdates(),  getDbSchema()).values();
-                            for (UUID ifIter : ifUuid) {
-                                for (Interface interfIter : ifUpdateRows) {
-                                    Column<GenericTableSchema, String> typeColumn = interfIter.getTypeColumn();
-                                    String type = typeColumn.getData();
-                                    if ((interfIter.getUuid()).equals(ifIter)) {
-                                        ovsdbTerminationPointBuilder.setInterfaceUuid(
-                                                new Uuid(interfIter.getUuid().toString()));
-                                        ovsdbTerminationPointBuilder.setInterfaceType(
-                                                SouthboundMapper.createInterfaceType(type));
-                                        Set<Long> ofPorts = interfIter.getOpenFlowPortColumn().getData();
-                                        if (ofPorts != null && !ofPorts.isEmpty()) {
-                                            Iterator<Long> ofPortsIter = ofPorts.iterator();
-                                            long ofPort = ofPortsIter.next();
-                                            if (ofPort >= 0) {
-                                                ovsdbTerminationPointBuilder
-                                                    .setOfport(ofPort);
-                                            } else {
-                                                LOG.debug("Received negative value for ofPort from ovsdb for {} {} {}",
-                                                        bridge.getName(), interfIter.getName(),ofPort);
-                                            }
-                                        }
-                                        Set<Long> ofPortRequests = interfIter
-                                                .getOpenFlowPortRequestColumn().getData();
-                                        if (ofPortRequests != null && !ofPortRequests.isEmpty()) {
-                                            Iterator<Long> ofPortRequestsIter = ofPortRequests.iterator();
-                                            int ofPort = ofPortRequestsIter.next().intValue();
-                                            if (ofPort >= 0) {
-                                                ovsdbTerminationPointBuilder
-                                                    .setOfportRequest(ofPort);
-                                            } else {
-                                                LOG.debug("Received negative value for ofPort from ovsdb for {} {} {}",
-                                                        bridge.getName(), interfIter.getName(),ofPort);
-                                            }
-                                        }
-
-                                        Map<String, String> interfaceExternalIds =
-                                                interfIter.getExternalIdsColumn().getData();
-                                        if (interfaceExternalIds != null && !interfaceExternalIds.isEmpty()) {
-                                            Set<String> externalIdKeys = interfaceExternalIds.keySet();
-                                            List<InterfaceExternalIds> externalIdsList =
-                                                    new ArrayList<InterfaceExternalIds>();
-                                            String externalIdValue;
-                                            for (String externalIdKey : externalIdKeys) {
-                                                externalIdValue = interfaceExternalIds.get(externalIdKey);
-                                                if (externalIdKey != null && externalIdValue != null) {
-                                                    externalIdsList.add(new InterfaceExternalIdsBuilder()
-                                                            .setExternalIdKey(externalIdKey)
-                                                            .setExternalIdValue(externalIdValue).build());
-                                                }
-                                            }
-                                            ovsdbTerminationPointBuilder.setInterfaceExternalIds(externalIdsList);
-                                        }
-
-                                        Map<String, String> optionsMap = interfIter.getOptionsColumn().getData();
-                                        if (optionsMap != null && !optionsMap.isEmpty()) {
-                                            List<Options> options = new ArrayList<Options>();
-                                            String optionsValueString;
-                                            OptionsKey optionsKey;
-                                            for (String optionsKeyString : optionsMap.keySet()) {
-                                                optionsValueString = optionsMap.get(optionsKeyString);
-                                                if (optionsKeyString != null && optionsValueString != null) {
-                                                    optionsKey = new OptionsKey(optionsKeyString);
-                                                    options.add(new OptionsBuilder()
-                                                        .setKey(optionsKey)
-                                                        .setValue(optionsValueString).build());
-                                                }
-                                            }
-                                            ovsdbTerminationPointBuilder.setOptions(options);
-                                        }
-                                        updateInterfaceOtherConfig(interfIter, ovsdbTerminationPointBuilder);
-
-                                        break;
-                                    }
-                                }
-                            }
-                            entry.addAugmentation(
-                                    OvsdbTerminationPointAugmentation.class,
-                                    ovsdbTerminationPointBuilder.build());
-
-                            tpList.add(entry.build());
-                            nodeBuilder.setTerminationPoint(tpList);
-                            nodeBuilder.addAugmentation(
-                                    OvsdbBridgeAugmentation.class,
-                                    node.get().getAugmentation(
-                                            OvsdbBridgeAugmentation.class));
+                            NodeBuilder nodeBuilder = buildNode(node, bridgeId, bridge, port);
                             transaction.merge(LogicalDatastoreType.OPERATIONAL,
                                     nodePath, nodeBuilder.build());
                         }
@@ -265,8 +101,253 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
+    private Optional<Node> readNode(ReadWriteTransaction transaction, final InstanceIdentifier<Node> nodePath) {
+        Optional<Node> node = Optional.absent();
+        try {
+            node = transaction.read(
+                    LogicalDatastoreType.OPERATIONAL, nodePath)
+                    .checkedGet();
+        } catch (final ReadFailedException e) {
+            LOG.warn("Read Operational/DS for Node fail! {}",
+                    nodePath, e);
+        }
+        return node;
+    }
+
+    private NodeBuilder buildNode(Optional<Node> node, NodeId bridgeId, Bridge bridge, Port port) {
+        NodeBuilder nodeBuilder = new NodeBuilder();
+        nodeBuilder.setNodeId(bridgeId);
+        List<TerminationPoint> tpList = buildTpList(bridge, port);
+        nodeBuilder.setTerminationPoint(tpList);
+        nodeBuilder.addAugmentation(
+                OvsdbBridgeAugmentation.class,
+                node.get().getAugmentation(
+                        OvsdbBridgeAugmentation.class));
+        return nodeBuilder;
+    }
+
+    private List<TerminationPoint> buildTpList(Bridge bridge, Port port) {
+        List<TerminationPoint> tpList = new ArrayList<TerminationPoint>();
+        TerminationPointBuilder entry = new TerminationPointBuilder();
+        entry.setTpId(new TpId(port.getName()));
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder =
+                new OvsdbTerminationPointAugmentationBuilder();
+        ovsdbTerminationPointBuilder
+                .setName(port.getName());
+        ovsdbTerminationPointBuilder.setPortUuid(new Uuid(
+                port.getUuid().toString()));
+        updatePort(port, ovsdbTerminationPointBuilder);
+        updateInterfaces(port, bridge, ovsdbTerminationPointBuilder);
+        entry.addAugmentation(
+                OvsdbTerminationPointAugmentation.class,
+                ovsdbTerminationPointBuilder.build());
+        return tpList;
+    }
+
+    private void updateInterfaces(Port port, Bridge bridge,
+            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+
+        Column<GenericTableSchema, Set<UUID>> iface = port.getInterfacesColumn();
+        Set<UUID> ifUuid = iface.getData();
+        Collection<Interface> ifUpdateRows = TyperUtils.extractRowsUpdated(
+                Interface.class, getUpdates(),  getDbSchema()).values();
+        updateInterfaces(ifUuid, ifUpdateRows, bridge, ovsdbTerminationPointBuilder);
+    }
+
+    private void updateInterfaces(Set<UUID> ifUuid, Collection<Interface> ifUpdateRows, Bridge bridge,
+            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+
+        for (UUID ifIter : ifUuid) {
+            for (Interface interfIter : ifUpdateRows) {
+                Column<GenericTableSchema, String> typeColumn = interfIter.getTypeColumn();
+                String type = typeColumn.getData();
+                if ((interfIter.getUuid()).equals(ifIter)) {
+                    updateInterface(interfIter, bridge, type, ovsdbTerminationPointBuilder);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void updatePort(Port port, OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+        updateVlan(port, ovsdbTerminationPointBuilder);
+        updateVlanTrunks(port, ovsdbTerminationPointBuilder);
+        updateVlanMode(port, ovsdbTerminationPointBuilder);
+        updatePortExternalIds(port, ovsdbTerminationPointBuilder);
+        updatePortOtherConfig(port, ovsdbTerminationPointBuilder);
+    }
+
+    private void updateInterface(Interface interf,
+            Bridge bridge, String type,
+            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+
+        ovsdbTerminationPointBuilder.setInterfaceUuid(
+                new Uuid(interf.getUuid().toString()));
+        ovsdbTerminationPointBuilder.setInterfaceType(
+                SouthboundMapper.createInterfaceType(type));
+        updateOfPort(interf, bridge, ovsdbTerminationPointBuilder);
+        updateOfPortRequest(interf, bridge, ovsdbTerminationPointBuilder);
+        updateInterfaceExternalIds(interf, ovsdbTerminationPointBuilder);
+        updateOptions(interf, ovsdbTerminationPointBuilder);
+        updateInterfaceOtherConfig(interf, ovsdbTerminationPointBuilder);
+    }
+
+    private void updateVlan(Port port,
+            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+
+        Collection<Long> vlanId = port.getTagColumn().getData();
+        if (vlanId.size() > 0) {
+            Iterator<Long> itr = vlanId.iterator();
+            // There are no loops here, just get the first element.
+            int id = itr.next().intValue();
+            ovsdbTerminationPointBuilder.setVlanTag(new VlanId(id));
+        }
+    }
+
+    private void updateVlanTrunks(Port port,
+            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+
+        Set<Long> portTrunks = port.getTrunksColumn().getData();
+        List<Trunks> modelTrunks = new ArrayList<Trunks>();
+        if (!portTrunks.isEmpty()) {
+            for (Long trunk: portTrunks) {
+                if (trunk != null) {
+                    modelTrunks.add(new TrunksBuilder()
+                        .setTrunk(new VlanId(trunk.intValue())).build());
+                }
+            }
+            ovsdbTerminationPointBuilder.setTrunks(modelTrunks);
+        }
+    }
+
+    private void updateVlanMode(Port port,
+            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+
+        Collection<String> vlanMode = port.getVlanModeColumn().getData();
+        if (!vlanMode.isEmpty()) {
+            Iterator<String> itr = vlanMode.iterator();
+            String vlanType = itr.next();
+            if (vlanType.equals(SouthboundConstants.VLANMODES.ACCESS.getMode())) {
+                ovsdbTerminationPointBuilder
+                    .setVlanMode(OvsdbPortInterfaceAttributes.VlanMode.Access);
+            } else if (vlanType.equals(SouthboundConstants.VLANMODES.NATIVE_TAGGED.getMode())) {
+                ovsdbTerminationPointBuilder
+                    .setVlanMode(OvsdbPortInterfaceAttributes.VlanMode.NativeTagged);
+            } else if (vlanType.equals(SouthboundConstants.VLANMODES.NATIVE_UNTAGGED.getMode())) {
+                ovsdbTerminationPointBuilder
+                    .setVlanMode(OvsdbPortInterfaceAttributes.VlanMode.NativeUntagged);
+            } else if (vlanType.equals(SouthboundConstants.VLANMODES.TRUNK.getMode())) {
+                ovsdbTerminationPointBuilder
+                    .setVlanMode(OvsdbPortInterfaceAttributes.VlanMode.Trunk);
+            } else {
+                LOG.debug("Invalid vlan mode {}.", vlanType);
+            }
+        }
+    }
+
+    private void updateOfPort(Interface interf,
+            Bridge bridge,
+            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+
+        Set<Long> ofPorts = interf.getOpenFlowPortColumn().getData();
+        if (ofPorts != null && !ofPorts.isEmpty()) {
+            Iterator<Long> ofPortsIter = ofPorts.iterator();
+            long ofPort = ofPortsIter.next();
+            if (ofPort >= 0) {
+                ovsdbTerminationPointBuilder
+                    .setOfport(ofPort);
+            } else {
+                LOG.debug("Received negative value for ofPort from ovsdb for {} {} {}",
+                        bridge.getName(), interf.getName(),ofPort);
+            }
+        }
+    }
+
+    private void updateOfPortRequest(Interface interf,
+            Bridge bridge,
+            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+
+        Set<Long> ofPortRequests = interf
+                .getOpenFlowPortRequestColumn().getData();
+        if (ofPortRequests != null && !ofPortRequests.isEmpty()) {
+            Iterator<Long> ofPortRequestsIter = ofPortRequests.iterator();
+            int ofPort = ofPortRequestsIter.next().intValue();
+            if (ofPort >= 0) {
+                ovsdbTerminationPointBuilder
+                    .setOfportRequest(ofPort);
+            } else {
+                LOG.debug("Received negative value for ofPort from ovsdb for {} {} {}",
+                        bridge.getName(), interf.getName(),ofPort);
+            }
+        }
+    }
+
+    private void updateInterfaceExternalIds(Interface interf,
+            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+
+        Map<String, String> interfaceExternalIds =
+                interf.getExternalIdsColumn().getData();
+        if (interfaceExternalIds != null && !interfaceExternalIds.isEmpty()) {
+            Set<String> externalIdKeys = interfaceExternalIds.keySet();
+            List<InterfaceExternalIds> externalIdsList =
+                    new ArrayList<InterfaceExternalIds>();
+            String externalIdValue;
+            for (String externalIdKey : externalIdKeys) {
+                externalIdValue = interfaceExternalIds.get(externalIdKey);
+                if (externalIdKey != null && externalIdValue != null) {
+                    externalIdsList.add(new InterfaceExternalIdsBuilder()
+                            .setExternalIdKey(externalIdKey)
+                            .setExternalIdValue(externalIdValue).build());
+                }
+            }
+            ovsdbTerminationPointBuilder.setInterfaceExternalIds(externalIdsList);
+        }
+    }
+
+    private void updatePortExternalIds(Port port,
+            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+
+        Map<String, String> portExternalIds = port.getExternalIdsColumn().getData();
+        if (portExternalIds != null && !portExternalIds.isEmpty()) {
+            Set<String> externalIdKeys = portExternalIds.keySet();
+            List<PortExternalIds> externalIdsList = new ArrayList<PortExternalIds>();
+            String externalIdValue;
+            for (String externalIdKey : externalIdKeys) {
+                externalIdValue = portExternalIds.get(externalIdKey);
+                if (externalIdKey != null && externalIdValue != null) {
+                    externalIdsList.add(new PortExternalIdsBuilder()
+                            .setExternalIdKey(externalIdKey)
+                            .setExternalIdValue(externalIdValue).build());
+                }
+            }
+            ovsdbTerminationPointBuilder.setPortExternalIds(externalIdsList);
+        }
+    }
+
+    private void updateOptions(Interface interf,
+            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+
+        Map<String, String> optionsMap = interf.getOptionsColumn().getData();
+        if (optionsMap != null && !optionsMap.isEmpty()) {
+            List<Options> options = new ArrayList<Options>();
+            String optionsValueString;
+            OptionsKey optionsKey;
+            for (String optionsKeyString : optionsMap.keySet()) {
+                optionsValueString = optionsMap.get(optionsKeyString);
+                if (optionsKeyString != null && optionsValueString != null) {
+                    optionsKey = new OptionsKey(optionsKeyString);
+                    options.add(new OptionsBuilder()
+                        .setKey(optionsKey)
+                        .setValue(optionsValueString).build());
+                }
+            }
+            ovsdbTerminationPointBuilder.setOptions(options);
+        }
+    }
+
     private void updatePortOtherConfig(Port port,
             OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+
         Map<String, String> portOtherConfigMap = port.getOtherConfigColumn().getData();
         if (portOtherConfigMap != null && !portOtherConfigMap.isEmpty()) {
             List<PortOtherConfigs> portOtherConfigs = new ArrayList<PortOtherConfigs>();
@@ -285,6 +366,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
 
     private void updateInterfaceOtherConfig(Interface interf,
             OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+
         Map<String, String> interfaceOtherConfigMap = interf.getOtherConfigColumn().getData();
         if (interfaceOtherConfigMap != null && !interfaceOtherConfigMap.isEmpty()) {
             List<InterfaceOtherConfigs> interfaceOtherConfigs = new ArrayList<InterfaceOtherConfigs>();

@@ -29,6 +29,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIdsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
@@ -98,6 +100,24 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                         }
                     }
                     ovsdbManagedNodeBuilder.setBridgeExternalIds(externalIdsList);
+                }
+
+                Map<String, String> otherConfigs = bridge
+                        .getOtherConfigColumn().getData();
+                if (otherConfigs != null && !otherConfigs.isEmpty()) {
+                    Set<String> otherConfigKeys = otherConfigs.keySet();
+                    List<BridgeOtherConfigs> otherConfigList = new ArrayList<BridgeOtherConfigs>();
+                    String otherConfigValue;
+                    for (String otherConfigKey : otherConfigKeys) {
+                        otherConfigValue = otherConfigs.get(otherConfigKey);
+                        if (otherConfigKey != null && otherConfigValue != null) {
+                            otherConfigList.add(new BridgeOtherConfigsBuilder()
+                                    .setBridgeOtherConfigKey(otherConfigKey)
+                                    .setBridgeOtherConfigValue(otherConfigValue)
+                                    .build());
+                        }
+                    }
+                    ovsdbManagedNodeBuilder.setBridgeOtherConfigs(otherConfigList);
                 }
 
                 if (!SouthboundMapper.createControllerEntries(bridge, updatedControllerRows).isEmpty()) {

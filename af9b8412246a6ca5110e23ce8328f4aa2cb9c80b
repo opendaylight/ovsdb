@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_3cc95b78",
+        "filename": "mdsal-northbound/impl/pom.xml",
+        "patchSetId": 12
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-10T20:23:12Z",
+      "side": 1,
+      "message": "I would suggest ovsdb-northbound-impl, mdsal-northbound-impl is confusing. Or if you want to have mdsal to differentiate from existing northbound module, you can use ovsdb-mdsal-northbound-impl.",
+      "revId": "af9b8412246a6ca5110e23ce8328f4aa2cb9c80b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_5cc4675e",
+        "filename": "mdsal-northbound/impl/pom.xml",
+        "patchSetId": 12
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-10T20:23:12Z",
+      "side": 1,
+      "message": "same suggest as above for mdsal-northbound-api.",
+      "revId": "af9b8412246a6ca5110e23ce8328f4aa2cb9c80b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_9cf50fcd",
+        "filename": "mdsal-northbound/impl/src/main/java/org/opendaylight/ovsdb/northbound/NorthboundUtil.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-10T20:23:12Z",
+      "side": 1,
+      "message": "nit-pick : please remote the tab. :)",
+      "revId": "af9b8412246a6ca5110e23ce8328f4aa2cb9c80b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_7c21234c",
+        "filename": "mdsal-northbound/impl/src/main/java/org/opendaylight/ovsdb/northbound/NorthboundUtil.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-10T20:23:12Z",
+      "side": 1,
+      "message": "remove this null check, not required.",
+      "revId": "af9b8412246a6ca5110e23ce8328f4aa2cb9c80b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_1ca6dfc1",
+        "filename": "mdsal-northbound/pom.xml",
+        "patchSetId": 12
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-10T20:23:12Z",
+      "side": 1,
+      "message": "isn\u0027t it that you have to use full artifact name here ?",
+      "revId": "af9b8412246a6ca5110e23ce8328f4aa2cb9c80b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

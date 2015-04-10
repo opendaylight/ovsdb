@@ -25,6 +25,7 @@ import java.net.UnknownHostException;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,10 +36,16 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.ovsdb.southbound.OvsdbClientKey;
+import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
+import org.opendaylight.ovsdb.southbound.SouthboundProvider;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -50,8 +57,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Integration test for
- * {@link org.opendaylight.ovsdb.southbound}
+ * Integration tests for southbound-impl
  *
  * @author Sam Hague (shague@redhat.com)
  */
@@ -75,6 +81,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static String portStr;
     private static String connectionType;
     private static Boolean setup = false;
+    private static MdsalUtils mdsalUtils = null;
 
     @Inject
     private BundleContext bc;
@@ -122,7 +129,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         String portStr = props.getProperty(SERVER_PORT, DEFAULT_SERVER_PORT);
         String connectionType = props.getProperty(CONNECTION_TYPE, CONNECTION_TYPE_ACTIVE);
 
-        LOG.info("1: Using the following properties: mode= {}, ip:port= {}:{}",
+        LOG.info("Using the following properties: mode= {}, ip:port= {}:{}",
                 connectionType, addressStr, portStr);
 
         Option[] options = new Option[] {
@@ -134,7 +141,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Before
-    public void setUp() {
+    public void setUp() throws InterruptedException {
         if (setup == true) {
             LOG.info("Skipping setUp, already initialized");
             return;
@@ -145,7 +152,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        dataBroker = getSession().getSALService(DataBroker.class);
+        //dataBroker = getSession().getSALService(DataBroker.class);
+        Thread.sleep(3000);
+        dataBroker = SouthboundProvider.getDb();
+        Assert.assertNotNull("db should not be null", dataBroker);
 
         addressStr = bc.getProperty(SERVER_IPADDRESS);
         portStr = bc.getProperty(SERVER_PORT);
@@ -159,6 +169,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             }
         }
 
+        mdsalUtils = new MdsalUtils(dataBroker);
         setup = true;
     }
 
@@ -173,7 +184,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     @Test
     public void testAddRemoveOvsdbNode() throws InterruptedException {
         OvsdbClientKey ovsdbClientKey = getOvsdbClientKey(addressStr, portStr);
-        DataBroker dataBroker = getSession().getSALService(DataBroker.class);
 
         // Write OVSDB node to configuration
         final ReadWriteTransaction configNodeTx = dataBroker.newReadWriteTransaction();
@@ -291,8 +301,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 SouthboundMapper.createNode(ovsdbClientKey));
         CheckedFuture<Void, TransactionCommitFailedException> commitFuture = rwTx.submit();
         try {
-            commitFuture.get();
-        } catch (ExecutionException | InterruptedException e) {
+            commitFuture.checkedGet();
+        } catch (TransactionCommitFailedException e) {
             fail("Failed transaction: " + rwTx + e);
         }
     }
@@ -327,5 +337,53 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         } catch (ExecutionException | InterruptedException e) {
             fail("Failed transaction: " + rwTx + e);
         }
+    }
+
+    private NetworkTopology readNetworkTopology(LogicalDatastoreType type) {
+        OvsdbClientKey ovsdbClientKey = getOvsdbClientKey(addressStr, portStr);
+
+        final ReadWriteTransaction rwTx = dataBroker.newReadWriteTransaction();
+        Optional<NetworkTopology> optional = Optional.absent();
+        CheckedFuture<Optional<NetworkTopology>, ReadFailedException> read;
+        read = rwTx.read(type, InstanceIdentifier.create(NetworkTopology.class));
+        try {
+            optional = read.checkedGet();
+            if (optional.isPresent()) {
+                return optional.get();
+            }
+        } catch (ReadFailedException e) {
+            fail("Failed transaction: " + rwTx + e);
+        }
+
+        return null;
+    }
+
+    @Test
+    public void testNetworkTopology() throws InterruptedException {
+        NetworkTopology networkTopology = MdsalUtils.readTransaction(LogicalDatastoreType.CONFIGURATION,
+                InstanceIdentifier.create(NetworkTopology.class));
+        Assert.assertNotNull("NetworkTopology could not be found in " + LogicalDatastoreType.CONFIGURATION,
+                networkTopology);
+
+        networkTopology = MdsalUtils.readTransaction(LogicalDatastoreType.OPERATIONAL,
+                InstanceIdentifier.create(NetworkTopology.class));
+        Assert.assertNotNull("NetworkTopology could not be found in " + LogicalDatastoreType.OPERATIONAL,
+                networkTopology);
+    }
+
+    @Test
+    public void testOvsdbTopology() throws InterruptedException {
+        InstanceIdentifier<Topology> path = InstanceIdentifier
+                .create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
+
+        Topology topology = MdsalUtils.readTransaction(LogicalDatastoreType.CONFIGURATION, path);
+        Assert.assertNotNull("Topology could not be found in " + LogicalDatastoreType.CONFIGURATION,
+                topology);
+
+        topology = MdsalUtils.readTransaction(LogicalDatastoreType.OPERATIONAL, path);
+
+        Assert.assertNotNull("Topology could not be found in " + LogicalDatastoreType.OPERATIONAL,
+                topology);
     }
 }

@@ -32,7 +32,13 @@ import com.google.common.util.concurrent.CheckedFuture;
 public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundProvider.class);
-    private DataBroker db;
+
+    public static DataBroker getDb() {
+        return db;
+    }
+
+    //private DataBroker db;
+    private static DataBroker db;
     private OvsdbConnectionManager cm;
 //    private OvsdbNodeDataChangeListener ovsdbNodeListener;
 //    private OvsdbManagedNodeDataChangeListener ovsdbManagedNodeListener;

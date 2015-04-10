@@ -7,6 +7,9 @@
  */
 package org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.southbound.impl.rev141210;
 
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
+import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
+import org.opendaylight.overlay.OverlayProvider;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.SouthboundProvider;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
@@ -31,9 +34,33 @@ public class SouthboundImplModule extends org.opendaylight.yang.gen.v1.urn.opend
     public java.lang.AutoCloseable createInstance() {
         SouthboundUtil.setInstanceIdentifierCodec(new InstanceIdentifierCodec(getSchemaServiceDependency(),
                 getBindingNormalizedNodeSerializerDependency()));
-        SouthboundProvider provider = new SouthboundProvider();
-        getBrokerDependency().registerProvider(provider);
-        return provider;
+        SouthboundProvider southboundProvider = new SouthboundProvider();
+        OverlayProvider overlayProvider = new OverlayProvider();
+        getBrokerDependency().registerProvider(southboundProvider);
+        getBrokerDependency().registerProvider(overlayProvider);
+
+        class ProviderAggregator implements BindingAwareProvider, java.lang.AutoCloseable {
+            public SouthboundProvider southboundProvider;
+            public OverlayProvider overlayProvider;
+
+            public ProviderAggregator(OverlayProvider overlayProvider, SouthboundProvider southboundProvider) {
+                this.southboundProvider = southboundProvider;
+                this.overlayProvider = overlayProvider;
+            }
+
+            @Override
+            public void close() throws Exception {
+                this.overlayProvider.close();
+                this.southboundProvider.close();
+            }
+
+            @Override
+            public void onSessionInitiated(ProviderContext session) {
+                this.overlayProvider.onSessionInitiated(session);
+                this.southboundProvider.onSessionInitiated(session);
+            }
+        }
+        return new ProviderAggregator(overlayProvider, southboundProvider);
     }
 
 }

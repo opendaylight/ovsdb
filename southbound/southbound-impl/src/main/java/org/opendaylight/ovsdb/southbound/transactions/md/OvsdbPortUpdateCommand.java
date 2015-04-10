@@ -39,6 +39,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceOtherConfigs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceOtherConfigsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.OptionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.OptionsKey;
@@ -161,6 +163,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                                 }
                                 ovsdbTerminationPointBuilder.setPortExternalIds(externalIdsList);
                             }
+                            updatePortOtherConfig(port,ovsdbTerminationPointBuilder);
 
                             Column<GenericTableSchema, Set<UUID>> iface = port.getInterfacesColumn();
                             Set<UUID> ifUuid = iface.getData();
@@ -235,6 +238,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                                             }
                                             ovsdbTerminationPointBuilder.setOptions(options);
                                         }
+                                        updateInterfaceOtherConfig(interfIter, ovsdbTerminationPointBuilder);
 
                                         break;
                                     }
@@ -256,6 +260,42 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                     }
                 }
             }
+        }
+    }
+
+    private void updatePortOtherConfig(Port port,
+            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+        Map<String, String> interfaceOtherConfigMap = port.getOtherConfigColumn().getData();
+        if (interfaceOtherConfigMap != null && !interfaceOtherConfigMap.isEmpty()) {
+            List<InterfaceOtherConfigs> interfaceOtherConfigs = new ArrayList<InterfaceOtherConfigs>();
+            String interfaceOtherConfigValueString;
+            for (String interfaceOtherConfigKeyString : interfaceOtherConfigMap.keySet()) {
+                interfaceOtherConfigValueString = interfaceOtherConfigMap.get(interfaceOtherConfigKeyString);
+                if (interfaceOtherConfigKeyString != null && interfaceOtherConfigValueString != null) {
+                    interfaceOtherConfigs.add(new InterfaceOtherConfigsBuilder()
+                        .setOtherConfigKey(interfaceOtherConfigKeyString)
+                        .setOtherConfigValue(interfaceOtherConfigValueString).build());
+                }
+            }
+            ovsdbTerminationPointBuilder.setInterfaceOtherConfigs(interfaceOtherConfigs);
+        }
+    }
+
+    private void updateInterfaceOtherConfig(Interface interf,
+            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+        Map<String, String> interfaceOtherConfigMap = interf.getOtherConfigColumn().getData();
+        if (interfaceOtherConfigMap != null && !interfaceOtherConfigMap.isEmpty()) {
+            List<InterfaceOtherConfigs> interfaceOtherConfigs = new ArrayList<InterfaceOtherConfigs>();
+            String interfaceOtherConfigValueString;
+            for (String interfaceOtherConfigKeyString : interfaceOtherConfigMap.keySet()) {
+                interfaceOtherConfigValueString = interfaceOtherConfigMap.get(interfaceOtherConfigKeyString);
+                if (interfaceOtherConfigKeyString != null && interfaceOtherConfigValueString != null) {
+                    interfaceOtherConfigs.add(new InterfaceOtherConfigsBuilder()
+                        .setOtherConfigKey(interfaceOtherConfigKeyString)
+                        .setOtherConfigValue(interfaceOtherConfigValueString).build());
+                }
+            }
+            ovsdbTerminationPointBuilder.setInterfaceOtherConfigs(interfaceOtherConfigs);
         }
     }
 }

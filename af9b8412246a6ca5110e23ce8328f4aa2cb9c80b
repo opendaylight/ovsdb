@@ -84,6 +84,24 @@
       "revId": "af9b8412246a6ca5110e23ce8328f4aa2cb9c80b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_fc2c5304",
+        "filename": "mdsal-northbound/pom.xml",
+        "patchSetId": 12
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-04-10T21:26:33Z",
+      "side": 1,
+      "message": "Just the folder name.",
+      "parentUuid": "5a93c517_1ca6dfc1",
+      "revId": "af9b8412246a6ca5110e23ce8328f4aa2cb9c80b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -88,4 +88,25 @@ public class SouthboundConstants {
             .put(DatapathTypeNetdev.class,"netdev")
             .build();
     public static final String IID_EXTERNAL_ID_KEY = "opendaylight-iid";
+
+    public static enum VLANMODES {
+        ACCESS("access"),
+        NATIVE_TAGGED("native-tagged"),
+        NATIVE_UNTAGGED("native-untagged"),
+        TRUNK("trunk");
+
+        private final String mode;
+
+        private VLANMODES(String mode) {
+            this.mode = mode;
+        }
+        @Override
+        public String toString() {
+            return mode;
+        }
+
+        public String getMode() {
+            return this.mode;
+        }
+    }
 }

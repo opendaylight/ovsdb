@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_d05cdbef",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointCreateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-11T05:56:48Z",
+      "side": 1,
+      "message": "please make OvsdbTerminationPointAugmentation parameter final in this and all the below method. Make sure nobody accidentally modify/null the object.",
+      "revId": "f066aa310b897d77a80211bcb768c940dfee5bc1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

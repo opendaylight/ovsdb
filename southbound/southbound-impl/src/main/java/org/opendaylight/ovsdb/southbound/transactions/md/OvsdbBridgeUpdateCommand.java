@@ -33,11 +33,14 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,16 +83,48 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
             Optional<Node> oldBridgeNode = readNode(transaction,bridgeIid);
             Node updatedBridgeNode = buildBridgeNode(bridge);
             transaction.merge(LogicalDatastoreType.OPERATIONAL, bridgeIid, updatedBridgeNode);
-            deleteControllers(transaction, controllerEntriesToRemove(bridgeIid, updatedBridgeNode,oldBridgeNode));
+            deleteEntries(transaction, controllerEntriesToRemove(bridgeIid, updatedBridgeNode,oldBridgeNode));
+            deleteEntries(transaction, protocolEntriesToRemove(bridgeIid,updatedBridgeNode,oldBridgeNode));
 
         }
     }
 
-    private void deleteControllers(ReadWriteTransaction transaction,
-            List<InstanceIdentifier<ControllerEntry>> controllerEntryIids) {
-        for (InstanceIdentifier<ControllerEntry> controllerEntryIid: controllerEntryIids) {
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, controllerEntryIid);
+    private <T extends DataObject> void deleteEntries(ReadWriteTransaction transaction,
+            List<InstanceIdentifier<T>> entryIids) {
+        for (InstanceIdentifier<T> entryIid: entryIids) {
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, entryIid);
         }
+    }
+
+
+    private List<InstanceIdentifier<ProtocolEntry>> protocolEntriesToRemove(
+            InstanceIdentifier<Node> bridgeIid, Node updatedBridgeNode,
+            Optional<Node> oldBridgeNode) {
+        List<InstanceIdentifier<ProtocolEntry>> result =
+                new ArrayList<InstanceIdentifier<ProtocolEntry>>();
+        if (oldBridgeNode.isPresent()) {
+            List<ProtocolEntryKey> oldProtocolEntryKeys = extractProtocolKeys(oldBridgeNode.get());
+            List<ProtocolEntryKey> updatedProtocolEntryKeys = extractProtocolKeys(updatedBridgeNode);
+            for (ProtocolEntryKey key: oldProtocolEntryKeys) {
+                if (!updatedProtocolEntryKeys.contains(key)) {
+                    result.add(bridgeIid
+                            .augmentation(OvsdbBridgeAugmentation.class)
+                            .child(ProtocolEntry.class,key));
+                }
+            }
+        }
+        return result;
+    }
+
+    private List<ProtocolEntryKey> extractProtocolKeys(Node bridgeNode) {
+        List<ProtocolEntryKey> result = new ArrayList<ProtocolEntryKey>();
+        if (bridgeNode != null && bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class) != null) {
+            OvsdbBridgeAugmentation bridgeAugmentation = bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class);
+            for (ProtocolEntry controller: bridgeAugmentation.getProtocolEntry()) {
+                result.add(controller.getKey());
+            }
+        }
+        return result;
     }
 
     private List<InstanceIdentifier<ControllerEntry>> controllerEntriesToRemove(

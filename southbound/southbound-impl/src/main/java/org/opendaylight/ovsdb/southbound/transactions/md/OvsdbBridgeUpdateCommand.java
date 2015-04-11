@@ -29,6 +29,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIdsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIdsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
@@ -81,6 +82,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
             Node bridgeNode = buildBridgeNode(bridge);
             transaction.merge(LogicalDatastoreType.OPERATIONAL, bridgeIid, bridgeNode);
             deleteEntries(transaction, protocolEntriesToRemove(bridgeIid,bridge));
+            deleteEntries(transaction, externalIdsToRemove(bridgeIid,bridge));
         }
     }
 
@@ -91,6 +93,30 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
+    private List<InstanceIdentifier<BridgeExternalIds>> externalIdsToRemove(
+            InstanceIdentifier<Node> bridgeIid, Bridge bridge) {
+        Preconditions.checkNotNull(bridgeIid);
+        Preconditions.checkNotNull(bridge);
+        List<InstanceIdentifier<BridgeExternalIds>> result =
+                new ArrayList<InstanceIdentifier<BridgeExternalIds>>();
+
+        Bridge oldBridge = oldBridgeRows.get(bridge.getUuid());
+
+        if (oldBridge != null && oldBridge.getExternalIdsColumn() != null) {
+            for (Entry<String, String> externalId:
+                oldBridge.getExternalIdsColumn().getData().entrySet()) {
+                if (bridge.getExternalIdsColumn() == null
+                        || !bridge.getExternalIdsColumn().getData().containsKey(externalId.getKey())) {
+                    InstanceIdentifier<BridgeExternalIds> iid = bridgeIid
+                            .augmentation(OvsdbBridgeAugmentation.class)
+                            .child(BridgeExternalIds.class,
+                                    new BridgeExternalIdsKey(externalId.getKey()));
+                    result.add(iid);
+                }
+            }
+        }
+        return result;
+    }
 
     private List<InstanceIdentifier<ProtocolEntry>> protocolEntriesToRemove(
             InstanceIdentifier<Node> bridgeIid, Bridge bridge) {

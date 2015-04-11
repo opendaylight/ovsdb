@@ -14,7 +14,6 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
-import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.ovsdb.southbound.OvsdbClientKey;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
@@ -44,15 +43,12 @@ import com.google.common.base.Optional;
 
 public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbBridgeUpdateCommand.class);
-    private Map<UUID,Controller> updatedControllerRows;
     private Map<UUID,Bridge> updatedBridgeRows;
 
     public OvsdbBridgeUpdateCommand(OvsdbClientKey key, TableUpdates updates,
             DatabaseSchema dbSchema) {
         super(key,updates,dbSchema);
         updatedBridgeRows = TyperUtils.extractRowsUpdated(Bridge.class, getUpdates(), getDbSchema());
-        updatedControllerRows = TyperUtils.extractRowsUpdated(Controller.class,
-                getUpdates(), getDbSchema());
     }
 
     @Override
@@ -124,7 +120,6 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         setProtocol(ovsdbBridgeAugmentationBuilder, bridge);
         setExternalIds(ovsdbBridgeAugmentationBuilder, bridge);
         setOtherConfig(ovsdbBridgeAugmentationBuilder, bridge);
-        setController(ovsdbBridgeAugmentationBuilder, bridge);
         setFailMode(ovsdbBridgeAugmentationBuilder, bridge);
         setManagedBy(ovsdbBridgeAugmentationBuilder);
         bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbBridgeAugmentationBuilder.build());
@@ -154,13 +149,6 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
             bridge.getFailModeColumn().getData().toArray(failmodeArray);
             ovsdbBridgeAugmentationBuilder.setFailMode(
                     SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get(failmodeArray[0]));
-        }
-    }
-
-    private void setController(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,Bridge bridge) {
-        if (!SouthboundMapper.createControllerEntries(bridge, updatedControllerRows).isEmpty()) {
-            ovsdbBridgeAugmentationBuilder.setControllerEntry(
-                    SouthboundMapper.createControllerEntries(bridge, updatedControllerRows));
         }
     }
 

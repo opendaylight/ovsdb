@@ -1,6 +1,7 @@
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,6 +32,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
@@ -75,9 +78,52 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
 
             // Update the bridge node with whatever data we are getting
             InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getKey(),bridge);
-            Node bridgeNode = buildBridgeNode(bridge);
-            transaction.merge(LogicalDatastoreType.OPERATIONAL, bridgeIid, bridgeNode);
+            Optional<Node> oldBridgeNode = readNode(transaction,bridgeIid);
+            Node updatedBridgeNode = buildBridgeNode(bridge);
+            transaction.merge(LogicalDatastoreType.OPERATIONAL, bridgeIid, updatedBridgeNode);
+            deleteControllers(transaction, controllerEntriesToRemove(bridgeIid,bridge,oldBridgeNode));
+
         }
+    }
+
+    private void deleteControllers(ReadWriteTransaction transaction,
+            List<InstanceIdentifier<ControllerEntry>> controllerEntryIids) {
+        for (InstanceIdentifier<ControllerEntry> controllerEntryIid: controllerEntryIids) {
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, controllerEntryIid);
+        }
+    }
+
+    private List<InstanceIdentifier<ControllerEntry>> controllerEntriesToRemove(
+            InstanceIdentifier<Node> bridgeIid, Bridge bridge, Optional<Node> oldBridgeNode) {
+        List<InstanceIdentifier<ControllerEntry>> result =
+                new ArrayList<InstanceIdentifier<ControllerEntry>>();
+        if (oldBridgeNode.isPresent()) {
+            Map<UUID,ControllerEntryKey> oldControllerEntryKeys = extractControllerKeys(oldBridgeNode.get());
+            for (Entry<UUID,ControllerEntryKey> entry: oldControllerEntryKeys.entrySet()) {
+                if (bridge != null
+                        && bridge.getControllerColumn() != null
+                        && bridge.getControllerColumn().getData() != null
+                        && !bridge.getControllerColumn().getData().contains(entry.getKey())) {
+                    result.add(bridgeIid
+                            .augmentation(OvsdbBridgeAugmentation.class)
+                            .child(ControllerEntry.class,entry.getValue()));
+                }
+            }
+        }
+        return result;
+    }
+
+    private Map<UUID,ControllerEntryKey> extractControllerKeys(Node bridgeNode) {
+        Map<UUID,ControllerEntryKey> result = new HashMap<UUID,ControllerEntryKey>();
+        if (bridgeNode != null && bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class) != null) {
+            OvsdbBridgeAugmentation bridgeAugmentation = bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class);
+            if (bridgeAugmentation.getControllerEntry() != null) {
+                for (ControllerEntry controller: bridgeAugmentation.getControllerEntry()) {
+                    result.put(new UUID(controller.getControllerUuid().getValue()),controller.getKey());
+                }
+            }
+        }
+        return result;
     }
 
     private Optional<Node> readNode(ReadWriteTransaction transaction,

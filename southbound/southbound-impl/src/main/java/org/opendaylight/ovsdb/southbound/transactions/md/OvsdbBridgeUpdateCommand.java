@@ -44,118 +44,180 @@ import com.google.common.base.Optional;
 
 public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbBridgeUpdateCommand.class);
+    private Map<UUID,Controller> updatedControllerRows;
+    private Map<UUID,Bridge> updatedBridgeRows;
 
     public OvsdbBridgeUpdateCommand(OvsdbClientKey key, TableUpdates updates,
             DatabaseSchema dbSchema) {
         super(key,updates,dbSchema);
+        updatedBridgeRows = TyperUtils.extractRowsUpdated(Bridge.class, getUpdates(), getDbSchema());
+        updatedControllerRows = TyperUtils.extractRowsUpdated(Controller.class,
+                getUpdates(), getDbSchema());
     }
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        Map<UUID,Bridge> updatedBridgeRows = TyperUtils.extractRowsUpdated(Bridge.class, getUpdates(), getDbSchema());
-        Map<UUID,Controller> updatedControllerRows = TyperUtils.extractRowsUpdated(Controller.class,
-                getUpdates(), getDbSchema());
         for (Entry<UUID, Bridge> entry : updatedBridgeRows.entrySet()) {
-            Bridge bridge = entry.getValue();
-            final InstanceIdentifier<Node> nodePath = getKey().toInstanceIndentifier();
-            Optional<Node> node = Optional.absent();
-            try {
-                node = transaction.read(LogicalDatastoreType.OPERATIONAL, nodePath).checkedGet();
-            } catch (final ReadFailedException e) {
-                LOG.debug("Read Operational/DS for Node fail! {}", nodePath, e);
+            updateBridge(transaction, entry.getValue());
+        }
+    }
+
+    private void updateBridge(ReadWriteTransaction transaction,
+            Bridge bridge) {
+        final InstanceIdentifier<Node> connectionIId = getKey().toInstanceIndentifier();
+        Optional<Node> connection = readNode(transaction, getKey().toInstanceIndentifier());
+        if (connection.isPresent()) {
+            LOG.debug("Connection {} is present",connection);
+
+            InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getKey(),bridge);
+            Node bridgeNode = buildBridgeNode(bridge);
+            transaction.merge(LogicalDatastoreType.OPERATIONAL, bridgeIid, bridgeNode);
+
+            Node connectionNode = buildConnectionNode(bridge);
+            transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
+
+        }
+    }
+
+    private Optional<Node> readNode(ReadWriteTransaction transaction,
+            final InstanceIdentifier<Node> connectionIid) {
+        Optional<Node> node = Optional.absent();
+        try {
+            node = transaction.read(LogicalDatastoreType.OPERATIONAL, connectionIid).checkedGet();
+        } catch (final ReadFailedException e) {
+            LOG.debug("Read Operational/DS for Node fail! {}", connectionIid, e);
+        }
+        return node;
+    }
+
+    private Node buildConnectionNode(
+            Bridge bridge) {
+        //Update node with managed node reference
+        NodeBuilder connectionNode = new NodeBuilder();
+        connectionNode.setNodeId(SouthboundMapper.createNodeId(getKey().getIp(),getKey().getPort()));
+
+        OvsdbNodeAugmentationBuilder ovsdbConnectionAugmentationBuilder = new OvsdbNodeAugmentationBuilder();
+        List<ManagedNodeEntry> managedBridges = new ArrayList<ManagedNodeEntry>();
+        InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getKey(),bridge);
+        ManagedNodeEntry managedBridge = new ManagedNodeEntryBuilder().setBridgeRef(
+                new OvsdbBridgeRef(bridgeIid)).build();
+        managedBridges.add(managedBridge);
+        ovsdbConnectionAugmentationBuilder.setManagedNodeEntry(managedBridges);
+
+        connectionNode.addAugmentation(OvsdbNodeAugmentation.class, ovsdbConnectionAugmentationBuilder.build());
+
+        LOG.debug("Update node with bridge node ref {}",ovsdbConnectionAugmentationBuilder.toString());
+        return connectionNode.build();
+    }
+
+    private Node buildBridgeNode(Bridge bridge) {
+        NodeBuilder bridgeNodeBuilder = new NodeBuilder();
+        InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getKey(),bridge);
+        NodeId bridgeNodeId = SouthboundMapper.createManagedNodeId(bridgeIid);
+        bridgeNodeBuilder.setNodeId(bridgeNodeId);
+        OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
+        ovsdbBridgeAugmentationBuilder.setBridgeName(new OvsdbBridgeName(bridge.getName()));
+        ovsdbBridgeAugmentationBuilder.setBridgeUuid(new Uuid(bridge.getUuid().toString()));
+        setDataPath(ovsdbBridgeAugmentationBuilder, bridge);
+        setDataPathType(ovsdbBridgeAugmentationBuilder, bridge);
+        setProtocol(ovsdbBridgeAugmentationBuilder, bridge);
+        setExternalIds(ovsdbBridgeAugmentationBuilder, bridge);
+        setOtherConfig(ovsdbBridgeAugmentationBuilder, bridge);
+        setController(ovsdbBridgeAugmentationBuilder, bridge);
+        setFailMode(ovsdbBridgeAugmentationBuilder, bridge);
+        setManagedBy(ovsdbBridgeAugmentationBuilder);
+        bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbBridgeAugmentationBuilder.build());
+
+        LOG.debug("Built with the intent to store bridge data {}",
+                ovsdbBridgeAugmentationBuilder.toString());
+        return bridgeNodeBuilder.build();
+    }
+
+    private void setManagedBy(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder) {
+        InstanceIdentifier<Node> connectionNodePath = getKey().toInstanceIndentifier();
+        ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath));
+    }
+
+    private void setDataPathType(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
+            Bridge bridge) {
+        ovsdbBridgeAugmentationBuilder.setDatapathType(
+                SouthboundMapper.createDatapathType(bridge.getDatapathTypeColumn().getData()));
+    }
+
+    private void setFailMode(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
+            Bridge bridge) {
+        if (bridge.getFailModeColumn() != null
+                && bridge.getFailModeColumn().getData() != null
+                && !bridge.getFailModeColumn().getData().isEmpty()) {
+            String[] failmodeArray = new String[bridge.getFailModeColumn().getData().size()];
+            bridge.getFailModeColumn().getData().toArray(failmodeArray);
+            ovsdbBridgeAugmentationBuilder.setFailMode(
+                    SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get(failmodeArray[0]));
+        }
+    }
+
+    private void setController(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,Bridge bridge) {
+        if (!SouthboundMapper.createControllerEntries(bridge, updatedControllerRows).isEmpty()) {
+            ovsdbBridgeAugmentationBuilder.setControllerEntry(
+                    SouthboundMapper.createControllerEntries(bridge, updatedControllerRows));
+        }
+    }
+
+    private void setOtherConfig(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
+            Bridge bridge) {
+        Map<String, String> otherConfigs = bridge
+                .getOtherConfigColumn().getData();
+        if (otherConfigs != null && !otherConfigs.isEmpty()) {
+            Set<String> otherConfigKeys = otherConfigs.keySet();
+            List<BridgeOtherConfigs> otherConfigList = new ArrayList<BridgeOtherConfigs>();
+            String otherConfigValue;
+            for (String otherConfigKey : otherConfigKeys) {
+                otherConfigValue = otherConfigs.get(otherConfigKey);
+                if (otherConfigKey != null && otherConfigValue != null) {
+                    otherConfigList.add(new BridgeOtherConfigsBuilder()
+                            .setBridgeOtherConfigKey(otherConfigKey)
+                            .setBridgeOtherConfigValue(otherConfigValue)
+                            .build());
+                }
             }
-            if (node.isPresent()) {
-                LOG.debug("Node {} is present",node);
-                NodeBuilder managedNodeBuilder = new NodeBuilder();
-                InstanceIdentifier<Node> managedNodePath = SouthboundMapper.createInstanceIdentifier(getKey(),bridge);
-                NodeId manageNodeId = SouthboundMapper.createManagedNodeId(managedNodePath);
-                managedNodeBuilder.setNodeId(manageNodeId);
-                OvsdbBridgeAugmentationBuilder ovsdbManagedNodeBuilder = new OvsdbBridgeAugmentationBuilder();
-                ovsdbManagedNodeBuilder.setBridgeName(new OvsdbBridgeName(bridge.getName()));
-                ovsdbManagedNodeBuilder.setBridgeUuid(new Uuid(bridge.getUuid().toString()));
-                DatapathId dpid = SouthboundMapper.createDatapathId(bridge);
-                if (dpid != null) {
-                    ovsdbManagedNodeBuilder.setDatapathId(dpid);
+            ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(otherConfigList);
+        }
+    }
+
+    private void setExternalIds(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
+            Bridge bridge) {
+        Map<String, String> externalIds = bridge.getExternalIdsColumn()
+                .getData();
+        if (externalIds != null && !externalIds.isEmpty()) {
+            Set<String> externalIdKeys = externalIds.keySet();
+            List<BridgeExternalIds> externalIdsList = new ArrayList<BridgeExternalIds>();
+            String externalIdValue;
+            for (String externalIdKey : externalIdKeys) {
+                externalIdValue = externalIds.get(externalIdKey);
+                if (externalIdKey != null && externalIdValue != null) {
+                    externalIdsList.add(new BridgeExternalIdsBuilder()
+                            .setBridgeExternalIdKey(externalIdKey)
+                            .setBridgeExternalIdValue(externalIdValue)
+                            .build());
                 }
-                ovsdbManagedNodeBuilder.setDatapathType(
-                        SouthboundMapper.createDatapathType(bridge.getDatapathTypeColumn().getData()));
-                if (SouthboundMapper.createMdsalProtocols(bridge) != null
-                        && SouthboundMapper.createMdsalProtocols(bridge).size() > 0) {
-                    ovsdbManagedNodeBuilder.setProtocolEntry(SouthboundMapper.createMdsalProtocols(bridge));
-                }
-
-                Map<String, String> externalIds = bridge.getExternalIdsColumn()
-                        .getData();
-                if (externalIds != null && !externalIds.isEmpty()) {
-                    Set<String> externalIdKeys = externalIds.keySet();
-                    List<BridgeExternalIds> externalIdsList = new ArrayList<BridgeExternalIds>();
-                    String externalIdValue;
-                    for (String externalIdKey : externalIdKeys) {
-                        externalIdValue = externalIds.get(externalIdKey);
-                        if (externalIdKey != null && externalIdValue != null) {
-                            externalIdsList.add(new BridgeExternalIdsBuilder()
-                                    .setBridgeExternalIdKey(externalIdKey)
-                                    .setBridgeExternalIdValue(externalIdValue)
-                                    .build());
-                        }
-                    }
-                    ovsdbManagedNodeBuilder.setBridgeExternalIds(externalIdsList);
-                }
-
-                Map<String, String> otherConfigs = bridge
-                        .getOtherConfigColumn().getData();
-                if (otherConfigs != null && !otherConfigs.isEmpty()) {
-                    Set<String> otherConfigKeys = otherConfigs.keySet();
-                    List<BridgeOtherConfigs> otherConfigList = new ArrayList<BridgeOtherConfigs>();
-                    String otherConfigValue;
-                    for (String otherConfigKey : otherConfigKeys) {
-                        otherConfigValue = otherConfigs.get(otherConfigKey);
-                        if (otherConfigKey != null && otherConfigValue != null) {
-                            otherConfigList.add(new BridgeOtherConfigsBuilder()
-                                    .setBridgeOtherConfigKey(otherConfigKey)
-                                    .setBridgeOtherConfigValue(otherConfigValue)
-                                    .build());
-                        }
-                    }
-                    ovsdbManagedNodeBuilder.setBridgeOtherConfigs(otherConfigList);
-                }
-
-                if (!SouthboundMapper.createControllerEntries(bridge, updatedControllerRows).isEmpty()) {
-                    ovsdbManagedNodeBuilder.setControllerEntry(
-                            SouthboundMapper.createControllerEntries(bridge, updatedControllerRows));
-                }
-
-                if (bridge.getFailModeColumn() != null
-                        && bridge.getFailModeColumn().getData() != null
-                        && !bridge.getFailModeColumn().getData().isEmpty()) {
-                    String[] failmodeArray = new String[bridge.getFailModeColumn().getData().size()];
-                    bridge.getFailModeColumn().getData().toArray(failmodeArray);
-                    ovsdbManagedNodeBuilder.setFailMode(
-                            SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get(failmodeArray[0]));
-                }
-                ovsdbManagedNodeBuilder.setManagedBy(new OvsdbNodeRef(nodePath));
-                managedNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbManagedNodeBuilder.build());
-
-                LOG.debug("Store managed node augmentation data {}",ovsdbManagedNodeBuilder.toString());
-                transaction.merge(LogicalDatastoreType.OPERATIONAL, managedNodePath, managedNodeBuilder.build());
-
-                //Update node with managed node reference
-                NodeBuilder nodeBuilder = new NodeBuilder();
-                nodeBuilder.setNodeId(SouthboundMapper.createNodeId(getKey().getIp(),getKey().getPort()));
-
-                OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = new OvsdbNodeAugmentationBuilder();
-                List<ManagedNodeEntry> managedNodes = new ArrayList<ManagedNodeEntry>();
-                ManagedNodeEntry managedNodeEntry = new ManagedNodeEntryBuilder().setBridgeRef(
-                        new OvsdbBridgeRef(managedNodePath)).build();
-                managedNodes.add(managedNodeEntry);
-                ovsdbNodeBuilder.setManagedNodeEntry(managedNodes);
-
-                nodeBuilder.addAugmentation(OvsdbNodeAugmentation.class, ovsdbNodeBuilder.build());
-
-                LOG.debug("Update node with managed node ref {}",ovsdbNodeBuilder.toString());
-                transaction.merge(LogicalDatastoreType.OPERATIONAL, nodePath, nodeBuilder.build());
-
             }
+            ovsdbBridgeAugmentationBuilder.setBridgeExternalIds(externalIdsList);
+        }
+    }
+
+    private void setProtocol(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
+            Bridge bridge) {
+        if (SouthboundMapper.createMdsalProtocols(bridge) != null
+                && SouthboundMapper.createMdsalProtocols(bridge).size() > 0) {
+            ovsdbBridgeAugmentationBuilder.setProtocolEntry(SouthboundMapper.createMdsalProtocols(bridge));
+        }
+    }
+
+    private void setDataPath(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
+            Bridge bridge) {
+        DatapathId dpid = SouthboundMapper.createDatapathId(bridge);
+        if (dpid != null) {
+            ovsdbBridgeAugmentationBuilder.setDatapathId(dpid);
         }
     }
 }

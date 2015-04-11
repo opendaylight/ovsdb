@@ -22,6 +22,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentationBuilder;
@@ -30,25 +31,31 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbBridgeUpdateCommand.class);
     private Map<UUID,Bridge> updatedBridgeRows;
+    private Map<UUID, Bridge> oldBridgeRows;
 
     public OvsdbBridgeUpdateCommand(OvsdbClientKey key, TableUpdates updates,
             DatabaseSchema dbSchema) {
         super(key,updates,dbSchema);
         updatedBridgeRows = TyperUtils.extractRowsUpdated(Bridge.class, getUpdates(), getDbSchema());
+        oldBridgeRows = TyperUtils.extractRowsOld(Bridge.class, getUpdates(), getDbSchema());
     }
 
     @Override
@@ -73,7 +80,41 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
             InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getKey(),bridge);
             Node bridgeNode = buildBridgeNode(bridge);
             transaction.merge(LogicalDatastoreType.OPERATIONAL, bridgeIid, bridgeNode);
+            deleteEntries(transaction, protocolEntriesToRemove(bridgeIid,bridge));
         }
+    }
+
+    private <T extends DataObject> void deleteEntries(ReadWriteTransaction transaction,
+            List<InstanceIdentifier<T>> entryIids) {
+        for (InstanceIdentifier<T> entryIid: entryIids) {
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, entryIid);
+        }
+    }
+
+
+    private List<InstanceIdentifier<ProtocolEntry>> protocolEntriesToRemove(
+            InstanceIdentifier<Node> bridgeIid, Bridge bridge) {
+        Preconditions.checkNotNull(bridgeIid);
+        Preconditions.checkNotNull(bridge);
+        List<InstanceIdentifier<ProtocolEntry>> result =
+                new ArrayList<InstanceIdentifier<ProtocolEntry>>();
+        Bridge oldBridge = oldBridgeRows.get(bridge.getUuid());
+
+        if (oldBridge != null && oldBridge.getProtocolsColumn() != null) {
+            for (String protocol: oldBridge.getProtocolsColumn().getData()) {
+                if (bridge.getProtocolsColumn() == null
+                        || !bridge.getProtocolsColumn().getData().contains(protocol)) {
+                    Class<? extends OvsdbBridgeProtocolBase> proto =
+                            SouthboundConstants.OVSDB_PROTOCOL_MAP.inverse().get(protocol);
+                    InstanceIdentifier<ProtocolEntry> iid = bridgeIid
+                            .augmentation(OvsdbBridgeAugmentation.class)
+                            .child(ProtocolEntry.class,
+                                    new ProtocolEntryKey(proto));
+                    result.add(iid);
+                }
+            }
+        }
+        return result;
     }
 
     private Optional<Node> readNode(ReadWriteTransaction transaction,

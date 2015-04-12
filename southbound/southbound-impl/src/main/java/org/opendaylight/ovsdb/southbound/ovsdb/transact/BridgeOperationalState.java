@@ -77,7 +77,9 @@ public class BridgeOperationalState {
 
     public Optional<TerminationPoint> getBrideTermiationPoint(InstanceIdentifier<?> iid) {
         Optional<Node> nodeOptional = getBridgeNode(iid);
-        if (nodeOptional.isPresent()) {
+        if (nodeOptional.isPresent()
+                && nodeOptional.get().getTerminationPoint() != null
+                && iid != null) {
             TerminationPointKey key = iid.firstKeyOf(TerminationPoint.class, TerminationPointKey.class);
             if (key != null) {
                 for (TerminationPoint tp:nodeOptional.get().getTerminationPoint()) {
@@ -101,7 +103,9 @@ public class BridgeOperationalState {
 
     public Optional<ControllerEntry> getControllerEntry(InstanceIdentifier<?> iid) {
         Optional<OvsdbBridgeAugmentation> ovsdbBridgeOptional = getOvsdbBridgeAugmentation(iid);
-        if (ovsdbBridgeOptional.isPresent()) {
+        if (ovsdbBridgeOptional.isPresent()
+                && ovsdbBridgeOptional.get().getControllerEntry() != null
+                && iid != null) {
             ControllerEntryKey key = iid.firstKeyOf(ControllerEntry.class, ControllerEntryKey.class);
             if (key != null) {
                 for (ControllerEntry entry: ovsdbBridgeOptional.get().getControllerEntry()) {

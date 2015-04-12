@@ -80,10 +80,6 @@ public class BridgeCreateCommand extends AbstractTransactCommand {
                         SouthboundConstants.OVSDB_FAIL_MODE_MAP.get(ovsdbManagedNode.getFailMode())));
             }
             bridge.setDatapathType(SouthboundMapper.createDatapathType(ovsdbManagedNode));
-            if (SouthboundMapper.createOvsdbBridgeProtocols(ovsdbManagedNode) != null
-                    && SouthboundMapper.createOvsdbBridgeProtocols(ovsdbManagedNode).size() > 0) {
-                bridge.setProtocols(SouthboundMapper.createOvsdbBridgeProtocols(ovsdbManagedNode));
-            }
             bridge.setPorts(Sets.newHashSet(new UUID(portNamedUuid)));
 
             // Set the iid external_id

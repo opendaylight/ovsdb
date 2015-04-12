@@ -32,6 +32,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 
 public class BridgeCreateCommand extends AbstractTransactCommand {
@@ -63,14 +64,40 @@ public class BridgeCreateCommand extends AbstractTransactCommand {
         LOG.debug("Received request to create ovsdb bridge name: {} uuid: {}",
                     ovsdbManagedNode.getBridgeName(),
                     ovsdbManagedNode.getBridgeUuid());
+        Optional<OvsdbBridgeAugmentation> operationalBridgeOptional =
+                getOperationalState().getOvsdbBridgeAugmentation(iid);
         Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
-        bridge.setName(ovsdbManagedNode.getBridgeName().getValue());
+        setName(bridge, ovsdbManagedNode,operationalBridgeOptional);
         setFailMode(bridge, ovsdbManagedNode);
-        bridge.setDatapathType(SouthboundMapper.createDatapathType(ovsdbManagedNode));
-        setPort(transaction, bridge, ovsdbManagedNode);
+        setDataPathType(bridge, ovsdbManagedNode);
         setOpenDaylightIidExternalId(bridge, iid);
-        String bridgeNamedUuid = "Bridge_" + SouthboundMapper.getRandomUUID();
-        transaction.add(op.insert(bridge).withId(bridgeNamedUuid));
+        if (!operationalBridgeOptional.isPresent()) {
+            setPort(transaction, bridge, ovsdbManagedNode);
+            transaction.add(op.insert(bridge));
+        } else if (bridge.getName() != null) {
+            transaction.add(op.update(bridge)
+                    .where(bridge.getNameColumn().getSchema().opEqual(bridge.getName()))
+                    .build());
+        }
+    }
+
+
+
+    private void setDataPathType(Bridge bridge,OvsdbBridgeAugmentation ovsdbManagedNode) {
+        if (ovsdbManagedNode.getDatapathType() != null) {
+            bridge.setDatapathType(SouthboundMapper.createDatapathType(ovsdbManagedNode));
+        }
+    }
+
+
+
+    private void setName(Bridge bridge, OvsdbBridgeAugmentation ovsdbManagedNode,
+            Optional<OvsdbBridgeAugmentation> operationalBridgeOptional) {
+        if (ovsdbManagedNode.getBridgeName() != null) {
+            bridge.setName(ovsdbManagedNode.getBridgeName().getValue());
+        } else if (operationalBridgeOptional.isPresent() && operationalBridgeOptional.get().getBridgeName() != null) {
+            bridge.setName(operationalBridgeOptional.get().getBridgeName().getValue());
+        }
     }
 
 

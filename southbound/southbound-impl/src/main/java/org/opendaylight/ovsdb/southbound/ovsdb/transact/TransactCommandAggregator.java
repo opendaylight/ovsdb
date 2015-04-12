@@ -25,7 +25,7 @@ public class TransactCommandAggregator implements TransactCommand {
             DataObject> changes) {
         this.operationalState = state;
         this.changes = changes;
-        commands.add(new BridgeCreateCommand(state,changes));
+        commands.add(new BridgeUpdateCommand(state,changes));
         commands.add(new OpenVSwitchBridgeAddCommand());
         commands.add(new ControllerUpdateCommand(state,changes));
         commands.add(new ControllerRemovedCommand(state,changes));

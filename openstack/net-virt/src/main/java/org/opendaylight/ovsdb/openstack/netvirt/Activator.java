@@ -90,7 +90,6 @@ public class Activator extends DependencyActivatorBase {
         manager.add(createComponent()
                 .setInterface(TenantNetworkManager.class.getName(), null)
                 .setImplementation(TenantNetworkManagerImpl.class)
-                .add(createServiceDependency().setService(NetworkingProviderManager.class))
                 .add(createServiceDependency().setService(OvsdbConfigurationService.class))
                 .add(createServiceDependency().setService(OvsdbConnectionService.class))
                 .add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
@@ -123,11 +122,9 @@ public class Activator extends DependencyActivatorBase {
                 .setImplementation(NetworkHandler.class)
                 .add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true))
                 .add(createServiceDependency().setService(BridgeConfigurationManager.class).setRequired(true))
-                .add(createServiceDependency().setService(ConfigurationService.class).setRequired(true))
                 .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
                 .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
-                .add(createServiceDependency().setService(OvsdbInventoryListener.class).setRequired(true))
                 .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
                 .add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true)));
 
@@ -150,7 +147,6 @@ public class Activator extends DependencyActivatorBase {
                 .setImplementation(PortHandler.class)
                 .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
                 .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
-                .add(createServiceDependency().setService(OvsdbInventoryListener.class).setRequired(true))
                 .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
                 .add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true)));
 
@@ -243,8 +239,7 @@ public class Activator extends DependencyActivatorBase {
                                 INeutronSecurityGroupAware.class.getName(), AbstractHandler.class.getName()},
                         portSecurityHandlerProperties)
                 .setImplementation(PortSecurityHandler.class)
-                .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
-                .add(createServiceDependency().setService(SecurityServicesManager.class).setRequired(true)));
+                .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true)));
 
         manager.add(createComponent()
                 .setInterface(new String[]{SecurityServicesManager.class.getName()}, null)
@@ -264,7 +259,6 @@ public class Activator extends DependencyActivatorBase {
         manager.add(createComponent()
                 .setInterface(NetworkingProviderManager.class.getName(), null)
                 .setImplementation(ProviderNetworkManagerImpl.class)
-                .add(createServiceDependency().setService(ConfigurationService.class).setRequired(true))
                 .add(createServiceDependency().setService(NetworkingProvider.class)
                         .setCallbacks("providerAdded", "providerRemoved")));
 
@@ -280,13 +274,11 @@ public class Activator extends DependencyActivatorBase {
                 .setImplementation(NeutronL3Adapter.class)
                 .add(createServiceDependency().setService(ConfigurationService.class).setRequired(true))
                 .add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true))
-                .add(createServiceDependency().setService(NetworkingProviderManager.class).setRequired(true))
                 .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
                 .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true))
-                .add(createServiceDependency().setService(MultiTenantAwareRouter.class).setRequired(true))
                 /* ToDo, we should probably just use the NetworkingProvider interface
                  * This should provide a way of getting service implementations
                  * Either that, or we should do service lookup at runtime based on getProvider().getName()

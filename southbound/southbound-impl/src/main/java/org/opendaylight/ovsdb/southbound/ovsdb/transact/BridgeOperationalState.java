@@ -14,6 +14,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
@@ -103,6 +105,23 @@ public class BridgeOperationalState {
             ControllerEntryKey key = iid.firstKeyOf(ControllerEntry.class, ControllerEntryKey.class);
             if (key != null) {
                 for (ControllerEntry entry: ovsdbBridgeOptional.get().getControllerEntry()) {
+                    if (entry.getKey().equals(key)) {
+                        return Optional.of(entry);
+                    }
+                }
+            }
+        }
+        return Optional.absent();
+    }
+
+    public Optional<ProtocolEntry> getProtocolEntry(InstanceIdentifier<ProtocolEntry> iid) {
+        Optional<OvsdbBridgeAugmentation> ovsdbBridgeOptional = getOvsdbBridgeAugmentation(iid);
+        if (ovsdbBridgeOptional.isPresent()
+                && ovsdbBridgeOptional.get().getProtocolEntry() != null
+                && iid != null) {
+            ProtocolEntryKey key = iid.firstKeyOf(ProtocolEntry.class, ProtocolEntryKey.class);
+            if (key != null) {
+                for (ProtocolEntry entry: ovsdbBridgeOptional.get().getProtocolEntry()) {
                     if (entry.getKey().equals(key)) {
                         return Optional.of(entry);
                     }

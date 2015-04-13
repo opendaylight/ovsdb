@@ -21,10 +21,10 @@ import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
 import org.opendaylight.ovsdb.southbound.transactions.md.OvsdbNodeRemoveCommand;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.overlay.rev150105.IpPortLocator;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -69,9 +69,9 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         // TODO handle case where we already have a connection
         // TODO use transaction chains to handle ordering issues between disconnected
         // and connected when writing to the operational store
-        InetAddress ip = SouthboundMapper.createInetAddress(ovsdbNode.getIp());
+        InetAddress ip = SouthboundMapper.createInetAddress(ovsdbNode.getConnectionInfo().getRemoteIp());
         OvsdbClient client = OvsdbConnectionService.getService().connect(ip,
-                ovsdbNode.getPort().getValue().intValue());
+                ovsdbNode.getConnectionInfo().getRemotePort().getValue().intValue());
         // For connections from the controller to the ovs instance, the library doesn't call
         // this method for us
         connected(client);
@@ -79,7 +79,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     }
 
     public void disconnect(OvsdbNodeAugmentation ovsdbNode) throws UnknownHostException {
-        OvsdbClientKey key = new OvsdbClientKey(ovsdbNode.getIp(), ovsdbNode.getPort());
+        OvsdbClientKey key = new OvsdbClientKey(ovsdbNode.getConnectionInfo().getRemoteIp(),
+                ovsdbNode.getConnectionInfo().getRemotePort());
         OvsdbClient client = clients.get(key);
         if (client != null) {
             client.disconnect();
@@ -97,15 +98,15 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         return clients.get(key);
     }
 
-    public OvsdbConnectionInstance getConnectionInstance(IpPortLocator loc) {
-        Preconditions.checkNotNull(loc);
-        return getConnectionInstance(new OvsdbClientKey(loc));
+    public OvsdbConnectionInstance getConnectionInstance(ConnectionInfo connectionInfo) {
+        Preconditions.checkNotNull(connectionInfo);
+        return getConnectionInstance(new OvsdbClientKey(connectionInfo));
     }
 
     public OvsdbConnectionInstance getConnectionInstance(OvsdbBridgeAttributes mn) {
         Optional<OvsdbNodeAugmentation> optional = SouthboundUtil.getManagingNode(db, mn);
         if (optional.isPresent()) {
-            return getConnectionInstance(optional.get());
+            return getConnectionInstance(optional.get().getConnectionInfo());
         } else {
             return null;
         }
@@ -116,7 +117,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         OvsdbNodeAugmentation ovsdbNode = node.getAugmentation(OvsdbNodeAugmentation.class);
         OvsdbBridgeAugmentation ovsdbManagedNode = node.getAugmentation(OvsdbBridgeAugmentation.class);
         if (ovsdbNode != null) {
-            return getConnectionInstance(ovsdbNode);
+            return getConnectionInstance(ovsdbNode.getConnectionInfo());
         } else if (ovsdbManagedNode != null) {
             return getConnectionInstance(ovsdbManagedNode);
         } else {
@@ -148,8 +149,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         return getConnectionInstance(key);
     }
 
-    public OvsdbClient getClient(IpPortLocator loc) {
-        return getConnectionInstance(loc);
+    public OvsdbClient getClient(ConnectionInfo connectionInfo) {
+        return getConnectionInstance(connectionInfo);
     }
 
     public OvsdbClient getClient(OvsdbBridgeAttributes mn) {

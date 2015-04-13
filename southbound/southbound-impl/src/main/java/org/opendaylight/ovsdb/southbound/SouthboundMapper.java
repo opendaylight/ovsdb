@@ -43,6 +43,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
@@ -81,8 +82,10 @@ public class SouthboundMapper {
 
     public static OvsdbNodeAugmentation createOvsdbAugmentation(OvsdbClientKey key) {
         OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = new OvsdbNodeAugmentationBuilder();
-        ovsdbNodeBuilder.setIp(key.getIp());
-        ovsdbNodeBuilder.setPort(key.getPort());
+        ConnectionInfoBuilder ciBuilder = new ConnectionInfoBuilder();
+        ciBuilder.setRemoteIp(key.getIp());
+        ciBuilder.setRemotePort(key.getPort());
+        ovsdbNodeBuilder.setConnectionInfo(ciBuilder.build());
         return ovsdbNodeBuilder.build();
     }
 

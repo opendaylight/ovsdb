@@ -212,8 +212,29 @@ module ovsdb {
 
     }
 
+    grouping ovsdb-connection-info-attributes { 
+          leaf remote-ip {
+            type inet:ip-address;
+            description "Ovsdb Connection Remote IP";
+          }
+          leaf remote-port {
+            type inet:port-number;
+            description "Ovsdb Connection Remote Port Number";
+          }
+          leaf local-ip {
+            type inet:ip-address;
+            description "Ovsdb Connection Local IP";
+          }
+          leaf local-port {
+            type inet:port-number;
+            description "Ovsdb Connection Local Port Number IP";
+          }
+    }
+
     grouping ovsdb-node-attributes {
-        uses overlay:ip-port-locator;
+        container connection-info{
+            uses ovsdb-connection-info-attributes;
+        }
 
         leaf ovs-version {
             type string;

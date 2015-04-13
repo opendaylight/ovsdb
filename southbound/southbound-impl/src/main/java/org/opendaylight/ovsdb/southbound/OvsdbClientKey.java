@@ -10,7 +10,7 @@ package org.opendaylight.ovsdb.southbound;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.overlay.rev150105.IpPortLocator;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
@@ -22,9 +22,9 @@ public class OvsdbClientKey {
     private IpAddress ipaddress;
     private PortNumber port;
 
-    OvsdbClientKey(IpPortLocator locator) {
-        ipaddress = locator.getIp();
-        port = locator.getPort();
+    OvsdbClientKey(ConnectionInfo connectionInfo) {
+        ipaddress = connectionInfo.getRemoteIp();
+        port = connectionInfo.getRemotePort();
     }
 
     public OvsdbClientKey(IpAddress ip, PortNumber port) {

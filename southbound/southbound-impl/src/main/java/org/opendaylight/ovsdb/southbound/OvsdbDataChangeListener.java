@@ -104,7 +104,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
         for (Entry<InstanceIdentifier<?>, DataObject> updated : changes.getUpdatedData().entrySet()) {
             if (updated.getValue() instanceof OvsdbNodeAugmentation) {
                 OvsdbNodeAugmentation value = (OvsdbNodeAugmentation) updated.getValue();
-                OvsdbClient client = cm.getClient(value);
+                OvsdbClient client = cm.getClient(value.getConnectionInfo());
                 if (client == null) {
                     for (Entry<InstanceIdentifier<?>, DataObject> original : changes.getOriginalData().entrySet()) {
                         if (original.getValue() instanceof OvsdbNodeAugmentation) {
@@ -164,8 +164,8 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                 } else {
                     OvsdbNodeAugmentation ovsNode =
                             ((Node)created.getValue()).getAugmentation(OvsdbNodeAugmentation.class);
-                    if (ovsNode != null) {
-                        OvsdbConnectionInstance client = cm.getConnectionInstance(ovsNode);
+                    if (ovsNode != null && ovsNode.getConnectionInfo() != null) {
+                        OvsdbConnectionInstance client = cm.getConnectionInstance(ovsNode.getConnectionInfo());
                         if (client != null) {
                             LOG.debug("Found client for {}", created.getValue());
                             result.add(client);

@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.util.concurrent.ListenableFuture;
 
 public class TransactInvokerImpl implements TransactInvoker {
-    private static final Logger LOG = LoggerFactory.getLogger(BridgeCreateCommand.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BridgeUpdateCommand.class);
     private OvsdbConnectionInstance connectionInstance;
     private DatabaseSchema dbSchema;
 

@@ -46,6 +46,30 @@
       "revId": "4dc2352fcc0e60d1e8eb0e128a9fcb0f8c03348a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_9c57c526",
+        "filename": "southbound/southbound-it/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-04-13T16:38:15Z",
+      "side": 1,
+      "message": "No worries ;)",
+      "parentUuid": "3aa0d159_9ca90527",
+      "range": {
+        "startLine": 15,
+        "startChar": 32,
+        "endLine": 15,
+        "endChar": 47
+      },
+      "revId": "4dc2352fcc0e60d1e8eb0e128a9fcb0f8c03348a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

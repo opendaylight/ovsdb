@@ -83,6 +83,12 @@ public class SouthboundMapper {
         OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = new OvsdbNodeAugmentationBuilder();
         ovsdbNodeBuilder.setIp(key.getIp());
         ovsdbNodeBuilder.setPort(key.getPort());
+        if (key.getLocalIp() != null) {
+            ovsdbNodeBuilder.setLocalIp(key.getLocalIp());
+        }
+        if (key.getLocalPort() != null) {
+            ovsdbNodeBuilder.setLocalPort(key.getLocalPort());
+        }
         return ovsdbNodeBuilder.build();
     }
 

@@ -21,6 +21,8 @@ public class OvsdbClientKey {
      */
     private IpAddress ipaddress;
     private PortNumber port;
+    private IpAddress localIpaddress = null;
+    private PortNumber localPort = null;
 
     OvsdbClientKey(IpPortLocator locator) {
         ipaddress = locator.getIp();
@@ -35,6 +37,8 @@ public class OvsdbClientKey {
     OvsdbClientKey(OvsdbClient client) {
         ipaddress = SouthboundMapper.createIpAddress(client.getConnectionInfo().getRemoteAddress());
         port = new PortNumber(client.getConnectionInfo().getRemotePort());
+        localIpaddress = SouthboundMapper.createIpAddress(client.getConnectionInfo().getLocalAddress());
+        localPort = new PortNumber(client.getConnectionInfo().getLocalPort());
     }
 
     public IpAddress getIp() {
@@ -43,6 +47,14 @@ public class OvsdbClientKey {
 
     public PortNumber getPort() {
         return port;
+    }
+
+    public IpAddress getLocalIp() {
+        return localIpaddress;
+    }
+
+    public PortNumber getLocalPort() {
+        return localPort;
     }
 
     @Override

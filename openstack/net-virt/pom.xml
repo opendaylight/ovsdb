@@ -44,6 +44,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>guava</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-binding-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.neutron</groupId>
       <artifactId>neutron-spi</artifactId>
     </dependency>
@@ -66,6 +70,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>utils.mdsal-node</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools.model</groupId>
+      <artifactId>ietf-topology</artifactId>
+      <version>2013.10.21.7-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>

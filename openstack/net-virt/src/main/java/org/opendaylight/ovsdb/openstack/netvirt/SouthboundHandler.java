@@ -15,6 +15,7 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
+import org.opendaylight.ovsdb.openstack.netvirt.api.MdsalConsumerListener;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
@@ -40,7 +41,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
 public class SouthboundHandler extends AbstractHandler
-        implements NodeCacheListener, OvsdbInventoryListener {
+        implements NodeCacheListener, /*OvsdbInventoryListener,*/ MdsalConsumerListener {
     static final Logger logger = LoggerFactory.getLogger(SouthboundHandler.class);
     //private Thread eventThread;
 

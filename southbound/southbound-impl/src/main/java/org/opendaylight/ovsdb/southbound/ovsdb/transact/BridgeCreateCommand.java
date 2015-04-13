@@ -15,7 +15,9 @@ import java.util.Map.Entry;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.operations.Insert;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
@@ -49,46 +51,74 @@ public class BridgeCreateCommand extends AbstractTransactCommand {
                 TransactUtils.extractCreated(getChanges(),OvsdbBridgeAugmentation.class);
         for (Entry<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> ovsdbManagedNodeEntry:
             created.entrySet()) {
-            OvsdbBridgeAugmentation ovsdbManagedNode = ovsdbManagedNodeEntry.getValue();
-            LOG.debug("Received request to create ovsdb bridge name: {} uuid: {}",
-                        ovsdbManagedNode.getBridgeName(),
-                        ovsdbManagedNode.getBridgeUuid());
+            updateBridge(transaction,  ovsdbManagedNodeEntry.getKey(), ovsdbManagedNodeEntry.getValue());
+        }
+    }
 
-            // Named UUIDs
-            String bridgeNamedUuid = "Bridge_" + SouthboundMapper.getRandomUUID();
-            String interfaceNamedUuid = "Interface_" + SouthboundMapper.getRandomUUID();
-            String portNamedUuid = "Port_" + SouthboundMapper.getRandomUUID();
 
-            // Interface part
-            Interface interfaceOvs = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Interface.class);
-            interfaceOvs.setName(ovsdbManagedNode.getBridgeName().getValue());
-            interfaceOvs.setType(SouthboundMapper.createOvsdbInterfaceType(InterfaceTypeInternal.class));
-            transaction.add(op.insert(interfaceOvs).withId(interfaceNamedUuid));
 
-            // Port part
-            Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
-            port.setName(ovsdbManagedNode.getBridgeName().getValue());
-            port.setInterfaces(Sets.newHashSet(new UUID(interfaceNamedUuid)));
-            transaction.add(op.insert(port).withId(portNamedUuid));
+    private void updateBridge(
+            TransactionBuilder transaction,
+            InstanceIdentifier<OvsdbBridgeAugmentation> iid, OvsdbBridgeAugmentation ovsdbManagedNode) {
+        LOG.debug("Received request to create ovsdb bridge name: {} uuid: {}",
+                    ovsdbManagedNode.getBridgeName(),
+                    ovsdbManagedNode.getBridgeUuid());
+        Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
+        bridge.setName(ovsdbManagedNode.getBridgeName().getValue());
+        setFailMode(bridge, ovsdbManagedNode);
+        bridge.setDatapathType(SouthboundMapper.createDatapathType(ovsdbManagedNode));
+        setPort(transaction, bridge, ovsdbManagedNode);
+        setOpenDaylightIidExternalId(bridge, iid);
+        String bridgeNamedUuid = "Bridge_" + SouthboundMapper.getRandomUUID();
+        transaction.add(op.insert(bridge).withId(bridgeNamedUuid));
+    }
 
-            // Bridge part
-            Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
-            bridge.setName(ovsdbManagedNode.getBridgeName().getValue());
-            if (ovsdbManagedNode.getFailMode() != null
-                    && SouthboundConstants.OVSDB_FAIL_MODE_MAP.get(ovsdbManagedNode.getFailMode()) != null ) {
-                bridge.setFailMode(Sets.newHashSet(
-                        SouthboundConstants.OVSDB_FAIL_MODE_MAP.get(ovsdbManagedNode.getFailMode())));
-            }
-            bridge.setDatapathType(SouthboundMapper.createDatapathType(ovsdbManagedNode));
-            bridge.setPorts(Sets.newHashSet(new UUID(portNamedUuid)));
 
-            // Set the iid external_id
-            Map<String,String> externalIds = new HashMap<String,String>();
-            externalIds.put(SouthboundConstants.IID_EXTERNAL_ID_KEY,
-                    SouthboundUtil.serializeInstanceIdentifier(ovsdbManagedNodeEntry.getKey()));
-            bridge.setExternalIds(externalIds);
 
-            transaction.add(op.insert(bridge).withId(bridgeNamedUuid));
+    private void setOpenDaylightIidExternalId(Bridge bridge,
+            InstanceIdentifier<OvsdbBridgeAugmentation> iid) {
+        // Set the iid external_id
+        Map<String,String> externalIds = new HashMap<String,String>();
+        externalIds.put(SouthboundConstants.IID_EXTERNAL_ID_KEY,
+                SouthboundUtil.serializeInstanceIdentifier(iid));
+        bridge.setExternalIds(externalIds);
+    }
+
+
+
+    private void setPort(TransactionBuilder transaction, Bridge bridge,
+            OvsdbBridgeAugmentation ovsdbManagedNode) {
+
+        Insert<GenericTableSchema> interfaceInsert = setInterface(transaction,ovsdbManagedNode);
+        // Port part
+        String portNamedUuid = "Port_" + SouthboundMapper.getRandomUUID();
+        Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
+        port.setName(ovsdbManagedNode.getBridgeName().getValue());
+        port.setInterfaces(Sets.newHashSet(TransactUtils.extractNamedUuid(interfaceInsert)));
+        transaction.add(op.insert(port).withId(portNamedUuid));
+        bridge.setPorts(Sets.newHashSet(new UUID(portNamedUuid)));
+    }
+
+    private Insert<GenericTableSchema> setInterface(TransactionBuilder transaction,
+            OvsdbBridgeAugmentation ovsdbManagedNode) {
+        // Interface part
+        String interfaceNamedUuid = "Interface_" + SouthboundMapper.getRandomUUID();
+        Interface interfaceOvs = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Interface.class);
+        interfaceOvs.setName(ovsdbManagedNode.getBridgeName().getValue());
+        interfaceOvs.setType(SouthboundMapper.createOvsdbInterfaceType(InterfaceTypeInternal.class));
+        Insert<GenericTableSchema> result = op.insert(interfaceOvs).withId(interfaceNamedUuid);
+        transaction.add(result);
+        return result;
+    }
+
+
+
+    private void setFailMode(Bridge bridge,
+            OvsdbBridgeAugmentation ovsdbManagedNode) {
+        if (ovsdbManagedNode.getFailMode() != null
+                && SouthboundConstants.OVSDB_FAIL_MODE_MAP.get(ovsdbManagedNode.getFailMode()) != null ) {
+            bridge.setFailMode(Sets.newHashSet(
+                    SouthboundConstants.OVSDB_FAIL_MODE_MAP.get(ovsdbManagedNode.getFailMode())));
         }
     }
 

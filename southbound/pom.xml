@@ -27,5 +27,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <module>southbound-karaf</module>
     <module>southbound-features</module>
     <module>southbound-artifacts</module>
+    <module>southbound-it</module>
   </modules>
 </project>

@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_fc9fe94e",
+        "filename": "southbound/southbound-it/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-04-13T14:59:23Z",
+      "side": 1,
+      "message": "To be clear... my concern is *only* over the parent switch.  Running the integration tests in the normal build is golden :)",
+      "range": {
+        "startLine": 15,
+        "startChar": 32,
+        "endLine": 15,
+        "endChar": 47
+      },
+      "revId": "4dc2352fcc0e60d1e8eb0e128a9fcb0f8c03348a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

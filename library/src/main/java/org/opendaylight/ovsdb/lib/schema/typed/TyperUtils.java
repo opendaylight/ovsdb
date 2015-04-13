@@ -459,6 +459,37 @@ public class TyperUtils {
 
     /**
      * This method extracts all row updates of Class<T> klazz from a TableUpdates
+     * that correspond to old version of rows of type klazz that have been updated
+     * Example:
+     * <code>
+     * Map<UUID,Bridge> oldBridges = extractRowsOld(Bridge.class,updates,dbSchema)
+     * </code>
+     *
+     * @param klazz Class for row type to be extracted
+     * @param updates TableUpdates from which to extract rowUpdates
+     * @param dbSchema Dbschema for the TableUpdates
+     * @return Map<UUID,T> for the type of things being sought
+     */
+    public static <T> Map<UUID,T> extractRowsOld(Class<T> klazz,TableUpdates updates,DatabaseSchema dbSchema) {
+        Preconditions.checkNotNull(klazz);
+        Preconditions.checkNotNull(updates);
+        Preconditions.checkNotNull(dbSchema);
+        Map<UUID,T> result = new HashMap<UUID,T>();
+        Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> rowUpdates =
+                extractRowUpdates(klazz,updates,dbSchema);
+        for (TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema> rowUpdate : rowUpdates.values()) {
+            if (rowUpdate != null) {
+                if (rowUpdate.getOld() != null) {
+                    Row<GenericTableSchema> row = rowUpdate.getOld();
+                    result.put(rowUpdate.getUuid(),TyperUtils.getTypedRowWrapper(dbSchema,klazz,row));
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * This method extracts all row updates of Class<T> klazz from a TableUpdates
      * that correspond to removal of rows of type klazz.
      * Example:
      * <code>

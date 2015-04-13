@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_c28c8682",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-04-13T21:52:56Z",
+      "side": 1,
+      "message": "is this really the dataplane address? the datplace address makes sense for the actual ovsdb node but I don\u0027t see the context here.",
+      "range": {
+        "startLine": 220,
+        "startChar": 35,
+        "endLine": 220,
+        "endChar": 36
+      },
+      "revId": "083b6d3fc119a98807944d20e92fcadc186e2165",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

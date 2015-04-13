@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_8964eae5",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 2138
+      },
+      "writtenOn": "2015-04-13T08:09:03Z",
+      "side": 1,
+      "message": "I cannot find any tpList.add() call. It seems like you are always returning empty list. Also the \u0027termination-point\u0027 list in \u0027operational/network-topology\u0027 remains empty - TerminationPoints are not populated.",
+      "range": {
+        "startLine": 145,
+        "startChar": 8,
+        "endLine": 145,
+        "endChar": 22
+      },
+      "revId": "8f8f73846012c4b5e4dda13195a971b15766b9b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

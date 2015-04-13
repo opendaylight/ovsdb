@@ -142,6 +142,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         entry.addAugmentation(
                 OvsdbTerminationPointAugmentation.class,
                 ovsdbTerminationPointBuilder.build());
+        tpList.add(entry.build());
         return tpList;
     }
 

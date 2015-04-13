@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_3ff8e3e4",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbControllerRemovedCommand.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-04-13T17:26:58Z",
+      "side": 1,
+      "message": "|| in java is short circuiting, meaning that if (a||b) be won\u0027t be evaluated unless a is false.  So if bridge.getControllerColumn() is null, we don\u0027t evaluate the next expression, and we won\u0027t NPE.",
+      "parentUuid": "3aa0d159_3f7303b3",
+      "revId": "6a43b25aab4c2272448d220d9545cae810d2f3b9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_7fa0abf4",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbControllerUpdateCommand.java",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2015-04-13T17:10:02Z",
       "side": 1,
       "message": "copyright?",
+      "revId": "6a43b25aab4c2272448d220d9545cae810d2f3b9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_9fe6d743",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbControllerUpdateCommand.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-04-13T17:26:58Z",
+      "side": 1,
+      "message": "Doh... will do.",
+      "parentUuid": "3aa0d159_7fa0abf4",
       "revId": "6a43b25aab4c2272448d220d9545cae810d2f3b9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

@@ -45,7 +45,6 @@ public class PortHandler extends AbstractHandler
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile OvsdbConfigurationService ovsdbConfigurationService;
     private volatile OvsdbConnectionService connectionService;
-    private volatile OvsdbInventoryListener ovsdbInventoryListener;
     private volatile NeutronL3Adapter neutronL3Adapter;
 
     /**

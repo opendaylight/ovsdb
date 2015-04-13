@@ -28,9 +28,6 @@ import com.google.common.collect.Maps;
 public class ProviderNetworkManagerImpl implements NetworkingProviderManager {
 
     static final Logger logger = LoggerFactory.getLogger(ProviderNetworkManagerImpl.class);
-    // The provider for each of these services is resolved by the OSGi Service Manager
-    private volatile ConfigurationService configurationService;
-
     private HashMap<Long, ProviderEntry> providers = Maps.newHashMap();
     private HashMap<Node, NetworkingProvider> nodeToProviderMapping = Maps.newHashMap();
 
@@ -41,12 +38,6 @@ public class ProviderNetworkManagerImpl implements NetworkingProviderManager {
         }
 
         final String targetVersion = Constants.OPENFLOW13;
-        /*
-         * Since we have hard depedencies on OpenFlow1.3 to get any of the services supported, we are
-         * Hardcoding the Openflow13 as the only version that we are interested in
-         */
-        // final String targetVersion = configurationService.getOpenflowVersion(node);
-
         Predicate<ProviderEntry> providerEntryPredicate = new Predicate<ProviderEntry>() {
             @Override
             public boolean apply(ProviderEntry providerEntry) {

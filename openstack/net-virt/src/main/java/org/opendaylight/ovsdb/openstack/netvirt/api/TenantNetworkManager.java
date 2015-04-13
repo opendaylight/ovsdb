@@ -65,12 +65,6 @@ public interface TenantNetworkManager {
     /**
      * Network Created Callback
      */
-    @Deprecated
-    public void networkCreated (String networkId);
-
-    /**
-     * Network Created Callback
-     */
     public int networkCreated (Node node, String networkId);
 
     /**

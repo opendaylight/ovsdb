@@ -22,7 +22,6 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
-import org.opendaylight.ovsdb.southbound.OvsdbClientKey;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentationBuilder;
@@ -48,7 +47,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory
             .getLogger(OpenVSwitchUpdateCommand.class);
 
-    public OpenVSwitchUpdateCommand(OvsdbClientKey key, TableUpdates updates,
+    public OpenVSwitchUpdateCommand(ConnectionInfo key, TableUpdates updates,
             DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
     }
@@ -61,8 +60,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
 
         for (Entry<UUID, OpenVSwitch> entry : updatedOpenVSwitchRows.entrySet()) {
             OpenVSwitch openVSwitch = entry.getValue();
-            final InstanceIdentifier<Node> nodePath = getKey()
-                    .toInstanceIndentifier();
+            final InstanceIdentifier<Node> nodePath = SouthboundMapper.createInstanceIdentifier(getConnectionInfo());
             Optional<Node> node = Optional.absent();
             try {
                 node = transaction.read(LogicalDatastoreType.OPERATIONAL,
@@ -73,7 +71,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
             if (node.isPresent()) {
                 LOG.debug("Node {} is present", node);
                 OvsdbNodeAugmentation ovsdbNode = SouthboundMapper
-                        .createOvsdbAugmentation(getKey());
+                        .createOvsdbAugmentation(getConnectionInfo());
                 OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = new OvsdbNodeAugmentationBuilder();
                 ovsdbNodeBuilder.setOvsVersion(openVSwitch.getVersion()
                         .toString());

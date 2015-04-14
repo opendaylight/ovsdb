@@ -27,7 +27,6 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
-import org.opendaylight.ovsdb.southbound.OvsdbClientKey;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
@@ -37,6 +36,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceOtherConfigs;
@@ -65,7 +65,7 @@ import com.google.common.base.Optional;
 public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbPortUpdateCommand.class);
 
-    public OvsdbPortUpdateCommand(OvsdbClientKey key, TableUpdates updates,
+    public OvsdbPortUpdateCommand(ConnectionInfo key, TableUpdates updates,
             DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
     }
@@ -86,7 +86,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                     if (portUUID.equals(port.getUuid())) {
                         bridgeName = bridge.getName();
                         NodeId bridgeId = SouthboundMapper.createManagedNodeId(
-                                getKey(), new OvsdbBridgeName(bridgeName));
+                                getConnectionInfo(), new OvsdbBridgeName(bridgeName));
                         final InstanceIdentifier<Node> nodePath = SouthboundMapper
                                 .createInstanceIdentifier(bridgeId);
                         Optional<Node> node = readNode(transaction, nodePath);

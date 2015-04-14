@@ -43,6 +43,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
@@ -69,23 +70,20 @@ public class SouthboundMapper {
         nodeBuilder.addAugmentation(OvsdbNodeAugmentation.class, createOvsdbAugmentation(client));
         return nodeBuilder.build();
     }
-    public static Node createNode(OvsdbClientKey key) {
+    public static Node createNode(ConnectionInfo key) {
         NodeBuilder nodeBuilder = new NodeBuilder();
-        nodeBuilder.setNodeId(createNodeId(key.getIp(),key.getPort()));
+        nodeBuilder.setNodeId(createNodeId(key.getRemoteIp(),key.getRemotePort()));
         nodeBuilder.addAugmentation(OvsdbNodeAugmentation.class, createOvsdbAugmentation(key));
         return nodeBuilder.build();
     }
 
     public static OvsdbNodeAugmentation createOvsdbAugmentation(OvsdbClient client) {
-        return createOvsdbAugmentation(new OvsdbClientKey(client));
+        return createOvsdbAugmentation(createConnectionInfo(client));
     }
 
-    public static OvsdbNodeAugmentation createOvsdbAugmentation(OvsdbClientKey key) {
+    public static OvsdbNodeAugmentation createOvsdbAugmentation(ConnectionInfo key) {
         OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = new OvsdbNodeAugmentationBuilder();
-        ConnectionInfoBuilder ciBuilder = new ConnectionInfoBuilder();
-        ciBuilder.setRemoteIp(key.getIp());
-        ciBuilder.setRemotePort(key.getPort());
-        ovsdbNodeBuilder.setConnectionInfo(ciBuilder.build());
+        ovsdbNodeBuilder.setConnectionInfo(key);
         return ovsdbNodeBuilder.build();
     }
 
@@ -122,11 +120,11 @@ public class SouthboundMapper {
         return nodePath;
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(OvsdbClientKey key,OvsdbBridgeName bridgeName) {
+    public static InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key,OvsdbBridgeName bridgeName) {
         return createInstanceIdentifier(createManagedNodeId(key, bridgeName));
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(OvsdbClientKey key,Bridge bridge) {
+    public static InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key,Bridge bridge) {
         String managedNodePathString = bridge
                 .getExternalIdsColumn()
                 .getData()
@@ -147,8 +145,8 @@ public class SouthboundMapper {
         return nodeKey.getNodeId();
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(OvsdbClientKey key) {
-        return createInstanceIdentifier(key.getIp(), key.getPort());
+    public static InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key) {
+        return createInstanceIdentifier(key.getRemoteIp(), key.getRemotePort());
     }
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(IpAddress ip, PortNumber port) {
@@ -175,8 +173,8 @@ public class SouthboundMapper {
                 bridgeName);
     }
 
-    public static NodeId createManagedNodeId(OvsdbClientKey key, OvsdbBridgeName bridgeName) {
-        return createManagedNodeId(key.getIp(),key.getPort(),bridgeName);
+    public static NodeId createManagedNodeId(ConnectionInfo key, OvsdbBridgeName bridgeName) {
+        return createManagedNodeId(key.getRemoteIp(),key.getRemotePort(),bridgeName);
     }
 
     public static NodeId createManagedNodeId(IpAddress ip, PortNumber port, OvsdbBridgeName bridgeName) {
@@ -340,5 +338,13 @@ public class SouthboundMapper {
 
     public static String getRandomUUID() {
         return "Random_" + java.util.UUID.randomUUID().toString().replace("-", "");
+    }
+    public static ConnectionInfo createConnectionInfo(OvsdbClient client) {
+        ConnectionInfoBuilder connectionInfoBuilder = new ConnectionInfoBuilder();
+        connectionInfoBuilder.setRemoteIp(createIpAddress(client.getConnectionInfo().getRemoteAddress()));
+        connectionInfoBuilder.setLocalIp(createIpAddress(client.getConnectionInfo().getLocalAddress()));
+        connectionInfoBuilder.setRemotePort(new PortNumber(client.getConnectionInfo().getRemotePort()));
+        connectionInfoBuilder.setLocalPort(new PortNumber(client.getConnectionInfo().getLocalPort()));
+        return connectionInfoBuilder.build();
     }
 }

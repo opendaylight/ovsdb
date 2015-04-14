@@ -17,10 +17,10 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
-import org.opendaylight.ovsdb.southbound.OvsdbClientKey;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
@@ -30,7 +30,7 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
     private Map<UUID, Controller> updatedControllerRows;
     private Map<UUID, Bridge> updatedBridgeRows;
 
-    public OvsdbControllerUpdateCommand(OvsdbClientKey key,
+    public OvsdbControllerUpdateCommand(ConnectionInfo key,
             TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         updatedBridgeRows = TyperUtils.extractRowsUpdated(Bridge.class, getUpdates(), getDbSchema());
@@ -48,7 +48,8 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
 
     private void setController(ReadWriteTransaction transaction, Bridge bridge) {
         for (ControllerEntry controllerEntry: SouthboundMapper.createControllerEntries(bridge, updatedControllerRows)) {
-            InstanceIdentifier<ControllerEntry> iid = SouthboundMapper.createInstanceIdentifier(getKey(), bridge)
+            InstanceIdentifier<ControllerEntry> iid =
+                    SouthboundMapper.createInstanceIdentifier(getConnectionInfo(), bridge)
                     .augmentation(OvsdbBridgeAugmentation.class)
                     .child(ControllerEntry.class,controllerEntry.getKey());
             transaction.put(LogicalDatastoreType.OPERATIONAL, iid, controllerEntry);

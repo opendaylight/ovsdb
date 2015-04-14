@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_0b2289b9",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/overlay/OverlayConstants.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-14T21:30:26Z",
+      "side": 1,
+      "message": "is this copyright correct? rest of the files has intel copyright and also it\u0027s not existing file, it\u0027s newly added file.",
+      "revId": "a2e13b9973d99118119ed0814767787c13ee9c19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_cb2b4193",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/overlay/OverlayMapper.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-14T21:30:26Z",
+      "side": 1,
+      "message": "is this copyright correct? just want to make sure it\u0027s not copy paste error.",
+      "revId": "a2e13b9973d99118119ed0814767787c13ee9c19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_2b12e562",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/overlay/transactions/md/DataChangesManagedByOverlayNodeEvent.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-14T21:30:26Z",
+      "side": 1,
+      "message": "copyright missing",
+      "revId": "a2e13b9973d99118119ed0814767787c13ee9c19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_4b173152",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/overlay/transactions/md/config/OverlayConfigCommandAggregator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-14T21:30:26Z",
+      "side": 1,
+      "message": "copyright missing",
+      "revId": "a2e13b9973d99118119ed0814767787c13ee9c19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_eb0b9d29",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/overlay/transactions/md/config/OverlayLinkCreateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-14T21:30:26Z",
+      "side": 1,
+      "message": "copyright missing",
+      "revId": "a2e13b9973d99118119ed0814767787c13ee9c19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_0b092931",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/overlay/transactions/md/config/OverlayLinkUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-14T21:30:26Z",
+      "side": 1,
+      "message": "remove unused imports.",
+      "revId": "a2e13b9973d99118119ed0814767787c13ee9c19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_ab059515",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/overlay/transactions/md/config/OverlayNodeCreateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-14T21:30:26Z",
+      "side": 1,
+      "message": "copyright missing",
+      "revId": "a2e13b9973d99118119ed0814767787c13ee9c19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_96047c16",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/overlay/transactions/md/operational/OverlayLinkCreateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-14T21:30:26Z",
+      "side": 1,
+      "message": "please add copyright",
+      "revId": "a2e13b9973d99118119ed0814767787c13ee9c19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_560ef435",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/overlay/transactions/md/operational/OverlayNodeCreateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-14T21:30:26Z",
+      "side": 1,
+      "message": "please add copyright",
+      "revId": "a2e13b9973d99118119ed0814767787c13ee9c19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

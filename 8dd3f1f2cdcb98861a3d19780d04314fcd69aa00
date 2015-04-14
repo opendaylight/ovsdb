@@ -22,6 +22,23 @@
       "revId": "8dd3f1f2cdcb98861a3d19780d04314fcd69aa00",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_ab80358c",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-04-14T21:06:02Z",
+      "side": 1,
+      "message": "Ok, modified to identifier.",
+      "revId": "8dd3f1f2cdcb98861a3d19780d04314fcd69aa00",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

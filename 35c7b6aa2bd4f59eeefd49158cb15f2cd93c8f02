@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_6b31cd0a",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-14T21:18:12Z",
+      "side": 1,
+      "message": "shell we name is bridge-openflow-node-ref, like we are using for referring other topological node like ovsdb-brige-ref, ovsdb-node-ref?",
+      "revId": "35c7b6aa2bd4f59eeefd49158cb15f2cd93c8f02",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

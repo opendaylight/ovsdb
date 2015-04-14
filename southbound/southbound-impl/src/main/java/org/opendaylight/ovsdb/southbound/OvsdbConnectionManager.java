@@ -25,6 +25,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -35,8 +36,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 
 public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoCloseable {
-    Map<OvsdbClientKey,OvsdbConnectionInstance> clients
-        = new ConcurrentHashMap<OvsdbClientKey,OvsdbConnectionInstance>();
+    Map<ConnectionInfo,OvsdbConnectionInstance> clients
+        = new ConcurrentHashMap<ConnectionInfo,OvsdbConnectionInstance>();
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionManager.class);
 
     private DataBroker db;
@@ -51,7 +52,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     public void connected(final OvsdbClient externalClient) {
         LOG.info("OVSDB Connection from {}:{}",externalClient.getConnectionInfo().getRemoteAddress(),
                 externalClient.getConnectionInfo().getRemotePort());
-        OvsdbClientKey key = new OvsdbClientKey(externalClient);
+        ConnectionInfo key = SouthboundMapper.createConnectionInfo(externalClient);
         OvsdbConnectionInstance client = new OvsdbConnectionInstance(key,externalClient,txInvoker);
         clients.put(key, client);
     }
@@ -60,7 +61,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     public void disconnected(OvsdbClient client) {
         LOG.info("OVSDB Disconnect from {}:{}",client.getConnectionInfo().getRemoteAddress(),
                 client.getConnectionInfo().getRemotePort());
-        OvsdbClientKey key = new OvsdbClientKey(client);
+        ConnectionInfo key = SouthboundMapper.createConnectionInfo(client);
         txInvoker.invoke(new OvsdbNodeRemoveCommand(key,null,null));
         clients.remove(key);
     }
@@ -79,9 +80,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     }
 
     public void disconnect(OvsdbNodeAugmentation ovsdbNode) throws UnknownHostException {
-        OvsdbClientKey key = new OvsdbClientKey(ovsdbNode.getConnectionInfo().getRemoteIp(),
-                ovsdbNode.getConnectionInfo().getRemotePort());
-        OvsdbClient client = clients.get(key);
+        OvsdbClient client = clients.get(ovsdbNode.getConnectionInfo());
         if (client != null) {
             client.disconnect();
         }
@@ -94,13 +93,9 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         }
     }
 
-    public OvsdbConnectionInstance getConnectionInstance(OvsdbClientKey key) {
-        return clients.get(key);
-    }
-
-    public OvsdbConnectionInstance getConnectionInstance(ConnectionInfo connectionInfo) {
-        Preconditions.checkNotNull(connectionInfo);
-        return getConnectionInstance(new OvsdbClientKey(connectionInfo));
+    public OvsdbConnectionInstance getConnectionInstance(ConnectionInfo key) {
+        ConnectionInfoBuilder connectionInfoBuilder = new ConnectionInfoBuilder(key);
+        return clients.get(connectionInfoBuilder.build());
     }
 
     public OvsdbConnectionInstance getConnectionInstance(OvsdbBridgeAttributes mn) {
@@ -143,10 +138,6 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             LOG.warn("Failed to get Ovsdb Node {}",nodePath, e);
             return null;
         }
-    }
-
-    public OvsdbClient getClient(OvsdbClientKey key) {
-        return getConnectionInstance(key);
     }
 
     public OvsdbClient getClient(ConnectionInfo connectionInfo) {

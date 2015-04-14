@@ -37,6 +37,7 @@ import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactInvoker;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactInvokerImpl;
 import org.opendaylight.ovsdb.southbound.transactions.md.OvsdbNodeCreateCommand;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,13 +47,13 @@ import com.google.common.util.concurrent.ListenableFuture;
 public class OvsdbConnectionInstance implements OvsdbClient {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionInstance.class);
     private OvsdbClient client;
-    private OvsdbClientKey key;
+    private ConnectionInfo connectionInfo;
     private TransactionInvoker txInvoker;
     private Map<DatabaseSchema,TransactInvoker> transactInvokers = new HashMap<DatabaseSchema,TransactInvoker>();
     private MonitorCallBack callback;
 
-    OvsdbConnectionInstance(OvsdbClientKey key,OvsdbClient client,TransactionInvoker txInvoker) {
-        this.key = key;
+    OvsdbConnectionInstance(ConnectionInfo key,OvsdbClient client,TransactionInvoker txInvoker) {
+        this.connectionInfo = key;
         this.client = client;
         this.txInvoker = txInvoker;
         txInvoker.invoke(new OvsdbNodeCreateCommand(key, null,null));
@@ -66,7 +67,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     }
 
     private void registerCallBack() {
-        this.callback = new OvsdbMonitorCallback(key,txInvoker);
+        this.callback = new OvsdbMonitorCallback(connectionInfo,txInvoker);
         try {
             List<String> databases = getDatabases().get();
             if (databases != null) {
@@ -76,14 +77,14 @@ public class OvsdbConnectionInstance implements OvsdbClient {
                         transactInvokers.put(dbSchema, new TransactInvokerImpl(this,dbSchema));
                         monitorAllTables(database, dbSchema);
                     } else {
-                        LOG.warn("No schema reported for database {} for key {}",database,key);
+                        LOG.warn("No schema reported for database {} for key {}",database,connectionInfo);
                     }
                 }
             } else {
-                LOG.warn("No databases reported from {}",key);
+                LOG.warn("No databases reported from {}",connectionInfo);
             }
         } catch (InterruptedException | ExecutionException e) {
-            LOG.warn("Exception attempting to initialize {}: {}",key,e);
+            LOG.warn("Exception attempting to initialize {}: {}",connectionInfo,e);
         }
     }
 
@@ -102,7 +103,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
             }
             this.callback.update(monitor(dbSchema, monitorRequests, callback),dbSchema);
         } else {
-            LOG.warn("No tables for schema {} for database {} for key {}",dbSchema,database,key);
+            LOG.warn("No tables for schema {} for database {} for key {}",dbSchema,database,connectionInfo);
         }
     }
 
@@ -154,10 +155,6 @@ public class OvsdbConnectionInstance implements OvsdbClient {
         client.stopEchoService();
     }
 
-    public OvsdbConnectionInfo getConnectionInfo() {
-        return client.getConnectionInfo();
-    }
-
     public boolean isActive() {
         return client.isActive();
     }
@@ -184,11 +181,15 @@ public class OvsdbConnectionInstance implements OvsdbClient {
         return client.getTypedRowWrapper(klazz, row);
     }
 
-    public OvsdbClientKey getKey() {
-        return key;
+    public OvsdbConnectionInfo getConnectionInfo() {
+        return client.getConnectionInfo();
     }
 
-    public void setKey(OvsdbClientKey key) {
-        this.key = key;
+    public ConnectionInfo getMDConnectionInfo() {
+        return connectionInfo;
+    }
+
+    public void setMDConnectionInfo(ConnectionInfo key) {
+        this.connectionInfo = key;
     }
 }

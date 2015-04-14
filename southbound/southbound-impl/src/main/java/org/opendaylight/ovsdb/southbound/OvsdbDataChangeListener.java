@@ -79,7 +79,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
             connectionInstance.transact(new TransactCommandAggregator(
                     new BridgeOperationalState(db, changes),
                     new DataChangesManagedByOvsdbNodeEvent(
-                            SouthboundMapper.createInstanceIdentifier(connectionInstance.getKey()),
+                            SouthboundMapper.createInstanceIdentifier(connectionInstance.getMDConnectionInfo()),
                             changes)));
         }
     }

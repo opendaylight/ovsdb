@@ -13,7 +13,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
@@ -25,10 +30,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
-
 /**
 * Unit test for {@link OvsdbClientKey}
 *
@@ -39,14 +40,17 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 public class OvsdbClientKeyTest {
     private static final String ADDRESS_STR = "192.168.120.1";
     private static final String PORT_STR = "6640";
-    private OvsdbClientKey ovsdbClientKeyTest;
+    private ConnectionInfo ovsdbClientKeyTest;
     private InstanceIdentifier<Node> nodePath;
 
     @Before
     public void setUp() {
         Ipv4Address ipv4 = new Ipv4Address(ADDRESS_STR);
         PortNumber port = new PortNumber(Integer.parseInt(PORT_STR));
-        ovsdbClientKeyTest = new OvsdbClientKey(new IpAddress(ipv4), port);
+        ConnectionInfoBuilder connectionInfoBuilder = new ConnectionInfoBuilder();
+        connectionInfoBuilder.setRemoteIp(new IpAddress(ipv4));
+        connectionInfoBuilder.setRemotePort(port);
+        ovsdbClientKeyTest = connectionInfoBuilder.build();
 
         String uriString = SouthboundConstants.OVSDB_URI_PREFIX + "://" + ADDRESS_STR + ":" + PORT_STR;
         Uri uri = new Uri(uriString);
@@ -61,10 +65,6 @@ public class OvsdbClientKeyTest {
     public void testToInstanceIndentifier() {
         Assert.assertNotNull("OvsdbClientKey should not be null", ovsdbClientKeyTest);
 
-        PowerMockito.mockStatic(SouthboundMapper.class);
-        PowerMockito.when(SouthboundMapper.createInstanceIdentifier(any(IpAddress.class), any(PortNumber.class)))
-                .thenReturn(nodePath);
-
-        Assert.assertEquals("Failed to return " + nodePath, nodePath, ovsdbClientKeyTest.toInstanceIndentifier());
+        Assert.assertEquals("Failed to return " + nodePath, nodePath, SouthboundMapper.createInstanceIdentifier(ovsdbClientKeyTest));
     }
 }

@@ -67,16 +67,19 @@ public class BridgeUpdateCommand extends AbstractTransactCommand {
         Optional<OvsdbBridgeAugmentation> operationalBridgeOptional =
                 getOperationalState().getOvsdbBridgeAugmentation(iid);
         Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
-        setName(bridge, ovsdbManagedNode,operationalBridgeOptional);
         setFailMode(bridge, ovsdbManagedNode);
         setDataPathType(bridge, ovsdbManagedNode);
         setOpenDaylightIidExternalId(bridge, iid);
         if (!operationalBridgeOptional.isPresent()) {
+            setName(bridge, ovsdbManagedNode,operationalBridgeOptional);
             setPort(transaction, bridge, ovsdbManagedNode);
             transaction.add(op.insert(bridge));
         } else if (bridge.getName() != null) {
+            // Name is immutable, and so we *can't* update it.  So we use extraBridge for the schema stuff
+            Bridge extraBridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
+            extraBridge.setName("");
             transaction.add(op.update(bridge)
-                    .where(bridge.getNameColumn().getSchema().opEqual(bridge.getName()))
+                    .where(extraBridge.getNameColumn().getSchema().opEqual(bridge.getName()))
                     .build());
         }
     }

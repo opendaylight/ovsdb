@@ -20,11 +20,14 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
+
 import javax.inject.Inject;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,12 +38,14 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.ovsdb.southbound.OvsdbClientKey;
+//import org.opendaylight.ovsdb.southbound.OvsdbClientKey;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundProvider;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
@@ -183,12 +188,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     @Test
     public void testAddRemoveOvsdbNode() throws InterruptedException {
-        OvsdbClientKey ovsdbClientKey = getOvsdbClientKey(addressStr, portStr);
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
 
         // Write OVSDB node to configuration
         final ReadWriteTransaction configNodeTx = dataBroker.newReadWriteTransaction();
-        configNodeTx.put(LogicalDatastoreType.CONFIGURATION, ovsdbClientKey.toInstanceIndentifier(),
-                SouthboundMapper.createNode(ovsdbClientKey));
+        configNodeTx.put(LogicalDatastoreType.CONFIGURATION, SouthboundMapper.createInstanceIdentifier(connectionInfo),
+                SouthboundMapper.createNode(connectionInfo));
         Futures.addCallback(configNodeTx.submit(), new FutureCallback<Void>() {
             @Override
             public void onSuccess(final Void result) {
@@ -209,7 +214,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         // Read from operational to verify if the OVSDB node is connected
         final ReadOnlyTransaction readNodeTx = dataBroker.newReadOnlyTransaction();
         ListenableFuture<Optional<Node>> dataFuture = readNodeTx.read(
-                LogicalDatastoreType.OPERATIONAL, ovsdbClientKey.toInstanceIndentifier());
+                LogicalDatastoreType.OPERATIONAL, SouthboundMapper.createInstanceIdentifier(connectionInfo));
         Futures.addCallback(dataFuture, new FutureCallback<Optional<Node>>() {
             @Override
             public void onSuccess(final Optional<Node> result) {
@@ -233,7 +238,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         // Delete OVSDB node from configuration
         final ReadWriteTransaction deleteNodeTx = dataBroker.newReadWriteTransaction();
-        deleteNodeTx.delete(LogicalDatastoreType.CONFIGURATION, ovsdbClientKey.toInstanceIndentifier());
+        deleteNodeTx.delete(LogicalDatastoreType.CONFIGURATION, 
+                SouthboundMapper.createInstanceIdentifier(connectionInfo));
         Futures.addCallback(deleteNodeTx.submit(), new FutureCallback<Void>() {
             @Override
             public void onSuccess(final Void result) {
@@ -257,11 +263,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         Optional<Node> node = Optional.absent();
         try {
             node = readNodeTx2.read(LogicalDatastoreType.OPERATIONAL,
-                    ovsdbClientKey.toInstanceIndentifier()).checkedGet();
+                    SouthboundMapper.createInstanceIdentifier(connectionInfo)).checkedGet();
             assertFalse("Failed to delete node from configuration and node is still connected",
                     node.isPresent());
         } catch (final ReadFailedException e) {
-            LOG.debug("Read Operational/DS for Node fail! {}", ovsdbClientKey.toInstanceIndentifier(), e);
+            LOG.debug("Read Operational/DS for Node fail! {}", 
+                    SouthboundMapper.createInstanceIdentifier(connectionInfo), e);
             fail("failed reading node from operational: " + readNodeTx2 + e);
         }
     }
@@ -279,7 +286,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         assertNull(node);
     }
 
-    private OvsdbClientKey getOvsdbClientKey(String addressStr, String portStr) {
+    private ConnectionInfo getConnectionInfo(String addressStr, String portStr) {
         InetAddress inetAddress = null;
         try {
             inetAddress = InetAddress.getByName(addressStr);
@@ -290,15 +297,18 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         IpAddress address = SouthboundMapper.createIpAddress(inetAddress);
         PortNumber port = new PortNumber(Integer.parseInt(portStr));
 
-        return new OvsdbClientKey(address, port);
+        return new ConnectionInfoBuilder()
+                       .setRemoteIp(address)
+                       .setRemotePort(port)
+                       .build();
     }
 
     private void addNode(String addressStr, String portStr) {
-        OvsdbClientKey ovsdbClientKey = getOvsdbClientKey(addressStr, portStr);
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
 
         final ReadWriteTransaction rwTx = dataBroker.newReadWriteTransaction();
-        rwTx.put(LogicalDatastoreType.CONFIGURATION, ovsdbClientKey.toInstanceIndentifier(),
-                SouthboundMapper.createNode(ovsdbClientKey));
+        rwTx.put(LogicalDatastoreType.CONFIGURATION, SouthboundMapper.createInstanceIdentifier(connectionInfo),
+                SouthboundMapper.createNode(connectionInfo));
         CheckedFuture<Void, TransactionCommitFailedException> commitFuture = rwTx.submit();
         try {
             commitFuture.checkedGet();
@@ -308,12 +318,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     private Node readNode(String addressStr, String portStr, LogicalDatastoreType type) {
-        OvsdbClientKey ovsdbClientKey = getOvsdbClientKey(addressStr, portStr);
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
 
         final ReadWriteTransaction rwTx = dataBroker.newReadWriteTransaction();
         Optional<Node> node = Optional.absent();
         CheckedFuture<Optional<Node>, ReadFailedException> read;
-        read = rwTx.read(type, ovsdbClientKey.toInstanceIndentifier());
+        read = rwTx.read(type, SouthboundMapper.createInstanceIdentifier(connectionInfo));
         try {
             node = read.checkedGet();
             if (node.isPresent()) {
@@ -327,10 +337,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     private void deleteNode(String addressStr, String portStr) {
-        OvsdbClientKey ovsdbClientKey = getOvsdbClientKey(addressStr, portStr);
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
 
         final ReadWriteTransaction rwTx = dataBroker.newReadWriteTransaction();
-        rwTx.delete(LogicalDatastoreType.CONFIGURATION, ovsdbClientKey.toInstanceIndentifier());
+        rwTx.delete(LogicalDatastoreType.CONFIGURATION, SouthboundMapper.createInstanceIdentifier(connectionInfo));
         CheckedFuture<Void, TransactionCommitFailedException> commitFuture = rwTx.submit();
         try {
             commitFuture.get();
@@ -340,7 +350,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     private NetworkTopology readNetworkTopology(LogicalDatastoreType type) {
-        OvsdbClientKey ovsdbClientKey = getOvsdbClientKey(addressStr, portStr);
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
 
         final ReadWriteTransaction rwTx = dataBroker.newReadWriteTransaction();
         Optional<NetworkTopology> optional = Optional.absent();

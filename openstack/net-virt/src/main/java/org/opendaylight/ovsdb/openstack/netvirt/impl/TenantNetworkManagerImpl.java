@@ -36,7 +36,6 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
     static final Logger logger = LoggerFactory.getLogger(TenantNetworkManagerImpl.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
-    private volatile NetworkingProviderManager networkingProviderManager;
     private volatile OvsdbConfigurationService ovsdbConfigurationService;
     private volatile OvsdbConnectionService connectionService;
     private volatile INeutronNetworkCRUD neutronNetworkCache;
@@ -89,13 +88,6 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
         if (networkId == null) {
             logger.debug("Tenant Network not found with Segmenation-id {}",segmentationId);
             return false;
-        }
-        if (networkingProviderManager.getProvider(node).hasPerTenantTunneling()) {
-            int internalVlan = vlanConfigurationCache.getInternalVlan(node, networkId);
-            if (internalVlan == 0) {
-                logger.debug("No InternalVlan provisioned for Tenant Network {}",networkId);
-                return false;
-            }
         }
 
         try {
@@ -171,16 +163,6 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
         NeutronNetwork neutronNetwork = neutronNetworkCache.getNetwork(neutronPort.getNetworkUUID());
         logger.debug("{} mapped to {}", intf, neutronNetwork);
         return neutronNetwork;
-    }
-
-    @Override
-    public void networkCreated (String networkId) {
-        List<Node> nodes = connectionService.getNodes();
-
-        for (Node node : nodes) {
-            this.networkCreated(node, networkId);
-        }
-
     }
 
     @Override

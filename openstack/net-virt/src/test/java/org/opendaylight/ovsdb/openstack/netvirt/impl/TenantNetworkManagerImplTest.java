@@ -162,10 +162,6 @@ public class TenantNetworkManagerImplTest {
         when(neutronPort.getNetworkUUID()).thenReturn("networkUUID");
 
         assertTrue("Error, did not return correct boolean for isTenantNetworkPresentInNode", tenantNetworkManagerImpl.isTenantNetworkPresentInNode(mock(Node.class), "segId"));
-
-
-        verify(networkingProviderManager, times(1)).getProvider(any(Node.class));
-        verify(vlanConfigurationCache, times(1)).getInternalVlan(any(Node.class), anyString());
     }
 
     /**
@@ -211,25 +207,4 @@ public class TenantNetworkManagerImplTest {
         verify(neutronNetworkCache, times(1)).getNetwork(anyString());
     }
 
-    /**
-     * Test method {@link TenantNetworkManagerImpl#networkCreated(String)}
-     */
-    @Test
-    public void testNetworkCreated() {
-        int numberOfNode = 10;
-        when(vlanConfigurationCache.assignInternalVlan(any(Node.class), anyString())).thenReturn(10);
-
-        List<Node> nodes = new ArrayList();
-        for (int i = 0; i<numberOfNode; i++) {
-            nodes.add(mock(Node.class));
-        }
-        when(ovsdbConnectionService.getNodes()).thenReturn(nodes);
-
-        tenantNetworkManagerImpl.networkCreated(NETWORK_ID);
-
-        verify(ovsdbConnectionService, times(1)).getNodes();
-        verify(vlanConfigurationCache, times(numberOfNode)).assignInternalVlan(any(Node.class), anyString());
-
-        assertEquals("Error, did not return the correct network id", 10,tenantNetworkManagerImpl.networkCreated(mock(Node.class), NETWORK_ID));
-    }
 }

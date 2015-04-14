@@ -2,13 +2,13 @@ package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.southbound.OvsdbClientKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 
 public abstract class AbstractTransactionCommand implements TransactionCommand {
 
     private TableUpdates updates;
     private DatabaseSchema dbSchema;
-    private OvsdbClientKey key;
+    private ConnectionInfo key;
 
     public TableUpdates getUpdates() {
         return updates;
@@ -18,7 +18,7 @@ public abstract class AbstractTransactionCommand implements TransactionCommand {
         return dbSchema;
     }
 
-    public OvsdbClientKey getKey() {
+    public ConnectionInfo getConnectionInfo() {
         return key;
     }
 
@@ -26,7 +26,7 @@ public abstract class AbstractTransactionCommand implements TransactionCommand {
         // NO OP
     }
 
-    public AbstractTransactionCommand(OvsdbClientKey key,TableUpdates updates, DatabaseSchema dbSchema) {
+    public AbstractTransactionCommand(ConnectionInfo key,TableUpdates updates, DatabaseSchema dbSchema) {
         this.updates = updates;
         this.dbSchema = dbSchema;
         this.key = key;

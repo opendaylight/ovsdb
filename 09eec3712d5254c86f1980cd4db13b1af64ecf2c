@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_828d1e34",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-04-14T01:37:45Z",
+      "side": 1,
+      "message": "maybe add a whitespace down the road",
+      "range": {
+        "startLine": 235,
+        "startChar": 33,
+        "endLine": 235,
+        "endChar": 34
+      },
+      "revId": "09eec3712d5254c86f1980cd4db13b1af64ecf2c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

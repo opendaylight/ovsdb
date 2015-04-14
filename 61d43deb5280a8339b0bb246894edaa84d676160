@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_45408056",
+        "filename": "openstack/net-virt-providers/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2015-04-14T13:09:29Z",
+      "side": 1,
+      "message": "No tabs here too",
+      "revId": "61d43deb5280a8339b0bb246894edaa84d676160",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_055b5855",
+        "filename": "openstack/net-virt-providers/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/PipelineOrchestratorImplTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2015-04-14T13:09:29Z",
+      "side": 1,
+      "message": "Should read \"Inocybe Technologies\" not \"Inocybe\" in the copyright headers just a side note on the full legal name. Change elsewhere please if it is the same elsewhere just change them all in a single patch.",
+      "revId": "61d43deb5280a8339b0bb246894edaa84d676160",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_85368802",
+        "filename": "openstack/net-virt-providers/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/PipelineOrchestratorImplTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2015-04-14T13:09:29Z",
+      "side": 1,
+      "message": "You can\u0027t use Tab characters so fix your eclipse tu use space vs tabs.",
+      "revId": "61d43deb5280a8339b0bb246894edaa84d676160",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_25445473",
+        "filename": "openstack/net-virt-providers/tools.jar",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1788
+      },
+      "writtenOn": "2015-04-14T13:09:29Z",
+      "side": 1,
+      "message": "This doesn\u0027t belong in a patch.. NEVER add binaries and always look at your output. (Use git rm tools.jar to remove then git commit --amend your patch) do not create a new commit (1 patch \u003d 1 commit)",
+      "revId": "61d43deb5280a8339b0bb246894edaa84d676160",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

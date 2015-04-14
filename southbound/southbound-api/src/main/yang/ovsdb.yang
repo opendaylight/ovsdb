@@ -150,6 +150,9 @@ module ovsdb {
                 description "The unique identifier of the controller";
                 type yang:uuid;
             }
+            leaf is-connected {
+                type boolean;
+            }
 
         }
 

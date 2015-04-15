@@ -36,17 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractConfigTestBase {
-
     private static final Logger LOG = LoggerFactory.getLogger(AbstractConfigTestBase.class);
-    public static final String ORG_OPS4J_PAX_LOGGING_CFG = "etc/org.ops4j.pax.logging.cfg";
-    public static final String CUSTOM_PROPERTIES = "etc/custom.properties";
-    private static final String SERVER_IPADDRESS = "ovsdbserver.ipaddress";
-    private static final String SERVER_PORT = "ovsdbserver.port";
-    private static final String CONNECTION_TYPE = "ovsdbserver.connection";
-    private static final String CONNECTION_TYPE_ACTIVE = "active";
-    private static final String CONNECTION_TYPE_PASSIVE = "passive";
-    private static final String DEFAULT_SERVER_IPADDRESS = "127.0.0.1";
-    private static final String DEFAULT_SERVER_PORT = "6640";
 
     /*
      * Wait up to 10s for our configured module to come up
@@ -63,12 +53,9 @@ public abstract class AbstractConfigTestBase {
 
     public Option[] getLoggingOptions() {
         Option[] options = new Option[] {
-                editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
+                editConfigurationFilePut(SouthboundITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
                         logConfiguration(AbstractConfigTestBase.class),
-                        LogLevel.INFO.name()),
-                editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
-                        "log4j.logger.org.opendaylight.ovsdb.southbound-impl",
-                        LogLevel.DEBUG.name())
+                        LogLevel.INFO.name())
         };
         return options;
     }

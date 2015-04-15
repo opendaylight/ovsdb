@@ -73,8 +73,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
                 OvsdbNodeAugmentation ovsdbNode = SouthboundMapper
                         .createOvsdbAugmentation(getConnectionInfo());
                 OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = new OvsdbNodeAugmentationBuilder();
-                ovsdbNodeBuilder.setOvsVersion(openVSwitch.getVersion()
-                        .toString());
+                ovsdbNodeBuilder.setOvsVersion(openVSwitch.getOvsVersionColumn().getData().iterator().next());
                 try {
                     Set<String> dptypes = openVSwitch.getDatapathTypesColumn()
                             .getData();

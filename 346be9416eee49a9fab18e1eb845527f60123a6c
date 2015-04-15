@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_835e7de8",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-04-15T14:42:05Z",
+      "side": 1,
+      "message": "Hey Sam, should the description from the OVS schema be added here ?",
+      "revId": "346be9416eee49a9fab18e1eb845527f60123a6c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

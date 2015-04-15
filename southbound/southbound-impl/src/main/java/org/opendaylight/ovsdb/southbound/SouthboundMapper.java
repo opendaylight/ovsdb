@@ -342,9 +342,9 @@ public class SouthboundMapper {
     public static ConnectionInfo createConnectionInfo(OvsdbClient client) {
         ConnectionInfoBuilder connectionInfoBuilder = new ConnectionInfoBuilder();
         connectionInfoBuilder.setRemoteIp(createIpAddress(client.getConnectionInfo().getRemoteAddress()));
-        connectionInfoBuilder.setLocalIp(createIpAddress(client.getConnectionInfo().getLocalAddress()));
+        //connectionInfoBuilder.setLocalIp(createIpAddress(client.getConnectionInfo().getLocalAddress()));
         connectionInfoBuilder.setRemotePort(new PortNumber(client.getConnectionInfo().getRemotePort()));
-        connectionInfoBuilder.setLocalPort(new PortNumber(client.getConnectionInfo().getLocalPort()));
+        //connectionInfoBuilder.setLocalPort(new PortNumber(client.getConnectionInfo().getLocalPort()));
         return connectionInfoBuilder.build();
     }
 }

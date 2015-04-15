@@ -24,12 +24,14 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,8 +46,10 @@ import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundProvider;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
@@ -405,5 +409,41 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         Assert.assertNotNull("Topology could not be found in " + LogicalDatastoreType.OPERATIONAL,
                 topology);
+    }
+
+    public Node connectNode(String addressStr, String portStr) throws InterruptedException {
+        LOG.error(">>>>> connectNode");
+        addNode("192.168.120.31", "6640");
+        Thread.sleep(1000);
+        Node node = readNode("192.168.120.31", "6640", LogicalDatastoreType.OPERATIONAL);
+        assertNotNull(node);
+        LOG.info("Connected node: {}", node);
+        return node;
+    }
+
+    public void disconnectNode(String addressStr, String portStr) throws InterruptedException {
+        LOG.error(">>>>> disconnectNode");
+        deleteNode("192.168.120.31", "6640");
+        Thread.sleep(1000);
+        LOG.error(">>>>> disconnectNode checking operational");
+        Node node = readNode("192.168.120.31", "6640", LogicalDatastoreType.OPERATIONAL);
+        Assume.assumeNotNull(node);
+    }
+
+    @Test
+    public void testOpenVSwitchOtherConfig() throws InterruptedException {
+        Node node = connectNode(addressStr, portStr);
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = node.getAugmentation(OvsdbNodeAugmentation.class);
+        assertNotNull(ovsdbNodeAugmentation);
+        List<OpenvswitchOtherConfigs> otherConfigsList = ovsdbNodeAugmentation.getOpenvswitchOtherConfigs();
+        if (otherConfigsList != null) {
+            for (OpenvswitchOtherConfigs otherConfig : otherConfigsList) {
+                if (otherConfig.getOtherConfigKey().equals("local_ip")) {
+                    LOG.info("local_ip: {}", otherConfig.getOtherConfigValue());
+                    break;
+                }
+            }
+        }
+        disconnectNode(addressStr, portStr);
     }
 }

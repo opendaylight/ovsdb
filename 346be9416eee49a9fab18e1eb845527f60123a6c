@@ -16,6 +16,24 @@
       "revId": "346be9416eee49a9fab18e1eb845527f60123a6c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_e373c113",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-04-15T17:17:36Z",
+      "side": 1,
+      "message": "That is where I took this text from - but not all of it. The schema doc had more verbose text talking about how to interpret the x.y.z format which I didn\u0027t think was useful to have in there. We can add it if desired.",
+      "parentUuid": "3aa0d159_835e7de8",
+      "revId": "346be9416eee49a9fab18e1eb845527f60123a6c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

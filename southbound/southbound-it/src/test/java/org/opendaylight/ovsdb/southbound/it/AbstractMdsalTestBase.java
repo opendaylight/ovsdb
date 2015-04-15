@@ -63,7 +63,7 @@ public abstract class AbstractMdsalTestBase extends AbstractConfigTestBase imple
     @Override
     public Option[] getLoggingOptions() {
         Option[] options = new Option[] {
-                editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
+                editConfigurationFilePut(SouthboundITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
                         logConfiguration(AbstractMdsalTestBase.class),
                         LogLevel.INFO.name()),
         };

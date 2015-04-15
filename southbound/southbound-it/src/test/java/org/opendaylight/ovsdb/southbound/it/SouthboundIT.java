@@ -16,6 +16,7 @@ import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ObjectArrays;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -23,13 +24,16 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -43,8 +47,10 @@ import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundProvider;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
@@ -53,6 +59,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.karaf.options.LogLevelOption;
 import org.ops4j.pax.exam.options.MavenUrlReference;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
@@ -69,14 +76,6 @@ import org.slf4j.LoggerFactory;
 @ExamReactorStrategy(PerClass.class)
 public class SouthboundIT extends AbstractMdsalTestBase {
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundIT.class);
-    private static final String SERVER_IPADDRESS = "ovsdbserver.ipaddress";
-    private static final String SERVER_PORT = "ovsdbserver.port";
-    private static final String CONNECTION_TYPE = "ovsdbserver.connection";
-    private static final String CONNECTION_TYPE_ACTIVE = "active";
-    private static final String CONNECTION_TYPE_PASSIVE = "passive";
-    private static final int CONNECTION_INIT_TIMEOUT = 10000;
-    private static final String DEFAULT_SERVER_IPADDRESS = "127.0.0.1";
-    private static final String DEFAULT_SERVER_PORT = "6640";
     private static Boolean writeStatus = false;
     private static Boolean readStatus = false;
     private static Boolean deleteStatus = false;
@@ -127,19 +126,36 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Override
+    public Option[] getLoggingOptions() {
+        Option[] options = new Option[] {
+                editConfigurationFilePut(SouthboundITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
+                        "log4j.logger.org.opendaylight.ovsdb.southbound-impl",
+                        LogLevelOption.LogLevel.DEBUG.name())
+        };
+        options = ObjectArrays.concat(options, super.getLoggingOptions(), Option.class);
+        return options;
+    }
+
+    @Override
     public Option[] getPropertiesOptions() {
         Properties props = new Properties(System.getProperties());
-        String addressStr = props.getProperty(SERVER_IPADDRESS, DEFAULT_SERVER_IPADDRESS);
-        String portStr = props.getProperty(SERVER_PORT, DEFAULT_SERVER_PORT);
-        String connectionType = props.getProperty(CONNECTION_TYPE, CONNECTION_TYPE_ACTIVE);
+        String addressStr = props.getProperty(SouthboundITConstants.SERVER_IPADDRESS,
+                SouthboundITConstants.DEFAULT_SERVER_IPADDRESS);
+        String portStr = props.getProperty(SouthboundITConstants.SERVER_PORT,
+                SouthboundITConstants.DEFAULT_SERVER_PORT);
+        String connectionType = props.getProperty(SouthboundITConstants.CONNECTION_TYPE,
+                SouthboundITConstants.CONNECTION_TYPE_ACTIVE);
 
         LOG.info("Using the following properties: mode= {}, ip:port= {}:{}",
                 connectionType, addressStr, portStr);
 
         Option[] options = new Option[] {
-                editConfigurationFilePut(CUSTOM_PROPERTIES, SERVER_IPADDRESS, addressStr),
-                editConfigurationFilePut(CUSTOM_PROPERTIES, SERVER_PORT, portStr),
-                editConfigurationFilePut(CUSTOM_PROPERTIES, CONNECTION_TYPE, connectionType)
+                editConfigurationFilePut(SouthboundITConstants.CUSTOM_PROPERTIES,
+                        SouthboundITConstants.SERVER_IPADDRESS, addressStr),
+                editConfigurationFilePut(SouthboundITConstants.CUSTOM_PROPERTIES,
+                        SouthboundITConstants.SERVER_PORT, portStr),
+                editConfigurationFilePut(SouthboundITConstants.CUSTOM_PROPERTIES,
+                        SouthboundITConstants.CONNECTION_TYPE, connectionType)
         };
         return options;
     }
@@ -161,13 +177,13 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         dataBroker = SouthboundProvider.getDb();
         Assert.assertNotNull("db should not be null", dataBroker);
 
-        addressStr = bc.getProperty(SERVER_IPADDRESS);
-        portStr = bc.getProperty(SERVER_PORT);
-        connectionType = bc.getProperty(CONNECTION_TYPE);
+        addressStr = bc.getProperty(SouthboundITConstants.SERVER_IPADDRESS);
+        portStr = bc.getProperty(SouthboundITConstants.SERVER_PORT);
+        connectionType = bc.getProperty(SouthboundITConstants.CONNECTION_TYPE);
 
         LOG.info("Using the following properties: mode= {}, ip:port= {}:{}",
                 connectionType, addressStr, portStr);
-        if (connectionType.equalsIgnoreCase(CONNECTION_TYPE_ACTIVE)) {
+        if (connectionType.equalsIgnoreCase(SouthboundITConstants.CONNECTION_TYPE_ACTIVE)) {
             if (addressStr == null) {
                 fail(usage());
             }
@@ -179,9 +195,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     @Test
     public void testPassiveNode() throws InterruptedException {
-        if (connectionType.equalsIgnoreCase(CONNECTION_TYPE_PASSIVE)) {
+        if (connectionType.equalsIgnoreCase(SouthboundITConstants.CONNECTION_TYPE_PASSIVE)) {
             //Wait for CONNECTION_INIT_TIMEOUT for the Passive connection to be initiated by the ovsdb-server.
-            Thread.sleep(CONNECTION_INIT_TIMEOUT);
+            Thread.sleep(SouthboundITConstants.CONNECTION_INIT_TIMEOUT);
         }
     }
 

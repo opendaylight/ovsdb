@@ -239,7 +239,13 @@ module ovsdb {
             uses ovsdb-connection-info-attributes;
         }
 
+        leaf db-version {
+            description "The database schema version";
+            type string;
+        }
+
         leaf ovs-version {
+            description "The Open_vSwitch version number";
             type string;
         }
 

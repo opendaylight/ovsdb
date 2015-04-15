@@ -31,7 +31,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <!-- Parent POM files -->
     <module>commons/parent</module>
     <module>commons/integrationtest</module>
-    <module>distribution/opendaylight-karaf</module>
+    <!--<module>distribution/opendaylight-karaf</module>-->
     <module>features/ovsdb</module>
     <module>features/ovs-sfc</module>
     <!-- OVSDB Components -->

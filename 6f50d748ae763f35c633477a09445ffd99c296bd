@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_1795c33f",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/AbstractServiceInstance.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-04-16T15:31:40Z",
+      "side": 1,
+      "message": "we should not remove this from cache until we get some sort of confidence that the transaction succeeded. Movie this to right after line 224.",
+      "range": {
+        "startLine": 219,
+        "startChar": 13,
+        "endLine": 219,
+        "endChar": 38
+      },
+      "revId": "6f50d748ae763f35c633477a09445ffd99c296bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

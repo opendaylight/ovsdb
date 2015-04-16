@@ -756,7 +756,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
         flowBuilder.setBarrier(true);
         flowBuilder.setTableId(getTable());
         flowBuilder.setKey(key);
-        flowBuilder.setPriority(16384);
+        flowBuilder.setPriority(16383);  // FIXME: change it back to 16384 once bug 3005 is fixed.
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);

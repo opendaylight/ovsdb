@@ -66,7 +66,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 public class ConfigurationServiceImpl implements OvsdbConfigurationService
 {
-    private static final Logger logger = LoggerFactory
+    private static final Logger LOGGER = LoggerFactory
             .getLogger(ConfigurationServiceImpl.class);
 
     OvsdbConnectionService connectionService;
@@ -107,7 +107,7 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
     }
 
     public void unsetConnectionServiceInternal(OvsdbConnectionService connectionService) {
-        if (this.connectionService == connectionService) {
+        if (this.connectionService.equals(connectionService)) {
             this.connectionService = null;
         }
     }
@@ -117,7 +117,7 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
     }
 
     public void unsetInventoryServiceInternal(OvsdbInventoryService ovsdbInventoryService) {
-        if (this.ovsdbInventoryService == ovsdbInventoryService) {
+        if (this.ovsdbInventoryService.equals(ovsdbInventoryService)) {
             this.ovsdbInventoryService = null;
         }
     }
@@ -136,7 +136,7 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
      * a Port row.
      */
     private void handleSpecialInsertCase(OvsdbClient client, String databaseName,
-            String tableName, String uuid, Row<GenericTableSchema> row, TransactionBuilder transactionBuilder) {
+            String tableName, Row<GenericTableSchema> row, TransactionBuilder transactionBuilder) {
         Port port = client.getTypedRowWrapper(Port.class, null);
         if (databaseName.equals(OvsVswitchdSchemaConstants.DATABASE_NAME) && tableName.equals(port.getSchema().getName())) {
             port = client.getTypedRowWrapper(Port.class, row);
@@ -171,7 +171,7 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
          * the older API (such as by inserting a mandatory Interface row automatically upon inserting
          * a Port row.
          */
-        handleSpecialInsertCase(client, databaseName, childTable, namedUuid, row, transactionBuilder);
+        handleSpecialInsertCase(client, databaseName, childTable, row, transactionBuilder);
     }
 
     /*
@@ -181,13 +181,17 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
      * plugin layer.
      */
     public String getSpecialCaseParentUUID(Node node, String databaseName, String childTableName) {
-        if (!databaseName.equals(OvsVswitchdSchemaConstants.DATABASE_NAME)) return null;
+        if (!databaseName.equals(OvsVswitchdSchemaConstants.DATABASE_NAME)) {
+            return null;
+        }
         String[] parentColumn = OvsVswitchdSchemaConstants.getParentColumnToMutate(childTableName);
         if (parentColumn != null && parentColumn[0].equals(OvsVswitchdSchemaConstants.DATABASE_NAME)) {
             Connection connection = connectionService.getConnection(node);
             OpenVSwitch openVSwitch = connection.getClient().getTypedRowWrapper(OpenVSwitch.class, null);
             ConcurrentMap<String, Row> row = this.getRows(node, openVSwitch.getSchema().getName());
-            if (row == null || row.size() == 0) return null;
+            if (row == null || row.size() == 0) {
+                return null;
+            }
             return (String)row.keySet().toArray()[0];
         }
         return null;
@@ -210,18 +214,19 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
         Connection connection = connectionService.getConnection(node);
         OvsdbClient client = connection.getClient();
 
-        if (parentUuid == null) {
-            parentUuid = this.getSpecialCaseParentUUID(node, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName);
+        String myParentUuid = parentUuid;
+        if (myParentUuid == null) {
+            myParentUuid = this.getSpecialCaseParentUUID(node, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName);
         }
-        logger.debug("insertRow Connection : {} Table : {} ParentTable : {} Parent Column: {} Parent UUID : {} Row : {}",
-                     client.getConnectionInfo(), tableName, parentColumn[0], parentColumn[1], parentUuid, row);
+        LOGGER.debug("insertRow Connection : {} Table : {} ParentTable : {} Parent Column: {} Parent UUID : {} Row : {}",
+                client.getConnectionInfo(), tableName, parentColumn[0], parentColumn[1], myParentUuid, row);
 
         DatabaseSchema dbSchema = client.getDatabaseSchema(OvsVswitchdSchemaConstants.DATABASE_NAME);
         TransactionBuilder transactionBuilder = client.transactBuilder(dbSchema);
 
         String namedUuid = "Transaction_"+ tableName;
         this.processTypedInsertTransaction(client, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName,
-                                parentColumn[0], parentUuid, parentColumn[1], namedUuid,
+                                parentColumn[0], myParentUuid, parentColumn[1], namedUuid,
                                 row, transactionBuilder);
 
         ListenableFuture<List<OperationResult>> results = transactionBuilder.execute();
@@ -286,7 +291,7 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
             parentColumn = new String[]{null, null};
         }
 
-        logger.debug("deleteRow : Connection : {} databaseName : {} tableName : {} Uuid : {} ParentTable : {} ParentColumn : {}",
+        LOGGER.debug("deleteRow : Connection : {} databaseName : {} tableName : {} Uuid : {} ParentTable : {} ParentColumn : {}",
                 client.getConnectionInfo(), databaseName, tableName, uuid, parentColumn[0], parentColumn[1]);
 
         DatabaseSchema dbSchema = client.getDatabaseSchema(databaseName);
@@ -307,7 +312,7 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
                 }
             }
         } catch (InterruptedException | ExecutionException e) {
-            logger.error("Error in deleteRow() {} {}", node, tableName, e);
+            LOGGER.error("Error in deleteRow() {} {}", node, tableName, e);
         }
 
         return new Status(StatusCode.SUCCESS);
@@ -324,7 +329,9 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
     @Deprecated
     public Row getRow(Node node, String tableName, String uuid) {
         Map<String, Row> ovsTable = ovsdbInventoryService.getTableCache(node, OvsVswitchdSchemaConstants.DATABASE_NAME,  tableName);
-        if (ovsTable == null) return null;
+        if (ovsTable == null) {
+            return null;
+        }
         return ovsTable.get(uuid);
     }
 
@@ -346,7 +353,7 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
                     return controllerIP;
                 }
             } catch (UnknownHostException e) {
-                logger.error("Host {} is invalid", addressString);
+                LOGGER.error("Host {} is invalid", addressString);
             }
         }
 
@@ -359,7 +366,7 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
                     return controllerIP;
                 }
             } catch (UnknownHostException e) {
-                logger.error("Host {} is invalid", addressString);
+                LOGGER.error("Host {} is invalid", addressString);
             }
         }
 
@@ -367,7 +374,7 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
             controllerIP = connection.getClient().getConnectionInfo().getLocalAddress();
             return controllerIP;
         } catch (Exception e) {
-            logger.debug("Invalid connection provided to getControllerIPAddresses", e);
+            LOGGER.debug("Invalid connection provided to getControllerIPAddresses", e);
         }
         return controllerIP;
     }
@@ -380,7 +387,7 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
             try {
                 openFlowPort = Short.decode(portString).shortValue();
             } catch (NumberFormatException e) {
-                logger.warn("Invalid port:{}, use default({})", portString,
+                LOGGER.warn("Invalid port:{}, use default({})", portString,
                         openFlowPort);
             }
         }
@@ -427,11 +434,11 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
             bridge.setProtocols(protocols);
             updateOperationStatus = this.updateRow(node, bridge.getSchema().getName(),
                                                    null, bridgeUUID, bridge.getRow());
-            logger.debug("Bridge {} updated to {} with Status {}", bridgeUUID,
-                         protocols.toArray()[0],updateOperationStatus);
+            LOGGER.debug("Bridge {} updated to {} with Status {}", bridgeUUID,
+                    protocols.toArray()[0], updateOperationStatus);
 
         } catch (SchemaVersionMismatchException e){
-            logger.debug(e.toString());
+            LOGGER.debug(e.toString());
         }
 
         // If we fail to update the protocols
@@ -468,7 +475,7 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
 
     public Boolean setBridgeOFController(Node node, String bridgeIdentifier) {
         if (connectionService == null) {
-            logger.error("Couldn't refer to the ConnectionService");
+            LOGGER.error("Couldn't refer to the ConnectionService");
             return false;
         }
 
@@ -484,7 +491,7 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
                 }
             }
         } catch(Exception e) {
-            logger.error("Error in setBridgeOFController()",e);
+            LOGGER.error("Error in setBridgeOFController()", e);
         }
         return false;
     }
@@ -668,8 +675,8 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
             parentColumn = this.getReferencingColumn(parentTableSchema, tableName);
         }
 
-        logger.debug("insertTree Connection : {} Table : {} ParentTable : {} Parent Column: {} Parent UUID : {} Row : {}",
-                     client.getConnectionInfo(), tableName, parentTable, parentColumn, parentUuid, row);
+        LOGGER.debug("insertTree Connection : {} Table : {} ParentTable : {} Parent Column: {} Parent UUID : {} Row : {}",
+                client.getConnectionInfo(), tableName, parentTable, parentColumn, parentUuid, row);
 
         Map<UUID, Map.Entry<String, Row<GenericTableSchema>>> referencedRows = Maps.newConcurrentMap();
         extractReferencedRows(node, databaseName, row, referencedRows, 0);
@@ -763,7 +770,7 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
                         referencedRows.put(refUuid, new AbstractMap.SimpleEntry<String, Row<GenericTableSchema>>(refRowObject.getRefTable(), refRow));
                         extractReferencedRows(node, dbName, refRow, referencedRows, namedUuidSuffix);
                     } catch (InterruptedException | ExecutionException e) {
-                        logger.error("Exception while extracting multi-level Row references " + e.getLocalizedMessage());
+                        LOGGER.error("Exception while extracting multi-level Row references " + e.getLocalizedMessage());
                     }
                 } else if (column.getData() instanceof OvsdbSet) {
                     OvsdbSet<Object> setObject = (OvsdbSet<Object>)column.getData();
@@ -780,7 +787,7 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
                                 referencedRows.put(refUuid, new AbstractMap.SimpleEntry<String, Row<GenericTableSchema>>(refRowObject.getRefTable(), refRow));
                                 extractReferencedRows(node, dbName, refRow, referencedRows, namedUuidSuffix);
                             } catch (InterruptedException | ExecutionException e) {
-                                logger.error("Exception while extracting multi-level Row references " + e.getLocalizedMessage());
+                                LOGGER.error("Exception while extracting multi-level Row references " + e.getLocalizedMessage());
                             }
                         } else {
                             modifiedSet.add(obj);
@@ -811,10 +818,10 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
                                                      List<OperationResult> operationResults, int referencedRowsInsertIndex) {
         UUID primaryRowUuid = operationResults.get(0).getUuid();
         TableSchema<GenericTableSchema> primaryRowTableSchema = dbSchema.table(tableName, GenericTableSchema.class);
-        ColumnSchema<GenericTableSchema, UUID> _uuid = primaryRowTableSchema.column("_uuid", UUID.class);
-        if (_uuid != null) {
-            Column<GenericTableSchema, UUID> _uuidColumn = new Column<GenericTableSchema, UUID>(_uuid, primaryRowUuid);
-            row.addColumn("_uuid", _uuidColumn);
+        ColumnSchema<GenericTableSchema, UUID> uuid = primaryRowTableSchema.column("_uuid", UUID.class);
+        if (uuid != null) {
+            Column<GenericTableSchema, UUID> uuidColumn = new Column<GenericTableSchema, UUID>(uuid, primaryRowUuid);
+            row.addColumn("_uuid", uuidColumn);
         }
 
         if (referencedRows != null) {
@@ -842,20 +849,20 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
     @Override
     public Row<GenericTableSchema> updateRow(Node node, String databaseName,
             String tableName, UUID rowUuid, Row<GenericTableSchema> row,
-            boolean overwrite) throws OvsdbPluginException {
+            boolean overwrite) {
         Connection connection = connectionService.getConnection(node);
         OvsdbClient client = connection.getClient();
 
-        logger.debug("updateRow : Connection : {} databaseName : {} tableName : {} rowUUID : {} row : {}",
-                      client.getConnectionInfo(), databaseName, tableName, rowUuid, row.toString());
+        LOGGER.debug("updateRow : Connection : {} databaseName : {} tableName : {} rowUUID : {} row : {}",
+                client.getConnectionInfo(), databaseName, tableName, rowUuid, row.toString());
         try{
             DatabaseSchema dbSchema = client.getDatabaseSchema(databaseName);
             TransactionBuilder transactionBuilder = client.transactBuilder(dbSchema);
             TableSchema<GenericTableSchema> tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
-            ColumnSchema<GenericTableSchema, UUID> _uuid = tableSchema.column("_uuid", UUID.class);
+            ColumnSchema<GenericTableSchema, UUID> uuid = tableSchema.column("_uuid", UUID.class);
             transactionBuilder.add(op.update(tableSchema, row)
-                                     .where(_uuid.opEqual(rowUuid))
-                                     .build());
+                    .where(uuid.opEqual(rowUuid))
+                    .build());
 
             ListenableFuture<List<OperationResult>> results = transactionBuilder.execute();
             List<OperationResult> operationResults = results.get();
@@ -877,7 +884,7 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
 
     @Override
     public void deleteRow(Node node, String databaseName, String tableName, String parentTable, UUID parentRowUuid,
-            String parentColumn, UUID rowUuid) throws OvsdbPluginException {
+            String parentColumn, UUID rowUuid) {
         Connection connection = connectionService.getConnection(node);
         OvsdbClient client = connection.getClient();
 
@@ -885,19 +892,20 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
             parentTable = this.getTableNameForRowUuid(node, databaseName, parentRowUuid);
         }
 
-        if (parentColumn == null && parentTable != null) {
+        String myParentColumn = parentColumn;
+        if (myParentColumn == null && parentTable != null) {
             DatabaseSchema dbSchema = client.getDatabaseSchema(databaseName);
             TableSchema<GenericTableSchema> parentTableSchema = dbSchema.table(parentTable, GenericTableSchema.class);
-            parentColumn = this.getReferencingColumn(parentTableSchema, tableName);
+            myParentColumn = this.getReferencingColumn(parentTableSchema, tableName);
         }
 
-        logger.debug("deleteRow : Connection : {} databaseName : {} tableName : {} Uuid : {} ParentTable : {} ParentColumn : {}",
-                client.getConnectionInfo(), databaseName, tableName, rowUuid, parentTable, parentColumn);
+        LOGGER.debug("deleteRow : Connection : {} databaseName : {} tableName : {} Uuid : {} ParentTable : {} ParentColumn : {}",
+                client.getConnectionInfo(), databaseName, tableName, rowUuid, parentTable, myParentColumn);
 
         DatabaseSchema dbSchema = client.getDatabaseSchema(databaseName);
         TransactionBuilder transactionBuilder = client.transactBuilder(dbSchema);
         this.processDeleteTransaction(client, databaseName, tableName,
-                                      parentTable, parentColumn, rowUuid.toString(), transactionBuilder);
+                                      parentTable, myParentColumn, rowUuid.toString(), transactionBuilder);
 
         ListenableFuture<List<OperationResult>> results = transactionBuilder.execute();
         List<OperationResult> operationResults;
@@ -912,19 +920,18 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
                 }
             }
         } catch (InterruptedException | ExecutionException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error("Error in deleteRow() {} {} {} {}", node, databaseName, tableName, parentTable, e);
         }
     }
 
     @Override
-    public void deleteRow(Node node, String databaseName, String tableName, UUID rowUuid) throws OvsdbPluginException {
+    public void deleteRow(Node node, String databaseName, String tableName, UUID rowUuid) {
         this.deleteRow(node, databaseName, tableName, null, null, null, rowUuid);
     }
 
     @Override
     public Row<GenericTableSchema> getRow(Node node, String databaseName,
-            String tableName, UUID uuid) throws OvsdbPluginException {
+            String tableName, UUID uuid) {
         ConcurrentMap<UUID, Row<GenericTableSchema>> rows = this.getRows(node, databaseName, tableName);
         if (rows != null) {
             return rows.get(uuid);
@@ -936,7 +943,9 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
     public ConcurrentMap<UUID, Row<GenericTableSchema>> getRows(Node node,
             String databaseName, String tableName) throws OvsdbPluginException {
         ConcurrentMap<String, Row> ovsTable = ovsdbInventoryService.getTableCache(node, databaseName, tableName);
-        if (ovsTable == null) return null;
+        if (ovsTable == null) {
+            return null;
+        }
         ConcurrentMap<UUID, Row<GenericTableSchema>> tableDB = Maps.newConcurrentMap();
         for (String uuidStr : ovsTable.keySet()) {
             tableDB.put(new UUID(uuidStr), ovsTable.get(uuidStr));
@@ -946,15 +955,17 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
 
     @Override
     public ConcurrentMap<UUID, Row<GenericTableSchema>> getRows(Node node,
-            String databaseName, String tableName, String fiqlQuery)
-            throws OvsdbPluginException {
+            String databaseName, String tableName, String fiqlQuery) {
         return this.getRows(node, databaseName, tableName);
     }
 
     @Override
-    public List<String> getTables(Node node, String databaseName) throws OvsdbPluginException {
+    public List<String> getTables(Node node, String databaseName) {
         ConcurrentMap<String, ConcurrentMap<String, Row>> cache  = ovsdbInventoryService.getCache(node, databaseName);
-        if (cache == null) return null;
-        return new ArrayList<String>(cache.keySet());
+        if (cache == null) {
+            return null;
+        } else {
+            return new ArrayList<String>(cache.keySet());
+        }
     }
 }

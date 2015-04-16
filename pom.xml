@@ -44,7 +44,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <module>plugin-shell</module>
     <module>schemas/hardwarevtep</module>
     <module>schemas/openvswitch</module>
-    <module>southbound</module>
+    <!-- <module>southbound</module>  FIXME: uncomment this line when build is fixed -->
     <module>utils</module>
     <!-- Integration Tests -->
     <module>integrationtest</module>

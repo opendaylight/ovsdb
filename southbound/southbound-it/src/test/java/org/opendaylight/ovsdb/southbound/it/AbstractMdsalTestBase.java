@@ -67,7 +67,7 @@ public abstract class AbstractMdsalTestBase extends AbstractConfigTestBase imple
                         logConfiguration(AbstractMdsalTestBase.class),
                         LogLevel.INFO.name()),
         };
-        options = ObjectArrays.concat(options, super.getLoggingOptions(),Option.class);
+        options = ObjectArrays.concat(options, super.getLoggingOptions(), Option.class);
         return options;
     }
 

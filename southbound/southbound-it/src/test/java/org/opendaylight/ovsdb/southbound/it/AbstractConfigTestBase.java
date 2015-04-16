@@ -64,8 +64,12 @@ public abstract class AbstractConfigTestBase {
         return "log4j.logger." + klazz.getPackage().getName();
     }
 
+    public Option[] getFeaturesOptions() {
+        return new Option[]{};
+    }
+
     public Option[] getPropertiesOptions() {
-        return null;
+        return new Option[]{};
     }
 
     public MavenArtifactUrlReference getKarafDistro() {
@@ -86,8 +90,9 @@ public abstract class AbstractConfigTestBase {
                         .unpackDirectory(new File("target/exam"))
                         .useDeployFolder(false),
                 keepRuntimeFolder(),
-                features(getFeatureRepo() , getFeatureName()),
+                features(getFeatureRepo() , getFeatureName())
         };
+        options = ObjectArrays.concat(options, getFeaturesOptions(), Option.class);
         options = ObjectArrays.concat(options, getLoggingOptions(), Option.class);
         options = ObjectArrays.concat(options, getPropertiesOptions(), Option.class);
         return options;
@@ -104,9 +109,7 @@ public abstract class AbstractConfigTestBase {
                 configRegistryClient.lookupConfigBean(getModuleName(), getInstanceName());
                 Thread.sleep(1);
             } catch (InstanceNotFoundException e) {
-                if (timer < MODULE_TIMEOUT) {
-                    continue;
-                } else {
+                if (timer >= MODULE_TIMEOUT) {
                     throw e;
                 }
             } catch (InterruptedException e) {

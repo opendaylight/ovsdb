@@ -68,7 +68,13 @@ import com.google.common.util.concurrent.CheckedFuture;
 @RunWith(MockitoJUnitRunner.class)
 public class AbstractServiceInstanceTest {
 
-    @InjectMocks AbstractServiceInstance abstractServiceInstance = mock(AbstractServiceInstance.class, Mockito.CALLS_REAL_METHODS);
+    private class AbstractServiceInstanceImpl extends AbstractServiceInstance{
+        public AbstractServiceInstanceImpl(Service service) {
+            super(service);
+        }
+    };
+
+    @InjectMocks AbstractServiceInstanceImpl abstractServiceInstance = Mockito.spy(new AbstractServiceInstanceImpl(null));
 
     @Mock private OvsdbConfigurationService ovsdbConfigService;
     @Mock private OvsdbConnectionService connectionService;
@@ -165,7 +171,6 @@ public class AbstractServiceInstanceTest {
 
         FlowBuilder flowBuilder = mock(FlowBuilder.class);
         when(flowBuilder.getKey()).thenReturn(mock(FlowKey.class));
-
         abstractServiceInstance.writeFlow(flowBuilder, nodeBuilder);
 
         verify(transaction, times(2)).put(eq(LogicalDatastoreType.CONFIGURATION), any(InstanceIdentifier.class), any(DataObject.class), eq(true));

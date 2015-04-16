@@ -9,10 +9,13 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
@@ -34,6 +37,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.ta
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowCookie;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
@@ -70,6 +74,8 @@ public abstract class AbstractServiceInstance {
     private volatile PipelineOrchestrator orchestrator;
     private volatile OvsdbConfigurationService ovsdbConfigService;
     private volatile OvsdbConnectionService connectionService;
+    private ConcurrentHashMap<FlowId, FlowCookie> flowIdAndCookieMap = new ConcurrentHashMap<FlowId, FlowCookie>();
+    private AtomicLong cookieCounter = new AtomicLong();
 
     // Concrete Service that this AbstractServiceInstance represent
     private Service service;
@@ -171,7 +177,8 @@ public abstract class AbstractServiceInstance {
             logger.error("ERROR finding reference for DataBroker. Please check MD-SAL support on the Controller.");
             return;
         }
-
+        //Set cookie for flow
+        flowBuilder.setCookie(getFlowCookieFromCache(flowBuilder.getId()));
         ReadWriteTransaction modification = dataBroker.newReadWriteTransaction();
         modification.put(LogicalDatastoreType.CONFIGURATION, createNodePath(nodeBuilder),
                 nodeBuilder.build(), true /*createMissingParents*/);
@@ -202,12 +209,18 @@ public abstract class AbstractServiceInstance {
             return;
         }
 
+        //Set cookie for flow
+        flowBuilder.setCookie(getFlowCookieFromCache(flowBuilder.getId()));
+
         WriteTransaction modification = dataBroker.newWriteOnlyTransaction();
         modification.delete(LogicalDatastoreType.CONFIGURATION, createFlowPath(flowBuilder, nodeBuilder));
 
         CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
         try {
             commitFuture.get();  // TODO: Make it async (See bug 1362)
+
+            //Remove cookie from cache.
+            this.removeFlowCookieFromCache(flowBuilder.getId());
             logger.debug("Transaction success for deletion of Flow "+flowBuilder.getFlowName());
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -287,5 +300,25 @@ public abstract class AbstractServiceInstance {
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
         writeFlow(flowBuilder, nodeBuilder);
+    }
+
+    private FlowCookie getFlowCookieFromCache(FlowId flowId){
+        if(flowId == null) return null;
+        if(this.flowIdAndCookieMap.containsKey(flowId)){
+            return this.flowIdAndCookieMap.get(flowId);
+        }
+        FlowCookie flowCookie = new FlowCookie(BigInteger.valueOf(this.cookieCounter.incrementAndGet()));
+        this.flowIdAndCookieMap.put(flowId, flowCookie);
+        return flowCookie;
+    }
+
+    private void removeFlowCookieFromCache(FlowId flowId){
+        if(flowId != null){
+            if(this.flowIdAndCookieMap.contains(flowId)){
+                this.flowIdAndCookieMap.remove(flowId);
+            }else{
+                logger.debug("Cookie does not exist for flow id : {}",flowId);
+            }
+        }
     }
 }

@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_2dff5236",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/impl/ConfigurationServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-04-16T23:09:10Z",
+      "side": 1,
+      "message": "please undo this change",
+      "range": {
+        "startLine": 79,
+        "startChar": 4,
+        "endLine": 79,
+        "endChar": 7
+      },
+      "revId": "ece1166e3a08e7e81a27c920a1a11bedae7fb38b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

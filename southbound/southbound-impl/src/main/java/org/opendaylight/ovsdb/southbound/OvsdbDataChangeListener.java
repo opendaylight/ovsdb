@@ -59,6 +59,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
     @Override
     public void onDataChanged(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
+        LOG.trace("onDataChanged: {}", changes);
         // Connect first if we have to:
         connect(changes);
 
@@ -150,7 +151,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
         Set<OvsdbConnectionInstance> result = new HashSet<OvsdbConnectionInstance>();
         for ( Entry<InstanceIdentifier<?>, DataObject> created : map.entrySet()) {
             if (created.getValue() instanceof Node) {
-                LOG.debug("Received request to create {}",created.getValue());
+                LOG.debug("Received request for {}",created.getValue());
                 OvsdbBridgeAugmentation bridge =
                         ((Node)created.getValue()).getAugmentation(OvsdbBridgeAugmentation.class);
                 if (bridge != null) {

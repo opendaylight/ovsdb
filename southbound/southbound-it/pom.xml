@@ -110,9 +110,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.karaf.tooling</groupId>
-      <artifactId>karaf-maven-plugin</artifactId>
-      <version>${karaf.version}</version>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
   <build>

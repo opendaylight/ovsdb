@@ -9,7 +9,7 @@ package org.opendaylight.ovsdb.southbound.it;
 
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
+//import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 
@@ -73,10 +73,15 @@ public abstract class AbstractConfigTestBase {
     }
 
     public MavenArtifactUrlReference getKarafDistro() {
-        MavenArtifactUrlReference karafUrl = maven()
+        /*MavenArtifactUrlReference karafUrl = maven()
                 .groupId("org.opendaylight.controller")
                 .artifactId("opendaylight-karaf-empty")
                 .version("1.5.0-SNAPSHOT")
+                .type("zip");*/
+        MavenArtifactUrlReference karafUrl = maven()
+                .groupId("org.opendaylight.ovsdb")
+                .artifactId("southbound-karaf")
+                .version("1.1.0-SNAPSHOT")
                 .type("zip");
         return karafUrl;
     }
@@ -90,7 +95,7 @@ public abstract class AbstractConfigTestBase {
                         .unpackDirectory(new File("target/exam"))
                         .useDeployFolder(false),
                 keepRuntimeFolder(),
-                features(getFeatureRepo() , getFeatureName())
+                //features(getFeatureRepo() , getFeatureName())
         };
         options = ObjectArrays.concat(options, getFeaturesOptions(), Option.class);
         options = ObjectArrays.concat(options, getLoggingOptions(), Option.class);

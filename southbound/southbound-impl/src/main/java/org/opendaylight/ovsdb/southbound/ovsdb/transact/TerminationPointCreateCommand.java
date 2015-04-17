@@ -36,11 +36,13 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Trunks;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
@@ -61,30 +63,34 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
                 OvsdbTerminationPointAugmentation terminationPoint = (OvsdbTerminationPointAugmentation) dataObject;
                 LOG.debug("Received request to create termination point {}",
                         terminationPoint.getName());
+                InstanceIdentifier terminationPointIid = entry.getKey();
+                Optional<TerminationPoint> terminationPointOptional =
+                        getOperationalState().getBridgeTerminationPoint(terminationPointIid);
+                if (!terminationPointOptional.isPresent()) {
+                    // Configure interface
+                    String interfaceUuid = "Interface_" + SouthboundMapper.getRandomUUID();;
+                    Interface ovsInterface =
+                            TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Interface.class);
+                    createInterface(terminationPoint, ovsInterface);
+                    transaction.add(op.insert(ovsInterface).withId(interfaceUuid));
 
-                // Configure interface
-                String interfaceUuid = "Interface_" + SouthboundMapper.getRandomUUID();;
-                Interface ovsInterface =
-                        TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Interface.class);
-                createInterface(terminationPoint, ovsInterface);
-                transaction.add(op.insert(ovsInterface).withId(interfaceUuid));
+                    // Configure port with the above interface details
+                    String portUuid = "Port_" + SouthboundMapper.getRandomUUID();
+                    Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
+                    createPort(terminationPoint, port, interfaceUuid);
+                    transaction.add(op.insert(port).withId(portUuid));
 
-                // Configure port with the above interface details
-                String portUuid = "Port_" + SouthboundMapper.getRandomUUID();
-                Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
-                createPort(terminationPoint, port, interfaceUuid);
-                transaction.add(op.insert(port).withId(portUuid));
+                    //Configure bridge with the above port details
+                    Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
+                    bridge.setName(getBridge(entry.getKey()).getBridgeName().getValue());
+                    bridge.setPorts(Sets.newHashSet(new UUID(portUuid)));
 
-                //Configure bridge with the above port details
-                Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
-                bridge.setName(getBridge(entry.getKey()).getBridgeName().getValue());
-                bridge.setPorts(Sets.newHashSet(new UUID(portUuid)));
-
-                transaction.add(op.mutate(bridge)
-                        .addMutation(bridge.getPortsColumn().getSchema(),
-                                Mutator.INSERT,bridge.getPortsColumn().getData())
-                        .where(bridge.getNameColumn().getSchema()
-                                .opEqual(bridge.getNameColumn().getData())).build());
+                    transaction.add(op.mutate(bridge)
+                            .addMutation(bridge.getPortsColumn().getSchema(),
+                                    Mutator.INSERT,bridge.getPortsColumn().getData())
+                            .where(bridge.getNameColumn().getSchema()
+                                    .opEqual(bridge.getNameColumn().getData())).build());
+                }
             }
         }
 

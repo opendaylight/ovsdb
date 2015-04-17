@@ -29,21 +29,18 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
   <modules>
     <!-- Parent POM files -->
-    <module>commons/parent</module>
-    <module>commons/integrationtest</module>
-    <!--<module>distribution/opendaylight-karaf</module>-->
-    <module>features/ovsdb</module>
-    <module>features/ovs-sfc</module>
+    <module>commons</module>
+    <module>features</module>
+    <module>karaf</module>
     <!-- OVSDB Components -->
     <module>library</module>
     <module>northbound</module>
-    <module>openstack/net-virt</module>
-    <module>openstack/net-virt-providers</module>
+    <module>openstack</module>
     <module>plugin</module>
+    <module>ovsdb-artifacts</module>
     <module>ovsdb-plugin-compatibility-layer</module>
     <module>plugin-shell</module>
-    <module>schemas/hardwarevtep</module>
-    <module>schemas/openvswitch</module>
+    <module>schemas</module>
     <module>southbound</module>
     <module>utils</module>
     <!-- Integration Tests -->

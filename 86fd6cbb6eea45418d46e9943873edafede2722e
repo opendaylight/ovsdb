@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_b1bad8df",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointCreateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-04-17T15:54:29Z",
+      "side": 1,
+      "message": "remove the whitespace",
+      "range": {
+        "startLine": 67,
+        "startChar": 69,
+        "endLine": 67,
+        "endChar": 70
+      },
+      "revId": "86fd6cbb6eea45418d46e9943873edafede2722e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

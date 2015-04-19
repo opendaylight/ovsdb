@@ -81,8 +81,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static String portStr;
     private static String connectionType;
     private static Boolean setup = false;
-    private MdsalUtils mdsalUtils = null;
-    private String extras = "false";
+    private static MdsalUtils mdsalUtils = null;
+    private static String extras = "false";
     private static final String NETVIRT = "org.opendaylight.ovsdb.openstack.net-virt";
     private static final String NETVIRTPROVIDERS = "org.opendaylight.ovsdb.openstack.net-virt-providers";
 
@@ -141,9 +141,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     @Override
     public Option[] getLoggingOptions() {
         Option[] options = new Option[] {
-                editConfigurationFilePut(SouthboundITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
+                /*editConfigurationFilePut(SouthboundITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
                         "log4j.logger.org.opendaylight.ovsdb",
-                        LogLevelOption.LogLevel.DEBUG.name()),
+                        LogLevelOption.LogLevel.DEBUG.name()),*/
                 editConfigurationFilePut(SouthboundITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
                         "log4j.logger.org.opendaylight.ovsdb.southbound-impl",
                         LogLevelOption.LogLevel.DEBUG.name())
@@ -337,7 +337,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         Node node = getOvsdbNode(connectionInfo);
         //Assert.assertNull(node);
         Assume.assumeNotNull(node);
-        LOG.info("Disonnected from {}", connectionInfoToString(connectionInfo));
+        LOG.info("Disconnected from {}", connectionInfoToString(connectionInfo));
         return true;
     }
 
@@ -413,7 +413,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private OvsdbBridgeAugmentation getBridge(ConnectionInfo connectionInfo) {
         InstanceIdentifier<Node> bridgeIid =
-                SouthboundMapper.createInstanceIdentifier(connectionInfo, new OvsdbBridgeName("brtest"));
+                SouthboundMapper.createInstanceIdentifier(connectionInfo, new OvsdbBridgeName(SouthboundITConstants.BRIDGE_NAME));
         Node bridgeNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
         Assert.assertNotNull(bridgeNode);
         OvsdbBridgeAugmentation ovsdbBridgeAugmentation = bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class);
@@ -423,7 +423,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private boolean deleteBridge(ConnectionInfo connectionInfo) throws InterruptedException {
         boolean result = mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION,
-                SouthboundMapper.createInstanceIdentifier(connectionInfo, new OvsdbBridgeName("brtest")));
+                SouthboundMapper.createInstanceIdentifier(connectionInfo, new OvsdbBridgeName(SouthboundITConstants.BRIDGE_NAME)));
         Thread.sleep(OVSDB_UPDATE_TIMEOUT);
         return result;
     }
@@ -433,7 +433,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
         Node ovsdbNode = connectOvsdbNode(connectionInfo);
 
-        Assert.assertTrue(addBridge(connectionInfo, "brtest"));
+        Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
         OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
         Assert.assertNotNull(bridge);
         LOG.info("bridge: {}", bridge);

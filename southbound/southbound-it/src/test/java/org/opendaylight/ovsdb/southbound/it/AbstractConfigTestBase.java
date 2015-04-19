@@ -22,6 +22,7 @@ import java.util.Calendar;
 import javax.management.InstanceNotFoundException;
 
 import org.junit.Rule;
+import org.junit.internal.AssumptionViolatedException;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
@@ -131,13 +132,27 @@ public abstract class AbstractConfigTestBase {
     public TestRule watcher = new TestWatcher() {
         @Override
         protected void starting(Description description) {
-            LOG.info("TestWatcher: Starting test: {}",
-                    description.getDisplayName());
+            LOG.info("TestWatcher: Starting test:\n{}", description.getDisplayName());
         }
 
         @Override
         protected void finished(Description description) {
-            LOG.info("TestWatcher: Finished test: {}", description.getDisplayName());
+            LOG.info("TestWatcher: Finished test:\n{}", description.getDisplayName());
+        }
+
+        @Override
+        protected void succeeded(Description description) {
+            LOG.info("TestWatcher: Test succeeded:\n{}", description.getDisplayName());
+        }
+
+        @Override
+        protected void failed(Throwable e, Description description) {
+            LOG.info("TestWatcher: Test failed:\n{} ", description.getDisplayName(), e);
+        }
+
+        @Override
+        protected void skipped(AssumptionViolatedException e, Description description) {
+            LOG.info("TestWatcher: Test skipped:\n{} ", description.getDisplayName(), e);
         }
     };
 }

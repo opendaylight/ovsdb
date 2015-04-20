@@ -17,16 +17,11 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
-import org.opendaylight.ovsdb.lib.notation.Mutator;
-import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
-import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
-import org.opendaylight.ovsdb.southbound.SouthboundMapper;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes.VlanMode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
@@ -35,94 +30,94 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Trunks;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
-public class TerminationPointCreateCommand extends AbstractTransactCommand {
+public class TerminationPointUpdateCommand extends AbstractTransactCommand {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TerminationPointCreateCommand.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TerminationPointUpdateCommand.class);
 
-    public TerminationPointCreateCommand(BridgeOperationalState state,
+    public TerminationPointUpdateCommand(BridgeOperationalState state,
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
         super(state, changes);
     }
 
     @Override
     public void execute(TransactionBuilder transaction) {
-        for (Entry<InstanceIdentifier<?>, DataObject> entry: getChanges().getCreatedData().entrySet()) {
-            DataObject dataObject = entry.getValue();
-            if (dataObject instanceof OvsdbTerminationPointAugmentation) {
-                OvsdbTerminationPointAugmentation terminationPoint = (OvsdbTerminationPointAugmentation) dataObject;
-                LOG.debug("Received request to create termination point {}",
-                        terminationPoint.getName());
-                InstanceIdentifier terminationPointIid = entry.getKey();
-                Optional<TerminationPoint> terminationPointOptional =
-                        getOperationalState().getBridgeTerminationPoint(terminationPointIid);
-                if (!terminationPointOptional.isPresent()) {
-                    // Configure interface
-                    String interfaceUuid = "Interface_" + SouthboundMapper.getRandomUUID();;
-                    Interface ovsInterface =
-                            TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Interface.class);
-                    createInterface(terminationPoint, ovsInterface);
-                    transaction.add(op.insert(ovsInterface).withId(interfaceUuid));
-
-                    // Configure port with the above interface details
-                    String portUuid = "Port_" + SouthboundMapper.getRandomUUID();
-                    Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
-                    createPort(terminationPoint, port, interfaceUuid);
-                    transaction.add(op.insert(port).withId(portUuid));
-
-                    //Configure bridge with the above port details
-                    Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
-                    bridge.setName(getBridge(entry.getKey()).getBridgeName().getValue());
-                    bridge.setPorts(Sets.newHashSet(new UUID(portUuid)));
-
-                    transaction.add(op.mutate(bridge)
-                            .addMutation(bridge.getPortsColumn().getSchema(),
-                                    Mutator.INSERT,bridge.getPortsColumn().getData())
-                            .where(bridge.getNameColumn().getSchema()
-                                    .opEqual(bridge.getNameColumn().getData())).build());
-                }
-            }
+        LOG.trace("TerminationPointUpdateCommand called");
+        Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation> created =
+            TransactUtils.extractCreated(getChanges(),OvsdbTerminationPointAugmentation.class);
+        for (Entry<InstanceIdentifier<OvsdbTerminationPointAugmentation>,
+                 OvsdbTerminationPointAugmentation> terminationPointEntry : created.entrySet()) {
+            updateTerminationPoint(transaction, terminationPointEntry.getKey(), terminationPointEntry.getValue());
         }
-
+        Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation> updated =
+                TransactUtils.extractUpdated(getChanges(), OvsdbTerminationPointAugmentation.class);
+        for (Entry<InstanceIdentifier<OvsdbTerminationPointAugmentation>,
+                 OvsdbTerminationPointAugmentation> terminationPointEntry : updated.entrySet()) {
+            updateTerminationPoint(transaction, terminationPointEntry.getKey(),
+                    terminationPointEntry.getValue());
+        }
     }
 
-    private void createInterface(
+    public void updateTerminationPoint(TransactionBuilder transaction,
+            InstanceIdentifier<OvsdbTerminationPointAugmentation> iid,
+            OvsdbTerminationPointAugmentation terminationPoint) {
+        if (terminationPoint instanceof OvsdbTerminationPointAugmentation) {
+            LOG.debug("Received request to update termination point {}",
+                    terminationPoint.getName());
+
+            // Update interface
+            Interface ovsInterface =
+                    TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Interface.class);
+            updateInterface(terminationPoint, ovsInterface);
+            Interface extraInterface = TyperUtils.getTypedRowWrapper(
+                    transaction.getDatabaseSchema(), Interface.class);
+            extraInterface.setName("");
+            transaction.add(op.update(ovsInterface)
+                    .where(extraInterface.getNameColumn().getSchema().opEqual(terminationPoint.getName()))
+                    .build());
+
+            // Update port
+            Port port = TyperUtils.getTypedRowWrapper(
+                    transaction.getDatabaseSchema(), Port.class);
+            updatePort(terminationPoint,port);
+            Port extraPort = TyperUtils.getTypedRowWrapper(
+                    transaction.getDatabaseSchema(), Port.class);
+            extraPort.setName("");
+            transaction.add(op.update(port)
+                    .where(extraPort.getNameColumn().getSchema().opEqual(terminationPoint.getName()))
+                    .build());
+        }
+    }
+
+    private void updateInterface(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
-        ovsInterface.setName(terminationPoint.getName());
-        ovsInterface.setType(SouthboundMapper.createOvsdbInterfaceType(terminationPoint.getInterfaceType()));
-
-        createOfPort(terminationPoint, ovsInterface);
-        createOfPortRequest(terminationPoint, ovsInterface);
-        createInterfaceOptions(terminationPoint, ovsInterface);
-        createInterfaceOtherConfig(terminationPoint, ovsInterface);
-        createInterfaceExternalIds(terminationPoint, ovsInterface);
+        updateOfPort(terminationPoint, ovsInterface);
+        updateOfPortRequest(terminationPoint, ovsInterface);
+        updateInterfaceOptions(terminationPoint, ovsInterface);
+        updateInterfaceOtherConfig(terminationPoint, ovsInterface);
+        updateInterfaceExternalIds(terminationPoint, ovsInterface);
     }
 
-    private void createPort(
+    private void updatePort(
             final OvsdbTerminationPointAugmentation terminationPoint,
-            final Port port, final String interfaceUuid) {
+            final Port port) {
 
-        port.setName(terminationPoint.getName());
-        port.setInterfaces(Sets.newHashSet(new UUID(interfaceUuid)));
-        createPortOtherConfig(terminationPoint, port);
-        createPortVlanTag(terminationPoint, port);
-        createPortVlanTrunk(terminationPoint, port);
-        createPortVlanMode(terminationPoint, port);
-        createPortExternalIds(terminationPoint, port);
+        updatePortOtherConfig(terminationPoint, port);
+        updatePortVlanTag(terminationPoint, port);
+        updatePortVlanTrunk(terminationPoint, port);
+        updatePortVlanMode(terminationPoint, port);
+        updatePortExternalIds(terminationPoint, port);
     }
 
-    private void createOfPort(
+    private void updateOfPort(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
 
@@ -132,7 +127,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
         }
     }
 
-    private void createOfPortRequest(
+    private void updateOfPortRequest(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
 
@@ -142,7 +137,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
         }
     }
 
-    private void createInterfaceOptions(
+    private void updateInterfaceOptions(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
 
@@ -160,7 +155,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
         }
     }
 
-    private void createInterfaceExternalIds(
+    private void updateInterfaceExternalIds(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
 
@@ -179,7 +174,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
         }
     }
 
-    private void createInterfaceOtherConfig(
+    private void updateInterfaceOtherConfig(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
 
@@ -199,7 +194,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
         }
     }
 
-    private void createPortExternalIds(
+    private void updatePortExternalIds(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Port port) {
 
@@ -217,7 +212,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
         }
     }
 
-    private void createPortVlanTag(
+    private void updatePortVlanTag(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Port port) {
 
@@ -228,7 +223,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
         }
     }
 
-    private void createPortVlanTrunk(
+    private void updatePortVlanTrunk(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Port port) {
 
@@ -244,7 +239,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
         }
     }
 
-    private void createPortVlanMode(
+    private void updatePortVlanMode(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Port port) {
         if (terminationPoint.getVlanMode() != null) {
@@ -255,7 +250,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
         }
     }
 
-    private void createPortOtherConfig(
+    private void updatePortOtherConfig(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Port ovsPort) {
         List<PortOtherConfigs> portOtherConfigs =
@@ -272,20 +267,6 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
                 LOG.warn("Incomplete OVSDB port other_config", e);
             }
         }
-    }
-
-    private OvsdbBridgeAugmentation getBridge(InstanceIdentifier<?> key) {
-        InstanceIdentifier<Node> nodeIid = key.firstIdentifierOf(Node.class);
-        Map<InstanceIdentifier<Node>, Node> nodes =
-                TransactUtils.extractCreatedOrUpdated(getChanges(),Node.class);
-        if (nodes != null && nodes.get(nodeIid) != null) {
-            Node node = nodes.get(nodeIid);
-            OvsdbBridgeAugmentation bridge = node.getAugmentation(OvsdbBridgeAugmentation.class);
-            if (bridge != null) {
-                return bridge;
-            }
-        }
-        return null;
     }
 
 }

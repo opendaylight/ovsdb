@@ -35,7 +35,7 @@ public class TransactInvokerImpl implements TransactInvoker {
         ListenableFuture<List<OperationResult>> result = tb.execute();
         try {
             List<OperationResult> got = result.get();
-            LOG.debug("Results of create bridge request",got);
+            LOG.debug("OVSDB transaction result: {}", got);
         } catch (Exception e) {
             LOG.warn("Transact execution exception: ",e);
         }

@@ -9,7 +9,7 @@ package org.opendaylight.ovsdb.southbound.it;
 
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
+//import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 
@@ -22,6 +22,7 @@ import java.util.Calendar;
 import javax.management.InstanceNotFoundException;
 
 import org.junit.Rule;
+import org.junit.internal.AssumptionViolatedException;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
@@ -64,15 +65,24 @@ public abstract class AbstractConfigTestBase {
         return "log4j.logger." + klazz.getPackage().getName();
     }
 
+    public Option[] getFeaturesOptions() {
+        return new Option[]{};
+    }
+
     public Option[] getPropertiesOptions() {
-        return null;
+        return new Option[]{};
     }
 
     public MavenArtifactUrlReference getKarafDistro() {
-        MavenArtifactUrlReference karafUrl = maven()
+        /*MavenArtifactUrlReference karafUrl = maven()
                 .groupId("org.opendaylight.controller")
                 .artifactId("opendaylight-karaf-empty")
                 .version("1.5.0-SNAPSHOT")
+                .type("zip");*/
+        MavenArtifactUrlReference karafUrl = maven()
+                .groupId("org.opendaylight.ovsdb")
+                .artifactId("southbound-karaf")
+                .version("1.1.0-SNAPSHOT")
                 .type("zip");
         return karafUrl;
     }
@@ -86,8 +96,9 @@ public abstract class AbstractConfigTestBase {
                         .unpackDirectory(new File("target/exam"))
                         .useDeployFolder(false),
                 keepRuntimeFolder(),
-                features(getFeatureRepo() , getFeatureName()),
+                //features(getFeatureRepo() , getFeatureName())
         };
+        options = ObjectArrays.concat(options, getFeaturesOptions(), Option.class);
         options = ObjectArrays.concat(options, getLoggingOptions(), Option.class);
         options = ObjectArrays.concat(options, getPropertiesOptions(), Option.class);
         return options;
@@ -104,9 +115,7 @@ public abstract class AbstractConfigTestBase {
                 configRegistryClient.lookupConfigBean(getModuleName(), getInstanceName());
                 Thread.sleep(1);
             } catch (InstanceNotFoundException e) {
-                if (timer < MODULE_TIMEOUT) {
-                    continue;
-                } else {
+                if (timer >= MODULE_TIMEOUT) {
                     throw e;
                 }
             } catch (InterruptedException e) {
@@ -123,13 +132,27 @@ public abstract class AbstractConfigTestBase {
     public TestRule watcher = new TestWatcher() {
         @Override
         protected void starting(Description description) {
-            LOG.info("TestWatcher: Starting test: {}",
-                    description.getDisplayName());
+            LOG.info("TestWatcher: Starting test:\n{}", description.getDisplayName());
         }
 
         @Override
         protected void finished(Description description) {
-            LOG.info("TestWatcher: Finished test: {}", description.getDisplayName());
+            LOG.info("TestWatcher: Finished test:\n{}", description.getDisplayName());
+        }
+
+        @Override
+        protected void succeeded(Description description) {
+            LOG.info("TestWatcher: Test succeeded:\n{}", description.getDisplayName());
+        }
+
+        @Override
+        protected void failed(Throwable ex, Description description) {
+            LOG.info("TestWatcher: Test failed:\n{} ", description.getDisplayName(), ex);
+        }
+
+        @Override
+        protected void skipped(AssumptionViolatedException ex, Description description) {
+            LOG.info("TestWatcher: Test skipped:\n{} ", description.getDisplayName(), ex);
         }
     };
 }

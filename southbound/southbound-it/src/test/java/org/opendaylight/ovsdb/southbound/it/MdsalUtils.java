@@ -11,20 +11,22 @@ import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
+import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Utility class to wrap mdsal transactions.
+ * Utility class for mdsal transactions.
  *
  * @author Sam Hague (shague@redhat.com)
  */
 public class MdsalUtils {
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundIT.class);
-    private static DataBroker databroker = null;
+    private DataBroker databroker = null;
 
     /**
      * Class constructor setting the data broker.
@@ -36,23 +38,92 @@ public class MdsalUtils {
     }
 
     /**
-     * Executes read transaction as a test2.
+     * Executes delete as a blocking transaction.
      *
-     * @param logicalDatastoreType {@link LogicalDatastoreType} from which read should occur
+     * @param store {@link LogicalDatastoreType} which should be modified
+     * @param path {@link InstanceIdentifier} to read from
+     * @param <D> the data object type
+     * @return the result of the request
+     */
+    public <D extends org.opendaylight.yangtools.yang.binding.DataObject> boolean delete(
+            final LogicalDatastoreType store, final InstanceIdentifier<D> path)  {
+        boolean result = false;
+        final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
+        transaction.delete(store, path);
+        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
+        try {
+            future.checkedGet();
+            result = true;
+        } catch (TransactionCommitFailedException e) {
+            LOG.warn("Failed to delete {} ", path, e);
+        }
+        return result;
+    }
+
+    /**
+     * Executes merge as a blocking transaction.
+     *
+     * @param logicalDatastoreType {@link LogicalDatastoreType} which should be modified
      * @param path {@link InstanceIdentifier} for path to read
      * @param <D> the data object type
-     * @return the data object requested
+     * @return the result of the request
      */
-    public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> D readTransaction(
-            final LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> path)  {
-        D ret = null;
-        final ReadOnlyTransaction readTx = databroker.newReadOnlyTransaction();
-        Optional<D> optionalDataObject = Optional.absent();
-        CheckedFuture<Optional<D>, ReadFailedException> submitFuture = readTx.read(logicalDatastoreType, path);
+    public <D extends org.opendaylight.yangtools.yang.binding.DataObject> boolean merge(
+            final LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> path, D data)  {
+        boolean result = false;
+        final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
+        transaction.merge(logicalDatastoreType, path, data, true);
+        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
         try {
-            optionalDataObject = submitFuture.checkedGet();
+            future.checkedGet();
+            result = true;
+        } catch (TransactionCommitFailedException e) {
+            LOG.warn("Failed to merge {} ", path, e);
+        }
+        return result;
+    }
+
+    /**
+     * Executes put as a blocking transaction.
+     *
+     * @param logicalDatastoreType {@link LogicalDatastoreType} which should be modified
+     * @param path {@link InstanceIdentifier} for path to read
+     * @param <D> the data object type
+     * @return the result of the request
+     */
+    public <D extends org.opendaylight.yangtools.yang.binding.DataObject> boolean put(
+            final LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> path, D data)  {
+        boolean result = false;
+        final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
+        transaction.put(logicalDatastoreType, path, data, true);
+        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
+        try {
+            future.checkedGet();
+            result = true;
+        } catch (TransactionCommitFailedException e) {
+            LOG.warn("Failed to put {} ", path, e);
+        }
+        return result;
+    }
+
+    /**
+     * Executes read as a blocking transaction.
+     *
+     * @param store {@link LogicalDatastoreType} to read
+     * @param path {@link InstanceIdentifier} for path to read
+     * @param <D> the data object type
+     * @return the result as the data object requested
+     */
+    public <D extends org.opendaylight.yangtools.yang.binding.DataObject> D read(
+            final LogicalDatastoreType store, final InstanceIdentifier<D> path)  {
+        D result = null;
+        final ReadOnlyTransaction transaction = databroker.newReadOnlyTransaction();
+        Optional<D> optionalDataObject;
+        CheckedFuture<Optional<D>, ReadFailedException> future = transaction.read(store, path);
+        try {
+            optionalDataObject = future.checkedGet();
             if (optionalDataObject.isPresent()) {
-                ret = optionalDataObject.get();
+                result = optionalDataObject.get();
             } else {
                 LOG.debug("{}: Failed to read {}",
                         Thread.currentThread().getStackTrace()[1], path);
@@ -60,8 +131,7 @@ public class MdsalUtils {
         } catch (ReadFailedException e) {
             LOG.warn("Failed to read {} ", path, e);
         }
-        readTx.close();
-        return ret;
+        transaction.close();
+        return result;
     }
-
 }

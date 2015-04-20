@@ -172,16 +172,19 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>javax.servlet.jsp</artifactId>
     </dependency>
     <dependency>
-      <groupId>equinoxSDK381</groupId>
+      <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.gogo.command</artifactId>
+      <version>0.14.0</version>
     </dependency>
     <dependency>
-      <groupId>equinoxSDK381</groupId>
+      <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.gogo.runtime</artifactId>
+      <version>0.12.1</version>
     </dependency>
     <dependency>
-      <groupId>equinoxSDK381</groupId>
+      <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.gogo.shell</artifactId>
+      <version>0.10.0</version>
     </dependency>
     <dependency>
       <groupId>equinoxSDK381</groupId>

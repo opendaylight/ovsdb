@@ -18,6 +18,8 @@ import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.MdsalConsumer;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConfigurationService;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
@@ -35,8 +37,8 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
     static final Logger logger = LoggerFactory.getLogger(TenantNetworkManagerImpl.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
-    //private volatile OvsdbConfigurationService ovsdbConfigurationService;
-    //private volatile OvsdbConnectionService connectionService;
+    private volatile OvsdbConfigurationService ovsdbConfigurationService;
+    private volatile OvsdbConnectionService connectionService;
     private volatile MdsalConsumer mdsalConsumer;
     private volatile INeutronNetworkCRUD neutronNetworkCache;
     private volatile INeutronPortCRUD neutronPortCache;
@@ -64,7 +66,7 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
 
     @Override
     public void programInternalVlan(Node node, String portUUID, NeutronNetwork network) {
-        /* TODO SB_MIGRATION
+        /* TODO SB_MIGRATION */
         Preconditions.checkNotNull(ovsdbConfigurationService);
 
         int vlan = vlanConfigurationCache.getInternalVlan(node, network.getID());
@@ -79,12 +81,11 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
         tags.add((long) vlan);
         port.setTag(tags);
         ovsdbConfigurationService.updateRow(node, port.getSchema().getName(), null, portUUID, port.getRow());
-        */
     }
 
     @Override
     public boolean isTenantNetworkPresentInNode(Node node, String segmentationId) {
-        /* TODO SB_MIGRATION
+        /* TODO SB_MIGRATION */
         Preconditions.checkNotNull(ovsdbConfigurationService);
 
         String networkId = this.getNetworkId(segmentationId);
@@ -92,8 +93,8 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
             logger.debug("Tenant Network not found with Segmenation-id {}",segmentationId);
             return false;
         }
-        */
-        /*try {*/
+
+        try {
             /* TODO SB_MIGRATION this code was already commented out
             // Vlan Tag based identification
             Map<String, Row> portTable = ovsdbConfigService.getRows(node, Port.NAME.getName());
@@ -112,7 +113,7 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
                 }
             }
              */ //TODO SB_MIGRATION this code was already commented out
-            /*// External-id based more accurate VM Location identification
+            // External-id based more accurate VM Location identification
             Map<String, Row> ifTable = ovsdbConfigurationService.getRows(node, ovsdbConfigurationService.getTableName(node, Interface.class));
             if (ifTable == null) {
                 logger.debug("Interface table is null for Node {} ", node);
@@ -138,7 +139,7 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
 
         logger.debug("Tenant Network {} with Segmenation-id {} is NOT present in Node {}",
                 networkId, segmentationId, node);
-*/
+
         return false;
     }
 

@@ -16,8 +16,9 @@ import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
-//import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.MdsalConsumer;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConfigurationService;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
@@ -50,8 +51,8 @@ public class NetworkHandler extends AbstractHandler
     private volatile TenantNetworkManager tenantNetworkManager;
     private volatile BridgeConfigurationManager bridgeConfigurationManager;
     /* TODO SB_MIGRATION */
-    //private volatile OvsdbConfigurationService ovsdbConfigurationService;
-    //private volatile OvsdbConnectionService connectionService;
+    private volatile OvsdbConfigurationService ovsdbConfigurationService;
+    private volatile OvsdbConnectionService connectionService;
     private volatile MdsalConsumer mdsalConsumer; // TODO SB_MIGRATION
     private volatile INeutronNetworkCRUD neutronNetworkCache;
     private volatile NeutronL3Adapter neutronL3Adapter;
@@ -146,7 +147,7 @@ public class NetworkHandler extends AbstractHandler
         enqueueEvent(new NorthboundEvent(network, Action.DELETE));
     }
     private void doNeutronNetworkDeleted(NeutronNetwork network) {
-        /* TODO SB_MIGRATION
+        /* TODO SB_MIGRATION */
         neutronL3Adapter.handleNeutronNetworkEvent(network, Action.DELETE);
 
         int result = canDeleteNetwork(network);
@@ -156,7 +157,7 @@ public class NetworkHandler extends AbstractHandler
                     result);
             return;
         }
-        *//* Is this the last Neutron tenant network *//*
+        /* Is this the last Neutron tenant network */
         List <NeutronNetwork> networks;
         if (neutronNetworkCache != null) {
             networks = neutronNetworkCache.getAllNetworks();
@@ -183,7 +184,7 @@ public class NetworkHandler extends AbstractHandler
                                     if (interfaceType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN)
                                         || interfaceType.equalsIgnoreCase(
                                             NetworkHandler.NETWORK_TYPE_GRE)) {
-                                        *//* delete tunnel ports on this node *//*
+                                        // delete tunnel ports on this node
                                         logger.trace("Delete tunnel interface {}", iface.getName());
                                         ovsdbConfigurationService.deleteRow(node,
                                                                      ovsdbConfigurationService.getTableName(node, Port.class),
@@ -205,7 +206,7 @@ public class NetworkHandler extends AbstractHandler
                 }
             }
         }
-        tenantNetworkManager.networkDeleted(network.getID());*/
+        tenantNetworkManager.networkDeleted(network.getID());
     }
 
     /**

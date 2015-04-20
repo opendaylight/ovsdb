@@ -17,7 +17,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
 import org.opendaylight.ovsdb.openstack.netvirt.api.MdsalConsumer;
-import org.opendaylight.ovsdb.openstack.netvirt.api.MdsalConsumerListener;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,11 +28,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author Sam Hague (shague@redhat.com)
  */
-public class MdsalConsumerImpl implements BindingAwareConsumer, MdsalConsumer {
-    private static final Logger LOG = LoggerFactory.getLogger(MdsalConsumerImpl.class);
+public class OvsdbInventoryServiceImpl implements BindingAwareConsumer, MdsalConsumer {
+    private static final Logger LOG = LoggerFactory.getLogger(OvsdbInventoryServiceImpl.class);
     private static DataBroker dataBroker = null;
 
-    private static Set<MdsalConsumerListener> mdsalConsumerListeners = Sets.newCopyOnWriteArraySet();
+    private static Set<OvsdbInventoryListener> mdsalConsumerListeners = Sets.newCopyOnWriteArraySet();
     private OvsdbDataChangeListener ovsdbDataChangeListener = null;
     private static MdsalUtils mdsalUtils = null;
     private volatile BindingAwareBroker broker; // dependency injection
@@ -65,12 +65,12 @@ public class MdsalConsumerImpl implements BindingAwareConsumer, MdsalConsumer {
         return dataBroker;
     }
 
-    private void listenerAdded(MdsalConsumerListener listener) {
+    private void listenerAdded(OvsdbInventoryListener listener) {
         this.mdsalConsumerListeners.add(listener);
         LOG.info("listenerAdded: {}", listener);
     }
 
-    private void listenerRemoved(MdsalConsumerListener listener) {
+    private void listenerRemoved(OvsdbInventoryListener listener) {
         this.mdsalConsumerListeners.remove(listener);
         LOG.info("listenerRemoved: {}", listener);
     }
@@ -90,7 +90,7 @@ public class MdsalConsumerImpl implements BindingAwareConsumer, MdsalConsumer {
 
     // get vlan and network id
 
-    public static Set<MdsalConsumerListener> getMdsalConsumerListeners () {
+    public static Set<OvsdbInventoryListener> getMdsalConsumerListeners () {
         return mdsalConsumerListeners;
     }
 

@@ -15,6 +15,7 @@ import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.NodeConfiguration;
 import org.opendaylight.ovsdb.openstack.netvirt.api.MdsalConsumer;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
@@ -36,8 +37,8 @@ public class VlanConfigurationCacheImpl implements VlanConfigurationCache {
     private Map<String, NodeConfiguration> configurationCache = Maps.newConcurrentMap();
 
     private volatile TenantNetworkManager tenantNetworkManager;
-    //private volatile OvsdbConfigurationService ovsdbConfigurationService;
-    private volatile MdsalConsumer mdsalConsumer; // TODO SB_MIGRATION
+    /* TODO SB_MIGRATION */
+    private volatile OvsdbConfigurationService ovsdbConfigurationService;
 
     private NodeConfiguration getNodeConfiguration(Node node){
         String nodeUuid = getNodeUUID(node);
@@ -52,8 +53,8 @@ public class VlanConfigurationCacheImpl implements VlanConfigurationCache {
     }
 
     private String getNodeUUID(Node node) {
-        String nodeUuid = mdsalConsumer.getNodeUUID(node);
-        /* TODO SB_MIGRATION
+        //String nodeUuid = mdsalConsumer.getNodeUUID(node);
+        /* TODO SB_MIGRATION */
         Preconditions.checkNotNull(ovsdbConfigurationService);
         String nodeUuid = new String();
 
@@ -63,13 +64,13 @@ public class VlanConfigurationCacheImpl implements VlanConfigurationCache {
         }
         catch (Exception e) {
             logger.error("Unable to get the Open_vSwitch table for Node {}", node, e);
-        }*/
+        }
 
         return nodeUuid;
     }
 
     private void initializeNodeConfiguration(String nodeUuid, Node node) {
-        /* TODO SB_MIGRATION
+        /* TODO SB_MIGRATION */
         NodeConfiguration nodeConfiguration = new NodeConfiguration();
         Integer vlan;
         String networkId = null;
@@ -127,7 +128,7 @@ public class VlanConfigurationCacheImpl implements VlanConfigurationCache {
         }
         catch (Exception e) {
             logger.debug("Error getting Port table for Node {}", node, e);
-        }*/
+        }
     }
 
     /*

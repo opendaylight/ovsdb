@@ -7,8 +7,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.ovsdb.openstack.netvirt.api.MdsalConsumer;
-import org.opendaylight.ovsdb.openstack.netvirt.api.MdsalConsumerListener;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryListener;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
@@ -64,8 +63,8 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
     }
 
     private void notifyNodeAdded(Node node) {
-        Set<MdsalConsumerListener> mdsalConsumerListeners = MdsalConsumerImpl.getMdsalConsumerListeners();
-        for (MdsalConsumerListener mdsalConsumerListener : mdsalConsumerListeners) {
+        Set<OvsdbInventoryListener> mdsalConsumerListeners = OvsdbInventoryServiceImpl.getMdsalConsumerListeners();
+        for (OvsdbInventoryListener mdsalConsumerListener : mdsalConsumerListeners) {
             mdsalConsumerListener.ovsdbNodeAdded(inventoryNodeFromTopology(node));
         }
     }

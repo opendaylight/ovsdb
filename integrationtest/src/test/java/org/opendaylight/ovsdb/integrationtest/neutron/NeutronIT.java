@@ -17,11 +17,9 @@ import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperty;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
 import org.opendaylight.ovsdb.openstack.netvirt.api.MdsalConsumer;
-import org.opendaylight.ovsdb.openstack.netvirt.impl.MdsalConsumerImpl;
 /* TODO SB_MIGRATION */
 import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
 import org.opendaylight.neutron.spi.NeutronNetwork;

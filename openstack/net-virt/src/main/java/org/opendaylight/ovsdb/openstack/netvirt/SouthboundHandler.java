@@ -9,18 +9,13 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
-import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
-import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
-import org.opendaylight.ovsdb.openstack.netvirt.api.MdsalConsumer;
-import org.opendaylight.ovsdb.openstack.netvirt.api.MdsalConsumerListener;
-import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
-import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
-import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.*;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
@@ -32,24 +27,19 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetAddress;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
 
 public class SouthboundHandler extends AbstractHandler
-        implements NodeCacheListener, /*OvsdbInventoryListener,*/ MdsalConsumerListener {
+        implements NodeCacheListener, OvsdbInventoryListener {
     static final Logger logger = LoggerFactory.getLogger(SouthboundHandler.class);
-    //private Thread eventThread;
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile ConfigurationService configurationService;
     private volatile BridgeConfigurationManager bridgeConfigurationManager;
     private volatile TenantNetworkManager tenantNetworkManager;
     private volatile NetworkingProviderManager networkingProviderManager;
-    //private volatile OvsdbConfigurationService ovsdbConfigurationService;
-    //private volatile OvsdbConnectionService connectionService;
+    private volatile OvsdbConfigurationService ovsdbConfigurationService;
+    private volatile OvsdbConnectionService connectionService;
     private volatile MdsalConsumer mdsalConsumer; // TODO SB_MIGRATION
     private volatile NeutronL3Adapter neutronL3Adapter;
 
@@ -91,7 +81,7 @@ public class SouthboundHandler extends AbstractHandler
      */
 
     private boolean isUpdateOfInterest(Node node, Row oldRow, Row newRow) {
-        /* TODO SB_MIGRATION
+        /* TODO SB_MIGRATION */
         if (oldRow == null) return true;
         if (newRow.getTableSchema().getName().equals(ovsdbConfigurationService.getTableName(node, Interface.class))) {
             // We are NOT interested in Stats only updates
@@ -113,10 +103,10 @@ public class SouthboundHandler extends AbstractHandler
         } else if (newRow.getTableSchema().getName().equals(ovsdbConfigurationService.getTableName(node, OpenVSwitch.class))) {
             OpenVSwitch oldOpenvSwitch = ovsdbConfigurationService.getTypedRow(node, OpenVSwitch.class, oldRow);
             if (oldOpenvSwitch.getOtherConfigColumn()== null) {
-                *//* we are only interested in other_config field change *//*
+                // we are only interested in other_config field change
                 return false;
             }
-        }*/
+        }
         return true;
     }
 
@@ -133,7 +123,7 @@ public class SouthboundHandler extends AbstractHandler
 
     private void processRowUpdate(Node node, String tableName, String uuid, Row row,
                                   Object context, Action action) {
-        /* TODO SB_MIGRATION
+        /* TODO SB_MIGRATION */
         if (action == Action.DELETE) {
             if (tableName.equalsIgnoreCase(ovsdbConfigurationService.getTableName(node, Interface.class))) {
                 logger.debug("Processing update of {}. Deleted node: {}, uuid: {}, row: {}", tableName, node, uuid, row);
@@ -150,7 +140,7 @@ public class SouthboundHandler extends AbstractHandler
                 if (deletedIntf.getTypeColumn().getData().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) ||
                     deletedIntf.getTypeColumn().getData().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE) ||
                     phyIfName.contains(deletedIntf.getName())) {
-                    *//* delete tunnel interfaces or physical interfaces *//*
+                    /* delete tunnel interfaces or physical interfaces */
                     this.handleInterfaceDelete(node, uuid, deletedIntf, false, null);
                 } else if (network != null && !network.getRouterExternal()) {
                     logger.debug("Processing update of {}:{} node {} intf {} network {}",
@@ -246,7 +236,7 @@ public class SouthboundHandler extends AbstractHandler
                     networkingProvider.notifyFlowCapableNodeEvent(StringConvertor.dpidStringToLong(dpid), action);
                 }
             }
-        }*/
+        }
     }
 
     private void handleInterfaceUpdate (Node node, String uuid, Interface intf) {
@@ -288,7 +278,7 @@ public class SouthboundHandler extends AbstractHandler
     }
 
     private String getPortIdForInterface (Node node, String uuid, Interface intf) {
-        /* TODO SB_MIGRATION
+        /* TODO SB_MIGRATION */
         try {
             Map<String, Row> ports = this.ovsdbConfigurationService.getRows(node, ovsdbConfigurationService.getTableName(node, Port.class));
             if (ports == null) return null;
@@ -305,12 +295,12 @@ public class SouthboundHandler extends AbstractHandler
             }
         } catch (Exception e) {
             logger.debug("Failed to get Port tag for for Intf " + intf, e);
-        }*/
+        }
         return null;
     }
 
     private void triggerUpdates() {
-        /* TODO SB_MIGRATION
+        /* TODO SB_MIGRATION */
         List<Node> nodes = connectionService.getNodes();
         if (nodes == null) return;
         for (Node node : nodes) {
@@ -328,7 +318,7 @@ public class SouthboundHandler extends AbstractHandler
             } catch (Exception e) {
                 logger.error("Exception during OVSDB Southbound update trigger", e);
             }
-        }*/
+        }
     }
 
     /**

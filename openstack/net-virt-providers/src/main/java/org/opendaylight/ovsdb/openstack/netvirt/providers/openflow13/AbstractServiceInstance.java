@@ -22,6 +22,8 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConfigurationService;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.utils.mdsal.node.StringConvertor;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
@@ -64,6 +66,9 @@ public abstract class AbstractServiceInstance {
     private static final Logger logger = LoggerFactory.getLogger(AbstractServiceInstance.class);
     public static final String OPENFLOW = "openflow:";
     // OSGi Services that we are dependent on.
+    /* TODO SB_MIGRATION */
+    private volatile OvsdbConnectionService connectionService;
+    private volatile OvsdbConfigurationService ovsdbConfigService;
     private volatile MdsalConsumer mdsalConsumer;
     private volatile PipelineOrchestrator orchestrator;
 
@@ -84,7 +89,7 @@ public abstract class AbstractServiceInstance {
     }
 
     private String getBridgeName(String nodeId){
-        /* SB_MIGRATION
+        /* TODO SB_MIGRATION */
         List<Node> ovsNodes = connectionService.getNodes();
 
         for (Node ovsNode : ovsNodes) {
@@ -104,7 +109,7 @@ public abstract class AbstractServiceInstance {
                     return bridge.getName();
                 }
             }
-        }*/
+        }
         return null;
     }
 

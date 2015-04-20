@@ -56,8 +56,9 @@ public class NeutronL3Adapter {
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile ConfigurationService configurationService;
     private volatile TenantNetworkManager tenantNetworkManager;
-    //private volatile OvsdbConfigurationService ovsdbConfigurationService;
-    //private volatile OvsdbConnectionService connectionService;
+    /* TODO SB_MIGRATION */
+    private volatile OvsdbConfigurationService ovsdbConfigurationService;
+    private volatile OvsdbConnectionService connectionService;
     private volatile MdsalConsumer mdsalConsumer;
     private volatile INeutronNetworkCRUD neutronNetworkCache;
     private volatile INeutronSubnetCRUD neutronSubnetCache;
@@ -951,8 +952,7 @@ public class NeutronL3Adapter {
     }
 
     private Long getDpid (Node node) {
-        return 0L;
-        /* TODO SB_MIGRATION
+        /* TODO SB_MIGRATION */
         Preconditions.checkNotNull(ovsdbConfigurationService);
 
         String bridgeName = configurationService.getIntegrationBridgeName();
@@ -972,11 +972,11 @@ public class NeutronL3Adapter {
         } catch (Exception e) {
             logger.error("Error finding Bridge's OF DPID", e);
             return 0L;
-        }*/
+        }
     }
 
     private String getInternalBridgeUUID (Node node, String bridgeName) {
-        /* TODO SB_MIGRATION
+        /* TODO SB_MIGRATION */
         Preconditions.checkNotNull(ovsdbConfigurationService);
         try {
             Map<String, Row> bridgeTable =
@@ -989,7 +989,7 @@ public class NeutronL3Adapter {
             }
         } catch (Exception e) {
             logger.error("Error getting Bridge Identifier for {} / {}", node, bridgeName, e);
-        }*/
+        }
         return null;
     }
 }

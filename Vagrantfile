@@ -4,6 +4,7 @@ VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.provision "shell", path: "resources/puppet/scripts/bootstrap.sh"
+
   config.vm.provision "puppet" do |puppet|
       puppet.hiera_config_path = "resources/puppet/hiera.yaml"
       puppet.working_directory = "/vagrant/resources/puppet"

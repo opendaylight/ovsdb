@@ -17,7 +17,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
+import org.opendaylight.ovsdb.openstack.netvirt.api.MdsalConsumer;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
@@ -30,7 +30,9 @@ import com.google.common.collect.Maps;
 public class ConfigurationServiceImpl implements ConfigurationService {
     static final Logger logger = LoggerFactory.getLogger(ConfigurationServiceImpl.class);
 
-    private volatile OvsdbConfigurationService ovsdbConfigurationService;
+    // Values set with dependency injection from OSGi
+    //private volatile OvsdbConfigurationService ovsdbConfigurationService;
+    private volatile MdsalConsumer mdsalConsumer;
 
     private String integrationBridgeName;
     private String networkBridgeName;
@@ -131,6 +133,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     @Override
     public InetAddress getTunnelEndPoint(Node node) {
+        InetAddress address = mdsalConsumer.getTunnelEndPoint(node);
+        /* TODO SB_MIGRATION
         InetAddress address = null;
         try {
             Map<String, Row> ovsTable = ovsdbConfigurationService.getRows(node,
@@ -164,7 +168,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         }
         catch (Exception e) {
             logger.error("Error populating Tunnel Endpoint for Node {} ", node, e);
-        }
+        }*/
 
         return address;
     }

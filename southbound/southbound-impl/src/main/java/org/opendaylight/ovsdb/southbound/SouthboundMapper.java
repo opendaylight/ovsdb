@@ -325,7 +325,6 @@ public class SouthboundMapper {
         List<ControllerEntry> controllerEntries = omn.getControllerEntry();
         Map<UUID,Controller> controllerMap = new HashMap<UUID,Controller>();
         if (controllerEntries != null && !controllerEntries.isEmpty()) {
-            int index = 0;
             for (ControllerEntry controllerEntry : controllerEntries) {
                 String controllerNamedUUID = "Controller_" + getRandomUUID();
                 Controller controller = TyperUtils.getTypedRowWrapper(dbSchema, Controller.class);
@@ -342,9 +341,14 @@ public class SouthboundMapper {
     public static ConnectionInfo createConnectionInfo(OvsdbClient client) {
         ConnectionInfoBuilder connectionInfoBuilder = new ConnectionInfoBuilder();
         connectionInfoBuilder.setRemoteIp(createIpAddress(client.getConnectionInfo().getRemoteAddress()));
-        //connectionInfoBuilder.setLocalIp(createIpAddress(client.getConnectionInfo().getLocalAddress()));
         connectionInfoBuilder.setRemotePort(new PortNumber(client.getConnectionInfo().getRemotePort()));
-        //connectionInfoBuilder.setLocalPort(new PortNumber(client.getConnectionInfo().getLocalPort()));
+        return connectionInfoBuilder.build();
+    }
+
+    public static ConnectionInfo createConnectionInfo(OvsdbNodeAugmentation ovsdbNodeAugmentation) {
+        ConnectionInfoBuilder connectionInfoBuilder = new ConnectionInfoBuilder();
+        connectionInfoBuilder.setRemoteIp(ovsdbNodeAugmentation.getConnectionInfo().getRemoteIp());
+        connectionInfoBuilder.setRemotePort(ovsdbNodeAugmentation.getConnectionInfo().getRemotePort());
         return connectionInfoBuilder.build();
     }
 }

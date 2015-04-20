@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_633b22ec",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-20T16:35:35Z",
+      "side": 1,
+      "message": "I am keeping this code because above code also has the similar line commented, so in case user uncomment above line, it should uncomment these one as well. But i think removing both is better, less confusion.",
+      "parentUuid": "3aa0d159_c3cc7638",
+      "revId": "df8b3e1f8fcb5ae9552006a6e819fc23a491f000",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_63d1e2cc",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
         "patchSetId": 1

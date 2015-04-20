@@ -20,8 +20,8 @@ import java.net.HttpURLConnection;
 
 import org.junit.Test;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
-import org.opendaylight.ovsdb.plugin.api.Status;
-import org.opendaylight.ovsdb.plugin.api.StatusCode;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
+import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
 /**
  * Unit test for {@link AbstractHandler}
  */

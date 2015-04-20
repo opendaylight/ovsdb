@@ -41,8 +41,6 @@ import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
@@ -55,8 +53,6 @@ public class PortHandlerTest {
 
     @InjectMocks PortHandler portHandler;
 
-    @Mock private OvsdbConfigurationService ovsdbConfigurationService;
-    @Mock private OvsdbConnectionService connectionService;
     @Mock private NeutronL3Adapter neutronL3Adapter;
 
     @Test
@@ -100,12 +96,13 @@ public class PortHandlerTest {
         Node node = mock(Node.class);
         List<Node> nodes = new ArrayList();
         nodes.add(node);
-        when(connectionService.getNodes()).thenReturn(nodes);
+        /* TODO SB_MIGRATION */
+        //when(connectionService.getNodes()).thenReturn(nodes);
 
         Row row = mock(Row.class);
         ConcurrentMap<String, Row> portRows = new ConcurrentHashMap();
         portRows.put("key", row);
-        when(ovsdbConfigurationService.getRows(any(Node.class), anyString())).thenReturn(portRows );
+        //when(ovsdbConfigurationService.getRows(any(Node.class), anyString())).thenReturn(portRows );
 
         Port port = mock(Port.class);
         Column<GenericTableSchema, Set<UUID>> itfaceColumns = mock(Column.class);
@@ -113,7 +110,7 @@ public class PortHandlerTest {
         Set<UUID> ifaceUUIDs = new HashSet();
         ifaceUUIDs.add(mock(UUID.class));
         when(itfaceColumns.getData()).thenReturn(ifaceUUIDs );
-        when(ovsdbConfigurationService.getTypedRow(any(Node.class), same(Port.class), any(Row.class))).thenReturn(port);
+        //when(ovsdbConfigurationService.getTypedRow(any(Node.class), same(Port.class), any(Row.class))).thenReturn(port);
 
         Interface itface = mock(Interface.class);
         Column<GenericTableSchema, Map<String, String>> externalIdColumns = mock(Column.class);
@@ -121,7 +118,7 @@ public class PortHandlerTest {
         externalIds.put(Constants.EXTERNAL_ID_INTERFACE_ID, "portUUID");
         when(externalIdColumns.getData()).thenReturn(externalIds);
         when(itface.getExternalIdsColumn()).thenReturn(externalIdColumns);
-        when(ovsdbConfigurationService.getTypedRow(any(Node.class), same(Interface.class), any(Row.class))).thenReturn(itface);
+        //when(ovsdbConfigurationService.getTypedRow(any(Node.class), same(Interface.class), any(Row.class))).thenReturn(itface);
 
 
         when(ev.getAction()).thenReturn(Action.DELETE);

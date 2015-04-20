@@ -80,10 +80,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>plugin</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>openstack.net-virt</artifactId>
     </dependency>
     <dependency>
@@ -151,6 +147,14 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Import-Package>
+              !org.opendaylight.ovsdb.lib.osgi, *
+            </Import-Package>
+            <!--<Private-Package>
+              !org.opendaylight.ovsdb.lib.osgi,
+              org.opendaylight.ovsdb.lib.*,
+              org.opendaylight.ovsdb.schema.openvswitch
+            </Private-Package>-->
             <Embed-Dependency>
               utils.config,utils.mdsal-node,utils.mdsal-openflow;type=!pom;inline=false
             </Embed-Dependency>

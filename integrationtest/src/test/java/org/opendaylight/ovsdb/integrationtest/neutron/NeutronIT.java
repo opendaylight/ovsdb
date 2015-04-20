@@ -17,7 +17,13 @@ import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperty;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
-import org.opendaylight.ovsdb.plugin.api.Status;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
+import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
+import org.opendaylight.ovsdb.openstack.netvirt.api.MdsalConsumer;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.MdsalConsumerImpl;
+/* TODO SB_MIGRATION */
+import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.ovsdb.integrationtest.ConfigurationBundles;
 import org.opendaylight.ovsdb.integrationtest.OvsdbIntegrationTestBase;
@@ -50,6 +56,7 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
+import org.ops4j.pax.exam.util.Filter;
 import org.ops4j.pax.exam.util.PathUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -68,7 +75,7 @@ import javax.inject.Inject;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
-public class NeutronIT extends OvsdbIntegrationTestBase {
+public class NeutronIT extends OvsdbIntegrationTestBase implements BindingAwareConsumer {
     private Logger log = LoggerFactory.getLogger(NeutronIT.class);
     @Inject
     private BundleContext bc;
@@ -83,6 +90,12 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
     BridgeConfigurationManager bridgeConfigurationManager;
     @Inject
     ConfigurationService netVirtConfigurationService;
+    //@Inject @Filter(timeout = 20000)
+    //static DataBroker dataBroker;
+    //private BindingAwareConsumer consumer;
+    //private BindingAwareBroker broker;
+    @Inject @Filter(timeout = 20000)
+    MdsalConsumer mdsalConsumer;
 
     Boolean tearDownBridge = false;
     ImmutablePair<UUID, Map<String, String>> tearDownOpenVSwitchOtherConfig = null;
@@ -138,6 +151,8 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
             }
         }
 
+
+        //broker.registerConsumer(MdsalConsumerImpl.class);
         //Register fake NetworkingProviders
         Properties of13Properties = new Properties();
         of13Properties.put(Constants.OPENFLOW_VERSION_PROPERTY, Constants.OPENFLOW13);
@@ -245,6 +260,11 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
         // log.info("testGetDefaultGatewayMacAddress got mac {}", defaultGatewayMacAddress);
     }
 
+    @Test
+    public void testGetDataBroker() {
+        //assertNotNull("dataBroker should not be null", mdsalConsumer.getDataBroker());
+    }
+
     @After
     public void tearDown() throws InterruptedException {
         Thread.sleep(5000);
@@ -286,6 +306,11 @@ public class NeutronIT extends OvsdbIntegrationTestBase {
                                                             OpenVSwitch.class,
                                                             ovsRows.values().iterator().next());
         return Version.fromString(ovsRow.getOvsVersionColumn().getData().iterator().next());
+    }
+
+    @Override
+    public void onSessionInitialized (BindingAwareBroker.ConsumerContext consumerContext) {
+        log.info("onsSessioninitialized");
     }
 
     private class FakeOF13Provider implements NetworkingProvider {

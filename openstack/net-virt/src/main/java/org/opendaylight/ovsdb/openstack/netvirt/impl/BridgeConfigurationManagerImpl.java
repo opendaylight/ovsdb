@@ -17,11 +17,10 @@ import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.openstack.netvirt.api.MdsalConsumer;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
-import org.opendaylight.ovsdb.plugin.api.Status;
-import org.opendaylight.ovsdb.plugin.api.StatusCode;
-import org.opendaylight.ovsdb.plugin.api.StatusWithUuid;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
+import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
@@ -46,14 +45,17 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile ConfigurationService configurationService;
     private volatile NetworkingProviderManager networkingProviderManager;
-    private volatile OvsdbConfigurationService ovsdbConfigurationService;
+    //private volatile OvsdbConfigurationService ovsdbConfigurationService;
+    private volatile MdsalConsumer mdsalConsumer;
 
     public BridgeConfigurationManagerImpl() {
     }
 
     @Override
     public String getBridgeUuid(Node node, String bridgeName) {
-        Preconditions.checkNotNull(ovsdbConfigurationService);
+        Preconditions.checkNotNull(mdsalConsumer);
+        /*
+        return mdsalConsumer.getBridgeUUID(bridgeName);
         try {
              Map<String, Row> bridgeTable =
                      ovsdbConfigurationService.getRows(node, ovsdbConfigurationService.getTableName(node, Bridge.class));
@@ -68,7 +70,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
             }
         } catch (Exception e) {
             LOGGER.error("Error getting Bridge Identifier for {} / {}", node, bridgeName, e);
-        }
+        }*/
         return null;
     }
 
@@ -80,13 +82,17 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
 
     @Override
     public boolean isNodeOverlayReady(Node node) {
+        /* TODO SB_MIGRATION
         Preconditions.checkNotNull(ovsdbConfigurationService);
         return this.isNodeNeutronReady(node)
                && this.getBridgeUuid(node, configurationService.getNetworkBridgeName()) != null;
+               */
+        return false;
     }
 
     @Override
     public boolean isPortOnBridge (Node node, Bridge bridge, String portName) {
+        /* TODO SB_MIGRATION
         Preconditions.checkNotNull(ovsdbConfigurationService);
         for (UUID portsUUID : bridge.getPortsColumn().getData()) {
             try {
@@ -102,7 +108,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
                 LOGGER.error("Error getting port {} for bridge domain {}/{}", portsUUID, node, bridge.getName(), e);
             }
         }
-
+        */
         return false;
     }
 
@@ -133,7 +139,8 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
 
     @Override
     public boolean isNodeVlanReady(Node node, NeutronNetwork network) {
-        Preconditions.checkNotNull(ovsdbConfigurationService);
+        /* TODO SB_MIGRATION */
+        //Preconditions.checkNotNull(ovsdbConfigurationService);
         Preconditions.checkNotNull(networkingProviderManager);
 
         /* is br-int created */
@@ -225,6 +232,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     @Override
     public String getPhysicalInterfaceName (Node node, String physicalNetwork) {
         String phyIf = null;
+        /* TODO SB_MIGRATION
         try {
             Map<String, Row> ovsTable =
                     ovsdbConfigurationService.getRows(node, ovsdbConfigurationService.getTableName(node, OpenVSwitch.class));
@@ -274,14 +282,14 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
             LOGGER.error("Physical interface not found for Node: {}, Network {}",
                          node, physicalNetwork);
         }
-
+*/
         return phyIf;
     }
 
     @Override
     public List<String> getAllPhysicalInterfaceNames(Node node) {
         List<String> phyIfName = Lists.newArrayList();
-
+        /* TODO SB_MIGRATION
         try {
             Map<String, Row> ovsTable =
                     ovsdbConfigurationService.getRows(node, ovsdbConfigurationService.getTableName(node, OpenVSwitch.class));
@@ -320,7 +328,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
 
         LOGGER.debug("Physical interface for Node: {}, If: {}",
                      node, phyIfName);
-
+        */
         return phyIfName;
     }
 
@@ -328,6 +336,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
      * Returns the Bridge for a given node and bridgeName
      */
     public Bridge getBridge (Node node, String bridgeName) {
+        /* TODO SB_MIGRATION
         Preconditions.checkNotNull(ovsdbConfigurationService);
         try {
             Map<String, Row> bridgeTable =
@@ -343,6 +352,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
         } catch (Exception e) {
             LOGGER.error("Error getting Bridge Identifier for {} / {}", node, bridgeName, e);
         }
+        */
         return null;
     }
 
@@ -494,6 +504,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
      * Add a Port to a Bridge
      */
     private Status addPortToBridge (Node node, String bridgeName, String portName) throws Exception {
+        /* TODO SB_MIGRATION
         Preconditions.checkNotNull(ovsdbConfigurationService);
 
         LOGGER.debug("addPortToBridge: Adding port: {} to Bridge {}, Node {}", portName, bridgeName, node);
@@ -504,8 +515,8 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
             return new Status(StatusCode.NOTFOUND, "Could not find "+bridgeName+" in "+node);
         }
 
-        /* Check if the port already exists. */
-        Row row = ovsdbConfigurationService
+        *//* Check if the port already exists. */
+        /*Row row = ovsdbConfigurationService
                 .getRow(node, ovsdbConfigurationService.getTableName(node, Bridge.class), bridgeUUID);
         Bridge bridge = ovsdbConfigurationService.getTypedRow(node, Bridge.class, row);
         if (bridge != null) {
@@ -552,7 +563,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
             LOGGER.error("addPortToBridge: Cannot identify Interface for port {}/{}", portName, portUUID);
             return new Status(StatusCode.INTERNALERROR);
         }
-
+*/
         return new Status(StatusCode.SUCCESS);
     }
 
@@ -560,12 +571,14 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
      * Add a Patch Port to a Bridge
      */
     private Status addPatchPort (Node node, String bridgeUUID, String portName, String peerPortName) throws Exception {
+        return new Status(StatusCode.SUCCESS);
+        /* TODO SB_MIGRATION
         Preconditions.checkNotNull(ovsdbConfigurationService);
 
         LOGGER.debug("addPatchPort: node: {}, bridgeUUID: {}, port: {}, peer: {}",
                      node, bridgeUUID, portName, peerPortName);
 
-        /* Check if the port already exists. */
+        *//* Check if the port already exists. *//*
         Row bridgeRow = ovsdbConfigurationService.getRow(node,
                                                   ovsdbConfigurationService.getTableName(node, Bridge.class), bridgeUUID);
         Bridge bridge = ovsdbConfigurationService.getTypedRow(node, Bridge.class, bridgeRow);
@@ -619,6 +632,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
                                             patchPortUUID,
                                             interfaceUUID,
                                             intf.getRow());
+                                            */
     }
 
     /**
@@ -626,10 +640,10 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
      */
     private Status addBridge(Node node, String bridgeName,
                              String localPatchName, String remotePatchName) throws Exception {
-        Preconditions.checkNotNull(ovsdbConfigurationService);
+        /*Preconditions.checkNotNull(mdsalConsumer);
         Preconditions.checkNotNull(networkingProviderManager);
 
-        String bridgeUUID = this.getBridgeUuid(node, bridgeName);
+        String bridgeUUID = getBridgeUuid(node, bridgeName);
         Bridge bridge = ovsdbConfigurationService.createTypedRow(node, Bridge.class);
         Set<String> failMode = new HashSet<>();
         failMode.add("secure");
@@ -637,9 +651,9 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
 
         Set<String> protocols = new HashSet<>();
 
-        /* ToDo: Plugin should expose an easy way to get the OVS Version or Schema Version
+        *//* ToDo: Plugin should expose an easy way to get the OVS Version or Schema Version
          * or, alternatively it should not attempt to add set unsupported fields
-         */
+         *//*
 
         try {
 	    protocols.add(Constants.OPENFLOW13);
@@ -680,7 +694,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
             remotePatchName != null &&
             networkingProviderManager.getProvider(node).hasPerTenantTunneling()) {
             return addPatchPort(node, bridgeUUID, localPatchName, remotePatchName);
-        }
+        }*/
         return new Status(StatusCode.SUCCESS);
     }
 

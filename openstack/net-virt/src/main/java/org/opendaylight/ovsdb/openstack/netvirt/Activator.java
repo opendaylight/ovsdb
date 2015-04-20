@@ -15,6 +15,7 @@ import java.util.Hashtable;
 
 import org.apache.felix.dm.DependencyActivatorBase;
 import org.apache.felix.dm.DependencyManager;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.neutron.spi.INeutronFirewallAware;
 import org.opendaylight.neutron.spi.INeutronFirewallPolicyAware;
 import org.opendaylight.neutron.spi.INeutronFirewallRuleAware;
@@ -33,27 +34,11 @@ import org.opendaylight.neutron.spi.INeutronSecurityGroupAware;
 import org.opendaylight.neutron.spi.INeutronSecurityRuleAware;
 import org.opendaylight.neutron.spi.INeutronSubnetAware;
 import org.opendaylight.neutron.spi.INeutronSubnetCRUD;
-import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
-import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
-import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
-import org.opendaylight.ovsdb.openstack.netvirt.api.InboundNatProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.MultiTenantAwareRouter;
-import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
-import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
-import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
-import org.opendaylight.ovsdb.openstack.netvirt.api.OutboundNatProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
-import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
-import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
+import org.opendaylight.ovsdb.openstack.netvirt.api.*;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.BridgeConfigurationManagerImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.ConfigurationServiceImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.EventDispatcherImpl;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.MdsalConsumerImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NodeCacheManagerImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.OpenstackRouter;
@@ -61,9 +46,9 @@ import org.opendaylight.ovsdb.openstack.netvirt.impl.ProviderNetworkManagerImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.SecurityServicesImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.TenantNetworkManagerImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.VlanConfigurationCacheImpl;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
-import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
+//import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
+//import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
+//import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
 
 import org.osgi.framework.BundleContext;
 
@@ -78,20 +63,19 @@ public class Activator extends DependencyActivatorBase {
         manager.add(createComponent()
                 .setInterface(ConfigurationService.class.getName(), null)
                 .setImplementation(ConfigurationServiceImpl.class)
-                .add(createServiceDependency().setService(OvsdbConfigurationService.class)));
+                .add(createServiceDependency().setService(MdsalConsumerImpl.class).setRequired(true)));
 
         manager.add(createComponent()
                 .setInterface(BridgeConfigurationManager.class.getName(), null)
                 .setImplementation(BridgeConfigurationManagerImpl.class)
                 .add(createServiceDependency().setService(ConfigurationService.class).setRequired(true))
                 .add(createServiceDependency().setService(NetworkingProviderManager.class))
-                .add(createServiceDependency().setService(OvsdbConfigurationService.class)));
+                .add(createServiceDependency().setService(MdsalConsumerImpl.class).setRequired(true)));
 
         manager.add(createComponent()
                 .setInterface(TenantNetworkManager.class.getName(), null)
                 .setImplementation(TenantNetworkManagerImpl.class)
-                .add(createServiceDependency().setService(OvsdbConfigurationService.class))
-                .add(createServiceDependency().setService(OvsdbConnectionService.class))
+                .add(createServiceDependency().setService(MdsalConsumerImpl.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(VlanConfigurationCache.class)));
@@ -99,7 +83,7 @@ public class Activator extends DependencyActivatorBase {
         manager.add(createComponent()
                 .setInterface(VlanConfigurationCache.class.getName(), null)
                 .setImplementation(VlanConfigurationCacheImpl.class)
-                .add(createServiceDependency().setService(OvsdbConfigurationService.class))
+                .add(createServiceDependency().setService(MdsalConsumerImpl.class).setRequired(true))
                 .add(createServiceDependency().setService(TenantNetworkManager.class)));
 
         Dictionary<String, Object> floatingIPHandlerPorperties = new Hashtable<>();
@@ -122,8 +106,7 @@ public class Activator extends DependencyActivatorBase {
                 .setImplementation(NetworkHandler.class)
                 .add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true))
                 .add(createServiceDependency().setService(BridgeConfigurationManager.class).setRequired(true))
-                .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
-                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
+                .add(createServiceDependency().setService(MdsalConsumerImpl.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
                 .add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true)));
@@ -145,8 +128,7 @@ public class Activator extends DependencyActivatorBase {
                 .setInterface(new String[]{INeutronPortAware.class.getName(), AbstractHandler.class.getName()},
                         portHandlerProperties)
                 .setImplementation(PortHandler.class)
-                .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
-                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
+                .add(createServiceDependency().setService(MdsalConsumerImpl.class).setRequired(true))
                 .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
                 .add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true)));
 
@@ -164,17 +146,17 @@ public class Activator extends DependencyActivatorBase {
         southboundHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.SOUTHBOUND);
 
         manager.add(createComponent()
-                .setInterface(new String[]{OvsdbInventoryListener.class.getName(),
+                .setInterface(new String[]{/*OvsdbInventoryListener.class.getName(),*/
                                 NodeCacheListener.class.getName(),
-                                AbstractHandler.class.getName()},
+                                AbstractHandler.class.getName(),
+                                MdsalConsumerListener.class.getName()},
                         southboundHandlerProperties)
                 .setImplementation(SouthboundHandler.class)
                 .add(createServiceDependency().setService(ConfigurationService.class).setRequired(true))
                 .add(createServiceDependency().setService(BridgeConfigurationManager.class).setRequired(true))
                 .add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true))
                 .add(createServiceDependency().setService(NetworkingProviderManager.class).setRequired(true))
-                .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
-                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
+                .add(createServiceDependency().setService(MdsalConsumerImpl.class).setRequired(true))
                 .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
                 .add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true))
                 .add(createServiceDependency().setService(NodeCacheManager.class).setRequired(true)));
@@ -195,7 +177,8 @@ public class Activator extends DependencyActivatorBase {
                 .add(createServiceDependency().setService(LoadBalancerProvider.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true))
-                .add(createServiceDependency().setService(NodeCacheManager.class).setRequired(true)));
+                .add(createServiceDependency().setService(NodeCacheManager.class).setRequired(true))
+                .add(createServiceDependency().setService(MdsalConsumerImpl.class).setRequired(true)));
 
         Dictionary<String, Object> lbaasPoolHandlerProperties = new Hashtable<>();
         lbaasPoolHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY,
@@ -274,8 +257,7 @@ public class Activator extends DependencyActivatorBase {
                 .setImplementation(NeutronL3Adapter.class)
                 .add(createServiceDependency().setService(ConfigurationService.class).setRequired(true))
                 .add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true))
-                .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
-                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
+                .add(createServiceDependency().setService(MdsalConsumerImpl.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true))
@@ -303,6 +285,14 @@ public class Activator extends DependencyActivatorBase {
                 .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
                 .add(createServiceDependency().setService(NodeCacheListener.class)
                         .setCallbacks("cacheListenerAdded", "cacheListenerRemoved")));
+
+        manager.add(createComponent()
+                .setInterface(MdsalConsumer.class.getName(), null)
+                .setImplementation(MdsalConsumerImpl.class)
+                .add(createServiceDependency()
+                        .setService(MdsalConsumerListener.class)
+                        .setCallbacks("listenerAdded", "listenerRemoved"))
+                .add(createServiceDependency().setService(BindingAwareBroker.class).setRequired(true)));
     }
 
     @Override

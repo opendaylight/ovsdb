@@ -35,12 +35,10 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.IngressAclProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.L2ForwardingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
+import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
+import org.opendaylight.ovsdb.openstack.netvirt.api.StatusWithUuid;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
-import org.opendaylight.ovsdb.plugin.api.Status;
-import org.opendaylight.ovsdb.plugin.api.StatusCode;
-import org.opendaylight.ovsdb.plugin.api.StatusWithUuid;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
@@ -112,8 +110,6 @@ public class OF13Provider implements NetworkingProvider {
     private volatile ConfigurationService configurationService;
     private volatile BridgeConfigurationManager bridgeConfigurationManager;
     private volatile TenantNetworkManager tenantNetworkManager;
-    private volatile OvsdbConfigurationService ovsdbConfigurationService;
-    private volatile OvsdbConnectionService connectionService;
     private volatile MdsalConsumer mdsalConsumer;
     private volatile SecurityServicesManager securityServicesManager;
     private volatile IngressAclProvider ingressAclProvider;
@@ -166,6 +162,7 @@ public class OF13Provider implements NetworkingProvider {
     }
 
     private boolean isTunnelPresent(Node node, String tunnelName, String bridgeUUID) throws Exception {
+        /* TODO SB_MIGRATION
         Preconditions.checkNotNull(ovsdbConfigurationService);
         Row bridgeRow = ovsdbConfigurationService
                 .getRow(node, ovsdbConfigurationService.getTableName(node, Bridge.class), bridgeUUID);
@@ -178,11 +175,12 @@ public class OF13Provider implements NetworkingProvider {
                 Port port = ovsdbConfigurationService.getTypedRow(node, Port.class, portRow);
                 if (port != null && tunnelName.equalsIgnoreCase(port.getName())) return true;
             }
-        }
+        }*/
         return false;
     }
 
     private String getPortUuid(Node node, String name, String bridgeUUID) throws Exception {
+        /* TODO SB_MIGRATION
         Preconditions.checkNotNull(ovsdbConfigurationService);
         Row bridgeRow = ovsdbConfigurationService
                 .getRow(node, ovsdbConfigurationService.getTableName(node, Bridge.class), bridgeUUID);
@@ -195,11 +193,12 @@ public class OF13Provider implements NetworkingProvider {
                 Port port = ovsdbConfigurationService.getTypedRow(node, Port.class, portRow);
                 if (port != null && name.equalsIgnoreCase(port.getName())) return portUUID.toString();
             }
-        }
+        }*/
         return null;
     }
 
     private Status addTunnelPort (Node node, String tunnelType, InetAddress src, InetAddress dst) {
+        /* TODO SB_MIGRATION
         Preconditions.checkNotNull(ovsdbConfigurationService);
         try {
             String bridgeUUID = null;
@@ -274,11 +273,13 @@ public class OF13Provider implements NetworkingProvider {
         } catch (Exception e) {
             logger.error("Exception in addTunnelPort", e);
             return new Status(StatusCode.INTERNALERROR);
-        }
+        }*/
+        return new Status(StatusCode.INTERNALERROR);
     }
 
     /* delete port from ovsdb port table */
     private Status deletePort(Node node, String bridgeName, String portName) {
+        /* TODO SB_MIGRATION
         Preconditions.checkNotNull(ovsdbConfigurationService);
         try {
             String bridgeUUID = null;
@@ -313,7 +314,8 @@ public class OF13Provider implements NetworkingProvider {
         } catch (Exception e) {
             logger.error("Exception in deletePort", e);
             return new Status(StatusCode.INTERNALERROR);
-        }
+        }*/
+        return new Status(StatusCode.INTERNALERROR);
     }
 
     private Status deleteTunnelPort(Node node, String tunnelType, InetAddress src, InetAddress dst) {
@@ -799,6 +801,7 @@ public class OF13Provider implements NetworkingProvider {
     }
 
     private Long getDpid (Node node, String bridgeUuid) {
+        /* TODO SB_MIGRATION
         Preconditions.checkNotNull(ovsdbConfigurationService);
         try {
             Row bridgeRow =  ovsdbConfigurationService
@@ -810,7 +813,7 @@ public class OF13Provider implements NetworkingProvider {
         } catch (Exception e) {
             logger.error("Error finding Bridge's OF DPID", e);
             return 0L;
-        }
+        }*/ return 0L;
     }
 
     private Long getIntegrationBridgeOFDPID (Node node) {
@@ -944,7 +947,7 @@ public class OF13Provider implements NetworkingProvider {
 
     private void programTunnelRules (String tunnelType, String segmentationId, InetAddress dst, Node node,
             Interface intf, boolean local) {
-
+        /* TODO SB_MIGRATION
         Preconditions.checkNotNull(ovsdbConfigurationService);
 
         try {
@@ -1007,11 +1010,12 @@ public class OF13Provider implements NetworkingProvider {
         } catch (Exception e) {
             logger.error("", e);
         }
+        */
     }
 
     private void removeTunnelRules (String tunnelType, String segmentationId, InetAddress dst, Node node,
             Interface intf, boolean local, boolean isLastInstanceOnNode) {
-
+        /* TODO SB_MIGRATION
         Preconditions.checkNotNull(ovsdbConfigurationService);
         try {
 
@@ -1070,10 +1074,11 @@ public class OF13Provider implements NetworkingProvider {
             }
         } catch (Exception e) {
             logger.error("", e);
-        }
+        }*/
     }
 
     private void programVlanRules (NeutronNetwork network, Node node, Interface intf) {
+        /* TODO SB_MIGRATION
         Preconditions.checkNotNull(ovsdbConfigurationService);
         logger.debug("Program vlan rules for interface {}", intf.getName());
         try {
@@ -1148,11 +1153,12 @@ public class OF13Provider implements NetworkingProvider {
             }
         } catch (Exception e) {
             logger.error("", e);
-        }
+        }*/
     }
 
     private void removeVlanRules (NeutronNetwork network, Node node,
             Interface intf, boolean isLastInstanceOnNode) {
+        /* TODO SB_MIGRATION
         Preconditions.checkNotNull(ovsdbConfigurationService);
         logger.debug("Remove vlan rules for interface {}", intf.getName());
 
@@ -1212,11 +1218,12 @@ public class OF13Provider implements NetworkingProvider {
             }
         } catch (Exception e) {
             logger.error("", e);
-        }
+        }*/
     }
 
     @Override
     public Status handleInterfaceUpdate(NeutronNetwork network, Node srcNode, Interface intf) {
+        /* TODO SB_MIGRATION
         Preconditions.checkNotNull(connectionService);
         List<Node> nodes = connectionService.getNodes();
         nodes.remove(srcNode);
@@ -1245,12 +1252,13 @@ public class OF13Provider implements NetworkingProvider {
                             dst != null ? dst.getHostAddress() : "null");
                 }
             }
-        }
+        }*/
 
         return new Status(StatusCode.SUCCESS);
     }
 
     private Status triggerInterfaceUpdates(Node node) {
+        /* TODO SB_MIGRATION
         Preconditions.checkNotNull(ovsdbConfigurationService);
         try {
             Map<String, Row> intfs = ovsdbConfigurationService.getRows(node, ovsdbConfigurationService.getTableName(node, Interface.class));
@@ -1267,7 +1275,7 @@ public class OF13Provider implements NetworkingProvider {
         } catch (Exception e) {
             logger.error("Error Triggering the lost interface updates for "+ node, e);
             return new Status(StatusCode.INTERNALERROR, e.getLocalizedMessage());
-        }
+        }*/
         return new Status(StatusCode.SUCCESS);
     }
     @Override
@@ -1279,6 +1287,7 @@ public class OF13Provider implements NetworkingProvider {
     @Override
     public Status handleInterfaceDelete(String tunnelType, NeutronNetwork network, Node srcNode, Interface intf,
             boolean isLastInstanceOnNode) {
+        /* TODO SB_MIGRATION
         Preconditions.checkNotNull(connectionService);
         Status status = new Status(StatusCode.SUCCESS);
         List<Node> nodes = connectionService.getNodes();
@@ -1288,7 +1297,7 @@ public class OF13Provider implements NetworkingProvider {
         List<String> phyIfName = bridgeConfigurationManager.getAllPhysicalInterfaceNames(srcNode);
         if (intf.getTypeColumn().getData().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN)
                 || intf.getTypeColumn().getData().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)) {
-            /* Delete tunnel port */
+            // Delete tunnel port
             try {
                 Map<String, String> options = intf.getOptionsColumn().getData();
                 InetAddress src = InetAddress.getByName(options.get("local_ip"));
@@ -1300,7 +1309,7 @@ public class OF13Provider implements NetworkingProvider {
         } else if (phyIfName.contains(intf.getName())) {
             deletePhysicalPort(srcNode, intf.getName());
         } else {
-            /* delete all other interfaces */
+            // delete all other interfaces
             this.removeLocalRules(network.getProviderNetworkType(), network.getProviderSegmentationID(),
                     srcNode, intf);
 
@@ -1330,8 +1339,9 @@ public class OF13Provider implements NetworkingProvider {
                     }
                 }
             }
-        }
-        return status;
+        }*/
+        //return status;
+        return new Status(StatusCode.SUCCESS);
     }
 
     @Override
@@ -2112,6 +2122,7 @@ public class OF13Provider implements NetworkingProvider {
 
     @Override
     public void initializeOFFlowRules(Node openflowNode) {
+        /* TODO SB_MIGRATION
         Preconditions.checkNotNull(connectionService);
         List<Node> ovsNodes = connectionService.getNodes();
         if (ovsNodes == null) return;
@@ -2129,7 +2140,7 @@ public class OF13Provider implements NetworkingProvider {
                 this.initializeFlowRules(ovsNode, configurationService.getIntegrationBridgeName());
                 this.triggerInterfaceUpdates(ovsNode);
             }
-        }
+        }*/
     }
 
     @Override
@@ -2151,6 +2162,7 @@ public class OF13Provider implements NetworkingProvider {
     }
 
     private String getInternalBridgeUUID (Node node, String bridgeName) {
+        /* TODO SB_MIGRATION
         Preconditions.checkNotNull(ovsdbConfigurationService);
         try {
             Map<String, Row> bridgeTable = ovsdbConfigurationService.getRows(node, ovsdbConfigurationService.getTableName(node, Bridge.class));
@@ -2161,7 +2173,7 @@ public class OF13Provider implements NetworkingProvider {
             }
         } catch (Exception e) {
             logger.error("Error getting Bridge Identifier for {} / {}", node, bridgeName, e);
-        }
+        }*/
         return null;
     }
 }

@@ -10,6 +10,7 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
+import java.util.ArrayList;
 import org.opendaylight.neutron.spi.INeutronNetworkCRUD;
 import org.opendaylight.neutron.spi.INeutronPortCRUD;
 import org.opendaylight.neutron.spi.INeutronSubnetCRUD;
@@ -21,20 +22,8 @@ import org.opendaylight.neutron.spi.NeutronRouter_Interface;
 import org.opendaylight.neutron.spi.NeutronSubnet;
 import org.opendaylight.neutron.spi.Neutron_IPs;
 import org.opendaylight.ovsdb.lib.notation.Row;
-import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
-import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
-import org.opendaylight.ovsdb.plugin.api.Status;
-import org.opendaylight.ovsdb.plugin.api.StatusCode;
+import org.opendaylight.ovsdb.openstack.netvirt.api.*;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
-import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
-import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.InboundNatProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.OutboundNatProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.ovsdb.utils.mdsal.node.StringConvertor;
@@ -67,8 +56,9 @@ public class NeutronL3Adapter {
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile ConfigurationService configurationService;
     private volatile TenantNetworkManager tenantNetworkManager;
-    private volatile OvsdbConfigurationService ovsdbConfigurationService;
-    private volatile OvsdbConnectionService connectionService;
+    //private volatile OvsdbConfigurationService ovsdbConfigurationService;
+    //private volatile OvsdbConnectionService connectionService;
+    private volatile MdsalConsumer mdsalConsumer;
     private volatile INeutronNetworkCRUD neutronNetworkCache;
     private volatile INeutronSubnetCRUD neutronSubnetCache;
     private volatile INeutronPortCRUD neutronPortCache;
@@ -273,7 +263,10 @@ public class NeutronL3Adapter {
         }
 
         final Action action = isDelete ? Action.DELETE : Action.ADD;
+        /* TODO SB_MIGRATION
         List<Node> nodes = connectionService.getNodes();
+        */
+        List<Node> nodes = new ArrayList<>(); // TODO SB_MIGRATION
         if (nodes.isEmpty()) {
             logger.trace("updateL3ForNeutronPort has no nodes to work with");
         }
@@ -396,7 +389,9 @@ public class NeutronL3Adapter {
             subnetIdToRouterInterfaceCache.put(subnet.getSubnetUUID(), destNeutronRouterInterface);
         }
 
-        List<Node> nodes = connectionService.getNodes();
+        /* TODO SB_MIGRATION
+        List<Node> nodes = connectionService.getNodes();*/
+        List<Node> nodes = new ArrayList<>(); // TODO SB_MIGRATION
         if (nodes.isEmpty()) {
             logger.trace("programFlowsForNeutronRouterInterface has no nodes to work with");
         }
@@ -825,7 +820,9 @@ public class NeutronL3Adapter {
         }
 
         final Action action = isDelete ? Action.DELETE : Action.ADD;
-        List<Node> nodes = connectionService.getNodes();
+        /* TODO SB_MIGRATION
+        List<Node> nodes = connectionService.getNodes();*/
+        List<Node> nodes = new ArrayList<>(); // TODO SB_MIGRATION
         if (nodes.isEmpty()) {
             logger.trace("programFlowsForFloatingIP has no nodes to work with");
         }
@@ -954,6 +951,8 @@ public class NeutronL3Adapter {
     }
 
     private Long getDpid (Node node) {
+        return 0L;
+        /* TODO SB_MIGRATION
         Preconditions.checkNotNull(ovsdbConfigurationService);
 
         String bridgeName = configurationService.getIntegrationBridgeName();
@@ -973,10 +972,11 @@ public class NeutronL3Adapter {
         } catch (Exception e) {
             logger.error("Error finding Bridge's OF DPID", e);
             return 0L;
-        }
+        }*/
     }
 
     private String getInternalBridgeUUID (Node node, String bridgeName) {
+        /* TODO SB_MIGRATION
         Preconditions.checkNotNull(ovsdbConfigurationService);
         try {
             Map<String, Row> bridgeTable =
@@ -989,7 +989,7 @@ public class NeutronL3Adapter {
             }
         } catch (Exception e) {
             logger.error("Error getting Bridge Identifier for {} / {}", node, bridgeName, e);
-        }
+        }*/
         return null;
     }
 }

@@ -15,10 +15,8 @@ import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.openstack.netvirt.api.MdsalConsumer;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
-import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
@@ -43,8 +41,10 @@ public class PortHandler extends AbstractHandler
     static final Logger logger = LoggerFactory.getLogger(PortHandler.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
+    /* TODO SB_MIGRATION
     private volatile OvsdbConfigurationService ovsdbConfigurationService;
-    private volatile OvsdbConnectionService connectionService;
+    private volatile OvsdbConnectionService connectionService;*/
+    private volatile MdsalConsumer mdsalConsumer;
     private volatile NeutronL3Adapter neutronL3Adapter;
 
     /**
@@ -153,6 +153,7 @@ public class PortHandler extends AbstractHandler
         logger.debug("Handling neutron delete port " + neutronPort);
         neutronL3Adapter.handleNeutronPortEvent(neutronPort, Action.DELETE);
 
+        /* TODO SB_MIGRATION
         List<Node> nodes = connectionService.getNodes();
         for (Node node : nodes) {
             try {
@@ -175,7 +176,7 @@ public class PortHandler extends AbstractHandler
                                 continue;
                             }
 
-                            /* Compare Neutron port uuid */
+                            *//* Compare Neutron port uuid *//*
                             String neutronPortId = externalIds.get(Constants.EXTERNAL_ID_INTERFACE_ID);
                             if (neutronPortId == null) {
                                 continue;
@@ -199,7 +200,7 @@ public class PortHandler extends AbstractHandler
                      " network-id - {}, port-id - {}",
                      neutronPort.getTenantID(), neutronPort.getNetworkUUID(),
                      neutronPort.getID());
-
+*/
     }
 
     /**

@@ -347,4 +347,13 @@ public class SouthboundMapper {
         //connectionInfoBuilder.setLocalPort(new PortNumber(client.getConnectionInfo().getLocalPort()));
         return connectionInfoBuilder.build();
     }
+
+    public static ConnectionInfo createConnectionInfo(OvsdbNodeAugmentation ovsdbNodeAugmentation) {
+        ConnectionInfoBuilder connectionInfoBuilder = new ConnectionInfoBuilder();
+        connectionInfoBuilder.setRemoteIp(ovsdbNodeAugmentation.getConnectionInfo().getRemoteIp());
+        //connectionInfoBuilder.setLocalIp(ovsdbNodeAugmentation.getConnectionInfo().getLocalIp());
+        connectionInfoBuilder.setRemotePort(ovsdbNodeAugmentation.getConnectionInfo().getRemotePort());
+        //connectionInfoBuilder.setLocalPort(ovsdbNodeAugmentation.getConnectionInfo().getLocalPort());
+        return connectionInfoBuilder.build();
+    }
 }

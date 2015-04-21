@@ -155,6 +155,7 @@ module ovsdb {
                 type yang:uuid;
             }
             leaf is-connected {
+                description "Tells if the controller is connected.";
                 type boolean;
             }
 

@@ -315,7 +315,9 @@ public class SouthboundMapper {
                             .ietf.yang.types.rev130715.Uuid(controller.getUuid().toString());
                 controllerEntries.add(new ControllerEntryBuilder()
                     .setTarget(new Uri(targetString))
-                    .setControllerUuid(uuid).build());
+                    .setControllerUuid(uuid)
+                    .setIsConnected(controller.getIsConnectedColumn().getData())
+                    .build());
             }
         }
         return controllerEntries;

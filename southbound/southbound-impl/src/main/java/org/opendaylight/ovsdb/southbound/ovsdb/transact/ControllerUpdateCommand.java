@@ -65,8 +65,10 @@ public class ControllerUpdateCommand extends AbstractTransactCommand {
                     controller.setTarget(entry.getValue().getTarget().getValue());
                     String controllerNamedUuidString = SouthboundMapper.getRandomUUID();
                     UUID controllerNamedUuid = new UUID(controllerNamedUuidString);
+                    if (entry.getValue().isIsConnected() != null) {
+                        controller.setIsConnected(entry.getValue().isIsConnected());
+                    }
                     transaction.add(op.insert(controller).withId(controllerNamedUuidString));
-
                     Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
                     bridge.setName(ovsdbBridge.getBridgeName().getValue());
                     bridge.setController(Sets.newHashSet(controllerNamedUuid));

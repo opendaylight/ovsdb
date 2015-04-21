@@ -64,10 +64,13 @@ import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.utils.mdsal.node.StringConvertor;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+//import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+//import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
+//import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.osgi.framework.ServiceReference;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -82,6 +85,7 @@ public class OF13ProviderTest {
 
     @InjectMocks private OF13Provider of13Provider;
     @Mock private NeutronNetwork network;
+    @Mock private org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node openflowNode;
     @Mock private Node node;
     @Mock private Node node2;
     @Mock private Node node3;
@@ -128,21 +132,21 @@ public class OF13ProviderTest {
         NodeKey nodeKey = new NodeKey(nodeId);
 
         node = Mockito.mock(Node.class);
-        when(node.getId()).thenReturn(nodeId);
+        when(node.getNodeId()).thenReturn(nodeId);
         when(node.getKey()).thenReturn(new NodeKey(nodeId));
         when(configurationService.getTunnelEndPoint(node)).thenReturn(InetAddress.getByName("192.168.0.1"));
         nodeList.add(node);
 
         nodeId = new NodeId("Node2");
         node2 = Mockito.mock(Node.class);
-        when(node2.getId()).thenReturn(nodeId);
+        when(node2.getNodeId()).thenReturn(nodeId);
         when(node2.getKey()).thenReturn(new NodeKey(nodeId));
         when(configurationService.getTunnelEndPoint(node2)).thenReturn(InetAddress.getByName("192.168.0.2"));
         nodeList.add(node2);
 
         nodeId = new NodeId("Node3");
         node3 = Mockito.mock(Node.class);
-        when(node3.getId()).thenReturn(nodeId);
+        when(node3.getNodeId()).thenReturn(nodeId);
         when(node3.getKey()).thenReturn(new NodeKey(nodeId));
         when(configurationService.getTunnelEndPoint(node3)).thenReturn(InetAddress.getByName("192.168.0.3"));
         nodeList.add(node3);
@@ -267,13 +271,13 @@ public class OF13ProviderTest {
     @Test
     public void initializeOFFlowRulesTest(){
 
-        of13Provider.initializeOFFlowRules(node);
+        of13Provider.initializeOFFlowRules(openflowNode);
         //verify(connectionService, times(1)).getNodes();
     }
 
     /**
      * Test method
-     * {@link OF13Provider#handleInterfaceUpdateTest(NeutronNetwor, Node, Interface)}
+     * {@link OF13Provider#handleInterfaceUpdateTest(NeutronNetwork, Node, Interface)}
      */
     @Test
     public void handleInterfaceUpdateTest(){
@@ -310,7 +314,7 @@ public class OF13ProviderTest {
 
     /**
      * Test method
-     * {@link OF13Provider#handleInterfaceDelete(String, NeutronNetwor, Node, Interface, boolean)}
+     * {@link OF13Provider#handleInterfaceDelete(String, NeutronNetwork, Node, Interface, boolean)}
      */
     @Test
     public void handleInterfaceDeleteTest(){
@@ -346,8 +350,8 @@ public class OF13ProviderTest {
         final String nodeId="node1";
 
         NodeBuilder builder = new NodeBuilder();
-        builder.setId(new NodeId(nodeId));
-        builder.setKey(new NodeKey(builder.getId()));
+        builder.setId(new org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId(nodeId));
+        builder.setKey(new org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey(builder.getId()));
 
         NodeBuilder builderStatic = OF13Provider.createNodeBuilder(nodeId);
 

@@ -74,35 +74,35 @@ public class OutboundNatServiceTest {
     }
 
     /**
-     * Test method {@link OutboundNatService#programIpRewriteRule(Node, Long, String, InetAddress, InetAddress, Action)}
+     * Test method {@link OutboundNatService#programIpRewriteRule(Long, String, InetAddress, InetAddress, Action)}
      */
     @Test
     public void testProgramIpRewriteRule() throws Exception {
         InetAddress address = mock(InetAddress.class);
         when(address.getHostAddress()).thenReturn(HOST_ADDRESS);
 
-        assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.SUCCESS), outboundNatService.programIpRewriteRule(mock(Node.class), Long.valueOf(123), SEGMENTATION_ID, address, address, Action.ADD));
+        assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.SUCCESS), outboundNatService.programIpRewriteRule(Long.valueOf(123), SEGMENTATION_ID, address, address, Action.ADD));
         verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
         verify(readWriteTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
-        assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.SUCCESS), outboundNatService.programIpRewriteRule(mock(Node.class), Long.valueOf(123), SEGMENTATION_ID, address, address, Action.DELETE));
+        assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.SUCCESS), outboundNatService.programIpRewriteRule(Long.valueOf(123), SEGMENTATION_ID, address, address, Action.DELETE));
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
         verify(readWriteTransaction, times(1)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above
     }
 
     /**
-     * Test method {@link OutboundNatService#programIpRewriteExclusion(Node, Long, String, String, Action)}
+     * Test method {@link OutboundNatService#programIpRewriteExclusion(Long, String, String, Action)}
      */
     @Test
     public void testProgramIpRewriteExclusion() throws Exception {
-        assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.SUCCESS), outboundNatService.programIpRewriteExclusion(mock(Node.class), Long.valueOf(123), SEGMENTATION_ID, HOST_ADDRESS_PREFIX, Action.ADD));
+        assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.SUCCESS), outboundNatService.programIpRewriteExclusion(Long.valueOf(123), SEGMENTATION_ID, HOST_ADDRESS_PREFIX, Action.ADD));
         verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
         verify(readWriteTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
-        assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.SUCCESS), outboundNatService.programIpRewriteExclusion(mock(Node.class), Long.valueOf(123), SEGMENTATION_ID, HOST_ADDRESS_PREFIX, Action.DELETE));
+        assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.SUCCESS), outboundNatService.programIpRewriteExclusion(Long.valueOf(123), SEGMENTATION_ID, HOST_ADDRESS_PREFIX, Action.DELETE));
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
         verify(readWriteTransaction, times(1)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above

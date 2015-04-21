@@ -65,7 +65,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
     private void notifyNodeAdded(Node node) {
         Set<OvsdbInventoryListener> mdsalConsumerListeners = OvsdbInventoryServiceImpl.getMdsalConsumerListeners();
         for (OvsdbInventoryListener mdsalConsumerListener : mdsalConsumerListeners) {
-            mdsalConsumerListener.ovsdbNodeAdded(inventoryNodeFromTopology(node));
+            mdsalConsumerListener.ovsdbNodeAdded(node);
         }
     }
 

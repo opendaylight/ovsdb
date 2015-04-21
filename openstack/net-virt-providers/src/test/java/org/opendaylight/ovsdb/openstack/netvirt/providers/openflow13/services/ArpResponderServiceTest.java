@@ -71,14 +71,14 @@ public class ArpResponderServiceTest {
         when(mdsalConsumer.getDataBroker()).thenReturn(dataBroker);
 
         // test for Action.ADD
-        assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.SUCCESS), arpResponderService.programStaticArpEntry(mock(Node.class), Long.valueOf(12), "2", MAC_ADDRESS, ipAddress, Action.ADD));
+        assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.SUCCESS), arpResponderService.programStaticArpEntry(Long.valueOf(12), "2", MAC_ADDRESS, ipAddress, Action.ADD));
 
         verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
         verify(readWriteTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         // test other Action, here Action.DELETE
-        assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.SUCCESS), arpResponderService.programStaticArpEntry(mock(Node.class), Long.valueOf(12), "2", MAC_ADDRESS, ipAddress, Action.DELETE));
+        assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.SUCCESS), arpResponderService.programStaticArpEntry(Long.valueOf(12), "2", MAC_ADDRESS, ipAddress, Action.DELETE));
 
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
         verify(commitFuture, times(2)).get(); // 1 + 1 above

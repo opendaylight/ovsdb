@@ -38,7 +38,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+//import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 
 import com.google.common.collect.Lists;
@@ -53,7 +53,7 @@ public class RoutingService extends AbstractServiceInstance implements RoutingPr
     }
 
     @Override
-    public Status programRouterInterface(Node node, Long dpid, String sourceSegId, String destSegId, String macAddress,
+    public Status programRouterInterface(Long dpid, String sourceSegId, String destSegId, String macAddress,
                                          InetAddress address, int mask, Action action) {
 
         String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpid;
@@ -130,7 +130,7 @@ public class RoutingService extends AbstractServiceInstance implements RoutingPr
     }
 
     @Override
-    public Status programDefaultRouteEntry(Node node, Long dpid, String segmentationId, String macAddress,
+    public Status programDefaultRouteEntry(Long dpid, String segmentationId, String macAddress,
                                            InetAddress nextHop, Action action) {
 
         String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpid;

@@ -27,7 +27,7 @@ import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.ovsdb.utils.mdsal.node.StringConvertor;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
@@ -303,12 +303,12 @@ public class NeutronL3Adapter {
 
         if (actionForNode == Action.DELETE && isProgrammed == Boolean.FALSE) {
             logger.trace("programL3ForwardingStage1 for node {} providerId {} mac {} ip {} action {} is already done",
-                         node.getId().getValue(), providerSegmentationId, macAddress, ipStr, actionForNode);
+                         node.getNodeId().getValue(), providerSegmentationId, macAddress, ipStr, actionForNode);
             return;
         }
         if (actionForNode == Action.ADD && isProgrammed == Boolean.TRUE) {
             logger.trace("programL3ForwardingStage1 for node {} providerId {} mac {} ip {} action {} is already done",
-                    node.getId().getValue(), providerSegmentationId, macAddress, ipStr, actionForNode);
+                    node.getNodeId().getValue(), providerSegmentationId, macAddress, ipStr, actionForNode);
             return;
         }
 
@@ -333,7 +333,7 @@ public class NeutronL3Adapter {
             InetAddress inetAddress = InetAddress.getByName(address);
             status = l3ForwardingProvider == null ?
                      new Status(StatusCode.SUCCESS) :
-                     l3ForwardingProvider.programForwardingTableEntry(node, dpid, providerSegmentationId,
+                     l3ForwardingProvider.programForwardingTableEntry(dpid, providerSegmentationId,
                                                                       inetAddress, macAddress, actionForNode);
         } catch (UnknownHostException e) {
             status = new Status(StatusCode.BADREQUEST);
@@ -406,7 +406,7 @@ public class NeutronL3Adapter {
                 final String ipStr = neutronIP.getIpAddress();
                 if (ipStr.isEmpty()) {
                     logger.debug("programFlowsForNeutronRouterInterface is skipping node {} ip {}",
-                            node.getId().getValue(), ipStr);
+                            node.getNodeId().getValue(), ipStr);
                     continue;
                 }
 
@@ -548,14 +548,14 @@ public class NeutronL3Adapter {
         if (actionForNode == Action.DELETE && isProgrammed == Boolean.FALSE) {
             logger.trace("programRouterInterfaceStage1 for node {} sourceSegId {} destSegId {} mac {} ip {} mask {}" +
                          "action {} is already done",
-                         node.getId().getValue(), sourceSegmentationId, destinationSegmentationId,
+                         node.getNodeId().getValue(), sourceSegmentationId, destinationSegmentationId,
                          ipStr, mask, actionForNode);
             return;
         }
         if (actionForNode == Action.ADD && isProgrammed == Boolean.TRUE) {
             logger.trace("programRouterInterfaceStage1 for node {} sourceSegId {} destSegId {} mac {} ip {} mask {}" +
                          "action {} is already done",
-                         node.getId().getValue(), sourceSegmentationId, destinationSegmentationId,
+                         node.getNodeId().getValue(), sourceSegmentationId, destinationSegmentationId,
                          ipStr, mask, actionForNode);
             return;
         }
@@ -584,7 +584,7 @@ public class NeutronL3Adapter {
             InetAddress inetAddress = InetAddress.getByName(address);
             status = routingProvider == null ?
                      new Status(StatusCode.SUCCESS) :
-                     routingProvider.programRouterInterface(node, dpid, sourceSegmentationId, destinationSegmentationId,
+                     routingProvider.programRouterInterface(dpid, sourceSegmentationId, destinationSegmentationId,
                                                             macAddress, inetAddress, mask, actionForNode);
         } catch (UnknownHostException e) {
             status = new Status(StatusCode.BADREQUEST);
@@ -612,12 +612,12 @@ public class NeutronL3Adapter {
 
         if (actionForNode == Action.DELETE && isProgrammed == Boolean.FALSE) {
             logger.trace("programStaticArpStage1 node {} providerId {} mac {} ip {} action {} is already done",
-                    node.getId().getValue(), providerSegmentationId, macAddress, ipStr, actionForNode);
+                    node.getNodeId().getValue(), providerSegmentationId, macAddress, ipStr, actionForNode);
             return;
         }
         if (actionForNode == Action.ADD && isProgrammed == Boolean.TRUE) {
             logger.trace("programStaticArpStage1 node {} providerId {} mac {} ip {} action {} is already done",
-                    node.getId().getValue(), providerSegmentationId, macAddress, ipStr, actionForNode);
+                    node.getNodeId().getValue(), providerSegmentationId, macAddress, ipStr, actionForNode);
             return;
         }
 
@@ -642,7 +642,7 @@ public class NeutronL3Adapter {
             InetAddress inetAddress = InetAddress.getByName(address);
             status = arpProvider == null ?
                      new Status(StatusCode.SUCCESS) :
-                     arpProvider.programStaticArpEntry(node, dpid, providerSegmentationId,
+                     arpProvider.programStaticArpEntry(dpid, providerSegmentationId,
                                                        macAddress, inetAddress, actionForNode);
         } catch (UnknownHostException e) {
             status = new Status(StatusCode.BADREQUEST);
@@ -672,13 +672,13 @@ public class NeutronL3Adapter {
 
         if (actionForRewriteExclusion == Action.DELETE && isProgrammed == Boolean.FALSE) {
             logger.trace("programIpRewriteExclusionStage1 node {} providerId {} {} cidr {} action {} is already done",
-                         node.getId().getValue(), providerSegmentationId, isInbound ? "inbound" : "outbound", cidr,
+                         node.getNodeId().getValue(), providerSegmentationId, isInbound ? "inbound" : "outbound", cidr,
                          actionForRewriteExclusion);
             return;
         }
         if (actionForRewriteExclusion == Action.ADD && isProgrammed == Boolean.TRUE) {
             logger.trace("programIpRewriteExclusionStage1 node {} providerId {} {} cidr {} action {} is already done",
-                         node.getId().getValue(), providerSegmentationId, isInbound ? "inbound" : "outbound", cidr,
+                         node.getNodeId().getValue(), providerSegmentationId, isInbound ? "inbound" : "outbound", cidr,
                          actionForRewriteExclusion);
             return;
         }
@@ -708,11 +708,11 @@ public class NeutronL3Adapter {
         Status status;
         if (isInbound) {
             status = inboundNatProvider == null ? new Status(StatusCode.SUCCESS) :
-                     inboundNatProvider.programIpRewriteExclusion(node, dpid, providerSegmentationId, cidr,
+                     inboundNatProvider.programIpRewriteExclusion(dpid, providerSegmentationId, cidr,
                                                                   actionForNode);
         } else {
             status = outboundNatProvider == null ? new Status(StatusCode.SUCCESS) :
-                     outboundNatProvider.programIpRewriteExclusion(node, dpid, providerSegmentationId, cidr,
+                     outboundNatProvider.programIpRewriteExclusion(dpid, providerSegmentationId, cidr,
                                                                    actionForNode);
         }
 
@@ -739,13 +739,13 @@ public class NeutronL3Adapter {
 
         if (actionForNodeDefaultRoute == Action.DELETE && isProgrammed == Boolean.FALSE) {
             logger.trace("programDefaultRouteStage1 node {} providerId {} mac {} gw {} action {} is already done",
-                         node.getId().getValue(), providerSegmentationId, defaultGatewayMacAddress, gatewayIp,
+                         node.getNodeId().getValue(), providerSegmentationId, defaultGatewayMacAddress, gatewayIp,
                          actionForNodeDefaultRoute);
             return;
         }
         if (actionForNodeDefaultRoute == Action.ADD && isProgrammed == Boolean.TRUE) {
             logger.trace("programDefaultRouteStage1 node {} providerId {} mac {} gw {} action {} is already done",
-                         node.getId().getValue(), providerSegmentationId, defaultGatewayMacAddress, gatewayIp,
+                         node.getNodeId().getValue(), providerSegmentationId, defaultGatewayMacAddress, gatewayIp,
                          actionForNodeDefaultRoute);
             return;
         }
@@ -778,7 +778,7 @@ public class NeutronL3Adapter {
             InetAddress inetAddress = InetAddress.getByName(gatewayIp);
             status = routingProvider == null ?
                      new Status(StatusCode.SUCCESS) :
-                     routingProvider.programDefaultRouteEntry(node, dpid, providerSegmentationId,
+                     routingProvider.programDefaultRouteEntry(dpid, providerSegmentationId,
                                                               defaultGatewayMacAddress, inetAddress,
                                                               actionForNodeDefaultRoute);
         } catch (UnknownHostException e) {
@@ -863,14 +863,14 @@ public class NeutronL3Adapter {
         if (actionForNode == Action.DELETE && isProgrammed == Boolean.FALSE) {
             logger.trace("programIpRewriteStage1 node {} providerId {} {} matchAddr {} rewriteAddr {} action {}" +
                          " is already done",
-                         node.getId().getValue(), providerSegmentationId, isInbound ? "inbound": "outbound",
+                         node.getNodeId().getValue(), providerSegmentationId, isInbound ? "inbound": "outbound",
                          matchAddress, rewriteAddress, actionForNode);
             return;
         }
         if (actionForNode == Action.ADD && isProgrammed == Boolean.TRUE) {
             logger.trace("programIpRewriteStage1 node {} providerId {} {} matchAddr {} rewriteAddr {} action {}" +
                          " is already done",
-                         node.getId().getValue(), providerSegmentationId, isInbound ? "inbound": "outbound",
+                         node.getNodeId().getValue(), providerSegmentationId, isInbound ? "inbound": "outbound",
                          matchAddress, rewriteAddress, actionForNode);
             return;
         }
@@ -906,12 +906,12 @@ public class NeutronL3Adapter {
             if (isInbound) {
                 status = inboundNatProvider == null ?
                          new Status(StatusCode.SUCCESS) :
-                         inboundNatProvider.programIpRewriteRule(node, dpid, providerSegmentationId,
+                         inboundNatProvider.programIpRewriteRule(dpid, providerSegmentationId,
                                                                  inetMatchAddress, inetRewriteAddress, actionForNode);
             } else {
                 status = outboundNatProvider == null ?
                          new Status(StatusCode.SUCCESS) :
-                         outboundNatProvider.programIpRewriteRule(node, dpid, providerSegmentationId,
+                         outboundNatProvider.programIpRewriteRule(dpid, providerSegmentationId,
                                                                   inetMatchAddress, inetRewriteAddress, actionForNode);
             }
         } catch (UnknownHostException e) {

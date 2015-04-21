@@ -31,7 +31,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.M
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +50,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
     }
 
     @Override
-    public void programPortSecurityACL(Node node, Long dpid, String segmentationId, String attachedMac, long localPort,
+    public void programPortSecurityACL(Long dpid, String segmentationId, String attachedMac, long localPort,
                                        NeutronSecurityGroup securityGroup) {
 
         logger.trace("programLocalBridgeRulesWithSec neutronSecurityGroup: {} ", securityGroup);

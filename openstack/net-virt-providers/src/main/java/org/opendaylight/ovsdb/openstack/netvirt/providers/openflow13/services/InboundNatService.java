@@ -32,7 +32,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.M
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+//import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 
 import com.google.common.collect.Lists;
@@ -47,7 +47,7 @@ public class InboundNatService extends AbstractServiceInstance implements Inboun
     }
 
     @Override
-    public Status programIpRewriteRule(Node node, Long dpid, String segmentationId, InetAddress matchAddress,
+    public Status programIpRewriteRule(Long dpid, String segmentationId, InetAddress matchAddress,
                                        InetAddress rewriteAddress, Action action) {
         String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpid;
 
@@ -100,7 +100,7 @@ public class InboundNatService extends AbstractServiceInstance implements Inboun
     }
 
     @Override
-    public Status programIpRewriteExclusion(Node node, Long dpid, String segmentationId, String excludedCidr,
+    public Status programIpRewriteExclusion(Long dpid, String segmentationId, String excludedCidr,
                                             Action action) {
         String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpid;
 

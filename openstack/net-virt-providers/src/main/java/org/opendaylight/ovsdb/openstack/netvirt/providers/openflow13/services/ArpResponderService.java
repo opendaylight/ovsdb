@@ -38,7 +38,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+//import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
 
@@ -54,7 +54,7 @@ public class ArpResponderService extends AbstractServiceInstance implements ArpP
     }
 
     @Override
-    public Status programStaticArpEntry(Node node, Long dpid, String segmentationId, String macAddressStr,
+    public Status programStaticArpEntry(Long dpid, String segmentationId, String macAddressStr,
                                         InetAddress ipAddress, Action action) {
 
         String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpid;

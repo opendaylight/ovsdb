@@ -10,8 +10,6 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-
 import java.net.InetAddress;
 
 /**
@@ -19,10 +17,10 @@ import java.net.InetAddress;
  */
 public interface RoutingProvider {
 
-    Status programRouterInterface(Node node, Long dpid, String srcSegId, String dstSegId, String macAddress,
+    Status programRouterInterface(Long dpid, String srcSegId, String dstSegId, String macAddress,
                                   InetAddress address, int mask, Action action);
 
-    Status programDefaultRouteEntry(Node node, Long dpid, String segmentationId, String macAddress,
+    Status programDefaultRouteEntry(Long dpid, String segmentationId, String macAddress,
                                     InetAddress nextHop, Action action);
 
 }

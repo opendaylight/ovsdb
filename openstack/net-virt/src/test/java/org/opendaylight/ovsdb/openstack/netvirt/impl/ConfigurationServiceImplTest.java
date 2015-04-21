@@ -29,8 +29,8 @@ import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -80,10 +80,12 @@ public class ConfigurationServiceImplTest {
         NodeId nodeId = mock(NodeId.class);
         PowerMockito.mockStatic(ConfigProperties.class);
 
-        when(node.getId()).thenReturn(nodeId);
+        when(node.getNodeId()).thenReturn(nodeId);
         when(nodeId.getValue()).thenReturn("nodeIdValue");
-        PowerMockito.when(ConfigProperties.getProperty(configurationServiceImpl.getClass(), "ovsdb.l3gateway.mac." + node.getId().getValue())).thenReturn("gateway");
+        PowerMockito.when(ConfigProperties.getProperty(configurationServiceImpl.getClass(),
+                "ovsdb.l3gateway.mac." + node.getNodeId().getValue())).thenReturn("gateway");
 
-        assertEquals("Error, did not return the defaultGatewayMacAddress of the node", "gateway", configurationServiceImpl.getDefaultGatewayMacAddress(node));
+        assertEquals("Error, did not return the defaultGatewayMacAddress of the node", "gateway",
+                configurationServiceImpl.getDefaultGatewayMacAddress(node));
     }
 }

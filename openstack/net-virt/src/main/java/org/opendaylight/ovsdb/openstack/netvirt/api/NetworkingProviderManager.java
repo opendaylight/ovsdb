@@ -10,18 +10,18 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 /**
- * The NetworkingProviderManager handles the mapping between {@link org.opendaylight.controller.sal.core.Node}
+ * The NetworkingProviderManager handles the mapping between {@Node}
  * and registered {@link org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider} implementations
  */
 public interface NetworkingProviderManager {
     /**
      * Returns the Networking Provider for a given node
-     * @param node a {@link org.opendaylight.controller.sal.core.Node}
+     * @param ovsdbNode a {@link Node}
      * @return a NetworkProvider
      * @see NetworkingProvider
      */
-    NetworkingProvider getProvider(Node node);
+    NetworkingProvider getProvider(Node ovsdbNode);
 }

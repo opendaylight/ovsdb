@@ -21,8 +21,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.MdsalConsumer;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -182,9 +181,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     @Override
     public String getDefaultGatewayMacAddress(Node node) {
+        /* TODO SB_MIGRATION */
         final String l3gatewayForNode =
             node != null ?
-            ConfigProperties.getProperty(this.getClass(), "ovsdb.l3gateway.mac." + node.getId().getValue()) : null;
+            ConfigProperties.getProperty(this.getClass(), "ovsdb.l3gateway.mac." + node.getNodeId().getValue()) : null;
         return l3gatewayForNode != null ?
                l3gatewayForNode : ConfigProperties.getProperty(this.getClass(), "ovsdb.l3gateway.mac");
     }

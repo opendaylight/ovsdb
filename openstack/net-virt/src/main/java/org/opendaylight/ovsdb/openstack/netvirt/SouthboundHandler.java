@@ -22,7 +22,7 @@ import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.utils.mdsal.node.StringConvertor;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -361,17 +361,21 @@ public class SouthboundHandler extends AbstractHandler
     /**
      * Notification about an OpenFlow Node
      *
-     * @param openFlowNode the {@link org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node Node} of interest in the notification
+     * @param openFlowNode the {@link Node Node} of interest in the notification
      * @param action the {@link Action}
      * @see NodeCacheListener#notifyNode
      */
     @Override
-    public void notifyNode (Node openFlowNode, Action action) {
+    public void notifyNode (org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node openFlowNode,
+                            Action action) {
         logger.info("notifyNode: Node {} update {} from Controller's inventory Service",
                 openFlowNode, action);
 
         if (action.equals(Action.ADD)) {
-            networkingProviderManager.getProvider(openFlowNode).initializeOFFlowRules(openFlowNode);
+            /* TODO SB_MIGRATION
+             * Need to map from ovsdbNode to openflowNode
+             */
+            //networkingProviderManager.getProvider(ovsdbNode).initializeOFFlowRules(openFlowNode);
         }
     }
 }

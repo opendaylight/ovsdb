@@ -13,6 +13,9 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.ovsdb.southbound.SouthboundMapper;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,10 +34,21 @@ public class MdsalUtils {
      *
      * @param dataBroker the {@link org.opendaylight.controller.md.sal.binding.api.DataBroker}
      */
-    public MdsalUtils (DataBroker dataBroker) {
+    public MdsalUtils(DataBroker dataBroker) {
         this.databroker = dataBroker;
     }
-
+/*
+    public static Node createNode(String nodeId) {
+            String[] pair = identifier.split("\\|");
+            if ((pair.length > 1) && (pair[0].equals("OVS"))) {
+                id = pair[1];
+            }
+            return id;
+        }
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        SouthboundMapper.createNode(connectionInfo);
+    }
+*/
     /**
      * Executes read transaction as a test2.
      *

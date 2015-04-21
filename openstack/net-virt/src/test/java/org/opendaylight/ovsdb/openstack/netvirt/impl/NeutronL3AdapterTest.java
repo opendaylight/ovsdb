@@ -48,8 +48,8 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -172,7 +172,7 @@ public class NeutronL3AdapterTest {
         when(tenantNetworkManager.isTenantNetworkPresentInNode(any(Node.class), anyString())).thenReturn(false);
         when(tenantNetworkManager.isTenantNetworkPresentInNode(any(Node.class), anyString())).thenReturn(true);
 
-        when(node.getId()).thenReturn(nodeID);
+        when(node.getNodeId()).thenReturn(nodeID);
 
         when(nodeID.getValue()).thenReturn("nodeId");
 

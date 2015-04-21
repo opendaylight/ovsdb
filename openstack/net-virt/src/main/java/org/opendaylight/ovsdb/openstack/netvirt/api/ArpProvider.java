@@ -10,8 +10,6 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-
 import java.net.InetAddress;
 
 /**
@@ -19,7 +17,7 @@ import java.net.InetAddress;
  */
 public interface ArpProvider {
 
-    Status programStaticArpEntry(Node node, Long dpid, String segmentationId,
+    Status programStaticArpEntry(Long dpid, String segmentationId,
                                  String macAddress, InetAddress ipAddress, Action action);
 
 }

@@ -10,7 +10,6 @@
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
 import org.opendaylight.neutron.spi.NeutronSecurityGroup;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 
 /**
  *  This interface allows ingress Port Security flows to be written to devices
@@ -27,6 +26,6 @@ public interface IngressAclProvider {
      * @param localPort the local port
      * @param securityGroup the security group
      */
-    public void programPortSecurityACL(Node node, Long dpid, String segmentationId, String attachedMac,
+    public void programPortSecurityACL(Long dpid, String segmentationId, String attachedMac,
             long localPort, NeutronSecurityGroup securityGroup);
 }

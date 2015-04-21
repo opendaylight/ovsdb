@@ -12,7 +12,7 @@ package org.opendaylight.ovsdb.openstack.netvirt.api;
 
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 /**
  * The NetworkingProvider interface is implemented by Neutron Networking Providers
@@ -60,7 +60,7 @@ public interface NetworkingProvider {
     /**
      * Initialize the Flow rules for a given OpenFlow node
      */
-    public void initializeOFFlowRules(Node openflowNode);
+    public void initializeOFFlowRules(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node openflowNode);
 
     /**
      * Generate event to announce flow capable node.

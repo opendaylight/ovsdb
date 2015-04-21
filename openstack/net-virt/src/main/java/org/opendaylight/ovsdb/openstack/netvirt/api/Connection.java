@@ -10,10 +10,7 @@
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
 import org.opendaylight.ovsdb.lib.OvsdbClient;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,18 +31,7 @@ public class Connection {
 
     private static final Logger logger = LoggerFactory.getLogger(Connection.class);
 
-    public Connection(String identifier, OvsdbClient client) {
-        super();
-
-        this.identifier = identifier;
-        this.client = client;
-        this.idCounter = 0L;
-        NodeId nodeId = new NodeId("OVS" + "|" + identifier);
-        NodeKey nodeKey = new NodeKey(nodeId);
-        node = new NodeBuilder()
-                .setId(nodeId)
-                .setKey(nodeKey)
-                .build();
+    public Connection(String identifier) {
     }
 
     public String getIdentifier() {

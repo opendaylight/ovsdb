@@ -100,7 +100,7 @@ public class EgressAclServiceTest {
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(1);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn(HOST_ADDRESS);
 
-        egressAclServiceSpy.programPortSecurityACL(mock(Node.class), Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup);
+        egressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup);
         verify(egressAclServiceSpy, times(1)).egressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
         verify(egressAclServiceSpy, times(1)).egressACLTcpPortWithPrefix(anyLong(), anyString(), anyString(), anyBoolean(), anyInt(), anyString(), anyInt());
         verify(readWriteTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
@@ -118,7 +118,7 @@ public class EgressAclServiceTest {
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(1);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn(HOST_ADDRESS);
 
-        egressAclServiceSpy.programPortSecurityACL(mock(Node.class), Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup);
+        egressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup);
         verify(egressAclServiceSpy, times(1)).egressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
         verify(egressAclServiceSpy, times(1)).egressACLTcpPortWithPrefix(anyLong(), anyString(), anyString(), anyBoolean(), anyInt(), anyString(), anyInt());
         verify(readWriteTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
@@ -136,7 +136,7 @@ public class EgressAclServiceTest {
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(null);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn(HOST_ADDRESS);
 
-        egressAclServiceSpy.programPortSecurityACL(mock(Node.class), Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup);
+        egressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup);
         verify(egressAclServiceSpy, times(1)).egressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
         verify(egressAclServiceSpy, times(1)).egressACLPermitAllProto(anyLong(), anyString(), anyString(), anyBoolean(), anyString(), anyInt());
         verify(readWriteTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
@@ -154,7 +154,7 @@ public class EgressAclServiceTest {
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(null);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn(HOST_ADDRESS);
 
-        egressAclServiceSpy.programPortSecurityACL(mock(Node.class), Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup);
+        egressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup);
         verify(egressAclServiceSpy, times(1)).egressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
         verify(egressAclServiceSpy, times(1)).egressACLPermitAllProto(anyLong(), anyString(), anyString(), anyBoolean(), anyString(), anyInt());
         verify(readWriteTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
@@ -172,7 +172,7 @@ public class EgressAclServiceTest {
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(1);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn(null);
 
-        egressAclServiceSpy.programPortSecurityACL(mock(Node.class), Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup);
+        egressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup);
         verify(egressAclServiceSpy, times(1)).egressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
         verify(egressAclServiceSpy, times(1)).egressACLTcpSyn(anyLong(), anyString(), anyString(), anyBoolean(), anyInt(), anyInt());
         verify(readWriteTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
@@ -190,7 +190,7 @@ public class EgressAclServiceTest {
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(1);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn(null);
 
-        egressAclServiceSpy.programPortSecurityACL(mock(Node.class), Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup);
+        egressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup);
         verify(egressAclServiceSpy, times(1)).egressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
         verify(egressAclServiceSpy, times(1)).egressACLTcpSyn(anyLong(), anyString(), anyString(), anyBoolean(), anyInt(), anyInt());
         verify(readWriteTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
@@ -208,7 +208,7 @@ public class EgressAclServiceTest {
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(null);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn(null);
 
-        egressAclServiceSpy.programPortSecurityACL(mock(Node.class), Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup);
+        egressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup);
         verify(egressAclServiceSpy, times(1)).egressAllowProto(anyLong(), anyString(), anyString(), anyBoolean(), anyString(), anyInt());
         verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
         verify(readWriteTransaction, times(1)).submit();

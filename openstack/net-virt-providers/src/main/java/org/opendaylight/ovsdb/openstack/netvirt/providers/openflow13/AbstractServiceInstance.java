@@ -41,6 +41,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
+//import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
@@ -90,9 +91,9 @@ public abstract class AbstractServiceInstance {
 
     private String getBridgeName(String nodeId){
         /* TODO SB_MIGRATION */
-        List<Node> ovsNodes = connectionService.getNodes();
+        List<org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node> ovsNodes = connectionService.getNodes();
 
-        for (Node ovsNode : ovsNodes) {
+        for (org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node ovsNode : ovsNodes) {
             Map<String, Row> bridges = ovsdbConfigService.getRows(ovsNode, ovsdbConfigService.getTableName(ovsNode, Bridge.class));
             if (bridges == null) continue;
             for (String brUuid : bridges.keySet()) {
@@ -105,7 +106,7 @@ public abstract class AbstractServiceInstance {
                 if (dpid.equals(Long.parseLong(nodeId))){
                     // Found the bridge
                     logger.debug("getOvsNode: found ovsNode {} bridge {} for ofNode {}",
-                            ovsNode.getId().getValue(), bridge.getName(), nodeId);
+                            ovsNode.getNodeId().getValue(), bridge.getName(), nodeId);
                     return bridge.getName();
                 }
             }
@@ -134,7 +135,8 @@ public abstract class AbstractServiceInstance {
 
     private static final InstanceIdentifier<Flow> createFlowPath(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
         return InstanceIdentifier.builder(Nodes.class)
-                .child(Node.class, nodeBuilder.getKey())
+                .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class,
+                        nodeBuilder.getKey())
                 .augmentation(FlowCapableNode.class)
                 .child(Table.class, new TableKey(flowBuilder.getTableId()))
                 .child(Flow.class, flowBuilder.getKey()).build();

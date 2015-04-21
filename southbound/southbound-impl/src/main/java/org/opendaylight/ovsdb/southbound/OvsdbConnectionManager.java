@@ -80,7 +80,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     }
 
     public void disconnect(OvsdbNodeAugmentation ovsdbNode) throws UnknownHostException {
-        OvsdbClient client = clients.get(ovsdbNode.getConnectionInfo());
+        OvsdbClient client = clients.get(SouthboundMapper.createConnectionInfo(ovsdbNode));
         if (client != null) {
             client.disconnect();
         }

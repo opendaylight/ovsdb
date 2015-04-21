@@ -14,6 +14,7 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfi
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 
 import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.ObjectArrays;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -41,17 +42,34 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.InterfaceTypeEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceOtherConfigs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceOtherConfigsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.OptionsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIdsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortOtherConfigs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortOtherConfigsBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -386,6 +404,37 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         return protocolList;
     }
 
+    private OvsdbTerminationPointAugmentationBuilder createGenericOvsdbTerminationPointAugmentationBuilder() {
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointAugmentationBuilder =
+                new OvsdbTerminationPointAugmentationBuilder();
+        ovsdbTerminationPointAugmentationBuilder.setInterfaceType(
+                new InterfaceTypeEntryBuilder()
+                .setInterfaceType(
+                        SouthboundMapper.createInterfaceType("internal"))
+                        .build().getInterfaceType());
+        return ovsdbTerminationPointAugmentationBuilder;
+    }
+
+    private boolean addTerminationPoint(NodeId bridgeNodeId, String portName,
+            OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointAugmentationBuilder)
+        throws InterruptedException {
+
+        InstanceIdentifier<Node> portIid = SouthboundMapper.createInstanceIdentifier(bridgeNodeId);
+        NodeBuilder portNodeBuilder = new NodeBuilder();
+        NodeId portNodeId = SouthboundMapper.createManagedNodeId(portIid);
+        portNodeBuilder.setNodeId(portNodeId);
+        TerminationPointBuilder entry = new TerminationPointBuilder();
+        entry.setKey(new TerminationPointKey(new TpId(portName)));
+        entry.addAugmentation(
+                OvsdbTerminationPointAugmentation.class,
+                ovsdbTerminationPointAugmentationBuilder.build());
+        portNodeBuilder.setTerminationPoint(Lists.newArrayList(entry.build()));
+        boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
+                portIid, portNodeBuilder.build());
+        Thread.sleep(OVSDB_UPDATE_TIMEOUT);
+        return result;
+    }
+
     private boolean addBridge(ConnectionInfo connectionInfo, String bridgeName) throws InterruptedException {
         //Node node = SouthboundMapper.createNode(connectionInfo);
         NodeBuilder bridgeNodeBuilder = new NodeBuilder();
@@ -443,6 +492,317 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         //Assert.assertFalse(disconnectOvsdbNode(connectionInfo));
         Assume.assumeTrue(disconnectOvsdbNode(connectionInfo));
+    }
+
+    @Test
+    public void testTerminationPointOfPort() throws InterruptedException {
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        connectOvsdbNode(connectionInfo);
+
+        Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
+        OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
+        Assert.assertNotNull(bridge);
+        LOG.info("bridge: {}", bridge);
+        NodeId nodeId = SouthboundMapper.createManagedNodeId(SouthboundMapper.createInstanceIdentifier(
+                connectionInfo, bridge.getBridgeName()));
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
+                createGenericOvsdbTerminationPointAugmentationBuilder();
+        String portName = "testOfPort";
+        ovsdbTerminationBuilder.setName(portName);
+        Long ofPortExpected = new Long(45002);
+        ovsdbTerminationBuilder.setOfport(ofPortExpected);
+        Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
+        InstanceIdentifier<Node> terminationPointIid =
+                SouthboundMapper.createInstanceIdentifier(connectionInfo,
+                bridge.getBridgeName());
+        Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
+
+        List<TerminationPoint> terminationPoints = terminationPointNode.getTerminationPoint();
+        for (TerminationPoint terminationPoint : terminationPoints) {
+            OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
+                    terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
+            if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
+                Long ofPort = ovsdbTerminationPointAugmentation.getOfport();
+                // if ephemeral port 45002 is in use, ofPort is set to 1
+                Assert.assertTrue(ofPort.equals(ofPortExpected) || ofPort.equals(new Long(1)));
+                LOG.info("ofPort: {}", ofPort);
+            }
+        }
+        Assert.assertTrue(deleteBridge(connectionInfo));
+    }
+
+    @Test
+    public void testTerminationPointOfPortRequest() throws InterruptedException {
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        connectOvsdbNode(connectionInfo);
+        Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
+        OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
+        Assert.assertNotNull(bridge);
+        NodeId nodeId = SouthboundMapper.createManagedNodeId(SouthboundMapper.createInstanceIdentifier(
+                connectionInfo, bridge.getBridgeName()));
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
+                createGenericOvsdbTerminationPointAugmentationBuilder();
+        String portName = "testOfPortRequest";
+        ovsdbTerminationBuilder.setName(portName);
+        Long ofPortExpected = new Long(45008);
+        Integer ofPortRequestExpected = ofPortExpected.intValue();
+        Long ofPortInput = new Long(45008);
+        ovsdbTerminationBuilder.setOfport(ofPortInput);
+        ovsdbTerminationBuilder.setOfportRequest(ofPortRequestExpected);
+        Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
+        InstanceIdentifier<Node> terminationPointIid =
+                SouthboundMapper.createInstanceIdentifier(connectionInfo,
+                new OvsdbBridgeName(SouthboundITConstants.BRIDGE_NAME));
+        Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
+
+        List<TerminationPoint> terminationPoints = terminationPointNode.getTerminationPoint();
+        for (TerminationPoint terminationPoint : terminationPoints) {
+            OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
+                    terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
+            if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
+                Long ofPort = ovsdbTerminationPointAugmentation.getOfport();
+                // if ephemeral port 45002 is in use, ofPort is set to 1
+                Assert.assertTrue(ofPort.equals(ofPortExpected) || ofPort.equals(new Long(1)));
+                LOG.info("ofPort: {}", ofPort);
+
+                Integer ofPortRequest = ovsdbTerminationPointAugmentation.getOfportRequest();
+                Assert.assertTrue(ofPortRequest.equals(ofPortRequestExpected));
+                LOG.info("ofPortRequest: {}", ofPortRequest);
+            }
+        }
+        Assert.assertTrue(deleteBridge(connectionInfo));
+    }
+
+    @Test
+    public void testTerminationPointPortExternalIds() throws InterruptedException {
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        connectOvsdbNode(connectionInfo);
+        Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
+        OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
+        Assert.assertNotNull(bridge);
+        NodeId nodeId = SouthboundMapper.createManagedNodeId(SouthboundMapper.createInstanceIdentifier(
+                connectionInfo, bridge.getBridgeName()));
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
+                createGenericOvsdbTerminationPointAugmentationBuilder();
+        String portName = "testPortExternalIds";
+        ovsdbTerminationBuilder.setName(portName);
+        //setup
+        PortExternalIdsBuilder externalIdsBuilder1 = new PortExternalIdsBuilder();
+        externalIdsBuilder1.setExternalIdKey("portExternalIdKey1");
+        externalIdsBuilder1.setExternalIdValue("portExternalIdValue1");
+        PortExternalIdsBuilder externalIdsBuilder2 = new PortExternalIdsBuilder();
+        externalIdsBuilder2.setExternalIdKey("portExternalIdKey2");
+        externalIdsBuilder2.setExternalIdValue("portExternalIdValue2");
+        List<PortExternalIds> portExternalIds = Lists.newArrayList(externalIdsBuilder1.build(),
+                externalIdsBuilder2.build());
+        ovsdbTerminationBuilder.setPortExternalIds(portExternalIds);
+
+        Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
+        InstanceIdentifier<Node> terminationPointIid =
+                SouthboundMapper.createInstanceIdentifier(connectionInfo,
+                bridge.getBridgeName());
+        Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
+
+        List<TerminationPoint> terminationPoints = terminationPointNode.getTerminationPoint();
+        for (TerminationPoint terminationPoint : terminationPoints) {
+            OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
+                    terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
+            if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
+                List<PortExternalIds> actualPortExternalIds = ovsdbTerminationPointAugmentation.getPortExternalIds();
+                Assert.assertTrue((portExternalIds.size() == actualPortExternalIds.size()));
+                for (PortExternalIds portExternalId : portExternalIds) {
+                    Assert.assertTrue(actualPortExternalIds.contains(portExternalId));
+                }
+            }
+        }
+        Assert.assertTrue(deleteBridge(connectionInfo));
+    }
+
+    @Test
+    public void testTerminationPointInterfaceExternalIds() throws InterruptedException {
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        connectOvsdbNode(connectionInfo);
+        Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
+        OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
+        Assert.assertNotNull(bridge);
+        NodeId nodeId = SouthboundMapper.createManagedNodeId(SouthboundMapper.createInstanceIdentifier(
+                connectionInfo, bridge.getBridgeName()));
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
+                createGenericOvsdbTerminationPointAugmentationBuilder();
+        String portName = "testInterfaceExternalIds";
+        ovsdbTerminationBuilder.setName(portName);
+        //setup
+        InterfaceExternalIdsBuilder externalIdsBuilder1 = new InterfaceExternalIdsBuilder();
+        externalIdsBuilder1.setExternalIdKey("interfaceExternalIdKey1");
+        externalIdsBuilder1.setExternalIdValue("interfaceExternalIdValue1");
+        InterfaceExternalIdsBuilder externalIdsBuilder2 = new InterfaceExternalIdsBuilder();
+        externalIdsBuilder2.setExternalIdKey("interfaceExternalIdKey2");
+        externalIdsBuilder2.setExternalIdValue("interfaceExternalIdValue2");
+        List<InterfaceExternalIds> interfaceExternalIds = Lists.newArrayList(externalIdsBuilder1.build(),
+                externalIdsBuilder2.build());
+        ovsdbTerminationBuilder.setInterfaceExternalIds(interfaceExternalIds);
+
+        Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
+        InstanceIdentifier<Node> terminationPointIid =
+                SouthboundMapper.createInstanceIdentifier(connectionInfo,
+                bridge.getBridgeName());
+        Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
+
+        List<TerminationPoint> terminationPoints = terminationPointNode.getTerminationPoint();
+        for (TerminationPoint terminationPoint : terminationPoints) {
+            OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
+                    terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
+            if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
+                List<InterfaceExternalIds> actualInterfaceExternalIds = ovsdbTerminationPointAugmentation.
+                        getInterfaceExternalIds();
+                Assert.assertTrue((interfaceExternalIds.size() == actualInterfaceExternalIds.size()));
+                for (InterfaceExternalIds interfaceExternalId : interfaceExternalIds) {
+                    Assert.assertTrue(actualInterfaceExternalIds.contains(interfaceExternalId));
+                }
+            }
+        }
+        Assert.assertTrue(deleteBridge(connectionInfo));
+    }
+
+    @Test
+    public void testTerminationPointOptions() throws InterruptedException {
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        connectOvsdbNode(connectionInfo);
+        Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
+        OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
+        Assert.assertNotNull(bridge);
+        NodeId nodeId = SouthboundMapper.createManagedNodeId(SouthboundMapper.createInstanceIdentifier(
+                connectionInfo, bridge.getBridgeName()));
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
+                createGenericOvsdbTerminationPointAugmentationBuilder();
+        String portName = "testInterfaceOptions";
+        ovsdbTerminationBuilder.setName(portName);
+        //setup
+        OptionsBuilder optionsBuilder1 = new OptionsBuilder();
+        optionsBuilder1.setOption("option1");
+        optionsBuilder1.setValue("optionValue1");
+        OptionsBuilder optionsBuilder2 = new OptionsBuilder();
+        optionsBuilder2.setOption("option2");
+        optionsBuilder2.setValue("optionValue2");
+        List<Options> options = Lists.newArrayList(optionsBuilder1.build(),
+                optionsBuilder2.build());
+        ovsdbTerminationBuilder.setOptions(options);
+
+        Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
+        InstanceIdentifier<Node> terminationPointIid =
+                SouthboundMapper.createInstanceIdentifier(connectionInfo,
+                bridge.getBridgeName());
+        Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
+
+        List<TerminationPoint> terminationPoints = terminationPointNode.getTerminationPoint();
+        for (TerminationPoint terminationPoint : terminationPoints) {
+            OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
+                    terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
+            if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
+                List<Options> actualOptions = ovsdbTerminationPointAugmentation.
+                        getOptions();
+                Assert.assertTrue((options.size() == actualOptions.size()));
+                for (Options option : options) {
+                    Assert.assertTrue(actualOptions.contains(option));
+                }
+            }
+        }
+        Assert.assertTrue(deleteBridge(connectionInfo));
+    }
+
+    @Test
+    public void testTerminationPointInterfaceOtherConfigs() throws InterruptedException {
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        connectOvsdbNode(connectionInfo);
+        Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
+        OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
+        Assert.assertNotNull(bridge);
+        NodeId nodeId = SouthboundMapper.createManagedNodeId(SouthboundMapper.createInstanceIdentifier(
+                connectionInfo, bridge.getBridgeName()));
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
+                createGenericOvsdbTerminationPointAugmentationBuilder();
+        String portName = "testInterfaceOtherConfigs";
+        ovsdbTerminationBuilder.setName(portName);
+        //setup
+        InterfaceOtherConfigsBuilder interfaceBuilder1 = new InterfaceOtherConfigsBuilder();
+        interfaceBuilder1.setOtherConfigKey("interfaceOtherConfigsKey1");
+        interfaceBuilder1.setOtherConfigValue("interfaceOtherConfigsValue1");
+        InterfaceOtherConfigsBuilder interfaceBuilder2 = new InterfaceOtherConfigsBuilder();
+        interfaceBuilder2.setOtherConfigKey("interfaceOtherConfigsKey2");
+        interfaceBuilder2.setOtherConfigValue("interfaceOtherConfigsValue2");
+        List<InterfaceOtherConfigs> interfaceOtherConfigs = Lists.newArrayList(interfaceBuilder1.build(),
+                interfaceBuilder2.build());
+        ovsdbTerminationBuilder.setInterfaceOtherConfigs(interfaceOtherConfigs);
+
+        Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
+        Thread.sleep(1000);
+        InstanceIdentifier<Node> terminationPointIid =
+                SouthboundMapper.createInstanceIdentifier(connectionInfo,
+                bridge.getBridgeName());
+        Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
+
+        List<TerminationPoint> terminationPoints = terminationPointNode.getTerminationPoint();
+        for (TerminationPoint terminationPoint : terminationPoints) {
+            OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
+                    terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
+            if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
+                List<InterfaceOtherConfigs> actualInterfaceOtherConfigs = ovsdbTerminationPointAugmentation.
+                        getInterfaceOtherConfigs();
+                Assert.assertNotNull(actualInterfaceOtherConfigs);
+                Assert.assertNotNull(interfaceOtherConfigs);
+                Assert.assertTrue(interfaceOtherConfigs.size() == actualInterfaceOtherConfigs.size());
+                for (InterfaceOtherConfigs interfaceOtherConfig : interfaceOtherConfigs) {
+                    Assert.assertTrue(actualInterfaceOtherConfigs.contains(interfaceOtherConfig));
+                }
+            }
+        }
+        Assert.assertTrue(deleteBridge(connectionInfo));
+    }
+
+    @Test
+    public void testTerminationPointPortOtherConfigs() throws InterruptedException {
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        connectOvsdbNode(connectionInfo);
+        Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
+        OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
+        Assert.assertNotNull(bridge);
+        NodeId nodeId = SouthboundMapper.createManagedNodeId(SouthboundMapper.createInstanceIdentifier(
+                connectionInfo, bridge.getBridgeName()));
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
+                createGenericOvsdbTerminationPointAugmentationBuilder();
+        String portName = "testPortOtherConfigs";
+        ovsdbTerminationBuilder.setName(portName);
+        //setup
+        PortOtherConfigsBuilder portBuilder1 = new PortOtherConfigsBuilder();
+        portBuilder1.setOtherConfigKey("portOtherConfigsKey1");
+        portBuilder1.setOtherConfigValue("portOtherConfigsValue1");
+        PortOtherConfigsBuilder portBuilder2 = new PortOtherConfigsBuilder();
+        portBuilder2.setOtherConfigKey("portOtherConfigsKey2");
+        portBuilder2.setOtherConfigValue("portOtherConfigsValue2");
+        List<PortOtherConfigs> portOtherConfigs = Lists.newArrayList(portBuilder1.build(),
+                portBuilder2.build());
+        ovsdbTerminationBuilder.setPortOtherConfigs(portOtherConfigs);
+
+        Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
+        InstanceIdentifier<Node> terminationPointIid =
+                SouthboundMapper.createInstanceIdentifier(connectionInfo,
+                bridge.getBridgeName());
+        Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
+
+        List<TerminationPoint> terminationPoints = terminationPointNode.getTerminationPoint();
+        for (TerminationPoint terminationPoint : terminationPoints) {
+            OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
+                    terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
+            if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
+                List<PortOtherConfigs> actualPortOtherConfigs = ovsdbTerminationPointAugmentation.
+                        getPortOtherConfigs();
+                Assert.assertTrue((portOtherConfigs.size() == actualPortOtherConfigs.size()));
+                for (PortOtherConfigs portOtherConfig : portOtherConfigs) {
+                    Assert.assertTrue(actualPortOtherConfigs.contains(portOtherConfig));
+                }
+            }
+        }
+        Assert.assertTrue(deleteBridge(connectionInfo));
     }
 
     /**

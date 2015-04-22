@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_86a3d29d",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 833,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-04-22T15:12:29Z",
+      "side": 1,
+      "message": "Might want to wrap this into a getTerminationPoint() method since this code is duplicated.",
+      "range": {
+        "startLine": 833,
+        "startChar": 0,
+        "endLine": 833,
+        "endChar": 8
+      },
+      "revId": "c1e89b86f95828284c2761725561a997c0612474",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_26951e33",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 836,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-04-22T15:12:29Z",
+      "side": 1,
+      "message": "Add an assertNotNull(node)",
+      "range": {
+        "startLine": 836,
+        "startChar": 13,
+        "endLine": 836,
+        "endChar": 33
+      },
+      "revId": "c1e89b86f95828284c2761725561a997c0612474",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

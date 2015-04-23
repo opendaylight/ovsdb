@@ -22,6 +22,30 @@
       "revId": "1a0113478653c0696337d8ab2b0a3c2d597ccdb6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_8adaf076",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/NetworkHandler.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 2850
+      },
+      "writtenOn": "2015-04-23T20:28:56Z",
+      "side": 1,
+      "message": "neutron/northbound-api/src/main/java/org/opendaylight/neutron/northbound/api/NeutronNetworksNorthbound.java\n\nThe result must be an HTTP value between 200 and 299. I think HTTP_OK is better than HTTP_CREATED here.",
+      "parentUuid": "3aa0d159_2ab95c2e",
+      "range": {
+        "startLine": 75,
+        "startChar": 33,
+        "endLine": 75,
+        "endChar": 40
+      },
+      "revId": "1a0113478653c0696337d8ab2b0a3c2d597ccdb6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

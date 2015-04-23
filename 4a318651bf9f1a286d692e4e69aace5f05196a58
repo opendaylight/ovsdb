@@ -22,6 +22,30 @@
       "revId": "4a318651bf9f1a286d692e4e69aace5f05196a58",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_0a3d808f",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/NetworkHandler.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 2850
+      },
+      "writtenOn": "2015-04-23T20:28:56Z",
+      "side": 0,
+      "message": "I think yes (see NeutronNetworksNorthbound.java) or we should add traces in every similar function. But I can publish aother review for this trace if you want.",
+      "parentUuid": "3aa0d159_caaa38d4",
+      "range": {
+        "startLine": 117,
+        "startChar": 61,
+        "endLine": 117,
+        "endChar": 69
+      },
+      "revId": "4a318651bf9f1a286d692e4e69aace5f05196a58",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

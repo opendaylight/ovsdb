@@ -30,7 +30,7 @@ public class SubnetHandler extends AbstractHandler implements INeutronSubnetAwar
 
     @Override
     public int canCreateSubnet(NeutronSubnet subnet) {
-        return HttpURLConnection.HTTP_CREATED;
+        return HttpURLConnection.HTTP_OK;
     }
 
     @Override
@@ -40,7 +40,7 @@ public class SubnetHandler extends AbstractHandler implements INeutronSubnetAwar
 
     @Override
     public int canUpdateSubnet(NeutronSubnet delta, NeutronSubnet original) {
-        return HttpURLConnection.HTTP_CREATED;
+        return HttpURLConnection.HTTP_OK;
     }
 
     @Override
@@ -50,8 +50,7 @@ public class SubnetHandler extends AbstractHandler implements INeutronSubnetAwar
 
     @Override
     public int canDeleteSubnet(NeutronSubnet subnet) {
-        // TODO Auto-generated method stub
-        return HttpURLConnection.HTTP_CREATED;
+        return HttpURLConnection.HTTP_OK;
     }
 
     @Override

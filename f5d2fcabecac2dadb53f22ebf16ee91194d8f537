@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_8ae4300e",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbBridgeUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 336,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-04-23T20:48:26Z",
+      "side": 1,
+      "message": "oh no.... sorry but I think the break should be inside the if(...equals()). Agree?!?",
+      "revId": "f5d2fcabecac2dadb53f22ebf16ee91194d8f537",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

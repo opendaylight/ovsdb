@@ -56,7 +56,7 @@ public class PortHandler extends AbstractHandler
      */
     @Override
     public int canCreatePort(NeutronPort port) {
-        return HttpURLConnection.HTTP_CREATED;
+        return HttpURLConnection.HTTP_OK;
     }
 
     /**
@@ -66,12 +66,6 @@ public class PortHandler extends AbstractHandler
      */
     @Override
     public void neutronPortCreated(NeutronPort neutronPort) {
-        int result = canCreatePort(neutronPort);
-        if (result != HttpURLConnection.HTTP_CREATED) {
-            logger.error(" Port create validation failed result - {} ", result);
-            return;
-        }
-
         enqueueEvent(new NorthboundEvent(neutronPort, Action.ADD));
     }
     private void doNeutronPortCreated(NeutronPort neutronPort) {
@@ -95,16 +89,7 @@ public class PortHandler extends AbstractHandler
     @Override
     public int canUpdatePort(NeutronPort delta,
                              NeutronPort original) {
-        int result = HttpURLConnection.HTTP_OK;
-        /**
-         * To basic validation of the request
-         */
-
-        if ((original == null) || (delta == null)) {
-            logger.error("port object not specified");
-            return HttpURLConnection.HTTP_BAD_REQUEST;
-        }
-        return result;
+        return HttpURLConnection.HTTP_OK;
     }
 
     /**
@@ -140,13 +125,6 @@ public class PortHandler extends AbstractHandler
      */
     @Override
     public void neutronPortDeleted(NeutronPort neutronPort) {
-
-        int result = canDeletePort(neutronPort);
-        if  (result != HttpURLConnection.HTTP_OK) {
-            logger.error(" deletePort validation failed - result {} ", result);
-            return;
-        }
-
         enqueueEvent(new NorthboundEvent(neutronPort, Action.DELETE));
     }
     private void doNeutronPortDeleted(NeutronPort neutronPort) {

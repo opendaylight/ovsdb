@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_caaa38d4",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/NetworkHandler.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-04-23T20:15:55Z",
+      "side": 0,
+      "message": "why did you remove this trace? Is it really that useless?",
+      "range": {
+        "startLine": 117,
+        "startChar": 61,
+        "endLine": 117,
+        "endChar": 69
+      },
+      "revId": "4a318651bf9f1a286d692e4e69aace5f05196a58",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

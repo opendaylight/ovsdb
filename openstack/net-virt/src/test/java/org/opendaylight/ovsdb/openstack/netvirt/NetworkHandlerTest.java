@@ -73,7 +73,7 @@ public class NetworkHandlerTest {
                                     .thenReturn(true)
                                     .thenReturn(false);
         assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_NOT_ACCEPTABLE, networkHandler.canCreateNetwork(neutronNetwork));
-        assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_CREATED, networkHandler.canCreateNetwork(neutronNetwork));
+        assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_OK, networkHandler.canCreateNetwork(neutronNetwork));
     }
 
     /**
@@ -144,7 +144,6 @@ public class NetworkHandlerTest {
         when(ev.getAction()).thenReturn(Action.DELETE);
         networkHandlerSpy.processEvent(ev);
         verify(neutronL3Adapter, times(1)).handleNeutronNetworkEvent(any(NeutronNetwork.class), same(Action.DELETE));
-        verify(networkHandlerSpy, times(1)).canDeleteNetwork(any(NeutronNetwork.class));
         verify(tenantNetworkManager, times(1)).networkDeleted(anyString());
     }
 }

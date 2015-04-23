@@ -61,13 +61,12 @@ public class PortHandlerTest {
 
     @Test
     public void testCanCreatePort() {
-        assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_CREATED, portHandler.canCreatePort(mock(NeutronPort.class)));
+        assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_OK, portHandler.canCreatePort(mock(NeutronPort.class)));
     }
 
     @Test
     public void testCanUpdatePort() {
         assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_OK, portHandler.canUpdatePort(mock(NeutronPort.class), mock(NeutronPort.class)));
-        assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_BAD_REQUEST, portHandler.canUpdatePort(null, null));
     }
 
     @Test

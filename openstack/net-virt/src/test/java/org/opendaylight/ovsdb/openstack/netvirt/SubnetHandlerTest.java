@@ -37,17 +37,17 @@ public class SubnetHandlerTest {
 
     @Test
     public void testCanCreateSubnet() {
-        assertEquals("Error, canCreateSubnet() did not return the correct HTTP flag", HttpURLConnection.HTTP_CREATED, subnetHandler.canCreateSubnet(mock(NeutronSubnet.class)));
+        assertEquals("Error, canCreateSubnet() did not return the correct HTTP flag", HttpURLConnection.HTTP_OK, subnetHandler.canCreateSubnet(mock(NeutronSubnet.class)));
     }
 
     @Test
     public void testCanUpdateSubnet() {
-        assertEquals("Error, canUpdateSubnet() did not return the correct HTTP flag", HttpURLConnection.HTTP_CREATED, subnetHandler.canUpdateSubnet(mock(NeutronSubnet.class), mock(NeutronSubnet.class)));
+        assertEquals("Error, canUpdateSubnet() did not return the correct HTTP flag", HttpURLConnection.HTTP_OK, subnetHandler.canUpdateSubnet(mock(NeutronSubnet.class), mock(NeutronSubnet.class)));
     }
 
     @Test
     public void testCanDeleteSubnet() {
-        assertEquals("Error, canDeleteSubnet() did not return the correct HTTP flag", HttpURLConnection.HTTP_CREATED, subnetHandler.canDeleteSubnet(mock(NeutronSubnet.class)));
+        assertEquals("Error, canDeleteSubnet() did not return the correct HTTP flag", HttpURLConnection.HTTP_OK, subnetHandler.canDeleteSubnet(mock(NeutronSubnet.class)));
     }
 
     @Test

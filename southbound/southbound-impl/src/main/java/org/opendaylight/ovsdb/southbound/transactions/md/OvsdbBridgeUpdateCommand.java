@@ -1,11 +1,15 @@
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
@@ -14,8 +18,11 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
+import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
@@ -32,6 +39,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigsKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
@@ -47,6 +55,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.net.InetAddresses;
 
 public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbBridgeUpdateCommand.class);
@@ -216,6 +225,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         setExternalIds(ovsdbBridgeAugmentationBuilder, bridge);
         setOtherConfig(ovsdbBridgeAugmentationBuilder, bridge);
         setFailMode(ovsdbBridgeAugmentationBuilder, bridge);
+        setOpenFlowNodeRef(ovsdbBridgeAugmentationBuilder, bridge);
         setManagedBy(ovsdbBridgeAugmentationBuilder);
         bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbBridgeAugmentationBuilder.build());
 
@@ -302,6 +312,50 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         DatapathId dpid = SouthboundMapper.createDatapathId(bridge);
         if (dpid != null) {
             ovsdbBridgeAugmentationBuilder.setDatapathId(dpid);
+        }
+    }
+
+    private void setOpenFlowNodeRef(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
+            Bridge bridge) {
+        Map<UUID, Controller> updatedControllerRows =
+                TyperUtils.extractRowsUpdated(Controller.class, getUpdates(), getDbSchema());
+        for (ControllerEntry controllerEntry: SouthboundMapper.createControllerEntries(bridge, updatedControllerRows)) {
+            if (controllerEntry != null && controllerEntry.isIsConnected()) {
+                String [] controllerTarget = controllerEntry.getTarget().getValue().split(":");
+                IpAddress bridgeControllerIpAddress = null;
+                PortNumber bridgeControllerPortNumber = null;
+                for (String targetElement : controllerTarget) {
+                    if (InetAddresses.isInetAddress(targetElement)) {
+                        bridgeControllerIpAddress = new IpAddress(targetElement.toCharArray());
+                        continue;
+                    }
+                    if (NumberUtils.isNumber(targetElement)) {
+                        bridgeControllerPortNumber = new PortNumber(
+                                Integer.valueOf(String.valueOf(targetElement)));
+                        continue;
+                    }
+                }
+                try {
+                    Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+                    networkInterfacesLoop:
+                    while (networkInterfaces.hasMoreElements()) {
+                        NetworkInterface networkInterface = networkInterfaces.nextElement();
+                        Enumeration<InetAddress> networkInterfaceAddresses = networkInterface.getInetAddresses();
+                        while (networkInterfaceAddresses.hasMoreElements()) {
+                            InetAddress networkInterfaceAddress = networkInterfaceAddresses.nextElement();
+                            if (bridgeControllerIpAddress.getIpv4Address().getValue()
+                                    .equals(networkInterfaceAddress.getHostAddress())) {
+                                ovsdbBridgeAugmentationBuilder.setBridgeOpenflowNodeRef(
+                                        SouthboundMapper.createInstanceIdentifier(bridgeControllerIpAddress,
+                                                bridgeControllerPortNumber));
+                                break networkInterfacesLoop;
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    LOG.debug("Error getting local ip address {}", e);
+                }
+            }
         }
     }
 }

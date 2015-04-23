@@ -22,6 +22,24 @@
       "revId": "882abe059c7ef80050e75d5eb705d51b2a706d23",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_4a1708ee",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbBridgeUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 335,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-04-23T20:42:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_2a039cb9",
+      "revId": "882abe059c7ef80050e75d5eb705d51b2a706d23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

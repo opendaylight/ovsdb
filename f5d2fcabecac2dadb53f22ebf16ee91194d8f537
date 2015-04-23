@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "3aa0d159_2ac87c73",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbBridgeUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 321,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-04-23T20:54:20Z",
+      "side": 1,
+      "message": "Is it guaranteed that there will be an address:port String? otherwise accessing [1] will cause a NPE.",
+      "revId": "f5d2fcabecac2dadb53f22ebf16ee91194d8f537",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_2a9f1c61",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbBridgeUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-04-23T20:54:20Z",
+      "side": 1,
+      "message": "might be nice to add a SouthboundMapper method like createIID(controllerTarget) since we already have a bunch like this in there already.",
+      "revId": "f5d2fcabecac2dadb53f22ebf16ee91194d8f537",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_8ae4300e",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbBridgeUpdateCommand.java",
         "patchSetId": 2

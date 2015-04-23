@@ -1,5 +1,7 @@
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,8 +16,11 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
+import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
@@ -32,6 +37,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigsKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
@@ -216,6 +222,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         setExternalIds(ovsdbBridgeAugmentationBuilder, bridge);
         setOtherConfig(ovsdbBridgeAugmentationBuilder, bridge);
         setFailMode(ovsdbBridgeAugmentationBuilder, bridge);
+        setOpenFlowNodeRef(ovsdbBridgeAugmentationBuilder, bridge);
         setManagedBy(ovsdbBridgeAugmentationBuilder);
         bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbBridgeAugmentationBuilder.build());
 
@@ -302,6 +309,31 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         DatapathId dpid = SouthboundMapper.createDatapathId(bridge);
         if (dpid != null) {
             ovsdbBridgeAugmentationBuilder.setDatapathId(dpid);
+        }
+    }
+
+    private void setOpenFlowNodeRef(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
+            Bridge bridge) {
+        Map<UUID, Controller> updatedControllerRows =
+                TyperUtils.extractRowsUpdated(Controller.class, getUpdates(), getDbSchema());
+        for (ControllerEntry controllerEntry: SouthboundMapper.createControllerEntries(bridge, updatedControllerRows)) {
+            if (controllerEntry != null && controllerEntry.isIsConnected()) {
+                String [] controllerTarget = controllerEntry.getTarget().getValue().split(":");
+                IpAddress bridgeControllerIpAddress = new IpAddress(controllerTarget[1].toCharArray());
+                PortNumber bridgeControllerPortNumber = new PortNumber(
+                        Integer.valueOf(String.valueOf(controllerTarget[2])));
+                String controllerIpAddress = null;
+                try {
+                    controllerIpAddress = InetAddress.getLocalHost().getHostAddress();
+                } catch (UnknownHostException e) {
+                    LOG.debug("Error getting local ip address {}", e);
+                }
+                if (bridgeControllerIpAddress.equals(controllerIpAddress)) {
+                    ovsdbBridgeAugmentationBuilder.setBridgeOpenflowNodeRef(
+                            SouthboundMapper.createInstanceIdentifier(bridgeControllerIpAddress,
+                                    bridgeControllerPortNumber));
+                }
+            }
         }
     }
 }

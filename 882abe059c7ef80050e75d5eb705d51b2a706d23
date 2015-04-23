@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_2a039cb9",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbBridgeUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 335,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-04-23T20:36:58Z",
+      "side": 1,
+      "message": "add break;\notherwise, I don\u0027t know why/if there is any point in iterating after match is found.",
+      "range": {
+        "startLine": 335,
+        "startChar": 16,
+        "endLine": 335,
+        "endChar": 17
+      },
+      "revId": "882abe059c7ef80050e75d5eb705d51b2a706d23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

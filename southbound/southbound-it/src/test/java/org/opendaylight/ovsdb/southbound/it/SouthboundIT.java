@@ -374,6 +374,15 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Test
+    public void testOvsdbNodeOvsVersion() throws InterruptedException {
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        Node ovsdbNode = connectOvsdbNode(connectionInfo);
+        OvsdbNodeAugmentation augment = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+        assertNotNull(augment.getOvsVersion());
+        Assume.assumeTrue(disconnectOvsdbNode(connectionInfo));
+    }
+
+    @Test
     public void testOpenVSwitchOtherConfig() throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
         Node ovsdbNode = connectOvsdbNode(connectionInfo);

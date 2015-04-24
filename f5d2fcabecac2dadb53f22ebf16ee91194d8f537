@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_fb5ee4e8",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbBridgeUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 321,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-04-24T12:48:39Z",
+      "side": 1,
+      "message": "Actually I don\u0027t really know how is the target provisioned. But what I could do is split the target, run trough the decomposition and look for an IP address. If there is any, good for us, if not, keep iterating",
+      "parentUuid": "3aa0d159_2ac87c73",
+      "revId": "f5d2fcabecac2dadb53f22ebf16ee91194d8f537",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_2a9f1c61",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbBridgeUpdateCommand.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2015-04-23T20:54:20Z",
       "side": 1,
       "message": "might be nice to add a SouthboundMapper method like createIID(controllerTarget) since we already have a bunch like this in there already.",
+      "revId": "f5d2fcabecac2dadb53f22ebf16ee91194d8f537",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_7b4bb42b",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbBridgeUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-04-24T12:48:39Z",
+      "side": 1,
+      "message": "as I have to test if the controllerIpAddress is equal to the bridgeControllerIpAddress, I have to get the bridgeControllerIpAddress here. Thus if I created a function SouthboundMapper.createInstanceIdentifier(ControllerEntry controllerEntry), I\u0027ll replicate the \"getting the bridgeControllerIpAddress\" operation...\nWhat do you think?",
+      "parentUuid": "3aa0d159_2a9f1c61",
       "revId": "f5d2fcabecac2dadb53f22ebf16ee91194d8f537",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

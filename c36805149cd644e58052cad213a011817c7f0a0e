@@ -16,6 +16,24 @@
       "revId": "c36805149cd644e58052cad213a011817c7f0a0e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_d6173d50",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbBridgeUpdateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-04-24T17:32:29Z",
+      "side": 1,
+      "message": "So you suggest I go through all network interfaces, and through all their IP addresses to find a match? Let\u0027s have a look at that in the next Patch Set where I did that.",
+      "parentUuid": "3aa0d159_f6c7d910",
+      "revId": "c36805149cd644e58052cad213a011817c7f0a0e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

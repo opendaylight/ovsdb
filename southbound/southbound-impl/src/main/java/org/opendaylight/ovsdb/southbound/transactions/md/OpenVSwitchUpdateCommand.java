@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -73,7 +74,11 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
                 OvsdbNodeAugmentation ovsdbNode = SouthboundMapper
                         .createOvsdbAugmentation(getConnectionInfo());
                 OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = new OvsdbNodeAugmentationBuilder();
-                ovsdbNodeBuilder.setOvsVersion(openVSwitch.getOvsVersionColumn().getData().iterator().next());
+                try {
+                    ovsdbNodeBuilder.setOvsVersion(openVSwitch.getOvsVersionColumn().getData().iterator().next());
+                } catch (NoSuchElementException e) {
+                    LOG.debug("ovs_version is not set for this switch",e);
+                }
                 try {
                     Set<String> dptypes = openVSwitch.getDatapathTypesColumn()
                             .getData();
@@ -87,7 +92,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
                     }
                     ovsdbNodeBuilder.setDatapathTypeEntry(dpEntryList);
                 } catch (SchemaVersionMismatchException e) {
-                    LOG.debug("Datapath types not supported by this version of ovsdb",e);;
+                    LOG.debug("Datapath types not supported by this version of ovsdb",e);
                 }
                 try {
                     Set<String> iftypes = openVSwitch.getIfaceTypesColumn().getData();

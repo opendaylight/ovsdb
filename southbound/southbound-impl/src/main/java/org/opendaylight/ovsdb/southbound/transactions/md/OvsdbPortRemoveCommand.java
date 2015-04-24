@@ -9,12 +9,15 @@
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import java.util.Collection;
+import java.util.Map;
 
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
+import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
+import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
@@ -23,8 +26,12 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OvsdbPortRemoveCommand extends AbstractTransactionCommand {
+    private static final Logger LOG = LoggerFactory.getLogger(OvsdbPortRemoveCommand.class);
+
     public OvsdbPortRemoveCommand(ConnectionInfo key, TableUpdates updates,
             DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
@@ -36,20 +43,30 @@ public class OvsdbPortRemoveCommand extends AbstractTransactionCommand {
         String portName = null;
         Collection<Port> portRemovedRows = TyperUtils.extractRowsRemoved(
                 Port.class, getUpdates(), getDbSchema()).values();
-        Collection<Port> portUpdatedRows = TyperUtils.extractRowsUpdated(
-                Port.class, getUpdates(), getDbSchema()).values();
-        for (Port bridge : portUpdatedRows) {
-            bridgeName = bridge.getName();
-            for (Port port : portRemovedRows) {
-                portName = port.getName();
-                final InstanceIdentifier<TerminationPoint> nodePath = SouthboundMapper
-                        .createInstanceIdentifier(getConnectionInfo(),
-                                new OvsdbBridgeName(bridgeName)).child(
-                                TerminationPoint.class,
-                                new TerminationPointKey(new TpId(portName)));
-                transaction.delete(LogicalDatastoreType.OPERATIONAL, nodePath);
-                transaction.submit();
+        Map<UUID,Bridge> bridgeUpdatedRows = TyperUtils.extractRowsUpdated(
+                Bridge.class, getUpdates(), getDbSchema());
+        Map<UUID,Bridge> bridgeUpdatedOldRows = TyperUtils.extractRowsOld(
+                Bridge.class, getUpdates(), getDbSchema());
+        for (Port port : portRemovedRows) {
+            for (UUID bridgeUUID : bridgeUpdatedOldRows.keySet()) {
+                Bridge oldBridgeData = bridgeUpdatedOldRows.get(bridgeUUID);
+                if (oldBridgeData.getPortsColumn().getData().contains(port.getUuidColumn().getData())) {
+                    Bridge updatedBridgeData = bridgeUpdatedRows.get(bridgeUUID);
+                    bridgeName = updatedBridgeData.getName();
+                    break;
+                }
             }
+            if (bridgeName == null) {
+                LOG.warn("Bridge not found for port {}",port);
+                continue;
+            }
+            portName = port.getName();
+            final InstanceIdentifier<TerminationPoint> nodePath = SouthboundMapper
+                    .createInstanceIdentifier(getConnectionInfo(),
+                            new OvsdbBridgeName(bridgeName)).child(
+                            TerminationPoint.class,
+                            new TerminationPointKey(new TpId(portName)));
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, nodePath);
         }
     }
 

@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -31,12 +32,13 @@ import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceOtherConfigs;
@@ -50,12 +52,16 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortOtherConfigsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Trunks;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.TrunksBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,41 +70,123 @@ import com.google.common.base.Optional;
 
 public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbPortUpdateCommand.class);
-
+    private Map<UUID, Port> portUpdatedRows;
+    private Map<UUID, Port> portOldRows;
+    private Map<UUID, Interface> interfaceUpdatedRows;
+    private Map<UUID, Interface> interfaceOldRows;
+    private Map<UUID, Bridge> bridgeUpdatedRows;
+    private Map<UUID, Bridge> bridgeOldRows;
     public OvsdbPortUpdateCommand(ConnectionInfo key, TableUpdates updates,
             DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
+        portUpdatedRows = TyperUtils.extractRowsUpdated(Port.class, updates, dbSchema);
+        portOldRows = TyperUtils.extractRowsOld(Port.class, updates, dbSchema);
+        interfaceUpdatedRows = TyperUtils.extractRowsUpdated(Interface.class, updates, dbSchema);
+        interfaceOldRows = TyperUtils.extractRowsOld(Interface.class, updates, dbSchema);
+        bridgeUpdatedRows = TyperUtils.extractRowsUpdated(Bridge.class, updates, dbSchema);
+        bridgeOldRows = TyperUtils.extractRowsOld(Bridge.class, updates, dbSchema);
     }
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        String bridgeName = null;
-        Collection<Port> portUpdatedRows = TyperUtils.extractRowsUpdated(
-                Port.class, getUpdates(), getDbSchema()).values();
-        Collection<Bridge> bridgeUpdatedRows = TyperUtils.extractRowsUpdated(
-                Bridge.class, getUpdates(), getDbSchema()).values();
-        for (Bridge bridge : bridgeUpdatedRows) {
-            Iterator<UUID> bridgePorts = bridge.getPortsColumn().getData()
-                    .iterator();
-            while (bridgePorts.hasNext()) {
-                UUID portUUID = bridgePorts.next();
-                for (Port port : portUpdatedRows) {
-                    if (portUUID.equals(port.getUuid())) {
-                        bridgeName = bridge.getName();
-                        NodeId bridgeId = SouthboundMapper.createManagedNodeId(
-                                getConnectionInfo(), new OvsdbBridgeName(bridgeName));
-                        final InstanceIdentifier<Node> nodePath = SouthboundMapper
-                                .createInstanceIdentifier(bridgeId);
-                        Optional<Node> node = readNode(transaction, nodePath);
-                        if (node.isPresent()) {
-                            NodeBuilder nodeBuilder = buildNode(node, bridgeId, bridge, port);
-                            transaction.merge(LogicalDatastoreType.OPERATIONAL,
-                                    nodePath, nodeBuilder.build());
-                        }
-                    }
+        final InstanceIdentifier<Node> connectionIId = SouthboundMapper.createInstanceIdentifier(getConnectionInfo());
+        if ( (portUpdatedRows == null && interfaceOldRows == null )
+                || ( interfaceOldRows.isEmpty() && portUpdatedRows.isEmpty())) {
+            return;
+        }
+        Optional<Node> node = readNode(transaction, connectionIId);
+        if (node.isPresent()) {
+            updateTerminationPoints(transaction, node.get());
+        }
+    }
+    private void updateTerminationPoints(ReadWriteTransaction transaction, Node node) {
+        for (Entry<UUID, Port> portUpdate : portUpdatedRows.entrySet()) {
+            String portName = null;
+            if (portOldRows.containsKey(portUpdate.getKey())) {
+                portName = portOldRows.get(portUpdate.getKey()).getNameColumn().getData();
+            } else {
+                portName = portUpdate.getValue().getNameColumn().getData();
+            }
+            Optional<String> bridgeName = getTerminationPointBridge(portUpdate.getKey());
+            if (!bridgeName.isPresent()) {
+                bridgeName = getTerminationPointBridge( transaction, node, portName);
+            }
+            if (bridgeName.isPresent()) {
+                NodeId bridgeId = SouthboundMapper.createManagedNodeId(
+                        getConnectionInfo(), new OvsdbBridgeName(bridgeName.get()));
+                TerminationPointKey tpKey = new TerminationPointKey(new TpId(portName));
+                InstanceIdentifier<TerminationPoint> tpPath = InstanceIdentifier
+                        .create(NetworkTopology.class)
+                        .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+                        .child(Node.class,new NodeKey(bridgeId))
+                        .child(TerminationPoint.class,tpKey);
+                TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
+                tpBuilder.setKey(tpKey);
+                tpBuilder.setTpId(tpKey.getTpId());
+                OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder =
+                        new OvsdbTerminationPointAugmentationBuilder();
+                buildTerminationPoint(tpAugmentationBuilder,portUpdate.getValue(),bridgeName.get());
+                UUID interfaceUUID = (UUID)portUpdate.getValue().getInterfacesColumn().getData().toArray()[0];
+                if (interfaceUpdatedRows.containsKey(interfaceUUID)) {
+                    buildTerminationPoint(tpAugmentationBuilder,
+                            interfaceUpdatedRows.get(interfaceUUID), bridgeName.get());
+                    interfaceUpdatedRows.remove(interfaceUUID);
+                    interfaceOldRows.remove(interfaceUUID);
+                }
+                tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
+                if (portOldRows.containsKey(portUpdate.getKey())) {
+                    transaction.merge(LogicalDatastoreType.OPERATIONAL,
+                            tpPath, tpBuilder.build());
+                } else {
+                    transaction.put(LogicalDatastoreType.OPERATIONAL,
+                            tpPath, tpBuilder.build());
                 }
             }
         }
+        for (Entry<UUID, Interface> interfaceUpdate : interfaceUpdatedRows.entrySet()) {
+            String interfaceName = null;
+            interfaceName = interfaceOldRows.get(interfaceUpdate.getKey()).getNameColumn().getData();
+            Optional<String> bridgeName = getTerminationPointBridge( transaction, node, interfaceName);
+            if (bridgeName.isPresent()) {
+                NodeId bridgeId = SouthboundMapper.createManagedNodeId(
+                        getConnectionInfo(), new OvsdbBridgeName(bridgeName.get()));
+                TerminationPointKey tpKey = new TerminationPointKey(new TpId(interfaceName));
+                InstanceIdentifier<TerminationPoint> tpPath = InstanceIdentifier
+                        .create(NetworkTopology.class)
+                        .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+                        .child(Node.class,new NodeKey(bridgeId))
+                        .child(TerminationPoint.class,tpKey);
+                TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
+                tpBuilder.setKey(tpKey);
+                tpBuilder.setTpId(tpKey.getTpId());
+                OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder =
+                        new OvsdbTerminationPointAugmentationBuilder();
+                buildTerminationPoint(tpAugmentationBuilder, interfaceUpdate.getValue(),bridgeName.get());
+                tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
+                transaction.merge(LogicalDatastoreType.OPERATIONAL,
+                        tpPath, tpBuilder.build());
+            }
+        }
+
+    }
+    private void buildTerminationPoint(OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder,
+            Port portUpdate, String bridgeName) {
+
+        tpAugmentationBuilder
+                .setName(portUpdate.getName());
+        tpAugmentationBuilder.setPortUuid(new Uuid(
+                portUpdate.getUuid().toString()));
+        updatePort(portUpdate, tpAugmentationBuilder);
+    }
+
+    private void buildTerminationPoint(OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder,
+            Interface interfaceUpdate, String bridgeName) {
+
+        tpAugmentationBuilder
+                .setName(interfaceUpdate.getName());
+        tpAugmentationBuilder.setPortUuid(new Uuid(
+                interfaceUpdate.getUuid().toString()));
+        updateInterfaces(interfaceUpdate, bridgeName, tpAugmentationBuilder);
     }
 
     private Optional<Node> readNode(final ReadWriteTransaction transaction, final InstanceIdentifier<Node> nodePath) {
@@ -114,61 +202,38 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         return node;
     }
 
-    private NodeBuilder buildNode(final Optional<Node> node, final NodeId bridgeId, final Bridge bridge,
-            final Port port) {
-        NodeBuilder nodeBuilder = new NodeBuilder();
-        nodeBuilder.setNodeId(bridgeId);
-        List<TerminationPoint> tpList = buildTpList(bridge, port);
-        nodeBuilder.setTerminationPoint(tpList);
-        nodeBuilder.addAugmentation(
-                OvsdbBridgeAugmentation.class,
-                node.get().getAugmentation(
-                        OvsdbBridgeAugmentation.class));
-        return nodeBuilder;
-    }
-
-    private List<TerminationPoint> buildTpList(final Bridge bridge, final Port port) {
-        List<TerminationPoint> tpList = new ArrayList<TerminationPoint>();
-        TerminationPointBuilder entry = new TerminationPointBuilder();
-        entry.setTpId(new TpId(port.getName()));
-        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder =
-                new OvsdbTerminationPointAugmentationBuilder();
-        ovsdbTerminationPointBuilder
-                .setName(port.getName());
-        ovsdbTerminationPointBuilder.setPortUuid(new Uuid(
-                port.getUuid().toString()));
-        updatePort(port, ovsdbTerminationPointBuilder);
-        updateInterfaces(port, bridge, ovsdbTerminationPointBuilder);
-        entry.addAugmentation(
-                OvsdbTerminationPointAugmentation.class,
-                ovsdbTerminationPointBuilder.build());
-        tpList.add(entry.build());
-        return tpList;
-    }
-
-    private void updateInterfaces(final Port port, final Bridge bridge,
-            final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
-
-        Column<GenericTableSchema, Set<UUID>> iface = port.getInterfacesColumn();
-        Set<UUID> ifUuid = iface.getData();
-        Collection<Interface> ifUpdateRows = TyperUtils.extractRowsUpdated(
-                Interface.class, getUpdates(),  getDbSchema()).values();
-        updateInterfaces(ifUuid, ifUpdateRows, bridge, ovsdbTerminationPointBuilder);
-    }
-
-    private void updateInterfaces(final Set<UUID> ifUuid, final Collection<Interface> ifUpdateRows,
-            final Bridge bridge, final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
-
-        for (UUID ifIter : ifUuid) {
-            for (Interface interfIter : ifUpdateRows) {
-                Column<GenericTableSchema, String> typeColumn = interfIter.getTypeColumn();
-                String type = typeColumn.getData();
-                if ((interfIter.getUuid()).equals(ifIter)) {
-                    updateInterface(interfIter, bridge, type, ovsdbTerminationPointBuilder);
-                    break;
-                }
+    private Optional<String> getTerminationPointBridge( UUID portUUID) {
+        for (UUID bridgeUUID : this.bridgeUpdatedRows.keySet()) {
+            if (this.bridgeUpdatedRows.get(bridgeUUID).getPortsColumn().getData().contains(portUUID)) {
+                return Optional.of(this.bridgeUpdatedRows.get(bridgeUUID).getNameColumn().getData());
             }
         }
+        return Optional.absent();
+    }
+    private Optional<String> getTerminationPointBridge(
+            final ReadWriteTransaction transaction, Node node, String tpName) {
+        OvsdbNodeAugmentation ovsdbNode = node.getAugmentation(OvsdbNodeAugmentation.class);
+        List<ManagedNodeEntry> managedNodes = ovsdbNode.getManagedNodeEntry();
+        for ( ManagedNodeEntry managedNodeEntry : managedNodes ) {
+            @SuppressWarnings("unchecked")
+            Node managedNode = readNode(transaction
+                    ,(InstanceIdentifier<Node>)managedNodeEntry.getBridgeRef().getValue()).get();
+            TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
+            TerminationPointKey tpKey = new TerminationPointKey(new TpId(tpName));
+            tpBuilder.setKey(tpKey);
+            if (managedNode.getTerminationPoint().contains(tpBuilder)) {
+                return Optional.of(managedNode.getNodeId().getValue());
+            }
+        }
+        return Optional.absent();
+    }
+
+    private void updateInterfaces(Interface interfaceUpdate,
+            final String bridge, final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+
+        Column<GenericTableSchema, String> typeColumn = interfaceUpdate.getTypeColumn();
+        String type = typeColumn.getData();
+        updateInterface(interfaceUpdate, bridge, type, ovsdbTerminationPointBuilder);
     }
 
     private void updatePort(final Port port,
@@ -182,7 +247,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
     }
 
     private void updateInterface(final Interface interf,
-            final Bridge bridge, final String type,
+            final String bridge, final String type,
             final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
 
         ovsdbTerminationPointBuilder.setInterfaceUuid(
@@ -250,7 +315,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
     }
 
     private void updateOfPort(final Interface interf,
-            final Bridge bridge,
+            final String bridge,
             final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
 
         Set<Long> ofPorts = interf.getOpenFlowPortColumn().getData();
@@ -262,13 +327,13 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                     .setOfport(ofPort);
             } else {
                 LOG.debug("Received negative value for ofPort from ovsdb for {} {} {}",
-                        bridge.getName(), interf.getName(),ofPort);
+                        bridge, interf.getName(),ofPort);
             }
         }
     }
 
     private void updateOfPortRequest(final Interface interf,
-            final Bridge bridge,
+            final String bridge,
             final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
 
         Set<Long> ofPortRequests = interf
@@ -281,7 +346,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                     .setOfportRequest(ofPort);
             } else {
                 LOG.debug("Received negative value for ofPort from ovsdb for {} {} {}",
-                        bridge.getName(), interf.getName(),ofPort);
+                        bridge, interf.getName(),ofPort);
             }
         }
     }

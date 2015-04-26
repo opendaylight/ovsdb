@@ -27,10 +27,11 @@ import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.*;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.MdsalUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
-import org.opendaylight.ovsdb.utils.mdsal.node.StringConvertor;
+import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.GroupActionCase;
@@ -71,6 +72,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
@@ -837,7 +839,8 @@ public class OF13Provider implements NetworkingProvider {
         }
     }
 
-    private void programLocalRules (String networkType, String segmentationId, Node node, Interface intf) {
+    private void programLocalRules (String networkType, String segmentationId, Node node,
+                                    OvsdbTerminationPointAugmentation intf) {
         try {
             Long dpid = this.getIntegrationBridgeOFDPID(node);
             if (dpid == 0L) {
@@ -845,22 +848,11 @@ public class OF13Provider implements NetworkingProvider {
                 return;
             }
 
-            Set<Long> of_ports = intf.getOpenFlowPortColumn().getData();
-            if (of_ports == null || of_ports.size() <= 0) {
-                logger.debug("Could NOT Identify OF value for port {} on {}", intf.getName(), node);
-                return;
-            }
-            long localPort = (Long)of_ports.toArray()[0];
+            long localPort = (Long)intf.getOfport();
 
-            Map<String, String> externalIds = intf.getExternalIdsColumn().getData();
-            if (externalIds == null) {
-                logger.error("No external_ids seen in {}", intf);
-                return;
-            }
-
-            String attachedMac = externalIds.get(Constants.EXTERNAL_ID_VM_MAC);
+            String attachedMac = MdsalUtils.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
             if (attachedMac == null) {
-                logger.error("No AttachedMac seen in {}", intf);
+                logger.warn("No AttachedMac seen in {}", intf);
                 return;
             }
 
@@ -870,10 +862,11 @@ public class OF13Provider implements NetworkingProvider {
                 programLocalVlanRules(node, dpid, segmentationId, attachedMac, localPort);
             }
             /* If the network type is tunnel based (VXLAN/GRRE/etc) with Neutron Port Security ACLs */
-            if ((networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE) || networkType.equalsIgnoreCase
+            /* TODO SB_MIGRATION */
+            /*if ((networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE) || networkType.equalsIgnoreCase
                     (NetworkHandler.NETWORK_TYPE_VXLAN)) && securityServicesManager.isPortSecurityReady(intf)) {
                 logger.debug("Neutron port has a Port Security Group");
-                /* Retrieve the security group UUID from the Neutron Port */
+                // Retrieve the security group UUID from the Neutron Port
                 NeutronSecurityGroup securityGroupInPort = securityServicesManager.getSecurityGroupInPort(intf);
                 logger.debug("Program Local rules for networkType: {} does contain a Port Security Group: {} " +
                         "to be installed on DPID: {}", networkType, securityGroupInPort, dpid);
@@ -881,7 +874,7 @@ public class OF13Provider implements NetworkingProvider {
                         securityGroupInPort);
                 egressAclProvider.programPortSecurityACL(dpid, segmentationId, attachedMac, localPort,
                         securityGroupInPort);
-            }
+            }*/
             if (networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE) ||
                     networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN)) {
                 logger.debug("Program local bridge rules for interface {}", intf.getName());
@@ -892,7 +885,8 @@ public class OF13Provider implements NetworkingProvider {
         }
     }
 
-    private void removeLocalRules (String networkType, String segmentationId, Node node, Interface intf) {
+    private void removeLocalRules (String networkType, String segmentationId, Node node,
+                                   OvsdbTerminationPointAugmentation intf) {
         try {
             Long dpid = this.getIntegrationBridgeOFDPID(node);
             if (dpid == 0L) {
@@ -900,22 +894,11 @@ public class OF13Provider implements NetworkingProvider {
                 return;
             }
 
-            Set<Long> of_ports = intf.getOpenFlowPortColumn().getData();
-            if (of_ports == null || of_ports.size() <= 0) {
-                logger.debug("Could NOT Identify OF value for port {} on {}", intf.getName(), node);
-                return;
-            }
-            long localPort = (Long)of_ports.toArray()[0];
+            long localPort = (Long)intf.getOfport();
 
-            Map<String, String> externalIds = intf.getExternalIdsColumn().getData();
-            if (externalIds == null) {
-                logger.error("No external_ids seen in {}", intf);
-                return;
-            }
-
-            String attachedMac = externalIds.get(Constants.EXTERNAL_ID_VM_MAC);
+            String attachedMac = MdsalUtils.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
             if (attachedMac == null) {
-                logger.error("No AttachedMac seen in {}", intf);
+                logger.warn("No AttachedMac seen in {}", intf);
                 return;
             }
 
@@ -934,62 +917,49 @@ public class OF13Provider implements NetworkingProvider {
     }
 
     private void programTunnelRules (String tunnelType, String segmentationId, InetAddress dst, Node node,
-            Interface intf, boolean local) {
+                                     OvsdbTerminationPointAugmentation intf, boolean local) {
         /* TODO SB_MIGRATION */
         Preconditions.checkNotNull(ovsdbConfigurationService);
 
         try {
-
             Long dpid = this.getIntegrationBridgeOFDPID(node);
             if (dpid == 0L) {
                 logger.debug("Openflow Datapath-ID not set for the integration bridge in {}", node);
                 return;
             }
 
-            Set<Long> of_ports = intf.getOpenFlowPortColumn().getData();
-            if (of_ports == null || of_ports.size() <= 0) {
-                logger.debug("Could NOT Identify OF value for port {} on {}", intf.getName(), node);
-                return;
-            }
-            long localPort = (Long)of_ports.toArray()[0];
+            long localPort = (Long)intf.getOfport();
 
-            Map<String, String> externalIds = intf.getExternalIdsColumn().getData();
-            if (externalIds == null) {
-                logger.error("No external_ids seen in {}", intf);
-                return;
-            }
-
-            String attachedMac = externalIds.get(Constants.EXTERNAL_ID_VM_MAC);
+            String attachedMac = MdsalUtils.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
             if (attachedMac == null) {
-                logger.error("No AttachedMac seen in {}", intf);
+                logger.warn("No AttachedMac seen in {}", intf);
                 return;
             }
 
-            Map<String, Row> intfs = ovsdbConfigurationService.getRows(node, ovsdbConfigurationService.getTableName(node, Interface.class));
+            Map<String, OvsdbTerminationPointAugmentation> intfs = ovsdbConfigurationService.getInterfaces(node);
             if (intfs != null) {
-                for (Row row : intfs.values()) {
-                    Interface tunIntf = ovsdbConfigurationService.getTypedRow(node, Interface.class, row);
+                for (OvsdbTerminationPointAugmentation tunIntf : intfs.values()) {
+                    Long ofPort = 0L;
                     if (tunIntf.getName().equals(this.getTunnelName(tunnelType, dst))) {
-                        of_ports = tunIntf.getOpenFlowPortColumn().getData();
-                        if (of_ports == null || of_ports.size() <= 0) {
-                            logger.debug("Could NOT Identify Tunnel port {} on {}", tunIntf.getName(), node);
-                            continue;
-                        }
-                        long tunnelOFPort = (Long)of_ports.toArray()[0];
+                        long tunnelOFPort = (Long)intf.getOfport();
 
                         if (tunnelOFPort == -1) {
-                            logger.error("Could NOT Identify Tunnel port {} -> OF ({}) on {}", tunIntf.getName(), tunnelOFPort, node);
+                            logger.error("Could not Identify Tunnel port {} -> OF ({}) on {}",
+                                    tunIntf.getName(), tunnelOFPort, node);
                             return;
                         }
-                        logger.debug("Identified Tunnel port {} -> OF ({}) on {}", tunIntf.getName(), tunnelOFPort, node);
+                        logger.debug("Identified Tunnel port {} -> OF ({}) on {}",
+                                tunIntf.getName(), tunnelOFPort, node);
 
                         if (!local) {
-                            programRemoteEgressTunnelBridgeRules(node, dpid, segmentationId, attachedMac, tunnelOFPort, localPort);
+                            programRemoteEgressTunnelBridgeRules(node, dpid, segmentationId, attachedMac,
+                                    tunnelOFPort, localPort);
                         }
-                        logger.trace("program local ingress tunnel rules: node"
-                                + node.getNodeId().getValue() + " intf " + intf.getName());
+                        logger.trace("program local ingress tunnel rules: node {}, intf {}",
+                                node.getNodeId().getValue(), intf.getName() );
                         if (local) {
-                            programLocalIngressTunnelBridgeRules(node, dpid, segmentationId, attachedMac, tunnelOFPort, localPort);
+                            programLocalIngressTunnelBridgeRules(node, dpid, segmentationId, attachedMac,
+                                    tunnelOFPort, localPort);
                         }
                         return;
                     }
@@ -1001,56 +971,43 @@ public class OF13Provider implements NetworkingProvider {
     }
 
     private void removeTunnelRules (String tunnelType, String segmentationId, InetAddress dst, Node node,
-            Interface intf, boolean local, boolean isLastInstanceOnNode) {
+                                    OvsdbTerminationPointAugmentation intf,
+                                    boolean local, boolean isLastInstanceOnNode) {
         /* TODO SB_MIGRATION */
         Preconditions.checkNotNull(ovsdbConfigurationService);
         try {
-
             Long dpid = this.getIntegrationBridgeOFDPID(node);
             if (dpid == 0L) {
                 logger.debug("Openflow Datapath-ID not set for the integration bridge in {}", node);
                 return;
             }
 
-            Set<Long> of_ports = intf.getOpenFlowPortColumn().getData();
-            if (of_ports == null || of_ports.size() <= 0) {
-                logger.error("Could NOT Identify OF value for port {} on {}", intf.getName(), node);
-                return;
-            }
-            long localPort = (Long)of_ports.toArray()[0];
+            long localPort = (Long)intf.getOfport();
 
-            Map<String, String> externalIds = intf.getExternalIdsColumn().getData();
-            if (externalIds == null) {
-                logger.error("No external_ids seen in {}", intf);
-                return;
-            }
-
-            String attachedMac = externalIds.get(Constants.EXTERNAL_ID_VM_MAC);
+            String attachedMac = MdsalUtils.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
             if (attachedMac == null) {
                 logger.error("No AttachedMac seen in {}", intf);
                 return;
             }
 
-            Map<String, Row> intfs = ovsdbConfigurationService.getRows(node, ovsdbConfigurationService.getTableName(node, Interface.class));
+            Map<String, OvsdbTerminationPointAugmentation> intfs = ovsdbConfigurationService.getInterfaces(node);
             if (intfs != null) {
-                for (Row row : intfs.values()) {
-                    Interface tunIntf = ovsdbConfigurationService.getTypedRow(node, Interface.class, row);
+                for (OvsdbTerminationPointAugmentation tunIntf : intfs.values()) {
+                    Long ofPort = 0L;
                     if (tunIntf.getName().equals(this.getTunnelName(tunnelType, dst))) {
-                        of_ports = tunIntf.getOpenFlowPortColumn().getData();
-                        if (of_ports == null || of_ports.size() <= 0) {
-                            logger.error("Could NOT Identify Tunnel port {} on {}", tunIntf.getName(), node);
-                            continue;
-                        }
-                        long tunnelOFPort = (Long)of_ports.toArray()[0];
+                        long tunnelOFPort = (Long)intf.getOfport();
 
                         if (tunnelOFPort == -1) {
-                            logger.error("Could NOT Identify Tunnel port {} -> OF ({}) on {}", tunIntf.getName(), tunnelOFPort, node);
+                            logger.error("Could not Identify Tunnel port {} -> OF ({}) on {}",
+                                    tunIntf.getName(), tunnelOFPort, node);
                             return;
                         }
-                        logger.debug("Identified Tunnel port {} -> OF ({}) on {}", tunIntf.getName(), tunnelOFPort, node);
+                        logger.debug("Identified Tunnel port {} -> OF ({}) on {}",
+                                tunIntf.getName(), tunnelOFPort, node);
 
                         if (!local) {
-                            removeRemoteEgressTunnelBridgeRules(node, dpid, segmentationId, attachedMac, tunnelOFPort, localPort);
+                            removeRemoteEgressTunnelBridgeRules(node, dpid, segmentationId, attachedMac,
+                                    tunnelOFPort, localPort);
                         }
                         if (local && isLastInstanceOnNode) {
                             removePerTunnelRules(node, dpid, segmentationId, tunnelOFPort);
@@ -1064,76 +1021,44 @@ public class OF13Provider implements NetworkingProvider {
         }
     }
 
-    private void programVlanRules (NeutronNetwork network, Node node, Interface intf) {
+    private void programVlanRules (NeutronNetwork network, Node node, OvsdbTerminationPointAugmentation intf) {
         /* TODO SB_MIGRATION */
         Preconditions.checkNotNull(ovsdbConfigurationService);
         logger.debug("Program vlan rules for interface {}", intf.getName());
         try {
-
             Long dpid = this.getIntegrationBridgeOFDPID(node);
             if (dpid == 0L) {
                 logger.debug("Openflow Datapath-ID not set for the integration bridge in {}", node);
                 return;
             }
 
-            Set<Long> of_ports = intf.getOpenFlowPortColumn().getData();
-            int timeout = 6;
-            while ((of_ports == null) && (timeout > 0)) {
-                of_ports = intf.getOpenFlowPortColumn().getData();
-                if (of_ports == null || of_ports.size() <= 0) {
-                    // Wait for the OVSDB update to sync up the Local cache.
-                    Thread.sleep(500);
-                    timeout--;
-                }
-            }
-            if (of_ports == null || of_ports.size() <= 0) {
-                logger.error("Could NOT Identify OF value for port {} on {}", intf.getName(), node);
-                return;
-            }
-            long localPort = (Long)of_ports.toArray()[0];
+            long localPort = (Long)intf.getOfport();
 
-            Map<String, String> externalIds = intf.getExternalIdsColumn().getData();
-            if (externalIds == null) {
-                logger.error("No external_ids seen in {}", intf);
-                return;
-            }
-
-            String attachedMac = externalIds.get(Constants.EXTERNAL_ID_VM_MAC);
+            String attachedMac = MdsalUtils.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
             if (attachedMac == null) {
                 logger.error("No AttachedMac seen in {}", intf);
                 return;
             }
 
-            Map<String, Row> intfs = ovsdbConfigurationService.getRows(node, ovsdbConfigurationService.getTableName(node, Interface.class));
+            Map<String, OvsdbTerminationPointAugmentation> intfs = ovsdbConfigurationService.getInterfaces(node);
             if (intfs != null) {
-                for (Row row : intfs.values()) {
-                    Interface ethIntf = ovsdbConfigurationService.getTypedRow(node, Interface.class, row);
-                    if (ethIntf.getName().equalsIgnoreCase(bridgeConfigurationManager.getPhysicalInterfaceName(node, network.getProviderPhysicalNetwork()))) {
-                        of_ports = ethIntf.getOpenFlowPortColumn().getData();
-                        timeout = 6;
-                        while ((of_ports == null) && (timeout > 0)) {
-                            of_ports = ethIntf.getOpenFlowPortColumn().getData();
-                            if (of_ports == null || of_ports.size() <= 0) {
-                                // Wait for the OVSDB update to sync up the Local cache.
-                                Thread.sleep(500);
-                                        timeout--;
-                            }
-                        }
-
-                        if (of_ports == null || of_ports.size() <= 0) {
-                            logger.error("Could NOT Identify eth port {} on {}", ethIntf.getName(), node);
-                            continue;
-                        }
-                        long ethOFPort = (Long)of_ports.toArray()[0];
+                for (OvsdbTerminationPointAugmentation ethIntf : intfs.values()) {
+                    Long ofPort = 0L;
+                    if (ethIntf.getName().equalsIgnoreCase(bridgeConfigurationManager.getPhysicalInterfaceName(
+                            node, network.getProviderPhysicalNetwork()))) {
+                        long ethOFPort = (Long)ethIntf.getOfport();
 
                         if (ethOFPort == -1) {
-                            logger.error("Could NOT Identify eth port {} -> OF ({}) on {}", ethIntf.getName(), ethOFPort, node);
+                            logger.error("Could Not Identify eth port {} -> OF ({}) on {}",
+                                    ethIntf.getName(), ethOFPort, node);
                             throw new Exception("port number < 0");
                         }
                         logger.debug("Identified eth port {} -> OF ({}) on {}", ethIntf.getName(), ethOFPort, node);
                         // TODO: add logic to only add rule on remote nodes
-                        programRemoteEgressVlanRules(node, dpid, network.getProviderSegmentationID(), attachedMac, ethOFPort);
-                        programLocalIngressVlanRules(node, dpid, network.getProviderSegmentationID(), attachedMac, localPort, ethOFPort);
+                        programRemoteEgressVlanRules(node, dpid, network.getProviderSegmentationID(),
+                                attachedMac, ethOFPort);
+                        programLocalIngressVlanRules(node, dpid, network.getProviderSegmentationID(),
+                                attachedMac, localPort, ethOFPort);
                         return;
                     }
                 }
@@ -1143,59 +1068,42 @@ public class OF13Provider implements NetworkingProvider {
         }
     }
 
-    private void removeVlanRules (NeutronNetwork network, Node node,
-            Interface intf, boolean isLastInstanceOnNode) {
+    private void removeVlanRules (NeutronNetwork network, Node node, OvsdbTerminationPointAugmentation intf,
+                                  boolean isLastInstanceOnNode) {
         /* TODO SB_MIGRATION */
         Preconditions.checkNotNull(ovsdbConfigurationService);
         logger.debug("Remove vlan rules for interface {}", intf.getName());
-
         try {
-
             Long dpid = this.getIntegrationBridgeOFDPID(node);
             if (dpid == 0L) {
                 logger.debug("Openflow Datapath-ID not set for the integration bridge in {}", node);
                 return;
             }
 
-            Set<Long> of_ports = intf.getOpenFlowPortColumn().getData();
-            if (of_ports == null || of_ports.size() <= 0) {
-                logger.error("Could NOT Identify OF value for port {} on {}", intf.getName(), node);
-                return;
-            }
-            long localPort = (Long)of_ports.toArray()[0];
+            long localPort = (Long)intf.getOfport();
 
-            Map<String, String> externalIds = intf.getExternalIdsColumn().getData();
-            if (externalIds == null) {
-                logger.error("No external_ids seen in {}", intf);
-                return;
-            }
-
-            String attachedMac = externalIds.get(Constants.EXTERNAL_ID_VM_MAC);
+            String attachedMac = MdsalUtils.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
             if (attachedMac == null) {
                 logger.error("No AttachedMac seen in {}", intf);
                 return;
             }
 
-            Map<String, Row> intfs = ovsdbConfigurationService.getRows(node, ovsdbConfigurationService.getTableName(node, Interface.class));
+            Map<String, OvsdbTerminationPointAugmentation> intfs = ovsdbConfigurationService.getInterfaces(node);
             if (intfs != null) {
-                for (Row row : intfs.values()) {
-                    Interface ethIntf = ovsdbConfigurationService.getTypedRow(node, Interface.class, row);
-                    if (ethIntf.getName().equalsIgnoreCase(bridgeConfigurationManager.getPhysicalInterfaceName(node,
-                            network.getProviderPhysicalNetwork()))) {
-                        of_ports = ethIntf.getOpenFlowPortColumn().getData();
-                        if (of_ports == null || of_ports.size() <= 0) {
-                            logger.error("Could NOT Identify eth port {} on {}", ethIntf.getName(), node);
-                            continue;
-                        }
-                        long ethOFPort = (Long)of_ports.toArray()[0];
+                for (OvsdbTerminationPointAugmentation ethIntf : intfs.values()) {
+                    Long ofPort = 0L;
+                    if (ethIntf.getName().equalsIgnoreCase(bridgeConfigurationManager.getPhysicalInterfaceName(
+                            node, network.getProviderPhysicalNetwork()))) {
+                        long ethOFPort = (Long)ethIntf.getOfport();
 
                         if (ethOFPort == -1) {
-                            logger.error("Could NOT Identify eth port {} -> OF ({}) on {}", ethIntf.getName(), ethOFPort, node);
+                            logger.error("Could Not Identify eth port {} -> OF ({}) on {}",
+                                    ethIntf.getName(), ethOFPort, node);
                             throw new Exception("port number < 0");
                         }
                         logger.debug("Identified eth port {} -> OF ({}) on {}", ethIntf.getName(), ethOFPort, node);
-
-                        removeRemoteEgressVlanRules(node, dpid, network.getProviderSegmentationID(), attachedMac, localPort, ethOFPort);
+                        removeRemoteEgressVlanRules(node, dpid, network.getProviderSegmentationID(),
+                                attachedMac, localPort, ethOFPort);
                         if (isLastInstanceOnNode) {
                             removePerVlanRules(node, dpid, network.getProviderSegmentationID(), localPort, ethOFPort);
                         }
@@ -1209,7 +1117,7 @@ public class OF13Provider implements NetworkingProvider {
     }
 
     @Override
-    public Status handleInterfaceUpdate(NeutronNetwork network, Node srcNode, Interface intf) {
+    public Status handleInterfaceUpdate(NeutronNetwork network, Node srcNode, OvsdbTerminationPointAugmentation intf) {
         /* TODO SB_MIGRATION */
         Preconditions.checkNotNull(connectionService);
         List<Node> nodes = connectionService.getNodes();
@@ -1255,7 +1163,8 @@ public class OF13Provider implements NetworkingProvider {
                     NeutronNetwork network = tenantNetworkManager.getTenantNetwork(intf);
                     logger.debug("Trigger Interface update for {}", intf);
                     if (network != null) {
-                        this.handleInterfaceUpdate(network, node, intf);
+                        /* TODO SB_MIGRATION */
+                        //this.handleInterfaceUpdate(network, node, intf);
                     }
                 }
             }
@@ -1271,9 +1180,17 @@ public class OF13Provider implements NetworkingProvider {
         return null;
     }
 
+    private boolean isInterfaceOfInterest(OvsdbTerminationPointAugmentation terminationPoint) {
+        return (SouthboundMapper.createOvsdbInterfaceType(
+                terminationPoint.getInterfaceType()).equals(NetworkHandler.NETWORK_TYPE_VXLAN)
+                ||
+                SouthboundMapper.createOvsdbInterfaceType(
+                        terminationPoint.getInterfaceType()).equals(NetworkHandler.NETWORK_TYPE_GRE));
+    }
+
     @Override
-    public Status handleInterfaceDelete(String tunnelType, NeutronNetwork network, Node srcNode, Interface intf,
-            boolean isLastInstanceOnNode) {
+    public Status handleInterfaceDelete(String tunnelType, NeutronNetwork network, Node srcNode,
+                                        OvsdbTerminationPointAugmentation intf, boolean isLastInstanceOnNode) {
         /* TODO SB_MIGRATION */
         Preconditions.checkNotNull(connectionService);
         Status status = new Status(StatusCode.SUCCESS);
@@ -1282,14 +1199,14 @@ public class OF13Provider implements NetworkingProvider {
 
         logger.info("Delete intf " + intf.getName() + " isLastInstanceOnNode " + isLastInstanceOnNode);
         List<String> phyIfName = bridgeConfigurationManager.getAllPhysicalInterfaceNames(srcNode);
-        if (intf.getTypeColumn().getData().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN)
-                || intf.getTypeColumn().getData().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)) {
+        if (isInterfaceOfInterest(intf)) {
             // Delete tunnel port
             try {
-                Map<String, String> options = intf.getOptionsColumn().getData();
-                InetAddress src = InetAddress.getByName(options.get("local_ip"));
-                InetAddress dst = InetAddress.getByName(options.get("remote_ip"));
-                status = deleteTunnelPort(srcNode, intf.getTypeColumn().getData(), src, dst);
+                InetAddress src = InetAddress.getByName(MdsalUtils.getOptionsValue(intf.getOptions(), "local_ip"));
+                InetAddress dst = InetAddress.getByName(MdsalUtils.getOptionsValue(intf.getOptions(), "remote_ip"));
+                status = deleteTunnelPort(srcNode,
+                        SouthboundMapper.createOvsdbInterfaceType(intf.getInterfaceType()),
+                        src, dst);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
             }
@@ -1327,8 +1244,7 @@ public class OF13Provider implements NetworkingProvider {
                 }
             }
         }
-        //return status;
-        return new Status(StatusCode.SUCCESS);
+        return status;
     }
 
     @Override

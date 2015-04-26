@@ -17,13 +17,14 @@ import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.MdsalConsumer;
-import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 import com.google.common.base.Preconditions;
@@ -55,13 +56,13 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
     }
 
     @Override
-    public void reclaimInternalVlan(Node node, String portUUID, NeutronNetwork network) {
+    public void reclaimInternalVlan(Node node, NeutronNetwork network) {
         int vlan = vlanConfigurationCache.reclaimInternalVlan(node, network.getID());
         if (vlan <= 0) {
             logger.debug("Unable to get an internalVlan for Network {}", network);
             return;
         }
-        logger.debug("Removed Vlan {} on {}", vlan, portUUID);
+        logger.debug("Removed Vlan {} on {}", vlan);
     }
 
     @Override
@@ -167,6 +168,47 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
         NeutronNetwork neutronNetwork = neutronNetworkCache.getNetwork(neutronPort.getNetworkUUID());
         logger.debug("{} mapped to {}", intf, neutronNetwork);
         return neutronNetwork;
+    }
+
+    @Override
+    public NeutronNetwork getTenantNetwork(OvsdbTerminationPointAugmentation terminationPointAugmentation) {
+        NeutronNetwork neutronNetwork = null;
+        logger.trace("getTenantNetwork for {}", terminationPointAugmentation.getName());
+        String neutronPortId = MdsalUtils.getInterfaceExternalIdsValue(terminationPointAugmentation,
+                Constants.EXTERNAL_ID_INTERFACE_ID);
+        if (neutronPortId != null) {
+            NeutronPort neutronPort = neutronPortCache.getPort(neutronPortId);
+            if (neutronPort != null) {
+                neutronNetwork = neutronNetworkCache.getNetwork(neutronPort.getNetworkUUID());
+                if (neutronNetwork != null) {
+                    logger.debug("mapped to {}", neutronNetwork);
+                }
+            }
+        }
+        if (neutronNetwork != null) {
+            logger.debug("mapped to {}", neutronNetwork);
+        } else {
+            logger.warn("getTenantPort did not find network for {}", terminationPointAugmentation.getName());
+        }
+        return neutronNetwork;
+    }
+
+    @Override
+    public NeutronPort getTenantPort(OvsdbTerminationPointAugmentation terminationPointAugmentation) {
+        NeutronPort neutronPort = null;
+        logger.trace("getTenantPort for {}", terminationPointAugmentation.getName());
+        String neutronPortId = MdsalUtils.getInterfaceExternalIdsValue(terminationPointAugmentation,
+            Constants.EXTERNAL_ID_INTERFACE_ID);
+        if (neutronPortId != null) {
+            neutronPort = neutronPortCache.getPort(neutronPortId);
+        }
+        if (neutronPort != null) {
+            logger.debug("mapped to {}", neutronPort);
+        } else {
+            logger.warn("getTenantPort did not find port for {}", terminationPointAugmentation.getName());
+        }
+
+        return neutronPort;
     }
 
     @Override

@@ -65,7 +65,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <module>southbound</module>
     <module>utils</module>
     <!-- Integration Tests -->
-    <module>integrationtest</module>
+    <!--<module>integrationtest</module>-->
   </modules>
 
   <build>

@@ -70,7 +70,7 @@ public class NetworkHandlerTest {
                                     .thenReturn(true)
                                     .thenReturn(false);
         assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_NOT_ACCEPTABLE, networkHandler.canCreateNetwork(neutronNetwork));
-        assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_CREATED, networkHandler.canCreateNetwork(neutronNetwork));
+        assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_OK, networkHandler.canCreateNetwork(neutronNetwork));
     }
 
     /**
@@ -78,6 +78,10 @@ public class NetworkHandlerTest {
      */
     @Test
     public void testCanUpdateNetwork() {
+        when(neutronNetwork.isShared())
+                                    .thenReturn(true)
+                                    .thenReturn(false);
+        assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_NOT_ACCEPTABLE, networkHandler.canUpdateNetwork(neutronNetwork, neutronNetwork));
         assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_OK, networkHandler.canUpdateNetwork(neutronNetwork, neutronNetwork));
     }
 
@@ -140,7 +144,6 @@ public class NetworkHandlerTest {
         networkHandlerSpy.processEvent(ev);
         /* TODO SB_MIGRATION */
         //verify(neutronL3Adapter, times(1)).handleNeutronNetworkEvent(any(NeutronNetwork.class), same(Action.DELETE));
-        verify(networkHandlerSpy, times(1)).canDeleteNetwork(any(NeutronNetwork.class));
-        verify(tenantNetworkManager, times(1)).networkDeleted(anyString());
+        //verify(tenantNetworkManager, times(1)).networkDeleted(anyString());
     }
 }

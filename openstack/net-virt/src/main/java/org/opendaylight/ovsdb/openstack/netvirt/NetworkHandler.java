@@ -71,7 +71,7 @@ public class NetworkHandler extends AbstractHandler
             return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
         }
 
-        return HttpURLConnection.HTTP_CREATED;
+        return HttpURLConnection.HTTP_OK;
     }
 
     /**
@@ -81,14 +81,6 @@ public class NetworkHandler extends AbstractHandler
      */
     @Override
     public void neutronNetworkCreated(NeutronNetwork network) {
-        int result = HttpURLConnection.HTTP_BAD_REQUEST;
-        logger.trace("neutronNetworkCreated: network: {}", network);
-        result = canCreateNetwork(network);
-        if (result != HttpURLConnection.HTTP_CREATED) {
-            logger.debug("Network creation failed {} ", result);
-            return;
-        }
-
         enqueueEvent(new NorthboundEvent(network, Action.ADD));
     }
     private void doNeutronNetworkCreated(NeutronNetwork network) {
@@ -108,7 +100,11 @@ public class NetworkHandler extends AbstractHandler
     @Override
     public int canUpdateNetwork(NeutronNetwork delta,
                                 NeutronNetwork original) {
-        logger.trace("canUpdateNetwork: network delta {} --- original {}", delta, original);
+        if (delta.isShared()) {
+            logger.error(" Network shared attribute not supported ");
+            return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
+        }
+
         return HttpURLConnection.HTTP_OK;
     }
 
@@ -150,13 +146,6 @@ public class NetworkHandler extends AbstractHandler
         /* TODO SB_MIGRATION */
         neutronL3Adapter.handleNeutronNetworkEvent(network, Action.DELETE);
 
-        int result = canDeleteNetwork(network);
-        logger.trace("canDeleteNetwork: network: {}", network);
-        if  (result != HttpURLConnection.HTTP_OK) {
-            logger.error(" deleteNetwork validation failed for result - {} ",
-                    result);
-            return;
-        }
         /* Is this the last Neutron tenant network */
         List <NeutronNetwork> networks;
         if (neutronNetworkCache != null) {

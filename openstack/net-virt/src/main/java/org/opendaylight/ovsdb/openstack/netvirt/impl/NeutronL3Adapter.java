@@ -27,6 +27,7 @@ import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.ovsdb.utils.mdsal.node.StringConvertor;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 import com.google.common.base.Preconditions;
@@ -209,29 +210,17 @@ public class NeutronL3Adapter {
     //
     // Callbacks from OVSDB's southbound handler
     //
-    public void handleInterfaceEvent(final Node node, final Interface intf, final NeutronNetwork neutronNetwork,
-                                     Action action) {
+    public void handleInterfaceEvent(final Node node, final OvsdbTerminationPointAugmentation intf,
+                                     final NeutronNetwork neutronNetwork, Action action) {
         logger.debug("southbound interface {} node:{} interface:{}, neutronNetwork:{}",
                      action, node, intf.getName(), neutronNetwork);
         if (!this.enabled)
             return;
 
-        // See if there is an external uuid, so we can find the respective neutronPort
-        Map<String, String> externalIds = intf.getExternalIdsColumn().getData();
-        if (externalIds == null) {
-            return;
+        NeutronPort neutronPort = tenantNetworkManager.getTenantPort(intf);
+        if (neutronPort != null) {
+            this.handleNeutronPortEvent(neutronPort, action);
         }
-        String neutronPortId = externalIds.get(Constants.EXTERNAL_ID_INTERFACE_ID);
-        if (neutronPortId == null) {
-            return;
-        }
-        final NeutronPort neutronPort = neutronPortCache.getPort(neutronPortId);
-        if (neutronPort == null) {
-            logger.warn("southbound interface {} node:{} interface:{}, neutronNetwork:{} did not find port:{}",
-                        action, node, intf.getName(), neutronNetwork, neutronPortId);
-            return;
-        }
-        this.handleNeutronPortEvent(neutronPort, action);
     }
 
     //

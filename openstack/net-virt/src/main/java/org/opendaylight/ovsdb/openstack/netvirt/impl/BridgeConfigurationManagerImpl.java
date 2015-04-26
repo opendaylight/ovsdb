@@ -9,30 +9,29 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
-import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
-import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
-import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.openstack.netvirt.api.MdsalConsumer;
-import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
-import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConfigurationService;
-import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
-import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
-import org.opendaylight.ovsdb.openstack.netvirt.api.StatusWithUuid;
+import org.opendaylight.ovsdb.openstack.netvirt.api.*;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
+import org.opendaylight.ovsdb.southbound.SouthboundMapper;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,31 +47,13 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     private volatile ConfigurationService configurationService;
     private volatile NetworkingProviderManager networkingProviderManager;
     private volatile OvsdbConfigurationService ovsdbConfigurationService;
-    //private volatile MdsalConsumer mdsalConsumer;
 
     public BridgeConfigurationManagerImpl() {
     }
 
     @Override
     public String getBridgeUuid(Node node, String bridgeName) {
-        //Preconditions.checkNotNull(mdsalConsumer);
-        /* TODO SB_MIGRATION */
-        try {
-             Map<String, Row> bridgeTable =
-                     ovsdbConfigurationService.getRows(node, ovsdbConfigurationService.getTableName(node, Bridge.class));
-            if (bridgeTable == null) {
-                return null;
-            }
-            for (String key : bridgeTable.keySet()) {
-                Bridge bridge = ovsdbConfigurationService.getTypedRow(node, Bridge.class, bridgeTable.get(key));
-                if (bridge.getName().equals(bridgeName)) {
-                    return key;
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.error("Error getting Bridge Identifier for {} / {}", node, bridgeName, e);
-        }
-        return null;
+        return MdsalUtils.getBridgeUuid(node, bridgeName).toString();
     }
 
     @Override
@@ -186,11 +167,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
         try {
             this.createIntegrationBridge(node);
         } catch (Exception e) {
-            LOGGER.error("Error creating Integration Bridge on " + node.toString(), e);
-            return;
-        }
-        if (networkingProviderManager == null) {
-            LOGGER.error("Error creating internal network. Provider Network Manager unavailable");
+            LOGGER.error("Error creating Integration Bridge on {}", node, e);
             return;
         }
         networkingProviderManager.getProvider(node).initializeFlowRules(node);
@@ -379,9 +356,9 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     private void createIntegrationBridge (Node node) throws Exception {
         Preconditions.checkNotNull(configurationService);
 
-        String brInt = configurationService.getIntegrationBridgeName();
+        String brIntName = configurationService.getIntegrationBridgeName();
 
-        Status status = this.addBridge(node, brInt, null, null);
+        Status status = addBridge(node, brIntName, null, null);
         if (!status.isSuccess()) {
             LOGGER.debug("Integration Bridge Creation Status: {}", status);
         }
@@ -640,7 +617,11 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
         Preconditions.checkNotNull(networkingProviderManager);
         /* TODO SB_MIGRATION */
 
-        String bridgeUUID = getBridgeUuid(node, bridgeName);
+        //String bridgeUUID = getBridgeUuid(node, bridgeName);
+        MdsalUtils.addBridge(node, bridgeName);//sb will also add port and interface if this is a new bridge
+
+
+        /*// TODO use the bridge it code to add bridge
         Bridge bridge = ovsdbConfigurationService.createTypedRow(node, Bridge.class);
         Set<String> failMode = new HashSet<>();
         failMode.add("secure");
@@ -648,9 +629,9 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
 
         Set<String> protocols = new HashSet<>();
 
-        /* ToDo: Plugin should expose an easy way to get the OVS Version or Schema Version
-         * or, alternatively it should not attempt to add set unsupported fields
-         */
+        // ToDo: Plugin should expose an easy way to get the OVS Version or Schema Version
+        // or, alternatively it should not attempt to add set unsupported fields
+        //
 
         try {
 	    protocols.add(Constants.OPENFLOW13);
@@ -691,7 +672,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
             remotePatchName != null &&
             networkingProviderManager.getProvider(node).hasPerTenantTunneling()) {
             return addPatchPort(node, bridgeUUID, localPatchName, remotePatchName);
-        }
+        }*/
         return new Status(StatusCode.SUCCESS);
     }
 

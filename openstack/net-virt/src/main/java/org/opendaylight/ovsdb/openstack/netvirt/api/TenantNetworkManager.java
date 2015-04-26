@@ -10,8 +10,12 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
+import java.util.List;
 import org.opendaylight.neutron.spi.NeutronNetwork;
+import org.opendaylight.neutron.spi.NeutronPort;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 /**
@@ -22,7 +26,7 @@ public interface TenantNetworkManager {
 
     /**
      * Get the VLAN assigned to the provided Network
-     * @param node the {@link org.opendaylight.controller.sal.core.Node} to query
+     * @param node the {Node} to query
      * @param networkId the Neutron Network ID
      * @return the assigned VLAN ID or 0 in case of an error
      */
@@ -30,15 +34,14 @@ public interface TenantNetworkManager {
 
     /**
      * Reclaim the assigned VLAN for the given Network
-     * @param node the {@link org.opendaylight.controller.sal.core.Node} to query
-     * @param portUUID the UUID of the neutron Port
+     * @param node the {Node} to query
      * @param network the Neutron Network ID
      */
-    public void reclaimInternalVlan(Node node, String portUUID, NeutronNetwork network);
+    public void reclaimInternalVlan(Node node, NeutronNetwork network);
 
     /**
      * Configures the VLAN for a Tenant Network
-     * @param node the {@link org.opendaylight.controller.sal.core.Node} to configure
+     * @param node the {Node} to configure
      * @param portUUID the UUID of the port to configure
      * @param network the Neutron Network ID
      */
@@ -46,7 +49,7 @@ public interface TenantNetworkManager {
 
     /**
      * Check is the given network is present on a Node
-     * @param node the {@link org.opendaylight.controller.sal.core.Node} to query
+     * @param node the {Node} to query
      * @param segmentationId the Neutron Segementation ID
      * @return True or False
      */
@@ -71,4 +74,7 @@ public interface TenantNetworkManager {
      * Network Deleted Callback
      */
     public void networkDeleted(String id);
+
+    NeutronNetwork getTenantNetwork(OvsdbTerminationPointAugmentation terminationPointAugmentation);
+    public NeutronPort getTenantPort(OvsdbTerminationPointAugmentation terminationPointAugmentation);
 }

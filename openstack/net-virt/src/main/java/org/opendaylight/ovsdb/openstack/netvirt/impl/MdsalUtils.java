@@ -8,14 +8,37 @@
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.util.concurrent.CheckedFuture;
+import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.List;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
+import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentationBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolBase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +51,7 @@ import org.slf4j.LoggerFactory;
 public class MdsalUtils {
     private static final Logger LOG = LoggerFactory.getLogger(MdsalUtils.class);
     private static DataBroker databroker = null;
+    private static final int OVSDB_UPDATE_TIMEOUT = 500;
 
     /**
      * Class constructor setting the data broker.
@@ -50,23 +74,92 @@ public class MdsalUtils {
     }
 */
     /**
-     * Executes read transaction as a test2.
+     * Executes delete as a blocking transaction.
      *
-     * @param logicalDatastoreType {@link org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType} from which read should occur
-     * @param path {@link org.opendaylight.yangtools.yang.binding.InstanceIdentifier} for path to read
+     * @param store {@link LogicalDatastoreType} which should be modified
+     * @param path {@link InstanceIdentifier} to read from
      * @param <D> the data object type
-     * @return the data object requested
+     * @return the result of the request
      */
-    public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> D readTransaction(
-            final LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> path)  {
-        D ret = null;
-        final ReadOnlyTransaction readTx = databroker.newReadOnlyTransaction();
-        Optional<D> optionalDataObject = Optional.absent();
-        CheckedFuture<Optional<D>, ReadFailedException> submitFuture = readTx.read(logicalDatastoreType, path);
+    public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> boolean delete(
+            final LogicalDatastoreType store, final InstanceIdentifier<D> path)  {
+        boolean result = false;
+        final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
+        transaction.delete(store, path);
+        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
         try {
-            optionalDataObject = submitFuture.checkedGet();
+            future.checkedGet();
+            result = true;
+        } catch (TransactionCommitFailedException e) {
+            LOG.warn("Failed to delete {} ", path, e);
+        }
+        return result;
+    }
+
+    /**
+     * Executes merge as a blocking transaction.
+     *
+     * @param logicalDatastoreType {@link LogicalDatastoreType} which should be modified
+     * @param path {@link InstanceIdentifier} for path to read
+     * @param <D> the data object type
+     * @return the result of the request
+     */
+    public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> boolean merge(
+            final LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> path, D data)  {
+        boolean result = false;
+        final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
+        transaction.merge(logicalDatastoreType, path, data, true);
+        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
+        try {
+            future.checkedGet();
+            result = true;
+        } catch (TransactionCommitFailedException e) {
+            LOG.warn("Failed to merge {} ", path, e);
+        }
+        return result;
+    }
+
+    /**
+     * Executes put as a blocking transaction.
+     *
+     * @param logicalDatastoreType {@link LogicalDatastoreType} which should be modified
+     * @param path {@link InstanceIdentifier} for path to read
+     * @param <D> the data object type
+     * @return the result of the request
+     */
+    public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> boolean put(
+            final LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> path, D data)  {
+        boolean result = false;
+        final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
+        transaction.put(logicalDatastoreType, path, data, true);
+        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
+        try {
+            future.checkedGet();
+            result = true;
+        } catch (TransactionCommitFailedException e) {
+            LOG.warn("Failed to put {} ", path, e);
+        }
+        return result;
+    }
+
+    /**
+     * Executes read as a blocking transaction.
+     *
+     * @param store {@link LogicalDatastoreType} to read
+     * @param path {@link InstanceIdentifier} for path to read
+     * @param <D> the data object type
+     * @return the result as the data object requested
+     */
+    public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> D read(
+            final LogicalDatastoreType store, final InstanceIdentifier<D> path)  {
+        D result = null;
+        final ReadOnlyTransaction transaction = databroker.newReadOnlyTransaction();
+        Optional<D> optionalDataObject;
+        CheckedFuture<Optional<D>, ReadFailedException> future = transaction.read(store, path);
+        try {
+            optionalDataObject = future.checkedGet();
             if (optionalDataObject.isPresent()) {
-                ret = optionalDataObject.get();
+                result = optionalDataObject.get();
             } else {
                 LOG.debug("{}: Failed to read {}",
                         Thread.currentThread().getStackTrace()[1], path);
@@ -74,8 +167,121 @@ public class MdsalUtils {
         } catch (ReadFailedException e) {
             LOG.warn("Failed to read {} ", path, e);
         }
-        readTx.close();
-        return ret;
+        transaction.close();
+        return result;
     }
 
+    public static String getOptionsValue(List<Options> options, String key) {
+        String value = null;
+        for (Options option : options) {
+            if (option.getKey().equals(key)) {
+                value = option.getValue();
+            }
+        }
+        return value;
+    }
+
+    public static String getInterfaceExternalIdsValue(OvsdbTerminationPointAugmentation terminationPointAugmentation,
+                                                      String key) {
+        String value = null;
+        List<InterfaceExternalIds> pairs = terminationPointAugmentation.getInterfaceExternalIds();
+        for (InterfaceExternalIds pair : pairs) {
+            if (pair.getKey().equals(key)) {
+                value = pair.getExternalIdValue();
+            }
+        }
+        return value;
+    }
+
+    public static ConnectionInfo getConnectionInfo(Node node) {
+        ConnectionInfo connectionInfo = null;
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = node.getAugmentation(OvsdbNodeAugmentation.class);
+        if (ovsdbNodeAugmentation != null) {
+            connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
+        }
+        return connectionInfo;
+    }
+
+    public static OvsdbBridgeAugmentation getBridge(Node node, String name) {
+        OvsdbBridgeAugmentation ovsdbBridgeAugmentation = null;
+        ConnectionInfo connectionInfo = MdsalUtils.getConnectionInfo(node);
+        if (connectionInfo != null) {
+            InstanceIdentifier<Node> bridgeIid =
+                    SouthboundMapper.createInstanceIdentifier(connectionInfo,
+                            new OvsdbBridgeName(name));
+            Node bridgeNode = MdsalUtils.read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
+            if (bridgeNode != null) {
+                ovsdbBridgeAugmentation = bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class);
+            }
+        }
+        return ovsdbBridgeAugmentation;
+    }
+
+    public static Uuid getBridgeUuid(Node node, String name) {
+        Uuid uuid = null;
+        OvsdbBridgeAugmentation ovsdbBridgeAugmentation = getBridge(node, name);
+        if (ovsdbBridgeAugmentation != null) {
+            uuid = ovsdbBridgeAugmentation.getBridgeUuid();
+        }
+        return uuid;
+    }
+
+    public static boolean addBridge(Node ovsdbNode, String bridgeName)
+            throws InterruptedException, InvalidParameterException {
+        boolean result = false;
+
+        ConnectionInfo connectionInfo = getConnectionInfo(ovsdbNode);
+        if (connectionInfo != null) {
+            NodeBuilder bridgeNodeBuilder = new NodeBuilder();
+            InstanceIdentifier<Node> bridgeIid =
+                    SouthboundMapper.createInstanceIdentifier(connectionInfo, new OvsdbBridgeName(bridgeName));
+            NodeId bridgeNodeId = SouthboundMapper.createManagedNodeId(bridgeIid);
+            bridgeNodeBuilder.setNodeId(bridgeNodeId);
+            OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
+            ovsdbBridgeAugmentationBuilder.setBridgeName(new OvsdbBridgeName(bridgeName));
+            ovsdbBridgeAugmentationBuilder.setProtocolEntry(createMdsalProtocols());
+            ovsdbBridgeAugmentationBuilder.setFailMode(
+                    SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"));
+            //setManagedBy(ovsdbBridgeAugmentationBuilder, connectionInfo);
+            bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbBridgeAugmentationBuilder.build());
+
+            result = merge(LogicalDatastoreType.CONFIGURATION, bridgeIid, bridgeNodeBuilder.build());
+            Thread.sleep(OVSDB_UPDATE_TIMEOUT);
+        } else {
+            throw new InvalidParameterException("Could not find ConnectionInfo");
+        }
+
+        return result;
+    }
+
+    private static void setManagedBy(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
+                              ConnectionInfo connectionInfo) {
+        InstanceIdentifier<Node> connectionNodePath = SouthboundMapper.createInstanceIdentifier(connectionInfo);
+        ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath));
+    }
+
+    private static List<ProtocolEntry> createMdsalProtocols() {
+        List<ProtocolEntry> protocolList = new ArrayList<ProtocolEntry>();
+        ImmutableBiMap<String, Class<? extends OvsdbBridgeProtocolBase>> mapper =
+                SouthboundConstants.OVSDB_PROTOCOL_MAP.inverse();
+        protocolList.add(new ProtocolEntryBuilder().
+                setProtocol((Class<? extends OvsdbBridgeProtocolBase>) mapper.get("OpenFlow13")).build());
+        return protocolList;
+    }
+
+    public static OvsdbTerminationPointAugmentation getTerminationPointAugmentation(Node bridgeNode, String portName) {
+        OvsdbBridgeAugmentation ovsdbBridgeAugmentation = bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class);
+        if (ovsdbBridgeAugmentation != null) {
+            List<TerminationPoint> terminationPoints = bridgeNode.getTerminationPoint();
+            for(TerminationPoint terminationPoint : terminationPoints) {
+                OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
+                        terminationPoint.getAugmentation( OvsdbTerminationPointAugmentation.class);
+                if (ovsdbTerminationPointAugmentation != null
+                        && ovsdbTerminationPointAugmentation.getName().equals(portName)) {
+                    return ovsdbTerminationPointAugmentation;
+                }
+            }
+        }
+        return null;
+    }
 }

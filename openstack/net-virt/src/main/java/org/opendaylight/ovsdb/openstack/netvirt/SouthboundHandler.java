@@ -16,12 +16,16 @@ import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.api.*;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
+import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.utils.mdsal.node.StringConvertor;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 import org.slf4j.Logger;
@@ -54,7 +58,7 @@ public class SouthboundHandler extends AbstractHandler
 
     @Override
     public void ovsdbNodeAdded(Node node) {
-        logger.info("nodeAdded: {}", node);
+        logger.info("ovsdbNodeAdded: {}", node);
         this.enqueueEvent(new SouthboundEvent(node, Action.ADD));
     }
 
@@ -115,10 +119,11 @@ public class SouthboundHandler extends AbstractHandler
         this.enqueueEvent(new SouthboundEvent(node, tableName, uuid, row, context, Action.DELETE));
     }
 
-    public void processNodeUpdate(Node node, Action action) {
-        if (action == Action.DELETE) return;
-        logger.trace("Process Node added {}", node);
-        bridgeConfigurationManager.prepareNode(node);
+    public void processOvsdbNodeAdded(Node node, Action action) {
+        if (action == Action.ADD) {
+            logger.trace("processOvsdbNodeAdded {}", node);
+            bridgeConfigurationManager.prepareNode(node);
+        }
     }
 
     private void processRowUpdate(Node node, String tableName, String uuid, Row row,
@@ -141,7 +146,7 @@ public class SouthboundHandler extends AbstractHandler
                     deletedIntf.getTypeColumn().getData().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE) ||
                     phyIfName.contains(deletedIntf.getName())) {
                     /* delete tunnel interfaces or physical interfaces */
-                    this.handleInterfaceDelete(node, uuid, deletedIntf, false, null);
+                    //this.handleInterfaceDelete(node, uuid, deletedIntf, false, null);
                 } else if (network != null && !network.getRouterExternal()) {
                     logger.debug("Processing update of {}:{} node {} intf {} network {}",
                             tableName, action, node, uuid, network.getNetworkUUID());
@@ -156,7 +161,7 @@ public class SouthboundHandler extends AbstractHandler
                                 NeutronNetwork neutronNetwork = tenantNetworkManager.getTenantNetwork(intf);
                                 if (neutronNetwork != null && neutronNetwork.equals(network)) isLastInstanceOnNode = false;
                             }
-                            this.handleInterfaceDelete(node, uuid, deletedIntf, isLastInstanceOnNode, network);
+                            //this.handleInterfaceDelete(node, uuid, deletedIntf, isLastInstanceOnNode, network);
                         }
                     } catch (Exception e) {
                         logger.error("Error fetching Interface Rows for node " + node, e);
@@ -182,7 +187,7 @@ public class SouthboundHandler extends AbstractHandler
                                  network.getNetworkUUID(), network.getNetworkName(), vlan);
                     }
                 }
-                this.handleInterfaceUpdate(node, uuid, intf);
+                //this.handleInterfaceUpdate(node, uuid, intf);
             }
 
         } else if (tableName.equalsIgnoreCase(ovsdbConfigurationService.getTableName(node, Port.class))) {
@@ -201,7 +206,7 @@ public class SouthboundHandler extends AbstractHandler
                          logger.debug("Processing update of {}:{} node {} intf {} network {}",
                                  tableName, action, node, intfUUID, network.getNetworkUUID());
                         tenantNetworkManager.programInternalVlan(node, uuid, network);
-                        this.handleInterfaceUpdate(node, intfUUID.toString(), intf);
+                        //this.handleInterfaceUpdate(node, intfUUID.toString(), intf);
                     } else {
                         logger.trace("Ignoring update because there is not a neutron network {} for port {}, interface {}",
                                 network, uuid, intfUUID);
@@ -218,7 +223,7 @@ public class SouthboundHandler extends AbstractHandler
                 if (interfaces != null) {
                     for (String intfUUID : interfaces.keySet()) {
                         Interface intf = ovsdbConfigurationService.getTypedRow(node, Interface.class, interfaces.get(intfUUID));
-                        this.handleInterfaceUpdate(node, intfUUID, intf);
+                        //this.handleInterfaceUpdate(node, intfUUID, intf);
                     }
                 }
             } catch (Exception e) {
@@ -239,30 +244,33 @@ public class SouthboundHandler extends AbstractHandler
         }
     }
 
-    private void handleInterfaceUpdate (Node node, String uuid, Interface intf) {
-        logger.trace("Interface update of node: {}, uuid: {}", node, uuid);
-        NeutronNetwork network = tenantNetworkManager.getTenantNetwork(intf);
+    private void handleInterfaceUpdate (Node node, String portName) {
+        OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
+                MdsalUtils.getTerminationPointAugmentation(node, portName);
+        logger.trace("Interface update of node: {}, portName: {}", node, portName);
+        NeutronNetwork network = tenantNetworkManager.getTenantNetwork(ovsdbTerminationPointAugmentation);
         if (network != null) {
-            neutronL3Adapter.handleInterfaceEvent(node, intf, network, Action.UPDATE);
+            neutronL3Adapter.handleInterfaceEvent(node, ovsdbTerminationPointAugmentation, network, Action.UPDATE);
             if (bridgeConfigurationManager.createLocalNetwork(node, network))
-                networkingProviderManager.getProvider(node).handleInterfaceUpdate(network, node, intf);
+                networkingProviderManager.getProvider(node).handleInterfaceUpdate(network, node,
+                        ovsdbTerminationPointAugmentation);
         } else {
-            logger.debug("No tenant network found on node: {}, uuid: {} for interface: {}", node, uuid, intf);
+            logger.debug("No tenant network found on node: {}, portName: {} for interface: {}",
+                    node, portName, ovsdbTerminationPointAugmentation);
         }
     }
 
-    private void handleInterfaceDelete (Node node, String uuid, Interface intf, boolean isLastInstanceOnNode,
+    private void handleInterfaceDelete (Node node, OvsdbTerminationPointAugmentation intf, boolean isLastInstanceOnNode,
                                         NeutronNetwork network) {
-        logger.debug("handleInterfaceDelete: node: {}, uuid: {}, isLastInstanceOnNode: {}, interface: {}",
-                node, uuid, isLastInstanceOnNode, intf);
+        logger.debug("handleInterfaceDelete: node: {}, isLastInstanceOnNode: {}, interface: {}",
+                node, isLastInstanceOnNode, intf);
 
         neutronL3Adapter.handleInterfaceEvent(node, intf, network, Action.DELETE);
         List<String> phyIfName = bridgeConfigurationManager.getAllPhysicalInterfaceNames(node);
-        if (intf.getTypeColumn().getData().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) ||
-            intf.getTypeColumn().getData().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE) ||
-            phyIfName.contains(intf.getName())) {
+        if (isInterfaceOfInterest(intf, phyIfName)) {
             /* delete tunnel or physical interfaces */
-            networkingProviderManager.getProvider(node).handleInterfaceDelete(intf.getTypeColumn().getData(), null, node, intf, isLastInstanceOnNode);
+            //networkingProviderManager.getProvider(node).handleInterfaceDelete(intf.getTypeColumn().getData(), null,
+            //        node, intf, isLastInstanceOnNode);
         } else if (network != null) {
             if (!network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) { /* vlan doesn't need a tunnel endpoint */
                 if (configurationService.getTunnelEndPoint(node) == null) {
@@ -271,7 +279,7 @@ public class SouthboundHandler extends AbstractHandler
                 }
             }
             if (isLastInstanceOnNode & networkingProviderManager.getProvider(node).hasPerTenantTunneling()) {
-                tenantNetworkManager.reclaimInternalVlan(node, uuid, network);
+                tenantNetworkManager.reclaimInternalVlan(node, network);
             }
             networkingProviderManager.getProvider(node).handleInterfaceDelete(network.getProviderNetworkType(), network, node, intf, isLastInstanceOnNode);
         }
@@ -321,41 +329,68 @@ public class SouthboundHandler extends AbstractHandler
         }
     }
 
-    /**
-     * Process the event.
-     *
-     * @param abstractEvent the {@link org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent} event to be handled.
-     * @see EventDispatcher
-     */
-    @Override
-    public void processEvent(AbstractEvent abstractEvent) {
-        if (!(abstractEvent instanceof SouthboundEvent)) {
-            logger.error("Unable to process abstract event " + abstractEvent);
-            return;
+    private void processBridgeUpdate(Node node, OvsdbBridgeAugmentation bridge, Action action) {
+        logger.debug("processBridgeUpdate {}: {}, {}", action, node, bridge);
+        final String dpid = bridge.getDatapathId().getValue();
+        if (dpid != null
+                && (bridge.getBridgeName().equals(configurationService.getIntegrationBridgeName())
+                || bridge.getBridgeName().equals(configurationService.getExternalBridgeName()))) {
+            NetworkingProvider networkingProvider = networkingProviderManager.getProvider(node);
+            networkingProvider.notifyFlowCapableNodeEvent(StringConvertor.dpidStringToLong(dpid), action);
         }
-        SouthboundEvent ev = (SouthboundEvent) abstractEvent;
-        //logger.info("processEvent: {}", ev);
-        switch (ev.getType()) {
-            case NODE:
-                try {
-                    processNodeUpdate(ev.getNode(), ev.getAction());
-                } catch (Exception e) {
-                    logger.error("Exception caught in ProcessNodeUpdate for node " + ev.getNode(), e);
-                }
-                break;
-            case ROW:
-                try {
-                    processRowUpdate(ev.getNode(), ev.getTableName(), ev.getUuid(), ev.getRow(),
-                                     ev.getContext(),ev.getAction());
-                } catch (Exception e) {
-                    logger.error("Exception caught in ProcessRowUpdate for node " + ev.getNode(), e);
-                }
-                break;
-            default:
-                logger.warn("Unable to process type " + ev.getType() +
-                            " action " + ev.getAction() + " for node " + ev.getNode());
-                break;
+    }
+
+    private void processInterfaceDelete(Node node, String portName, Object context, Action action) {
+        OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
+                MdsalUtils.getTerminationPointAugmentation(node, portName);
+        logger.debug("processInterfaceDelete {}: {}", node, portName);
+        NeutronNetwork network = null;
+        if (context == null) {
+            network = tenantNetworkManager.getTenantNetwork(ovsdbTerminationPointAugmentation);
+        } else {
+            network = (NeutronNetwork)context;
         }
+        List<String> phyIfName = bridgeConfigurationManager.getAllPhysicalInterfaceNames(node);
+        if (isInterfaceOfInterest(ovsdbTerminationPointAugmentation, phyIfName)) {
+            this.handleInterfaceDelete(node, ovsdbTerminationPointAugmentation, false, null);
+        } else if (network != null && !network.getRouterExternal()) {
+            /*logger.debug("Processing update of {}:{} node {} intf {} network {}",
+                    tableName, action, node, uuid, network.getNetworkUUID());
+            try {
+                ConcurrentMap<String, Row> interfaces = this.ovsdbConfigurationService
+                        .getRows(node, ovsdbConfigurationService.getTableName(node, Interface.class));
+                if (interfaces != null) {
+                    boolean isLastInstanceOnNode = true;
+                    for (String intfUUID : interfaces.keySet()) {
+                        if (intfUUID.equals(uuid)) continue;
+                        Interface intf = this.ovsdbConfigurationService.getTypedRow(node, Interface.class, interfaces.get(intfUUID));
+                        NeutronNetwork neutronNetwork = tenantNetworkManager.getTenantNetwork(intf);
+                        if (neutronNetwork != null && neutronNetwork.equals(network)) isLastInstanceOnNode = false;
+                    }
+                    this.handleInterfaceDelete(node, uuid, deletedIntf, isLastInstanceOnNode, network);
+                }
+            } catch (Exception e) {
+                logger.error("Error fetching Interface Rows for node " + node, e);
+            }*/
+        }
+    }
+    private void processInterfaceUpdate(Node node, OvsdbTerminationPointAugmentation terminationPoint,
+                                        String portName, Object context, Action action) {
+        if (action == Action.DELETE) {
+            processInterfaceDelete(node, portName, context, action);
+        } else {
+
+        }
+    }
+
+    private boolean isInterfaceOfInterest(OvsdbTerminationPointAugmentation terminationPoint, List<String> phyIfName) {
+        return (SouthboundMapper.createOvsdbInterfaceType(
+                terminationPoint.getInterfaceType()).equals(NetworkHandler.NETWORK_TYPE_VXLAN)
+                ||
+                SouthboundMapper.createOvsdbInterfaceType(
+                        terminationPoint.getInterfaceType()).equals(NetworkHandler.NETWORK_TYPE_GRE)
+                ||
+                phyIfName.contains(terminationPoint.getName()));
     }
 
     /**
@@ -376,6 +411,58 @@ public class SouthboundHandler extends AbstractHandler
              * Need to map from ovsdbNode to openflowNode
              */
             //networkingProviderManager.getProvider(ovsdbNode).initializeOFFlowRules(openFlowNode);
+        }
+    }
+
+    /**
+     * Process the event.
+     *
+     * @param abstractEvent the {@link org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent} event to be handled.
+     * @see EventDispatcher
+     */
+    @Override
+    public void processEvent(AbstractEvent abstractEvent) {
+        if (!(abstractEvent instanceof SouthboundEvent)) {
+            logger.error("Unable to process abstract event " + abstractEvent);
+            return;
+        }
+        SouthboundEvent ev = (SouthboundEvent) abstractEvent;
+        logger.info("processEvent: {}", ev);
+        switch (ev.getType()) {
+            case NODE:
+                try {
+                    processOvsdbNodeAdded(ev.getNode(), ev.getAction());
+                } catch (Exception e) {
+                    logger.error("Exception caught in ProcessNodeUpdate for node " + ev.getNode(), e);
+                }
+                break;
+            case ROW:
+                try {
+                    processRowUpdate(ev.getNode(), ev.getTableName(), ev.getUuid(), ev.getRow(),
+                            ev.getContext(), ev.getAction());
+                } catch (Exception e) {
+                    logger.error("Exception caught in ProcessRowUpdate for node " + ev.getNode(), e);
+                }
+                break;
+            case BRIDGE:
+                try {
+                    processBridgeUpdate(ev.getNode(), ev.getBridge(), ev.getAction());
+                } catch (Exception e) {
+                    logger.error("Exception caught in processBridgeUpdate for node {}", ev.getNode(), e);
+                }
+                break;
+            case PORT:
+                try {
+                    processInterfaceUpdate(ev.getNode(), ev.getPort(), ev.getPortName(),
+                            ev.getContext(), ev.getAction());
+                } catch (Exception e) {
+                    logger.error("Exception caught in processInterfaceUpdate for node {}", ev.getNode(), e);
+                }
+                break;
+            default:
+                logger.warn("Unable to process type " + ev.getType() +
+                        " action " + ev.getAction() + " for node " + ev.getNode());
+                break;
         }
     }
 }

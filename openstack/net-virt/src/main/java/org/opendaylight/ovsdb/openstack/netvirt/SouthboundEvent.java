@@ -12,16 +12,21 @@ package org.opendaylight.ovsdb.openstack.netvirt;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 //import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 public class SouthboundEvent extends AbstractEvent {
-    public enum Type { NODE, ROW }
+    public enum Type { NODE, ROW, OPENVSWITCH, BRIDGE, PORT }
     private Type type;
     private Node node;
     private String tableName;
     private String uuid;
     private Row row;
     private Object context;
+    private OvsdbBridgeAugmentation bridge;
+    private OvsdbTerminationPointAugmentation port;
+    private String portName;
     public SouthboundEvent(Node node, Action action) {
         super(HandlerType.SOUTHBOUND, action);
         this.type = Type.NODE;
@@ -44,6 +49,20 @@ public class SouthboundEvent extends AbstractEvent {
         this.row = row;
         this.context = context;
     }
+    public SouthboundEvent(Node node, OvsdbBridgeAugmentation bridge, Action action) {
+        super(HandlerType.SOUTHBOUND, action);
+        this.type = Type.BRIDGE;
+        this.node = node;
+        this.bridge = bridge;
+    }
+    public SouthboundEvent(Node node, OvsdbTerminationPointAugmentation port, String portName, Action action) {
+        super(HandlerType.SOUTHBOUND, action);
+        this.type = Type.PORT;
+        this.node = node;
+        this.port = port;
+        this.portName = portName;
+    }
+
     public Type getType() {
         return type;
     }
@@ -61,6 +80,15 @@ public class SouthboundEvent extends AbstractEvent {
     }
     public Object getContext() {
         return context;
+    }
+    public OvsdbBridgeAugmentation getBridge() {
+        return bridge;
+    }
+    public OvsdbTerminationPointAugmentation getPort() {
+        return port;
+    }
+    public String getPortName() {
+        return portName;
     }
     @Override
     public String toString() {

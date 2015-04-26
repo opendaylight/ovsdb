@@ -12,6 +12,7 @@ package org.opendaylight.ovsdb.openstack.netvirt.api;
 
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 /**
@@ -42,12 +43,13 @@ public interface NetworkingProvider {
     /**
      * Handle Interface Update Callback Method
      */
-    public Status handleInterfaceUpdate(NeutronNetwork network, Node source, Interface intf);
+    public Status handleInterfaceUpdate(NeutronNetwork network, Node source, OvsdbTerminationPointAugmentation intf);
 
     /**
      * Handle Interface Delete Callback Method
      */
-    public Status handleInterfaceDelete(String tunnelType, NeutronNetwork network, Node source, Interface intf, boolean isLastInstanceOnNode);
+    public Status handleInterfaceDelete(String tunnelType, NeutronNetwork network, Node source,
+                                        OvsdbTerminationPointAugmentation intf, boolean isLastInstanceOnNode);
 
     /**
      * Initialize the Flow rules given the OVSDB node.

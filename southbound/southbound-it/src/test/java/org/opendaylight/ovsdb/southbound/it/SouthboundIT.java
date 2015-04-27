@@ -103,9 +103,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static String addressStr;
     private static String portStr;
     private static String connectionType;
+    private static String extrasStr;
     private static Boolean setup = false;
     private static MdsalUtils mdsalUtils = null;
-    private static String extras = "true";
+    //private static String extras = "false";
     private static final String NETVIRT = "org.opendaylight.ovsdb.openstack.net-virt";
     private static final String NETVIRTPROVIDERS = "org.opendaylight.ovsdb.openstack.net-virt-providers";
 
@@ -139,6 +140,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     @Override
     public String getFeatureName() {
+        //setExtras();
         return "odl-ovsdb-southbound-impl-ui";
     }
 
@@ -149,19 +151,19 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Override
-    public Option[] getFeaturesOptions() {
-        /*if (extras.equals("true")) {
+    public Option[] getFeaturesOptions(boolean extras) {
+        if (extras == true) {
             Option[] options = new Option[] {
                     features("mvn:org.opendaylight.ovsdb/features-ovsdb/1.1.0-SNAPSHOT/xml/features",
                             "odl-ovsdb-openstack-sb")};
             return options;
-        } else {*/
+        } else {
             return new Option[]{};
-        //}
+        }
     }
 
     @Override
-    public Option[] getLoggingOptions() {
+    public Option[] getLoggingOptions(boolean extras) {
         Option[] options = new Option[] {
                 editConfigurationFilePut(SouthboundITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
                         "log4j.logger.org.opendaylight.ovsdb",
@@ -171,8 +173,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         LogLevelOption.LogLevel.DEBUG.name())*/
         };
 
-        LOG.info("getLoggingOptions extras: {}", extras);
-        if (extras.equals("true")) {
+        if (extras == true) {
             Option[] extraOptions = new Option[] {
                 editConfigurationFilePut(SouthboundITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
                         "log4j.logger.org.opendaylight.ovsdb",
@@ -184,12 +185,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             options = ObjectArrays.concat(options, extraOptions, Option.class);
         }
 
-        options = ObjectArrays.concat(options, super.getLoggingOptions(), Option.class);
+        options = ObjectArrays.concat(options, super.getLoggingOptions(extras), Option.class);
         return options;
     }
 
     @Override
-    public Option[] getPropertiesOptions() {
+    public Option[] getPropertiesOptions(boolean extras) {
         Properties props = new Properties(System.getProperties());
         String addressStr = props.getProperty(SouthboundITConstants.SERVER_IPADDRESS,
                 SouthboundITConstants.DEFAULT_SERVER_IPADDRESS);
@@ -197,11 +198,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 SouthboundITConstants.DEFAULT_SERVER_PORT);
         String connectionType = props.getProperty(SouthboundITConstants.CONNECTION_TYPE,
                 SouthboundITConstants.CONNECTION_TYPE_ACTIVE);
-        String extras = props.getProperty(SouthboundITConstants.SERVER_EXTRAS,
+        String extrasStr = props.getProperty(SouthboundITConstants.SERVER_EXTRAS,
                 SouthboundITConstants.DEFAULT_SERVER_EXTRAS);
 
         LOG.info("getPropertiesOptions: Using the following properties: mode= {}, ip:port= {}:{}, extras= {}",
-                connectionType, addressStr, portStr, extras);
+                connectionType, addressStr, portStr, extrasStr);
 
         Option[] options = new Option[] {
                 editConfigurationFilePut(SouthboundITConstants.CUSTOM_PROPERTIES,
@@ -211,18 +212,17 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 editConfigurationFilePut(SouthboundITConstants.CUSTOM_PROPERTIES,
                         SouthboundITConstants.CONNECTION_TYPE, connectionType),
                 editConfigurationFilePut(SouthboundITConstants.CUSTOM_PROPERTIES,
-                        SouthboundITConstants.SERVER_EXTRAS, extras)
+                        SouthboundITConstants.SERVER_EXTRAS, extrasStr)
         };
         return options;
     }
 
-    @Override
-    public void setExtras() {
+    public boolean setExtras() {
         Properties props = new Properties(System.getProperties());
-        extras = props.getProperty(SouthboundITConstants.SERVER_EXTRAS,
-                SouthboundITConstants.DEFAULT_SERVER_EXTRAS);
+        boolean extras = props.getProperty(SouthboundITConstants.SERVER_EXTRAS,
+                SouthboundITConstants.DEFAULT_SERVER_EXTRAS).equals("true");
         LOG.info("setExtras: {}", extras);
-        System.out.println("setExtras: " + extras);
+        return extras;
     }
 
     @Before
@@ -245,9 +245,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         addressStr = bundleContext.getProperty(SouthboundITConstants.SERVER_IPADDRESS);
         portStr = bundleContext.getProperty(SouthboundITConstants.SERVER_PORT);
         connectionType = bundleContext.getProperty(SouthboundITConstants.CONNECTION_TYPE);
+        extrasStr = bundleContext.getProperty(SouthboundITConstants.SERVER_EXTRAS);
 
         LOG.info("setUp: Using the following properties: mode= {}, ip:port= {}:{}, extras= {}",
-                connectionType, addressStr, portStr, extras);
+                connectionType, addressStr, portStr, extrasStr);
         if (connectionType.equalsIgnoreCase(SouthboundITConstants.CONNECTION_TYPE_ACTIVE)) {
             if (addressStr == null) {
                 fail(usage());
@@ -257,9 +258,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         mdsalUtils = new MdsalUtils(dataBroker);
         setup = true;
 
-        //setExtras();
-        LOG.info("setUp: extras: {}", extras);
-        if (extras.equals("true")) {
+        if (extrasStr.equals("true")) {
             isBundleReady(bundleContext, NETVIRT);
             isBundleReady(bundleContext, NETVIRTPROVIDERS);
         }
@@ -365,8 +364,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private boolean disconnectOvsdbNode(ConnectionInfo connectionInfo) throws InterruptedException {
         Assert.assertTrue(deleteOvsdbNode(connectionInfo));
         Node node = getOvsdbNode(connectionInfo);
-        //Assert.assertNull(node);
-        Assume.assumeNotNull(node);
+        Assert.assertNull(node);
+        //Assume.assumeNotNull(node); // Using assumeNotNull because there is no assumeNull
         LOG.info("Disconnected from {}", connectionInfoToString(connectionInfo));
         return true;
     }
@@ -375,17 +374,19 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     public void testAddDeleteOvsdbNode() throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
         Node ovsdbNode = connectOvsdbNode(connectionInfo);
-        //Assert.assertFalse(disconnectOvsdbNode(connectionInfo));
-        Assume.assumeTrue(disconnectOvsdbNode(connectionInfo));
+        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+        //Assume.assumeTrue(disconnectOvsdbNode(connectionInfo));
     }
 
     @Test
     public void testOvsdbNodeOvsVersion() throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
         Node ovsdbNode = connectOvsdbNode(connectionInfo);
-        OvsdbNodeAugmentation augment = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
-        assertNotNull(augment.getOvsVersion());
-        Assume.assumeTrue(disconnectOvsdbNode(connectionInfo));
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+        Assert.assertNotNull(ovsdbNodeAugmentation);
+        assertNotNull(ovsdbNodeAugmentation.getOvsVersion());
+        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+        //Assume.assumeTrue(disconnectOvsdbNode(connectionInfo));
     }
 
     @Test
@@ -393,7 +394,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
         Node ovsdbNode = connectOvsdbNode(connectionInfo);
         OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
-        assertNotNull(ovsdbNodeAugmentation);
+        Assert.assertNotNull(ovsdbNodeAugmentation);
         List<OpenvswitchOtherConfigs> otherConfigsList = ovsdbNodeAugmentation.getOpenvswitchOtherConfigs();
         if (otherConfigsList != null) {
             for (OpenvswitchOtherConfigs otherConfig : otherConfigsList) {
@@ -407,8 +408,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         } else {
             LOG.info("other_config is not present");
         }
-        //Assert.assertFalse(disconnectOvsdbNode(connectionInfo));
-        Assume.assumeTrue(disconnectOvsdbNode(connectionInfo));
+        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+        //Assume.assumeTrue(disconnectOvsdbNode(connectionInfo));
     }
 
     private void setManagedBy(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
@@ -458,7 +459,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     private boolean addBridge(ConnectionInfo connectionInfo, String bridgeName) throws InterruptedException {
-        //Node node = SouthboundMapper.createNode(connectionInfo);
         NodeBuilder bridgeNodeBuilder = new NodeBuilder();
         InstanceIdentifier<Node> bridgeIid =
                 SouthboundMapper.createInstanceIdentifier(connectionInfo, new OvsdbBridgeName(bridgeName));
@@ -512,8 +512,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         Assert.assertTrue(deleteBridge(connectionInfo));
 
-        //Assert.assertFalse(disconnectOvsdbNode(connectionInfo));
-        Assume.assumeTrue(disconnectOvsdbNode(connectionInfo));
+        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+        //Assume.assumeTrue(disconnectOvsdbNode(connectionInfo));
     }
 
     private InstanceIdentifier<Node> getTpIid(ConnectionInfo connectionInfo, OvsdbBridgeAugmentation bridge) {
@@ -1007,7 +1007,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
         Node ovsdbNode = connectOvsdbNode(connectionInfo);
-        //Assert.assertFalse(disconnectOvsdbNode(connectionInfo));
-        Assume.assumeTrue(disconnectOvsdbNode(connectionInfo));
+        Assert.assertFalse(disconnectOvsdbNode(connectionInfo));
+        //Assume.assumeTrue(disconnectOvsdbNode(connectionInfo));
     }
 }

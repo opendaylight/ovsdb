@@ -82,7 +82,8 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
         for (Map.Entry<InstanceIdentifier<?>, DataObject> created : changes.getCreatedData().entrySet()) {
             // TODO validate we have the correct kind of InstanceIdentifier
             if (created.getValue() instanceof OvsdbNodeAugmentation) {
-                Map<InstanceIdentifier<Node>,Node> nodeMap = extractCreated(changes, Node.class);
+                //Map<InstanceIdentifier<Node>,Node> nodeMap = extractCreated(changes, Node.class);
+                Map<InstanceIdentifier<Node>,Node> nodeMap = TransactUtils.extractNode(changes.getCreatedData());
                 LOG.info("nodeMap: {}", nodeMap);
                 for (Map.Entry<InstanceIdentifier<Node>, Node> ovsdbNode: nodeMap.entrySet()) {
                     notifyNodeAdded(ovsdbNode.getValue());

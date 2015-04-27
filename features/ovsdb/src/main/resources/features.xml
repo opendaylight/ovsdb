@@ -73,6 +73,7 @@
     <bundle>mvn:org.opendaylight.ovsdb/schema.openvswitch/${schema.openvswitch.version}</bundle>
     <feature version="${openflowplugin.version}">odl-openflowplugin-nsf-services</feature>
     <feature version="1.1.0-SNAPSHOT">odl-ovsdb-southbound-impl-ui</feature>
+    <feature version="${openflowplugin.version}">odl-openflowplugin-nsf-services</feature>
     <feature version="${openflowplugin.version}">odl-openflowplugin-nxm-extensions</feature>
     <feature version="${openflowplugin.version}">odl-openflowplugin-southbound</feature>
     <feature version="${openflowplugin.version}">odl-openflowplugin-flow-services</feature>

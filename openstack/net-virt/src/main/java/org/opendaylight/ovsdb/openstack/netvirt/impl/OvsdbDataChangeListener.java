@@ -12,6 +12,7 @@ import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryListener;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
+import org.opendaylight.ovsdb.southbound.SouthboundProvider;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
@@ -42,15 +43,16 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
     private ListenerRegistration<DataChangeListener> registration;
 
     public OvsdbDataChangeListener (DataBroker dataBroker) {
-        LOG.info(">>>>> Registering OvsdbNodeDataChangeListener");
+        LOG.info(">>>>> Registering OvsdbNodeDataChangeListener: dataBroker= {}", dataBroker);
         this.dataBroker = dataBroker;
+        //this.dataBroker = SouthboundProvider.getDb();
         InstanceIdentifier<Node> path = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
                 .child(Node.class);
-        registration =
-                dataBroker.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, path, this,
-                        DataChangeScope.SUBTREE);
+        registration = dataBroker.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, path, this,
+                DataChangeScope.SUBTREE);
+        LOG.info("netvirt OvsdbDataChangeListener: registration= {}", registration);
     }
 
     @Override
@@ -60,7 +62,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
     @Override
     public void onDataChanged(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        LOG.trace("onDataChanged: {}", changes);
+        LOG.info(">>>>> onDataChanged: {}", changes);
 
         updateConnections(changes);
     }
@@ -73,14 +75,15 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extractCreated(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,Class<T> klazz) {
-        return TransactUtils.extractCreated(changes, klazz);
+        return TransactUtils.extract(changes.getCreatedData(), klazz);
     }
 
     private void updateConnections(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
         for (Map.Entry<InstanceIdentifier<?>, DataObject> created : changes.getCreatedData().entrySet()) {
             // TODO validate we have the correct kind of InstanceIdentifier
             if (created.getValue() instanceof OvsdbNodeAugmentation) {
-                Map<InstanceIdentifier<Node>,Node> nodeMap = TransactUtils.extractCreated(changes, Node.class);
+                Map<InstanceIdentifier<Node>,Node> nodeMap = extractCreated(changes, Node.class);
+                LOG.info("nodeMap: {}", nodeMap);
                 for (Map.Entry<InstanceIdentifier<Node>, Node> ovsdbNode: nodeMap.entrySet()) {
                     notifyNodeAdded(ovsdbNode.getValue());
                 }

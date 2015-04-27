@@ -47,6 +47,25 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <features.file>features.xml</features.file>
   </properties>
 
+  <dependencyManagement>
+    <dependencies>
+      <!-- project specific dependencies -->
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>yangtools-artifacts</artifactId>
+        <version>${yangtools.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>mdsal-artifacts</artifactId>
+        <version>${mdsal.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
   <dependencies>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -188,6 +207,46 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <groupId>orbit</groupId>
       <artifactId>org.apache.tomcat.util</artifactId>
       <version>7.0.53.v201406070630</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>features-yangtools</artifactId>
+      <type>xml</type>
+      <classifier>features</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>features-mdsal</artifactId>
+      <type>xml</type>
+      <classifier>features</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>features-restconf</artifactId>
+      <type>xml</type>
+      <classifier>features</classifier>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>southbound-features</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>southbound-impl</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>southbound-impl</artifactId>
+      <version>${project.version}</version>
+      <type>xml</type>
+      <classifier>config</classifier>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>southbound-api</artifactId>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
   <build>

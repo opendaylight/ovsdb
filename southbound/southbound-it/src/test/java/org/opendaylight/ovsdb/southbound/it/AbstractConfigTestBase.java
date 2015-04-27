@@ -9,7 +9,7 @@ package org.opendaylight.ovsdb.southbound.it;
 
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
-//import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 
@@ -52,6 +52,8 @@ public abstract class AbstractConfigTestBase {
 
     public abstract String getFeatureName();
 
+    public void setExtras() {}
+
     public Option[] getLoggingOptions() {
         Option[] options = new Option[] {
                 editConfigurationFilePut(SouthboundITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
@@ -81,7 +83,8 @@ public abstract class AbstractConfigTestBase {
                 .type("zip");*/
         MavenArtifactUrlReference karafUrl = maven()
                 .groupId("org.opendaylight.ovsdb")
-                .artifactId("southbound-karaf")
+                //.artifactId("southbound-karaf")
+                .artifactId("karaf")
                 .version("1.1.0-SNAPSHOT")
                 .type("zip");
         return karafUrl;
@@ -89,6 +92,7 @@ public abstract class AbstractConfigTestBase {
 
     @Configuration
     public Option[] config() {
+        setExtras();
         Option[] options = new Option[] {
                 // KarafDistributionOption.debugConfiguration("5005", true),
                 karafDistributionConfiguration()
@@ -98,9 +102,10 @@ public abstract class AbstractConfigTestBase {
                 keepRuntimeFolder(),
                 //features(getFeatureRepo() , getFeatureName())
         };
-        options = ObjectArrays.concat(options, getFeaturesOptions(), Option.class);
+        //options = ObjectArrays.concat(options, getFeaturesOptions(), Option.class);
         options = ObjectArrays.concat(options, getLoggingOptions(), Option.class);
         options = ObjectArrays.concat(options, getPropertiesOptions(), Option.class);
+        LOG.info("options: {}", options);
         return options;
     }
 

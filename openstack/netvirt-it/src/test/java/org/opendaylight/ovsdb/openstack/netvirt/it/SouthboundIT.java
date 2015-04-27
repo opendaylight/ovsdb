@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.ovsdb.southbound.it;
+package org.opendaylight.ovsdb.openstack.netvirt.it;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
@@ -131,7 +131,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     public MavenUrlReference getFeatureRepo() {
         return maven()
                 .groupId("org.opendaylight.ovsdb")
-                .artifactId("southbound-features")
+                //.artifactId("southbound-features")
+                .artifactId("features-ovsdb")
                 .classifier("features")
                 .type("xml")
                 .versionAsInProject();
@@ -237,9 +238,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        //dataBroker = getSession().getSALService(DataBroker.class);
+        dataBroker = getSession().getSALService(DataBroker.class);
         Thread.sleep(3000);
-        dataBroker = SouthboundProvider.getDb();
+        //dataBroker = SouthboundProvider.getDb();
         Assert.assertNotNull("db should not be null", dataBroker);
 
         addressStr = bundleContext.getProperty(SouthboundITConstants.SERVER_IPADDRESS);

@@ -28,7 +28,7 @@ public abstract class AbstractMdsalTestBase extends AbstractConfigTestBase imple
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractMdsalTestBase.class);
     private static final int REGISTRATION_TIMEOUT = 10000;
-    @Inject @Filter(timeout = 240000)
+    @Inject @Filter(timeout = 60000)
     private BindingAwareBroker broker;
     private ProviderContext session = null;
 
@@ -63,11 +63,11 @@ public abstract class AbstractMdsalTestBase extends AbstractConfigTestBase imple
     @Override
     public Option[] getLoggingOptions() {
         Option[] options = new Option[] {
-                editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
+                editConfigurationFilePut(SouthboundITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
                         logConfiguration(AbstractMdsalTestBase.class),
                         LogLevel.INFO.name()),
         };
-        options = ObjectArrays.concat(options, super.getLoggingOptions(),Option.class);
+        options = ObjectArrays.concat(options, super.getLoggingOptions(), Option.class);
         return options;
     }
 

@@ -13,6 +13,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <repository>mvn:org.opendaylight.yangtools/features-yangtools/${yangtools.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.controller/features-mdsal/${mdsal.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.controller/features-restconf/${mdsal.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.ovsdb/features-ovsdb/1.1.0-SNAPSHOT/xml/features</repository>
   <feature name='odl-ovsdb-southbound-api' version='${project.version}' description='OpenDaylight :: southbound :: api '>
     <feature version='${yangtools.version}'>odl-yangtools-models</feature>
     <bundle>mvn:org.opendaylight.ovsdb/southbound-api/${project.version}</bundle>
@@ -44,5 +45,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <feature version="${mdsal.version}">odl-mdsal-apidocs</feature>
     <feature version="${mdsal.version}">odl-mdsal-xsql</feature>
   </feature>
+  <!--<feature name='odl-ovsdb-southbound-impl-ui-netvirt' version='${project.version}' description='OpenDaylight :: southbound :: impl :: UI netvirt'>
+    <feature version="${project.version}">odl-ovsdb-southbound-impl-ui</feature>
+    <feature version="${project.version}">odl-ovsdb-openstack-sb</feature>
+  </feature>-->
 
 </features>

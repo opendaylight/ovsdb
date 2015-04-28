@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_bca3689d",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-04-28T22:04:44Z",
+      "side": 1,
+      "message": "Going with prior art ...\nSchemaVersionMismatchException for datapath_type and iface_type report under debug.",
+      "parentUuid": "3aa0d159_dcc19481",
+      "revId": "02a1cfb66f3a988ddff58150dcde78213c8d0804",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_3c2d1847",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbBridgeUpdateCommand.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-04-28T20:54:13Z",
       "side": 1,
       "message": "might want to adjust the audoformat for your editor to avoid unrelated whitespace changes. looks like it wants to chop things down to 80 or 90 - or something that is shorter than 110 (I think 110 is the checkstyle limit)",
+      "revId": "02a1cfb66f3a988ddff58150dcde78213c8d0804",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_dca0b492",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbBridgeUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-04-28T22:04:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_3c2d1847",
       "revId": "02a1cfb66f3a988ddff58150dcde78213c8d0804",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

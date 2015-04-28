@@ -20,6 +20,7 @@ import java.util.Set;
 
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
+import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
@@ -285,7 +286,12 @@ public class SouthboundMapper {
     }
 
     public static List<ProtocolEntry> createMdsalProtocols(Bridge bridge) {
-        Set<String> protocols = bridge.getProtocolsColumn().getData();
+        Set<String> protocols = null;
+        try {
+            protocols = bridge.getProtocolsColumn().getData();
+        } catch (SchemaVersionMismatchException e) {
+            LOG.debug("protocols not supported by this version of ovsdb", e);
+        }
         List<ProtocolEntry> protocolList = new ArrayList<ProtocolEntry>();
         if (protocols != null && protocols.size() > 0) {
             ImmutableBiMap<String, Class<? extends OvsdbBridgeProtocolBase>> mapper =

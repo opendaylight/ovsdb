@@ -9,6 +9,7 @@ import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
@@ -153,19 +154,24 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                 new ArrayList<InstanceIdentifier<ProtocolEntry>>();
         Bridge oldBridge = oldBridgeRows.get(bridge.getUuid());
 
-        if (oldBridge != null && oldBridge.getProtocolsColumn() != null) {
-            for (String protocol: oldBridge.getProtocolsColumn().getData()) {
-                if (bridge.getProtocolsColumn() == null
-                        || !bridge.getProtocolsColumn().getData().contains(protocol)) {
-                    Class<? extends OvsdbBridgeProtocolBase> proto =
-                            SouthboundConstants.OVSDB_PROTOCOL_MAP.inverse().get(protocol);
-                    InstanceIdentifier<ProtocolEntry> iid = bridgeIid
-                            .augmentation(OvsdbBridgeAugmentation.class)
-                            .child(ProtocolEntry.class,
-                                    new ProtocolEntryKey(proto));
-                    result.add(iid);
+        try {
+            if (oldBridge != null && oldBridge.getProtocolsColumn() != null) {
+                for (String protocol : oldBridge.getProtocolsColumn().getData()) {
+                    if (bridge.getProtocolsColumn() == null
+                            || !bridge.getProtocolsColumn().getData()
+                                    .contains(protocol)) {
+                        Class<? extends OvsdbBridgeProtocolBase> proto = SouthboundConstants.OVSDB_PROTOCOL_MAP
+                                .inverse().get(protocol);
+                        InstanceIdentifier<ProtocolEntry> iid = bridgeIid
+                                .augmentation(OvsdbBridgeAugmentation.class)
+                                .child(ProtocolEntry.class,
+                                        new ProtocolEntryKey(proto));
+                        result.add(iid);
+                    }
                 }
             }
+        } catch (SchemaVersionMismatchException e) {
+            LOG.debug("protocol not supported by this version of ovsdb", e);
         }
         return result;
     }

@@ -16,6 +16,23 @@
       "revId": "02a1cfb66f3a988ddff58150dcde78213c8d0804",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_3c2d1847",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbBridgeUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-04-28T20:54:13Z",
+      "side": 1,
+      "message": "might want to adjust the audoformat for your editor to avoid unrelated whitespace changes. looks like it wants to chop things down to 80 or 90 - or something that is shorter than 110 (I think 110 is the checkstyle limit)",
+      "revId": "02a1cfb66f3a988ddff58150dcde78213c8d0804",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

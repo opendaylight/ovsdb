@@ -13,6 +13,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
@@ -162,19 +163,23 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                 new ArrayList<InstanceIdentifier<ProtocolEntry>>();
         Bridge oldBridge = oldBridgeRows.get(bridge.getUuid());
 
-        if (oldBridge != null && oldBridge.getProtocolsColumn() != null) {
-            for (String protocol: oldBridge.getProtocolsColumn().getData()) {
-                if (bridge.getProtocolsColumn() == null
-                        || !bridge.getProtocolsColumn().getData().contains(protocol)) {
-                    Class<? extends OvsdbBridgeProtocolBase> proto =
-                            SouthboundConstants.OVSDB_PROTOCOL_MAP.inverse().get(protocol);
-                    InstanceIdentifier<ProtocolEntry> iid = bridgeIid
-                            .augmentation(OvsdbBridgeAugmentation.class)
-                            .child(ProtocolEntry.class,
-                                    new ProtocolEntryKey(proto));
-                    result.add(iid);
+        try {
+            if (oldBridge != null && oldBridge.getProtocolsColumn() != null) {
+                for (String protocol : oldBridge.getProtocolsColumn().getData()) {
+                    if (bridge.getProtocolsColumn() == null || !bridge.getProtocolsColumn().getData()
+                                .contains(protocol)) {
+                        Class<? extends OvsdbBridgeProtocolBase> proto = SouthboundConstants.OVSDB_PROTOCOL_MAP
+                                .inverse().get(protocol);
+                        InstanceIdentifier<ProtocolEntry> iid = bridgeIid
+                                .augmentation(OvsdbBridgeAugmentation.class)
+                                .child(ProtocolEntry.class,
+                                        new ProtocolEntryKey(proto));
+                        result.add(iid);
+                    }
                 }
             }
+        } catch (SchemaVersionMismatchException e) {
+            LOG.warn("protocol not supported by this version of ovsdb", e);
         }
         return result;
     }
@@ -185,7 +190,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         try {
             node = transaction.read(LogicalDatastoreType.OPERATIONAL, connectionIid).checkedGet();
         } catch (final ReadFailedException e) {
-            LOG.debug("Read Operational/DS for Node fail! {}", connectionIid, e);
+            LOG.warn("Read Operational/DS for Node fail! {}", connectionIid, e);
         }
         return node;
     }
@@ -353,7 +358,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                         }
                     }
                 } catch (Exception e) {
-                    LOG.debug("Error getting local ip address {}", e);
+                    LOG.warn("Error getting local ip address {}", e);
                 }
             }
         }

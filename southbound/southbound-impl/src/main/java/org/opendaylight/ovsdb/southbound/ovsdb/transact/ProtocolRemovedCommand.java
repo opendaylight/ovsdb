@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
@@ -15,12 +16,15 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 
 public class ProtocolRemovedCommand extends AbstractTransactCommand {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ProtocolRemovedCommand.class);
     private Set<InstanceIdentifier<ProtocolEntry>> removed;
     private Map<InstanceIdentifier<ProtocolEntry>, ProtocolEntry> operationalProtocolEntries;
     private Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> updatedBridges;
@@ -48,8 +52,16 @@ public class ProtocolRemovedCommand extends AbstractTransactCommand {
                     String protocolString = SouthboundConstants.OVSDB_PROTOCOL_MAP.get(protocolEntry.getProtocol());
                     if (protocolString != null) {
                         bridge.setProtocols(Sets.newHashSet(protocolString));
-                        transaction.add(op.mutate(bridge).addMutation(bridge.getProtocolsColumn().getSchema(),
-                                Mutator.DELETE, bridge.getProtocolsColumn().getData()));
+                        try {
+                            transaction.add(op.mutate(bridge).addMutation(
+                                    bridge.getProtocolsColumn().getSchema(),
+                                    Mutator.DELETE,
+                                    bridge.getProtocolsColumn().getData()));
+                        } catch (SchemaVersionMismatchException e) {
+                            LOG.debug(
+                                    "protocol is not supported by this version of ovsdb",
+                                    e);
+                        }
                     }
                 }
             }

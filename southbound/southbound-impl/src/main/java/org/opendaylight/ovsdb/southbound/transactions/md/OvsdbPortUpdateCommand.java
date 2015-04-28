@@ -19,6 +19,7 @@ import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.ovsdb.lib.error.ColumnSchemaNotFoundException;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -333,8 +334,12 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
             final String bridge,
             final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
 
-        Set<Long> ofPortRequests = interf
-                .getOpenFlowPortRequestColumn().getData();
+        Set<Long> ofPortRequests = null;
+        try {
+            ofPortRequests = interf.getOpenFlowPortRequestColumn().getData();
+        } catch (ColumnSchemaNotFoundException e) {
+            LOG.debug("Cannot find openflow column", e);
+        }
         if (ofPortRequests != null && !ofPortRequests.isEmpty()) {
             Iterator<Long> ofPortRequestsIter = ofPortRequests.iterator();
             int ofPort = ofPortRequestsIter.next().intValue();

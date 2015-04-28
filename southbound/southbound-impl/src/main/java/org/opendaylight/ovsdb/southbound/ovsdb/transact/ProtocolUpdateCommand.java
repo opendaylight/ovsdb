@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
@@ -15,12 +16,15 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 
 public class ProtocolUpdateCommand extends AbstractTransactCommand {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ProtocolUpdateCommand.class);
     private Map<InstanceIdentifier<ProtocolEntry>, ProtocolEntry> protocols;
     private Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> bridges;
 
@@ -55,12 +59,16 @@ public class ProtocolUpdateCommand extends AbstractTransactCommand {
                     if (protocolString != null) {
                         Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
                         bridge.setName(ovsdbBridge.getBridgeName().getValue());
-                        bridge.setProtocols(Sets.newHashSet(protocolString));
-                        transaction.add(op.mutate(bridge)
+                        try {
+                            bridge.setProtocols(Sets.newHashSet(protocolString));
+                            transaction.add(op.mutate(bridge)
                                 .addMutation(bridge.getProtocolsColumn().getSchema(),
                                         Mutator.INSERT,bridge.getProtocolsColumn().getData())
                                 .where(bridge.getNameColumn().getSchema().opEqual(bridge.getNameColumn().getData()))
                                 .build());
+                        } catch (SchemaVersionMismatchException e) {
+                            LOG.debug("protocol not supported by this version of ovsdb", e);
+                        }
                     }
                 }
             }

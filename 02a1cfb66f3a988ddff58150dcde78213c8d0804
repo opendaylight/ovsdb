@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_dcc19481",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-04-28T19:45:39Z",
+      "side": 1,
+      "message": "i believe it should be warning message.",
+      "revId": "02a1cfb66f3a988ddff58150dcde78213c8d0804",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

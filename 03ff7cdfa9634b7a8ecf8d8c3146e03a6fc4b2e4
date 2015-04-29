@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_c8ff8e33",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbBridgeUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 329,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-04-29T20:52:03Z",
+      "side": 1,
+      "message": "Thanks Thomas. I have this same fix also. There is another problem down further that fixes that.",
+      "range": {
+        "startLine": 329,
+        "startChar": 35,
+        "endLine": 329,
+        "endChar": 48
+      },
+      "revId": "03ff7cdfa9634b7a8ecf8d8c3146e03a6fc4b2e4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

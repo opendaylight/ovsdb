@@ -19,7 +19,7 @@ import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
-import org.opendaylight.ovsdb.openstack.netvirt.api.MdsalConsumer;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryService;
 /* TODO SB_MIGRATION */
 import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
 import org.opendaylight.neutron.spi.NeutronNetwork;
@@ -93,7 +93,7 @@ public class NeutronIT extends OvsdbIntegrationTestBase implements BindingAwareC
     //private BindingAwareConsumer consumer;
     //private BindingAwareBroker broker;
     @Inject @Filter(timeout = 20000)
-    MdsalConsumer mdsalConsumer;
+    OvsdbInventoryService mdsalConsumer;
 
     Boolean tearDownBridge = false;
     ImmutablePair<UUID, Map<String, String>> tearDownOpenVSwitchOtherConfig = null;

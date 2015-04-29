@@ -24,7 +24,6 @@ import org.opendaylight.neutron.spi.Neutron_IPs;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.openstack.netvirt.api.*;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
-import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.ovsdb.utils.mdsal.node.StringConvertor;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
@@ -60,7 +59,7 @@ public class NeutronL3Adapter {
     /* TODO SB_MIGRATION */
     private volatile OvsdbConfigurationService ovsdbConfigurationService;
     private volatile OvsdbConnectionService connectionService;
-    private volatile MdsalConsumer mdsalConsumer;
+    //private volatile OvsdbInventoryService mdsalConsumer;
     private volatile INeutronNetworkCRUD neutronNetworkCache;
     private volatile INeutronSubnetCRUD neutronSubnetCache;
     private volatile INeutronPortCRUD neutronPortCache;

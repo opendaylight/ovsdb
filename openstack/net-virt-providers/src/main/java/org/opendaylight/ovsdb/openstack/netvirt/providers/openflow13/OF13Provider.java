@@ -115,6 +115,10 @@ public class OF13Provider implements NetworkingProvider {
 
     }
 
+    public void init() {
+        logger.info(">>>>> init OF13Provider");
+    }
+
     @Override
     public String getName() {
         return NAME;
@@ -1202,8 +1206,10 @@ public class OF13Provider implements NetworkingProvider {
         if (isInterfaceOfInterest(intf)) {
             // Delete tunnel port
             try {
-                InetAddress src = InetAddress.getByName(MdsalUtils.getOptionsValue(intf.getOptions(), "local_ip"));
-                InetAddress dst = InetAddress.getByName(MdsalUtils.getOptionsValue(intf.getOptions(), "remote_ip"));
+                InetAddress src = InetAddress.getByName(
+                        MdsalUtils.getOptionsValue(intf.getOptions(), "local_ip"));
+                InetAddress dst = InetAddress.getByName(
+                        MdsalUtils.getOptionsValue(intf.getOptions(), "remote_ip"));
                 status = deleteTunnelPort(srcNode,
                         SouthboundMapper.createOvsdbInterfaceType(intf.getInterfaceType()),
                         src, dst);

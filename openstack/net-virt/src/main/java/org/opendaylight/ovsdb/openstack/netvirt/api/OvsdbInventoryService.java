@@ -17,7 +17,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
  *
  * @author Sam Hague (shague@redhat.com)
  */
-public interface MdsalConsumer {
+public interface OvsdbInventoryService {
     //public ConsumerContext getConsumerContext();
     public static DataBroker dataBroker = null;
     //public NotificationProviderService getNotificationService();

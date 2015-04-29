@@ -76,10 +76,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>library</artifactId>
     </dependency>
-    <!--<dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>plugin</artifactId>
-    </dependency>-->
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>schema.openvswitch</artifactId>

@@ -1,6 +1,5 @@
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
-import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -8,27 +7,20 @@ import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryListener;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
-import org.opendaylight.ovsdb.southbound.SouthboundProvider;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactUtils;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +52,11 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
         registration.close();
     }
 
+    /* TODO
+     * Recognize when netvirt added a bridge to config and then the operational update comes in
+     * can it be ignored or just viewed as a new switch? ports and interfaces can likely be mapped
+     * to the old path where there were updates for them for update and insert row.
+     */
     @Override
     public void onDataChanged(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
         LOG.info(">>>>> onDataChanged: {}", changes);
@@ -67,27 +64,14 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
         updateConnections(changes);
     }
 
-    private Node getOvsdbNode(ConnectionInfo connectionInfo) {
-        Node node = MdsalUtils.read(LogicalDatastoreType.OPERATIONAL,
-                SouthboundMapper.createInstanceIdentifier(connectionInfo));
-        return node;
-    }
-
-    public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extractCreated(
-            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,Class<T> klazz) {
-        return TransactUtils.extract(changes.getCreatedData(), klazz);
-    }
-
     private void updateConnections(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
         for (Map.Entry<InstanceIdentifier<?>, DataObject> created : changes.getCreatedData().entrySet()) {
-            // TODO validate we have the correct kind of InstanceIdentifier
+            LOG.info("created: {}", created);
             if (created.getValue() instanceof OvsdbNodeAugmentation) {
-                //Map<InstanceIdentifier<Node>,Node> nodeMap = extractCreated(changes, Node.class);
-                Map<InstanceIdentifier<Node>,Node> nodeMap = TransactUtils.extractNode(changes.getCreatedData());
-                LOG.info("nodeMap: {}", nodeMap);
-                for (Map.Entry<InstanceIdentifier<Node>, Node> ovsdbNode: nodeMap.entrySet()) {
-                    notifyNodeAdded(ovsdbNode.getValue());
-                }
+                InstanceIdentifier<Node> nodeInstanceIdentifier = created.getKey().firstIdentifierOf(Node.class);
+                Node ovsdbNode = (Node)changes.getCreatedData().get(nodeInstanceIdentifier);
+                LOG.info("ovsdbNode: {}", ovsdbNode);
+                notifyNodeAdded(ovsdbNode);
             }
         }
     }
@@ -97,19 +81,5 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
         for (OvsdbInventoryListener mdsalConsumerListener : mdsalConsumerListeners) {
             mdsalConsumerListener.ovsdbNodeAdded(node);
         }
-    }
-
-    private org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node
-            inventoryNodeFromTopology(Node topologyNode) {
-        OvsdbNodeAugmentation ovsdbNodeAugmentation = topologyNode.getAugmentation(OvsdbNodeAugmentation.class);
-        String addrPort = ovsdbNodeAugmentation.getConnectionInfo().getRemoteIp().getValue() + ":"
-                + ovsdbNodeAugmentation.getConnectionInfo().getRemotePort().getValue();
-        NodeId nodeId = new NodeId("OVS" + "|" + addrPort);
-        NodeKey nodeKey = new NodeKey(nodeId);
-        org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node inventoryNode = new NodeBuilder()
-                .setId(nodeId)
-                .setKey(nodeKey)
-                .build();
-        return inventoryNode;
     }
 }

@@ -16,7 +16,7 @@ import org.opendaylight.neutron.spi.NeutronPort;
 import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.openstack.netvirt.api.MdsalConsumer;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
@@ -24,7 +24,6 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 import com.google.common.base.Preconditions;
@@ -38,9 +37,10 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
     static final Logger logger = LoggerFactory.getLogger(TenantNetworkManagerImpl.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
+    /* TODO SB_MIGRATION */
     private volatile OvsdbConfigurationService ovsdbConfigurationService;
-    private volatile OvsdbConnectionService connectionService;
-    private volatile MdsalConsumer mdsalConsumer;
+    //private volatile OvsdbConnectionService connectionService;
+    //private volatile OvsdbInventoryService mdsalConsumer;
     private volatile INeutronNetworkCRUD neutronNetworkCache;
     private volatile INeutronPortCRUD neutronPortCache;
     private volatile VlanConfigurationCache vlanConfigurationCache;

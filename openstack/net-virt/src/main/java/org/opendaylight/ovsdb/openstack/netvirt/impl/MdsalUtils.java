@@ -19,7 +19,6 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
@@ -61,18 +60,7 @@ public class MdsalUtils {
     public MdsalUtils(DataBroker dataBroker) {
         this.databroker = dataBroker;
     }
-/*
-    public static Node createNode(String nodeId) {
-            String[] pair = identifier.split("\\|");
-            if ((pair.length > 1) && (pair[0].equals("OVS"))) {
-                id = pair[1];
-            }
-            return id;
-        }
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
-        SouthboundMapper.createNode(connectionInfo);
-    }
-*/
+
     /**
      * Executes delete as a blocking transaction.
      *
@@ -204,12 +192,12 @@ public class MdsalUtils {
 
     public static OvsdbBridgeAugmentation getBridge(Node node, String name) {
         OvsdbBridgeAugmentation ovsdbBridgeAugmentation = null;
-        ConnectionInfo connectionInfo = MdsalUtils.getConnectionInfo(node);
+        ConnectionInfo connectionInfo = getConnectionInfo(node);
         if (connectionInfo != null) {
             InstanceIdentifier<Node> bridgeIid =
                     SouthboundMapper.createInstanceIdentifier(connectionInfo,
                             new OvsdbBridgeName(name));
-            Node bridgeNode = MdsalUtils.read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
+            Node bridgeNode = read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
             if (bridgeNode != null) {
                 ovsdbBridgeAugmentation = bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class);
             }
@@ -230,6 +218,7 @@ public class MdsalUtils {
             throws InterruptedException, InvalidParameterException {
         boolean result = false;
 
+        LOG.info("addBridge: node: {}, bridgeName: {}", ovsdbNode, bridgeName);
         ConnectionInfo connectionInfo = getConnectionInfo(ovsdbNode);
         if (connectionInfo != null) {
             NodeBuilder bridgeNodeBuilder = new NodeBuilder();
@@ -242,10 +231,11 @@ public class MdsalUtils {
             ovsdbBridgeAugmentationBuilder.setProtocolEntry(createMdsalProtocols());
             ovsdbBridgeAugmentationBuilder.setFailMode(
                     SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"));
-            //setManagedBy(ovsdbBridgeAugmentationBuilder, connectionInfo);
+            setManagedBy(ovsdbBridgeAugmentationBuilder, connectionInfo);
             bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbBridgeAugmentationBuilder.build());
 
             result = merge(LogicalDatastoreType.CONFIGURATION, bridgeIid, bridgeNodeBuilder.build());
+            LOG.info("addBridge: result: {}", result);
             Thread.sleep(OVSDB_UPDATE_TIMEOUT);
         } else {
             throw new InvalidParameterException("Could not find ConnectionInfo");
@@ -255,7 +245,7 @@ public class MdsalUtils {
     }
 
     private static void setManagedBy(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
-                              ConnectionInfo connectionInfo) {
+                                     ConnectionInfo connectionInfo) {
         InstanceIdentifier<Node> connectionNodePath = SouthboundMapper.createInstanceIdentifier(connectionInfo);
         ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath));
     }

@@ -33,6 +33,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundProvider;
@@ -1001,12 +1002,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     @Test
     public void testNetVirt() throws InterruptedException {
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        Node ovsdbNode = connectOvsdbNode(connectionInfo);
+
         LOG.info(">>>>> waiting");
         Thread.sleep(10000);
         LOG.info(">>>>> back");
-
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
-        Node ovsdbNode = connectOvsdbNode(connectionInfo);
         Assert.assertFalse(disconnectOvsdbNode(connectionInfo));
         //Assume.assumeTrue(disconnectOvsdbNode(connectionInfo));
     }

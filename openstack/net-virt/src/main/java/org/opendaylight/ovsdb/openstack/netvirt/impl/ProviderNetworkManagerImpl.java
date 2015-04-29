@@ -30,6 +30,10 @@ public class ProviderNetworkManagerImpl implements NetworkingProviderManager {
     private HashMap<Long, ProviderEntry> providers = Maps.newHashMap();
     private HashMap<Node, NetworkingProvider> nodeToProviderMapping = Maps.newHashMap();
 
+    public void init() {
+        logger.info(">>>>> init ProviderNetworkManagerImpl");
+    }
+
     @Override
     public NetworkingProvider getProvider(Node node) {
         if (nodeToProviderMapping.get(node) != null) {

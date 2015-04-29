@@ -68,6 +68,7 @@ public class PipelineOrchestratorImpl implements PipelineOrchestrator {
     public void init() {
         eventHandler = Executors.newSingleThreadExecutor();
         this.queue = new LinkedBlockingQueue<String>();
+        logger.info(">>>>> init PipelineOrchestratorImpl");
     }
 
     public void start() {

@@ -44,16 +44,16 @@ public class SouthboundHandler extends AbstractHandler
     private volatile NetworkingProviderManager networkingProviderManager;
     private volatile OvsdbConfigurationService ovsdbConfigurationService;
     private volatile OvsdbConnectionService connectionService;
-    private volatile MdsalConsumer mdsalConsumer; // TODO SB_MIGRATION
+    private volatile OvsdbInventoryService mdsalConsumer; // TODO SB_MIGRATION
     private volatile NeutronL3Adapter neutronL3Adapter;
 
     void init() {
-        logger.info(">>>>> init");
+        logger.info(">>>>> init SouthboundHandler");
     }
 
     void start() {
-        logger.info(">>>>> started");
-        this.triggerUpdates(); // TODO SB_MIGRATION
+        logger.info(">>>>> start SouthboundHandler");
+        //this.triggerUpdates(); // TODO SB_MIGRATION
     }
 
     @Override
@@ -119,9 +119,9 @@ public class SouthboundHandler extends AbstractHandler
         this.enqueueEvent(new SouthboundEvent(node, tableName, uuid, row, context, Action.DELETE));
     }
 
-    public void processOvsdbNodeAdded(Node node, Action action) {
+    public void processOvsdbNodeUpdate(Node node, Action action) {
         if (action == Action.ADD) {
-            logger.trace("processOvsdbNodeAdded {}", node);
+            logger.trace("processOvsdbNodeUpdate {}", node);
             bridgeConfigurationManager.prepareNode(node);
         }
     }
@@ -431,9 +431,9 @@ public class SouthboundHandler extends AbstractHandler
         switch (ev.getType()) {
             case NODE:
                 try {
-                    processOvsdbNodeAdded(ev.getNode(), ev.getAction());
+                    processOvsdbNodeUpdate(ev.getNode(), ev.getAction());
                 } catch (Exception e) {
-                    logger.error("Exception caught in ProcessNodeUpdate for node " + ev.getNode(), e);
+                    logger.error("Exception caught in processNodeUpdate for node " + ev.getNode(), e);
                 }
                 break;
             case ROW:

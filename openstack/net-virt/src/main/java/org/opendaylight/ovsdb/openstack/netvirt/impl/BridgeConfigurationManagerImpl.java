@@ -9,9 +9,7 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.neutron.spi.NeutronNetwork;
-import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
@@ -20,18 +18,12 @@ import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
-import org.opendaylight.ovsdb.southbound.SouthboundMapper;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -170,7 +162,8 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
             LOGGER.error("Error creating Integration Bridge on {}", node, e);
             return;
         }
-        networkingProviderManager.getProvider(node).initializeFlowRules(node);
+        /* TODO SB_MIGRATION
+        networkingProviderManager.getProvider(node).initializeFlowRules(node);*/
     }
 
     /*
@@ -618,8 +611,8 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
         /* TODO SB_MIGRATION */
 
         //String bridgeUUID = getBridgeUuid(node, bridgeName);
-        MdsalUtils.addBridge(node, bridgeName);//sb will also add port and interface if this is a new bridge
-
+        //sb will also add port and interface if this is a new bridge
+        boolean result = MdsalUtils.addBridge(node, bridgeName);
 
         /*// TODO use the bridge it code to add bridge
         Bridge bridge = ovsdbConfigurationService.createTypedRow(node, Bridge.class);

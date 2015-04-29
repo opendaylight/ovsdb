@@ -14,7 +14,6 @@ package org.opendaylight.ovsdb.openstack.netvirt.impl;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.NodeConfiguration;
-import org.opendaylight.ovsdb.openstack.netvirt.api.MdsalConsumer;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;

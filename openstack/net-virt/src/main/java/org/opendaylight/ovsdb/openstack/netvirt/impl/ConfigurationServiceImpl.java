@@ -17,7 +17,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.openstack.netvirt.api.MdsalConsumer;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;

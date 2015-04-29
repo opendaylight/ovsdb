@@ -153,12 +153,13 @@ public class Activator extends DependencyActivatorBase {
                 .setImplementation(SouthboundHandler.class)
                 .add(createServiceDependency().setService(ConfigurationService.class).setRequired(true))
                 .add(createServiceDependency().setService(BridgeConfigurationManager.class).setRequired(true))
-                .add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true))
-                .add(createServiceDependency().setService(NetworkingProviderManager.class).setRequired(true))
-                .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
-                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
+                        //.add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true))
+                        //.add(createServiceDependency().setService(NetworkingProviderManager.class).setRequired(true))
+                        .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
+                        //.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
                 .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
-                .add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true))
+                        //.add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true))
+                .add(createServiceDependency().setService(OvsdbInventoryService.class).setRequired(true))
                 .add(createServiceDependency().setService(NodeCacheManager.class).setRequired(true)));
 
         Dictionary<String, Object> lbaasHandlerProperties = new Hashtable<>();
@@ -232,9 +233,9 @@ public class Activator extends DependencyActivatorBase {
         fWaasHandlerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.NEUTRON_FWAAS);
 
         manager.add(createComponent()
-                .setInterface(new String[] {INeutronFirewallAware.class.getName(),
-                                INeutronFirewallRuleAware.class.getName(), INeutronFirewallPolicyAware.class.getName(),
-                                AbstractHandler.class.getName()}, fWaasHandlerProperties)
+                .setInterface(new String[]{INeutronFirewallAware.class.getName(),
+                        INeutronFirewallRuleAware.class.getName(), INeutronFirewallPolicyAware.class.getName(),
+                        AbstractHandler.class.getName()}, fWaasHandlerProperties)
                 .setImplementation(FWaasHandler.class)
                 .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true)));
 
@@ -287,10 +288,10 @@ public class Activator extends DependencyActivatorBase {
                         .setCallbacks("cacheListenerAdded", "cacheListenerRemoved")));
 
         manager.add(createComponent()
-                .setInterface(MdsalConsumer.class.getName(), null)
+                .setInterface(new String[] {OvsdbConfigurationService.class.getName(),
+                        OvsdbInventoryService.class.getName()}, null)
                 .setImplementation(OvsdbInventoryServiceImpl.class)
-                .add(createServiceDependency()
-                        .setService(OvsdbInventoryListener.class)
+                .add(createServiceDependency().setService(OvsdbInventoryListener.class)
                         .setCallbacks("listenerAdded", "listenerRemoved"))
                 .add(createServiceDependency().setService(BindingAwareBroker.class).setRequired(true)));
     }

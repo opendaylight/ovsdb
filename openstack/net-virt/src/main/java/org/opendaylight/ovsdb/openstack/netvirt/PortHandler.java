@@ -15,7 +15,7 @@ import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.openstack.netvirt.api.MdsalConsumer;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
@@ -46,7 +46,7 @@ public class PortHandler extends AbstractHandler
     /* TODO SB_MIGRATION */
     private volatile OvsdbConfigurationService ovsdbConfigurationService;
     private volatile OvsdbConnectionService connectionService;
-    private volatile MdsalConsumer mdsalConsumer;
+    //private volatile OvsdbInventoryService mdsalConsumer;
     private volatile NeutronL3Adapter neutronL3Adapter;
 
     /**

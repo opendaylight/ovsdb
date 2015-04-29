@@ -325,7 +325,8 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         Map<UUID, Controller> updatedControllerRows =
                 TyperUtils.extractRowsUpdated(Controller.class, getUpdates(), getDbSchema());
         for (ControllerEntry controllerEntry: SouthboundMapper.createControllerEntries(bridge, updatedControllerRows)) {
-            if (controllerEntry != null && controllerEntry.isIsConnected()) {
+            if (controllerEntry != null
+                && controllerEntry.isIsConnected() != null && controllerEntry.isIsConnected()) {
                 String [] controllerTarget = controllerEntry.getTarget().getValue().split(":");
                 IpAddress bridgeControllerIpAddress = null;
                 PortNumber bridgeControllerPortNumber = null;

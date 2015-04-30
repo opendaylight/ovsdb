@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_ba3b619b",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbControllerUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-04-30T23:30:01Z",
+      "side": 1,
+      "message": "is this right - getUuid is returned here, but then later we really use the bridgeName in the getControllerBridge()",
+      "range": {
+        "startLine": 83,
+        "startChar": 29,
+        "endLine": 83,
+        "endChar": 39
+      },
+      "revId": "ae68703b9237c4fd6d97c00ac18e1b8df6c42cf5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_1a4cd541",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbControllerUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-04-30T23:30:01Z",
+      "side": 1,
+      "message": "surprised this isn\u0027t a helper method somewhere",
+      "revId": "ae68703b9237c4fd6d97c00ac18e1b8df6c42cf5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

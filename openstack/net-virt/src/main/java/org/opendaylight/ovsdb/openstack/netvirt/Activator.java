@@ -155,8 +155,8 @@ public class Activator extends DependencyActivatorBase {
                 .add(createServiceDependency().setService(BridgeConfigurationManager.class).setRequired(true))
                         //.add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true))
                         //.add(createServiceDependency().setService(NetworkingProviderManager.class).setRequired(true))
-                        .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
-                        //.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
+                .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
+                        .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
                 .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
                         //.add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true))
                 .add(createServiceDependency().setService(OvsdbInventoryService.class).setRequired(true))
@@ -288,7 +288,8 @@ public class Activator extends DependencyActivatorBase {
                         .setCallbacks("cacheListenerAdded", "cacheListenerRemoved")));
 
         manager.add(createComponent()
-                .setInterface(new String[] {OvsdbConfigurationService.class.getName(),
+                .setInterface(new String[] {OvsdbConnectionService.class.getName(),
+                        OvsdbConfigurationService.class.getName(),
                         OvsdbInventoryService.class.getName()}, null)
                 .setImplementation(OvsdbInventoryServiceImpl.class)
                 .add(createServiceDependency().setService(OvsdbInventoryListener.class)

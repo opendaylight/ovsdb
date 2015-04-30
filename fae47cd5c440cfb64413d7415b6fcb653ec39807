@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_942c3c04",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-04-30T14:09:43Z",
+      "side": 1,
+      "message": "Hey Sam, I got a patch in the works, sorry it\u0027s taking a little more time, but I was busy with something else yesterday.",
+      "revId": "fae47cd5c440cfb64413d7415b6fcb653ec39807",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -314,10 +314,12 @@ public class SouthboundMapper {
                         new org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang
                             .ietf.yang.types.rev130715.Uuid(controller.getUuid().toString());
                 controllerEntries.add(new ControllerEntryBuilder()
-                    .setTarget(new Uri(targetString))
-                    .setControllerUuid(uuid).build());
+                        .setTarget(new Uri(targetString))
+                        .setIsConnected(controller.getIsConnectedColumn().getData())
+                        .setControllerUuid(uuid).build());
             }
         }
+        LOG.debug("controllerEntries: {}", controllerEntries.toString());
         return controllerEntries;
     }
 

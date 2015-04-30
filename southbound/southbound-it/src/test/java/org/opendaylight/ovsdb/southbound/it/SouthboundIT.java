@@ -22,6 +22,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Properties;
 import java.util.Set;
 
@@ -39,6 +40,8 @@ import org.opendaylight.ovsdb.southbound.SouthboundProvider;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeBase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
@@ -52,6 +55,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.DatapathTypeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.InterfaceTypeEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
@@ -377,6 +381,78 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         Node ovsdbNode = connectOvsdbNode(connectionInfo);
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
         //Assume.assumeTrue(disconnectOvsdbNode(connectionInfo));
+    }
+
+    @Test
+    public void testDpdkSwitch() throws InterruptedException {
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        Node ovsdbNode = connectOvsdbNode(connectionInfo);
+        List<DatapathTypeEntry> nodeAugment = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class)
+                .getDatapathTypeEntry();
+        if (nodeAugment == null) {
+            LOG.info("DPDK not supported on this node.");
+        } else {
+
+            // Verify if DPDK is supported.
+            ListIterator<DatapathTypeEntry> literator = nodeAugment.listIterator();
+            while (literator.hasNext()) {
+                Class<? extends DatapathTypeBase> dpType = literator.next().getDatapathType();
+                String dpName = SouthboundConstants.DATAPATH_TYPE_MAP.get(dpType);
+                LOG.info("dp type is {}", dpName);
+                if (dpName.equals("netdev")) {
+
+                    // Since this is a DPDK node, lets add a netdev device.
+                    LOG.info("It is a DPDK node");
+                    NodeBuilder bridgeNodeBuilder = new NodeBuilder();
+                    InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(connectionInfo,
+                            new OvsdbBridgeName(SouthboundITConstants.BRIDGE_NAME));
+                    NodeId bridgeNodeId = SouthboundMapper.createManagedNodeId(bridgeIid);
+                    bridgeNodeBuilder.setNodeId(bridgeNodeId);
+                    OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
+                    ovsdbBridgeAugmentationBuilder.setBridgeName(new OvsdbBridgeName(SouthboundITConstants.BRIDGE_NAME));
+                    ovsdbBridgeAugmentationBuilder.setDatapathType(dpType);
+                    setManagedBy(ovsdbBridgeAugmentationBuilder, connectionInfo);
+                    bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class,
+                            ovsdbBridgeAugmentationBuilder.build());
+                    mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, bridgeIid, bridgeNodeBuilder.build());
+                    Thread.sleep(OVSDB_UPDATE_TIMEOUT);
+
+                    // Verify that the device is netdev
+                    OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
+                    LOG.info("new datapath is {}", bridge.getDatapathType());
+                    LOG.info("dpType  is {}", dpType);
+                    Assert.assertTrue(bridge.getDatapathType().equals(dpType));
+
+                    // Add dpdk port.
+                    OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
+                            createGenericOvsdbTerminationPointAugmentationBuilder();
+                    String portName = "testDPDKPort";
+                    ovsdbTerminationBuilder.setName(portName);
+                    Class<? extends InterfaceTypeBase> ifType = SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP.get("dpdk");
+                    ovsdbTerminationBuilder.setInterfaceType(ifType);
+                    LOG.info("ifType is {}", ifType);
+                    Assert.assertTrue(addTerminationPoint(bridgeNodeId, portName, ovsdbTerminationBuilder));
+
+                    // Verify that DPDK port was created.
+                    InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
+                    Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
+                    Assert.assertNotNull(terminationPointNode);
+                    List<TerminationPoint> terminationPoints = terminationPointNode.getTerminationPoint();
+                    for (TerminationPoint terminationPoint : terminationPoints) {
+                        OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
+                                terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
+                        if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
+                            Class<? extends InterfaceTypeBase> opPort = ovsdbTerminationPointAugmentation.getInterfaceType();
+                            LOG.info("ifType from oper : {}", opPort);
+                            Assert.assertTrue(ifType.equals(opPort));
+                        }
+                    }
+                    Assert.assertTrue(deleteBridge(connectionInfo));
+                    break;
+                }
+            }
+        }
+        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
 
     @Test

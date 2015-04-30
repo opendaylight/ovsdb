@@ -1,0 +1,187 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_1a6935be",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 391,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-04-30T22:44:45Z",
+      "side": 1,
+      "message": "can you name this datapathTypeEntries",
+      "range": {
+        "startLine": 391,
+        "startChar": 32,
+        "endLine": 391,
+        "endChar": 43
+      },
+      "revId": "6e46505a92b40ef5d7b7c7ca3c3d5991fea27b57",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_ba9fe1b3",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 407,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-04-30T22:44:45Z",
+      "side": 1,
+      "message": "would be nice if this code was common. Mostly everything in addBridge() is here other than setting the dataPathType. Maybe the bridge creation can be moved to a method that returns the OvsdbBridgeAugmentation. From there two wrappers with different apis - createBridge(conninfo, bridgename) and createBridge(conninfo, bridgename, datapathType)",
+      "revId": "6e46505a92b40ef5d7b7c7ca3c3d5991fea27b57",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_7a72b9ae",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 412,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-04-30T22:44:45Z",
+      "side": 1,
+      "message": "whitespace",
+      "range": {
+        "startLine": 412,
+        "startChar": 87,
+        "endLine": 412,
+        "endChar": 88
+      },
+      "revId": "6e46505a92b40ef5d7b7c7ca3c3d5991fea27b57",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_5aa6dd11",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 424,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-04-30T22:44:45Z",
+      "side": 1,
+      "message": "maybe assertNotNull on the node",
+      "range": {
+        "startLine": 424,
+        "startChar": 49,
+        "endLine": 424,
+        "endChar": 55
+      },
+      "revId": "6e46505a92b40ef5d7b7c7ca3c3d5991fea27b57",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_7aa959de",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 427,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-04-30T22:44:45Z",
+      "side": 1,
+      "message": "the assert next should be able to remove the need for the logs. if the assert passes you know the data is right. This applies to much of the new logs added.",
+      "revId": "6e46505a92b40ef5d7b7c7ca3c3d5991fea27b57",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_da62edd7",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 428,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-04-30T22:44:45Z",
+      "side": 1,
+      "message": "using assertEquals is more readable",
+      "range": {
+        "startLine": 428,
+        "startChar": 27,
+        "endLine": 428,
+        "endChar": 37
+      },
+      "revId": "6e46505a92b40ef5d7b7c7ca3c3d5991fea27b57",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_1ab05542",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 431,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-04-30T22:44:45Z",
+      "side": 1,
+      "message": "whitespace",
+      "revId": "6e46505a92b40ef5d7b7c7ca3c3d5991fea27b57",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_fab48936",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 439,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-04-30T22:44:45Z",
+      "side": 1,
+      "message": "use assertEquals",
+      "range": {
+        "startLine": 439,
+        "startChar": 27,
+        "endLine": 439,
+        "endChar": 37
+      },
+      "revId": "6e46505a92b40ef5d7b7c7ca3c3d5991fea27b57",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_dab98d2f",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 441,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-04-30T22:44:45Z",
+      "side": 1,
+      "message": "same as bridge comments above, would be nice to reuse code if possible",
+      "revId": "6e46505a92b40ef5d7b7c7ca3c3d5991fea27b57",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -26,18 +26,18 @@ public class PipelineOrchestratorImpl implements PipelineOrchestrator {
 
     private static final Logger logger = LoggerFactory.getLogger(PipelineOrchestratorImpl.class);
     private List<Service> staticPipeline = Lists.newArrayList(
-                                                                Service.CLASSIFIER,
-                                                                Service.ARP_RESPONDER,
-                                                                Service.INBOUND_NAT,
-                                                                Service.EGRESS_ACL,
-                                                                Service.LOAD_BALANCER,
-                                                                Service.ROUTING,
-                                                                Service.L3_FORWARDING,
-                                                                Service.L2_REWRITE,
-                                                                Service.INGRESS_ACL,
-                                                                Service.OUTBOUND_NAT,
-                                                                Service.L2_FORWARDING
-                                                              );
+            Service.CLASSIFIER,
+            Service.ARP_RESPONDER,
+            Service.INBOUND_NAT,
+            Service.EGRESS_ACL,
+            Service.LOAD_BALANCER,
+            Service.ROUTING,
+            Service.L3_FORWARDING,
+            Service.L2_REWRITE,
+            Service.INGRESS_ACL,
+            Service.OUTBOUND_NAT,
+            Service.L2_FORWARDING
+    );
     Map<Service, AbstractServiceInstance> serviceRegistry = Maps.newConcurrentMap();
     private volatile BlockingQueue<String> queue;
     private ExecutorService eventHandler;
@@ -46,6 +46,7 @@ public class PipelineOrchestratorImpl implements PipelineOrchestrator {
 
     public void registerService(final ServiceReference ref, AbstractServiceInstance serviceInstance){
         Service service = (Service)ref.getProperty(AbstractServiceInstance.SERVICE_PROPERTY);
+        logger.info("registerService {} - {}", serviceInstance, service);
         serviceRegistry.put(service, serviceInstance);
     }
 
@@ -88,7 +89,10 @@ public class PipelineOrchestratorImpl implements PipelineOrchestrator {
                         Thread.sleep(1000);
                         for (Service service : staticPipeline) {
                             AbstractServiceInstance serviceInstance = getServiceInstance(service);
-                            serviceInstance.programDefaultPipelineRule(nodeId);
+                            logger.info("pipeline: {} - {}", service, serviceInstance);
+                            if (serviceInstance != null) {
+                                serviceInstance.programDefaultPipelineRule(nodeId);
+                            }
                         }
                     }
                 } catch (Exception e) {

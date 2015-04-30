@@ -27,13 +27,11 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundProvider;
@@ -74,6 +72,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
@@ -179,6 +178,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 editConfigurationFilePut(SouthboundITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
                         "log4j.logger.org.opendaylight.ovsdb",
                         LogLevelOption.LogLevel.DEBUG.name()),
+                editConfigurationFilePut(SouthboundITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
+                        "log4j.logger.org.opendaylight.ovsdb.lib",
+                        LogLevelOption.LogLevel.TRACE.name()),
                 /*editConfigurationFilePut(SouthboundITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
                         "log4j.logger.org.opendaylight.ovsdb.openstack.net-virt",
                         LogLevelOption.LogLevel.DEBUG.name())*/
@@ -975,6 +977,23 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
+    @Test
+    public void testGetOvsdbNodes() throws InterruptedException {
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        connectOvsdbNode(connectionInfo);
+        InstanceIdentifier<Topology> topologyPath = InstanceIdentifier
+                .create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
+
+        Topology topology = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, topologyPath);
+        Assert.assertEquals("There should only be one node in the topology", 1, topology.getNode().size());
+        InstanceIdentifier<Node> expectedNodeIid = SouthboundMapper.createInstanceIdentifier(connectionInfo);
+        Node node = topology.getNode().iterator().next();
+        NodeId expectedNodeId = expectedNodeIid.firstKeyOf(Node.class, NodeKey.class).getNodeId();
+        Assert.assertEquals(expectedNodeId, node.getNodeId());
+        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+    }
+
     /**
      * isBundleReady is used to check if the requested bundle is Active
      */
@@ -1003,12 +1022,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     @Test
     public void testNetVirt() throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
-        Node ovsdbNode = connectOvsdbNode(connectionInfo);
+        connectOvsdbNode(connectionInfo);
 
         LOG.info(">>>>> waiting");
         Thread.sleep(10000);
         LOG.info(">>>>> back");
-        Assert.assertFalse(disconnectOvsdbNode(connectionInfo));
-        //Assume.assumeTrue(disconnectOvsdbNode(connectionInfo));
+        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
 }

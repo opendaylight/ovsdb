@@ -12,6 +12,8 @@ package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services;
 import java.math.BigInteger;
 import java.util.List;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ClassifierProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
@@ -41,6 +43,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev14
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.dst.choice.grouping.dst.choice.DstNxRegCaseBuilder;
 
 import com.google.common.collect.Lists;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ClassifierService extends AbstractServiceInstance implements ClassifierProvider {
     public final static long REG_VALUE_FROM_LOCAL = 0x1L;
@@ -53,6 +57,12 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
 
     public ClassifierService(Service service) {
         super(service);
+    }
+
+    private static final Logger logger = LoggerFactory.getLogger(ClassifierService.class);
+
+    public void init() {
+        logger.info(">>>>> init ClassifierService");
     }
 
     /*

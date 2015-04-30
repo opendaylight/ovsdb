@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.openstack.netvirt.impl;
 import com.google.common.collect.Sets;
 import java.net.InetAddress;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
@@ -23,7 +24,10 @@ import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Connection;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ConnectionConstants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConfigurationService;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryListener;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbPluginException;
@@ -41,7 +45,7 @@ import org.slf4j.LoggerFactory;
  * @author Sam Hague (shague@redhat.com)
  */
 public class OvsdbInventoryServiceImpl implements BindingAwareConsumer,
-        OvsdbConfigurationService, OvsdbInventoryService {
+        OvsdbConfigurationService, OvsdbConnectionService, OvsdbInventoryService {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbInventoryServiceImpl.class);
     private static DataBroker dataBroker = null;
 
@@ -179,6 +183,26 @@ public class OvsdbInventoryServiceImpl implements BindingAwareConsumer,
 
     @Override
     public ConcurrentMap<String, OvsdbTerminationPointAugmentation> getInterfaces(Node node) {
+        return null;
+    }
+
+    @Override
+    public Connection getConnection(Node node) {
+        return null;
+    }
+
+    @Override
+    public List<Node> getNodes() {
+        return null;
+    }
+
+    @Override
+    public Node getNode(String identifier) {
+        return null;
+    }
+
+    @Override
+    public Node connect(String identifier, Map<ConnectionConstants, String> params) {
         return null;
     }
 }

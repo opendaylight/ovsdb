@@ -21,6 +21,7 @@ import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentationBuilder;
@@ -29,12 +30,17 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
@@ -214,11 +220,11 @@ public class MdsalUtils {
         return uuid;
     }
 
-    public static boolean addBridge(Node ovsdbNode, String bridgeName)
+    public static boolean addBridge(Node ovsdbNode, String bridgeName, String target)
             throws InterruptedException, InvalidParameterException {
         boolean result = false;
 
-        LOG.info("addBridge: node: {}, bridgeName: {}", ovsdbNode, bridgeName);
+        LOG.info("addBridge: node: {}, bridgeName: {}, target: {}", ovsdbNode, bridgeName, target);
         ConnectionInfo connectionInfo = getConnectionInfo(ovsdbNode);
         if (connectionInfo != null) {
             NodeBuilder bridgeNodeBuilder = new NodeBuilder();
@@ -227,6 +233,7 @@ public class MdsalUtils {
             NodeId bridgeNodeId = SouthboundMapper.createManagedNodeId(bridgeIid);
             bridgeNodeBuilder.setNodeId(bridgeNodeId);
             OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
+            //ovsdbBridgeAugmentationBuilder.setControllerEntry(setControllerEntries(target));
             ovsdbBridgeAugmentationBuilder.setBridgeName(new OvsdbBridgeName(bridgeName));
             ovsdbBridgeAugmentationBuilder.setProtocolEntry(createMdsalProtocols());
             ovsdbBridgeAugmentationBuilder.setFailMode(
@@ -236,6 +243,8 @@ public class MdsalUtils {
 
             result = merge(LogicalDatastoreType.CONFIGURATION, bridgeIid, bridgeNodeBuilder.build());
             LOG.info("addBridge: result: {}", result);
+            Thread.sleep(OVSDB_UPDATE_TIMEOUT);
+            addController(ovsdbNode, bridgeName, target);
             Thread.sleep(OVSDB_UPDATE_TIMEOUT);
         } else {
             throw new InvalidParameterException("Could not find ConnectionInfo");
@@ -248,6 +257,29 @@ public class MdsalUtils {
                                      ConnectionInfo connectionInfo) {
         InstanceIdentifier<Node> connectionNodePath = SouthboundMapper.createInstanceIdentifier(connectionInfo);
         ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath));
+    }
+
+    private static void addController(Node ovsdbNode, String bridgeName, String targetString) {
+        ConnectionInfo connectionInfo = getConnectionInfo(ovsdbNode);
+        if (connectionInfo != null) {
+            for (ControllerEntry controllerEntry: setControllerEntries(targetString)) {
+                InstanceIdentifier<ControllerEntry> iid =
+                        SouthboundMapper.createInstanceIdentifier(connectionInfo, new OvsdbBridgeName(bridgeName))
+                                .augmentation(OvsdbBridgeAugmentation.class)
+                                .child(ControllerEntry.class, controllerEntry.getKey());
+
+                boolean result = put(LogicalDatastoreType.CONFIGURATION, iid, controllerEntry);
+                LOG.info("addController: result: {}", result);
+            }
+        }
+    }
+
+    private static List<ControllerEntry> setControllerEntries(String targetString) {
+        List<ControllerEntry> controllerEntries = new ArrayList<ControllerEntry>();
+        ControllerEntryBuilder controllerEntryBuilder = new ControllerEntryBuilder();
+        controllerEntryBuilder.setTarget(new Uri(targetString));
+        controllerEntries.add(controllerEntryBuilder.build());
+        return controllerEntries;
     }
 
     private static List<ProtocolEntry> createMdsalProtocols() {
@@ -273,5 +305,14 @@ public class MdsalUtils {
             }
         }
         return null;
+    }
+
+    private static Topology getOvsdbTopology() {
+        InstanceIdentifier<Topology> path = InstanceIdentifier
+                .create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
+
+        Topology topology = read(LogicalDatastoreType.OPERATIONAL, path);
+        return topology;
     }
 }

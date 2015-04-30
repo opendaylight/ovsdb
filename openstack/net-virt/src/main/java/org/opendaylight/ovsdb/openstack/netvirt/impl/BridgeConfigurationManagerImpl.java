@@ -9,6 +9,8 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -18,6 +20,7 @@ import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
+import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 import com.google.common.base.Preconditions;
@@ -612,7 +615,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
 
         //String bridgeUUID = getBridgeUuid(node, bridgeName);
         //sb will also add port and interface if this is a new bridge
-        boolean result = MdsalUtils.addBridge(node, bridgeName);
+        boolean result = MdsalUtils.addBridge(node, bridgeName, getControllerTarget());
 
         /*// TODO use the bridge it code to add bridge
         Bridge bridge = ovsdbConfigurationService.createTypedRow(node, Bridge.class);
@@ -669,5 +672,77 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
         return new Status(StatusCode.SUCCESS);
     }
 
+    private InetAddress getControllerIPAddress(/*Connection connection*/) {
+        InetAddress controllerIP = null;
 
+        String addressString = ConfigProperties.getProperty(this.getClass(), "ovsdb.controller.address");
+        if (addressString != null) {
+            try {
+                controllerIP = InetAddress.getByName(addressString);
+                if (controllerIP != null) {
+                    return controllerIP;
+                }
+            } catch (UnknownHostException e) {
+                LOGGER.error("Host {} is invalid", addressString);
+            }
+        }
+
+        addressString = ConfigProperties.getProperty(this.getClass(), "of.address");
+        if (addressString != null) {
+            try {
+                controllerIP = InetAddress.getByName(addressString);
+                if (controllerIP != null) {
+                    return controllerIP;
+                }
+            } catch (UnknownHostException e) {
+                LOGGER.error("Host {} is invalid", addressString);
+            }
+        }
+
+        /*
+        try {
+            controllerIP = connection.getClient().getConnectionInfo().getLocalAddress();
+            return controllerIP;
+        } catch (Exception e) {
+            LOGGER.debug("Invalid connection provided to getControllerIPAddresses", e);
+        }
+        */
+
+        if (addressString != null) {
+            try {
+                controllerIP = InetAddress.getByName(addressString);
+                if (controllerIP != null) {
+                    return controllerIP;
+                }
+            } catch (UnknownHostException e) {
+                LOGGER.error("Host {} is invalid", addressString);
+            }
+        }
+
+        return controllerIP;
+    }
+
+    private short getControllerOFPort() {
+        Short defaultOpenFlowPort = 6633;
+        Short openFlowPort = defaultOpenFlowPort;
+        String portString = ConfigProperties.getProperty(this.getClass(), "of.listenPort");
+        if (portString != null) {
+            try {
+                openFlowPort = Short.decode(portString).shortValue();
+            } catch (NumberFormatException e) {
+                LOGGER.warn("Invalid port:{}, use default({})", portString,
+                        openFlowPort);
+            }
+        }
+        return openFlowPort;
+    }
+
+    private String getControllerTarget() {
+        /* TODO SB_MIGRATION
+         * hardcoding value, need to find better way to get local ip
+         */
+        //String target = "tcp:" + getControllerIPAddress() + ":" + getControllerOFPort();
+        String target = "tcp:192.168.120.1:6633";
+        return target;
+    }
 }

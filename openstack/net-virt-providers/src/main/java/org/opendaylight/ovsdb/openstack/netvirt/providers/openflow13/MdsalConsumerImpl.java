@@ -60,7 +60,7 @@ public class MdsalConsumerImpl implements BindingAwareConsumer, MdsalConsumer, B
         this.consumerContext = session;
         dataBroker = session.getSALService(DataBroker.class);
         logger.info("OVSDB Neutron Session Initialized with CONSUMER CONTEXT {}", session.toString());
-        //flowCapableNodeChangeListener = new FlowCapableNodeDataChangeListener(dataBroker);
+        flowCapableNodeChangeListener = new FlowCapableNodeDataChangeListener(dataBroker);
     }
 
     @Override

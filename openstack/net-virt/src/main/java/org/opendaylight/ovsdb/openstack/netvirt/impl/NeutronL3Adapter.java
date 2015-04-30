@@ -595,12 +595,14 @@ public class NeutronL3Adapter {
         }
 
         if (status.isSuccess()) {
-            logger.debug("ProgramRouterInterface {} for mac:{} addr:{}/{} node:{} action:{}",
+            logger.debug("ProgramRouterInterface {} for mac:{} addr:{}/{} node:{} srcTunId:{} destTunId:{} action:{}",
                          routingProvider == null ? "skipped" : "programmed",
-                         macAddress, address, mask, node, actionForNode);
+                         macAddress, address, mask, node, sourceSegmentationId, destinationSegmentationId,
+                         actionForNode);
         } else {
-            logger.error("ProgramRouterInterface failed for mac:{} addr:{}/{} node:{} action:{} status:{}",
-                         macAddress, address, mask, node, actionForNode, status);
+            logger.error("ProgramRouterInterface failed for mac:{} addr:{}/{} node:{} srcTunId:{} destTunId:{} action:{} status:{}",
+                         macAddress, address, mask, node, sourceSegmentationId, destinationSegmentationId,
+                         actionForNode, status);
         }
         return status;
     }

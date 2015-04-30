@@ -348,6 +348,8 @@ public class SouthboundMapper {
         ConnectionInfoBuilder connectionInfoBuilder = new ConnectionInfoBuilder();
         connectionInfoBuilder.setRemoteIp(createIpAddress(client.getConnectionInfo().getRemoteAddress()));
         connectionInfoBuilder.setRemotePort(new PortNumber(client.getConnectionInfo().getRemotePort()));
+        connectionInfoBuilder.setLocalIp(createIpAddress(client.getConnectionInfo().getLocalAddress()));
+        connectionInfoBuilder.setLocalPort(new PortNumber(client.getConnectionInfo().getLocalPort()));
         return connectionInfoBuilder.build();
     }
 
@@ -355,6 +357,8 @@ public class SouthboundMapper {
         ConnectionInfoBuilder connectionInfoBuilder = new ConnectionInfoBuilder();
         connectionInfoBuilder.setRemoteIp(ovsdbNodeAugmentation.getConnectionInfo().getRemoteIp());
         connectionInfoBuilder.setRemotePort(ovsdbNodeAugmentation.getConnectionInfo().getRemotePort());
+        connectionInfoBuilder.setLocalIp(ovsdbNodeAugmentation.getConnectionInfo().getLocalIp());
+        connectionInfoBuilder.setLocalPort(ovsdbNodeAugmentation.getConnectionInfo().getLocalPort());
         return connectionInfoBuilder.build();
     }
 }

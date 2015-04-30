@@ -32,6 +32,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowCookie;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCaseBuilder;
@@ -108,12 +109,13 @@ public class RoutingService extends AbstractServiceInstance implements RoutingPr
         flowBuilder.setMatch(matchBuilder.build());
         flowBuilder.setInstructions(isb.setInstruction(instructions).build());
 
-        String flowId = "Routing_" + prefixString;
+        String flowId = "Routing_" + sourceSegId + "_" + prefixString;
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setBarrier(true);
         flowBuilder.setTableId(this.getTable());
         flowBuilder.setKey(key);
+        flowBuilder.setCookie(new FlowCookie(new BigInteger(sourceSegId)));
         flowBuilder.setPriority(2048);
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);

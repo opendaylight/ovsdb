@@ -87,26 +87,33 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
     }
 
     private void updateOpenflowConnections(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        for (Map.Entry<InstanceIdentifier<?>, DataObject> created : changes.getCreatedData().entrySet()) {
-            LOG.info("updateOpenflowConnections created: {}", created);
-            if (created.getValue() instanceof OvsdbBridgeAugmentation) {
-                OvsdbBridgeAugmentation ovsdbBridgeAugmentation = (OvsdbBridgeAugmentation)created.getValue();
+        for (Map.Entry<InstanceIdentifier<?>, DataObject> change : changes.getCreatedData().entrySet()) {
+            LOG.info("updateOpenflowConnections created: {}", change);
+            if (change.getValue() instanceof OvsdbBridgeAugmentation) {
+                OvsdbBridgeAugmentation ovsdbBridgeAugmentation = (OvsdbBridgeAugmentation)change.getValue();
+                String datapathId = MdsalUtils.getDatapathId(ovsdbBridgeAugmentation);
+                // Having a datapathId means the bridge has connected so it exists
+                if (datapathId != null) {
                 // This value is not being set right now - OvsdbBridgeupdateCommand
                 //if (ovsdbBridgeAugmentation.getBridgeOpenflowNodeRef() != null) {
                     nodeCacheManager = (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
-                    nodeCacheManager.nodeAdded(getNode(changes, created));
-                //}
+                    nodeCacheManager.nodeAdded(getNode(changes, change));
+                }
             }
         }
-        for (Map.Entry<InstanceIdentifier<?>, DataObject> created : changes.getUpdatedData().entrySet()) {
-            LOG.info("updateOpenflowConnections updated: {}", created);
-            if (created.getValue() instanceof OvsdbBridgeAugmentation) {
-                OvsdbBridgeAugmentation ovsdbBridgeAugmentation = (OvsdbBridgeAugmentation)created.getValue();
+
+        for (Map.Entry<InstanceIdentifier<?>, DataObject> change : changes.getUpdatedData().entrySet()) {
+            LOG.info("updateOpenflowConnections updated: {}", change);
+            if (change.getValue() instanceof OvsdbBridgeAugmentation) {
+                OvsdbBridgeAugmentation ovsdbBridgeAugmentation = (OvsdbBridgeAugmentation)change.getValue();
+                String datapathId = MdsalUtils.getDatapathId(ovsdbBridgeAugmentation);
+                // Having a datapathId means the bridge has connected so it exists
+                if (datapathId != null) {
                 // This value is not being set right now - OvsdbBridgeupdateCommand
                 // if (ovsdbBridgeAugmentation.getBridgeOpenflowNodeRef() != null) {
                     nodeCacheManager = (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
-                    nodeCacheManager.nodeAdded(getNode(changes, created));
-                //}
+                    nodeCacheManager.nodeAdded(getNode(changes, change));
+                }
             }
         }
     }

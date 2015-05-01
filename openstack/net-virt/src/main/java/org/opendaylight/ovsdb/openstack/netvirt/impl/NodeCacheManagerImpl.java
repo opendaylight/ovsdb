@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheManager {
 
     private static final Logger logger = LoggerFactory.getLogger(NodeCacheManagerImpl.class);
+    private final Object nodeCacheLock = new Object();
     private List<Node> nodeCache = Lists.newArrayList();
     private Map<Long, NodeCacheListener> handlers = Maps.newHashMap();
 
@@ -39,19 +40,57 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
     @Override
     public void nodeAdded(Node node) {
         logger.debug("nodeAdded: Node added: {}", node);
-        enqueueEvent(new NodeCacheManagerEvent(node, Action.ADD));
+        if (addNodeToCache(node)) {
+            enqueueEvent(new NodeCacheManagerEvent(node, Action.ADD));
+        } else {
+            enqueueEvent(new NodeCacheManagerEvent(node, Action.UPDATE));
+        }
+
     }
+
     @Override
     public void nodeRemoved(Node node) {
         logger.debug("nodeRemoved: Node removed: {}", node);
-        enqueueEvent(new NodeCacheManagerEvent(node, Action.DELETE));
+        if (removeNodeFromCache(node)) {
+            enqueueEvent(new NodeCacheManagerEvent(node, Action.DELETE));
+        }
     }
+
     @Override
     public List<Node> getNodes() {
         return nodeCache;
     }
 
-    private void _processNodeAdded(Node node) {
+    /**
+     * This method returns the true if node was added to the nodeCache. If param node
+     * is already in the cache, this method is expected to return false.
+     *
+     * @param openFlowNode the node to be added to the cache, if needed
+     * @return whether new node entry was added to cache
+     */
+    private Boolean addNodeToCache (Node openFlowNode) {
+        synchronized (nodeCacheLock) {
+            if (nodeCache.contains(openFlowNode)) {
+                return false;
+            }
+            return nodeCache.add(openFlowNode);
+        }
+    }
+
+    /**
+     * This method returns the true if node was removed from the nodeCache. If param node
+     * is not in the cache, this method is expected to return false.
+     *
+     * @param openFlowNode the node to be removed from the cache, if needed
+     * @return whether new node entry was removed from cache
+     */
+    private Boolean removeNodeFromCache (Node openFlowNode) {
+        synchronized (nodeCacheLock) {
+            return nodeCache.remove(openFlowNode);
+        }
+    }
+
+    private void processNodeAdded(Node node) {
         nodeCache.add(node);
         for (NodeCacheListener handler : handlers.values()) {
             try {
@@ -61,7 +100,7 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
             }
         }
     }
-    private void _processNodeRemoved(Node node) {
+    private void processNodeRemoved(Node node) {
         nodeCache.remove(node);
         for (NodeCacheListener handler : handlers.values()) {
             try {
@@ -88,10 +127,10 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
         logger.debug(">>>>> dequeue: {}", ev);
         switch (ev.getAction()) {
             case ADD:
-                _processNodeAdded(ev.getNode());
+                processNodeAdded(ev.getNode());
                 break;
             case DELETE:
-                _processNodeRemoved(ev.getNode());
+                processNodeRemoved(ev.getNode());
                 break;
             case UPDATE:
                 break;

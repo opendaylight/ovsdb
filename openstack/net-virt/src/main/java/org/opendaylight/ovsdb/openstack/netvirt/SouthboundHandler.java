@@ -407,9 +407,6 @@ public class SouthboundHandler extends AbstractHandler
         logger.info("notifyNode: Node {} update {}", openFlowNode, action);
 
         if (action.equals(Action.ADD)) {
-            /* TODO SB_MIGRATION
-             * Need to map from ovsdbNode to openflowNode
-             */
             networkingProviderManager.getProvider(openFlowNode).initializeOFFlowRules(openFlowNode);
         }
     }

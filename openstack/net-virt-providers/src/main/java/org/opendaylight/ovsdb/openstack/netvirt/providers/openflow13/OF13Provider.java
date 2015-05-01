@@ -114,12 +114,8 @@ public class OF13Provider implements NetworkingProvider {
 
     public static final String NAME = "OF13Provider";
 
-    public OF13Provider(){
-
-    }
-
     public void init() {
-        logger.info(">>>>> init OF13Provider");
+        logger.info(">>>>> init {}", this.getClass());
     }
 
     @Override
@@ -797,58 +793,26 @@ public class OF13Provider implements NetworkingProvider {
         handleVlanMiss(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, ethPort, false);
     }
 
-    private Long getDpid (Node node, String bridgeUuid) {
+    private Long getDpid (Node node) {
         String datapathIdString = node.getAugmentation(OvsdbBridgeAugmentation.class).getDatapathId().getValue();
-        //String datapathIdNoColons = datapathIdString.replaceAll("[:]","");
         Long dpidLong = StringConvertor.dpidStringToLong(datapathIdString);
         return dpidLong;
-        /* TODO SB_MIGRATION
-        Preconditions.checkNotNull(ovsdbConfigurationService);
-        try {
-            Row bridgeRow =  ovsdbConfigurationService
-                    .getRow(node, ovsdbConfigurationService.getTableName(node, Bridge.class), bridgeUuid);
-            Bridge bridge = ovsdbConfigurationService.getTypedRow(node, Bridge.class, bridgeRow);
-            Set<String> dpids = bridge.getDatapathIdColumn().getData();
-            if (dpids == null || dpids.size() == 0) return 0L;
-            return StringConvertor.dpidStringToLong((String) dpids.toArray()[0]);
-        } catch (Exception e) {
-            logger.error("Error finding Bridge's OF DPID", e);
-            return 0L;
-        }*/
     }
 
     private Long getIntegrationBridgeOFDPID (Node node) {
-        try {
-            String bridgeName = configurationService.getIntegrationBridgeName();
-            /* TODO SB_MIGRATION */
-            String brIntId = "ignored";// getInternalBridgeUUID(node, bridgeName);
-            //if (brIntId == null) {
-            //    logger.error("Unable to spot Bridge Identifier for {} in {}", bridgeName, node);
-            //    return 0L;
-            //}
-
-            return getDpid(node, brIntId);
-        } catch (Exception e) {
-            logger.error("Error finding Integration Bridge's OF DPID", e);
-            return 0L;
+        Long dpid = 0L;
+        if (getBridgeName(node).equals(configurationService.getIntegrationBridgeName())) {
+            dpid = getDpid(node);
         }
+        return dpid;
     }
 
     private Long getExternalBridgeDpid (Node node) {
-        try {
-            String bridgeName = configurationService.getExternalBridgeName();
-            String brUuid = this.getInternalBridgeUUID(node, bridgeName);
-            if (brUuid == null) {
-                // Note: it is okay for certain nodes to not have br-ex configured; not an error
-                logger.info("Unable to spot Bridge Identifier for {} in {}", bridgeName, node);
-                return 0L;
-            }
-
-            return getDpid(node, brUuid);
-        } catch (Exception e) {
-            logger.error("Error finding External Bridge's OF DPID", e);
-            return 0L;
+        Long dpid = 0L;
+        if (getBridgeName(node).equals(configurationService.getExternalBridgeName())) {
+            dpid = getDpid(node);
         }
+        return dpid;
     }
 
     private void programLocalRules (String networkType, String segmentationId, Node node,
@@ -1269,12 +1233,8 @@ public class OF13Provider implements NetworkingProvider {
     }
 
     private void initializeFlowRules(Node node, String bridgeName) {
-        String bridgeUuid = this.getInternalBridgeUUID(node, bridgeName);
-        if (bridgeUuid == null) {
-            return;
-        }
-
-        Long dpid = getDpid(node, bridgeUuid);
+        Long dpid = getDpid(node);
+        logger.info("initializeFlowRules: bridgeName: {}, dpid: {}", bridgeName, dpid);
 
         if (dpid == 0L) {
             logger.debug("Openflow Datapath-ID not set for the integration bridge in {}", node);
@@ -1289,6 +1249,7 @@ public class OF13Provider implements NetworkingProvider {
          */
 
         writeLLDPRule(dpid);
+
         if (bridgeName.equals(configurationService.getExternalBridgeName())) {
             writeNormalRule(dpid);
         }
@@ -2043,8 +2004,8 @@ public class OF13Provider implements NetworkingProvider {
 
     @Override
     public void initializeOFFlowRules(Node openflowNode) {
-        /* TODO SB_MIGRATION */
         String bridgeName = getBridgeName(openflowNode);
+        logger.info("initializeOFFlowRules: bridgeName: {}", bridgeName);
         if (bridgeName.equals(configurationService.getIntegrationBridgeName())) {
             initializeFlowRules(openflowNode, configurationService.getIntegrationBridgeName());
             triggerInterfaceUpdates(openflowNode);
@@ -2052,25 +2013,6 @@ public class OF13Provider implements NetworkingProvider {
             initializeFlowRules(openflowNode, configurationService.getExternalBridgeName());
             triggerInterfaceUpdates(openflowNode);
         }
-        /*Preconditions.checkNotNull(connectionService);
-        List<Node> ovsNodes = connectionService.getNodes();
-        if (ovsNodes == null) return;
-        for (Node ovsNode : ovsNodes) {
-            Long brIntDpid = getIntegrationBridgeOFDPID(ovsNode);
-            Long brExDpid = getExternalBridgeDpid(ovsNode);
-            logger.debug("Compare openflowNode to OVS node {} vs {} and {}",
-                    openflowNode.getNodeId().getValue(), brIntDpid, brExDpid);
-            Long openflowID = getDpid(openflowNode, "ignored"); //openflowNode.getId().getValue();
-            if (openflowID == brIntDpid) {
-            //if (openflowID.contains(brExDpid.toString())) {
-                initializeFlowRules(ovsNode, configurationService.getExternalBridgeName());
-                triggerInterfaceUpdates(ovsNode);
-            } else if (openflowID == brExDpid)
-            //if (openflowID.contains(brIntDpid.toString())) {
-                initializeFlowRules(ovsNode, configurationService.getIntegrationBridgeName());
-                triggerInterfaceUpdates(ovsNode);
-            }
-        }*/
     }
 
     @Override

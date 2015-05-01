@@ -316,8 +316,21 @@ public class MdsalUtils {
         return topology;
     }
 
-    public static String getDataPathId(Node node) {
-        return (node.getAugmentation(OvsdbBridgeAugmentation.class).getDatapathId().getValue());
+    public static String getDatapathId(Node node) {
+        String datapathId = null;
+        OvsdbBridgeAugmentation ovsdbBridgeAugmentation = node.getAugmentation(OvsdbBridgeAugmentation.class);
+        if (ovsdbBridgeAugmentation != null && ovsdbBridgeAugmentation.getDatapathId() != null) {
+            datapathId = node.getAugmentation(OvsdbBridgeAugmentation.class).getDatapathId().getValue();
+        }
+        return datapathId;
+    }
+
+    public static String getDatapathId(OvsdbBridgeAugmentation ovsdbBridgeAugmentation) {
+        String datapathId = null;
+        if (ovsdbBridgeAugmentation != null && ovsdbBridgeAugmentation.getDatapathId() != null) {
+            datapathId = ovsdbBridgeAugmentation.getDatapathId().getValue();
+        }
+        return datapathId;
     }
 
     public static String getBridgeName(Node node) {

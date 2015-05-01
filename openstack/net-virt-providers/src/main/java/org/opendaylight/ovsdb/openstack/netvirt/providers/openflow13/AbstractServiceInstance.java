@@ -97,31 +97,6 @@ public abstract class AbstractServiceInstance {
         return false;
     }
 
-    private String getBridgeName(String nodeId){
-        /* TODO SB_MIGRATION */
-        List<org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node> ovsNodes = connectionService.getNodes();
-
-        for (org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node ovsNode : ovsNodes) {
-            Map<String, Row> bridges = ovsdbConfigService.getRows(ovsNode, ovsdbConfigService.getTableName(ovsNode, Bridge.class));
-            if (bridges == null) continue;
-            for (String brUuid : bridges.keySet()) {
-                Bridge bridge = ovsdbConfigService.getTypedRow(ovsNode, Bridge.class, bridges.get(brUuid));
-
-                Set<String> dpids = bridge.getDatapathIdColumn().getData();
-                if (dpids == null || dpids.size() == 0) return null;
-                Long dpid = StringConvertor.dpidStringToLong((String) dpids.toArray()[0]);
-                logger.debug("getBridgeName: bridgeDpid {} ofNodeDpid {}", bridge.getDatapathIdColumn().getData().toArray()[0], nodeId);
-                if (dpid.equals(Long.parseLong(nodeId))){
-                    // Found the bridge
-                    logger.debug("getOvsNode: found ovsNode {} bridge {} for ofNode {}",
-                            ovsNode.getNodeId().getValue(), bridge.getName(), nodeId);
-                    return bridge.getName();
-                }
-            }
-        }
-        return null;
-    }
-
     public short getTable() {
         return service.getTable();
     }
@@ -159,7 +134,7 @@ public abstract class AbstractServiceInstance {
     }
 
     /**
-     * This method returns the required Pipeline Instructions to by used by any matching flows that needs
+     * This method returns the required Pipeline Instructions to by used by any matching flows that need
      * to be further processed by next service in the pipeline.
      *
      * Important to note that this is a convenience method which returns a mutable instructionBuilder which
@@ -177,6 +152,7 @@ public abstract class AbstractServiceInstance {
 
     protected void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
         Preconditions.checkNotNull(mdsalConsumer);
+        logger.info("writeFlow: flowBuilder: {}, nodeBuilder: {}", flowBuilder, nodeBuilder);
         if (mdsalConsumer == null) {
             logger.error("ERROR finding MDSAL Service. Its possible that writeFlow is called too soon ?");
             return;
@@ -224,7 +200,7 @@ public abstract class AbstractServiceInstance {
         CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
         try {
             commitFuture.get();  // TODO: Make it async (See bug 1362)
-            logger.debug("Transaction success for deletion of Flow "+flowBuilder.getFlowName());
+            logger.debug("Transaction success for deletion of Flow " + flowBuilder.getFlowName());
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             modification.cancel();
@@ -259,6 +235,12 @@ public abstract class AbstractServiceInstance {
         return null;
     }
 
+    private Long getDpid(Node node) {
+        String datapathIdString = node.getAugmentation(OvsdbBridgeAugmentation.class).getDatapathId().getValue();
+        Long dpidLong = StringConvertor.dpidStringToLong(datapathIdString);
+        return dpidLong;
+    }
+
     /**
      * Program Default Pipeline Flow.
      *
@@ -271,7 +253,8 @@ public abstract class AbstractServiceInstance {
         }
         MatchBuilder matchBuilder = new MatchBuilder();
         FlowBuilder flowBuilder = new FlowBuilder();
-        NodeBuilder nodeBuilder = createNodeBuilder(node.getNodeId().getValue());
+        String nodeName = OPENFLOW + getDpid(node);
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
 
         // Create the OF Actions and Instructions
         InstructionsBuilder isb = new InstructionsBuilder();

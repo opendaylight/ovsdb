@@ -251,11 +251,13 @@ public class AbstractServiceInstanceTest {
         Set<String> dpids = new HashSet();
         dpids.add(DPID);
         when(datapathIdColumn.getData()).thenReturn(dpids);
+        /* TODO SB_MIGRATION */
         //when(ovsdbConfigService.getTypedRow(any(Node.class), same(Bridge.class), any(Row.class))).thenReturn(bridge);
 
         abstractServiceInstance.setService(service);
 
-        abstractServiceInstance.programDefaultPipelineRule(NODE_ID);
+        /* TODO SB_MIGRATION */ // Need topology Node rather than the NODE_ID
+        //abstractServiceInstance.programDefaultPipelineRule(NODE_ID);
 
         /* TODO SB_MIGRATION */
         //verify(abstractServiceInstance, times(1)).isBridgeInPipeline(NODE_ID);

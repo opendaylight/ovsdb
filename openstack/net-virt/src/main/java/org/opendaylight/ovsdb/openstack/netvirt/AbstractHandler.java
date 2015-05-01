@@ -34,6 +34,10 @@ public abstract class AbstractHandler {
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile EventDispatcher eventDispatcher;
 
+    void init() {
+        logger.info(">>>>> init {}", this.getClass());
+    }
+
     /**
      * Convert failure status returned by the  manager into
      * neutron API service errors.

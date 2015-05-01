@@ -43,7 +43,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration.LoadBalancerPoolMember;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -176,12 +176,13 @@ public class LBaaSHandlerTest {
      * Test method {@link LBaaSHandler#notifyNode(Node, Action)}
      */
     @Test
-    public void testNotifyNode(){
+    public void testNotifyNode() {
         lbaasHandlerSpy.notifyNode(mock(Node.class), Action.ADD);
 
         verify(lbaasHandlerSpy, times(1)).extractLBConfiguration(any(NeutronLoadBalancer.class));
         verify(neutronLBCache, times(1)).getAllNeutronLoadBalancers();
         verify(neutronLBPoolCache, times(1)).getAllNeutronLoadBalancerPools();
+        /* TODO SB_MIGRATION */
         verify(loadBalancerProvider, times(1)).programLoadBalancerRules(any(Node.class), any(LoadBalancerConfiguration.class), any(Action.class));
     }
 }

@@ -41,10 +41,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
-//import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,9 +80,17 @@ public abstract class AbstractServiceInstance {
         this.service = service;
     }
 
-    public boolean isBridgeInPipeline (String nodeId){
-        String bridgeName = getBridgeName(nodeId.split(":")[1]);
-        logger.debug("isBridgeInPipeline: nodeId {} bridgeName {}", nodeId, bridgeName);
+    void init() {
+        logger.info(">>>>> init {}", this.getClass());
+    }
+
+    private String getBridgeName(Node node) {
+        return (node.getAugmentation(OvsdbBridgeAugmentation.class).getBridgeName().getValue());
+    }
+
+    public boolean isBridgeInPipeline (Node node){
+        String bridgeName = getBridgeName(node);
+        logger.debug("isBridgeInPipeline: node {} bridgeName {}", node, bridgeName);
         if (bridgeName != null && Constants.INTEGRATION_BRIDGE.equalsIgnoreCase(bridgeName)) {
             return true;
         }
@@ -142,8 +150,12 @@ public abstract class AbstractServiceInstance {
                 .child(Flow.class, flowBuilder.getKey()).build();
     }
 
-    private static final InstanceIdentifier<Node> createNodePath(NodeBuilder nodeBuilder) {
-        return InstanceIdentifier.builder(Nodes.class).child(Node.class, nodeBuilder.getKey()).build();
+    private static final
+    InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node>
+    createNodePath(NodeBuilder nodeBuilder) {
+        return InstanceIdentifier.builder(Nodes.class)
+                .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class,
+                        nodeBuilder.getKey()).build();
     }
 
     /**
@@ -252,14 +264,14 @@ public abstract class AbstractServiceInstance {
      *
      * @param nodeId Node on which the default pipeline flow is programmed.
      */
-    protected void programDefaultPipelineRule(String nodeId) {
-        if (!isBridgeInPipeline(nodeId)) {
-            logger.debug("Bridge {} is not in pipeline", nodeId);
+    protected void programDefaultPipelineRule(Node node) {
+        if (!isBridgeInPipeline(node)) {
+            logger.debug("Bridge {} is not in pipeline", node);
             return;
         }
         MatchBuilder matchBuilder = new MatchBuilder();
         FlowBuilder flowBuilder = new FlowBuilder();
-        NodeBuilder nodeBuilder = createNodeBuilder(nodeId);
+        NodeBuilder nodeBuilder = createNodeBuilder(node.getNodeId().getValue());
 
         // Create the OF Actions and Instructions
         InstructionsBuilder isb = new InstructionsBuilder();

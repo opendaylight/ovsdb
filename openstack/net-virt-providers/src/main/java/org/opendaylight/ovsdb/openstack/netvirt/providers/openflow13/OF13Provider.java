@@ -32,6 +32,7 @@ import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
+import org.opendaylight.ovsdb.utils.mdsal.node.StringConvertor;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.GroupActionCase;
@@ -72,6 +73,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
@@ -795,6 +798,10 @@ public class OF13Provider implements NetworkingProvider {
     }
 
     private Long getDpid (Node node, String bridgeUuid) {
+        String datapathIdString = node.getAugmentation(OvsdbBridgeAugmentation.class).getDatapathId().getValue();
+        //String datapathIdNoColons = datapathIdString.replaceAll("[:]","");
+        Long dpidLong = StringConvertor.dpidStringToLong(datapathIdString);
+        return dpidLong;
         /* TODO SB_MIGRATION
         Preconditions.checkNotNull(ovsdbConfigurationService);
         try {
@@ -807,17 +814,18 @@ public class OF13Provider implements NetworkingProvider {
         } catch (Exception e) {
             logger.error("Error finding Bridge's OF DPID", e);
             return 0L;
-        }*/ return 0L;
+        }*/
     }
 
     private Long getIntegrationBridgeOFDPID (Node node) {
         try {
             String bridgeName = configurationService.getIntegrationBridgeName();
-            String brIntId = this.getInternalBridgeUUID(node, bridgeName);
-            if (brIntId == null) {
-                logger.error("Unable to spot Bridge Identifier for {} in {}", bridgeName, node);
-                return 0L;
-            }
+            /* TODO SB_MIGRATION */
+            String brIntId = "ignored";// getInternalBridgeUUID(node, bridgeName);
+            //if (brIntId == null) {
+            //    logger.error("Unable to spot Bridge Identifier for {} in {}", bridgeName, node);
+            //    return 0L;
+            //}
 
             return getDpid(node, brIntId);
         } catch (Exception e) {
@@ -960,7 +968,7 @@ public class OF13Provider implements NetworkingProvider {
                                     tunnelOFPort, localPort);
                         }
                         logger.trace("program local ingress tunnel rules: node {}, intf {}",
-                                node.getNodeId().getValue(), intf.getName() );
+                                node.getNodeId().getValue(), intf.getName());
                         if (local) {
                             programLocalIngressTunnelBridgeRules(node, dpid, segmentationId, attachedMac,
                                     tunnelOFPort, localPort);
@@ -2029,27 +2037,40 @@ public class OF13Provider implements NetworkingProvider {
         }
     }
 
+    private String getBridgeName(Node node) {
+        return (node.getAugmentation(OvsdbBridgeAugmentation.class).getBridgeName().getValue());
+    }
+
     @Override
-    public void initializeOFFlowRules(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node openflowNode) {
+    public void initializeOFFlowRules(Node openflowNode) {
         /* TODO SB_MIGRATION */
-        Preconditions.checkNotNull(connectionService);
+        String bridgeName = getBridgeName(openflowNode);
+        if (bridgeName.equals(configurationService.getIntegrationBridgeName())) {
+            initializeFlowRules(openflowNode, configurationService.getIntegrationBridgeName());
+            triggerInterfaceUpdates(openflowNode);
+        } else if (bridgeName.equals(configurationService.getExternalBridgeName())) {
+            initializeFlowRules(openflowNode, configurationService.getExternalBridgeName());
+            triggerInterfaceUpdates(openflowNode);
+        }
+        /*Preconditions.checkNotNull(connectionService);
         List<Node> ovsNodes = connectionService.getNodes();
         if (ovsNodes == null) return;
         for (Node ovsNode : ovsNodes) {
-            Long brIntDpid = this.getIntegrationBridgeOFDPID(ovsNode);
-            Long brExDpid = this.getExternalBridgeDpid(ovsNode);
+            Long brIntDpid = getIntegrationBridgeOFDPID(ovsNode);
+            Long brExDpid = getExternalBridgeDpid(ovsNode);
             logger.debug("Compare openflowNode to OVS node {} vs {} and {}",
-                    openflowNode.getId().getValue(), brIntDpid, brExDpid);
-            String openflowID = openflowNode.getId().getValue();
-            if (openflowID.contains(brExDpid.toString())) {
-                this.initializeFlowRules(ovsNode, configurationService.getExternalBridgeName());
-                this.triggerInterfaceUpdates(ovsNode);
+                    openflowNode.getNodeId().getValue(), brIntDpid, brExDpid);
+            Long openflowID = getDpid(openflowNode, "ignored"); //openflowNode.getId().getValue();
+            if (openflowID == brIntDpid) {
+            //if (openflowID.contains(brExDpid.toString())) {
+                initializeFlowRules(ovsNode, configurationService.getExternalBridgeName());
+                triggerInterfaceUpdates(ovsNode);
+            } else if (openflowID == brExDpid)
+            //if (openflowID.contains(brIntDpid.toString())) {
+                initializeFlowRules(ovsNode, configurationService.getIntegrationBridgeName());
+                triggerInterfaceUpdates(ovsNode);
             }
-            if (openflowID.contains(brIntDpid.toString())) {
-                this.initializeFlowRules(ovsNode, configurationService.getIntegrationBridgeName());
-                this.triggerInterfaceUpdates(ovsNode);
-            }
-        }
+        }*/
     }
 
     @Override
@@ -2083,6 +2104,7 @@ public class OF13Provider implements NetworkingProvider {
         } catch (Exception e) {
             logger.error("Error getting Bridge Identifier for {} / {}", node, bridgeName, e);
         }
-        return null;
+        //return null;
+        return "ignore";
     }
 }

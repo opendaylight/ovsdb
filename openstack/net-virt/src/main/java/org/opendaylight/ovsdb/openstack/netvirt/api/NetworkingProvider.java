@@ -62,7 +62,7 @@ public interface NetworkingProvider {
     /**
      * Initialize the Flow rules for a given OpenFlow node
      */
-    public void initializeOFFlowRules(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node openflowNode);
+    public void initializeOFFlowRules(Node openflowNode);
 
     /**
      * Generate event to announce flow capable node.

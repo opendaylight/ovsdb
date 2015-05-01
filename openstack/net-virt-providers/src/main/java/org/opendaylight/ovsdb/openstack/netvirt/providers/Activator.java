@@ -13,24 +13,7 @@ package org.opendaylight.ovsdb.openstack.netvirt.providers;
 import org.apache.felix.dm.DependencyActivatorBase;
 import org.apache.felix.dm.DependencyManager;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
-import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
-import org.opendaylight.ovsdb.openstack.netvirt.api.ClassifierProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
-import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.openstack.netvirt.api.EgressAclProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.InboundNatProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.IngressAclProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.L2ForwardingProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.OutboundNatProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConfigurationService;
-import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConnectionService;
-import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
-import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.*;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.MdsalConsumer;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.MdsalConsumerImpl;
@@ -88,11 +71,13 @@ public class Activator extends DependencyActivatorBase {
                 .add(createServiceDependency().setService(L2ForwardingProvider.class).setRequired(true)));
 
         manager.add(createComponent()
-                .setInterface(PipelineOrchestrator.class.getName(), null)
+                .setInterface(new String[]{PipelineOrchestrator.class.getName(),
+                        NodeCacheListener.class.getName()}, null)
                 .setImplementation(PipelineOrchestratorImpl.class)
                 .add(createServiceDependency().setService(AbstractServiceInstance.class)
                         .setCallbacks("registerService", "unregisterService"))
-                .add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true)));
+                .add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true))
+                .add(createServiceDependency().setService(NodeCacheManager.class).setRequired(true)));
 
         Dictionary<String, Object> props2 = new Hashtable<>();
         props2.put(AbstractServiceInstance.SERVICE_PROPERTY, Service.CLASSIFIER);

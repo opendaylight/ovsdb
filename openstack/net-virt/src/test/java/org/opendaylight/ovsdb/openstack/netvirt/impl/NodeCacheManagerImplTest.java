@@ -23,7 +23,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.NodeCacheManagerEvent;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
 import org.opendaylight.ovsdb.utils.mdsal.node.NodeUtils;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.osgi.framework.ServiceReference;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -48,7 +48,7 @@ public class NodeCacheManagerImplTest {
         when(ev.getNodeIdentifier()).thenReturn("node_identifier");
 
         PowerMockito.mockStatic(NodeUtils.class);
-        when(NodeUtils.getOpenFlowNode(anyString())).thenReturn(mock(Node.class));
+        //when(NodeUtils.getOpenFlowNode(anyString())).thenReturn(mock(Node.class));
 
         when(ev.getAction()).thenReturn(Action.ADD);
         nodeCacheManagerImpl.processEvent(ev);

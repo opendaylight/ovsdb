@@ -16,6 +16,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
  * Abstract class for events used by neutron northbound and southbound events.
  */
 public abstract class AbstractEvent {
+
     public enum HandlerType {
         SOUTHBOUND,
         NEUTRON_FLOATING_IP,

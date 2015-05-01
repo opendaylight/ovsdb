@@ -315,4 +315,12 @@ public class MdsalUtils {
         Topology topology = read(LogicalDatastoreType.OPERATIONAL, path);
         return topology;
     }
+
+    public static String getDataPathId(Node node) {
+        return (node.getAugmentation(OvsdbBridgeAugmentation.class).getDatapathId().getValue());
+    }
+
+    public static String getBridgeName(Node node) {
+        return (node.getAugmentation(OvsdbBridgeAugmentation.class).getBridgeName().getValue());
+    }
 }

@@ -1,47 +1,50 @@
 /*
- * Copyright (C) 2015 Red Hat, Inc.
+ * Copyright (c) 2015 Red Hat, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- *  Authors : Flavio Fernandes
  */
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.List;
+import java.util.Map;
 import org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent;
 import org.opendaylight.ovsdb.openstack.netvirt.AbstractHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.NodeCacheManagerEvent;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
-import org.opendaylight.ovsdb.utils.mdsal.node.NodeUtils;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Map;
-
-public class NodeCacheManagerImpl extends AbstractHandler
-        implements NodeCacheManager {
+/**
+ * @author Flavio Fernandes (ffernand@redhat.com)
+ * @author Sam Hague (shague@redhat.com)
+ */
+public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheManager {
 
     private static final Logger logger = LoggerFactory.getLogger(NodeCacheManagerImpl.class);
     private List<Node> nodeCache = Lists.newArrayList();
     private Map<Long, NodeCacheListener> handlers = Maps.newHashMap();
 
+    void init() {
+        logger.info(">>>>> init {}", this.getClass());
+    }
+
     @Override
-    public void nodeAdded(String nodeIdentifier) {
-        logger.debug(">>>>> enqueue: Node added : {}", nodeIdentifier);
-        enqueueEvent(new NodeCacheManagerEvent(nodeIdentifier, Action.ADD));
+    public void nodeAdded(Node node) {
+        logger.debug("nodeAdded: Node added: {}", node);
+        enqueueEvent(new NodeCacheManagerEvent(node, Action.ADD));
     }
     @Override
-    public void nodeRemoved(String nodeIdentifier) {
-        logger.debug(">>>>> enqueue: Node removed : {}", nodeIdentifier);
-        enqueueEvent(new NodeCacheManagerEvent(nodeIdentifier, Action.DELETE));
+    public void nodeRemoved(Node node) {
+        logger.debug("nodeRemoved: Node removed: {}", node);
+        enqueueEvent(new NodeCacheManagerEvent(node, Action.DELETE));
     }
     @Override
     public List<Node> getNodes() {
@@ -85,10 +88,10 @@ public class NodeCacheManagerImpl extends AbstractHandler
         logger.debug(">>>>> dequeue: {}", ev);
         switch (ev.getAction()) {
             case ADD:
-                _processNodeAdded(NodeUtils.getOpenFlowNode(ev.getNodeIdentifier()));
+                _processNodeAdded(ev.getNode());
                 break;
             case DELETE:
-                _processNodeRemoved(NodeUtils.getOpenFlowNode(ev.getNodeIdentifier()));
+                _processNodeRemoved(ev.getNode());
                 break;
             case UPDATE:
                 break;

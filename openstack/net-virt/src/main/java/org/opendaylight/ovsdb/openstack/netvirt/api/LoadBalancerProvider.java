@@ -11,7 +11,7 @@
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration.LoadBalancerPoolMember;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 /**
  * This interface allows load-balancer flows to be written to nodes

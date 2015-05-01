@@ -154,7 +154,7 @@ public class Activator extends DependencyActivatorBase {
                 .add(createServiceDependency().setService(ConfigurationService.class).setRequired(true))
                 .add(createServiceDependency().setService(BridgeConfigurationManager.class).setRequired(true))
                         //.add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true))
-                        //.add(createServiceDependency().setService(NetworkingProviderManager.class).setRequired(true))
+                        .add(createServiceDependency().setService(NetworkingProviderManager.class).setRequired(true))
                 .add(createServiceDependency().setService(OvsdbConfigurationService.class).setRequired(true))
                         .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
                 .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))

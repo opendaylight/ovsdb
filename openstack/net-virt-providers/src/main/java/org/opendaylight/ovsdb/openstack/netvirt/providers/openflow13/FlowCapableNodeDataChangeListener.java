@@ -161,10 +161,10 @@ public class FlowCapableNodeDataChangeListener implements DataChangeListener, Au
         LOG.info("notifyNodeCreated: Node {} from Controller's inventory Service", openflowId);
 
         if (pipelineOrchestrator != null) {
-            pipelineOrchestrator.enqueue(openflowId);
+            //pipelineOrchestrator.enqueue(openflowId);
         }
         if (nodeCacheManager != null) {
-            nodeCacheManager.nodeAdded(openflowId);
+            //nodeCacheManager.nodeAdded(openflowId);
         }
     }
 
@@ -173,7 +173,7 @@ public class FlowCapableNodeDataChangeListener implements DataChangeListener, Au
                 openFlowNode.getId().getValue());
 
         if (nodeCacheManager != null) {
-            nodeCacheManager.nodeRemoved(openFlowNode.getId().getValue());
+            //nodeCacheManager.nodeRemoved(openFlowNode);
         }
     }
 

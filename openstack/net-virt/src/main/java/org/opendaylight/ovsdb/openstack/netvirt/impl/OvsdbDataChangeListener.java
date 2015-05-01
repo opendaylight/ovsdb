@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2015 Red Hat, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import java.util.Map;
@@ -7,10 +14,13 @@ import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryListener;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactUtils;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
@@ -33,11 +43,11 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbDataChangeListener.class);
     private DataBroker dataBroker = null;
     private ListenerRegistration<DataChangeListener> registration;
+    private NodeCacheManager nodeCacheManager = null;
 
     public OvsdbDataChangeListener (DataBroker dataBroker) {
         LOG.info(">>>>> Registering OvsdbNodeDataChangeListener: dataBroker= {}", dataBroker);
         this.dataBroker = dataBroker;
-        //this.dataBroker = SouthboundProvider.getDb();
         InstanceIdentifier<Node> path = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
@@ -62,18 +72,49 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
         LOG.info(">>>>> onDataChanged: {}", changes);
 
         updateConnections(changes);
+        updateOpenflowConnections(changes);
     }
 
     private void updateConnections(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
         for (Map.Entry<InstanceIdentifier<?>, DataObject> created : changes.getCreatedData().entrySet()) {
-            LOG.info("created: {}", created);
+            LOG.info("updateConnections created: {}", created);
             if (created.getValue() instanceof OvsdbNodeAugmentation) {
-                InstanceIdentifier<Node> nodeInstanceIdentifier = created.getKey().firstIdentifierOf(Node.class);
-                Node ovsdbNode = (Node)changes.getCreatedData().get(nodeInstanceIdentifier);
+                Node ovsdbNode = getNode(changes, created);
                 LOG.info("ovsdbNode: {}", ovsdbNode);
                 notifyNodeAdded(ovsdbNode);
             }
         }
+    }
+
+    private void updateOpenflowConnections(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
+        for (Map.Entry<InstanceIdentifier<?>, DataObject> created : changes.getCreatedData().entrySet()) {
+            LOG.info("updateOpenflowConnections created: {}", created);
+            if (created.getValue() instanceof OvsdbBridgeAugmentation) {
+                OvsdbBridgeAugmentation ovsdbBridgeAugmentation = (OvsdbBridgeAugmentation)created.getValue();
+                // This value is not being set right now - OvsdbBridgeupdateCommand
+                //if (ovsdbBridgeAugmentation.getBridgeOpenflowNodeRef() != null) {
+                    nodeCacheManager = (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
+                    nodeCacheManager.nodeAdded(getNode(changes, created));
+                //}
+            }
+        }
+        for (Map.Entry<InstanceIdentifier<?>, DataObject> created : changes.getUpdatedData().entrySet()) {
+            LOG.info("updateOpenflowConnections updated: {}", created);
+            if (created.getValue() instanceof OvsdbBridgeAugmentation) {
+                OvsdbBridgeAugmentation ovsdbBridgeAugmentation = (OvsdbBridgeAugmentation)created.getValue();
+                // This value is not being set right now - OvsdbBridgeupdateCommand
+                // if (ovsdbBridgeAugmentation.getBridgeOpenflowNodeRef() != null) {
+                    nodeCacheManager = (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
+                    nodeCacheManager.nodeAdded(getNode(changes, created));
+                //}
+            }
+        }
+    }
+
+    private Node getNode(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
+                         Map.Entry<InstanceIdentifier<?>, DataObject> created) {
+        InstanceIdentifier<Node> nodeInstanceIdentifier = created.getKey().firstIdentifierOf(Node.class);
+        return (Node)changes.getCreatedData().get(nodeInstanceIdentifier);
     }
 
     private void notifyNodeAdded(Node node) {

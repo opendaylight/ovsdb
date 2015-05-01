@@ -357,7 +357,7 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
         }
 
         @Override
-        public void rowRemoved(Node node, String tableName, String uuid, Row row, Object context) {
+        public void rowRemoved(Node node, String tableName, String uuid, Row row) {
 
         }
     }

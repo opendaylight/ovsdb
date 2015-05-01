@@ -180,9 +180,8 @@ public class InventoryServiceImpl implements OvsdbInventoryService,
 
     @Override
     public void rowRemoved(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node node,
-                           String tableName, String uuid, Row row,
-            Object context) {
+                           String tableName, String uuid, Row row) {
         for(OvsdbInventoryListener listener : this.ovsdbInventoryListeners)
-            listener.rowRemoved(NodeUtils.getSalNode(node), tableName, uuid, row, context);
+            listener.rowRemoved(NodeUtils.getSalNode(node), tableName, uuid, row);
     }
 }

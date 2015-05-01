@@ -118,8 +118,8 @@ public class SouthboundHandler extends AbstractHandler
     }
 
     @Override
-    public void rowRemoved(Node node, String tableName, String uuid, Row row, Object context) {
-        this.enqueueEvent(new SouthboundEvent(node, tableName, uuid, row, context, Action.DELETE));
+    public void rowRemoved(Node node, String tableName, String uuid, Row row) {
+        this.enqueueEvent(new SouthboundEvent(node, tableName, uuid, row, Action.DELETE));
     }
 
     public void processNodeUpdate(Node node, Action action) {
@@ -128,18 +128,12 @@ public class SouthboundHandler extends AbstractHandler
         bridgeConfigurationManager.prepareNode(node);
     }
 
-    private void processRowUpdate(Node node, String tableName, String uuid, Row row,
-                                  Object context, Action action) {
+    private void processRowUpdate(Node node, String tableName, String uuid, Row row, Action action) {
         if (action == Action.DELETE) {
             if (tableName.equalsIgnoreCase(ovsdbConfigurationService.getTableName(node, Interface.class))) {
                 logger.debug("Processing update of {}. Deleted node: {}, uuid: {}, row: {}", tableName, node, uuid, row);
                 Interface deletedIntf = ovsdbConfigurationService.getTypedRow(node, Interface.class, row);
-                NeutronNetwork network = null;
-                if (context == null) {
-                    network = tenantNetworkManager.getTenantNetwork(deletedIntf);
-                } else {
-                    network = (NeutronNetwork)context;
-                }
+                NeutronNetwork network = tenantNetworkManager.getTenantNetwork(deletedIntf);
                 List<String> phyIfName = bridgeConfigurationManager.getAllPhysicalInterfaceNames(node);
                 logger.info("Delete interface " + deletedIntf.getName());
 
@@ -350,7 +344,7 @@ public class SouthboundHandler extends AbstractHandler
             case ROW:
                 try {
                     processRowUpdate(ev.getNode(), ev.getTableName(), ev.getUuid(), ev.getRow(),
-                                     ev.getContext(),ev.getAction());
+                                     ev.getAction());
                 } catch (Exception e) {
                     logger.error("Exception caught in ProcessRowUpdate for node " + ev.getNode(), e);
                 }

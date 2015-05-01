@@ -79,7 +79,7 @@ public class L3ForwardingService extends AbstractServiceInstance implements L3Fo
         flowBuilder.setMatch(matchBuilder.build());
         flowBuilder.setInstructions(isb.setInstruction(instructions).build());
 
-        String flowId = "L3Forwarding_" + ipAddress.getHostAddress();
+        String flowId = "L3Forwarding_" + segmentationId + "_" + ipAddress.getHostAddress();
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setBarrier(true);

@@ -78,7 +78,7 @@ public class InboundNatService extends AbstractServiceInstance implements Inboun
         flowBuilder.setMatch(matchBuilder.build());
         flowBuilder.setInstructions(isb.setInstruction(instructions).build());
 
-        String flowId = "InboundNAT_" + rewriteAddress.getHostAddress();
+        String flowId = "InboundNAT_" + segmentationId + "_" + rewriteAddress.getHostAddress();
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setBarrier(true);
@@ -88,7 +88,6 @@ public class InboundNatService extends AbstractServiceInstance implements Inboun
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
-        writeFlow(flowBuilder, nodeBuilder);
 
         if (action.equals(Action.ADD)) {
             writeFlow(flowBuilder, nodeBuilder);
@@ -126,7 +125,7 @@ public class InboundNatService extends AbstractServiceInstance implements Inboun
         flowBuilder.setMatch(matchBuilder.build());
         flowBuilder.setInstructions(isb.setInstruction(instructions).build());
 
-        String flowId = "InboundNATExclusion_" + excludedCidr;
+        String flowId = "InboundNATExclusion_" + segmentationId + "_" + excludedCidr;
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setBarrier(true);
@@ -136,7 +135,6 @@ public class InboundNatService extends AbstractServiceInstance implements Inboun
         flowBuilder.setFlowName(flowId);
         flowBuilder.setHardTimeout(0);
         flowBuilder.setIdleTimeout(0);
-        writeFlow(flowBuilder, nodeBuilder);
 
         if (action.equals(Action.ADD)) {
             writeFlow(flowBuilder, nodeBuilder);

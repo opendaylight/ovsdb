@@ -219,7 +219,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                                                               Constants.TCP_SYN, segmentationId).build());
 
         logger.debug("ingressACLTcpSyn MatchBuilder contains:  {}", flowBuilder.getMatch());
-        String flowId = "UcastOut_ACL2" + segmentationId + "_" + attachedMac + securityRulePortMin;
+        String flowId = "UcastOut_ACL2_" + segmentationId + "_" + attachedMac + securityRulePortMin;
         // Add Flow Attributes
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
@@ -368,7 +368,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                 attachedMac, Constants.TCP_SYN, segmentationId).build());
 
         logger.debug("MatchBuilder contains: {}", flowBuilder.getMatch());
-        String flowId = "PortSec_TCP_Syn_Default_Drop_" + attachedMac;
+        String flowId = "PortSec_TCP_Syn_Default_Drop_" + segmentationId + "_" + attachedMac;
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setStrict(false);

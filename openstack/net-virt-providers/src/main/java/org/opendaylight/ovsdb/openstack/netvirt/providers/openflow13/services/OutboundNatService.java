@@ -81,7 +81,7 @@ public class OutboundNatService extends AbstractServiceInstance implements Outbo
         flowBuilder.setMatch(matchBuilder.build());
         flowBuilder.setInstructions(isb.setInstruction(instructions).build());
 
-        String flowId = "OutboundNAT_" + rewriteAddress.getHostAddress();
+        String flowId = "OutboundNAT_" + segmentationId + "_" + rewriteAddress.getHostAddress();
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setBarrier(true);
@@ -128,7 +128,7 @@ public class OutboundNatService extends AbstractServiceInstance implements Outbo
         flowBuilder.setMatch(matchBuilder.build());
         flowBuilder.setInstructions(isb.setInstruction(instructions).build());
 
-        String flowId = "OutboundNATExclusion_" + excludedCidr;
+        String flowId = "OutboundNATExclusion_" + segmentationId + "_" + excludedCidr;
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setBarrier(true);

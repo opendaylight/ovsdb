@@ -38,6 +38,8 @@ import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundProvider;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentationBuilder;
@@ -48,6 +50,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes.VlanMode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
@@ -429,6 +434,16 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         return protocolList;
     }
 
+    private List<ControllerEntry> createControllerEntry() {
+        List<ControllerEntry> controllerList = new ArrayList<ControllerEntry>();
+        controllerList.add(new ControllerEntryBuilder().setControllerUuid(
+                new Uuid("c2037112-b420-4808-b0df-9ad568fa4dde"))
+                .setIsConnected(Boolean.TRUE)
+                .setKey(new ControllerEntryKey(new Uri("Testuri")))
+                .build());
+        return controllerList;
+    }
+
     private OvsdbTerminationPointAugmentationBuilder createGenericOvsdbTerminationPointAugmentationBuilder() {
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointAugmentationBuilder =
                 new OvsdbTerminationPointAugmentationBuilder();
@@ -469,6 +484,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
         ovsdbBridgeAugmentationBuilder.setBridgeName(new OvsdbBridgeName(bridgeName));
         ovsdbBridgeAugmentationBuilder.setProtocolEntry(createMdsalProtocols());
+        ovsdbBridgeAugmentationBuilder.setControllerEntry(createControllerEntry());
         ovsdbBridgeAugmentationBuilder.setFailMode(
                 SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"));
         setManagedBy(ovsdbBridgeAugmentationBuilder, connectionInfo);
@@ -516,6 +532,21 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
         //Assume.assumeTrue(disconnectOvsdbNode(connectionInfo));
+    }
+
+    @Test
+    public void testOvsdbBridgeControllerInfo() throws InterruptedException {
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr,portStr);
+        Node ovsdbNode = connectOvsdbNode(connectionInfo);
+        Assert.assertTrue(addBridge(connectionInfo,SouthboundITConstants.BRIDGE_NAME));
+        OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
+        Assert.assertNotNull(bridge);
+        Assert.assertNotNull(bridge.getControllerEntry());
+        Assert.assertNotNull(bridge.getFailMode());
+        Assert.assertNotNull(bridge.getProtocolEntry());
+        Assert.assertNotNull(bridge.getBridgeName());
+        Assert.assertTrue(deleteBridge(connectionInfo));
+        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
 
     private InstanceIdentifier<Node> getTpIid(ConnectionInfo connectionInfo, OvsdbBridgeAugmentation bridge) {

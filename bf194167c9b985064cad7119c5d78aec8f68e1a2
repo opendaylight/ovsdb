@@ -1,0 +1,84 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_c36208ad",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 440,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-05-01T23:49:31Z",
+      "side": 1,
+      "message": "you shouldn\u0027t need to add the uuid. this should be set by the ovsdb node and written to operational when that even comes in",
+      "range": {
+        "startLine": 440,
+        "startChar": 20,
+        "endLine": 440,
+        "endChar": 24
+      },
+      "revId": "bf194167c9b985064cad7119c5d78aec8f68e1a2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_835c00ef",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 441,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-05-01T23:49:31Z",
+      "side": 1,
+      "message": "same here, this should be set when the node actually connects",
+      "range": {
+        "startLine": 441,
+        "startChar": 17,
+        "endLine": 441,
+        "endChar": 31
+      },
+      "revId": "bf194167c9b985064cad7119c5d78aec8f68e1a2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_03c4705d",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 442,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-05-01T23:49:31Z",
+      "side": 1,
+      "message": "same here.",
+      "revId": "bf194167c9b985064cad7119c5d78aec8f68e1a2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_a3a25cac",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 444,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-05-01T23:49:31Z",
+      "side": 1,
+      "message": "setting the above values is more like a unit test\n\nsomething else that could be set is the target to actually see if the node will connect to ODL:\n\nString targetString \u003d \"tcp:192.168.120.1:6633\";\ncontrollerEntryBuilder.setTarget(new Uri(targetString));\n\nThe issue here though is you need a way to get the controller address. PAssing it into the test is the easiest. But there is no need to actually see a connection at this point. you could simply use any value and the connection will still be updated, but the is_connected would be false;",
+      "revId": "bf194167c9b985064cad7119c5d78aec8f68e1a2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

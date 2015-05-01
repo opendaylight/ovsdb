@@ -181,7 +181,7 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         MatchUtils.createDstL3IPv4Match(matchBuilder, MatchUtils.iPv4PrefixFromIPv4Address(lbConfig.getVip()));
         MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(REG_FIELD_A, FIRST_PASS_REGA_MATCH_VALUE));
 
-        String flowId = "LOADBALANCER_FORWARD_FLOW1_" + lbConfig.getVip();
+        String flowId = "LOADBALANCER_FORWARD_FLOW1_" + lbConfig.getProviderSegmentationId() + "_" + lbConfig.getVip();
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setMatch(matchBuilder.build());
@@ -281,7 +281,8 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(REG_FIELD_A, SECOND_PASS_REGA_MATCH_VALUE),
                                                new MatchUtils.RegMatch(REG_FIELD_B, (long)member.getIndex()));
 
-        String flowId = "LOADBALANCER_FORWARD_FLOW2_" + vip + "_" + member.getIP();
+        String flowId = "LOADBALANCER_FORWARD_FLOW2_" + lbConfig.getProviderSegmentationId() + "_" +
+                        vip + "_" + member.getIP();
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setMatch(matchBuilder.build());
@@ -377,7 +378,8 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         MatchUtils.createSrcL3IPv4Match(matchBuilder, MatchUtils.iPv4PrefixFromIPv4Address(member.getIP()));
         MatchUtils.createSetSrcTcpMatch(matchBuilder, new PortNumber(member.getPort()));
 
-        String flowId = "LOADBALANCER_REVERSE_FLOW_" + vip + "_" + member.getIP();
+        String flowId = "LOADBALANCER_REVERSE_FLOW_" + lbConfig.getProviderSegmentationId() +
+                        vip + "_" + member.getIP();
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setMatch(matchBuilder.build());

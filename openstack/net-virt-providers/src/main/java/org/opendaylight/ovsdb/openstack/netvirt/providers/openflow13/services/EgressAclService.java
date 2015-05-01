@@ -229,7 +229,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                                                                        attachedMac, Constants.TCP_SYN, segmentationId).build());
         logger.debug("MatchBuilder contains: {}", flowBuilder.getMatch());
 
-        String flowId = "TCP_Syn_Egress_Default_Drop_" + attachedMac;
+        String flowId = "TCP_Syn_Egress_Default_Drop_" segmentationId + "_" + attachedMac;
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setStrict(false);

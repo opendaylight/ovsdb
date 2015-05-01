@@ -165,7 +165,7 @@ public class InventoryServiceImpl implements OvsdbInventoryService {
                 if (tCache != null) {
                     if (!ovsdbInventoryListeners.isEmpty()) {
                         for (OvsdbInventoryListener listener : ovsdbInventoryListeners) {
-                            listener.rowRemoved(n, tableName, uuid.toString(), update.getOld(uuid), update.getNew(uuid));
+                            listener.rowRemoved(n, tableName, uuid.toString(), update.getOld(uuid));
                         }
                     }
                 }

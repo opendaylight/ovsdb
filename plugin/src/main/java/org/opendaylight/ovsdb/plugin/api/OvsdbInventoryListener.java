@@ -19,5 +19,5 @@ public interface OvsdbInventoryListener {
     public void nodeRemoved(Node node);
     public void rowAdded(Node node, String tableName, String uuid, Row row);
     public void rowUpdated(Node node, String tableName, String uuid, Row old, Row row);
-    public void rowRemoved(Node node, String tableName, String uuid, Row row, Object context);
+    public void rowRemoved(Node node, String tableName, String uuid, Row row);
 }

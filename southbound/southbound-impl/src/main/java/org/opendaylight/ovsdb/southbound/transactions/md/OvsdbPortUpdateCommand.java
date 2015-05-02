@@ -78,8 +78,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
     private Map<UUID, Interface> interfaceOldRows;
     private Map<UUID, Bridge> bridgeUpdatedRows;
     public OvsdbPortUpdateCommand(ConnectionInfo key, TableUpdates updates,
-            DatabaseSchema dbSchema) {
-        super(key, updates, dbSchema);
+            DatabaseSchema dbSchema, InstanceIdentifier<Node> connectionIid) {
+        super(key, updates, dbSchema, connectionIid);
         portUpdatedRows = TyperUtils.extractRowsUpdated(Port.class, updates, dbSchema);
         portOldRows = TyperUtils.extractRowsOld(Port.class, updates, dbSchema);
         interfaceUpdatedRows = TyperUtils.extractRowsUpdated(Interface.class, updates, dbSchema);
@@ -89,12 +89,11 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        final InstanceIdentifier<Node> connectionIId = SouthboundMapper.createInstanceIdentifier(getConnectionInfo());
         if ( (portUpdatedRows == null && interfaceOldRows == null )
                 || ( interfaceOldRows.isEmpty() && portUpdatedRows.isEmpty())) {
             return;
         }
-        Optional<Node> node = readNode(transaction, connectionIId);
+        Optional<Node> node = readNode(transaction, getConnectionIid());
         if (node.isPresent()) {
             updateTerminationPoints(transaction, node.get());
         }
@@ -109,7 +108,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
             }
             if (bridgeName.isPresent()) {
                 NodeId bridgeId = SouthboundMapper.createManagedNodeId(
-                        getConnectionInfo(), new OvsdbBridgeName(bridgeName.get()));
+                        getConnectionIid(), new OvsdbBridgeName(bridgeName.get()));
                 TerminationPointKey tpKey = new TerminationPointKey(new TpId(portName));
                 InstanceIdentifier<TerminationPoint> tpPath = InstanceIdentifier
                         .create(NetworkTopology.class)
@@ -132,10 +131,10 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                 tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
                 if (portOldRows.containsKey(portUpdate.getKey())) {
                     transaction.merge(LogicalDatastoreType.OPERATIONAL,
-                            tpPath, tpBuilder.build());
+                            tpPath, tpBuilder.build(), true);
                 } else {
                     transaction.put(LogicalDatastoreType.OPERATIONAL,
-                            tpPath, tpBuilder.build());
+                            tpPath, tpBuilder.build(), true);
                 }
             }
         }
@@ -145,7 +144,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
             Optional<String> bridgeName = getTerminationPointBridge( transaction, node, interfaceName);
             if (bridgeName.isPresent()) {
                 NodeId bridgeId = SouthboundMapper.createManagedNodeId(
-                        getConnectionInfo(), new OvsdbBridgeName(bridgeName.get()));
+                        getConnectionIid(), new OvsdbBridgeName(bridgeName.get()));
                 TerminationPointKey tpKey = new TerminationPointKey(new TpId(interfaceName));
                 InstanceIdentifier<TerminationPoint> tpPath = InstanceIdentifier
                         .create(NetworkTopology.class)
@@ -160,7 +159,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                 buildTerminationPoint(tpAugmentationBuilder, interfaceUpdate.getValue(),bridgeName.get());
                 tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
                 transaction.merge(LogicalDatastoreType.OPERATIONAL,
-                        tpPath, tpBuilder.build());
+                        tpPath, tpBuilder.build(), true);
             }
         }
 

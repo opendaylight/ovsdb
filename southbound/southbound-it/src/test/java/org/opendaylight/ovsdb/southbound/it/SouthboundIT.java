@@ -411,7 +411,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 LOG.info("dp type is {}", dpTypeStr);
                 if (dpTypeStr.equals(NETDEV_DP_TYPE)) {
                     LOG.info("Found a DPDK node; adding a corresponding netdev device");
-                    InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(connectionInfo,
+                    InstanceIdentifier<Node> connectionIid = SouthboundMapper.createInstanceIdentifier(connectionInfo);
+                    InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(connectionIid,
                             new OvsdbBridgeName(SouthboundITConstants.BRIDGE_NAME));
                     NodeId bridgeNodeId = SouthboundMapper.createManagedNodeId(bridgeIid);
                     addBridge(connectionInfo, bridgeIid, SouthboundITConstants.BRIDGE_NAME, bridgeNodeId, false, null,
@@ -571,8 +572,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             final List<BridgeOtherConfigs> otherConfigs) throws InterruptedException {
 
         NodeBuilder bridgeNodeBuilder = new NodeBuilder();
+        InstanceIdentifier<Node> connectionIid = SouthboundMapper.createInstanceIdentifier(connectionInfo);
         if (bridgeIid == null) {
-            bridgeIid = SouthboundMapper.createInstanceIdentifier(connectionInfo, new OvsdbBridgeName(bridgeName));
+            bridgeIid = SouthboundMapper.createInstanceIdentifier(connectionIid, new OvsdbBridgeName(bridgeName));
         }
         if (bridgeNodeId == null) {
             bridgeNodeId = SouthboundMapper.createManagedNodeId(bridgeIid);
@@ -627,8 +629,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     private Node getBridgeNode(ConnectionInfo connectionInfo, String bridgeName) {
+        InstanceIdentifier<Node> connectionIid = SouthboundMapper.createInstanceIdentifier(connectionInfo);
         InstanceIdentifier<Node> bridgeIid =
-                SouthboundMapper.createInstanceIdentifier(connectionInfo,
+                SouthboundMapper.createInstanceIdentifier(connectionIid,
                     new OvsdbBridgeName(bridgeName));
         return mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
     }
@@ -639,9 +642,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private boolean deleteBridge(final ConnectionInfo connectionInfo, final String bridgeName)
         throws InterruptedException {
-
+        InstanceIdentifier<Node> connectionIid = SouthboundMapper.createInstanceIdentifier(connectionInfo);
         boolean result = mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION,
-                SouthboundMapper.createInstanceIdentifier(connectionInfo,
+                SouthboundMapper.createInstanceIdentifier(connectionIid,
                         new OvsdbBridgeName(bridgeName)));
         Thread.sleep(OVSDB_UPDATE_TIMEOUT);
         return result;
@@ -664,7 +667,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     private InstanceIdentifier<Node> getTpIid(ConnectionInfo connectionInfo, OvsdbBridgeAugmentation bridge) {
-        return SouthboundMapper.createInstanceIdentifier(connectionInfo,
+        InstanceIdentifier<Node> connectionIid = SouthboundMapper.createInstanceIdentifier(connectionInfo);
+        return SouthboundMapper.createInstanceIdentifier(connectionIid,
             bridge.getBridgeName());
     }
 
@@ -677,8 +681,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
         Assert.assertNotNull(bridge);
         LOG.info("bridge: {}", bridge);
+        InstanceIdentifier<Node> connectionIid = SouthboundMapper.createInstanceIdentifier(connectionInfo);
         NodeId nodeId = SouthboundMapper.createManagedNodeId(SouthboundMapper.createInstanceIdentifier(
-                connectionInfo, bridge.getBridgeName()));
+                connectionIid, bridge.getBridgeName()));
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
                 createGenericOvsdbTerminationPointAugmentationBuilder();
         String portName = "testOfPort";
@@ -712,8 +717,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
         OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
         Assert.assertNotNull(bridge);
+        InstanceIdentifier<Node> connectionIid = SouthboundMapper.createInstanceIdentifier(connectionInfo);
         NodeId nodeId = SouthboundMapper.createManagedNodeId(SouthboundMapper.createInstanceIdentifier(
-                connectionInfo, bridge.getBridgeName()));
+                connectionIid, bridge.getBridgeName()));
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
                 createGenericOvsdbTerminationPointAugmentationBuilder();
         String portName = "testOfPortRequest";
@@ -754,8 +760,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
         OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
         Assert.assertNotNull(bridge);
+        InstanceIdentifier<Node> connectionIid = SouthboundMapper.createInstanceIdentifier(connectionInfo);
         NodeId nodeId = SouthboundMapper.createManagedNodeId(SouthboundMapper.createInstanceIdentifier(
-                connectionInfo, bridge.getBridgeName()));
+                connectionIid, bridge.getBridgeName()));
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
                 createGenericOvsdbTerminationPointAugmentationBuilder();
         String portName = "testPortExternalIds";
@@ -799,8 +806,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
         OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
         Assert.assertNotNull(bridge);
+        InstanceIdentifier<Node> connectionIid = SouthboundMapper.createInstanceIdentifier(connectionInfo);
         NodeId nodeId = SouthboundMapper.createManagedNodeId(SouthboundMapper.createInstanceIdentifier(
-                connectionInfo, bridge.getBridgeName()));
+                connectionIid, bridge.getBridgeName()));
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
                 createGenericOvsdbTerminationPointAugmentationBuilder();
         String portName = "testInterfaceExternalIds";
@@ -845,8 +853,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
         OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
         Assert.assertNotNull(bridge);
+        InstanceIdentifier<Node> connectionIid = SouthboundMapper.createInstanceIdentifier(connectionInfo);
         NodeId nodeId = SouthboundMapper.createManagedNodeId(SouthboundMapper.createInstanceIdentifier(
-                connectionInfo, bridge.getBridgeName()));
+                connectionIid, bridge.getBridgeName()));
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
                 createGenericOvsdbTerminationPointAugmentationBuilder();
         String portName = "testInterfaceOptions";
@@ -891,8 +900,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
         OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
         Assert.assertNotNull(bridge);
+        InstanceIdentifier<Node> connectionIid = SouthboundMapper.createInstanceIdentifier(connectionInfo);
         NodeId nodeId = SouthboundMapper.createManagedNodeId(SouthboundMapper.createInstanceIdentifier(
-                connectionInfo, bridge.getBridgeName()));
+                connectionIid, bridge.getBridgeName()));
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
                 createGenericOvsdbTerminationPointAugmentationBuilder();
         String portName = "testInterfaceOtherConfigs";
@@ -940,8 +950,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
         OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
         Assert.assertNotNull(bridge);
+        InstanceIdentifier<Node> connectionIid = SouthboundMapper.createInstanceIdentifier(connectionInfo);
         NodeId nodeId = SouthboundMapper.createManagedNodeId(SouthboundMapper.createInstanceIdentifier(
-                connectionInfo, bridge.getBridgeName()));
+                connectionIid, bridge.getBridgeName()));
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
                 createGenericOvsdbTerminationPointAugmentationBuilder();
         String portName = "testPortOtherConfigs";
@@ -986,8 +997,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
         OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
         Assert.assertNotNull(bridge);
+        InstanceIdentifier<Node> connectionIid = SouthboundMapper.createInstanceIdentifier(connectionInfo);
         NodeId nodeId = SouthboundMapper.createManagedNodeId(SouthboundMapper.createInstanceIdentifier(
-                connectionInfo, bridge.getBridgeName()));
+                connectionIid, bridge.getBridgeName()));
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
                 createGenericOvsdbTerminationPointAugmentationBuilder();
         String portName = "testTerminationPointVlanId";
@@ -1027,8 +1039,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
             OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
             Assert.assertNotNull(bridge);
+            InstanceIdentifier<Node> connectionIid = SouthboundMapper.createInstanceIdentifier(connectionInfo);
             NodeId nodeId = SouthboundMapper.createManagedNodeId(SouthboundMapper.createInstanceIdentifier(
-                    connectionInfo, bridge.getBridgeName()));
+                    connectionIid, bridge.getBridgeName()));
             OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
                     createGenericOvsdbTerminationPointAugmentationBuilder();
             String portName = "testTerminationPointVlanMode" + vlanMode.toString();
@@ -1102,8 +1115,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
             OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
             Assert.assertNotNull(bridge);
+            InstanceIdentifier<Node> connectionIid = SouthboundMapper.createInstanceIdentifier(connectionInfo);
             NodeId nodeId = SouthboundMapper.createManagedNodeId(SouthboundMapper.createInstanceIdentifier(
-                    connectionInfo, bridge.getBridgeName()));
+                    connectionIid, bridge.getBridgeName()));
             OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
                     createGenericOvsdbTerminationPointAugmentationBuilder();
             String portName = "testTerminationPointVlanTrunks" + testCase;

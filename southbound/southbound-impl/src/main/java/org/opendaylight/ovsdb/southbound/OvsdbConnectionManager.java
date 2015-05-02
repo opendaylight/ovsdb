@@ -7,8 +7,10 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
+import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -19,6 +21,10 @@ import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
+import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
+import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
+import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.southbound.transactions.md.OvsdbNodeRemoveCommand;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAttributes;
@@ -62,11 +68,14 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         LOG.info("OVSDB Disconnect from {}:{}",client.getConnectionInfo().getRemoteAddress(),
                 client.getConnectionInfo().getRemotePort());
         ConnectionInfo key = SouthboundMapper.createConnectionInfo(client);
-        txInvoker.invoke(new OvsdbNodeRemoveCommand(key,null,null));
+        OvsdbConnectionInstance connectionInstance = getConnectionInstance(key);
+        txInvoker.invoke(new OvsdbNodeRemoveCommand(
+                connectionInstance.getMDConnectionInfo(),null,null,connectionInstance.getConnectionIid()));
         clients.remove(key);
     }
 
-    public OvsdbClient connect(OvsdbNodeAugmentation ovsdbNode) throws UnknownHostException {
+    public OvsdbClient connect(OvsdbNodeAugmentation ovsdbNode,
+            InstanceIdentifier<Node> iid) throws UnknownHostException {
         // TODO handle case where we already have a connection
         // TODO use transaction chains to handle ordering issues between disconnected
         // and connected when writing to the operational store
@@ -75,6 +84,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 ovsdbNode.getConnectionInfo().getRemotePort().getValue().intValue());
         // For connections from the controller to the ovs instance, the library doesn't call
         // this method for us
+        writeNodeIdOvs(iid, client);
         connected(client);
         return client;
     }
@@ -155,5 +165,24 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     public OvsdbClient getClient(Node node) {
         return getConnectionInstance(node);
+    }
+
+    public void writeNodeIdOvs(InstanceIdentifier<Node> iid, OvsdbClient client) {
+        Map<String, String> externalIds = SouthboundUtil.getOpenVswitchExternalIds(client);
+        try {
+            List<String> databases = client.getDatabases().get();
+            for (String database : databases) {
+                DatabaseSchema dbSchema = client.getSchema(database).get();
+                TransactionBuilder transactionBuilder = new TransactionBuilder(client,dbSchema);
+                OpenVSwitch ovs = TyperUtils.getTypedRowWrapper(dbSchema, OpenVSwitch.class);
+                externalIds.put(SouthboundConstants.IID_EXTERNAL_ID_KEY,
+                        SouthboundUtil.serializeInstanceIdentifier(iid));
+                ovs.setExternalIds(externalIds);
+                transactionBuilder.add(op.update(ovs));
+                transactionBuilder.execute();
+            }
+        } catch (Exception e) {
+            LOG.warn("Cannot write nodeId to ovs" + e);
+        }
     }
 }

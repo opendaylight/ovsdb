@@ -37,6 +37,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigsBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,8 +50,8 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
             .getLogger(OpenVSwitchUpdateCommand.class);
 
     public OpenVSwitchUpdateCommand(ConnectionInfo key, TableUpdates updates,
-            DatabaseSchema dbSchema) {
-        super(key, updates, dbSchema);
+            DatabaseSchema dbSchema, InstanceIdentifier<Node> connectionIid) {
+        super(key, updates, dbSchema, connectionIid);
     }
 
     @Override
@@ -61,13 +62,12 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
 
         for (Entry<UUID, OpenVSwitch> entry : updatedOpenVSwitchRows.entrySet()) {
             OpenVSwitch openVSwitch = entry.getValue();
-            final InstanceIdentifier<Node> nodePath = SouthboundMapper.createInstanceIdentifier(getConnectionInfo());
             Optional<Node> node = Optional.absent();
             try {
                 node = transaction.read(LogicalDatastoreType.OPERATIONAL,
-                        nodePath).checkedGet();
+                        getConnectionIid()).checkedGet();
             } catch (final ReadFailedException e) {
-                LOG.debug("Read Operational/DS for Node fail! {}", nodePath, e);
+                LOG.debug("Read Operational/DS for Node fail! {}", getConnectionIid(), e);
             }
             if (node.isPresent()) {
                 LOG.debug("Node {} is present", node);
@@ -82,13 +82,11 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
                 setOtherConfig(ovsdbNodeBuilder, openVSwitch);
 
                 NodeBuilder nodeBuilder = new NodeBuilder();
-                ConnectionInfo connectionInfo = ovsdbNode.getConnectionInfo();
-                nodeBuilder.setNodeId(SouthboundMapper.createNodeId(
-                        connectionInfo.getRemoteIp(), connectionInfo.getRemotePort()));
+                nodeBuilder.setNodeId(getConnectionIid().firstKeyOf(Node.class, NodeKey.class).getNodeId());
                 nodeBuilder.addAugmentation(OvsdbNodeAugmentation.class,
                         ovsdbNodeBuilder.build());
-                transaction.merge(LogicalDatastoreType.OPERATIONAL, nodePath,
-                        nodeBuilder.build());
+                transaction.merge(LogicalDatastoreType.OPERATIONAL, getConnectionIid(),
+                        nodeBuilder.build(), true);
             }
         }
     }

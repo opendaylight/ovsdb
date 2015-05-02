@@ -39,8 +39,8 @@ public class OvsdbControllerRemovedCommand extends AbstractTransactionCommand {
     private Map<UUID, Bridge> updatedBridgeRows;
 
     public OvsdbControllerRemovedCommand(ConnectionInfo key,
-            TableUpdates updates, DatabaseSchema dbSchema) {
-        super(key, updates, dbSchema);
+            TableUpdates updates, DatabaseSchema dbSchema, InstanceIdentifier<Node> connectionIid) {
+        super(key, updates, dbSchema,connectionIid);
         updatedBridgeRows = TyperUtils.extractRowsUpdated(Bridge.class, getUpdates(), getDbSchema());
         oldBridgeRows = TyperUtils.extractRowsOld(Bridge.class, getUpdates(), getDbSchema());
         removedControllerRows = TyperUtils.extractRowsRemoved(Controller.class,
@@ -50,7 +50,8 @@ public class OvsdbControllerRemovedCommand extends AbstractTransactionCommand {
     @Override
     public void execute(ReadWriteTransaction transaction) {
         for (Bridge bridge : updatedBridgeRows.values()) {
-            InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getConnectionInfo(), bridge);
+            InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(
+                    getConnectionIid(),bridge);
             deleteControllers(transaction, controllerEntriesToRemove(bridgeIid,bridge));
         }
     }
@@ -87,5 +88,4 @@ public class OvsdbControllerRemovedCommand extends AbstractTransactionCommand {
         }
         return result;
     }
-
 }

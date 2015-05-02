@@ -49,6 +49,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -64,8 +65,8 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
     private Map<UUID, Bridge> oldBridgeRows;
 
     public OvsdbBridgeUpdateCommand(ConnectionInfo key, TableUpdates updates,
-            DatabaseSchema dbSchema) {
-        super(key,updates,dbSchema);
+            DatabaseSchema dbSchema, InstanceIdentifier<Node> connectionIid) {
+        super(key,updates,dbSchema,connectionIid);
         updatedBridgeRows = TyperUtils.extractRowsUpdated(Bridge.class, getUpdates(), getDbSchema());
         oldBridgeRows = TyperUtils.extractRowsOld(Bridge.class, getUpdates(), getDbSchema());
     }
@@ -79,19 +80,18 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
 
     private void updateBridge(ReadWriteTransaction transaction,
             Bridge bridge) {
-        final InstanceIdentifier<Node> connectionIId = SouthboundMapper.createInstanceIdentifier(getConnectionInfo());
-        Optional<Node> connection = readNode(transaction, connectionIId);
+        Optional<Node> connection = readNode(transaction, getConnectionIid());
         if (connection.isPresent()) {
             LOG.debug("Connection {} is present",connection);
 
             // Update the connection node to let it know it manages this bridge
             Node connectionNode = buildConnectionNode(bridge);
-            transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
+            transaction.merge(LogicalDatastoreType.OPERATIONAL, getConnectionIid(), connectionNode, true);
 
             // Update the bridge node with whatever data we are getting
-            InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getConnectionInfo(),bridge);
+            InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getConnectionIid(), bridge);
             Node bridgeNode = buildBridgeNode(bridge);
-            transaction.merge(LogicalDatastoreType.OPERATIONAL, bridgeIid, bridgeNode);
+            transaction.merge(LogicalDatastoreType.OPERATIONAL, bridgeIid, bridgeNode, true);
             deleteEntries(transaction, protocolEntriesToRemove(bridgeIid,bridge));
             deleteEntries(transaction, externalIdsToRemove(bridgeIid,bridge));
             deleteEntries(transaction, bridgeOtherConfigsToRemove(bridgeIid,bridge));
@@ -199,12 +199,11 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
             Bridge bridge) {
         //Update node with managed node reference
         NodeBuilder connectionNode = new NodeBuilder();
-        connectionNode.setNodeId(SouthboundMapper.createNodeId(getConnectionInfo().getRemoteIp(),
-                getConnectionInfo().getRemotePort()));
+        connectionNode.setNodeId(getConnectionIid().firstKeyOf(Node.class, NodeKey.class).getNodeId());
 
         OvsdbNodeAugmentationBuilder ovsdbConnectionAugmentationBuilder = new OvsdbNodeAugmentationBuilder();
         List<ManagedNodeEntry> managedBridges = new ArrayList<ManagedNodeEntry>();
-        InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getConnectionInfo(),bridge);
+        InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getConnectionIid(),bridge);
         ManagedNodeEntry managedBridge = new ManagedNodeEntryBuilder().setBridgeRef(
                 new OvsdbBridgeRef(bridgeIid)).build();
         managedBridges.add(managedBridge);
@@ -218,7 +217,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
 
     private Node buildBridgeNode(Bridge bridge) {
         NodeBuilder bridgeNodeBuilder = new NodeBuilder();
-        InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getConnectionInfo(),bridge);
+        InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getConnectionIid(),bridge);
         NodeId bridgeNodeId = SouthboundMapper.createManagedNodeId(bridgeIid);
         bridgeNodeBuilder.setNodeId(bridgeNodeId);
         OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
@@ -240,8 +239,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
     }
 
     private void setManagedBy(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder) {
-        InstanceIdentifier<Node> connectionNodePath = SouthboundMapper.createInstanceIdentifier(getConnectionInfo());
-        ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath));
+        ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(getConnectionIid()));
     }
 
     private void setDataPathType(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,

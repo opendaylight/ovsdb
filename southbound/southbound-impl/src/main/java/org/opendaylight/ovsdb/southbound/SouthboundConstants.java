@@ -109,4 +109,6 @@ public class SouthboundConstants {
             return this.mode;
         }
     }
+    public static final String EXTERNAL_IDS_COLUMN_NAME = "external_ids";
+    public static final String EXTERNAL_IDS_OVS_SYSTEM_ID = "system-id";
 }

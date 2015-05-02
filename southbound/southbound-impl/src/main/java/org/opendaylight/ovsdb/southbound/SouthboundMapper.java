@@ -7,6 +7,9 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
+import static org.opendaylight.ovsdb.southbound.SouthboundConstants.EXTERNAL_IDS_OVS_SYSTEM_ID;
+import static org.opendaylight.ovsdb.southbound.SouthboundConstants.IID_EXTERNAL_ID_KEY;
+
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -108,11 +111,6 @@ public class SouthboundMapper {
         return new IpAddress(ipv6);
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(OvsdbClient client) {
-        return createInstanceIdentifier(createIpAddress(client.getConnectionInfo().getRemoteAddress()),
-                new PortNumber(client.getConnectionInfo().getRemotePort()));
-    }
-
     public static InstanceIdentifier<Node> createInstanceIdentifier(NodeId nodeId) {
         InstanceIdentifier<Node> nodePath = InstanceIdentifier
                 .create(NetworkTopology.class)
@@ -121,11 +119,13 @@ public class SouthboundMapper {
         return nodePath;
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key,OvsdbBridgeName bridgeName) {
-        return createInstanceIdentifier(createManagedNodeId(key, bridgeName));
+    public static InstanceIdentifier<Node> createInstanceIdentifier(InstanceIdentifier<Node> connectionIid,
+            OvsdbBridgeName bridgeName) {
+        return createInstanceIdentifier(createManagedNodeId(connectionIid, bridgeName));
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key,Bridge bridge) {
+    public static InstanceIdentifier<Node> createInstanceIdentifier(InstanceIdentifier<Node> connectionIid,
+            Bridge bridge) {
         String managedNodePathString = bridge
                 .getExternalIdsColumn()
                 .getData()
@@ -136,7 +136,8 @@ public class SouthboundMapper {
                     .deserializeInstanceIdentifier(managedNodePathString);
         }
         if (managedNodePath == null) {
-            managedNodePath = SouthboundMapper.createInstanceIdentifier(key,new OvsdbBridgeName(bridge.getName()));
+            managedNodePath = SouthboundMapper.createInstanceIdentifier(connectionIid,
+                    new OvsdbBridgeName(bridge.getName()));
         }
         return managedNodePath;
     }
@@ -150,43 +151,71 @@ public class SouthboundMapper {
         return createInstanceIdentifier(key.getRemoteIp(), key.getRemotePort());
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(IpAddress ip, PortNumber port) {
+    private static InstanceIdentifier<Node> createInstanceIdentifier(String systemId) {
         InstanceIdentifier<Node> path = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
-                .child(Node.class,createNodeKey(ip,port));
+                .child(Node.class,createNodeKey(systemId));
         LOG.debug("Created ovsdb path: {}",path);
         return path;
     }
 
-    public static NodeKey createNodeKey(IpAddress ip, PortNumber port) {
-        return new NodeKey(createNodeId(ip,port));
+    public static InstanceIdentifier<Node> createInstanceIdentifier(IpAddress ip, PortNumber port) {
+        InstanceIdentifier<Node> path = InstanceIdentifier
+                .create(NetworkTopology.class)
+                .child(Topology.class,
+                        new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+                .child(Node.class, createNodeKey(ip, port));
+        LOG.debug("Created ovsdb path: {}", path);
+        return path;
     }
 
     public static NodeId createNodeId(OvsdbConnectionInfo connectionInfo) {
         return createNodeId(createIpAddress(connectionInfo.getRemoteAddress()),
-                new PortNumber(connectionInfo.getRemotePort()));
+                    new PortNumber(connectionInfo.getRemotePort()));
     }
 
-    public static NodeId createManagedNodeId(OvsdbConnectionInfo connectionInfo, OvsdbBridgeName bridgeName) {
-        return createManagedNodeId(createIpAddress(connectionInfo.getRemoteAddress()),
-                new PortNumber(connectionInfo.getRemotePort()),
-                bridgeName);
+    private static NodeKey createNodeKey(IpAddress ip, PortNumber port) {
+        return new NodeKey(createNodeId(ip, port));
     }
 
-    public static NodeId createManagedNodeId(ConnectionInfo key, OvsdbBridgeName bridgeName) {
-        return createManagedNodeId(key.getRemoteIp(),key.getRemotePort(),bridgeName);
+    public static InstanceIdentifier<Node> createInstanceIdentifier(Map<String,String> externalIds,
+            ConnectionInfo key) {
+        InstanceIdentifier<Node> connectionIid = null;
+        if (!(null != externalIds && !externalIds.isEmpty()
+                && (externalIds.containsKey(IID_EXTERNAL_ID_KEY)
+                        || externalIds.containsKey(EXTERNAL_IDS_OVS_SYSTEM_ID)))) {
+            return createInstanceIdentifier(key.getRemoteIp(), key.getRemotePort());
+        }
+        if (externalIds.containsKey(IID_EXTERNAL_ID_KEY)) {
+            String nodePathString = externalIds.get(IID_EXTERNAL_ID_KEY);
+            connectionIid = (InstanceIdentifier<Node>) SouthboundUtil.deserializeInstanceIdentifier(nodePathString);
+        } else {
+            String systemId = externalIds.get(EXTERNAL_IDS_OVS_SYSTEM_ID);
+            connectionIid = SouthboundMapper.createInstanceIdentifier(systemId);
+        }
+        return connectionIid;
     }
 
-    public static NodeId createManagedNodeId(IpAddress ip, PortNumber port, OvsdbBridgeName bridgeName) {
-        return new NodeId(createNodeId(ip,port).getValue()
+    private static NodeKey createNodeKey(String systemId) {
+        return new NodeKey(createNodeId(systemId));
+    }
+
+    public static NodeId createManagedNodeId(InstanceIdentifier<Node> connectionIid, OvsdbBridgeName bridgeName) {
+        return new NodeId(connectionIid.firstKeyOf(Node.class, NodeKey.class).getNodeId().getValue()
                 + "/" + SouthboundConstants.BRIDGE_URI_PREFIX + "/" + bridgeName.getValue());
     }
 
-    public static NodeId createNodeId(IpAddress ip, PortNumber port) {
+    private static NodeId createNodeId(IpAddress ip, PortNumber port) {
         String uriString = SouthboundConstants.OVSDB_URI_PREFIX + "://"
                 + new String(ip.getValue()) + ":" + port.getValue();
         Uri uri = new Uri(uriString);
+        NodeId nodeId = new NodeId(uri);
+        return nodeId;
+    }
+
+    private static NodeId createNodeId(String systemId) {
+        Uri uri = new Uri(SouthboundConstants.OVSDB_URI_PREFIX + ":" + systemId);
         NodeId nodeId = new NodeId(uri);
         return nodeId;
     }

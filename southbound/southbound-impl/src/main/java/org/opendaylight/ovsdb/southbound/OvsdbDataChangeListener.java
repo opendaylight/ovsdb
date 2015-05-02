@@ -80,8 +80,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
             connectionInstance.transact(new TransactCommandAggregator(
                     new BridgeOperationalState(db, changes),
                     new DataChangesManagedByOvsdbNodeEvent(
-                            SouthboundMapper.createInstanceIdentifier(connectionInstance.getMDConnectionInfo()),
-                            changes)));
+                            connectionInstance.getConnectionIid(), changes)));
         }
     }
 
@@ -105,13 +104,15 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
         for (Entry<InstanceIdentifier<?>, DataObject> updated : changes.getUpdatedData().entrySet()) {
             if (updated.getValue() instanceof OvsdbNodeAugmentation) {
                 OvsdbNodeAugmentation value = (OvsdbNodeAugmentation) updated.getValue();
+                InstanceIdentifier<Node> iid = (InstanceIdentifier<Node>) updated.getKey()
+                        .firstIdentifierOf(Node.class);
                 OvsdbClient client = cm.getClient(value.getConnectionInfo());
                 if (client == null) {
                     for (Entry<InstanceIdentifier<?>, DataObject> original : changes.getOriginalData().entrySet()) {
                         if (original.getValue() instanceof OvsdbNodeAugmentation) {
                             try {
                                 cm.disconnect((OvsdbNodeAugmentation) original.getValue());
-                                cm.connect(value);
+                                cm.connect(value,iid);
                             } catch (UnknownHostException e) {
                                 LOG.warn("Failed to disconnect to ovsdbNode", e);
                             }
@@ -128,7 +129,8 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
             // TODO validate we have the correct kind of InstanceIdentifier
             if (created.getValue() instanceof OvsdbNodeAugmentation) {
                 try {
-                    cm.connect((OvsdbNodeAugmentation) created.getValue());
+                    cm.connect((OvsdbNodeAugmentation) created.getValue(),
+                            (InstanceIdentifier<Node>) created.getKey().firstIdentifierOf(Node.class));
                 } catch (UnknownHostException e) {
                     LOG.warn("Failed to connect to ovsdbNode", e);
                 }

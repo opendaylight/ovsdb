@@ -7,8 +7,6 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
-import static org.mockito.Matchers.any;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,7 +24,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -65,6 +62,7 @@ public class OvsdbClientKeyTest {
     public void testToInstanceIndentifier() {
         Assert.assertNotNull("OvsdbClientKey should not be null", ovsdbClientKeyTest);
 
-        Assert.assertEquals("Failed to return " + nodePath, nodePath, SouthboundMapper.createInstanceIdentifier(ovsdbClientKeyTest));
+        Assert.assertEquals("Failed to return " + nodePath, nodePath, SouthboundMapper.createInstanceIdentifier(
+                ovsdbClientKeyTest.getRemoteIp(), ovsdbClientKeyTest.getRemotePort()));
     }
 }

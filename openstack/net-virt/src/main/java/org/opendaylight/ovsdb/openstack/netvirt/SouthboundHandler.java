@@ -15,6 +15,7 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
@@ -133,7 +134,14 @@ public class SouthboundHandler extends AbstractHandler
             if (tableName.equalsIgnoreCase(ovsdbConfigurationService.getTableName(node, Interface.class))) {
                 logger.debug("Processing update of {}. Deleted node: {}, uuid: {}, row: {}", tableName, node, uuid, row);
                 Interface deletedIntf = ovsdbConfigurationService.getTypedRow(node, Interface.class, row);
+                //TODO Fix the following race condition
                 NeutronNetwork network = tenantNetworkManager.getTenantNetwork(deletedIntf);
+                if (network == null) {
+                    Map<String, String> externalIds = deletedIntf.getExternalIdsColumn().getData();
+                    if ((externalIds != null) && (externalIds.get(Constants.EXTERNAL_ID_INTERFACE_ID) != null)) {
+                        logger.warn("Race condition: unable to find the corresponding neutron port or network for {}", deletedIntf);
+                    }
+                }
                 List<String> phyIfName = bridgeConfigurationManager.getAllPhysicalInterfaceNames(node);
                 logger.info("Delete interface " + deletedIntf.getName());
 

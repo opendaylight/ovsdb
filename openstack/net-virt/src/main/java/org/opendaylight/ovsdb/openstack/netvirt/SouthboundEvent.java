@@ -17,7 +17,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 public class SouthboundEvent extends AbstractEvent {
-    public enum Type { NODE, ROW, OPENVSWITCH, BRIDGE, PORT }
+    public enum Type { NODE, ROW, OPENVSWITCH, BRIDGE, CONTROLLER, PORT }
     private Type type;
     private Node node;
     private String tableName;
@@ -61,6 +61,11 @@ public class SouthboundEvent extends AbstractEvent {
         this.node = node;
         this.port = port;
         this.portName = portName;
+    }
+    public SouthboundEvent(Node node, Type type, Action action) {
+        super(HandlerType.SOUTHBOUND, action);
+        this.type = type;
+        this.node = node;
     }
 
     public Type getType() {

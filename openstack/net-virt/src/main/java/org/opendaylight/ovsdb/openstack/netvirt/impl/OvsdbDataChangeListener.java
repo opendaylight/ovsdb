@@ -14,6 +14,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryListener;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
@@ -73,6 +74,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
         updateConnections(changes);
         updateOpenflowConnections(changes);
+
     }
 
     private void updateConnections(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
@@ -81,7 +83,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
             if (created.getValue() instanceof OvsdbNodeAugmentation) {
                 Node ovsdbNode = getNode(changes, created);
                 LOG.info("ovsdbNode: {}", ovsdbNode);
-                notifyNodeAdded(ovsdbNode);
+                ovsdbUpdate(ovsdbNode, OvsdbInventoryListener.OvsdbType.NODE, Action.ADD);
             }
         }
     }
@@ -93,12 +95,20 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                 OvsdbBridgeAugmentation ovsdbBridgeAugmentation = (OvsdbBridgeAugmentation)change.getValue();
                 String datapathId = MdsalUtils.getDatapathId(ovsdbBridgeAugmentation);
                 // Having a datapathId means the bridge has connected so it exists
-                if (datapathId != null) {
-                // This value is not being set right now - OvsdbBridgeupdateCommand
+                if (datapathId == null) {
+                    LOG.info("dataPathId not found");
+                    continue;
+                }
+                Node node = getNode(changes.getCreatedData(), change);
+                if (node == null) {
+                    LOG.warn("node not found");
+                    continue;
+                }
+                // This value is not being set right now - OvsdbBridgeUpdateCommand
                 //if (ovsdbBridgeAugmentation.getBridgeOpenflowNodeRef() != null) {
                     nodeCacheManager = (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
-                    nodeCacheManager.nodeAdded(getNode(changes, change));
-                }
+                    nodeCacheManager.nodeAdded(node);
+                //}
             }
         }
 
@@ -108,26 +118,40 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                 OvsdbBridgeAugmentation ovsdbBridgeAugmentation = (OvsdbBridgeAugmentation)change.getValue();
                 String datapathId = MdsalUtils.getDatapathId(ovsdbBridgeAugmentation);
                 // Having a datapathId means the bridge has connected so it exists
-                if (datapathId != null) {
-                // This value is not being set right now - OvsdbBridgeupdateCommand
+                if (datapathId == null) {
+                    LOG.info("dataPathId not found");
+                    continue;
+                }
+                Node node = getNode(changes.getUpdatedData(), change);
+                if (node == null) {
+                    LOG.warn("node not found");
+                    continue;
+                }
+                // This value is not being set right now - OvsdbBridgeUpdateCommand
                 // if (ovsdbBridgeAugmentation.getBridgeOpenflowNodeRef() != null) {
                     nodeCacheManager = (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
-                    nodeCacheManager.nodeAdded(getNode(changes, change));
-                }
+                    nodeCacheManager.nodeAdded(node);
+                //}
             }
         }
     }
 
     private Node getNode(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
-                         Map.Entry<InstanceIdentifier<?>, DataObject> created) {
-        InstanceIdentifier<Node> nodeInstanceIdentifier = created.getKey().firstIdentifierOf(Node.class);
+                         Map.Entry<InstanceIdentifier<?>, DataObject> change) {
+        InstanceIdentifier<Node> nodeInstanceIdentifier = change.getKey().firstIdentifierOf(Node.class);
         return (Node)changes.getCreatedData().get(nodeInstanceIdentifier);
     }
 
-    private void notifyNodeAdded(Node node) {
+    private Node getNode(Map<InstanceIdentifier<?>, DataObject> changes,
+                         Map.Entry<InstanceIdentifier<?>, DataObject> change) {
+        InstanceIdentifier<Node> nodeInstanceIdentifier = change.getKey().firstIdentifierOf(Node.class);
+        return (Node)changes.get(nodeInstanceIdentifier);
+    }
+
+    private void ovsdbUpdate(Node node, OvsdbInventoryListener.OvsdbType ovsdbType, Action action) {
         Set<OvsdbInventoryListener> mdsalConsumerListeners = OvsdbInventoryServiceImpl.getMdsalConsumerListeners();
         for (OvsdbInventoryListener mdsalConsumerListener : mdsalConsumerListeners) {
-            mdsalConsumerListener.ovsdbNodeAdded(node);
+            mdsalConsumerListener.ovsdbUpdate(node, ovsdbType, action);
         }
     }
 }

@@ -23,12 +23,7 @@ import java.net.HttpURLConnection;
 /**
  * Handle requests for Neutron Router.
  */
-public class RouterHandler extends AbstractHandler
-        implements INeutronRouterAware {
-
-    /**
-     * Logger instance.
-     */
+public class RouterHandler extends AbstractHandler implements INeutronRouterAware {
     static final Logger logger = LoggerFactory.getLogger(RouterHandler.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager

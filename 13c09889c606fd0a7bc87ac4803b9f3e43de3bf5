@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_be7a6eef",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2015-05-04T20:58:19Z",
+      "side": 1,
+      "message": "Shouldn\u0027t we be polling for both created and updated?  This is what is done for OvsdbTerminationPoint.",
+      "range": {
+        "startLine": 54,
+        "startChar": 30,
+        "endLine": 54,
+        "endChar": 44
+      },
+      "revId": "13c09889c606fd0a7bc87ac4803b9f3e43de3bf5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_de7dfae8",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2015-05-04T20:58:19Z",
+      "side": 1,
+      "message": "We generally do ImmutableMap.copyOf(otherConfigMap) surrounded in try-catch setup so we catch NPE for this.",
+      "range": {
+        "startLine": 129,
+        "startChar": 34,
+        "endLine": 129,
+        "endChar": 48
+      },
+      "revId": "13c09889c606fd0a7bc87ac4803b9f3e43de3bf5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

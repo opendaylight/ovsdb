@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
+
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -24,8 +25,10 @@ import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 //import org.opendaylight.ovsdb.utils.mdsal.node.StringConvertor;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -389,27 +392,33 @@ public class SouthboundHandler extends AbstractHandler
         if (isInterfaceOfInterest(ovsdbTerminationPointAugmentation, phyIfName)) {
             this.handleInterfaceDelete(node, ovsdbTerminationPointAugmentation, false, null);
         } else if (network != null && !network.getRouterExternal()) {
-            /* TODO SB_MIGRATION */
-            /*logger.debug("Processing update of {}:{} node {} intf {} network {}",
-                    tableName, action, node, uuid, network.getNetworkUUID());
+            logger.debug("Network {} : Delete interface {} attached to bridge {}", network.getNetworkUUID(),
+                    ovsdbTerminationPointAugmentation.getInterfaceUuid(), node);
             try {
-                ConcurrentMap<String, Row> interfaces = this.ovsdbConfigurationService
-                        .getRows(node, ovsdbConfigurationService.getTableName(node, Interface.class));
-                if (interfaces != null) {
-                    boolean isLastInstanceOnNode = true;
-                    for (String intfUUID : interfaces.keySet()) {
-                        if (intfUUID.equals(uuid)) continue;
-                        Interface intf = this.ovsdbConfigurationService.getTypedRow(node, Interface.class, interfaces.get(intfUUID));
-                        NeutronNetwork neutronNetwork = tenantNetworkManager.getTenantNetwork(intf);
-                        if (neutronNetwork != null && neutronNetwork.equals(network)) isLastInstanceOnNode = false;
+                OvsdbBridgeAugmentation ovsdbBridgeAugmentation = node.getAugmentation(OvsdbBridgeAugmentation.class);
+                if (ovsdbBridgeAugmentation != null) {
+                    List<TerminationPoint> terminationPoints = node.getTerminationPoint();
+                    if(!terminationPoints.isEmpty()){
+                        boolean isLastInstanceOnNode = true;
+                        for(TerminationPoint terminationPoint : terminationPoints) {
+                            OvsdbTerminationPointAugmentation tpAugmentation =
+                                    terminationPoint.getAugmentation( OvsdbTerminationPointAugmentation.class);
+                            if(tpAugmentation.getInterfaceUuid().equals(ovsdbTerminationPointAugmentation.getInterfaceUuid())) continue;
+                            NeutronNetwork neutronNetwork = tenantNetworkManager.getTenantNetwork(tpAugmentation);
+                            if (neutronNetwork != null && neutronNetwork.equals(network)) {
+                                isLastInstanceOnNode = false;
+                                break;
+                            }
+                        }
+                        this.handleInterfaceDelete(node, ovsdbTerminationPointAugmentation, isLastInstanceOnNode, network);
                     }
-                    this.handleInterfaceDelete(node, uuid, deletedIntf, isLastInstanceOnNode, network);
                 }
             } catch (Exception e) {
                 logger.error("Error fetching Interface Rows for node " + node, e);
-            }*/
+            }
         }
     }
+
     private void processInterfaceUpdate(Node node, OvsdbTerminationPointAugmentation terminationPoint,
                                         String portName, Object context, Action action) {
         if (action == Action.DELETE) {

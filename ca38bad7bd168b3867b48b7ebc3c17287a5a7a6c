@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_fee556a8",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 362,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-05-04T21:13:28Z",
+      "side": 1,
+      "message": "what is the third value to be output?",
+      "range": {
+        "startLine": 362,
+        "startChar": 78,
+        "endLine": 362,
+        "endChar": 82
+      },
+      "revId": "ca38bad7bd168b3867b48b7ebc3c17287a5a7a6c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_def2da6e",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 364,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-05-04T21:13:28Z",
+      "side": 1,
+      "message": "Eventually it would be nice to move this block of code to MdsalUtils as getPorts(Node, bridge). Those are APIs listed in the trello to eventually implement",
+      "range": {
+        "startLine": 364,
+        "startChar": 0,
+        "endLine": 364,
+        "endChar": 16
+      },
+      "revId": "ca38bad7bd168b3867b48b7ebc3c17287a5a7a6c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

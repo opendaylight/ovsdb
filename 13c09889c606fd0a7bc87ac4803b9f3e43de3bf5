@@ -25,6 +25,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_3eb17e8f",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-05-04T21:30:10Z",
+      "side": 1,
+      "message": "bridge create is also handled here.",
+      "parentUuid": "3aa0d159_be7a6eef",
+      "revId": "13c09889c606fd0a7bc87ac4803b9f3e43de3bf5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_de7dfae8",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeUpdateCommand.java",
         "patchSetId": 1
@@ -42,6 +60,24 @@
         "endLine": 129,
         "endChar": 48
       },
+      "revId": "13c09889c606fd0a7bc87ac4803b9f3e43de3bf5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_dec09ae2",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-05-04T21:30:10Z",
+      "side": 1,
+      "message": "sure makes sense. Will do that change",
+      "parentUuid": "3aa0d159_de7dfae8",
       "revId": "13c09889c606fd0a7bc87ac4803b9f3e43de3bf5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

@@ -19,6 +19,7 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
@@ -335,5 +336,37 @@ public class MdsalUtils {
 
     public static String getBridgeName(Node node) {
         return (node.getAugmentation(OvsdbBridgeAugmentation.class).getBridgeName().getValue());
+    }
+
+    public static List<Node> getBridges(Node node) {
+        return null;
+    }
+
+    public static List<OvsdbTerminationPointAugmentation> getPorts(Node node) {
+        return null;
+    }
+
+    public static Boolean deletePort(Node node, String portName) {
+        return false;
+    }
+
+    public static Boolean addPort(Node node, String bridgeName, String portName) {
+        return false;
+    }
+
+    public static Boolean addPatchPort(Node node, String bridgeName, String portName, String peerPortName) {
+        return false;
+    }
+
+    public static OvsdbTerminationPointAugmentation getPort(Node node, String portName) {
+        return null;
+    }
+
+    public static String getExternalId(Node node, OvsdbTables table, String key) {
+        return null;
+    }
+
+    public static String getOtherConfig(Node node, OvsdbTables table, String key) {
+        return null;
     }
 }

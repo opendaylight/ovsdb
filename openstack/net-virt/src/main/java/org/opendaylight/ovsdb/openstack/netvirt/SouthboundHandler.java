@@ -22,7 +22,7 @@ import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
-import org.opendaylight.ovsdb.utils.mdsal.node.StringConvertor;
+//import org.opendaylight.ovsdb.utils.mdsal.node.StringConvertor;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -49,12 +49,7 @@ public class SouthboundHandler extends AbstractHandler
     private volatile OvsdbInventoryService mdsalConsumer; // TODO SB_MIGRATION
     private volatile NeutronL3Adapter neutronL3Adapter;
 
-    void init() {
-        logger.info(">>>>> init SouthboundHandler");
-    }
-
     void start() {
-        logger.info(">>>>> start SouthboundHandler");
         //this.triggerUpdates(); // TODO SB_MIGRATION
     }
 
@@ -121,10 +116,44 @@ public class SouthboundHandler extends AbstractHandler
         this.enqueueEvent(new SouthboundEvent(node, tableName, uuid, row, context, Action.DELETE));
     }
 
+    private SouthboundEvent.Type ovsdbTypeToSouthboundEventType(OvsdbType ovsdbType) {
+        SouthboundEvent.Type type = SouthboundEvent.Type.NODE;
+
+        switch (ovsdbType) {
+            case NODE:
+                type = SouthboundEvent.Type.NODE;
+                break;
+            case BRIDGE:
+                type = SouthboundEvent.Type.BRIDGE;
+                break;
+            case PORT:
+                type = SouthboundEvent.Type.PORT;
+                break;
+            case CONTROLLER:
+                type = SouthboundEvent.Type.CONTROLLER;
+                break;
+            case OPENVSWITCH:
+                type = SouthboundEvent.Type.OPENVSWITCH;
+                break;
+            default:
+                logger.warn("Invalid OvsdbType: {}", ovsdbType);
+                break;
+        }
+        return type;
+    }
+
+    @Override
+    public void ovsdbUpdate(Node node, OvsdbType ovsdbType, Action action) {
+        logger.info("ovsdbUpdate: {} - {} - {}", node, ovsdbType, action);
+        this.enqueueEvent(new SouthboundEvent(node, ovsdbTypeToSouthboundEventType(ovsdbType), action));
+    }
+
     public void processOvsdbNodeUpdate(Node node, Action action) {
         if (action == Action.ADD) {
-            logger.trace("processOvsdbNodeUpdate {}", node);
+            logger.info("processOvsdbNodeUpdate {}", node);
             bridgeConfigurationManager.prepareNode(node);
+        } else {
+            logger.info("Not implemented yet: {}", action);
         }
     }
 
@@ -240,7 +269,9 @@ public class SouthboundHandler extends AbstractHandler
                             bridge.getName().equals(configurationService.getExternalBridgeName()))) {
                 NetworkingProvider networkingProvider = networkingProviderManager.getProvider(node);
                 for (String dpid : dpids) {
-                    networkingProvider.notifyFlowCapableNodeEvent(StringConvertor.dpidStringToLong(dpid), action);
+                    // TODO SB_MIGRATION
+                    // I don't think this is used anymore since adding NodeCacheManager to service dependency
+                    //networkingProvider.notifyFlowCapableNodeEvent(StringConvertor.dpidStringToLong(dpid), action);
                 }
             }
         }
@@ -338,7 +369,9 @@ public class SouthboundHandler extends AbstractHandler
                 && (bridge.getBridgeName().equals(configurationService.getIntegrationBridgeName())
                 || bridge.getBridgeName().equals(configurationService.getExternalBridgeName()))) {
             NetworkingProvider networkingProvider = networkingProviderManager.getProvider(node);
-            networkingProvider.notifyFlowCapableNodeEvent(StringConvertor.dpidStringToLong(dpid), action);
+            // TODO SB_MIGRATION
+            // I don't think this is used anymore since adding NodeCacheManager to service dependency
+            //networkingProvider.notifyFlowCapableNodeEvent(StringConvertor.dpidStringToLong(dpid), action);
         }
     }
 
@@ -356,6 +389,7 @@ public class SouthboundHandler extends AbstractHandler
         if (isInterfaceOfInterest(ovsdbTerminationPointAugmentation, phyIfName)) {
             this.handleInterfaceDelete(node, ovsdbTerminationPointAugmentation, false, null);
         } else if (network != null && !network.getRouterExternal()) {
+            /* TODO SB_MIGRATION */
             /*logger.debug("Processing update of {}:{} node {} intf {} network {}",
                     tableName, action, node, uuid, network.getNetworkUUID());
             try {
@@ -427,11 +461,18 @@ public class SouthboundHandler extends AbstractHandler
         logger.info("processEvent: {}", ev);
         switch (ev.getType()) {
             case NODE:
-                try {
-                    processOvsdbNodeUpdate(ev.getNode(), ev.getAction());
-                } catch (Exception e) {
-                    logger.error("Exception caught in processNodeUpdate for node " + ev.getNode(), e);
-                }
+                processOvsdbNodeUpdate(ev.getNode(), ev.getAction());
+                break;
+            case BRIDGE:
+                processBridgeUpdate(ev.getNode(), ev.getAction());
+                break;
+
+            case PORT:
+                processPortUpdate(ev.getNode(), ev.getAction());
+                break;
+
+            case OPENVSWITCH:
+                processOpenVSwitchUpdate(ev.getNode(), ev.getAction());
                 break;
             case ROW:
                 try {
@@ -441,25 +482,35 @@ public class SouthboundHandler extends AbstractHandler
                     logger.error("Exception caught in ProcessRowUpdate for node " + ev.getNode(), e);
                 }
                 break;
-            case BRIDGE:
-                try {
-                    processBridgeUpdate(ev.getNode(), ev.getBridge(), ev.getAction());
-                } catch (Exception e) {
-                    logger.error("Exception caught in processBridgeUpdate for node {}", ev.getNode(), e);
-                }
-                break;
-            case PORT:
-                try {
-                    processInterfaceUpdate(ev.getNode(), ev.getPort(), ev.getPortName(),
-                            ev.getContext(), ev.getAction());
-                } catch (Exception e) {
-                    logger.error("Exception caught in processInterfaceUpdate for node {}", ev.getNode(), e);
-                }
-                break;
             default:
                 logger.warn("Unable to process type " + ev.getType() +
                         " action " + ev.getAction() + " for node " + ev.getNode());
                 break;
         }
+    }
+
+    private void processPortUpdate(Node node, Action action) {
+        switch (action) {
+            case ADD:
+            case UPDATE:
+                processPortUpdate(node);
+                break;
+            case DELETE:
+                processPortDelete(node);
+                break;
+        }
+    }
+
+    private void processPortDelete(Node node) {
+    }
+
+    private void processPortUpdate(Node node) {
+    }
+
+    private void processBridgeUpdate(Node node, Action action) {
+    }
+
+    private void processOpenVSwitchUpdate(Node node, Action action) {
+        //do the work that rowUpdate(table=openvswith) would have done
     }
 }

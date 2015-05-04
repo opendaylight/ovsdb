@@ -34,12 +34,7 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * Handle requests for Neutron Port.
  */
-public class PortHandler extends AbstractHandler
-                         implements INeutronPortAware {
-
-    /**
-     * Logger instance.
-     */
+public class PortHandler extends AbstractHandler implements INeutronPortAware {
     static final Logger logger = LoggerFactory.getLogger(PortHandler.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager

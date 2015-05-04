@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -27,6 +28,7 @@ import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeInternal;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -70,6 +72,7 @@ public class BridgeUpdateCommand extends AbstractTransactCommand {
         setFailMode(bridge, ovsdbManagedNode);
         setDataPathType(bridge, ovsdbManagedNode);
         setOpenDaylightIidExternalId(bridge, iid);
+        setOpenDaylightOtherConfig(bridge, ovsdbManagedNode);
         if (!operationalBridgeOptional.isPresent()) {
             setName(bridge, ovsdbManagedNode,operationalBridgeOptional);
             setPort(transaction, bridge, ovsdbManagedNode);
@@ -112,6 +115,19 @@ public class BridgeUpdateCommand extends AbstractTransactCommand {
         externalIds.put(SouthboundConstants.IID_EXTERNAL_ID_KEY,
                 SouthboundUtil.serializeInstanceIdentifier(iid));
         bridge.setExternalIds(externalIds);
+    }
+
+
+
+    private void setOpenDaylightOtherConfig(Bridge bridge, OvsdbBridgeAugmentation ovsdbManagedNode) {
+        List<BridgeOtherConfigs> bridgeOtherConfig = ovsdbManagedNode.getBridgeOtherConfigs();
+        if (bridgeOtherConfig != null) {
+            HashMap<String, String> otherConfigMap = new HashMap<String, String>();
+            for (BridgeOtherConfigs otherConf : bridgeOtherConfig) {
+                otherConfigMap.put(otherConf.getBridgeOtherConfigKey(), otherConf.getBridgeOtherConfigValue());
+            }
+            bridge.setOtherConfig(otherConfigMap);
+        }
     }
 
 

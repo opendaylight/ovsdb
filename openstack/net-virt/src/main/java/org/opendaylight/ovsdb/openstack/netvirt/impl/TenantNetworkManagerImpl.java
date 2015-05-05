@@ -66,22 +66,18 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
     }
 
     @Override
-    public void programInternalVlan(Node node, String portUUID, NeutronNetwork network) {
+    public void programInternalVlan(Node node, OvsdbTerminationPointAugmentation tp, NeutronNetwork network) {
         /* TODO SB_MIGRATION */
         Preconditions.checkNotNull(ovsdbConfigurationService);
 
         int vlan = vlanConfigurationCache.getInternalVlan(node, network.getID());
-        logger.debug("Programming Vlan {} on {}", vlan, portUUID);
+        logger.debug("Programming Vlan {} on {}", vlan, tp);
         if (vlan <= 0) {
             logger.debug("Unable to get an internalVlan for Network {}", network);
             return;
         }
 
-        Port port = ovsdbConfigurationService.createTypedRow(node, Port.class);
-        OvsdbSet<Long> tags = new OvsdbSet<>();
-        tags.add((long) vlan);
-        port.setTag(tags);
-        ovsdbConfigurationService.updateRow(node, port.getSchema().getName(), null, portUUID, port.getRow());
+        MdsalUtils.addVlanToTp(vlan);
     }
 
     @Override

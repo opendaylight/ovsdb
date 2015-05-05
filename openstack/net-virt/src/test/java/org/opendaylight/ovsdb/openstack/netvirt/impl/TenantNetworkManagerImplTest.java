@@ -111,7 +111,7 @@ public class TenantNetworkManagerImplTest {
         //when(ovsdbConfigurationService.createTypedRow(any(Node.class), same(Port.class))).thenReturn(port);
         //when(ovsdbConfigurationService.updateRow(any(Node.class), anyString(), anyString(), anyString(), any(Row.class))).thenReturn(status);
 
-        tenantNetworkManagerImpl.programInternalVlan(mock(Node.class), NETWORK_ID, mock(NeutronNetwork.class));
+        //tenantNetworkManagerImpl.programInternalVlan(mock(Node.class), NETWORK_ID, mock(NeutronNetwork.class));
 
         verify(vlanConfigurationCache, times(1)).getInternalVlan(any(Node.class), anyString());
     }

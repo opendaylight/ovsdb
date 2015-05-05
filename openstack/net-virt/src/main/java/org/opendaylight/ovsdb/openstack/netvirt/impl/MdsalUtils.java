@@ -308,6 +308,15 @@ public class MdsalUtils {
         return null;
     }
 
+    public static List<TerminationPoint> getTerminationPoints(Node node) {
+        List<TerminationPoint> terminationPoints = null;
+        OvsdbBridgeAugmentation ovsdbBridgeAugmentation = node.getAugmentation(OvsdbBridgeAugmentation.class);
+        if (ovsdbBridgeAugmentation != null) {
+            terminationPoints = node.getTerminationPoint();
+        }
+        return terminationPoints;
+    }
+
     private static Topology getOvsdbTopology() {
         InstanceIdentifier<Topology> path = InstanceIdentifier
                 .create(NetworkTopology.class)
@@ -368,5 +377,9 @@ public class MdsalUtils {
 
     public static String getOtherConfig(Node node, OvsdbTables table, String key) {
         return null;
+    }
+
+    public static boolean addVlanToTp(long vlan) {
+        return false;
     }
 }

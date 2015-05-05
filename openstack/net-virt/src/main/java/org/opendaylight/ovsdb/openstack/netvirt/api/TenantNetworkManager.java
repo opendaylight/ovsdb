@@ -42,10 +42,10 @@ public interface TenantNetworkManager {
     /**
      * Configures the VLAN for a Tenant Network
      * @param node the {Node} to configure
-     * @param portUUID the UUID of the port to configure
+     * @param tp the termination point
      * @param network the Neutron Network ID
      */
-    public void programInternalVlan(Node node, String portUUID, NeutronNetwork network);
+    public void programInternalVlan(Node node, OvsdbTerminationPointAugmentation tp, NeutronNetwork network);
 
     /**
      * Check is the given network is present on a Node

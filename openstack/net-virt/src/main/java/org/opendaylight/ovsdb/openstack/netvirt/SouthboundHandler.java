@@ -7,6 +7,7 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt;
 
+import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -54,69 +55,6 @@ public class SouthboundHandler extends AbstractHandler
 
     void start() {
         //this.triggerUpdates(); // TODO SB_MIGRATION
-    }
-
-    @Override
-    public void ovsdbNodeAdded(Node node) {
-        logger.info("ovsdbNodeAdded: {}", node);
-        this.enqueueEvent(new SouthboundEvent(node, Action.ADD));
-    }
-
-    @Override
-    public void ovsdbNodeRemoved(Node node) {
-        this.enqueueEvent(new SouthboundEvent(node, Action.DELETE));
-    }
-
-    @Override
-    public void rowAdded(Node node, String tableName, String uuid, Row row) {
-        this.enqueueEvent(new SouthboundEvent(node, tableName, uuid, row, Action.ADD));
-    }
-
-    @Override
-    public void rowUpdated(Node node, String tableName, String uuid, Row oldRow, Row newRow) {
-        if (this.isUpdateOfInterest(node, oldRow, newRow)) {
-            this.enqueueEvent(new SouthboundEvent(node, tableName, uuid, newRow, Action.UPDATE));
-        }
-    }
-
-    /*
-     * Ignore unnecessary updates to be even considered for processing.
-     * (Especially stats update are fast and furious).
-     */
-
-    private boolean isUpdateOfInterest(Node node, Row oldRow, Row newRow) {
-        /* TODO SB_MIGRATION */
-        if (oldRow == null) return true;
-        if (newRow.getTableSchema().getName().equals(ovsdbConfigurationService.getTableName(node, Interface.class))) {
-            // We are NOT interested in Stats only updates
-            Interface oldIntf = ovsdbConfigurationService.getTypedRow(node, Interface.class, oldRow);
-            if (oldIntf.getName() == null && oldIntf.getExternalIdsColumn() == null && oldIntf.getMacColumn() == null &&
-                oldIntf.getOpenFlowPortColumn() == null && oldIntf.getOptionsColumn() == null && oldIntf.getOtherConfigColumn() == null &&
-                oldIntf.getTypeColumn() == null) {
-                logger.trace("IGNORING Interface Update: node {}, row: {}", node, newRow);
-                return false;
-            }
-        } else if (newRow.getTableSchema().getName().equals(ovsdbConfigurationService.getTableName(node, Port.class))) {
-            // We are NOT interested in Stats only updates
-            Port oldPort = ovsdbConfigurationService.getTypedRow(node, Port.class, oldRow);
-            if (oldPort.getName() == null && oldPort.getExternalIdsColumn() == null && oldPort.getMacColumn() == null &&
-                oldPort.getInterfacesColumn() == null && oldPort.getTagColumn() == null && oldPort.getTrunksColumn() == null) {
-                logger.trace("IGNORING Port Update: node {}, row: {}", node, newRow);
-                return false;
-            }
-        } else if (newRow.getTableSchema().getName().equals(ovsdbConfigurationService.getTableName(node, OpenVSwitch.class))) {
-            OpenVSwitch oldOpenvSwitch = ovsdbConfigurationService.getTypedRow(node, OpenVSwitch.class, oldRow);
-            if (oldOpenvSwitch.getOtherConfigColumn()== null) {
-                // we are only interested in other_config field change
-                return false;
-            }
-        }
-        return true;
-    }
-
-    @Override
-    public void rowRemoved(Node node, String tableName, String uuid, Row row, Object context) {
-        this.enqueueEvent(new SouthboundEvent(node, tableName, uuid, row, context, Action.DELETE));
     }
 
     private SouthboundEvent.Type ovsdbTypeToSouthboundEventType(OvsdbType ovsdbType) {
@@ -202,53 +140,6 @@ public class SouthboundHandler extends AbstractHandler
                     }
                 }
             }
-        }
-        else if (tableName.equalsIgnoreCase(ovsdbConfigurationService.getTableName(node, Interface.class))) {
-            logger.debug("Processing update of {}:{} node: {}, interface uuid: {}, row: {}",
-                    tableName, action, node, uuid, row);
-            Interface intf = this.ovsdbConfigurationService.getTypedRow(node, Interface.class, row);
-            NeutronNetwork network = tenantNetworkManager.getTenantNetwork(intf);
-            if (network != null && !network.getRouterExternal()) {
-                if (networkingProviderManager.getProvider(node).hasPerTenantTunneling()) {
-                    int vlan = tenantNetworkManager.networkCreated(node, network.getID());
-                    String portUUID = this.getPortIdForInterface(node, uuid, intf);
-                    if (portUUID != null) {
-                        logger.debug("Neutron Network {}:{} Created with Internal vlan {} port {}",
-                                 network.getNetworkUUID(), network.getNetworkName(), vlan, portUUID);
-                        tenantNetworkManager.programInternalVlan(node, portUUID, network);
-                    } else {
-                        logger.trace("Neutron Network {}:{} Created with Internal vlan {} but have no portUUID",
-                                 network.getNetworkUUID(), network.getNetworkName(), vlan);
-                    }
-                }
-                //this.handleInterfaceUpdate(node, uuid, intf);
-            }
-
-        } else if (tableName.equalsIgnoreCase(ovsdbConfigurationService.getTableName(node, Port.class))) {
-            logger.debug("Processing update of {}:{} node: {}, port uuid: {}, row: {}", tableName, action, node, uuid, row);
-            Port port = this.ovsdbConfigurationService.getTypedRow(node, Port.class, row);
-            Set<UUID> interfaceUUIDs = port.getInterfacesColumn().getData();
-            for (UUID intfUUID : interfaceUUIDs) {
-                logger.trace("Scanning interface "+intfUUID);
-                try {
-                    Row intfRow = this.ovsdbConfigurationService
-                            .getRow(node, ovsdbConfigurationService.getTableName(node, Interface.class),
-                                    intfUUID.toString());
-                    Interface intf = this.ovsdbConfigurationService.getTypedRow(node, Interface.class, intfRow);
-                    NeutronNetwork network = tenantNetworkManager.getTenantNetwork(intf);
-                    if (network != null && !network.getRouterExternal()) {
-                         logger.debug("Processing update of {}:{} node {} intf {} network {}",
-                                 tableName, action, node, intfUUID, network.getNetworkUUID());
-                        tenantNetworkManager.programInternalVlan(node, uuid, network);
-                        //this.handleInterfaceUpdate(node, intfUUID.toString(), intf);
-                    } else {
-                        logger.trace("Ignoring update because there is not a neutron network {} for port {}, interface {}",
-                                network, uuid, intfUUID);
-                    }
-                } catch (Exception e) {
-                    logger.error("Failed to process row update", e);
-                }
-            }
         } else if (tableName.equalsIgnoreCase(ovsdbConfigurationService.getTableName(node, OpenVSwitch.class))) {
             logger.debug("Processing update of {}:{} node: {}, ovs uuid: {}, row: {}", tableName, action, node, uuid, row);
             try {
@@ -280,19 +171,18 @@ public class SouthboundHandler extends AbstractHandler
         }
     }
 
-    private void handleInterfaceUpdate (Node node, String portName) {
-        OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
-                MdsalUtils.getTerminationPointAugmentation(node, portName);
-        logger.trace("Interface update of node: {}, portName: {}", node, portName);
-        NeutronNetwork network = tenantNetworkManager.getTenantNetwork(ovsdbTerminationPointAugmentation);
-        if (network != null) {
-            neutronL3Adapter.handleInterfaceEvent(node, ovsdbTerminationPointAugmentation, network, Action.UPDATE);
-            if (bridgeConfigurationManager.createLocalNetwork(node, network))
-                networkingProviderManager.getProvider(node).handleInterfaceUpdate(network, node,
-                        ovsdbTerminationPointAugmentation);
+    private void handleInterfaceUpdate (Node node, OvsdbTerminationPointAugmentation tp) {
+        logger.trace("handleInterfaceUpdate node: {}, tp: {}", node, tp);
+        NeutronNetwork network = tenantNetworkManager.getTenantNetwork(tp);
+        if (network != null && !network.getRouterExternal()) {
+            logger.trace("handleInterfaceUpdate node: {}, tp: {}, network: {}", node, tp, network.getNetworkUUID());
+            tenantNetworkManager.programInternalVlan(node, tp, network);
+            neutronL3Adapter.handleInterfaceEvent(node, tp, network, Action.UPDATE);
+            if (bridgeConfigurationManager.createLocalNetwork(node, network)) {
+                networkingProviderManager.getProvider(node).handleInterfaceUpdate(network, node, tp);
+            }
         } else {
-            logger.debug("No tenant network found on node: {}, portName: {} for interface: {}",
-                    node, portName, ovsdbTerminationPointAugmentation);
+            logger.debug("No tenant network found on node: {} for interface: {}", node, tp);
         }
     }
 
@@ -356,7 +246,7 @@ public class SouthboundHandler extends AbstractHandler
                     if (rows == null) continue;
                     for (String uuid : rows.keySet()) {
                         Row row = rows.get(uuid);
-                        this.rowAdded(node, tableName, uuid, row);
+                        //this.rowAdded(node, tableName, uuid, row);
                     }
                 }
             } catch (Exception e) {
@@ -514,6 +404,10 @@ public class SouthboundHandler extends AbstractHandler
     }
 
     private void processPortUpdate(Node node) {
+        List<TerminationPoint> terminationPoints = MdsalUtils.getTerminationPoints(node);
+        for (TerminationPoint terminationPoint : terminationPoints) {
+            processPortUpdate(node, terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class));
+        }
     }
 
     private void processBridgeUpdate(Node node, Action action) {
@@ -521,5 +415,14 @@ public class SouthboundHandler extends AbstractHandler
 
     private void processOpenVSwitchUpdate(Node node, Action action) {
         //do the work that rowUpdate(table=openvswith) would have done
+    }
+
+    private void processPortUpdate(Node node, OvsdbTerminationPointAugmentation tp) {
+        logger.debug("processPortUpdate {} - {}", node, tp);
+        NeutronNetwork network = tenantNetworkManager.getTenantNetwork(tp);
+        if (network != null && !network.getRouterExternal()) {
+            this.handleInterfaceUpdate(node, tp);
+        }
+
     }
 }

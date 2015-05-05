@@ -12,10 +12,5 @@ public interface OvsdbInventoryListener {
         CONTROLLER,
         PORT
     }
-    public void ovsdbNodeAdded(Node node);
-    public void ovsdbNodeRemoved(Node node);
-    public void rowAdded(Node node, String tableName, String uuid, Row row);
-    public void rowUpdated(Node node, String tableName, String uuid, Row old, Row row);
-    public void rowRemoved(Node node, String tableName, String uuid, Row row, Object context);
     public void ovsdbUpdate(Node node, OvsdbType type, Action action);
 }

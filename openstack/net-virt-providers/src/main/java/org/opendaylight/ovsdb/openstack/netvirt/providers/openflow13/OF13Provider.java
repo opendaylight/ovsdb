@@ -1093,7 +1093,8 @@ public class OF13Provider implements NetworkingProvider {
     }
 
     @Override
-    public Status handleInterfaceUpdate(NeutronNetwork network, Node srcNode, OvsdbTerminationPointAugmentation intf) {
+    public Status handleInterfaceUpdate(NeutronNetwork network, Node srcNode,
+                                        OvsdbTerminationPointAugmentation intf) {
         /* TODO SB_MIGRATION */
         Preconditions.checkNotNull(connectionService);
         List<Node> nodes = connectionService.getNodes();

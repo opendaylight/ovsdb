@@ -92,46 +92,7 @@ public class SouthboundHandler extends AbstractHandler
     private void processRowUpdate(Node node, String tableName, String uuid, Row row,
                                   Object context, Action action) {
         /* TODO SB_MIGRATION */
-        if (action == Action.DELETE) {
-            if (tableName.equalsIgnoreCase(ovsdbConfigurationService.getTableName(node, Interface.class))) {
-                logger.debug("Processing update of {}. Deleted node: {}, uuid: {}, row: {}", tableName, node, uuid, row);
-                Interface deletedIntf = ovsdbConfigurationService.getTypedRow(node, Interface.class, row);
-                NeutronNetwork network = null;
-                if (context == null) {
-                    network = tenantNetworkManager.getTenantNetwork(deletedIntf);
-                } else {
-                    network = (NeutronNetwork)context;
-                }
-                List<String> phyIfName = bridgeConfigurationManager.getAllPhysicalInterfaceNames(node);
-                logger.info("Delete interface " + deletedIntf.getName());
-
-                if (deletedIntf.getTypeColumn().getData().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) ||
-                    deletedIntf.getTypeColumn().getData().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE) ||
-                    phyIfName.contains(deletedIntf.getName())) {
-                    /* delete tunnel interfaces or physical interfaces */
-                    //this.handleInterfaceDelete(node, uuid, deletedIntf, false, null);
-                } else if (network != null && !network.getRouterExternal()) {
-                    logger.debug("Processing update of {}:{} node {} intf {} network {}",
-                            tableName, action, node, uuid, network.getNetworkUUID());
-                    try {
-                        ConcurrentMap<String, Row> interfaces = this.ovsdbConfigurationService
-                                .getRows(node, ovsdbConfigurationService.getTableName(node, Interface.class));
-                        if (interfaces != null) {
-                            boolean isLastInstanceOnNode = true;
-                            for (String intfUUID : interfaces.keySet()) {
-                                if (intfUUID.equals(uuid)) continue;
-                                Interface intf = this.ovsdbConfigurationService.getTypedRow(node, Interface.class, interfaces.get(intfUUID));
-                                NeutronNetwork neutronNetwork = tenantNetworkManager.getTenantNetwork(intf);
-                                if (neutronNetwork != null && neutronNetwork.equals(network)) isLastInstanceOnNode = false;
-                            }
-                            //this.handleInterfaceDelete(node, uuid, deletedIntf, isLastInstanceOnNode, network);
-                        }
-                    } catch (Exception e) {
-                        logger.error("Error fetching Interface Rows for node " + node, e);
-                    }
-                }
-            }
-        } else if (tableName.equalsIgnoreCase(ovsdbConfigurationService.getTableName(node, OpenVSwitch.class))) {
+        if (tableName.equalsIgnoreCase(ovsdbConfigurationService.getTableName(node, OpenVSwitch.class))) {
             logger.debug("Processing update of {}:{} node: {}, ovs uuid: {}, row: {}", tableName, action, node, uuid, row);
             try {
                 ConcurrentMap<String, Row> interfaces = this.ovsdbConfigurationService
@@ -163,8 +124,8 @@ public class SouthboundHandler extends AbstractHandler
         }
     }
 
-    private void handleInterfaceDelete (Node node, OvsdbTerminationPointAugmentation intf, boolean isLastInstanceOnNode,
-                                        NeutronNetwork network) {
+    private void handleInterfaceDelete (Node node, OvsdbTerminationPointAugmentation intf,
+                                        boolean isLastInstanceOnNode, NeutronNetwork network) {
         logger.debug("handleInterfaceDelete: node: {}, isLastInstanceOnNode: {}, interface: {}",
                 node, isLastInstanceOnNode, intf);
 
@@ -207,10 +168,9 @@ public class SouthboundHandler extends AbstractHandler
         }
     }
 
-    private void processInterfaceDelete(Node node, String portName, Object context, Action action) {
-        OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
-                MdsalUtils.getTerminationPointAugmentation(node, portName);
-        logger.debug("processInterfaceDelete {}: {}", node, portName);
+    private void processPortDelete(Node node, OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation,
+                                   Object context) {
+        logger.debug("processportDelete {}: {}", node, ovsdbTerminationPointAugmentation);
         NeutronNetwork network = null;
         if (context == null) {
             network = tenantNetworkManager.getTenantNetwork(ovsdbTerminationPointAugmentation);
@@ -332,6 +292,10 @@ public class SouthboundHandler extends AbstractHandler
     }
 
     private void processPortDelete(Node node) {
+        List<TerminationPoint> terminationPoints = MdsalUtils.getTerminationPoints(node);
+        for (TerminationPoint terminationPoint : terminationPoints) {
+            processPortDelete(node, terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class), null);
+        }
     }
 
     private void processPortUpdate(Node node) {

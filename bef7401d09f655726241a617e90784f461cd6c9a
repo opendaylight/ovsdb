@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_2a7db8b1",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 558,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-05-05T18:24:14Z",
+      "side": 1,
+      "message": "not setting dpType",
+      "revId": "bef7401d09f655726241a617e90784f461cd6c9a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

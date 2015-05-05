@@ -108,11 +108,12 @@ public class SouthboundHandler extends AbstractHandler
         neutronL3Adapter.handleInterfaceEvent(node, intf, network, Action.DELETE);
         List<String> phyIfName = bridgeConfigurationManager.getAllPhysicalInterfaceNames(node);
         if (isInterfaceOfInterest(intf, phyIfName)) {
-            /* delete tunnel or physical interfaces */
-            //networkingProviderManager.getProvider(node).handleInterfaceDelete(intf.getTypeColumn().getData(), null,
-            //        node, intf, isLastInstanceOnNode);
+            // delete tunnel or physical interfaces
+            networkingProviderManager.getProvider(node).handleInterfaceDelete(network.getProviderNetworkType(),
+                    network, node, intf, isLastInstanceOnNode);
         } else if (network != null) {
-            if (!network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) { /* vlan doesn't need a tunnel endpoint */
+            // vlan doesn't need a tunnel endpoint
+            if (!network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
                 if (configurationService.getTunnelEndPoint(node) == null) {
                     logger.error("Tunnel end-point configuration missing. Please configure it in OpenVSwitch Table");
                     return;
@@ -121,7 +122,8 @@ public class SouthboundHandler extends AbstractHandler
             if (isLastInstanceOnNode & networkingProviderManager.getProvider(node).hasPerTenantTunneling()) {
                 tenantNetworkManager.reclaimInternalVlan(node, network);
             }
-            networkingProviderManager.getProvider(node).handleInterfaceDelete(network.getProviderNetworkType(), network, node, intf, isLastInstanceOnNode);
+            networkingProviderManager.getProvider(node).handleInterfaceDelete(network.getProviderNetworkType(),
+                    network, node, intf, isLastInstanceOnNode);
         }
     }
 
@@ -273,6 +275,15 @@ public class SouthboundHandler extends AbstractHandler
         }
     }
 
+    private void processPortUpdate(Node node, OvsdbTerminationPointAugmentation port) {
+        logger.debug("processPortUpdate {} - {}", node, port);
+        NeutronNetwork network = tenantNetworkManager.getTenantNetwork(port);
+        if (network != null && !network.getRouterExternal()) {
+            this.handleInterfaceUpdate(node, port);
+        }
+
+    }
+
     private void processOpenVSwitchUpdate(Node node, Action action) {
         switch (action) {
             case ADD:
@@ -291,15 +302,6 @@ public class SouthboundHandler extends AbstractHandler
         for (TerminationPoint terminationPoint : terminationPoints) {
             processPortUpdate(node, terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class));
         }
-    }
-
-    private void processPortUpdate(Node node, OvsdbTerminationPointAugmentation port) {
-        logger.debug("processPortUpdate {} - {}", node, port);
-        NeutronNetwork network = tenantNetworkManager.getTenantNetwork(port);
-        if (network != null && !network.getRouterExternal()) {
-            this.handleInterfaceUpdate(node, port);
-        }
-
     }
 
     private void processBridgeUpdate(Node node, Action action) {

@@ -20,7 +20,7 @@ import java.util.List;
  * OpenStack Neutron with the Open vSwitch plugin relies on a typical bridge configuration that
  * consists of br-int (Integration Bridge), br-net (Network bridge), br-ex (External bridge).
  *
- * This class ensures that the bridges on each {@link org.opendaylight.controller.sal.core.Node}
+ * This class ensures that the bridges on each {@link Node}
  * are correctly configured for OpenStack Neutron
  *
  */
@@ -28,7 +28,7 @@ public interface BridgeConfigurationManager {
 
     /**
      * A helper function to get the UUID of a given Bridge
-     * @param node the {@link org.opendaylight.controller.sal.core.Node} where the bridge is configured
+     * @param node the {@link Node} where the bridge is configured
      * @param bridgeName the name of the bridge
      * @return the UUID of the bridge
      */
@@ -36,21 +36,21 @@ public interface BridgeConfigurationManager {
 
     /**
      * Checks for the existence of the Integration Bridge on a given Node
-     * @param node the {@link org.opendaylight.controller.sal.core.Node} where the bridge should be configured
+     * @param node the {@link Node} where the bridge should be configured
      * @return True if the bridge exists, False if it does not
      */
     public boolean isNodeNeutronReady(Node node);
 
     /**
      * Checks for the existence of the Network Bridge on a given Node
-     * @param node the {@link org.opendaylight.controller.sal.core.Node} where the bridge should be configured
+     * @param node the {@link Node} where the bridge should be configured
      * @return True if the bridge exists, False if it does not
      */
     public boolean isNodeOverlayReady(Node node);
 
     /**
      * Checks for the existence of the Network Bridge on a given Node
-     * @param node the {@link org.opendaylight.controller.sal.core.Node} where the bridge should be configured
+     * @param node the {@link Node} where the bridge should be configured
      * @return True if the bridge exists, False if it does not
      */
 
@@ -58,7 +58,7 @@ public interface BridgeConfigurationManager {
      * Checks that a Node is ready for a Tunnel Network Provider
      * For OpenFlow 1.0 the Integration, Network Bridge and corresponding patch ports are required
      * For OpenFlow 1.3 only the Integration Bridge is required
-     * @param node the {@link org.opendaylight.controller.sal.core.Node} where the bridge is configured
+     * @param node the {@link Node} where the bridge is configured
      * @return True or False
      */
     public boolean isNodeTunnelReady(Node node);
@@ -74,7 +74,7 @@ public interface BridgeConfigurationManager {
      * For OpenFlow 1.0 the Integration Bridge, Network Bridge, patch ports and a physical device connected to the
      * Network Bridge are required.
      * For OpenFlow 1.3 the Integration Bridge is required and must have a physical device connected.
-     * @param node the {@link org.opendaylight.controller.sal.core.Node} where the bridge is configured
+     * @param node the {@link Node} where the bridge is configured
      * @param network the {@link org.opendaylight.neutron.spi.NeutronNetwork}
      * @return True or False
      */
@@ -82,7 +82,7 @@ public interface BridgeConfigurationManager {
 
     /**
      * A helper function to determine if a port exists on a given bridge
-     * @param node the {@link org.opendaylight.controller.sal.core.Node} where the bridge is configured
+     * @param node the {@link Node} where the bridge is configured
      * @param bridge the {@link org.opendaylight.ovsdb.schema.openvswitch.Bridge} to query
      * @param portName the name of the port to search for
      * @return True if the port exists, otherwise False
@@ -93,7 +93,7 @@ public interface BridgeConfigurationManager {
     /**
      * Returns true if the bridges required for the provider network type are created
      * If the bridges are not created, this method will attempt to create them
-     * @param node the {@link org.opendaylight.controller.sal.core.Node} to query
+     * @param node the {@link Node} to query
      * @param network the {@link org.opendaylight.neutron.spi.NeutronNetwork}
      * @return True or False
      */
@@ -101,7 +101,7 @@ public interface BridgeConfigurationManager {
 
     /**
      * Prepares the given Node for Neutron Networking by creating the Integration Bridge
-     * @param node the {@link org.opendaylight.controller.sal.core.Node} to prepare
+     * @param node the {@link Node} to prepare
      */
     public void prepareNode(Node node);
 
@@ -115,7 +115,7 @@ public interface BridgeConfigurationManager {
 
     /** Returns all physical interfaces configured in the bridge mapping
      * Bridge mappings will be of the following format:
-     * @param node the {@link org.opendaylight.controller.sal.core.Node} to query
+     * @param node the {@link Node} to query
      * @return a List in the format {eth1, eth2} given bridge_mappings=physnet1:eth1,physnet2:eth2
      */
     public List<String> getAllPhysicalInterfaceNames(Node node);

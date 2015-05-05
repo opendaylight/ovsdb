@@ -28,6 +28,7 @@ import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeInternal;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -72,7 +73,7 @@ public class BridgeUpdateCommand extends AbstractTransactCommand {
         Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
         setFailMode(bridge, ovsdbManagedNode);
         setDataPathType(bridge, ovsdbManagedNode);
-        setOpenDaylightIidExternalId(bridge, iid);
+        setOpenDaylightExternalIds(bridge, iid, ovsdbManagedNode);
         setOpenDaylightOtherConfig(bridge, ovsdbManagedNode);
         if (!operationalBridgeOptional.isPresent()) {
             setName(bridge, ovsdbManagedNode,operationalBridgeOptional);
@@ -109,13 +110,23 @@ public class BridgeUpdateCommand extends AbstractTransactCommand {
 
 
 
-    private void setOpenDaylightIidExternalId(Bridge bridge,
-            InstanceIdentifier<OvsdbBridgeAugmentation> iid) {
+    private void setOpenDaylightExternalIds(Bridge bridge, InstanceIdentifier<OvsdbBridgeAugmentation> iid,
+            OvsdbBridgeAugmentation ovsdbManagedNode) {
         // Set the iid external_id
-        Map<String,String> externalIds = new HashMap<String,String>();
-        externalIds.put(SouthboundConstants.IID_EXTERNAL_ID_KEY,
-                SouthboundUtil.serializeInstanceIdentifier(iid));
-        bridge.setExternalIds(externalIds);
+        Map<String, String> externalIdMap = new HashMap<String, String>();
+        externalIdMap.put(SouthboundConstants.IID_EXTERNAL_ID_KEY, SouthboundUtil.serializeInstanceIdentifier(iid));
+        // Set user provided external ids
+        List<BridgeExternalIds> bridgeExternalId = ovsdbManagedNode.getBridgeExternalIds();
+        if (bridgeExternalId != null) {
+            for (BridgeExternalIds externalId : bridgeExternalId) {
+                externalIdMap.put(externalId.getBridgeExternalIdKey(), externalId.getBridgeExternalIdValue());
+            }
+        }
+        try {
+            bridge.setExternalIds(ImmutableMap.copyOf(externalIdMap));
+        } catch (NullPointerException e) {
+            LOG.warn("Incomplete bridge external Id");
+        }
     }
 
 

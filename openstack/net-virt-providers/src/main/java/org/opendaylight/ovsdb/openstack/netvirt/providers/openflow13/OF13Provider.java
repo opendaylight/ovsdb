@@ -2016,11 +2016,6 @@ public class OF13Provider implements NetworkingProvider {
         }
     }
 
-    @Override
-    public void notifyFlowCapableNodeEvent(Long dpid, org.opendaylight.ovsdb.openstack.netvirt.api.Action action) {
-        mdsalConsumer.notifyFlowCapableNodeCreateEvent(Constants.OPENFLOW_NODE_PREFIX + dpid, action);
-    }
-
     public static NodeBuilder createNodeBuilder(String nodeId) {
         NodeBuilder builder = new NodeBuilder();
         builder.setId(new NodeId(nodeId));

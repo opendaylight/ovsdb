@@ -80,11 +80,4 @@ public class MdsalConsumerImpl implements BindingAwareConsumer, MdsalConsumer, B
     public void onSessionInitiated(ProviderContext session) {
         notificationService = session.getSALService(NotificationProviderService.class);
     }
-
-    @Override
-    public void notifyFlowCapableNodeCreateEvent(String openFlowId, Action action) {
-        if (flowCapableNodeChangeListener != null) {
-            flowCapableNodeChangeListener.notifyFlowCapableNodeEvent(openFlowId, action);
-        }
-    }
 }

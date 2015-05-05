@@ -63,11 +63,4 @@ public interface NetworkingProvider {
      * Initialize the Flow rules for a given OpenFlow node
      */
     public void initializeOFFlowRules(Node openflowNode);
-
-    /**
-     * Generate event to announce flow capable node.
-     * @param dpid the data path id of the node
-     * @param action the type of update for the given dpid
-     */
-    public void notifyFlowCapableNodeEvent(Long dpid, Action action);
 }

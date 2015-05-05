@@ -7,7 +7,6 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt;
 
-import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,9 +23,7 @@ import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
-//import org.opendaylight.ovsdb.utils.mdsal.node.StringConvertor;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
@@ -154,20 +151,6 @@ public class SouthboundHandler extends AbstractHandler
             } catch (Exception e) {
                 logger.error("Error fetching Interface Rows for node " + node, e);
             }
-        } else if (tableName.equalsIgnoreCase(ovsdbConfigurationService.getTableName(node, Bridge.class))) {
-            logger.debug("Processing update of {}:{} node: {}, bridge uuid: {}, row: {}", tableName, action, node, uuid, row);
-            Bridge bridge = ovsdbConfigurationService.getTypedRow(node, Bridge.class, row);
-            final Set<String> dpids = bridge.getDatapathIdColumn().getData();
-            if (dpids != null &&
-                    (bridge.getName().equals(configurationService.getIntegrationBridgeName()) ||
-                            bridge.getName().equals(configurationService.getExternalBridgeName()))) {
-                NetworkingProvider networkingProvider = networkingProviderManager.getProvider(node);
-                for (String dpid : dpids) {
-                    // TODO SB_MIGRATION
-                    // I don't think this is used anymore since adding NodeCacheManager to service dependency
-                    //networkingProvider.notifyFlowCapableNodeEvent(StringConvertor.dpidStringToLong(dpid), action);
-                }
-            }
         }
     }
 
@@ -252,19 +235,6 @@ public class SouthboundHandler extends AbstractHandler
             } catch (Exception e) {
                 logger.error("Exception during OVSDB Southbound update trigger", e);
             }
-        }
-    }
-
-    private void processBridgeUpdate(Node node, OvsdbBridgeAugmentation bridge, Action action) {
-        logger.debug("processBridgeUpdate {}: {}, {}", action, node, bridge);
-        final String dpid = bridge.getDatapathId().getValue();
-        if (dpid != null
-                && (bridge.getBridgeName().equals(configurationService.getIntegrationBridgeName())
-                || bridge.getBridgeName().equals(configurationService.getExternalBridgeName()))) {
-            NetworkingProvider networkingProvider = networkingProviderManager.getProvider(node);
-            // TODO SB_MIGRATION
-            // I don't think this is used anymore since adding NodeCacheManager to service dependency
-            //networkingProvider.notifyFlowCapableNodeEvent(StringConvertor.dpidStringToLong(dpid), action);
         }
     }
 
@@ -373,6 +343,7 @@ public class SouthboundHandler extends AbstractHandler
             case OPENVSWITCH:
                 processOpenVSwitchUpdate(ev.getNode(), ev.getAction());
                 break;
+
             case ROW:
                 try {
                     processRowUpdate(ev.getNode(), ev.getTableName(), ev.getUuid(), ev.getRow(),
@@ -410,9 +381,6 @@ public class SouthboundHandler extends AbstractHandler
         }
     }
 
-    private void processBridgeUpdate(Node node, Action action) {
-    }
-
     private void processOpenVSwitchUpdate(Node node, Action action) {
         //do the work that rowUpdate(table=openvswith) would have done
     }
@@ -425,4 +393,27 @@ public class SouthboundHandler extends AbstractHandler
         }
 
     }
+
+    private void processBridgeUpdate(Node node, Action action) {
+        OvsdbBridgeAugmentation bridge = MdsalUtils.getBridge(node);
+        switch (action) {
+            case ADD:
+            case UPDATE:
+                processBridgeUpdate(node, bridge);
+                break;
+            case DELETE:
+                processBridgeDelete(node, bridge);
+                break;
+        }
+    }
+
+    private void processBridgeDelete(Node node, OvsdbBridgeAugmentation bridge) {
+        logger.debug("processBridgeUpdate {}, {}", node, bridge);
+    }
+
+    private void processBridgeUpdate(Node node, OvsdbBridgeAugmentation bridge) {
+        logger.debug("processBridgeUpdate {}, {}", node, bridge);
+    }
+
+
 }

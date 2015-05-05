@@ -104,22 +104,6 @@ public class FlowCapableNodeDataChangeListener implements DataChangeListener, Au
         }
     }
 
-    public void notifyFlowCapableNodeEvent (String openFlowId, Action action) {
-        LOG.debug("Notification of flow capable node {}, action {}", openFlowId, action);
-        checkMemberInitialization();
-
-        Node openFlowNode = NodeUtils.getOpenFlowNode(openFlowId);
-        if (action == Action.DELETE) {
-            notifyNodeRemoved(openFlowNode);
-        } else {
-            if (addNodeToCache(openFlowNode)) {
-                notifyNodeCreated(openFlowNode);
-            } else {
-                notifyNodeUpdated(openFlowNode);
-            }
-        }
-    }
-
     /**
      * This method returns the true if node was added to the nodeCache. If param node
      * is already in the cache, this method is expected to return false.

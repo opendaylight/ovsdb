@@ -123,7 +123,7 @@ public class MdsalConsumerImplTest {
         FlowCapableNodeDataChangeListener nodeChangeListener = (FlowCapableNodeDataChangeListener) getClassField(mdsalConsumer, "flowCapableNodeChangeListener");
 
         //Send a notification
-        mdsalConsumer.notifyFlowCapableNodeCreateEvent("flowId1", Action.ADD);
+        //mdsalConsumer.notifyFlowCapableNodeCreateEvent("flowId1", Action.ADD);
 
         List<Node> nodeCache = (List<Node>) getClassField(nodeChangeListener, "nodeCache");
         assertEquals("Error, notifyFlowCapableNodeEvent() - MdsalConsumerImpl NodeDataChangeLister inventory size after an ADD operation is incorrect", 1, nodeCache.size());

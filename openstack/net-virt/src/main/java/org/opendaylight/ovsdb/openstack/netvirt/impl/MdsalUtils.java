@@ -347,6 +347,10 @@ public class MdsalUtils {
         return (node.getAugmentation(OvsdbBridgeAugmentation.class).getBridgeName().getValue());
     }
 
+    public static OvsdbBridgeAugmentation getBridge(Node node) {
+        return (node.getAugmentation(OvsdbBridgeAugmentation.class));
+    }
+
     public static List<Node> getBridges(Node node) {
         return null;
     }

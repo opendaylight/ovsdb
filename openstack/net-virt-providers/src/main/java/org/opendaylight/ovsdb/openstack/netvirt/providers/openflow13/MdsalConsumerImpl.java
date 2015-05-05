@@ -29,7 +29,6 @@ public class MdsalConsumerImpl implements BindingAwareConsumer, MdsalConsumer, B
     private ConsumerContext consumerContext = null;
     private DataBroker dataBroker;
     private NotificationProviderService notificationService;
-    private FlowCapableNodeDataChangeListener flowCapableNodeChangeListener;
 
     static final Logger logger = LoggerFactory.getLogger(MdsalConsumerImpl.class);
 
@@ -49,18 +48,11 @@ public class MdsalConsumerImpl implements BindingAwareConsumer, MdsalConsumer, B
         }
     }
 
-    void start() {
-    }
-
-    void stop() {
-    }
-
     @Override
     public void onSessionInitialized(ConsumerContext session) {
         this.consumerContext = session;
         dataBroker = session.getSALService(DataBroker.class);
         logger.info("OVSDB Neutron Session Initialized with CONSUMER CONTEXT {}", session.toString());
-        //flowCapableNodeChangeListener = new FlowCapableNodeDataChangeListener(dataBroker);
     }
 
     @Override

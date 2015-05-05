@@ -115,23 +115,8 @@ public class MdsalConsumerImplTest {
     }
 
     /**
-     * Test method {@link MdsalConsumerImpl#notifyFlowCapableNodeCreateEvent(String, Action)}
-     */
-    @Test
-    public void notifyFlowCapableNodeCreateEventTest() throws Exception{
-
-        FlowCapableNodeDataChangeListener nodeChangeListener = (FlowCapableNodeDataChangeListener) getClassField(mdsalConsumer, "flowCapableNodeChangeListener");
-
-        //Send a notification
-        //mdsalConsumer.notifyFlowCapableNodeCreateEvent("flowId1", Action.ADD);
-
-        List<Node> nodeCache = (List<Node>) getClassField(nodeChangeListener, "nodeCache");
-        assertEquals("Error, notifyFlowCapableNodeEvent() - MdsalConsumerImpl NodeDataChangeLister inventory size after an ADD operation is incorrect", 1, nodeCache.size());
-    }
-
-    /**
      * Get the specified field from MdsalConsumerImpl using reflection
-     * @param instancee - the class instance
+     * @param instance - the class instance
      * @param fieldName - the field to retrieve
      *
      * @return the desired field
@@ -141,18 +126,4 @@ public class MdsalConsumerImplTest {
         field.setAccessible(true);
         return field.get(instance);
     }
-
-    /**
-     * Get the specified field from FlowCapableNodeDataChangeListener using reflection
-     * @param instancee - the class instance
-     * @param fieldName - the field to retrieve
-     *
-     * @return the desired field
-     */
-    private Object getClassField(FlowCapableNodeDataChangeListener instance, String fieldName) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException{
-        Field field = FlowCapableNodeDataChangeListener.class.getDeclaredField(fieldName);
-        field.setAccessible(true);
-        return field.get(instance);
-    }
-
 }

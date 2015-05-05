@@ -8,15 +8,11 @@
 package org.opendaylight.ovsdb.openstack.netvirt;
 
 import java.util.List;
-import java.util.concurrent.ConcurrentMap;
 
 import org.opendaylight.neutron.spi.NeutronNetwork;
-import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.openstack.netvirt.api.*;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
-import org.opendaylight.ovsdb.schema.openvswitch.Interface;
-import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
@@ -86,26 +82,6 @@ public class SouthboundHandler extends AbstractHandler
             bridgeConfigurationManager.prepareNode(node);
         } else {
             logger.info("Not implemented yet: {}", action);
-        }
-    }
-
-    private void processRowUpdate(Node node, String tableName, String uuid, Row row,
-                                  Object context, Action action) {
-        /* TODO SB_MIGRATION */
-        if (tableName.equalsIgnoreCase(ovsdbConfigurationService.getTableName(node, OpenVSwitch.class))) {
-            logger.debug("Processing update of {}:{} node: {}, ovs uuid: {}, row: {}", tableName, action, node, uuid, row);
-            try {
-                ConcurrentMap<String, Row> interfaces = this.ovsdbConfigurationService
-                        .getRows(node, ovsdbConfigurationService.getTableName(node, Interface.class));
-                if (interfaces != null) {
-                    for (String intfUUID : interfaces.keySet()) {
-                        Interface intf = ovsdbConfigurationService.getTypedRow(node, Interface.class, interfaces.get(intfUUID));
-                        //this.handleInterfaceUpdate(node, intfUUID, intf);
-                    }
-                }
-            } catch (Exception e) {
-                logger.error("Error fetching Interface Rows for node " + node, e);
-            }
         }
     }
 
@@ -264,14 +240,6 @@ public class SouthboundHandler extends AbstractHandler
                 processOpenVSwitchUpdate(ev.getNode(), ev.getAction());
                 break;
 
-            case ROW:
-                try {
-                    processRowUpdate(ev.getNode(), ev.getTableName(), ev.getUuid(), ev.getRow(),
-                            ev.getContext(), ev.getAction());
-                } catch (Exception e) {
-                    logger.error("Exception caught in ProcessRowUpdate for node " + ev.getNode(), e);
-                }
-                break;
             default:
                 logger.warn("Unable to process type " + ev.getType() +
                         " action " + ev.getAction() + " for node " + ev.getNode());
@@ -306,7 +274,23 @@ public class SouthboundHandler extends AbstractHandler
     }
 
     private void processOpenVSwitchUpdate(Node node, Action action) {
-        //do the work that rowUpdate(table=openvswith) would have done
+        switch (action) {
+            case ADD:
+            case UPDATE:
+                processOpenVSwitchUpdate(node);
+                break;
+            case DELETE:
+                break;
+        }
+    }
+
+    private void processOpenVSwitchUpdate(Node node) {
+        // TODO this node might be the OvsdbNode and not have termination points
+        // Would need to change listener or grab tp nodes in here.
+        List<TerminationPoint> terminationPoints = MdsalUtils.getTerminationPoints(node);
+        for (TerminationPoint terminationPoint : terminationPoints) {
+            processPortUpdate(node, terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class));
+        }
     }
 
     private void processPortUpdate(Node node, OvsdbTerminationPointAugmentation port) {

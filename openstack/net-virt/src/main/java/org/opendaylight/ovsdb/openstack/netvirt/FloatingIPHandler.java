@@ -119,7 +119,7 @@ public class FloatingIPHandler extends AbstractHandler
      * Process the event.
      *
      * @param abstractEvent the {@link org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent} event to be handled.
-     * @see EventDispatcher
+     * @see org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher
      */
     @Override
     public void processEvent(AbstractEvent abstractEvent) {

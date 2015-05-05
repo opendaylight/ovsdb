@@ -104,7 +104,7 @@ public interface ConfigurationService {
 
     /**
      * Gets the tunnel endpoint address for a given Node
-     * @param node a {@link org.opendaylight.controller.sal.core.Node}
+     * @param node a {@link Node}
      * @return the tunnel endpoint
      * @see java.net.InetAddress
      */

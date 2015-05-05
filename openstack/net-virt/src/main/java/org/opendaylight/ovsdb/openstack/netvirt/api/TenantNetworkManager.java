@@ -22,7 +22,7 @@ public interface TenantNetworkManager {
 
     /**
      * Get the VLAN assigned to the provided Network
-     * @param node the {@link org.opendaylight.controller.sal.core.Node} to query
+     * @param node the {@link Node} to query
      * @param networkId the Neutron Network ID
      * @return the assigned VLAN ID or 0 in case of an error
      */
@@ -30,7 +30,7 @@ public interface TenantNetworkManager {
 
     /**
      * Reclaim the assigned VLAN for the given Network
-     * @param node the {@link org.opendaylight.controller.sal.core.Node} to query
+     * @param node the {@link Node} to query
      * @param portUUID the UUID of the neutron Port
      * @param network the Neutron Network ID
      */
@@ -38,7 +38,7 @@ public interface TenantNetworkManager {
 
     /**
      * Configures the VLAN for a Tenant Network
-     * @param node the {@link org.opendaylight.controller.sal.core.Node} to configure
+     * @param node the {@link Node} to configure
      * @param portUUID the UUID of the port to configure
      * @param network the Neutron Network ID
      */
@@ -46,7 +46,7 @@ public interface TenantNetworkManager {
 
     /**
      * Check is the given network is present on a Node
-     * @param node the {@link org.opendaylight.controller.sal.core.Node} to query
+     * @param node the {@link Node} to query
      * @param segmentationId the Neutron Segementation ID
      * @return True or False
      */

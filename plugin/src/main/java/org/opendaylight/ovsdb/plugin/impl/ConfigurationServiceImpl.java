@@ -582,7 +582,7 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
      * insert a Row in a Table of a specified Database Schema.
      *
      * This method can insert just a single Row specified in the row parameter.
-     * But {@link #insertTree(Node, String, String, UUID, Row<GenericTableSchema>) insertTree}
+     * But {@link #insertTree(Node, String, String, UUID, Row) insertTree}
      * can insert a hierarchy of rows with parent-child relationship.
      *
      * @param node OVSDB Node
@@ -612,18 +612,18 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
 
     /**
      * insert a Row in a Table of a specified Database Schema. This is a convenience method on top of
-     * {@link insertRow(Node, String, String, String, UUID, String, Row<GenericTableSchema>) insertRow}
+     * {@link insertRow(Node, String, String, String, UUID, String, Row) insertRow}
      * which assumes that OVSDB schema implementation that corresponds to the databaseName will provide
      * the necessary service to populate the Parent Table Name and Parent Column Name.
      *
      * This method can insert just a single Row specified in the row parameter.
-     * But {@link #insertTree(Node, String, String, UUID, Row<GenericTableSchema>) insertTree}
+     * But {@link #insertTree(Node, String, String, UUID, Row) insertTree}
      * can insert a hierarchy of rows with parent-child relationship.
      *
      * @param node OVSDB Node
      * @param databaseName Database Name that represents the Schema supported by the node.
      * @param tableName Table on which the row is inserted
-     * @param parentUuid UUID of the parent table to which this operation will result in attaching/mutating.
+     * @param parentRowUuid UUID of the parent table to which this operation will result in attaching/mutating.
      * @param row Row of table Content to be inserted
      * @throws OvsdbPluginException Any failure during the insert transaction will result in a specific exception.
      * @return UUID of the inserted Row
@@ -711,12 +711,12 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
 
     /**
      * inserts a Tree of Rows in multiple Tables that has parent-child relationships referenced through the OVSDB schema's refTable construct.
-     * This is a convenience method on top of {@link #insertTree(Node, String, String, String, UUID, String, Row<GenericTableSchema>) insertTree}
+     * This is a convenience method on top of {@link #insertTree(Node, String, String, String, UUID, String, Row) insertTree}
      *
      * @param node OVSDB Node
      * @param databaseName Database Name that represents the Schema supported by the node.
      * @param tableName Table on which the row is inserted
-     * @param parentUuid UUID of a Row in parent table to which this operation will result in attaching/mutating.
+     * @param parentRowUuid UUID of a Row in parent table to which this operation will result in attaching/mutating.
      * @param row Row Tree with parent-child relationships via column of type refTable.
      * @throws OvsdbPluginException Any failure during the insert transaction will result in a specific exception.
      * @return Returns the row tree with the UUID of every inserted Row populated in the _uuid column of every row in the tree

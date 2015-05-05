@@ -39,10 +39,13 @@ import org.opendaylight.ovsdb.southbound.SouthboundProvider;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeBase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolBase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbFailModeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes.VlanMode;
@@ -52,6 +55,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.DatapathTypeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.InterfaceTypeEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
@@ -381,6 +385,68 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Test
+    public void testDpdkSwitch() throws InterruptedException {
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        Node ovsdbNode = connectOvsdbNode(connectionInfo);
+        List<DatapathTypeEntry> datapathTypeEntries = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class)
+                .getDatapathTypeEntry();
+        if (datapathTypeEntries == null) {
+            LOG.info("DPDK not supported on this node.");
+        } else {
+            Class<? extends DatapathTypeBase> dpType = null;
+            String dpTypeStr = null;
+            for (DatapathTypeEntry dpTypeEntry : datapathTypeEntries) {
+                dpType = dpTypeEntry.getDatapathType();
+                dpTypeStr = SouthboundConstants.DATAPATH_TYPE_MAP.get(dpType);
+                LOG.info("dp type is {}", dpTypeStr);
+                if (dpTypeStr.equals("netdev")) {
+                    LOG.info("Found a DPDK node; adding a corresponding netdev device");
+                    InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(connectionInfo,
+                            new OvsdbBridgeName(SouthboundITConstants.BRIDGE_NAME));
+                    NodeId bridgeNodeId = SouthboundMapper.createManagedNodeId(bridgeIid);
+                    addBridge(connectionInfo, bridgeIid, SouthboundITConstants.BRIDGE_NAME, bridgeNodeId, false, null,
+                            true, dpType);
+
+                    // Verify that the device is netdev
+                    OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
+                    Assert.assertNotNull(bridge);
+                    Assert.assertEquals(dpTypeStr, bridge.getDatapathType());
+
+                    // Add dpdk port
+                    String testPortName = "testDPDKPort";
+                    OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder = 
+                            createGenericDpdkOvsdbTerminationPointAugmentationBuilder(testPortName);
+                    Assert.assertTrue(addTerminationPoint(bridgeNodeId, testPortName, ovsdbTerminationBuilder));
+
+                    // Verify that DPDK port was created
+                    InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
+                    Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL,
+                            terminationPointIid);
+                    Assert.assertNotNull(terminationPointNode);
+
+                    // Verify that each termination point has DPDK ifType
+                    Class<? extends InterfaceTypeBase> dpdkIfType = SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP
+                            .get("dpdk");
+                    Class<? extends InterfaceTypeBase> opPort = null;
+                    List<TerminationPoint> terminationPoints = terminationPointNode.getTerminationPoint();
+                    for (TerminationPoint terminationPoint : terminationPoints) {
+                        OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation = terminationPoint
+                                .getAugmentation(OvsdbTerminationPointAugmentation.class);
+                        if (ovsdbTerminationPointAugmentation.getName().equals(testPortName)) {
+                            opPort = ovsdbTerminationPointAugmentation
+                                    .getInterfaceType();
+                            Assert.assertEquals(dpdkIfType, opPort);
+                        }
+                    }
+                    Assert.assertTrue(deleteBridge(connectionInfo));
+                    break;
+                }
+            }
+        }
+        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+    }
+
+    @Test
     public void testOvsdbNodeOvsVersion() throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
         Node ovsdbNode = connectOvsdbNode(connectionInfo);
@@ -440,6 +506,17 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         return ovsdbTerminationPointAugmentationBuilder;
     }
 
+    private OvsdbTerminationPointAugmentationBuilder createGenericDpdkOvsdbTerminationPointAugmentationBuilder(
+            String portName) {
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
+                createGenericOvsdbTerminationPointAugmentationBuilder();
+        ovsdbTerminationBuilder.setName(portName);
+        Class<? extends InterfaceTypeBase> ifType = SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP
+                .get("dpdk");
+        ovsdbTerminationBuilder.setInterfaceType(ifType);
+        return ovsdbTerminationBuilder;
+    }
+
     private boolean addTerminationPoint(NodeId bridgeNodeId, String portName,
             OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointAugmentationBuilder)
         throws InterruptedException {
@@ -460,27 +537,55 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         return result;
     }
 
-    private boolean addBridge(ConnectionInfo connectionInfo, String bridgeName) throws InterruptedException {
+    /*
+     * base method for adding test bridges.  Other helper methods used to create bridges should utilize this method.
+     *
+     * @param connectionInfo
+     * @param bridgeIid if passed null, one is created
+     * @param bridgeName cannot be null
+     * @param bridgeNodeId if passed null, one is created based on <code>bridgeIid</code>
+     * @param setProtocolEntries toggles whether default protocol entries are set for the bridge
+     * @param failMode toggles whether default fail mode is set for the bridge
+     * @param setManagedBy toggles whether to setManagedBy for the bridge
+     * @param if passed null, this parameter is ignored
+     * @return success of bridge addition
+     * @throws InterruptedException
+     */
+    private boolean addBridge(ConnectionInfo connectionInfo, InstanceIdentifier<Node> bridgeIid, String bridgeName,
+            NodeId bridgeNodeId, boolean setProtocolEntries, Class<? extends OvsdbFailModeBase> failMode,
+            boolean setManagedBy, Class<? extends DatapathTypeBase> dpType) throws InterruptedException {
+
         NodeBuilder bridgeNodeBuilder = new NodeBuilder();
-        InstanceIdentifier<Node> bridgeIid =
-                SouthboundMapper.createInstanceIdentifier(connectionInfo, new OvsdbBridgeName(bridgeName));
-        NodeId bridgeNodeId = SouthboundMapper.createManagedNodeId(bridgeIid);
+        if (bridgeIid == null) {
+            bridgeIid = SouthboundMapper.createInstanceIdentifier(connectionInfo, new OvsdbBridgeName(bridgeName));
+        }
+        if (bridgeNodeId == null) {
+            bridgeNodeId = SouthboundMapper.createManagedNodeId(bridgeIid);
+        }
         bridgeNodeBuilder.setNodeId(bridgeNodeId);
         OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
         ovsdbBridgeAugmentationBuilder.setBridgeName(new OvsdbBridgeName(bridgeName));
-        ovsdbBridgeAugmentationBuilder.setProtocolEntry(createMdsalProtocols());
-        ovsdbBridgeAugmentationBuilder.setFailMode(
-                SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"));
-        setManagedBy(ovsdbBridgeAugmentationBuilder, connectionInfo);
+        if (setProtocolEntries) {
+            ovsdbBridgeAugmentationBuilder.setProtocolEntry(createMdsalProtocols());
+        }
+        if (failMode != null) {
+            ovsdbBridgeAugmentationBuilder.setFailMode(failMode);
+        }
+        if (setManagedBy) {
+            setManagedBy(ovsdbBridgeAugmentationBuilder, connectionInfo);
+        }
         bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbBridgeAugmentationBuilder.build());
-
         LOG.debug("Built with the intent to store bridge data {}",
                 ovsdbBridgeAugmentationBuilder.toString());
-
         boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
                 bridgeIid, bridgeNodeBuilder.build());
         Thread.sleep(OVSDB_UPDATE_TIMEOUT);
         return result;
+    }
+
+    private boolean addBridge(ConnectionInfo connectionInfo, String bridgeName) throws InterruptedException {
+        return addBridge(connectionInfo, null, bridgeName, null, true,
+                SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"), true, null);
     }
 
     private OvsdbBridgeAugmentation getBridge(ConnectionInfo connectionInfo) {

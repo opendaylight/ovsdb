@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_8a83ac03",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 402,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-05-05T17:01:53Z",
+      "side": 1,
+      "message": "please use CONSTANT variable for the string.",
+      "revId": "9c3a29b79d5d49a623151ced254a33598c52fe56",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_aa86a811",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 416,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-05-05T17:01:53Z",
+      "side": 1,
+      "message": "use CONSTANT Variable for the string",
+      "revId": "9c3a29b79d5d49a623151ced254a33598c52fe56",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_4a7da41b",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 417,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-05-05T17:01:53Z",
+      "side": 1,
+      "message": "whitespace.",
+      "revId": "9c3a29b79d5d49a623151ced254a33598c52fe56",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

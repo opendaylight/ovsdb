@@ -355,10 +355,4 @@ public class NeutronIT extends OvsdbIntegrationTestBase implements BindingAwareC
         public void initializeOFFlowRules(Node openflowNode) {
 
         }
-
-        @Override
-        public void notifyFlowCapableNodeEvent(Long dpid, Action action) {
-
-        }
-    }
 }

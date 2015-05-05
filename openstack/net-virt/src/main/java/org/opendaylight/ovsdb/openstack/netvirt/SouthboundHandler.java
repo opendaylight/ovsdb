@@ -8,20 +8,15 @@
 package org.opendaylight.ovsdb.openstack.netvirt;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.ovsdb.lib.notation.Row;
-import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.api.*;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
-import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
-import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
@@ -47,11 +42,10 @@ public class SouthboundHandler extends AbstractHandler
     private volatile NetworkingProviderManager networkingProviderManager;
     private volatile OvsdbConfigurationService ovsdbConfigurationService;
     private volatile OvsdbConnectionService connectionService;
-    private volatile OvsdbInventoryService mdsalConsumer; // TODO SB_MIGRATION
     private volatile NeutronL3Adapter neutronL3Adapter;
 
     void start() {
-        //this.triggerUpdates(); // TODO SB_MIGRATION
+        this.triggerUpdates();
     }
 
     private SouthboundEvent.Type ovsdbTypeToSouthboundEventType(OvsdbType ovsdbType) {
@@ -194,46 +188,21 @@ public class SouthboundHandler extends AbstractHandler
         }
     }
 
-    private String getPortIdForInterface (Node node, String uuid, Interface intf) {
-        /* TODO SB_MIGRATION */
-        try {
-            Map<String, Row> ports = this.ovsdbConfigurationService.getRows(node, ovsdbConfigurationService.getTableName(node, Port.class));
-            if (ports == null) return null;
-            for (String portUUID : ports.keySet()) {
-                Port port = ovsdbConfigurationService.getTypedRow(node, Port.class, ports.get(portUUID));
-                Set<UUID> interfaceUUIDs = port.getInterfacesColumn().getData();
-                logger.trace("Scanning Port {} to identify interface : {} ",port, uuid);
-                for (UUID intfUUID : interfaceUUIDs) {
-                    if (intfUUID.toString().equalsIgnoreCase(uuid)) {
-                        logger.trace("Found Interface {} -> {}", uuid, portUUID);
-                        return portUUID;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            logger.debug("Failed to get Port tag for for Intf " + intf, e);
-        }
-        return null;
-    }
-
     private void triggerUpdates() {
-        /* TODO SB_MIGRATION */
         List<Node> nodes = connectionService.getNodes();
         if (nodes == null) return;
         for (Node node : nodes) {
-            try {
-                List<String> tableNames = ovsdbConfigurationService.getTables(node);
-                if (tableNames == null) continue;
-                for (String tableName : tableNames) {
-                    Map<String, Row> rows = ovsdbConfigurationService.getRows(node, tableName);
-                    if (rows == null) continue;
-                    for (String uuid : rows.keySet()) {
-                        Row row = rows.get(uuid);
-                        //this.rowAdded(node, tableName, uuid, row);
-                    }
+            OvsdbBridgeAugmentation bridge = node.getAugmentation(OvsdbBridgeAugmentation.class);
+            if (bridge != null) {
+                processBridgeUpdate(node, bridge);
+            }
+
+            List<TerminationPoint> tps = MdsalUtils.getTerminationPoints(node);
+            for (TerminationPoint tp : tps) {
+                OvsdbTerminationPointAugmentation port = tp.getAugmentation(OvsdbTerminationPointAugmentation.class);
+                if (port != null) {
+                    processPortUpdate(node, port);
                 }
-            } catch (Exception e) {
-                logger.error("Exception during OVSDB Southbound update trigger", e);
             }
         }
     }
@@ -276,15 +245,6 @@ public class SouthboundHandler extends AbstractHandler
             } catch (Exception e) {
                 logger.error("Error fetching Interface Rows for node " + node, e);
             }
-        }
-    }
-
-    private void processInterfaceUpdate(Node node, OvsdbTerminationPointAugmentation terminationPoint,
-                                        String portName, Object context, Action action) {
-        if (action == Action.DELETE) {
-            processInterfaceDelete(node, portName, context, action);
-        } else {
-
         }
     }
 
@@ -385,11 +345,11 @@ public class SouthboundHandler extends AbstractHandler
         //do the work that rowUpdate(table=openvswith) would have done
     }
 
-    private void processPortUpdate(Node node, OvsdbTerminationPointAugmentation tp) {
-        logger.debug("processPortUpdate {} - {}", node, tp);
-        NeutronNetwork network = tenantNetworkManager.getTenantNetwork(tp);
+    private void processPortUpdate(Node node, OvsdbTerminationPointAugmentation port) {
+        logger.debug("processPortUpdate {} - {}", node, port);
+        NeutronNetwork network = tenantNetworkManager.getTenantNetwork(port);
         if (network != null && !network.getRouterExternal()) {
-            this.handleInterfaceUpdate(node, tp);
+            this.handleInterfaceUpdate(node, port);
         }
 
     }
@@ -414,6 +374,4 @@ public class SouthboundHandler extends AbstractHandler
     private void processBridgeUpdate(Node node, OvsdbBridgeAugmentation bridge) {
         logger.debug("processBridgeUpdate {}, {}", node, bridge);
     }
-
-
 }

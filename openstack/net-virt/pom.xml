@@ -126,9 +126,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           <instructions>
             <Embed-Dependency>utils.config,utils.mdsal-node;type=!pom;inline=false</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
-            <Export-Package>
-                  org.opendaylight.ovsdb.openstack.netvirt.api
-              </Export-Package>
             <Bundle-Activator>org.opendaylight.ovsdb.openstack.netvirt.Activator</Bundle-Activator>
           </instructions>
         </configuration>

@@ -88,7 +88,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                 LOG.info("Processing ovsdb connections : {}", created);
                 Node ovsdbNode = getNode(changes.getCreatedData(), created);
                 LOG.info("ovsdbNode: {}", ovsdbNode);
-                ovsdbUpdate(ovsdbNode, OvsdbInventoryListener.OvsdbType.NODE, Action.ADD);
+                ovsdbUpdate(ovsdbNode, created.getValue(), OvsdbInventoryListener.OvsdbType.NODE, Action.ADD);
             }
         }
     }
@@ -161,14 +161,31 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                 }
 
                 LOG.debug("Process new port {} creation on Node : {}", newPort.getValue(),tpParentNode);
-                ovsdbUpdate(tpParentNode, OvsdbInventoryListener.OvsdbType.PORT, Action.ADD);
+                ovsdbUpdate(tpParentNode, newPort.getValue(),OvsdbInventoryListener.OvsdbType.PORT, Action.ADD);
             }
         }
     }
 
     private void processPortDeletion(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        // TODO Auto-generated method stub
+        LOG.info("processPortDeletion - Received changes : {}", changes);
+
+        for(InstanceIdentifier<?> removedPort : changes.getRemovedPaths()) {
+            Node tpParentNode = getNode(changes.getOriginalData(), removedPort);
+            if(tpParentNode == null){
+                //Throwing this warning in case behavior of southbound plugin changes.
+                LOG.warn("Port's {} parent node details are not present in original data, it should not happen", removedPort);
+                continue;
+            }
+            //Fetch data of removed port from original data
+            @SuppressWarnings("unchecked")
+            OvsdbTerminationPointAugmentation removedTPAugmentationData = getDataChanges(changes.getOriginalData(),
+                    (InstanceIdentifier<OvsdbTerminationPointAugmentation>)removedPort);
+
+            LOG.debug("Process port {} deletion on Node : {}", removedPort,tpParentNode);
+            ovsdbUpdate(tpParentNode, removedTPAugmentationData, OvsdbInventoryListener.OvsdbType.PORT, Action.DELETE);
+
+        }
 
     }
 
@@ -204,10 +221,27 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
         return (Node)changes.get(nodeInstanceIdentifier);
     }
 
-    private void ovsdbUpdate(Node node, OvsdbInventoryListener.OvsdbType ovsdbType, Action action) {
+    private Node getNode(Map<InstanceIdentifier<?>, DataObject> changes,InstanceIdentifier<?> path) {
+        InstanceIdentifier<Node> nodeInstanceIdentifier = path.firstIdentifierOf(Node.class);
+        return (Node)changes.get(nodeInstanceIdentifier);
+    }
+
+    private <T extends DataObject> T getDataChanges(Map<InstanceIdentifier<?>, DataObject> changes,InstanceIdentifier<T> path){
+
+        for(Map.Entry<InstanceIdentifier<?>,DataObject> change : changes.entrySet()){
+            if(change.getKey().getTargetType().equals(path.getTargetType())){
+                @SuppressWarnings("unchecked")
+                T dataObject = (T) change.getValue();
+                return dataObject;
+            }
+        }
+        return null;
+    }
+
+    private void ovsdbUpdate(Node node, DataObject resourceAugmentationDataChanges, OvsdbInventoryListener.OvsdbType ovsdbType, Action action) {
         Set<OvsdbInventoryListener> mdsalConsumerListeners = OvsdbInventoryServiceImpl.getMdsalConsumerListeners();
         for (OvsdbInventoryListener mdsalConsumerListener : mdsalConsumerListeners) {
-            mdsalConsumerListener.ovsdbUpdate(node, ovsdbType, action);
+            mdsalConsumerListener.ovsdbUpdate(node, resourceAugmentationDataChanges, ovsdbType, action);
         }
     }
 }

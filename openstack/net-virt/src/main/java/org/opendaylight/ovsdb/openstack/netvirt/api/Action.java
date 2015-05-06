@@ -11,7 +11,7 @@
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
 /**
- * This enumeration represents the type of action being perfomed
+ * This enumeration represents the type of action being performed
  */
 public enum Action {
     ADD,

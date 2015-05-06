@@ -21,4 +21,6 @@ public interface NodeCacheManager {
     public void nodeAdded(Node node);
     public void nodeRemoved(Node node);
     public List<Node> getNodes();
+    public List<Node> getOvsdbNodes();
+    public List<Node> getBridgeNodes();
 }

@@ -17,6 +17,8 @@ import org.opendaylight.ovsdb.openstack.netvirt.NodeCacheManagerEvent;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
@@ -150,5 +152,27 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
         Long pid = (Long) ref.getProperty(org.osgi.framework.Constants.SERVICE_ID);
         handlers.remove(pid);
         logger.debug("Node cache listener unregistered, pid {}", pid);
+    }
+
+    @Override
+    public List<Node> getOvsdbNodes() {
+        List<Node> nodes = Lists.newArrayList();
+        for (Node node: nodeCache) {
+            if (node.getAugmentation(OvsdbNodeAugmentation.class) != null) {
+                nodes.add(node);
+            }
+        }
+        return nodes;
+    }
+
+    @Override
+    public List<Node> getBridgeNodes() {
+        List<Node> nodes = Lists.newArrayList();
+        for (Node node: nodeCache) {
+            if (node.getAugmentation(OvsdbBridgeAugmentation.class) != null) {
+                nodes.add(node);
+            }
+        }
+        return nodes;
     }
 }

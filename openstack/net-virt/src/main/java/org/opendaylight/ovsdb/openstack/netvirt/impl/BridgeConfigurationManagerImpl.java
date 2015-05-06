@@ -106,7 +106,10 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
             LOGGER.error("Error creating Integration Bridge on {}", node, e);
             return;
         }
-        networkingProviderManager.getProvider(node).initializeFlowRules(node);
+        // this node is an ovsdb node so it doesn't have a bridge
+        // so either look up the bridges or just wait for the bridge update to come in
+        // and add the flows there.
+        //networkingProviderManager.getProvider(node).initializeFlowRules(node);
     }
 
     /**

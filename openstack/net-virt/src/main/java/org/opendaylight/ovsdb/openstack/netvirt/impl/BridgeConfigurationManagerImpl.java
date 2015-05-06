@@ -10,7 +10,9 @@
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.UnknownHostException;
+
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -27,10 +29,12 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -409,7 +413,25 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
          * hardcoding value, need to find better way to get local ip
          */
         //String target = "tcp:" + getControllerIPAddress() + ":" + getControllerOFPort();
-        String target = "tcp:192.168.120.1:6633";
-        return target;
+        //TODO: dirty fix, need to remove it once we have proper solution
+        String ipaddress = null;
+        try{
+            for (Enumeration ifaces = NetworkInterface.getNetworkInterfaces();ifaces.hasMoreElements();){
+                NetworkInterface iface = (NetworkInterface) ifaces.nextElement();
+
+                for (Enumeration inetAddrs = iface.getInetAddresses(); inetAddrs.hasMoreElements();) {
+                    InetAddress inetAddr = (InetAddress) inetAddrs.nextElement();
+                    if (!inetAddr.isLoopbackAddress()) {
+                        if (inetAddr.isSiteLocalAddress()) {
+                            ipaddress = inetAddr.getHostAddress();
+                            break;
+                        }
+                    }
+                }
+            }
+        }catch (Exception e){
+            LOGGER.warn("ROYALLY SCREWED : Exception while fetching local host ip address ",e);
+        }
+        return "tcp:"+ipaddress+":6633";
     }
 }

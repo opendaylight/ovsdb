@@ -105,7 +105,8 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                 Node parentNode = getNode(changes.getOriginalData(), removedOvsdbNode);
                 if(parentNode == null){
                     //Throwing this warning in case behavior of southbound plugin changes.
-                    LOG.warn("OvsdbNode's {} parent node details are not present in original data, it should not happen", parentNode);
+                    LOG.warn("OvsdbNode's {} parent node details are not present in original data,"
+                            + " it should not happen", parentNode);
                     continue;
                 }
                 //Fetch data of removed connection info from original data
@@ -115,7 +116,9 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
                 LOG.debug("Process ovsdb node delete : {} ", removedOvsdbNode);
                 //Assuming Openvswitch type represent the ovsdb node connection and not OvsdbType.NODE
-                ovsdbUpdate(parentNode, removedOvsdbNodeAugmentationData, OvsdbInventoryListener.OvsdbType.OPENVSWITCH, Action.DELETE);
+
+                ovsdbUpdate(parentNode, removedOvsdbNodeAugmentationData,
+                        OvsdbInventoryListener.OvsdbType.OPENVSWITCH, Action.DELETE);
             }
         }
     }
@@ -162,7 +165,8 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                 }
                 // This value is not being set right now - OvsdbBridgeUpdateCommand
                 // if (ovsdbBridgeAugmentation.getBridgeOpenflowNodeRef() != null) {
-                    nodeCacheManager = (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
+                    nodeCacheManager = (NodeCacheManager) ServiceHelper.getGlobalInstance(
+                            NodeCacheManager.class, this);
                     nodeCacheManager.nodeAdded(node);
                 //}
             }
@@ -182,8 +186,10 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                     tpParentNode = getNode(changes.getCreatedData(),newPort);
                 }
                 if(tpParentNode == null){
-                    // Logging this warning, to make sure we didn't change anything in southbound plugin that changes this behavior.
-                    LOG.warn("Parent Node for port is not found. Port creation must create or update the Node. This condition should not occure" );
+                    // Logging this warning, to make sure we didn't change anything
+                    // in southbound plugin that changes this behavior.
+                    LOG.warn("Parent Node for port is not found. Port creation must create or "
+                            + "update the Node. This condition should not occure" );
                     continue;
                 }
 
@@ -202,7 +208,8 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                 Node tpParentNode = getNode(changes.getOriginalData(), removedPort);
                 if(tpParentNode == null){
                     //Throwing this warning in case behavior of southbound plugin changes.
-                    LOG.warn("Port's {} parent node details are not present in original data, it should not happen", removedPort);
+                    LOG.warn("Port's {} parent node details are not present in original data, "
+                            + "it should not happen", removedPort);
                     continue;
                 }
                 //Fetch data of removed port from original data
@@ -211,30 +218,31 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                         (InstanceIdentifier<OvsdbTerminationPointAugmentation>)removedPort);
 
                 LOG.debug("Process port {} deletion on Node : {}", removedPort,tpParentNode);
-                ovsdbUpdate(tpParentNode, removedTPAugmentationData, OvsdbInventoryListener.OvsdbType.PORT, Action.DELETE);
+                ovsdbUpdate(tpParentNode, removedTPAugmentationData,
+                        OvsdbInventoryListener.OvsdbType.PORT, Action.DELETE);
 
             }
         }
-
     }
 
     private void processBridgeCreation(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
         LOG.info("processBridgeCreation - Received changes : {}", changes);
+
         for(Map.Entry<InstanceIdentifier<?>, DataObject> newBridge : changes.getCreatedData().entrySet()){
             if(newBridge.getKey() instanceof OvsdbBridgeAugmentation){
                 LOG.info("Processing creation of new bridge : {}",newBridge);
-                //Bridge augmentation happens directly on the Node so Node details should also existing in created data.
+                //Bridge augmentation happens directly on the Node so Node details should also exist in created data.
                 Node bridgeParentNode  = getNode(changes.getCreatedData(),newBridge);
                 if(bridgeParentNode == null){
                     // Logging this warning, to catch any change in southbound plugin behavior
-                    LOG.warn("Parent Node for bridge is not found. Bridge creation must provide the Node details in create Data Changes. "
-                            + "This condition should not occure" );
+                    LOG.warn("Parent Node for bridge is not found. Bridge creation must provide the Node "
+                            + "details in create Data Changes. This condition should not occure" );
                     continue;
                 }
-
                 LOG.debug("Process new bridge {} creation on Node : {}", newBridge.getValue(),bridgeParentNode);
-                ovsdbUpdate(bridgeParentNode, newBridge.getValue(),OvsdbInventoryListener.OvsdbType.BRIDGE, Action.ADD);
+                ovsdbUpdate(bridgeParentNode, newBridge.getValue(),
+                        OvsdbInventoryListener.OvsdbType.BRIDGE, Action.ADD);
             }
         }
     }
@@ -247,8 +255,27 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
     private void processBridgeDeletion(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        // TODO Auto-generated method stub
+        LOG.info("processBridgeDeletion - Received changes : {}", changes);
 
+        for(InstanceIdentifier<?> removedBridge : changes.getRemovedPaths()) {
+            if(removedBridge.getTargetType().equals(OvsdbBridgeAugmentation.class)){
+                Node bridgeParentNode = getNode(changes.getOriginalData(), removedBridge);
+                if(bridgeParentNode == null){
+                    //Throwing this warning to catch the behavior change of southbound plugin.
+                    LOG.warn("Bridge's {} parent node details are not present in original data"
+                            + ", it should not happen", removedBridge);
+                    continue;
+                }
+                //Fetch data of removed bridge from original data
+                @SuppressWarnings("unchecked")
+                OvsdbBridgeAugmentation removedBridgeAugmentationData = getDataChanges(changes.getOriginalData(),
+                        (InstanceIdentifier<OvsdbBridgeAugmentation>) removedBridge);
+
+                LOG.debug("Process bridge {} deletion on Node : {}", removedBridge,bridgeParentNode);
+                ovsdbUpdate(bridgeParentNode, removedBridgeAugmentationData,
+                        OvsdbInventoryListener.OvsdbType.BRIDGE, Action.DELETE);
+            }
+        }
     }
 
     //TODO: Will remove it if not needed

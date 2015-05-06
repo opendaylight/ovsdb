@@ -129,8 +129,34 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
     private void processOvsdbConnectionAttributeUpdates(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        // TODO Auto-generated method stub
+        LOG.info("processOvsdbConnectionAttributeUpdates - Received changes : {}", changes);
 
+        for(Map.Entry<InstanceIdentifier<?>, DataObject> updatedOvsdbNode : changes.getUpdatedData().entrySet()){
+            if(updatedOvsdbNode.getKey() instanceof OvsdbNodeAugmentation){
+                LOG.info("Processing Ovsdb Node attributes update : {}",updatedOvsdbNode);
+                // XXX (NOTE):Extract parent node data from originalData(),rather then extracting it from
+                // updatedData() because, extracting it from originalData() will give all the
+                // (existing data of parent node + old data of the OvsdbNodeAugmentation).
+                // If we extract parent node data from updatedData, it will give us
+                // ( Node data + new OvsdbNodeAugmentation data). To determine the update in
+                // OvsdbNodeAugmentation, we need to compare it's old and new values, so parent
+                // node data from originalData will contain old value and OvsdbNodeAugmentation
+                // from updateData() will provide new data.
+                Node parentNode  = getNode(changes.getOriginalData(),updatedOvsdbNode);
+                if(parentNode == null){
+                    // Logging this warning, to catch any change in southbound plugin's behavior.
+                    LOG.warn("Parent Node for OvsdbNodeAugmentation is not found. On OvsdbNodeAugmentation update "
+                            + "data store must provide the parent node update. This condition should not occure "
+                            + "with the existing models define in southbound plugin." );
+                    continue;
+                }
+                LOG.debug("Process ovsdb conenction  {} related update on Node : {}",
+                        updatedOvsdbNode.getValue(),parentNode);
+
+                ovsdbUpdate(parentNode, updatedOvsdbNode.getValue(),
+                        OvsdbInventoryListener.OvsdbType.OPENVSWITCH, Action.UPDATE);
+            }
+        }
     }
 
     private void processOpenflowConnections(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
@@ -242,14 +268,15 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
         for(Map.Entry<InstanceIdentifier<?>, DataObject> updatedPort : changes.getUpdatedData().entrySet()){
             if(updatedPort.getKey() instanceof OvsdbTerminationPointAugmentation){
-                LOG.info("Processing port updates : {}",updatedPort);
-                // XXX (NOTE): Extract parent node data from originalData(), rather then extracting it from updatedData()
-                // because, extracting it from originalData() will give all the
+                LOG.info("Processing port update : {}",updatedPort);
+                // XXX (NOTE): Extract parent node data from originalData(), rather then extracting it from
+                // updatedData() because, extracting it from originalData() will give all the
                 // (existing data of parent node + old data of the OvsdbTerminationPointAugmentation).
                 // If we extract parent node data from updatedData, it will give us
-                // ( Node data + new OvsdbTermiantionPointAugmentation data). To determine the update in
-                // OvsdbTerminationPointAugmentation, we need to pass it's old and new values to ovsdbUpdate.
-                // We anyways pass new data of OvsdbTerminationPointAugmentation to ovsdbUpdate.
+                // ( Node data + new OvsdbTerminationPointAugmentation data). To determine the update in
+                // OvsdbTerminationPointAugmentation, we need to compare it's old and new values, so parent
+                // node data from originalData will contain old value and OvsdbTerminationPointAugmentation
+                // from updateData() will provide new data.
                 Node tpParentNode  = getNode(changes.getOriginalData(),updatedPort);
                 if(tpParentNode == null){
                     // Logging this warning, to catch any change in southbound plugin's behavior.
@@ -260,7 +287,8 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                 }
 
                 LOG.debug("Process port's {} update on Node : {}", updatedPort.getValue(),tpParentNode);
-                ovsdbUpdate(tpParentNode, updatedPort.getValue(),OvsdbInventoryListener.OvsdbType.PORT, Action.UPDATE);
+                ovsdbUpdate(tpParentNode, updatedPort.getValue(),
+                        OvsdbInventoryListener.OvsdbType.PORT, Action.UPDATE);
             }
         }
     }
@@ -336,7 +364,8 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
         return (Node)changes.get(nodeInstanceIdentifier);
     }
 
-    private <T extends DataObject> T getDataChanges(Map<InstanceIdentifier<?>, DataObject> changes,InstanceIdentifier<T> path){
+    private <T extends DataObject> T getDataChanges(
+            Map<InstanceIdentifier<?>, DataObject> changes,InstanceIdentifier<T> path){
 
         for(Map.Entry<InstanceIdentifier<?>,DataObject> change : changes.entrySet()){
             if(change.getKey().getTargetType().equals(path.getTargetType())){
@@ -348,7 +377,9 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
         return null;
     }
 
-    private void ovsdbUpdate(Node node, DataObject resourceAugmentationDataChanges, OvsdbInventoryListener.OvsdbType ovsdbType, Action action) {
+    private void ovsdbUpdate(Node node, DataObject resourceAugmentationDataChanges,
+            OvsdbInventoryListener.OvsdbType ovsdbType, Action action) {
+
         Set<OvsdbInventoryListener> mdsalConsumerListeners = OvsdbInventoryServiceImpl.getMdsalConsumerListeners();
         for (OvsdbInventoryListener mdsalConsumerListener : mdsalConsumerListeners) {
             mdsalConsumerListener.ovsdbUpdate(node, resourceAugmentationDataChanges, ovsdbType, action);

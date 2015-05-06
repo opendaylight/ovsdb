@@ -71,6 +71,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
         LOG.info(">>>>> onDataChanged: {}", changes);
 
         processOvsdbConnections(changes);
+        processOvsdbDisconnect(changes);
         processOpenflowConnections(changes);
         processBridgeCreation(changes);
         processBridgeDeletion(changes);
@@ -89,6 +90,32 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                 Node ovsdbNode = getNode(changes.getCreatedData(), created);
                 LOG.info("ovsdbNode: {}", ovsdbNode);
                 ovsdbUpdate(ovsdbNode, created.getValue(), OvsdbInventoryListener.OvsdbType.NODE, Action.ADD);
+            }
+        }
+    }
+
+    private void processOvsdbDisconnect(
+            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
+        LOG.info("processOvsdbDisconnect - Received changes : {}", changes);
+
+        for(InstanceIdentifier<?> removedOvsdbNode : changes.getRemovedPaths()) {
+            if(removedOvsdbNode.getTargetType().equals(OvsdbNodeAugmentation.class)){
+                //Get top node to get details of all the bridge/termination point augmentation
+                // in case we want to do any cleanup task while processing node disconnection
+                Node parentNode = getNode(changes.getOriginalData(), removedOvsdbNode);
+                if(parentNode == null){
+                    //Throwing this warning in case behavior of southbound plugin changes.
+                    LOG.warn("OvsdbNode's {} parent node details are not present in original data, it should not happen", parentNode);
+                    continue;
+                }
+                //Fetch data of removed connection info from original data
+                @SuppressWarnings("unchecked")
+                OvsdbNodeAugmentation removedOvsdbNodeAugmentationData = getDataChanges(changes.getOriginalData(),
+                        (InstanceIdentifier<OvsdbNodeAugmentation>)removedOvsdbNode);
+
+                LOG.debug("Process ovsdb node delete : {} ", removedOvsdbNode);
+                //Assuming Openvswitch type represent the ovsdb node connection and not OvsdbType.NODE
+                ovsdbUpdate(parentNode, removedOvsdbNodeAugmentationData, OvsdbInventoryListener.OvsdbType.OPENVSWITCH, Action.DELETE);
             }
         }
     }

@@ -218,6 +218,27 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
     }
 
+    private void processBridgeCreation(
+            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
+        LOG.info("processBridgeCreation - Received changes : {}", changes);
+        for(Map.Entry<InstanceIdentifier<?>, DataObject> newBridge : changes.getCreatedData().entrySet()){
+            if(newBridge.getKey() instanceof OvsdbBridgeAugmentation){
+                LOG.info("Processing creation of new bridge : {}",newBridge);
+                //Bridge augmentation happens directly on the Node so Node details should also existing in created data.
+                Node bridgeParentNode  = getNode(changes.getCreatedData(),newBridge);
+                if(bridgeParentNode == null){
+                    // Logging this warning, to catch any change in southbound plugin behavior
+                    LOG.warn("Parent Node for bridge is not found. Bridge creation must provide the Node details in create Data Changes. "
+                            + "This condition should not occure" );
+                    continue;
+                }
+
+                LOG.debug("Process new bridge {} creation on Node : {}", newBridge.getValue(),bridgeParentNode);
+                ovsdbUpdate(bridgeParentNode, newBridge.getValue(),OvsdbInventoryListener.OvsdbType.BRIDGE, Action.ADD);
+            }
+        }
+    }
+
     private void processBridgeUpdate(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
         // TODO Auto-generated method stub
@@ -229,13 +250,6 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
         // TODO Auto-generated method stub
 
     }
-
-    private void processBridgeCreation(
-            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        // TODO Auto-generated method stub
-
-    }
-
 
     //TODO: Will remove it if not needed
     private Node getNodeFromCreatedData(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,

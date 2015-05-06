@@ -61,11 +61,6 @@ public interface TenantNetworkManager {
     public String getNetworkId (String segmentationId);
 
     /**
-     * Get the {@link org.opendaylight.neutron.spi.NeutronNetwork} for a given Interface
-     */
-    public NeutronNetwork getTenantNetwork(Interface intf);
-
-    /**
      * Network Created Callback
      */
     public int networkCreated (Node node, String networkId);

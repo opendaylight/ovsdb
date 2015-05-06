@@ -21,11 +21,8 @@ import org.opendaylight.neutron.spi.NeutronRouter;
 import org.opendaylight.neutron.spi.NeutronRouter_Interface;
 import org.opendaylight.neutron.spi.NeutronSubnet;
 import org.opendaylight.neutron.spi.Neutron_IPs;
-import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.openstack.netvirt.api.*;
-import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
-import org.opendaylight.ovsdb.utils.mdsal.node.StringConvertor;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
@@ -56,10 +53,7 @@ public class NeutronL3Adapter {
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile ConfigurationService configurationService;
     private volatile TenantNetworkManager tenantNetworkManager;
-    /* TODO SB_MIGRATION */
-    private volatile OvsdbConfigurationService ovsdbConfigurationService;
     private volatile OvsdbConnectionService connectionService;
-    //private volatile OvsdbInventoryService mdsalConsumer;
     private volatile INeutronNetworkCRUD neutronNetworkCache;
     private volatile INeutronSubnetCRUD neutronSubnetCache;
     private volatile INeutronPortCRUD neutronPortCache;
@@ -252,10 +246,7 @@ public class NeutronL3Adapter {
         }
 
         final Action action = isDelete ? Action.DELETE : Action.ADD;
-        /* TODO SB_MIGRATION
-        List<Node> nodes = connectionService.getNodes();
-        */
-        List<Node> nodes = new ArrayList<>(); // TODO SB_MIGRATION
+        List<Node> nodes = connectionService.getBridgeNodes();
         if (nodes.isEmpty()) {
             logger.trace("updateL3ForNeutronPort has no nodes to work with");
         }
@@ -378,9 +369,7 @@ public class NeutronL3Adapter {
             subnetIdToRouterInterfaceCache.put(subnet.getSubnetUUID(), destNeutronRouterInterface);
         }
 
-        /* TODO SB_MIGRATION
-        List<Node> nodes = connectionService.getNodes();*/
-        List<Node> nodes = new ArrayList<>(); // TODO SB_MIGRATION
+        List<Node> nodes = connectionService.getBridgeNodes();
         if (nodes.isEmpty()) {
             logger.trace("programFlowsForNeutronRouterInterface has no nodes to work with");
         }
@@ -809,9 +798,7 @@ public class NeutronL3Adapter {
         }
 
         final Action action = isDelete ? Action.DELETE : Action.ADD;
-        /* TODO SB_MIGRATION
-        List<Node> nodes = connectionService.getNodes();*/
-        List<Node> nodes = new ArrayList<>(); // TODO SB_MIGRATION
+        List<Node> nodes = connectionService.getBridgeNodes();
         if (nodes.isEmpty()) {
             logger.trace("programFlowsForFloatingIP has no nodes to work with");
         }
@@ -919,10 +906,6 @@ public class NeutronL3Adapter {
         return status;
     }
 
-    //
-    // More Internals
-    //
-
     private int getMaskLenFromCidr(String cidr) {
         if (cidr == null) return 0;
         String[] splits = cidr.split("/");
@@ -939,45 +922,10 @@ public class NeutronL3Adapter {
         return result;
     }
 
-    private Long getDpid (Node node) {
+    private Long getDpid(Node node) {
         /* TODO SB_MIGRATION */
-        Preconditions.checkNotNull(ovsdbConfigurationService);
-
-        String bridgeName = configurationService.getIntegrationBridgeName();
-        String bridgeUuid = this.getInternalBridgeUUID(node, bridgeName);
-        if (bridgeUuid == null) {
-            logger.error("Unable to spot Bridge Identifier for {} in {}", bridgeName, node);
-            return 0L;
-        }
-
-        try {
-            Row bridgeRow =  ovsdbConfigurationService
-                    .getRow(node, ovsdbConfigurationService.getTableName(node, Bridge.class), bridgeUuid);
-            Bridge bridge = ovsdbConfigurationService.getTypedRow(node, Bridge.class, bridgeRow);
-            Set<String> dpids = bridge.getDatapathIdColumn().getData();
-            if (dpids == null || dpids.size() == 0) return 0L;
-            return StringConvertor.dpidStringToLong((String) dpids.toArray()[0]);
-        } catch (Exception e) {
-            logger.error("Error finding Bridge's OF DPID", e);
-            return 0L;
-        }
-    }
-
-    private String getInternalBridgeUUID (Node node, String bridgeName) {
-        /* TODO SB_MIGRATION */
-        Preconditions.checkNotNull(ovsdbConfigurationService);
-        try {
-            Map<String, Row> bridgeTable =
-                    ovsdbConfigurationService.getRows(node,
-                                                      ovsdbConfigurationService.getTableName(node, Bridge.class));
-            if (bridgeTable == null) return null;
-            for (String key : bridgeTable.keySet()) {
-                Bridge bridge = ovsdbConfigurationService.getTypedRow(node, Bridge.class, bridgeTable.get(key));
-                if (bridge.getName().equals(bridgeName)) return key;
-            }
-        } catch (Exception e) {
-            logger.error("Error getting Bridge Identifier for {} / {}", node, bridgeName, e);
-        }
-        return null;
+        // may need to go from OvsdbNode to BridgeNode
+        // get integration bridge on this node and then get dpid
+        return MdsalUtils.getDataPathId(node);
     }
 }

@@ -20,11 +20,8 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConnectionService;
-import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.utils.mdsal.node.StringConvertor;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
@@ -69,11 +66,10 @@ public abstract class AbstractServiceInstance {
     // OSGi Services that we are dependent on.
     /* TODO SB_MIGRATION */
     private volatile OvsdbConnectionService connectionService;
-    private volatile OvsdbConfigurationService ovsdbConfigService;
     private volatile MdsalConsumer mdsalConsumer;
     private volatile PipelineOrchestrator orchestrator;
 
-    // Concrete Service that this AbstractServiceInstance represent
+    // Concrete Service that this AbstractServiceInstance represents
     private Service service;
 
     public AbstractServiceInstance (Service service) {
@@ -81,7 +77,7 @@ public abstract class AbstractServiceInstance {
     }
 
     void init() {
-        logger.info(">>>>> init {}", this.getClass());
+        logger.info(">>>>> init service: {}", this.getClass());
     }
 
     private String getBridgeName(Node node) {

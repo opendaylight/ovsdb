@@ -10,15 +10,18 @@ package org.opendaylight.ovsdb.openstack.netvirt.impl;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.util.concurrent.CheckedFuture;
+import java.math.BigInteger;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
@@ -36,6 +39,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
@@ -176,6 +180,17 @@ public class MdsalUtils {
         return value;
     }
 
+    public static String getOpenVSwitchExternalIdsValue(OvsdbNodeAugmentation ovsdbNodeAugmentation, String key) {
+        String value = null;
+        List<OpenvswitchExternalIds> pairs = ovsdbNodeAugmentation.getOpenvswitchExternalIds();
+        for (OpenvswitchExternalIds pair : pairs) {
+            if (pair.getKey().equals(key)) {
+                value = pair.getExternalIdValue();
+            }
+        }
+        return value;
+    }
+
     public static String getInterfaceExternalIdsValue(OvsdbTerminationPointAugmentation terminationPointAugmentation,
                                                       String key) {
         String value = null;
@@ -197,7 +212,7 @@ public class MdsalUtils {
         return connectionInfo;
     }
 
-    public static OvsdbBridgeAugmentation getBridge(Node node, String name) {
+    public static OvsdbBridgeAugmentation readBridge(Node node, String name) {
         OvsdbBridgeAugmentation ovsdbBridgeAugmentation = null;
         ConnectionInfo connectionInfo = getConnectionInfo(node);
         if (connectionInfo != null) {
@@ -214,7 +229,7 @@ public class MdsalUtils {
 
     public static Uuid getBridgeUuid(Node node, String name) {
         Uuid uuid = null;
-        OvsdbBridgeAugmentation ovsdbBridgeAugmentation = getBridge(node, name);
+        OvsdbBridgeAugmentation ovsdbBridgeAugmentation = readBridge(node, name);
         if (ovsdbBridgeAugmentation != null) {
             uuid = ovsdbBridgeAugmentation.getBridgeUuid();
         }
@@ -335,6 +350,15 @@ public class MdsalUtils {
         return datapathId;
     }
 
+    public static long getDataPathId(Node node) {
+        long dpid = 0L;
+        String datapathId = getDatapathId(node);
+        if (datapathId != null) {
+            dpid = new BigInteger(datapathId.replaceAll(":", ""), 16).longValue();
+        }
+        return dpid;
+    }
+
     public static String getDatapathId(OvsdbBridgeAugmentation ovsdbBridgeAugmentation) {
         String datapathId = null;
         if (ovsdbBridgeAugmentation != null && ovsdbBridgeAugmentation.getDatapathId() != null) {
@@ -343,11 +367,21 @@ public class MdsalUtils {
         return datapathId;
     }
 
+    public static OvsdbBridgeAugmentation getBridge(Node node, String name) {
+        OvsdbBridgeAugmentation bridge = node.getAugmentation(OvsdbBridgeAugmentation.class);
+        if (bridge != null) {
+            if (!bridge.getBridgeName().equals(name)) {
+                bridge = null;
+            }
+        }
+        return bridge;
+    }
+
     public static String getBridgeName(Node node) {
         return (node.getAugmentation(OvsdbBridgeAugmentation.class).getBridgeName().getValue());
     }
 
-    public static OvsdbBridgeAugmentation getBridge(Node node) {
+    public static OvsdbBridgeAugmentation readBridge(Node node) {
         return (node.getAugmentation(OvsdbBridgeAugmentation.class));
     }
 
@@ -364,6 +398,11 @@ public class MdsalUtils {
     }
 
     public static Boolean addPort(Node node, String bridgeName, String portName) {
+        return false;
+    }
+
+    public static Boolean addTunnelPort(Node node, String bridgeName, String portName, String type,
+                                        Map<String, String> options) {
         return false;
     }
 
@@ -385,5 +424,22 @@ public class MdsalUtils {
 
     public static boolean addVlanToTp(long vlan) {
         return false;
+    }
+
+    public static boolean isTunnel(OvsdbTerminationPointAugmentation port) {
+        return SouthboundMapper.createOvsdbInterfaceType(
+                port.getInterfaceType()).equals(NetworkHandler.NETWORK_TYPE_VXLAN)
+                || SouthboundMapper.createOvsdbInterfaceType(
+                port.getInterfaceType()).equals(NetworkHandler.NETWORK_TYPE_GRE);
+    }
+
+    public static String getNodeUUID(Node node) {
+        String nodeUUID = null;
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = node.getAugmentation(OvsdbNodeAugmentation.class);
+        if (ovsdbNodeAugmentation != null) {
+            // TODO replace with proper uuid and not the system-id
+            nodeUUID = getOpenVSwitchExternalIdsValue(ovsdbNodeAugmentation, "system-id");
+        }
+        return nodeUUID;
     }
 }

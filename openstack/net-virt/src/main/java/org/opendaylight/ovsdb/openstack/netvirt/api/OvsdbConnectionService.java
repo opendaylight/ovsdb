@@ -10,6 +10,8 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 public interface OvsdbConnectionService {
     public Connection getConnection(Node node);
     public List<Node> getNodes();
+    public List<Node> getOvsdbNodes();
+    public List<Node> getBridgeNodes();
     public Node getNode(String identifier);
     public Node connect(String identifier, Map<ConnectionConstants, String> params);
 }

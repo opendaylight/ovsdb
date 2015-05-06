@@ -45,7 +45,6 @@ import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 /* TODO SB_MIGRATION */
-//import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 //import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
@@ -75,7 +74,6 @@ public class AbstractServiceInstanceTest {
     @InjectMocks AbstractServiceInstance abstractServiceInstance = mock(AbstractServiceInstance.class, Mockito.CALLS_REAL_METHODS);
 
     /* TODO SB_MIGRATION */
-    //@Mock private OvsdbConfigurationService ovsdbConfigService;
     //@Mock private OvsdbConnectionService connectionService;
     @Mock private PipelineOrchestrator orchestrator;
     @Mock private MdsalConsumer mdsalConsumer;

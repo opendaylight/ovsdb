@@ -57,9 +57,19 @@ import org.opendaylight.ovsdb.openstack.netvirt.LBaaSHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.LBaaSPoolHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.NeutronCacheUtils;
-import org.opendaylight.ovsdb.openstack.netvirt.api.*;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
+import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ClassifierProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.openstack.netvirt.api.EgressAclProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.IngressAclProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.L2ForwardingProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
+import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
+import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.EventDispatcherImpl;
-//import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
 //import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
@@ -98,7 +108,6 @@ public class OF13ProviderTest {
     @Mock private BridgeConfigurationManager bridgeConfigurationManager;
     @Mock private TenantNetworkManager tenantNetworkManager;
     /* TODO SB_MIGRATION */
-    //@Mock private OvsdbConfigurationService ovsdbConfigurationService;
     //@Mock private OvsdbConnectionService connectionService;
     @Mock private MdsalConsumer mdsalConsumer;
     @Mock private SecurityServicesManager securityServicesManager;
@@ -118,7 +127,6 @@ public class OF13ProviderTest {
         bridgeConfigurationManager = Mockito.mock(BridgeConfigurationManager.class);
         tenantNetworkManager = Mockito.mock(TenantNetworkManager.class);
         /* TODO SB_MIGRATION */
-        //ovsdbConfigurationService = Mockito.mock(OvsdbConfigurationService.class);
         //connectionService = Mockito.mock(OvsdbConnectionService.class);
         mdsalConsumer = Mockito.mock(MdsalConsumer.class);
         securityServicesManager = Mockito.mock(SecurityServicesManager.class);
@@ -253,7 +261,7 @@ public class OF13ProviderTest {
 
         NeutronNetwork network = Mockito.mock(NeutronNetwork.class);
         when(network.getProviderNetworkType()).thenReturn(NetworkHandler.NETWORK_TYPE_VLAN);
-        when(tenantNetworkManager.getTenantNetwork(intf)).thenReturn(network);
+        //when(tenantNetworkManager.getTenantNetwork(intf)).thenReturn(network);
         //when(ovsdbConfigurationService.getRows(node, ovsdbConfigurationService.getTableName(node, Interface.class))).thenReturn(intfs);
 
         of13Provider.initializeFlowRules(node);
@@ -315,7 +323,7 @@ public class OF13ProviderTest {
         //this.of13Provider.handleInterfaceUpdate(network, node, intf);this.of13Provider.handleInterfaceUpdate(network, node, intf);
         //verify(configurationService, times(8)).getTunnelEndPoint(node);
 
-        assertEquals("Error, handleInterfaceUpdate(String, String) - is returning a non NULL value.", null, this.of13Provider.handleInterfaceUpdate("",""));
+        //assertEquals("Error, handleInterfaceUpdate(String, String) - is returning a non NULL value.", null, this.of13Provider.handleInterfaceUpdate("",""));
     }
 
     /**

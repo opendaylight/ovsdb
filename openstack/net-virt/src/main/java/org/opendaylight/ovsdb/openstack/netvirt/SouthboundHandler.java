@@ -36,12 +36,15 @@ public class SouthboundHandler extends AbstractHandler
     private volatile BridgeConfigurationManager bridgeConfigurationManager;
     private volatile TenantNetworkManager tenantNetworkManager;
     private volatile NetworkingProviderManager networkingProviderManager;
-    private volatile OvsdbConfigurationService ovsdbConfigurationService;
     private volatile OvsdbConnectionService connectionService;
     private volatile NeutronL3Adapter neutronL3Adapter;
 
     void start() {
         this.triggerUpdates();
+    }
+
+    void init() {
+        logger.info(">>>>>> init {}", this.getClass());
     }
 
     private SouthboundEvent.Type ovsdbTypeToSouthboundEventType(OvsdbType ovsdbType) {
@@ -305,7 +308,7 @@ public class SouthboundHandler extends AbstractHandler
     }
 
     private void processBridgeUpdate(Node node, Action action) {
-        OvsdbBridgeAugmentation bridge = MdsalUtils.getBridge(node);
+        OvsdbBridgeAugmentation bridge = MdsalUtils.readBridge(node);
         switch (action) {
             case ADD:
             case UPDATE:

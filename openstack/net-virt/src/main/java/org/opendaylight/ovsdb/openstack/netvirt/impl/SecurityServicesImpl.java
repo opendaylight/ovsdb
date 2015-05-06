@@ -26,7 +26,8 @@ public class SecurityServicesImpl implements SecurityServicesManager {
     static final Logger logger = LoggerFactory.getLogger(TenantNetworkManagerImpl.class);
     private volatile INeutronPortCRUD neutronPortService;
 
-    public SecurityServicesImpl() {
+    void init() {
+        logger.info(">>>>>> init {}", this.getClass());
     }
 
     /**

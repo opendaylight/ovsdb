@@ -13,39 +13,26 @@ import org.opendaylight.neutron.spi.INeutronNetworkCRUD;
 import org.opendaylight.neutron.spi.INeutronPortCRUD;
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.neutron.spi.NeutronPort;
-import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
-import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryService;
-import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConfigurationService;
-import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
-import org.opendaylight.ovsdb.schema.openvswitch.Interface;
-import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
-import com.google.common.base.Preconditions;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.Map;
 
 public class TenantNetworkManagerImpl implements TenantNetworkManager {
     static final Logger logger = LoggerFactory.getLogger(TenantNetworkManagerImpl.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
-    /* TODO SB_MIGRATION */
-    private volatile OvsdbConfigurationService ovsdbConfigurationService;
-    //private volatile OvsdbConnectionService connectionService;
-    //private volatile OvsdbInventoryService mdsalConsumer;
     private volatile INeutronNetworkCRUD neutronNetworkCache;
     private volatile INeutronPortCRUD neutronPortCache;
     private volatile VlanConfigurationCache vlanConfigurationCache;
 
-    public TenantNetworkManagerImpl() {
+    void init() {
+        logger.info(">>>>>> init {}", this.getClass());
     }
 
     @Override
@@ -67,9 +54,6 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
 
     @Override
     public void programInternalVlan(Node node, OvsdbTerminationPointAugmentation tp, NeutronNetwork network) {
-        /* TODO SB_MIGRATION */
-        Preconditions.checkNotNull(ovsdbConfigurationService);
-
         int vlan = vlanConfigurationCache.getInternalVlan(node, network.getID());
         logger.debug("Programming Vlan {} on {}", vlan, tp);
         if (vlan <= 0) {
@@ -82,9 +66,6 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
 
     @Override
     public boolean isTenantNetworkPresentInNode(Node node, String segmentationId) {
-        /* TODO SB_MIGRATION */
-        Preconditions.checkNotNull(ovsdbConfigurationService);
-
         String networkId = this.getNetworkId(segmentationId);
         if (networkId == null) {
             logger.debug("Tenant Network not found with Segmenation-id {}",segmentationId);
@@ -92,43 +73,15 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
         }
 
         try {
-            /* TODO SB_MIGRATION this code was already commented out
-            // Vlan Tag based identification
-            Map<String, Row> portTable = ovsdbConfigService.getRows(node, Port.NAME.getName());
-            if (portTable == null) {
-                logger.debug("Port table is null for Node {} ", node);
-                return false;
-            }
-
-            for (Row row : portTable.values()) {
-                Port port = (Port)row;
-                Set<BigInteger> tags = port.getTag();
-                if (tags.contains(internalVlan)) {
-                    logger.debug("Tenant Network {} with Segmenation-id {} is present in Node {} / Port {}",
-                                  networkId, segmentationId, node, port);
+            List<OvsdbTerminationPointAugmentation> ports = MdsalUtils.getPorts(node);
+            for (OvsdbTerminationPointAugmentation port : ports) {
+                String ifaceId = MdsalUtils.getInterfaceExternalIdsValue(port, Constants.EXTERNAL_ID_INTERFACE_ID);
+                if (ifaceId != null && isInterfacePresentInTenantNetwork(ifaceId, networkId)) {
+                    logger.debug("Tenant Network {} with Segmentation-id {} is present in Node {} / Interface {}",
+                            networkId, segmentationId, node, port);
                     return true;
                 }
             }
-             */ //TODO SB_MIGRATION this code was already commented out
-            // External-id based more accurate VM Location identification
-            Map<String, Row> ifTable = ovsdbConfigurationService.getRows(node, ovsdbConfigurationService.getTableName(node, Interface.class));
-            if (ifTable == null) {
-                logger.debug("Interface table is null for Node {} ", node);
-                return false;
-            }
-
-            for (Row row : ifTable.values()) {
-                Interface intf = ovsdbConfigurationService.getTypedRow(node, Interface.class, row);
-                Map<String, String> externalIds = intf.getExternalIdsColumn().getData();
-                if (externalIds != null && externalIds.get(Constants.EXTERNAL_ID_INTERFACE_ID) != null) {
-                    if (this.isInterfacePresentInTenantNetwork(externalIds.get(Constants.EXTERNAL_ID_INTERFACE_ID), networkId)) {
-                        logger.debug("Tenant Network {} with Segmentation-id {} is present in Node {} / Interface {}",
-                                      networkId, segmentationId, node, intf);
-                        return true;
-                    }
-                }
-            }
-
         } catch (Exception e) {
             logger.error("Error while trying to determine if network is present on node", e);
             return false;
@@ -147,23 +100,6 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
             if (network.getProviderSegmentationID().equalsIgnoreCase(segmentationId)) return network.getNetworkUUID();
         }
         return null;
-    }
-
-    @Override
-    public NeutronNetwork getTenantNetwork(Interface intf) {
-        logger.trace("getTenantNetwork for {}", intf);
-        if (intf == null) return null;
-        Map<String, String> externalIds = intf.getExternalIdsColumn().getData();
-        logger.trace("externalIds {}", externalIds);
-        if (externalIds == null) return null;
-        String neutronPortId = externalIds.get(Constants.EXTERNAL_ID_INTERFACE_ID);
-        if (neutronPortId == null) return null;
-        NeutronPort neutronPort = neutronPortCache.getPort(neutronPortId);
-        logger.trace("neutronPort {}", neutronPort);
-        if (neutronPort == null) return null;
-        NeutronNetwork neutronNetwork = neutronNetworkCache.getNetwork(neutronPort.getNetworkUUID());
-        logger.debug("{} mapped to {}", intf, neutronNetwork);
-        return neutronNetwork;
     }
 
     @Override
@@ -214,12 +150,11 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
 
     @Override
     public void networkDeleted(String id) {
-        //ToDo: Delete? This method does nothing how we dropped container support...
+        //ToDo: Delete? This method does nothing since container support was dropped...
     }
 
     private boolean isInterfacePresentInTenantNetwork (String portId, String networkId) {
         NeutronPort neutronPort = neutronPortCache.getPort(portId);
         return neutronPort != null && neutronPort.getNetworkUUID().equalsIgnoreCase(networkId);
     }
-
 }

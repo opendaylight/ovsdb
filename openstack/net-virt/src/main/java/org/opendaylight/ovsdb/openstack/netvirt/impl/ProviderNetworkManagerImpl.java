@@ -31,7 +31,7 @@ public class ProviderNetworkManagerImpl implements NetworkingProviderManager {
     private HashMap<Node, NetworkingProvider> nodeToProviderMapping = Maps.newHashMap();
 
     public void init() {
-        logger.info(">>>>> init ProviderNetworkManagerImpl");
+        logger.info(">>>>>> init ProviderNetworkManagerImpl");
     }
 
     @Override
@@ -64,11 +64,14 @@ public class ProviderNetworkManagerImpl implements NetworkingProviderManager {
     public void providerAdded(final ServiceReference ref, final NetworkingProvider provider){
         Map <String, String> properties = Maps.newHashMap();
         Long pid = (Long) ref.getProperty(org.osgi.framework.Constants.SERVICE_ID);
-        properties.put(Constants.SOUTHBOUND_PROTOCOL_PROPERTY, (String) ref.getProperty(Constants.SOUTHBOUND_PROTOCOL_PROPERTY));
-        properties.put(Constants.OPENFLOW_VERSION_PROPERTY, (String) ref.getProperty(Constants.OPENFLOW_VERSION_PROPERTY));
+        properties.put(Constants.SOUTHBOUND_PROTOCOL_PROPERTY,
+                (String) ref.getProperty(Constants.SOUTHBOUND_PROTOCOL_PROPERTY));
+        properties.put(Constants.OPENFLOW_VERSION_PROPERTY,
+                (String) ref.getProperty(Constants.OPENFLOW_VERSION_PROPERTY));
         properties.put(Constants.PROVIDER_TYPE_PROPERTY, (String) ref.getProperty(Constants.PROVIDER_TYPE_PROPERTY));
         providers.put(pid, new ProviderEntry(provider, properties));
-        logger.info("Neutron Networking Provider Registered: {}, with {} and pid={}", provider.getClass().getName(), properties.toString(), pid);
+        logger.info("Neutron Networking Provider Registered: {}, with {} and pid={}",
+                provider.getClass().getName(), properties.toString(), pid);
     }
 
     public void providerRemoved(final ServiceReference ref){

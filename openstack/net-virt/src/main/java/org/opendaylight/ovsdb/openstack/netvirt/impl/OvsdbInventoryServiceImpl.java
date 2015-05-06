@@ -12,28 +12,17 @@ import java.net.InetAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutionException;
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 //import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
-import org.opendaylight.ovsdb.lib.notation.Row;
-import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Connection;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConnectionConstants;
-import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryListener;
-import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbPluginException;
-import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
-import org.opendaylight.ovsdb.openstack.netvirt.api.StatusWithUuid;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * @author Sam Hague (shague@redhat.com)
  */
 public class OvsdbInventoryServiceImpl implements BindingAwareConsumer,
-        OvsdbConfigurationService, OvsdbConnectionService, OvsdbInventoryService {
+        OvsdbConnectionService, OvsdbInventoryService {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbInventoryServiceImpl.class);
     private static DataBroker dataBroker = null;
 
@@ -110,80 +99,8 @@ public class OvsdbInventoryServiceImpl implements BindingAwareConsumer,
         return null;
     }
 
-    // get vlan and network id
-
     public static Set<OvsdbInventoryListener> getMdsalConsumerListeners () {
         return mdsalConsumerListeners;
-    }
-
-    @Override
-    public StatusWithUuid insertRow(Node node, String tableName, String parentUuid, Row<GenericTableSchema> row) {
-        return null;
-    }
-
-    @Override
-    public Status updateRow(Node node, String tableName, String parentUuid, String rowUuid, Row row) {
-        return null;
-    }
-
-    @Override
-    public Status deleteRow(Node node, String tableName, String rowUuid) {
-        return null;
-    }
-
-    @Override
-    public Row getRow(Node node, String tableName, String uuid) {
-        return null;
-    }
-
-    @Override
-    public Row<GenericTableSchema> getRow(Node node, String databaseName, String tableName, UUID uuid) throws OvsdbPluginException {
-        return null;
-    }
-
-    @Override
-    public ConcurrentMap<String, Row> getRows(Node node, String tableName) {
-        return null;
-    }
-
-    @Override
-    public ConcurrentMap<UUID, Row<GenericTableSchema>> getRows(Node node, String databaseName, String tableName) throws OvsdbPluginException {
-        return null;
-    }
-
-    @Override
-    public ConcurrentMap<UUID, Row<GenericTableSchema>> getRows(Node node, String databaseName, String tableName, String fiqlQuery) throws OvsdbPluginException {
-        return null;
-    }
-
-    @Override
-    public List<String> getTables(Node node) {
-        return null;
-    }
-
-    @Override
-    public Boolean setOFController(Node node, String bridgeUUID) throws InterruptedException, ExecutionException {
-        return null;
-    }
-
-    @Override
-    public <T extends TypedBaseTable<?>> String getTableName(Node node, Class<T> typedClass) {
-        return null;
-    }
-
-    @Override
-    public <T extends TypedBaseTable<?>> T getTypedRow(Node node, Class<T> typedClass, Row row) {
-        return null;
-    }
-
-    @Override
-    public <T extends TypedBaseTable<?>> T createTypedRow(Node node, Class<T> typedClass) {
-        return null;
-    }
-
-    @Override
-    public ConcurrentMap<String, OvsdbTerminationPointAugmentation> getInterfaces(Node node) {
-        return null;
     }
 
     @Override
@@ -193,6 +110,16 @@ public class OvsdbInventoryServiceImpl implements BindingAwareConsumer,
 
     @Override
     public List<Node> getNodes() {
+        return null;
+    }
+
+    @Override
+    public List<Node> getOvsdbNodes() {
+        return null;
+    }
+
+    @Override
+    public List<Node> getBridgeNodes() {
         return null;
     }
 

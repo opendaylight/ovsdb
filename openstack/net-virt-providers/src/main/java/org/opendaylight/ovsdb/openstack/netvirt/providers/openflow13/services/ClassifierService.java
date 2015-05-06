@@ -61,10 +61,6 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
 
     private static final Logger logger = LoggerFactory.getLogger(ClassifierService.class);
 
-    public void init() {
-        logger.info(">>>>> init ClassifierService");
-    }
-
     /*
      * (Table:Classifier) Egress VM Traffic Towards TEP
      * Match: Destination Ethernet Addr and OpenFlow InPort

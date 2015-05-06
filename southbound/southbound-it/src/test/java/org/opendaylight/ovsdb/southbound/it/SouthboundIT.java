@@ -558,6 +558,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             }
         }
         Assert.assertTrue(deleteBridge(connectionInfo));
+        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
 
     @Test
@@ -599,6 +600,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             }
         }
         Assert.assertTrue(deleteBridge(connectionInfo));
+        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
 
     @Test
@@ -643,6 +645,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             }
         }
         Assert.assertTrue(deleteBridge(connectionInfo));
+        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
 
     @Test
@@ -688,6 +691,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             }
         }
         Assert.assertTrue(deleteBridge(connectionInfo));
+        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
 
     @Test
@@ -733,6 +737,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             }
         }
         Assert.assertTrue(deleteBridge(connectionInfo));
+        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
 
     @Test
@@ -781,6 +786,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             }
         }
         Assert.assertTrue(deleteBridge(connectionInfo));
+        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
 
     @Test
@@ -826,6 +832,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             }
         }
         Assert.assertTrue(deleteBridge(connectionInfo));
+        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
 
     @Test
@@ -863,14 +870,15 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             }
         }
         Assert.assertTrue(deleteBridge(connectionInfo));
+        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
 
     @Test
     public void testTerminationPointVlanModes() throws InterruptedException {
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        connectOvsdbNode(connectionInfo);
         VlanMode []vlanModes = VlanMode.values();
         for (VlanMode vlanMode : vlanModes) {
-            ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
-            connectOvsdbNode(connectionInfo);
             Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
             OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
             Assert.assertNotNull(bridge);
@@ -898,6 +906,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             }
             Assert.assertTrue(deleteBridge(connectionInfo));
         }
+        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
 
     private ArrayList<Set<Integer>> generateVlanSets() {
@@ -939,12 +948,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     @Test
     public void testTerminationPointVlanTrunks() throws InterruptedException {
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        connectOvsdbNode(connectionInfo);
         ArrayList<Set<Integer>> vlanSets = generateVlanSets();
         int testCase = 0;
         for (Set<Integer> vlanSet : vlanSets) {
             ++testCase;
-            ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
-            connectOvsdbNode(connectionInfo);
             Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
             OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
             Assert.assertNotNull(bridge);
@@ -975,6 +984,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             }
             Assert.assertTrue(deleteBridge(connectionInfo));
         }
+        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
 
     @Test

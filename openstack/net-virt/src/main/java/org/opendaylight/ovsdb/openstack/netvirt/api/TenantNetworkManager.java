@@ -26,7 +26,7 @@ public interface TenantNetworkManager {
 
     /**
      * Get the VLAN assigned to the provided Network
-     * @param node the {Node} to query
+     * @param node the {@link Node} to query
      * @param networkId the Neutron Network ID
      * @return the assigned VLAN ID or 0 in case of an error
      */
@@ -34,14 +34,14 @@ public interface TenantNetworkManager {
 
     /**
      * Reclaim the assigned VLAN for the given Network
-     * @param node the {Node} to query
+     * @param node the {@link Node} to query
      * @param network the Neutron Network ID
      */
     public void reclaimInternalVlan(Node node, NeutronNetwork network);
 
     /**
      * Configures the VLAN for a Tenant Network
-     * @param node the {Node} to configure
+     * @param node the {@link Node} to configure
      * @param tp the termination point
      * @param network the Neutron Network ID
      */
@@ -49,7 +49,7 @@ public interface TenantNetworkManager {
 
     /**
      * Check is the given network is present on a Node
-     * @param node the {Node} to query
+     * @param node the {@link Node} to query
      * @param segmentationId the Neutron Segementation ID
      * @return True or False
      */

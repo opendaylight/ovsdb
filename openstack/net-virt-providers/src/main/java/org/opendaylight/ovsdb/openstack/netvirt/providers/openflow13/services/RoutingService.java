@@ -108,7 +108,7 @@ public class RoutingService extends AbstractServiceInstance implements RoutingPr
         flowBuilder.setMatch(matchBuilder.build());
         flowBuilder.setInstructions(isb.setInstruction(instructions).build());
 
-        String flowId = "Routing_" + prefixString;
+        String flowId = "Routing_" + sourceSegId + "_" + prefixString;
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setBarrier(true);

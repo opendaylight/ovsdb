@@ -306,7 +306,7 @@ public class InstructionUtils {
     }
 
     /**
-     * Create Set Vlan ID Instruction - This includes push vlan action, and set field -> vlan vid action
+     * Create Set Vlan ID Instruction - This includes push vlan action, and set field -&gt; vlan vid action
      *
      * @param ib     Map InstructionBuilder without any instructions
      * @param vlanId Integer representing a VLAN ID Integer representing a VLAN ID

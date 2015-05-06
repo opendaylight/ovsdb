@@ -13,7 +13,7 @@ package org.opendaylight.ovsdb.openstack.netvirt.api;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 /**
- * The NetworkingProviderManager handles the mapping between {@Node}
+ * The NetworkingProviderManager handles the mapping between {@link Node}
  * and registered {@link org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider} implementations
  */
 public interface NetworkingProviderManager {

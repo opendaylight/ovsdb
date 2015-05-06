@@ -134,7 +134,7 @@ public class ArpResponderService extends AbstractServiceInstance implements ArpP
         flowBuilder.setMatch(matchBuilder.build());
         flowBuilder.setInstructions(isb.setInstruction(instructions).build());
 
-        String flowId = "ArpResponder_" + ipAddress.getHostAddress();
+        String flowId = "ArpResponder_" + segmentationId + "_" + ipAddress.getHostAddress();
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setBarrier(true);

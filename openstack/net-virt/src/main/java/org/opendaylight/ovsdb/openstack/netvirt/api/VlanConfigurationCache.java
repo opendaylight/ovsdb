@@ -20,7 +20,7 @@ public interface VlanConfigurationCache {
 
     /**
      * Assigns a free VLAN ID for the given tenant network
-     * @param node an Open vSwitch {@link org.opendaylight.controller.sal.core.Node}
+     * @param node an Open vSwitch {@link Node}
      * @param networkId the Neutron Network ID
      * @return a VLAN ID or 0 in case of an error
      */
@@ -28,7 +28,7 @@ public interface VlanConfigurationCache {
 
     /**
      * Recovers an assigned VLAN ID when it is no longer required
-     * @param node an Open vSwitch {@link org.opendaylight.controller.sal.core.Node}
+     * @param node an Open vSwitch {@link Node}
      * @param networkId the Neutron Network ID
      * @return the reclaimed VLAN ID or 0 in case of an error
      */
@@ -36,7 +36,7 @@ public interface VlanConfigurationCache {
 
     /**
      * Returns a VLAN ID assigned to a given tenant network
-     * @param node an Open vSwitch {@link org.opendaylight.controller.sal.core.Node}
+     * @param node an Open vSwitch {@link Node}
      * @param networkId the Neutron Network ID
      * @return the VLAN ID or 0 in case of an error
      */

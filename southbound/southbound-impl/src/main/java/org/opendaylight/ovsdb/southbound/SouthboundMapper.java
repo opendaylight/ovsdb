@@ -350,13 +350,15 @@ public class SouthboundMapper {
         ConnectionInfoBuilder connectionInfoBuilder = new ConnectionInfoBuilder();
         connectionInfoBuilder.setRemoteIp(createIpAddress(client.getConnectionInfo().getRemoteAddress()));
         connectionInfoBuilder.setRemotePort(new PortNumber(client.getConnectionInfo().getRemotePort()));
+        connectionInfoBuilder.setLocalIp(createIpAddress(client.getConnectionInfo().getLocalAddress()));
+        connectionInfoBuilder.setLocalPort(new PortNumber(client.getConnectionInfo().getLocalPort()));
         return connectionInfoBuilder.build();
     }
 
-    public static ConnectionInfo createConnectionInfo(OvsdbNodeAugmentation ovsdbNodeAugmentation) {
+    public static ConnectionInfo suppressLocalIpPort(ConnectionInfo connectionInfo) {
         ConnectionInfoBuilder connectionInfoBuilder = new ConnectionInfoBuilder();
-        connectionInfoBuilder.setRemoteIp(ovsdbNodeAugmentation.getConnectionInfo().getRemoteIp());
-        connectionInfoBuilder.setRemotePort(ovsdbNodeAugmentation.getConnectionInfo().getRemotePort());
+        connectionInfoBuilder.setRemoteIp(connectionInfo.getRemoteIp());
+        connectionInfoBuilder.setRemotePort(connectionInfo.getRemotePort());
         return connectionInfoBuilder.build();
     }
 }

@@ -107,7 +107,7 @@ public class OvsdbNorthboundV2 {
      * @param nodeType type of node e.g OVS
      * @param nodeId ID of the node
      * @param tableName name of the OVSDB table
-     * @param row the {@link OvsdbRow} Row that is being inserted
+     * @param rowJson the {@link OvsdbRow} Row that is being inserted
      *
      * @return Response as dictated by the HTTP Response Status code
      *

@@ -317,8 +317,23 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
     private void processBridgeUpdate(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        // TODO Auto-generated method stub
-
+        LOG.info("processBridgeUpdate - Received changes : {}", changes);
+        
+        for (Map.Entry<InstanceIdentifier<?>, DataObject> updatedBridge : changes.getUpdatedData().entrySet()) {
+            if(updatedBridge.getKey() instanceof OvsdbBridgeAugmentation){
+                LOG.info("Processing update on a bridge : {}",updatedBridge);
+                Node bridgeParentNode  = getNode(changes.getUpdatedData(), updatedBridge);
+                if(bridgeParentNode == null){
+                    // Logging this warning, to catch any change in southbound plugin behavior
+                    LOG.warn("Parent Node for bridge is not found. Bridge creation must provide the Node "
+                            + "details in create Data Changes. This condition should not occure" );
+                    continue;
+                }
+                LOG.debug("Process bridge {} update on Node : {}", updatedBridge.getValue(),bridgeParentNode);
+                ovsdbUpdate(bridgeParentNode, updatedBridge.getValue(),
+                        OvsdbInventoryListener.OvsdbType.BRIDGE, Action.ADD);
+            }
+        }
     }
 
     private void processBridgeDeletion(

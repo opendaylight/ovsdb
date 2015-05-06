@@ -13,9 +13,8 @@ import org.opendaylight.neutron.spi.INeutronNetworkCRUD;
 import org.opendaylight.neutron.spi.INeutronPortCRUD;
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.neutron.spi.NeutronPort;
-import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
-import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
+import org.opendaylight.ovsdb.openstack.netvirt.api.*;
+import org.opendaylight.ovsdb.utils.servicehelper.*;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
@@ -105,7 +104,13 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
     @Override
     public NeutronNetwork getTenantNetwork(OvsdbTerminationPointAugmentation terminationPointAugmentation) {
         NeutronNetwork neutronNetwork = null;
-        logger.trace("getTenantNetwork for {}", terminationPointAugmentation.getName());
+        neutronPortCache = (INeutronPortCRUD) ServiceHelper.getGlobalInstance(INeutronPortCRUD.class, this);
+        neutronNetworkCache = (INeutronNetworkCRUD) ServiceHelper.getGlobalInstance(INeutronNetworkCRUD.class, this);
+        if (neutronPortCache == null || neutronNetworkCache == null) {
+            logger.error("neutron interfaces are null");
+            return neutronNetwork;
+        }
+        logger.debug("getTenantNetwork for {}", terminationPointAugmentation.getName());
         String neutronPortId = MdsalUtils.getInterfaceExternalIdsValue(terminationPointAugmentation,
                 Constants.EXTERNAL_ID_INTERFACE_ID);
         if (neutronPortId != null) {
@@ -120,7 +125,7 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
         if (neutronNetwork != null) {
             logger.debug("mapped to {}", neutronNetwork);
         } else {
-            logger.warn("getTenantPort did not find network for {}", terminationPointAugmentation.getName());
+            logger.warn("getTenantNetwork did not find network for {}", terminationPointAugmentation.getName());
         }
         return neutronNetwork;
     }
@@ -128,6 +133,11 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
     @Override
     public NeutronPort getTenantPort(OvsdbTerminationPointAugmentation terminationPointAugmentation) {
         NeutronPort neutronPort = null;
+        neutronPortCache = (INeutronPortCRUD) ServiceHelper.getGlobalInstance(INeutronPortCRUD.class, this);
+        if (neutronPortCache == null) {
+            logger.error("neutron port is null");
+            return neutronPort;
+        }
         logger.trace("getTenantPort for {}", terminationPointAugmentation.getName());
         String neutronPortId = MdsalUtils.getInterfaceExternalIdsValue(terminationPointAugmentation,
             Constants.EXTERNAL_ID_INTERFACE_ID);

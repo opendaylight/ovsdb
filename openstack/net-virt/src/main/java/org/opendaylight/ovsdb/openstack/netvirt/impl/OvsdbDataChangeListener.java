@@ -152,7 +152,8 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                 }
                 // This value is not being set right now - OvsdbBridgeUpdateCommand
                 //if (ovsdbBridgeAugmentation.getBridgeOpenflowNodeRef() != null) {
-                    nodeCacheManager = (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
+                    nodeCacheManager =
+                            (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
                     nodeCacheManager.nodeAdded(node);
                 //}
             }
@@ -175,8 +176,8 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                 }
                 // This value is not being set right now - OvsdbBridgeUpdateCommand
                 // if (ovsdbBridgeAugmentation.getBridgeOpenflowNodeRef() != null) {
-                    nodeCacheManager = (NodeCacheManager) ServiceHelper.getGlobalInstance(
-                            NodeCacheManager.class, this);
+                    nodeCacheManager =
+                            (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
                     nodeCacheManager.nodeAdded(node);
                 //}
             }

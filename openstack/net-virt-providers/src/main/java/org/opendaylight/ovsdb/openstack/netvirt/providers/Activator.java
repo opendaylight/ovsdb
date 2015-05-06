@@ -59,14 +59,15 @@ public class Activator extends DependencyActivatorBase {
                 .setInterface(NetworkingProvider.class.getName(), props1)
                 .setImplementation(OF13Provider.class)
                 .add(createServiceDependency().setService(ConfigurationService.class).setRequired(true))
-                //.add(createServiceDependency().setService(BridgeConfigurationManager.class).setRequired(true))
-                //.add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true)));
+                .add(createServiceDependency().setService(BridgeConfigurationManager.class).setRequired(true))
+                .add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true))
                 //.add(createServiceDependency().setService(SecurityServicesManager.class).setRequired(true))
                 //.add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
-                //.add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true))
+                .add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true))
                 .add(createServiceDependency().setService(ClassifierProvider.class).setRequired(true))
                 .add(createServiceDependency().setService(IngressAclProvider.class).setRequired(true))
-                ////.add(createServiceDependency().setService(EgressAclProvider.class).setRequired(true))
+                .add(createServiceDependency().setService(EgressAclProvider.class).setRequired(true))
+                .add(createServiceDependency().setService(NodeCacheManager.class).setRequired(true))
                 .add(createServiceDependency().setService(L2ForwardingProvider.class).setRequired(true)));
 
         manager.add(createComponent()

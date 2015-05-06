@@ -95,7 +95,7 @@ public class SouthboundHandler extends AbstractHandler
         if (network != null && !network.getRouterExternal()) {
             logger.trace("handleInterfaceUpdate node: {}, tp: {}, network: {}", node, tp, network.getNetworkUUID());
             tenantNetworkManager.programInternalVlan(node, tp, network);
-            neutronL3Adapter.handleInterfaceEvent(node, tp, network, Action.UPDATE);
+            //neutronL3Adapter.handleInterfaceEvent(node, tp, network, Action.UPDATE);
             if (bridgeConfigurationManager.createLocalNetwork(node, network)) {
                 networkingProviderManager.getProvider(node).handleInterfaceUpdate(network, node, tp);
             }
@@ -109,7 +109,7 @@ public class SouthboundHandler extends AbstractHandler
         logger.debug("handleInterfaceDelete: node: {}, isLastInstanceOnNode: {}, interface: {}",
                 node, isLastInstanceOnNode, intf);
 
-        neutronL3Adapter.handleInterfaceEvent(node, intf, network, Action.DELETE);
+        //neutronL3Adapter.handleInterfaceEvent(node, intf, network, Action.DELETE);
         List<String> phyIfName = bridgeConfigurationManager.getAllPhysicalInterfaceNames(node);
         if (isInterfaceOfInterest(intf, phyIfName)) {
             // delete tunnel or physical interfaces

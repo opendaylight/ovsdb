@@ -148,7 +148,8 @@ public abstract class AbstractServiceInstance {
 
     protected void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
         Preconditions.checkNotNull(mdsalConsumer);
-        logger.info("writeFlow: flowBuilder: {}, nodeBuilder: {}", flowBuilder, nodeBuilder);
+        logger.debug("writeFlow: flowBuilder: {}, nodeBuilder: {}",
+                flowBuilder.build(), nodeBuilder.build());
         if (mdsalConsumer == null) {
             logger.error("ERROR finding MDSAL Service. Its possible that writeFlow is called too soon ?");
             return;

@@ -195,9 +195,11 @@ public class MdsalUtils {
                                                       String key) {
         String value = null;
         List<InterfaceExternalIds> pairs = terminationPointAugmentation.getInterfaceExternalIds();
-        for (InterfaceExternalIds pair : pairs) {
-            if (pair.getKey().equals(key)) {
-                value = pair.getExternalIdValue();
+        if (pairs != null) {
+            for (InterfaceExternalIds pair : pairs) {
+                if (pair.getKey().equals(key)) {
+                    value = pair.getExternalIdValue();
+                }
             }
         }
         return value;
@@ -375,6 +377,10 @@ public class MdsalUtils {
             }
         }
         return bridge;
+    }
+
+    public static OvsdbBridgeAugmentation getBridge(Node node) {
+        return node.getAugmentation(OvsdbBridgeAugmentation.class);
     }
 
     public static String getBridgeName(Node node) {

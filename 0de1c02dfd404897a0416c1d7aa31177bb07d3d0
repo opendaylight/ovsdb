@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_001e9b63",
+        "filename": "southbound/southbound-it/abrt_checker_28550.log",
+        "patchSetId": 6
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-05-06T05:33:25Z",
+      "side": 1,
+      "message": "please remove it, if it\u0027s not required",
+      "revId": "0de1c02dfd404897a0416c1d7aa31177bb07d3d0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

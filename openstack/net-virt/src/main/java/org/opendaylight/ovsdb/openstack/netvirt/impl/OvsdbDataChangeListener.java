@@ -69,15 +69,19 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
     @Override
     public void onDataChanged(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
         LOG.info(">>>>> onDataChanged: {}", changes);
-
+        //TODO: off load this process to execution service, blocking md-sal notification thread
+        // has performance impact on overall controller performance. With new notification broker
+        //it might create weird issues.
         processOvsdbConnections(changes);
         processOvsdbDisconnect(changes);
+        processOvsdbConnectionAttributeUpdates(changes);
         processOpenflowConnections(changes);
         processBridgeCreation(changes);
         processBridgeDeletion(changes);
         processBridgeUpdate(changes);
         processPortCreation(changes);
         processPortDeletion(changes);
+        processPortUpdate(changes);
 
 
     }
@@ -121,6 +125,12 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                         OvsdbInventoryListener.OvsdbType.OPENVSWITCH, Action.DELETE);
             }
         }
+    }
+
+    private void processOvsdbConnectionAttributeUpdates(
+            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
+        // TODO Auto-generated method stub
+
     }
 
     private void processOpenflowConnections(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
@@ -221,6 +231,35 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                 ovsdbUpdate(tpParentNode, removedTPAugmentationData,
                         OvsdbInventoryListener.OvsdbType.PORT, Action.DELETE);
 
+            }
+        }
+    }
+
+    private void processPortUpdate(
+            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
+        LOG.info("processPortUpdate - Received changes : {}", changes);
+
+        for(Map.Entry<InstanceIdentifier<?>, DataObject> updatedPort : changes.getUpdatedData().entrySet()){
+            if(updatedPort.getKey() instanceof OvsdbTerminationPointAugmentation){
+                LOG.info("Processing port updates : {}",updatedPort);
+                // XXX (NOTE): Extract parent node data from originalData(), rather then extracting it from updatedData()
+                // because, extracting it from originalData() will give all the
+                // (existing data of parent node + old data of the OvsdbTerminationPointAugmentation).
+                // If we extract parent node data from updatedData, it will give us
+                // ( Node data + new OvsdbTermiantionPointAugmentation data). To determine the update in
+                // OvsdbTerminationPointAugmentation, we need to pass it's old and new values to ovsdbUpdate.
+                // We anyways pass new data of OvsdbTerminationPointAugmentation to ovsdbUpdate.
+                Node tpParentNode  = getNode(changes.getOriginalData(),updatedPort);
+                if(tpParentNode == null){
+                    // Logging this warning, to catch any change in southbound plugin's behavior.
+                    LOG.warn("Parent Node for port is not found. On Port/Interface update data store"
+                            + " must provide the parent node update. This condition should not occure "
+                            + "with the existing models define in southbound plugin." );
+                    continue;
+                }
+
+                LOG.debug("Process port's {} update on Node : {}", updatedPort.getValue(),tpParentNode);
+                ovsdbUpdate(tpParentNode, updatedPort.getValue(),OvsdbInventoryListener.OvsdbType.PORT, Action.UPDATE);
             }
         }
     }

@@ -26,19 +26,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.neutron.spi.NeutronNetwork;
-import org.opendaylight.ovsdb.lib.notation.Column;
-import org.opendaylight.ovsdb.lib.notation.Row;
-import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
-import org.opendaylight.ovsdb.schema.openvswitch.Interface;
-import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 /**
  * Unit test for {@link VlanConfigurationCacheImpl}
  */
-// TODO SB_MIGRATION
-@Ignore
+@Ignore // TODO SB_MIGRATION
 @RunWith(MockitoJUnitRunner.class)
 public class VlanConfigurationCacheImplTest {
 
@@ -53,34 +46,34 @@ public class VlanConfigurationCacheImplTest {
      */
     @Before
     public void setUp(){
-        Row row = mock(Row.class);
-        Port port = mock(Port.class);
+        //Row row = mock(Row.class);
+        //Port port = mock(Port.class);
 
-        ConcurrentHashMap<String, Row> ovsTable;
-        ovsTable = new ConcurrentHashMap<>();
-        ovsTable.put(NODE_UUID, row);
+        //ConcurrentHashMap<String, Row> ovsTable;
+        //ovsTable = new ConcurrentHashMap<>();
+        //ovsTable.put(NODE_UUID, row);
 
         Set<Long> tags = new HashSet<Long>();
         tags.add(Long.valueOf(1));
 
-        UUID uuid = mock(UUID.class);
-        Set<UUID> uuidSet = new HashSet<>();
-        uuidSet.add(uuid);
+        //UUID uuid = mock(UUID.class);
+        //Set<UUID> uuidSet = new HashSet<>();
+        //uuidSet.add(uuid);
 
-        Column<GenericTableSchema, Set<Long>> longColumnMock = mock(Column.class);
-        Column<GenericTableSchema, Set<UUID>> uuidColumnMock = mock(Column.class);
+        //Column<GenericTableSchema, Set<Long>> longColumnMock = mock(Column.class);
+        //Column<GenericTableSchema, Set<UUID>> uuidColumnMock = mock(Column.class);
 
-        Interface iface = mock(Interface.class);
+        //Interface iface = mock(Interface.class);
         NeutronNetwork neutronNetwork = mock(NeutronNetwork.class);
 
         /* TODO SB_MIGRATION */
         //when(ovsdbConfigurationService.getRows(any(Node.class), anyString())).thenReturn(ovsTable);
         //when(ovsdbConfigurationService.getTypedRow(any(Node.class), same(Port.class), any(Row.class))).thenReturn(port);
 
-        when(port.getTagColumn()).thenReturn(longColumnMock);
-        when(longColumnMock.getData()).thenReturn(tags);
-        when(port.getInterfacesColumn()).thenReturn(uuidColumnMock);
-        when(uuidColumnMock.getData()).thenReturn(uuidSet);
+        //when(port.getTagColumn()).thenReturn(longColumnMock);
+        //when(longColumnMock.getData()).thenReturn(tags);
+        //when(port.getInterfacesColumn()).thenReturn(uuidColumnMock);
+        //when(uuidColumnMock.getData()).thenReturn(uuidSet);
 
         //when(ovsdbConfigurationService.getRow(any(Node.class), anyString(), anyString())).thenReturn(row);
         //when(ovsdbConfigurationService.getTypedRow(any(Node.class), same(Interface.class), any(Row.class))).thenReturn(iface);

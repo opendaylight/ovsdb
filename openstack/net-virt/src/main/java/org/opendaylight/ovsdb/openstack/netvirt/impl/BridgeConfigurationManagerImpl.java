@@ -4,41 +4,36 @@
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Madhu Venugopal, Brent Salisbury, Sam Hague
  */
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.UnknownHostException;
-
 import org.opendaylight.neutron.spi.NeutronNetwork;
-import org.opendaylight.ovsdb.lib.notation.Row;
-import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
-import org.opendaylight.ovsdb.openstack.netvirt.api.*;
-import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
-import org.opendaylight.ovsdb.schema.openvswitch.Interface;
-import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
-import org.opendaylight.ovsdb.schema.openvswitch.Port;
+import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.UnknownHostException;
+import java.util.Enumeration;
+import java.util.List;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+/**
+ * @author Madhu Venugopal
+ * @author Brent Salisbury
+ * @author Sam Hague (shague@redhat.com)
+ */
 public class BridgeConfigurationManagerImpl implements BridgeConfigurationManager {
     static final Logger LOGGER = LoggerFactory.getLogger(BridgeConfigurationManagerImpl.class);
 
@@ -69,7 +64,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     }
 
     @Override
-    public boolean isPortOnBridge (Node node, Bridge bridge, String portName) {
+    public boolean isPortOnBridge (Node node, String portName) {
         return MdsalUtils.getPort(node, portName) != null;
     }
 
@@ -197,15 +192,15 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     /**
      * Returns true if a patch port exists between the Integration Bridge and Network Bridge
      */
-    private boolean isNetworkPatchCreated(Node node, Bridge intBridge, Bridge netBridge) {
+    private boolean isNetworkPatchCreated(Node node, Node intBridge, Node netBridge) {
         Preconditions.checkNotNull(configurationService);
 
         boolean isPatchCreated = false;
 
         String portName = configurationService.getPatchPortName(new ImmutablePair<>(intBridge, netBridge));
-        if (isPortOnBridge(node, intBridge, portName)) {
+        if (isPortOnBridge(intBridge, portName)) {
             portName = configurationService.getPatchPortName(new ImmutablePair<>(netBridge, intBridge));
-            if (isPortOnBridge(node, netBridge, portName)) {
+            if (isPortOnBridge(netBridge, portName)) {
                 isPatchCreated = true;
             }
         }
@@ -284,7 +279,6 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     private boolean createBridges(Node node, NeutronNetwork network) throws Exception {
         Preconditions.checkNotNull(configurationService);
         Preconditions.checkNotNull(networkingProviderManager);
-        Status status;
 
         LOGGER.debug("createBridges: node: {}, network type: {}", node, network.getProviderNetworkType());
 
@@ -343,7 +337,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
         return MdsalUtils.addBridge(node, bridgeName, getControllerTarget());
     }
 
-    private InetAddress getControllerIPAddress(/*Connection connection*/) {
+    private InetAddress getControllerIPAddress() {
         InetAddress controllerIP = null;
 
         String addressString = ConfigProperties.getProperty(this.getClass(), "ovsdb.controller.address");

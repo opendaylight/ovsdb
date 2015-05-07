@@ -20,16 +20,9 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.neutron.spi.NeutronNetwork;
-import org.opendaylight.ovsdb.lib.notation.Column;
-import org.opendaylight.ovsdb.lib.notation.Row;
-import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
-import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
-import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
-import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,12 +47,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-/* TODO SB_MIGRATION */ @Ignore
+@Ignore // TODO SB_MIGRATION
 @RunWith(MockitoJUnitRunner.class)
 public class BridgeConfigurationManagerImplTest {
 
     private Node nodeMock = mock(Node.class, RETURNS_DEEP_STUBS);
-    private Bridge bridgeMock = mock(Bridge.class, RETURNS_DEEP_STUBS);
+    //private Bridge bridgeMock = mock(Bridge.class, RETURNS_DEEP_STUBS);
 
     @Mock private ConfigurationService configurationService;
     @Mock private NetworkingProviderManager networkingProviderManager;
@@ -72,12 +65,12 @@ public class BridgeConfigurationManagerImplTest {
 
     @Test
     public void testGetBridgeUuid() throws Exception {
-        Row row = mock(Row.class);
-        Bridge bridge = mock(Bridge.class, RETURNS_DEEP_STUBS);
+        //Row row = mock(Row.class);
+        //Bridge bridge = mock(Bridge.class, RETURNS_DEEP_STUBS);
 
-        ConcurrentHashMap<String, Row> hashMap;
-        hashMap = new ConcurrentHashMap<>();
-        hashMap.put("mockUUID", row);
+        //ConcurrentHashMap<String, Row> hashMap;
+        //hashMap = new ConcurrentHashMap<>();
+        //hashMap.put("mockUUID", row);
 
         /* TODO SB_MIGRATION */
         //verifyNoMoreInteractions(ovsdbConfigurationService);
@@ -87,7 +80,7 @@ public class BridgeConfigurationManagerImplTest {
         //when(ovsdbConfigurationService.getRows(any(Node.class), anyString())).thenReturn(hashMap);
         //when(ovsdbConfigurationService.getTypedRow(any(Node.class), same(Bridge.class),
         //        any(Row.class))).thenReturn(bridge);
-        when(bridge.getName()).thenReturn("test-bridge");
+        //when(bridge.getName()).thenReturn("test-bridge");
 
         /* TODO SB_MIGRATION */
         //assertEquals("Error, did not return UUID of correct bridge", "mockUUID",
@@ -100,12 +93,12 @@ public class BridgeConfigurationManagerImplTest {
 
     @Test
     public void testIsNodeNeutronReady() throws Exception {
-        Row row = mock(Row.class);
-        Bridge bridge = mock(Bridge.class, RETURNS_DEEP_STUBS);
+        //Row row = mock(Row.class);
+        //Bridge bridge = mock(Bridge.class, RETURNS_DEEP_STUBS);
 
-        ConcurrentHashMap<String, Row> hashMap;
-        hashMap = new ConcurrentHashMap<>();
-        hashMap.put("mockUUID", row);
+        //ConcurrentHashMap<String, Row> hashMap;
+        //hashMap = new ConcurrentHashMap<>();
+        //hashMap.put("mockUUID", row);
 
         /* TODO SB_MIGRATION */
         //verifyNoMoreInteractions(ovsdbConfigurationService);
@@ -118,7 +111,7 @@ public class BridgeConfigurationManagerImplTest {
         //when(ovsdbConfigurationService.getRows(any(Node.class), anyString())).thenReturn(hashMap);
         //when(ovsdbConfigurationService.getTypedRow(any(Node.class), same(Bridge.class),
         //        any(Row.class))).thenReturn(bridge);
-        when(bridge.getName()).thenReturn("test-bridge");
+        //when(bridge.getName()).thenReturn("test-bridge");
         when(configurationService.getIntegrationBridgeName()).thenReturn("test-bridge");
 
         assertEquals("Error, did not return correct boolean from isNodeNeutronReady", true,
@@ -131,12 +124,12 @@ public class BridgeConfigurationManagerImplTest {
     /* TODO SB_MIGRATION */ @Ignore
     @Test
     public void testIsNodeOverlayReady() throws Exception {
-        Row row = mock(Row.class);
-        Bridge bridge = mock(Bridge.class, RETURNS_DEEP_STUBS);
+        //Row row = mock(Row.class);
+        //Bridge bridge = mock(Bridge.class, RETURNS_DEEP_STUBS);
 
-        ConcurrentHashMap<String, Row> hashMap;
-        hashMap = new ConcurrentHashMap<>();
-        hashMap.put("mockUUID", row);
+        //ConcurrentHashMap<String, Row> hashMap;
+        //hashMap = new ConcurrentHashMap<>();
+        //hashMap.put("mockUUID", row);
 
         /* TODO SB_MIGRATION */
         //verifyNoMoreInteractions(ovsdbConfigurationService);
@@ -149,7 +142,7 @@ public class BridgeConfigurationManagerImplTest {
         //when(ovsdbConfigurationService.getRows(any(Node.class), anyString())).thenReturn(hashMap);
         //when(ovsdbConfigurationService.getTypedRow(any(Node.class), same(Bridge.class),
         //        any(Row.class))).thenReturn(bridge);
-        when(bridge.getName()).thenReturn("test-bridge");
+        //when(bridge.getName()).thenReturn("test-bridge");
         when(configurationService.getIntegrationBridgeName()).thenReturn("test-bridge");
         when(configurationService.getNetworkBridgeName()).thenReturn("test-bridge");
 
@@ -163,10 +156,10 @@ public class BridgeConfigurationManagerImplTest {
         verifyNoMoreInteractions(networkingProviderManager);
     }
 
-    /* TODO SB_MIGRATION */
-    @Ignore
+    @Ignore // TODO SB_MIGRATION
     @Test
     public void testIsPortOnBridge() throws Exception {
+        /*
         UUID uuid = mock(UUID.class);
         Set<UUID> uuidSet = new HashSet<>();
         uuidSet.add(uuid);
@@ -174,7 +167,6 @@ public class BridgeConfigurationManagerImplTest {
         Port port = mock(Port.class, RETURNS_DEEP_STUBS);
         String portName = "portNameMock";
 
-        /* TODO SB_MIGRATION */
         //verifyNoMoreInteractions(ovsdbConfigurationService);
         verifyNoMoreInteractions(configurationService);
         verifyNoMoreInteractions(networkingProviderManager);
@@ -189,7 +181,6 @@ public class BridgeConfigurationManagerImplTest {
         //when(ovsdbConfigurationService.getTypedRow(any(Node.class), any(Class.class), any(Row.class))).thenReturn(port);
         when(port.getName()).thenReturn(portName);
 
-        /* TODO SB_MIGRATION */
         //assertEquals("Error, did not return correct boolean from isPortOnBridge", true,
         //        bridgeConfigurationManagerImpl.isPortOnBridge(nodeMock, bridgeMock, portName));
 
@@ -198,7 +189,7 @@ public class BridgeConfigurationManagerImplTest {
         //verify(ovsdbConfigurationService, times(2)).getTableName(any(Node.class), any(Class.class));
         //verify(ovsdbConfigurationService, times(2)).getTypedRow(any(Node.class), any(Class.class), any(Row.class));
         verifyNoMoreInteractions(networkingProviderManager);
-        verifyNoMoreInteractions(configurationService);
+        verifyNoMoreInteractions(configurationService);*/
     }
 
     @Test
@@ -309,19 +300,20 @@ public class BridgeConfigurationManagerImplTest {
         }
     }
 
+    @Ignore // TODO SB_MIGRATION
     @Test
     public void testGetPhysicalInterfaceName() throws Exception {
         ConcurrentHashMap ovsTable = mock(ConcurrentHashMap.class, RETURNS_DEEP_STUBS);
-        Row row = mock(Row.class);
-        OpenVSwitch ovsRowOVS = mock(OpenVSwitch.class);
-        Column<GenericTableSchema, Map<String, String>> col = mock(Column.class);
+        //Row row = mock(Row.class);
+        //OpenVSwitch ovsRowOVS = mock(OpenVSwitch.class);
+        //Column<GenericTableSchema, Map<String, String>> col = mock(Column.class);
         Map<String, String> colMap = mock(Map.class);
 
-        HashMap<String, OpenVSwitch> hashMapOVS = new HashMap<>();
-        hashMapOVS.put("ovsRow", ovsRowOVS);
-        ConcurrentHashMap<String, Row> hashMap;
-        hashMap = new ConcurrentHashMap<>();
-        hashMap.put("row1", row);
+        //HashMap<String, OpenVSwitch> hashMapOVS = new HashMap<>();
+        //hashMapOVS.put("ovsRow", ovsRowOVS);
+        //ConcurrentHashMap<String, Row> hashMap;
+        //hashMap = new ConcurrentHashMap<>();
+        //hashMap.put("row1", row);
 
         String networkNames[] = {"network-0", "network-1", "network-2", "network-3"};
         String interfaceNames[] = {"interfaceName-0", "interfaceName-1", "interfaceName-2", "interfaceName-3"};
@@ -330,10 +322,10 @@ public class BridgeConfigurationManagerImplTest {
         for (String networkName : networkNames) {
             /* TODO SB_MIGRATION */
             //when(ovsdbConfigurationService.getRows(any(Node.class), anyString())).thenReturn(hashMap);
-            when(ovsTable.values()).thenReturn(hashMapOVS.values());
+            //when(ovsTable.values()).thenReturn(hashMapOVS.values());
 
-            when(ovsRowOVS.getOtherConfigColumn()).thenReturn(col);
-            when(col.getData()).thenReturn(colMap);
+            //when(ovsRowOVS.getOtherConfigColumn()).thenReturn(col);
+            //when(col.getData()).thenReturn(colMap);
             when(configurationService.getProviderMappingsKey()).thenReturn("network-0:interfaceName-0," +
                     "network-1:interfaceName-1,network-2:interfaceName-2,network-3:interfaceName-3");
             when(colMap.get(anyString())).thenReturn("network-0:interfaceName-0,network-1:interfaceName-1," +
@@ -366,20 +358,20 @@ public class BridgeConfigurationManagerImplTest {
         for (String name: interfaceNames){
             intNameList.add(name);
         }
-        Row row = mock(Row.class);
-        OpenVSwitch ovsRowOVS = mock(OpenVSwitch.class);
-        Column<GenericTableSchema, Map<String, String>> col = mock(Column.class);
+        //Row row = mock(Row.class);
+        //OpenVSwitch ovsRowOVS = mock(OpenVSwitch.class);
+        //Column<GenericTableSchema, Map<String, String>> col = mock(Column.class);
         Map<String, String> colMap = mock(Map.class);
-        ConcurrentHashMap<String, Row> hashMap;
-        hashMap = new ConcurrentHashMap<>();
-        hashMap.put("row1", row);
+        //ConcurrentHashMap<String, Row> hashMap;
+        //hashMap = new ConcurrentHashMap<>();
+        //hashMap.put("row1", row);
 
         /* TODO SB_MIGRATION */
         //when(ovsdbConfigurationService.getRows(any(Node.class), anyString())).thenReturn(hashMap);
         //when(ovsdbConfigurationService.getTypedRow(any(Node.class), same(OpenVSwitch.class),
         //        any(Row.class))).thenReturn(ovsRowOVS);
-        when(ovsRowOVS.getOtherConfigColumn()).thenReturn(col);
-        when(col.getData()).thenReturn(colMap);
+        //when(ovsRowOVS.getOtherConfigColumn()).thenReturn(col);
+        //when(col.getData()).thenReturn(colMap);
         when(colMap.get(anyString())).thenReturn("network-0:interfaceName-0,network-1:interfaceName-1," +
                 "network-2:interfaceName-2,network-3:interfaceName-3");
 

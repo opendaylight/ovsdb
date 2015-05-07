@@ -11,7 +11,6 @@
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
 import org.opendaylight.neutron.spi.NeutronNetwork;
-import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 import java.util.List;
@@ -83,11 +82,10 @@ public interface BridgeConfigurationManager {
     /**
      * A helper function to determine if a port exists on a given bridge
      * @param node the {@link Node} where the bridge is configured
-     * @param bridge the {@link org.opendaylight.ovsdb.schema.openvswitch.Bridge} to query
      * @param portName the name of the port to search for
      * @return True if the port exists, otherwise False
      */
-    public boolean isPortOnBridge (Node node, Bridge bridge, String portName);
+    public boolean isPortOnBridge (Node node, String portName);
 
 
     /**

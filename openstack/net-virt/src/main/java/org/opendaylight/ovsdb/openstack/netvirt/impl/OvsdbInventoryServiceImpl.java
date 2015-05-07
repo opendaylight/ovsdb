@@ -10,16 +10,13 @@ package org.opendaylight.ovsdb.openstack.netvirt.impl;
 import com.google.common.collect.Sets;
 import java.net.InetAddress;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.apache.felix.dm.Component;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-//import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
-import org.opendaylight.ovsdb.openstack.netvirt.api.Connection;
-import org.opendaylight.ovsdb.openstack.netvirt.api.ConnectionConstants;
+import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryListener;
@@ -104,11 +101,6 @@ public class OvsdbInventoryServiceImpl implements BindingAwareConsumer,
     }
 
     @Override
-    public Connection getConnection(Node node) {
-        return null;
-    }
-
-    @Override
     public List<Node> getNodes() {
         return null;
     }
@@ -125,11 +117,6 @@ public class OvsdbInventoryServiceImpl implements BindingAwareConsumer,
 
     @Override
     public Node getNode(String identifier) {
-        return null;
-    }
-
-    @Override
-    public Node connect(String identifier, Map<ConnectionConstants, String> params) {
         return null;
     }
 }

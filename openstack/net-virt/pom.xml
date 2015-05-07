@@ -48,17 +48,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
     </dependency>
-    <dependency>
+    <!--<dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.dependencymanager</artifactId>
-    </dependency>
+    </dependency>-->
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
@@ -74,19 +70,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>library</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>schema.openvswitch</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>southbound-api</artifactId>
-      <version>1.1.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>southbound-impl</artifactId>
       <version>1.1.0-SNAPSHOT</version>
     </dependency>
@@ -96,16 +79,16 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>utils.mdsal-node</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>utils.servicehelper</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.yangtools.model</groupId>
       <artifactId>ietf-topology</artifactId>
-      <version>2013.10.21.7-SNAPSHOT</version>
+      <!--<version>2013.10.21.7-SNAPSHOT</version>-->
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
@@ -115,7 +98,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>org.powermock</groupId>
       <artifactId>powermock-core</artifactId>
-      <version>${powermock.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -139,21 +121,17 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>2.4.0</version>
+        <!--<version>2.4.0</version>-->
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Embed-Dependency>utils.config,utils.mdsal-node;type=!pom;inline=false</Embed-Dependency>
-            <Embed-Transitive>true</Embed-Transitive>
-            <Import-Package>
-              !org.opendaylight.ovsdb.lib.osgi, *
-            </Import-Package>
-            <Export-Package>
-              org.opendaylight.ovsdb.openstack.netvirt,
-              org.opendaylight.ovsdb.openstack.netvirt.api,
+            <!--<Export-Package>
+              org.opendaylight.ovsdb.openstack.netvirt.api.*,
               org.opendaylight.ovsdb.openstack.netvirt.impl,
-              org.opendaylight.ovsdb.openstack.netvirt.impl.MdsalUtils
-            </Export-Package>
+              org.opendaylight.ovsdb.openstack.netvirt
+            </Export-Package>-->
+            <Embed-Dependency>utils.config;type=!pom;inline=false</Embed-Dependency>
+            <Embed-Transitive>true</Embed-Transitive>
             <Bundle-Activator>org.opendaylight.ovsdb.openstack.netvirt.Activator</Bundle-Activator>
           </instructions>
         </configuration>

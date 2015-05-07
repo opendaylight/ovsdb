@@ -22,7 +22,7 @@ import org.mockito.Spy;
 import org.opendaylight.ovsdb.openstack.netvirt.NodeCacheManagerEvent;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
-import org.opendaylight.ovsdb.utils.mdsal.node.NodeUtils;
+//import org.opendaylight.ovsdb.utils.mdsal.node.NodeUtils;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.osgi.framework.ServiceReference;
 import org.powermock.api.mockito.PowerMockito;
@@ -36,7 +36,7 @@ import com.google.common.collect.Maps;
  */
 /* TODO SB_MIGRATION */ @Ignore
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(NodeUtils.class)
+//@PrepareForTest(NodeUtils.class)
 public class NodeCacheManagerImplTest {
 
     @InjectMocks NodeCacheManagerImpl nodeCacheManagerImpl;
@@ -47,7 +47,7 @@ public class NodeCacheManagerImplTest {
         NodeCacheManagerEvent ev = mock(NodeCacheManagerEvent.class);
         when(ev.getNodeIdentifier()).thenReturn("node_identifier");
 
-        PowerMockito.mockStatic(NodeUtils.class);
+        //PowerMockito.mockStatic(NodeUtils.class);
         //when(NodeUtils.getOpenFlowNode(anyString())).thenReturn(mock(Node.class));
 
         when(ev.getAction()).thenReturn(Action.ADD);

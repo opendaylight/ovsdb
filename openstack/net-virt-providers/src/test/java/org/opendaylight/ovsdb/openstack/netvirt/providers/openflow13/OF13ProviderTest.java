@@ -47,10 +47,6 @@ import org.opendaylight.neutron.spi.INeutronPortCRUD;
 import org.opendaylight.neutron.spi.INeutronSubnetCRUD;
 import org.opendaylight.neutron.spi.NeutronLoadBalancerPool;
 import org.opendaylight.neutron.spi.NeutronNetwork;
-import org.opendaylight.ovsdb.lib.notation.Column;
-import org.opendaylight.ovsdb.lib.notation.Row;
-import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent;
 import org.opendaylight.ovsdb.openstack.netvirt.AbstractHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.LBaaSHandler;
@@ -71,10 +67,6 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.EventDispatcherImpl;
 //import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
-import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
-import org.opendaylight.ovsdb.schema.openvswitch.Interface;
-import org.opendaylight.ovsdb.schema.openvswitch.Port;
-import org.opendaylight.ovsdb.utils.mdsal.node.StringConvertor;
 //import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 //import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
@@ -90,8 +82,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 /**
  * Unit test for {@link OF13Provider}
  */
-/* TODO SB_MIGRATION */
-@Ignore
+@Ignore // TODO SB_MIGRATION
 @PrepareForTest(OF13Provider.class)
 @RunWith(PowerMockRunner.class)
 public class OF13ProviderTest {
@@ -102,7 +93,7 @@ public class OF13ProviderTest {
     @Mock private Node node;
     @Mock private Node node2;
     @Mock private Node node3;
-    @Mock private Interface intf;
+    //@Mock private Interface intf;
 
     @Mock private ConfigurationService configurationService;
     @Mock private BridgeConfigurationManager bridgeConfigurationManager;
@@ -162,7 +153,7 @@ public class OF13ProviderTest {
         when(configurationService.getTunnelEndPoint(node3)).thenReturn(InetAddress.getByName("192.168.0.3"));
         nodeList.add(node3);
 
-        /* TODO SB_MIGRATION */
+        /* TODO SB_MIGRATION
         //when(connectionService.getNodes()).thenReturn(nodeList);
 
         final String key = "key";
@@ -179,7 +170,6 @@ public class OF13ProviderTest {
         when(dataPathIdColumns.getData()).thenReturn(paths);
         when(bridge.getDatapathIdColumn()).thenReturn(dataPathIdColumns);
 
-        /* TODO SB_MIGRATION */
         when(configurationService.getIntegrationBridgeName()).thenReturn(key);
         //when(ovsdbConfigurationService.getTableName(node, Bridge.class)).thenReturn(key);
         //when(ovsdbConfigurationService.getRows(node, key)).thenReturn(bridgeTable);
@@ -215,7 +205,7 @@ public class OF13ProviderTest {
 
         when(intf.getExternalIdsColumn()).thenReturn(externalIdColumns);
         //when(ovsdbConfigurationService.getTypedRow(any(Node.class), same(Interface.class), any(Row.class))).thenReturn(intf);
-
+*/
     }
 
 
@@ -253,11 +243,11 @@ public class OF13ProviderTest {
     @Test
     public void initializeFlowRulesTest(){
 
-        Row row = Mockito.mock(Row.class);
+        //Row row = Mockito.mock(Row.class);
         //when(ovsdbConfigurationService.getTypedRow(node, Interface.class, row)).thenReturn(intf);
 
-        ConcurrentHashMap<String, Row> intfs = new ConcurrentHashMap();
-        intfs.put("intf1", row);
+        //ConcurrentHashMap<String, Row> intfs = new ConcurrentHashMap();
+        //intfs.put("intf1", row);
 
         NeutronNetwork network = Mockito.mock(NeutronNetwork.class);
         when(network.getProviderNetworkType()).thenReturn(NetworkHandler.NETWORK_TYPE_VLAN);
@@ -338,16 +328,16 @@ public class OF13ProviderTest {
         when(network.getProviderNetworkType()).thenReturn(NetworkHandler.NETWORK_TYPE_VLAN);
         when(bridgeConfigurationManager.getAllPhysicalInterfaceNames(node)).thenReturn(Arrays.asList(new String[] { "eth0", "eth1" ,"eth2"}));
 
-        Column<GenericTableSchema, String> typeColumn = Mockito.mock(Column.class);
-        when(typeColumn.getData()).thenReturn(NetworkHandler.NETWORK_TYPE_VXLAN);
-        when(intf.getTypeColumn()).thenReturn(typeColumn);
+        //Column<GenericTableSchema, String> typeColumn = Mockito.mock(Column.class);
+        //when(typeColumn.getData()).thenReturn(NetworkHandler.NETWORK_TYPE_VXLAN);
+        //when(intf.getTypeColumn()).thenReturn(typeColumn);
 
         Map<String, String> options = new HashMap();
         options.put("local_ip", "192.168.0.1");
         options.put("remote_ip", "10.0.12.0");
 
-        Column<GenericTableSchema, Map<String, String>> optionColumns = Mockito.mock(Column.class);
-        when(intf.getOptionsColumn()).thenReturn(optionColumns);
+        //Column<GenericTableSchema, Map<String, String>> optionColumns = Mockito.mock(Column.class);
+        //when(intf.getOptionsColumn()).thenReturn(optionColumns);
 
         /* TODO SB_MIGRATION */
         Status status = null;//this.of13Provider.handleInterfaceDelete("tunnel1", network, node, intf, true);

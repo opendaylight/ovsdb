@@ -68,16 +68,12 @@
 -->
   <feature name="odl-ovsdb-openstack-sb" description="OpenDaylight :: OVSDB :: OpenStack Network Virtualization SB" version='${openstack.netvirt.version}'>
     <feature version="${odl.karaf.base.version}">odl-base-all</feature>
-    <bundle>mvn:com.google.code.gson/gson/${gson.version}</bundle>
-    <bundle>mvn:org.opendaylight.ovsdb/library/${ovsdb.library.version}</bundle>
-    <bundle>mvn:org.opendaylight.ovsdb/schema.openvswitch/${schema.openvswitch.version}</bundle>
-    <feature version="${openflowplugin.version}">odl-openflowplugin-nsf-services</feature>
-    <feature version="1.1.0-SNAPSHOT">odl-ovsdb-southbound-impl-ui</feature>
-    <feature version="${openflowplugin.version}">odl-openflowplugin-nsf-services</feature>
-    <feature version="${openflowplugin.version}">odl-openflowplugin-nxm-extensions</feature>
-    <feature version="${openflowplugin.version}">odl-openflowplugin-southbound</feature>
+    <!--<feature version="${openflowplugin.version}">odl-openflowplugin-nsf-services</feature>-->
+    <!--<feature version="${openflowplugin.version}">odl-openflowplugin-southbound</feature>-->
     <feature version="${openflowplugin.version}">odl-openflowplugin-flow-services</feature>
+      <feature version="${openflowplugin.version}">odl-openflowplugin-nxm-extensions</feature>
     <feature version="${networkconfig.neutron.version}">odl-neutron-service</feature>
+    <feature version="1.1.0-SNAPSHOT">odl-ovsdb-southbound-impl-ui</feature>
     <bundle>mvn:org.opendaylight.ovsdb/utils.servicehelper/${ovsdb.utils.servicehelper.version}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt/${openstack.netvirt.version}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt-providers/${openstack.netvirt.providers.version}</bundle>

@@ -40,13 +40,7 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.ovsdb.lib.notation.Column;
-import org.opendaylight.ovsdb.lib.notation.Row;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-/* TODO SB_MIGRATION */
-//import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
-import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
@@ -66,8 +60,7 @@ import com.google.common.util.concurrent.CheckedFuture;
 /**
  * Unit test for {@link AbstractServiceInstance}
  */
-/* TODO SB_MIGRATION */
-@Ignore
+@Ignore // TODO SB_MIGRATION
 @RunWith(MockitoJUnitRunner.class)
 public class AbstractServiceInstanceTest {
 
@@ -98,17 +91,17 @@ public class AbstractServiceInstanceTest {
         /* TODO SB_MIGRATION */
         //when(connectionService.getNodes()).thenReturn(nodes);
 
-        ConcurrentMap<String, Row> bridges = new ConcurrentHashMap();
-        bridges.put("key", mock(Row.class));
+        //ConcurrentMap<String, Row> bridges = new ConcurrentHashMap();
+        //bridges.put("key", mock(Row.class));
         //when(ovsdbConfigService.getRows(any(Node.class), anyString())).thenReturn(bridges);
 
-        Bridge bridge = mock(Bridge.class);
-        Column<GenericTableSchema, Set<String>> datapathIdColumn = mock(Column.class);
-        when(bridge.getDatapathIdColumn()).thenReturn(datapathIdColumn);
-        when(bridge.getName()).thenReturn(Constants.INTEGRATION_BRIDGE);
+        //Bridge bridge = mock(Bridge.class);
+        //Column<GenericTableSchema, Set<String>> datapathIdColumn = mock(Column.class);
+        //when(bridge.getDatapathIdColumn()).thenReturn(datapathIdColumn);
+        //when(bridge.getName()).thenReturn(Constants.INTEGRATION_BRIDGE);
         Set<String> dpids = new HashSet();
         dpids.add(DPID);
-        when(datapathIdColumn.getData()).thenReturn(dpids);
+        //when(datapathIdColumn.getData()).thenReturn(dpids);
         //when(ovsdbConfigService.getTypedRow(any(Node.class), same(Bridge.class), any(Row.class))).thenReturn(bridge);
 
         /* TODO SB_MIGRATION */
@@ -238,17 +231,17 @@ public class AbstractServiceInstanceTest {
         /* TODO SB_MIGRATION */
         //when(connectionService.getNodes()).thenReturn(nodes);
 
-        ConcurrentMap<String, Row> bridges = new ConcurrentHashMap();
-        bridges.put("key", mock(Row.class));
+        //ConcurrentMap<String, Row> bridges = new ConcurrentHashMap();
+        //bridges.put("key", mock(Row.class));
         //when(ovsdbConfigService.getRows(any(Node.class), anyString())).thenReturn(bridges);
 
-        Bridge bridge = mock(Bridge.class);
-        Column<GenericTableSchema, Set<String>> datapathIdColumn = mock(Column.class);
-        when(bridge.getDatapathIdColumn()).thenReturn(datapathIdColumn);
-        when(bridge.getName()).thenReturn(Constants.INTEGRATION_BRIDGE);
+        //Bridge bridge = mock(Bridge.class);
+        //Column<GenericTableSchema, Set<String>> datapathIdColumn = mock(Column.class);
+        //when(bridge.getDatapathIdColumn()).thenReturn(datapathIdColumn);
+        //when(bridge.getName()).thenReturn(Constants.INTEGRATION_BRIDGE);
         Set<String> dpids = new HashSet();
         dpids.add(DPID);
-        when(datapathIdColumn.getData()).thenReturn(dpids);
+        //when(datapathIdColumn.getData()).thenReturn(dpids);
         /* TODO SB_MIGRATION */
         //when(ovsdbConfigService.getTypedRow(any(Node.class), same(Bridge.class), any(Row.class))).thenReturn(bridge);
 

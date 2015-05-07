@@ -36,23 +36,17 @@ import org.opendaylight.neutron.spi.INeutronNetworkCRUD;
 import org.opendaylight.neutron.spi.INeutronPortCRUD;
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.neutron.spi.NeutronPort;
-import org.opendaylight.ovsdb.lib.notation.Column;
-import org.opendaylight.ovsdb.lib.notation.Row;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
 import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
-import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
-import org.opendaylight.ovsdb.schema.openvswitch.Interface;
-import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 /**
  * Unit test for {@link TenantNetworkManagerImpl}
  */
-/* TODO SB_MIGRATION */ @Ignore
+@Ignore // TODO SB_MIGRATION
 @RunWith(MockitoJUnitRunner.class)
 public class TenantNetworkManagerImplTest {
 
@@ -98,13 +92,13 @@ public class TenantNetworkManagerImplTest {
      */
     @Test
     public void testProgramInternalVlan(){
-        Port port = mock(Port.class);
-        Row row = mock(Row.class);
-        GenericTableSchema tableSchema = mock(GenericTableSchema.class);
+        //Port port = mock(Port.class);
+        //Row row = mock(Row.class);
+        //GenericTableSchema tableSchema = mock(GenericTableSchema.class);
         Status status = mock(Status.class);
 
-        when(port.getRow()).thenReturn(row);
-        when(port.getSchema()).thenReturn(tableSchema);
+        //when(port.getRow()).thenReturn(row);
+        //when(port.getSchema()).thenReturn(tableSchema);
 
         when(vlanConfigurationCache.getInternalVlan(any(Node.class), anyString())).thenReturn(10);
         /* TODO SB_MIGRATION */
@@ -125,17 +119,17 @@ public class TenantNetworkManagerImplTest {
     public void testIsTenantNetworkPresentInNode() {
         NetworkingProvider networkingProvider = mock(NetworkingProvider.class);
 
-        Interface intf = mock(Interface.class);
-        Column<GenericTableSchema, Map<String, String>> columnMock = mock(Column.class);
+        //Interface intf = mock(Interface.class);
+        //Column<GenericTableSchema, Map<String, String>> columnMock = mock(Column.class);
         Map<String, String> externalIds = new HashMap<String, String>();
         externalIds.put(Constants.EXTERNAL_ID_INTERFACE_ID, "interfaceId");
 
-        Row row = mock(Row.class);
-        Bridge bridge = mock(Bridge.class, RETURNS_DEEP_STUBS);
+        //Row row = mock(Row.class);
+        //Bridge bridge = mock(Bridge.class, RETURNS_DEEP_STUBS);
 
-        ConcurrentHashMap<String, Row> map;
-        map = new ConcurrentHashMap<>();
-        map.put("row", row);
+        //ConcurrentHashMap<String, Row> map;
+        //map = new ConcurrentHashMap<>();
+        //map.put("row", row);
 
         NeutronNetwork neutronNetwork = mock(NeutronNetwork.class);
         NeutronPort neutronPort = mock(NeutronPort.class);
@@ -158,8 +152,8 @@ public class TenantNetworkManagerImplTest {
         //when(ovsdbConfigurationService.getTypedRow(any(Node.class), same(Interface.class),
         //        any(Row.class))).thenReturn(intf);
 
-        when(intf.getExternalIdsColumn()).thenReturn(columnMock);
-        when(columnMock.getData()).thenReturn(externalIds);
+        //when(intf.getExternalIdsColumn()).thenReturn(columnMock);
+        //when(columnMock.getData()).thenReturn(externalIds);
 
         when(neutronPortCache.getPort(anyString())).thenReturn(neutronPort);
         when(neutronPort.getNetworkUUID()).thenReturn("networkUUID");
@@ -190,15 +184,15 @@ public class TenantNetworkManagerImplTest {
      */
     @Test
     public void testGetTenantNetwork() {
-        Interface intf = mock(Interface.class);
-        Column<GenericTableSchema, Map<String, String>> columnMock = mock(Column.class);
+        //Interface intf = mock(Interface.class);
+        //Column<GenericTableSchema, Map<String, String>> columnMock = mock(Column.class);
         Map<String, String> externalIds = new HashMap<String, String>();
         externalIds.put(Constants.EXTERNAL_ID_INTERFACE_ID, "tenantValue");
         NeutronPort neutronPort = mock(NeutronPort.class);
         NeutronNetwork neutronNetwork = mock(NeutronNetwork.class);
 
-        when(intf.getExternalIdsColumn()).thenReturn(columnMock);
-        when(columnMock.getData()).thenReturn(externalIds);
+        //when(intf.getExternalIdsColumn()).thenReturn(columnMock);
+        //when(columnMock.getData()).thenReturn(externalIds);
 
         when(neutronPort.getNetworkUUID()).thenReturn("neutronUUID");
         when(neutronPortCache.getPort(anyString())).thenReturn(neutronPort);

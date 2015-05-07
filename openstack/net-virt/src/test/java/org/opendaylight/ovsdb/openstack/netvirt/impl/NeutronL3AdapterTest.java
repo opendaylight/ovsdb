@@ -39,14 +39,10 @@ import org.opendaylight.neutron.spi.NeutronRouter;
 import org.opendaylight.neutron.spi.NeutronRouter_Interface;
 import org.opendaylight.neutron.spi.NeutronSubnet;
 import org.opendaylight.neutron.spi.Neutron_IPs;
-import org.opendaylight.ovsdb.lib.notation.Column;
-import org.opendaylight.ovsdb.lib.notation.Row;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
-import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -122,8 +118,9 @@ public class NeutronL3AdapterTest {
         NeutronNetwork neutronNetwork = mock(NeutronNetwork.class);
         Node node = mock(Node.class);
         NodeId nodeID = mock(NodeId.class);
-        Row row = mock(Row.class);
-        Bridge bridge = mock(Bridge.class);
+        // TODO SB_MIGRATION
+        //Row row = mock(Row.class);
+        //Bridge bridge = mock(Bridge.class);
         Status status = mock(Status.class);
 
         List<Neutron_IPs> list_neutronIP = new ArrayList<Neutron_IPs>();
@@ -135,10 +132,10 @@ public class NeutronL3AdapterTest {
         List<Node> list_nodes = new ArrayList<Node>();
         list_nodes.add(node);
 
-        ConcurrentMap<String, Row> rowMap = mock(ConcurrentMap.class);
-        rowMap.put("key", row);
+        //ConcurrentMap<String, Row> rowMap = mock(ConcurrentMap.class);
+        //rowMap.put("key", row);
 
-        Column<GenericTableSchema, Set<String>> bridgeColumnIds = mock(Column.class);
+        //Column<GenericTableSchema, Set<String>> bridgeColumnIds = mock(Column.class);
         Set<String> dpids = new HashSet();
         dpids.add("11111");
 
@@ -188,10 +185,10 @@ public class NeutronL3AdapterTest {
         //when(ovsdbConfigurationService.getTypedRow(any(Node.class), same(Bridge.class), any(Row.class))).thenReturn(bridge);
         //when(ovsdbConfigurationService.getRow(any(Node.class), anyString(), anyString())).thenReturn(row);
 
-        when(bridge.getName()).thenReturn("brName");
-        when(bridge.getDatapathIdColumn()).thenReturn(bridgeColumnIds);
+        //when(bridge.getName()).thenReturn("brName");
+        //when(bridge.getDatapathIdColumn()).thenReturn(bridgeColumnIds);
 
-        when(bridgeColumnIds.getData()).thenReturn(dpids);
+        //when(bridgeColumnIds.getData()).thenReturn(dpids);
     }
 
 

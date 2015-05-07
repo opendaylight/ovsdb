@@ -11,20 +11,20 @@ package org.opendaylight.ovsdb.openstack.netvirt.impl;
 import org.opendaylight.neutron.spi.INeutronPortCRUD;
 import org.opendaylight.neutron.spi.NeutronPort;
 import org.opendaylight.neutron.spi.NeutronSecurityGroup;
+import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
 
-import org.opendaylight.ovsdb.schema.openvswitch.Interface;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Map;
 
 public class SecurityServicesImpl implements SecurityServicesManager {
 
     static final Logger logger = LoggerFactory.getLogger(TenantNetworkManagerImpl.class);
-    private volatile INeutronPortCRUD neutronPortService;
+    private volatile INeutronPortCRUD neutronPortCache;
 
     void init() {
         logger.info(">>>>>> init {}", this.getClass());
@@ -33,18 +33,24 @@ public class SecurityServicesImpl implements SecurityServicesManager {
     /**
      * Is security group ready.
      *
-     * @param intf the intf
+     * @param terminationPointAugmentation the intf
      * @return the boolean
      */
-    public boolean isPortSecurityReady(Interface intf) {
-        logger.trace("getTenantNetworkForInterface for {}", intf);
-        if (intf == null) return false;
-        Map<String, String> externalIds = intf.getExternalIdsColumn().getData();
-        logger.trace("externalIds {}", externalIds);
-        if (externalIds == null) return false;
-        String neutronPortId = externalIds.get(Constants.EXTERNAL_ID_INTERFACE_ID);
-        if (neutronPortId == null) return false;
-        NeutronPort neutronPort = neutronPortService.getPort(neutronPortId);
+    public boolean isPortSecurityReady(OvsdbTerminationPointAugmentation terminationPointAugmentation) {
+        if (neutronPortCache == null) {
+            logger.error("neutron port is null");
+            return false;
+        }
+        logger.trace("isPortSecurityReady for {}", terminationPointAugmentation.getName());
+        String neutronPortId = MdsalUtils.getInterfaceExternalIdsValue(terminationPointAugmentation,
+                Constants.EXTERNAL_ID_INTERFACE_ID);
+        if (neutronPortId == null) {
+            return false;
+        }
+        NeutronPort neutronPort = neutronPortCache.getPort(neutronPortId);
+        if (neutronPort == null) {
+            return false;
+        }
         String deviceOwner = neutronPort.getDeviceOwner();
         if (!deviceOwner.contains("compute")) {
             logger.debug("Port {} is not a compute host, it is a: {}", neutronPortId, deviceOwner);
@@ -56,11 +62,8 @@ public class SecurityServicesImpl implements SecurityServicesManager {
                     neutronPortId);
             return false;
         }
-        try {
-            String vmPort = externalIds.get("attached-mac");
-        } catch(Exception e) {
-            logger.debug("Error VMID did *NOT* work");
-        }
+        String vmPort = MdsalUtils.getInterfaceExternalIdsValue(terminationPointAugmentation,
+                Constants.EXTERNAL_ID_VM_MAC);
         logger.debug("Security Group Check {} DOES contain a Neutron Security Group", neutronPortId);
         return true;
     }
@@ -68,20 +71,31 @@ public class SecurityServicesImpl implements SecurityServicesManager {
     /**
      * Gets security group in port.
      *
-     * @param intf the intf
+     * @param terminationPointAugmentation the intf
      * @return the security group in port
      */
-    public NeutronSecurityGroup getSecurityGroupInPort(Interface intf) {
-        logger.trace("getTenantNetworkForInterface for {}", intf);
-        if (intf == null) return null;
-        Map<String, String> externalIds = intf.getExternalIdsColumn().getData();
-        logger.trace("externalIds {}", externalIds);
-        if (externalIds == null) return null;
-        String neutronPortId = externalIds.get(Constants.EXTERNAL_ID_INTERFACE_ID);
-        if (neutronPortId == null) return null;
-        NeutronPort neutronPort = neutronPortService.getPort(neutronPortId);
+    public NeutronSecurityGroup getSecurityGroupInPort(OvsdbTerminationPointAugmentation terminationPointAugmentation) {
+        if (neutronPortCache == null) {
+            logger.error("neutron port is null");
+            return null;
+        }
+        logger.trace("isPortSecurityReady for {}", terminationPointAugmentation.getName());
+        String neutronPortId = MdsalUtils.getInterfaceExternalIdsValue(terminationPointAugmentation,
+                Constants.EXTERNAL_ID_INTERFACE_ID);
+        if (neutronPortId == null) {
+            return null;
+        }
+        NeutronPort neutronPort = neutronPortCache.getPort(neutronPortId);
+        if (neutronPort == null) {
+            return null;
+        }
+
         List<NeutronSecurityGroup> neutronSecurityGroups = neutronPort.getSecurityGroups();
-        NeutronSecurityGroup neutronSecurityGroup = (NeutronSecurityGroup) neutronSecurityGroups.toArray()[0];
-        return neutronSecurityGroup;
+        if (neutronSecurityGroups != null) {
+            NeutronSecurityGroup neutronSecurityGroup = (NeutronSecurityGroup) neutronSecurityGroups.toArray()[0];
+            return neutronSecurityGroup;
+        } else {
+            return null;
+        }
     }
 }

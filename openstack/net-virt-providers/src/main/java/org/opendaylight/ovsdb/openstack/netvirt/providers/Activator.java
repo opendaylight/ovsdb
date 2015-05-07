@@ -87,7 +87,6 @@ public class Activator extends DependencyActivatorBase {
                 .setInterface(new String[]{AbstractServiceInstance.class.getName(),
                                 ClassifierProvider.class.getName()},props2)
                 .setImplementation(ClassifierService.class)
-                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
                 .add(createServiceDependency().setService(PipelineOrchestrator.class).setRequired(true))
                 .add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true)));
 

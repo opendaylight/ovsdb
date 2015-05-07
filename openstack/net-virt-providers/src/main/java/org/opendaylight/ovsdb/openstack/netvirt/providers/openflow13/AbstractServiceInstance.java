@@ -9,11 +9,6 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -21,8 +16,7 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConnectionService;
-import org.opendaylight.ovsdb.utils.mdsal.node.StringConvertor;
+import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
@@ -43,13 +37,15 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.CheckedFuture;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Any ServiceInstance class that extends AbstractServiceInstance to be a part of the pipeline
@@ -64,8 +60,6 @@ public abstract class AbstractServiceInstance {
     private static final Logger logger = LoggerFactory.getLogger(AbstractServiceInstance.class);
     public static final String OPENFLOW = "openflow:";
     // OSGi Services that we are dependent on.
-    /* TODO SB_MIGRATION */
-    private volatile OvsdbConnectionService connectionService;
     private volatile MdsalConsumer mdsalConsumer;
     private volatile PipelineOrchestrator orchestrator;
 
@@ -233,9 +227,12 @@ public abstract class AbstractServiceInstance {
     }
 
     private Long getDpid(Node node) {
-        String datapathIdString = node.getAugmentation(OvsdbBridgeAugmentation.class).getDatapathId().getValue();
-        Long dpidLong = StringConvertor.dpidStringToLong(datapathIdString);
-        return dpidLong;
+        Long dpid = 0L;
+        dpid = MdsalUtils.getDataPathId(node);
+        if (dpid == 0) {
+            logger.warn("getDpid: dpid not found: {}", node);
+        }
+        return dpid;
     }
 
     /**

@@ -9,8 +9,6 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
-import org.opendaylight.ovsdb.lib.notation.Version;
-
 /**
  * A collection of configuration constants
  */
@@ -45,7 +43,6 @@ public final class Constants {
      * OpenFlow Versions
      */
     public static final String OPENFLOW13 = "OpenFlow13";
-    public static final Version OPENFLOW13_SUPPORTED = Version.fromString("1.10.0");
 
     /*
      * VLAN Constants

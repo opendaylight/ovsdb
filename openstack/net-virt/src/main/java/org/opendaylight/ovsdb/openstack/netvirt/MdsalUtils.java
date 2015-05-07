@@ -14,6 +14,7 @@ import com.google.common.util.concurrent.CheckedFuture;
 import java.math.BigInteger;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -68,6 +69,7 @@ public class MdsalUtils {
     private static final Logger LOG = LoggerFactory.getLogger(MdsalUtils.class);
     private static DataBroker databroker = null;
     private static final int OVSDB_UPDATE_TIMEOUT = 500;
+    private static final String PATCH_PORT_TYPE = "patch";
 
     /**
      * Class constructor setting the data broker.
@@ -440,18 +442,17 @@ public class MdsalUtils {
         return delete(LogicalDatastoreType.CONFIGURATION,tpIid);
     }
 
-    public static Boolean addTunnelTerminationPoint(Node bridgeNode, String bridgeName, String portName, String type,
-                                        Map<String, String> options) {
-        InstanceIdentifier<TerminationPoint> tpIid =
-                MdsalHelper.createTerminationPointInstanceIdentifier(bridgeNode, portName);
-        OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder =
-                new OvsdbTerminationPointAugmentationBuilder();
+    public static Boolean addTerminationPoint(Node bridgeNode, String bridgeName, String portName,
+            String type, Map<String, String> options) {
+        InstanceIdentifier<TerminationPoint> tpIid = MdsalHelper.createTerminationPointInstanceIdentifier(
+                bridgeNode, portName);
+        OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder = new OvsdbTerminationPointAugmentationBuilder();
 
         tpAugmentationBuilder.setName(portName);
         tpAugmentationBuilder.setInterfaceType(MdsalHelper.OVSDB_INTERFACE_TYPE_MAP.get(type));
 
         List<Options> optionsList = new ArrayList<Options>();
-        for(Map.Entry<String,String> entry : options.entrySet()){
+        for (Map.Entry<String, String> entry : options.entrySet()) {
             OptionsBuilder optionsBuilder = new OptionsBuilder();
             optionsBuilder.setKey(new OptionsKey(entry.getKey()));
             optionsBuilder.setOption(entry.getKey());
@@ -462,11 +463,18 @@ public class MdsalUtils {
 
         TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
         tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
-        return put(LogicalDatastoreType.CONFIGURATION,tpIid,tpBuilder.build());
+        return put(LogicalDatastoreType.CONFIGURATION, tpIid, tpBuilder.build());
+    }
+
+    public static Boolean addTunnelTerminationPoint(Node bridgeNode, String bridgeName, String portName, String type,
+                                        Map<String, String> options) {
+        return addTerminationPoint(bridgeNode, bridgeName, portName, type, options);
     }
 
     public static Boolean addPatchTerminationPoint(Node node, String bridgeName, String portName, String peerPortName) {
-        return false;
+        Map<String, String> option = new HashMap<String, String>();
+        option.put("peer", peerPortName);
+        return addTerminationPoint(node, bridgeName, portName, PATCH_PORT_TYPE, option);
     }
 
     public static String getExternalId(Node node, OvsdbTables table, String key) {

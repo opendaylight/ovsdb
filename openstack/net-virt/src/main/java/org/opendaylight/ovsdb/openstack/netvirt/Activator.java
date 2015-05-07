@@ -90,8 +90,8 @@ public class Activator extends DependencyActivatorBase {
         manager.add(createComponent()
                 .setInterface(TenantNetworkManager.class.getName(), null)
                 .setImplementation(TenantNetworkManagerImpl.class)
-                //.add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
-                //.add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true))
+                .add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
+                .add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(VlanConfigurationCache.class)));
 
         manager.add(createComponent()
@@ -270,9 +270,9 @@ public class Activator extends DependencyActivatorBase {
                 .add(createServiceDependency().setService(ConfigurationService.class).setRequired(true))
                 .add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true))
                 .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
-                //.add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
-                //.add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true))
-                //.add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true))
+                .add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
+                .add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true))
+                .add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(ArpProvider.class).setRequired(false))
                 .add(createServiceDependency().setService(InboundNatProvider.class).setRequired(false))
                 .add(createServiceDependency().setService(OutboundNatProvider.class).setRequired(false))

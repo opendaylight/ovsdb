@@ -76,6 +76,7 @@ public class NeutronL3Adapter {
     private Boolean enabled = false;
 
     void init() {
+        logger.info(">>>>>> init {}", this.getClass());
         final String enabledPropertyStr = ConfigProperties.getProperty(this.getClass(), "ovsdb.l3.fwd.enabled");
         if (enabledPropertyStr != null && enabledPropertyStr.equalsIgnoreCase("yes")) {
             this.inboundIpRewriteCache = new HashSet<>();

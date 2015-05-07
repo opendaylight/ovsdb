@@ -17,7 +17,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
-import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
+//import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
@@ -107,8 +107,8 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
     @Override
     public NeutronNetwork getTenantNetwork(OvsdbTerminationPointAugmentation terminationPointAugmentation) {
         NeutronNetwork neutronNetwork = null;
-        neutronPortCache = (INeutronPortCRUD) ServiceHelper.getGlobalInstance(INeutronPortCRUD.class, this);
-        neutronNetworkCache = (INeutronNetworkCRUD) ServiceHelper.getGlobalInstance(INeutronNetworkCRUD.class, this);
+        //neutronPortCache = (INeutronPortCRUD) ServiceHelper.getGlobalInstance(INeutronPortCRUD.class, this);
+        //neutronNetworkCache = (INeutronNetworkCRUD) ServiceHelper.getGlobalInstance(INeutronNetworkCRUD.class, this);
         if (neutronPortCache == null || neutronNetworkCache == null) {
             logger.error("neutron interfaces are null");
             return neutronNetwork;
@@ -136,7 +136,7 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
     @Override
     public NeutronPort getTenantPort(OvsdbTerminationPointAugmentation terminationPointAugmentation) {
         NeutronPort neutronPort = null;
-        neutronPortCache = (INeutronPortCRUD) ServiceHelper.getGlobalInstance(INeutronPortCRUD.class, this);
+        //neutronPortCache = (INeutronPortCRUD) ServiceHelper.getGlobalInstance(INeutronPortCRUD.class, this);
         if (neutronPortCache == null) {
             logger.error("neutron port is null");
             return neutronPort;

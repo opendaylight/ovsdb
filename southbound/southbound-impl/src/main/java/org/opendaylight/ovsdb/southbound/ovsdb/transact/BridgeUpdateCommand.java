@@ -58,6 +58,12 @@ public class BridgeUpdateCommand extends AbstractTransactCommand {
             created.entrySet()) {
             updateBridge(transaction,  ovsdbManagedNodeEntry.getKey(), ovsdbManagedNodeEntry.getValue());
         }
+        Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> updated =
+                TransactUtils.extractUpdated(getChanges(),OvsdbBridgeAugmentation.class);
+        for (Entry<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> ovsdbManagedNodeEntry:
+            updated.entrySet()) {
+            updateBridge(transaction,  ovsdbManagedNodeEntry.getKey(), ovsdbManagedNodeEntry.getValue());
+        }
     }
 
 
@@ -79,12 +85,13 @@ public class BridgeUpdateCommand extends AbstractTransactCommand {
             setName(bridge, ovsdbManagedNode,operationalBridgeOptional);
             setPort(transaction, bridge, ovsdbManagedNode);
             transaction.add(op.insert(bridge));
-        } else if (bridge.getName() != null) {
+        } else {
+            String existingBridgeName = operationalBridgeOptional.get().getBridgeName().getValue();
             // Name is immutable, and so we *can't* update it.  So we use extraBridge for the schema stuff
             Bridge extraBridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
             extraBridge.setName("");
             transaction.add(op.update(bridge)
-                    .where(extraBridge.getNameColumn().getSchema().opEqual(bridge.getName()))
+                    .where(extraBridge.getNameColumn().getSchema().opEqual(existingBridgeName))
                     .build());
         }
     }

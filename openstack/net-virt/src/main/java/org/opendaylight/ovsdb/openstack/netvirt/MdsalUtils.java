@@ -42,6 +42,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
@@ -345,7 +346,14 @@ public class MdsalUtils {
     }
 
     public static List<Node> getAllBridgesOnOvsdbNode(Node node) {
-        return null;
+        List<Node> nodes = new ArrayList<Node>();
+        List<ManagedNodeEntry> managedNodes = node.getAugmentation(OvsdbNodeAugmentation.class).getManagedNodeEntry();
+        for (ManagedNodeEntry bridgeNode : managedNodes) {
+            InstanceIdentifier<?> bridgeIid = bridgeNode.getBridgeRef().getValue();
+            Node node1 = (Node) read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
+            nodes.add(node1);
+        }
+        return nodes;
     }
 
     /**

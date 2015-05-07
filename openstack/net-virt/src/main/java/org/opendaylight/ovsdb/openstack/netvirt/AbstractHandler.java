@@ -72,7 +72,7 @@ public abstract class AbstractHandler {
     /**
      * Enqueue the event.
      *
-     * @param event the {@link org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent} event to be handled.
+     * @param abstractEvent the {@link org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent} event to be handled.
      * @see org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher
      */
     protected void enqueueEvent(AbstractEvent abstractEvent) {
@@ -83,7 +83,7 @@ public abstract class AbstractHandler {
     /**
      * Process the event.
      *
-     * @param event the {@link org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent} event to be handled.
+     * @param abstractEvent the {@link org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent} event to be handled.
      * @see org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher
      */
     public abstract void processEvent(AbstractEvent abstractEvent);

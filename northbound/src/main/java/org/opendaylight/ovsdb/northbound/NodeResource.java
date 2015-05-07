@@ -2,6 +2,7 @@ package org.opendaylight.ovsdb.northbound;
 
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -99,6 +100,7 @@ public class NodeResource {
         for (Node node : nodes) {
             nodeIds.add(node.getId().getValue());
         }
+        Collections.sort(nodeIds);
 
         String response = objectMapper.writeValueAsString(nodeIds);
         return Response.status(Response.Status.OK)

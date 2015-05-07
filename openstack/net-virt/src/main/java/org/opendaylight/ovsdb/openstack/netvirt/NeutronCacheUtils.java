@@ -58,7 +58,7 @@ public class NeutronCacheUtils {
     /**
      * Look up in the NeutronNetworkCRUD cache and NeutronSubnetCRUD cache for
      * extracting the provider segmentation_type and segmentation_id
-     * @param subnetId Subnet UUID
+     * @param subnetID Subnet UUID
      * @return {Type: ID} pair for that subnet ID
      */
     public static Map.Entry<String,String> getProviderInformation(INeutronNetworkCRUD neutronNetworkCache,

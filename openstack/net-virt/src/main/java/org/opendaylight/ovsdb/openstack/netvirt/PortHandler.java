@@ -50,7 +50,7 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware {
     /**
      * Invoked to take action after a port has been created.
      *
-     * @param port An instance of new Neutron Port object.
+     * @param neutronPort An instance of new Neutron Port object.
      */
     @Override
     public void neutronPortCreated(NeutronPort neutronPort) {
@@ -83,7 +83,7 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware {
     /**
      * Invoked to take action after a port has been updated.
      *
-     * @param port An instance of modified Neutron Port object.
+     * @param neutronPort An instance of modified Neutron Port object.
      */
     @Override
     public void neutronPortUpdated(NeutronPort neutronPort) {
@@ -146,7 +146,7 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware {
      * Process the event.
      *
      * @param abstractEvent the {@link org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent} event to be handled.
-     * @see EventDispatcher
+     * @see org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher
      */
     @Override
     public void processEvent(AbstractEvent abstractEvent) {

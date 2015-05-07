@@ -180,7 +180,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
 
         tpAugmentationBuilder
                 .setName(interfaceUpdate.getName());
-        tpAugmentationBuilder.setPortUuid(new Uuid(
+        tpAugmentationBuilder.setInterfaceUuid(new Uuid(
                 interfaceUpdate.getUuid().toString()));
         updateInterfaces(interfaceUpdate, bridgeName, tpAugmentationBuilder);
     }

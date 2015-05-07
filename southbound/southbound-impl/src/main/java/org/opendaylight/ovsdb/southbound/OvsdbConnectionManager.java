@@ -25,7 +25,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -54,7 +53,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 externalClient.getConnectionInfo().getRemotePort());
         ConnectionInfo key = SouthboundMapper.createConnectionInfo(externalClient);
         OvsdbConnectionInstance client = new OvsdbConnectionInstance(key,externalClient,txInvoker);
-        clients.put(key, client);
+        putConnectionInstance(key, client);
     }
 
     @Override
@@ -80,7 +79,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     }
 
     public void disconnect(OvsdbNodeAugmentation ovsdbNode) throws UnknownHostException {
-        OvsdbClient client = clients.get(SouthboundMapper.createConnectionInfo(ovsdbNode));
+        OvsdbClient client = getConnectionInstance(ovsdbNode.getConnectionInfo());
         if (client != null) {
             client.disconnect();
         }
@@ -93,9 +92,14 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         }
     }
 
+    private void putConnectionInstance(ConnectionInfo key,OvsdbConnectionInstance instance) {
+        ConnectionInfo connectionInfo = SouthboundMapper.suppressLocalIpPort(key);
+        clients.put(connectionInfo, instance);
+    }
+
     public OvsdbConnectionInstance getConnectionInstance(ConnectionInfo key) {
-        ConnectionInfoBuilder connectionInfoBuilder = new ConnectionInfoBuilder(key);
-        return clients.get(connectionInfoBuilder.build());
+        ConnectionInfo connectionInfo = SouthboundMapper.suppressLocalIpPort(key);
+        return clients.get(connectionInfo);
     }
 
     public OvsdbConnectionInstance getConnectionInstance(OvsdbBridgeAttributes mn) {

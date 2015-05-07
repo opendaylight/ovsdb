@@ -23,12 +23,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 public interface OvsdbConfigurationService {
 
     /**
-     * @deprecated This version of insertRow is a short-term replacement for the older & now deprecated method of the same name.
+     * @deprecated This version of insertRow is a short-term replacement for the older and now deprecated method of the same name.
      * This API assumes an Open_vSwitch database Schema.
      *
      * This API is replaced by
-     * {@link #insertRow(Node, String, String, String, Row<GenericTableSchema>) insertRow} and
-     * {@link #insertTree(Node, String, String, String, Row<GenericTableSchema>) insertTree}
+     * {@link #insertRow(Node, String, String, Row)} and
+     * {@link #insertTree(Node, String, String, UUID, Row)}
      *
      * @param node OVSDB Node
      * @param tableName Table on which the row is inserted
@@ -41,18 +41,18 @@ public interface OvsdbConfigurationService {
 
     /**
      * insert a Row in a Table of a specified Database Schema. This is a convenience method on top of
-     * {@link insertRow(Node, String, String, String, UUID, String, Row<GenericTableSchema>) insertRow}
+     * {@link insertRow(Node, String, String, String, UUID, String, Row) insertRow}
      * which assumes that OVSDB schema implementation that corresponds to the databaseName will provide
      * the necessary service to populate the Parent Table Name and Parent Column Name.
      *
      * This method can insert just a single Row specified in the row parameter.
-     * But {@link #insertTree(Node, String, String, UUID, Row<GenericTableSchema>) insertTree}
+     * But {@link #insertTree(Node, String, String, UUID, Row) insertTree}
      * can insert a hierarchy of rows with parent-child relationship.
      *
      * @param node OVSDB Node
      * @param databaseName Database Name that represents the Schema supported by the node.
      * @param tableName Table on which the row is inserted
-     * @param parentUuid UUID of the parent table to which this operation will result in attaching/mutating.
+     * @param parentRowUuid UUID of the parent table to which this operation will result in attaching/mutating.
      * @param row Row of table Content to be inserted
      * @throws OvsdbPluginException Any failure during the insert transaction will result in a specific exception.
      * @return UUID of the inserted Row
@@ -64,14 +64,14 @@ public interface OvsdbConfigurationService {
      * insert a Row in a Table of a specified Database Schema.
      *
      * This method can insert just a single Row specified in the row parameter.
-     * But {@link #insertTree(Node, String, String, UUID, Row<GenericTableSchema>) insertTree}
+     * But {@link #insertTree(Node, String, String, UUID, Row)}
      * can insert a hierarchy of rows with parent-child relationship.
      *
      * @param node OVSDB Node
      * @param databaseName Database Name that represents the Schema supported by the node.
      * @param tableName Table on which the row is inserted
      * @param parentTable Name of the Parent Table to which this operation will result in attaching/mutating.
-     * @param parentUuid UUID of a Row in parent table to which this operation will result in attaching/mutating.
+     * @param parentRowUuid UUID of a Row in parent table to which this operation will result in attaching/mutating.
      * @param parentColumn Name of the Column in the Parent Table to be mutated with the UUID that results from the insert operation.
      * @param row Row of table Content to be inserted
      * @throws OvsdbPluginException Any failure during the insert transaction will result in a specific exception.
@@ -82,12 +82,12 @@ public interface OvsdbConfigurationService {
 
     /**
      * inserts a Tree of Rows in multiple Tables that has parent-child relationships referenced through the OVSDB schema's refTable construct.
-     * This is a convenience method on top of {@link #insertTree(Node, String, String, String, UUID, String, Row<GenericTableSchema>) insertTree}
+     * This is a convenience method on top of {@link #insertTree(Node, String, String, String, UUID, String, Row)}
      *
      * @param node OVSDB Node
      * @param databaseName Database Name that represents the Schema supported by the node.
      * @param tableName Table on which the row is inserted
-     * @param parentUuid UUID of a Row in parent table to which this operation will result in attaching/mutating.
+     * @param parentRowUuid UUID of a Row in parent table to which this operation will result in attaching/mutating.
      * @param row Row Tree with parent-child relationships via column of type refTable.
      * @throws OvsdbPluginException Any failure during the insert transaction will result in a specific exception.
      * @return Returns the row tree with the UUID of every inserted Row populated in the _uuid column of every row in the tree
@@ -102,7 +102,7 @@ public interface OvsdbConfigurationService {
      * @param databaseName Database Name that represents the Schema supported by the node.
      * @param tableName Table on which the row is inserted
      * @param parentTable Name of the Parent Table to which this operation will result in attaching/mutating.
-     * @param parentUuid UUID of a Row in parent table to which this operation will result in attaching/mutating.
+     * @param parentRowUuid UUID of a Row in parent table to which this operation will result in attaching/mutating.
      * @param parentColumn Name of the Column in the Parent Table to be mutated with the UUID that results from the insert operation.
      * @param row Row Tree with parent-child relationships via column of type refTable.
      * @throws OvsdbPluginException Any failure during the insert transaction will result in a specific exception.
@@ -112,15 +112,15 @@ public interface OvsdbConfigurationService {
                                               String parentColumn, Row<GenericTableSchema> row) throws OvsdbPluginException;
 
     /**
-     * @deprecated This version of updateRow is a short-term replacement for the older & now deprecated method of the same name.
+     * @deprecated This version of updateRow is a short-term replacement for the older and now deprecated method of the same name.
      * This API assumes an Open_vSwitch database Schema.
      *
      * This API is replaced by
-     * {@link #updateRow(Node, String, String, UUID, Row<GenericTableSchema>, boolean) updateRow}
+     * {@link #updateRow(Node, String, String, UUID, Row, boolean) updateRow}
      *
      * @param node OVSDB Node
      * @param tableName Table on which the row is Updated
-     * @param parentUuid UUID of the parent row on which this operation might result in mutating.
+     * @param rowUuid UUID of the parent row on which this operation might result in mutating.
      * @param rowUuid UUID of the row that is being updated
      * @param row Row of table Content to be Updated. Include just those columns that needs to be updated.
      */
@@ -144,10 +144,10 @@ public interface OvsdbConfigurationService {
                             Row<GenericTableSchema> row, boolean overwrite) throws OvsdbPluginException;
 
     /**
-     * @deprecated This version of deleteRow is a short-term replacement for the older & now deprecated method of the same name.
+     * @deprecated This version of deleteRow is a short-term replacement for the older and now deprecated method of the same name.
      * This API assumes an Open_vSwitch database Schema.
      *
-     * This API is replaced by {@link #deleteRow(Node, String, String, UUID) deleteRow}
+     * This API is replaced by {@link #deleteRow(Node, String, String, UUID)}
      *
      * @param node OVSDB Node
      * @param tableName Table on which the row is Updated
@@ -184,14 +184,14 @@ public interface OvsdbConfigurationService {
                            UUID parentRowUuid, String parentColumn, UUID rowUuid) throws OvsdbPluginException;
 
     /**
-     * @deprecated This version of getRow is a short-term replacement for the older & now deprecated method of the same name.
+     * @deprecated This version of getRow is a short-term replacement for the older and now deprecated method of the same name.
      * This API assumes an Open_vSwitch database Schema.
      *
      * This API is replaced by {@link #getRow(Node, String, String, UUID) getRow}
      *
      * @param node OVSDB Node
      * @param tableName Table Name
-     * @param rowUuid UUID of the row being queried
+     * @param uuid UUID of the row being queried
      * @return a row with a list of Column data that corresponds to an unique Row-identifier called uuid in a given table.
      */
     @Deprecated
@@ -210,7 +210,7 @@ public interface OvsdbConfigurationService {
     public Row<GenericTableSchema> getRow(Node node, String databaseName, String tableName, UUID uuid) throws OvsdbPluginException;
 
     /**
-     * @Deprecated This version of getRows is a short-term replacement for the older & now deprecated method of the same name.
+     * @deprecated This version of getRows is a short-term replacement for the older and now deprecated method of the same name.
      * This API assumes an Open_vSwitch database Schema.
      *
      * This API is replaced by
@@ -240,14 +240,14 @@ public interface OvsdbConfigurationService {
      * @param node OVSDB Node
      * @param databaseName Database Name that represents the Schema supported by the node.
      * @param tableName Table Name
-     * @param fiqlQuery FIQL style String Query {@link http://tools.ietf.org/html/draft-nottingham-atompub-fiql-00} to filter rows
+     * @param fiqlQuery FIQL style String Query <a href="http://tools.ietf.org/html/draft-nottingham-atompub-fiql-00">draft-nottingham-atompub-fiql</a> to filter rows
      * @throws OvsdbPluginException Any failure during the get operation will result in a specific exception.
      * @return Map of rows to its UUID that makes the entire Table.
      */
     public ConcurrentMap<UUID, Row<GenericTableSchema>> getRows(Node node, String databaseName, String tableName, String fiqlQuery) throws OvsdbPluginException;
 
     /**
-     * @Deprecated Returns all the Tables in a given Ndoe.
+     * @deprecated Returns all the Tables in a given Ndoe.
      * This API assumes an Open_vSwitch database Schema.
      *
      * This API is replaced by

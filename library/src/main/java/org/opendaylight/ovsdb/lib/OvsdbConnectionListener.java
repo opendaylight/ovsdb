@@ -16,13 +16,13 @@ package org.opendaylight.ovsdb.lib;
 public interface OvsdbConnectionListener {
     /**
      * Event thrown to the connection listener when a new Passive connection is established.
-     * @param OvsdbClient that represents the connection.
+     * @param client OvsdbClient that represents the connection.
      */
     public void connected(OvsdbClient client);
 
     /**
      * Event thrown to the connection listener when an existing connection is terminated.
-     * @param OvsdbClient that represents the connection.
+     * @param client OvsdbClient that represents the connection.
      */
     public void disconnected(OvsdbClient client);
 }

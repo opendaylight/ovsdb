@@ -26,7 +26,11 @@ public interface TenantNetworkManager {
 
     /**
      * Get the VLAN assigned to the provided Network
+<<<<<<< HEAD
      * @param node the {Node} to query
+=======
+     * @param node the {@link Node} to query
+>>>>>>> master
      * @param networkId the Neutron Network ID
      * @return the assigned VLAN ID or 0 in case of an error
      */
@@ -34,22 +38,32 @@ public interface TenantNetworkManager {
 
     /**
      * Reclaim the assigned VLAN for the given Network
+<<<<<<< HEAD
      * @param node the {Node} to query
+=======
+     * @param node the {@link Node} to query
+     * @param portUUID the UUID of the neutron Port
+>>>>>>> master
      * @param network the Neutron Network ID
      */
     public void reclaimInternalVlan(Node node, NeutronNetwork network);
 
     /**
      * Configures the VLAN for a Tenant Network
+<<<<<<< HEAD
      * @param node the {Node} to configure
      * @param tp the termination point
+=======
+     * @param node the {@link Node} to configure
+     * @param portUUID the UUID of the port to configure
+>>>>>>> master
      * @param network the Neutron Network ID
      */
     public void programInternalVlan(Node node, OvsdbTerminationPointAugmentation tp, NeutronNetwork network);
 
     /**
      * Check is the given network is present on a Node
-     * @param node the {Node} to query
+     * @param node the {@link Node} to query
      * @param segmentationId the Neutron Segementation ID
      * @return True or False
      */
@@ -69,7 +83,6 @@ public interface TenantNetworkManager {
      * Network Deleted Callback
      */
     public void networkDeleted(String id);
-
     NeutronNetwork getTenantNetwork(OvsdbTerminationPointAugmentation terminationPointAugmentation);
     public NeutronPort getTenantPort(OvsdbTerminationPointAugmentation terminationPointAugmentation);
 }

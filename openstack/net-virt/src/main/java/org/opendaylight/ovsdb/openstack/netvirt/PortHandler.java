@@ -122,7 +122,7 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware {
         List<Node> nodes = connectionService.getNodes();
         for (Node node : nodes) {
             try {
-                List<OvsdbTerminationPointAugmentation> ports = MdsalUtils.getPorts(node);
+                List<OvsdbTerminationPointAugmentation> ports = MdsalUtils.getTerminationPointsOfBridge(node);
                 for (OvsdbTerminationPointAugmentation port : ports) {
                     String neutronPortId =
                             MdsalUtils.getInterfaceExternalIdsValue(port, Constants.EXTERNAL_ID_INTERFACE_ID);

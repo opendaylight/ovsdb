@@ -72,7 +72,7 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
         }
 
         try {
-            List<OvsdbTerminationPointAugmentation> ports = MdsalUtils.getPorts(node);
+            List<OvsdbTerminationPointAugmentation> ports = MdsalUtils.getTerminationPointsOfBridge(node);
             for (OvsdbTerminationPointAugmentation port : ports) {
                 String ifaceId = MdsalUtils.getInterfaceExternalIdsValue(port, Constants.EXTERNAL_ID_INTERFACE_ID);
                 if (ifaceId != null && isInterfacePresentInTenantNetwork(ifaceId, networkId)) {

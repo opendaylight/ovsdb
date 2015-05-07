@@ -371,13 +371,6 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
         }
     }
 
-    //TODO: Will remove it if not needed
-    private Node getNodeFromCreatedData(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes,
-                         Map.Entry<InstanceIdentifier<?>, DataObject> change) {
-        InstanceIdentifier<Node> nodeInstanceIdentifier = change.getKey().firstIdentifierOf(Node.class);
-        return (Node)changes.getCreatedData().get(nodeInstanceIdentifier);
-    }
-
     private Node getNode(Map<InstanceIdentifier<?>, DataObject> changes,
                          Map.Entry<InstanceIdentifier<?>, DataObject> change) {
         InstanceIdentifier<Node> nodeInstanceIdentifier = change.getKey().firstIdentifierOf(Node.class);

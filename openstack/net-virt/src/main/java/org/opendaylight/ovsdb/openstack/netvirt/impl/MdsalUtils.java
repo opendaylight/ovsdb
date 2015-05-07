@@ -395,8 +395,38 @@ public class MdsalUtils {
         return null;
     }
 
+    /**
+     * Method read ports from bridge node. Method will check if the provided node
+     * has the ports details, if not, it will read from Operational data store.
+     * @param node
+     * @return
+     */
     public static List<OvsdbTerminationPointAugmentation> getPorts(Node node) {
-        return null;
+        List<OvsdbTerminationPointAugmentation> tpAugmentations = extractPortsFromNode( node);
+        if(tpAugmentations.isEmpty()){
+            tpAugmentations = readPortsFromDataStore(node);
+        }
+        return tpAugmentations;
+    }
+
+    public static List<OvsdbTerminationPointAugmentation> extractPortsFromNode( Node node ) {
+        List<OvsdbTerminationPointAugmentation> tpAugmentations = new ArrayList<OvsdbTerminationPointAugmentation>();
+        List<TerminationPoint> terminationPoints = node.getTerminationPoint();
+        if(terminationPoints != null && !terminationPoints.isEmpty()){
+            for(TerminationPoint tp : terminationPoints){
+                tpAugmentations.add(tp.getAugmentation(OvsdbTerminationPointAugmentation.class));
+            }
+        }
+        return tpAugmentations;
+    }
+
+    public static List<OvsdbTerminationPointAugmentation> readPortsFromDataStore( Node node ) {
+        InstanceIdentifier<Node> bridgeNodeIid = SouthboundMapper.createInstanceIdentifier(node.getNodeId());
+        Node operNode = read(LogicalDatastoreType.OPERATIONAL, bridgeNodeIid);
+        if(operNode != null){
+            return extractPortsFromNode(operNode);
+        }
+        return new ArrayList<OvsdbTerminationPointAugmentation>();
     }
 
     public static Boolean deletePort(Node node, String portName) {

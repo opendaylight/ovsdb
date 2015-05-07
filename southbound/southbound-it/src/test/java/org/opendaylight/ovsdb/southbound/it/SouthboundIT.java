@@ -15,13 +15,16 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.ObjectArrays;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -51,6 +54,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes.VlanMode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIdsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
@@ -102,6 +109,8 @@ import org.slf4j.LoggerFactory;
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 public class SouthboundIT extends AbstractMdsalTestBase {
+    private static final String EXPECTED_VALUES_KEY = "ExpectedValuesKey";
+    private static final String INPUT_VALUES_KEY = "InputValuesKey";
     private static final String NETDEV_DP_TYPE = "netdev";
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundIT.class);
     private static final int OVSDB_UPDATE_TIMEOUT = 1000;
@@ -406,12 +415,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                             new OvsdbBridgeName(SouthboundITConstants.BRIDGE_NAME));
                     NodeId bridgeNodeId = SouthboundMapper.createManagedNodeId(bridgeIid);
                     addBridge(connectionInfo, bridgeIid, SouthboundITConstants.BRIDGE_NAME, bridgeNodeId, false, null,
-                            true, dpType);
+                            true, dpType, null, null);
 
                     // Verify that the device is netdev
                     OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
                     Assert.assertNotNull(bridge);
-                    Assert.assertEquals(dpType, bridge.getDatapathType());
+                    Assert.assertEquals(dpTypeStr, bridge.getDatapathType());
 
                     // Add dpdk port
                     final String TEST_PORT_NAME = "testDPDKPort";
@@ -549,13 +558,17 @@ public class SouthboundIT extends AbstractMdsalTestBase {
      * @param failMode toggles whether default fail mode is set for the bridge
      * @param setManagedBy toggles whether to setManagedBy for the bridge
      * @param dpType if passed null, this parameter is ignored
+     * @param externalIds if passed null, this parameter is ignored
+     * @param otherConfig if passed null, this parameter is ignored
      * @return success of bridge addition
      * @throws InterruptedException
      */
     private boolean addBridge(final ConnectionInfo connectionInfo, InstanceIdentifier<Node> bridgeIid,
             final String bridgeName, NodeId bridgeNodeId, final boolean setProtocolEntries,
             final Class<? extends OvsdbFailModeBase> failMode, final boolean setManagedBy,
-            final Class<? extends DatapathTypeBase> dpType) throws InterruptedException {
+            final Class<? extends DatapathTypeBase> dpType,
+            final List<BridgeExternalIds> externalIds,
+            final List<BridgeOtherConfigs> otherConfigs) throws InterruptedException {
 
         NodeBuilder bridgeNodeBuilder = new NodeBuilder();
         if (bridgeIid == null) {
@@ -579,6 +592,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         if (dpType != null) {
             ovsdbBridgeAugmentationBuilder.setDatapathType(dpType);
         }
+        if (externalIds != null) {
+            ovsdbBridgeAugmentationBuilder.setBridgeExternalIds(externalIds);
+        }
+        if (otherConfigs != null) {
+            ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(otherConfigs);
+        }
         bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbBridgeAugmentationBuilder.build());
         LOG.debug("Built with the intent to store bridge data {}",
                 ovsdbBridgeAugmentationBuilder.toString());
@@ -592,24 +611,38 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         throws InterruptedException {
 
         return addBridge(connectionInfo, null, bridgeName, null, true,
-                SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"), true, null);
+                SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"), true, null, null, null);
     }
 
     private OvsdbBridgeAugmentation getBridge(ConnectionInfo connectionInfo) {
-        InstanceIdentifier<Node> bridgeIid =
-                SouthboundMapper.createInstanceIdentifier(connectionInfo,
-                        new OvsdbBridgeName(SouthboundITConstants.BRIDGE_NAME));
-        Node bridgeNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
+        return getBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME);
+    }
+
+    private OvsdbBridgeAugmentation getBridge(ConnectionInfo connectionInfo, String bridgeName) {
+        Node bridgeNode = getBridgeNode(connectionInfo, bridgeName);
         Assert.assertNotNull(bridgeNode);
         OvsdbBridgeAugmentation ovsdbBridgeAugmentation = bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class);
         Assert.assertNotNull(ovsdbBridgeAugmentation);
         return ovsdbBridgeAugmentation;
     }
 
+    private Node getBridgeNode(ConnectionInfo connectionInfo, String bridgeName) {
+        InstanceIdentifier<Node> bridgeIid =
+                SouthboundMapper.createInstanceIdentifier(connectionInfo,
+                    new OvsdbBridgeName(bridgeName));
+        return mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
+    }
+
     private boolean deleteBridge(ConnectionInfo connectionInfo) throws InterruptedException {
+        return deleteBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME);
+    }
+
+    private boolean deleteBridge(final ConnectionInfo connectionInfo, final String bridgeName)
+        throws InterruptedException {
+
         boolean result = mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION,
                 SouthboundMapper.createInstanceIdentifier(connectionInfo,
-                        new OvsdbBridgeName(SouthboundITConstants.BRIDGE_NAME)));
+                        new OvsdbBridgeName(bridgeName)));
         Thread.sleep(OVSDB_UPDATE_TIMEOUT);
         return result;
     }
@@ -990,6 +1023,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         connectOvsdbNode(connectionInfo);
         VlanMode []vlanModes = VlanMode.values();
         for (VlanMode vlanMode : vlanModes) {
+
             Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
             OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
             Assert.assertNotNull(bridge);
@@ -1112,6 +1146,382 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         Node node = topology.getNode().iterator().next();
         NodeId expectedNodeId = expectedNodeIid.firstKeyOf(Node.class, NodeKey.class).getNodeId();
         Assert.assertEquals(expectedNodeId, node.getNodeId());
+        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+    }
+
+    /*
+     * Generates the test cases involved in testing BridgeExternalIds.  See inline comments for descriptions of
+     * the particular cases considered.
+     *
+     * The return value is a Map in the form (K,V)=(testCaseName,testCase).
+     * - testCaseName is a String
+     * - testCase is a Map in the form (K,V) s.t. K=(EXPECTED_VALUES_KEY|INPUT_VALUES_KEY) and V is a List of
+     *     either corresponding INPUT bridge external ids, or EXPECTED bridge external ids
+     *     INPUT is the List we use when calling BridgeAugmentationBuilder.setBridgeExternalIds()
+     *     EXPECTED is the List we expect to receive after calling BridgeAugmentationBuilder.getBridgeExternalIds()
+     */
+    private Map<String, Map<String, List<BridgeExternalIds>>> generateBridgeExternalIdsTestCases() {
+        Map<String, Map<String, List<BridgeExternalIds>>> testMap =
+                new HashMap<String, Map<String, List<BridgeExternalIds>>>();
+
+        final String BRIDGE_EXTERNAL_ID_KEY = "BridgeExternalIdKey";
+        final String BRIDGE_EXTERNAL_ID_VALUE = "BridgeExternalIdValue";
+        final String FORMAT_STR = "%s_%s_%d";
+        final String GOOD_KEY = "GoodKey";
+        final String GOOD_VALUE = "GoodValue";
+        final String NO_VALUE_FOR_KEY = "NoValueForKey";
+        final String NO_KEY_FOR_VALUE = "NoKeyForValue";
+
+        // Test Case 1:  TestOneExternalId
+        // Test Type:    Positive
+        // Description:  Create a bridge with one BridgeExternalIds
+        // Expected:     A bridge is created with the single external_ids specified below
+        final String testOneExternalIdName = "TestOneExternalId";
+        int externalIdCounter = 0;
+        List<BridgeExternalIds> oneExternalId = (List<BridgeExternalIds>) Lists.newArrayList(
+            (new BridgeExternalIdsBuilder()
+                .setBridgeExternalIdKey(String.format(FORMAT_STR, testOneExternalIdName,
+                            BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
+                    .setBridgeExternalIdValue(String.format(FORMAT_STR, testOneExternalIdName,
+                            BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
+                    .build()));
+        Map<String,List<BridgeExternalIds>> testCase = Maps.newHashMap();
+        testCase.put(EXPECTED_VALUES_KEY, oneExternalId);
+        testCase.put(INPUT_VALUES_KEY, oneExternalId);
+        testMap.put(testOneExternalIdName, testCase);
+
+        // Test Case 2:  TestFiveExternalId
+        // Test Type:    Positive
+        // Description:  Create a bridge with multiple (five) BridgeExternalIds
+        // Expected:     A bridge is created with the five external_ids specified below
+        final String testFiveExternalIdName = "TestFiveExternalId";
+        externalIdCounter = 0;
+        List<BridgeExternalIds> fiveExternalId = (List<BridgeExternalIds>) Lists.newArrayList(
+            (new BridgeExternalIdsBuilder()
+                .setBridgeExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
+                            BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
+                    .setBridgeExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
+                            BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
+                    .build()),
+            (new BridgeExternalIdsBuilder()
+                .setBridgeExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
+                            BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
+                    .setBridgeExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
+                            BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
+                    .build()),
+            (new BridgeExternalIdsBuilder()
+                .setBridgeExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
+                            BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
+                    .setBridgeExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
+                            BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
+                    .build()),
+            (new BridgeExternalIdsBuilder()
+                .setBridgeExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
+                            BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
+                    .setBridgeExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
+                            BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
+                    .build()),
+            (new BridgeExternalIdsBuilder()
+                .setBridgeExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
+                        BRIDGE_EXTERNAL_ID_KEY, ++externalIdCounter))
+                    .setBridgeExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
+                            BRIDGE_EXTERNAL_ID_VALUE, externalIdCounter))
+                    .build()));
+        testCase = Maps.newHashMap();
+        testCase.put(EXPECTED_VALUES_KEY, fiveExternalId);
+        testCase.put(INPUT_VALUES_KEY, fiveExternalId);
+        testMap.put(testOneExternalIdName, testCase);
+
+        // Test Case 3:  TestOneGoodExternalIdOneMalformedExternalIdValue
+        // Test Type:    Negative
+        // Description:
+        //     One perfectly fine BridgeExternalId
+        //        (TestOneGoodExternalIdOneMalformedExternalIdValue_BridgeExternalIdKey_1,
+        //        TestOneGoodExternalIdOneMalformedExternalId_BridgeExternalIdValue_1)
+        //     and one malformed BridgeExternalId which only has key specified
+        //        (TestOneGoodExternalIdOneMalformedExternalIdValue_NoValueForKey_2,
+        //        UNSPECIFIED)
+        // Expected:     A bridge is created without any external_ids
+        final String testOneGoodExternalIdOneMalformedExternalIdValueName =
+                "TestOneGoodExternalIdOneMalformedExternalIdValue";
+        externalIdCounter = 0;
+        BridgeExternalIds oneGood = new BridgeExternalIdsBuilder()
+            .setBridgeExternalIdKey(String.format(FORMAT_STR, testOneGoodExternalIdOneMalformedExternalIdValueName,
+                    GOOD_KEY, ++externalIdCounter))
+                .setBridgeExternalIdValue(String.format("FORMAT_STR",
+                        testOneGoodExternalIdOneMalformedExternalIdValueName,
+                            GOOD_VALUE, externalIdCounter))
+                .build();
+        BridgeExternalIds oneBad = new BridgeExternalIdsBuilder()
+            .setBridgeExternalIdKey(String.format(FORMAT_STR,
+                    testOneGoodExternalIdOneMalformedExternalIdValueName, NO_VALUE_FOR_KEY, ++externalIdCounter))
+                .build();
+        List<BridgeExternalIds> oneGoodOneBadInput = (List<BridgeExternalIds>) Lists.newArrayList(
+                oneGood, oneBad);
+        List<BridgeExternalIds> oneGoodOneBadExpected = null;
+        testCase = Maps.newHashMap();
+        testCase.put(INPUT_VALUES_KEY, oneGoodOneBadInput);
+        testCase.put(EXPECTED_VALUES_KEY, oneGoodOneBadExpected);
+
+        // Test Case 4:  TestOneGoodExternalIdOneMalformedExternalIdKey
+        // Test Type:    Negative
+        // Description:
+        //     One perfectly fine BridgeExternalId
+        //        (TestOneGoodExternalIdOneMalformedExternalIdValue_BridgeExternalIdKey_1,
+        //        TestOneGoodExternalIdOneMalformedExternalId_BridgeExternalIdValue_1)
+        //     and one malformed BridgeExternalId which only has key specified
+        //        (UNSPECIFIED,
+        //        TestOneGoodExternalIdOneMalformedExternalIdKey_NoKeyForValue_2)
+        // Expected:     A bridge is created without any external_ids
+        final String testOneGoodExternalIdOneMalformedExternalIdKeyName =
+                "TestOneGoodExternalIdOneMalformedExternalIdKey";
+        externalIdCounter = 0;
+        oneGood = new BridgeExternalIdsBuilder()
+            .setBridgeExternalIdKey(String.format(FORMAT_STR, testOneGoodExternalIdOneMalformedExternalIdKeyName,
+                    GOOD_KEY, ++externalIdCounter))
+                .setBridgeExternalIdValue(String.format("FORMAT_STR",
+                        testOneGoodExternalIdOneMalformedExternalIdKeyName,
+                            GOOD_VALUE, externalIdCounter))
+                .build();
+        oneBad = new BridgeExternalIdsBuilder()
+            .setBridgeExternalIdKey(String.format(FORMAT_STR,
+                    testOneGoodExternalIdOneMalformedExternalIdKeyName, NO_KEY_FOR_VALUE, ++externalIdCounter))
+                .build();
+        oneGoodOneBadInput = (List<BridgeExternalIds>) Lists.newArrayList(
+                oneGood, oneBad);
+        oneGoodOneBadExpected = null;
+        testCase = Maps.newHashMap();
+        testCase.put(INPUT_VALUES_KEY, oneGoodOneBadInput);
+        testCase.put(EXPECTED_VALUES_KEY, oneGoodOneBadExpected);
+
+        return testMap;
+    }
+
+    /*
+     * @see <code>SouthboundIT.generateBridgeExternalIdsTestCases()</code> for specific test case information
+     */
+    @Test
+    public void testBridgeExternalIds() throws InterruptedException {
+        final String TEST_BRIDGE_PREFIX = "BridgeExtIds";
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        connectOvsdbNode(connectionInfo);
+
+        Map<String,Map<String, List<BridgeExternalIds>>> testCases =
+                generateBridgeExternalIdsTestCases();
+        List<BridgeExternalIds> inputBridgeExternalIds = null;
+        List<BridgeExternalIds> expectedBridgeExternalIds = null;
+        List<BridgeExternalIds> actualBridgeExternalIds = null;
+        String testBridgeName = null;
+        boolean bridgeAdded = false;
+        for (String testCaseKey : testCases.keySet()) {
+            testBridgeName = String.format("%s_%s", TEST_BRIDGE_PREFIX, testCaseKey);
+            inputBridgeExternalIds = testCases.get(testCaseKey).get(INPUT_VALUES_KEY);
+            expectedBridgeExternalIds = testCases.get(testCaseKey).get(EXPECTED_VALUES_KEY);
+            bridgeAdded = addBridge(connectionInfo, null, testBridgeName, null, true,
+                    SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"), true, null,
+                    inputBridgeExternalIds, null);
+            Assert.assertTrue(bridgeAdded);
+
+            actualBridgeExternalIds = getBridge(connectionInfo, testBridgeName).getBridgeExternalIds();
+
+            // Verify the expected external_ids are present, or no (null) external_ids are present
+            if (expectedBridgeExternalIds != null) {
+                for (BridgeExternalIds expectedExternalId : expectedBridgeExternalIds) {
+                    Assert.assertTrue(actualBridgeExternalIds.contains(expectedExternalId));
+                }
+            } else {
+                Assert.assertNull(actualBridgeExternalIds);
+            }
+            Assert.assertTrue(deleteBridge(connectionInfo, testBridgeName));
+        }
+        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+    }
+
+    /*
+     * Generates the test cases involved in testing BridgeOtherConfigs.  See inline comments for descriptions of
+     * the particular cases considered.
+     *
+     * The return value is a Map in the form (K,V)=(testCaseName,testCase).
+     * - testCaseName is a String
+     * - testCase is a Map in the form (K,V) s.t. K=(EXPECTED_VALUES_KEY|INPUT_VALUES_KEY) and V is a List of
+     *     either corresponding INPUT bridge other_configs, or EXPECTED bridge other_configs
+     *     INPUT is the List we use when calling BridgeAugmentationBuilder.setBridgeOtherConfigs()
+     *     EXPECTED is the List we expect to receive after calling BridgeAugmentationBuilder.getBridgeOtherConfigs()
+     */
+    private Map<String, Map<String, List<BridgeOtherConfigs>>> generateBridgeOtherConfigsTestCases() {
+        Map<String, Map<String, List<BridgeOtherConfigs>>> testMap =
+                new HashMap<String, Map<String, List<BridgeOtherConfigs>>>();
+
+        final String BRIDGE_OTHER_CONFIGS_KEY = "BridgeOtherConfigKey";
+        final String BRIDGE_OTHER_CONFIGS_VALUE = "BridgeOtherConfigValue";
+        final String FORMAT_STR = "%s_%s_%d";
+        final String GOOD_KEY = "GoodKey";
+        final String GOOD_VALUE = "GoodValue";
+        final String NO_VALUE_FOR_KEY = "NoValueForKey";
+        final String NO_KEY_FOR_VALUE = "NoKeyForValue";
+
+        // Test Case 1:  TestOneOtherConfig
+        // Test Type:    Positive
+        // Description:  Create a bridge with one other_config
+        // Expected:     A bridge is created with the single other_config specified below
+        final String testOneOtherConfigName = "TestOneOtherConfig";
+        int otherConfigCounter = 0;
+        List<BridgeOtherConfigs> oneOtherConfig = (List<BridgeOtherConfigs>) Lists.newArrayList(
+            (new BridgeOtherConfigsBuilder()
+                .setBridgeOtherConfigKey(String.format(FORMAT_STR, testOneOtherConfigName,
+                            BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
+                    .setBridgeOtherConfigValue(String.format(FORMAT_STR, testOneOtherConfigName,
+                            BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
+                    .build()));
+        Map<String,List<BridgeOtherConfigs>> testCase = Maps.newHashMap();
+        testCase.put(EXPECTED_VALUES_KEY, oneOtherConfig);
+        testCase.put(INPUT_VALUES_KEY, oneOtherConfig);
+        testMap.put(testOneOtherConfigName, testCase);
+
+        // Test Case 2:  TestFiveOtherConfig
+        // Test Type:    Positive
+        // Description:  Create a bridge with multiple (five) other_configs
+        // Expected:     A bridge is created with the five other_configs specified below
+        final String testFiveOtherConfigName = "TestFiveOtherConfig";
+        otherConfigCounter = 0;
+        List<BridgeOtherConfigs> fiveOtherConfig = (List<BridgeOtherConfigs>) Lists.newArrayList(
+            (new BridgeOtherConfigsBuilder()
+                .setBridgeOtherConfigKey(String.format(FORMAT_STR, testFiveOtherConfigName,
+                            BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
+                    .setBridgeOtherConfigValue(String.format(FORMAT_STR, testFiveOtherConfigName,
+                            BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
+                    .build()),
+            (new BridgeOtherConfigsBuilder()
+                .setBridgeOtherConfigKey(String.format(FORMAT_STR, testFiveOtherConfigName,
+                            BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
+                    .setBridgeOtherConfigValue(String.format(FORMAT_STR, testFiveOtherConfigName,
+                            BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
+                    .build()),
+            (new BridgeOtherConfigsBuilder()
+                .setBridgeOtherConfigKey(String.format(FORMAT_STR, testFiveOtherConfigName,
+                            BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
+                    .setBridgeOtherConfigValue(String.format(FORMAT_STR, testFiveOtherConfigName,
+                            BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
+                    .build()),
+            (new BridgeOtherConfigsBuilder()
+                .setBridgeOtherConfigKey(String.format(FORMAT_STR, testFiveOtherConfigName,
+                            BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
+                    .setBridgeOtherConfigValue(String.format(FORMAT_STR, testFiveOtherConfigName,
+                            BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
+                    .build()),
+            (new BridgeOtherConfigsBuilder()
+                .setBridgeOtherConfigKey(String.format(FORMAT_STR, testFiveOtherConfigName,
+                        BRIDGE_OTHER_CONFIGS_KEY, ++otherConfigCounter))
+                    .setBridgeOtherConfigValue(String.format(FORMAT_STR, testFiveOtherConfigName,
+                            BRIDGE_OTHER_CONFIGS_VALUE, otherConfigCounter))
+                    .build()));
+        testCase = Maps.newHashMap();
+        testCase.put(EXPECTED_VALUES_KEY, fiveOtherConfig);
+        testCase.put(INPUT_VALUES_KEY, fiveOtherConfig);
+        testMap.put(testOneOtherConfigName, testCase);
+
+        // Test Case 3:  TestOneGoodOtherConfigOneMalformedOtherConfigValue
+        // Test Type:    Negative
+        // Description:
+        //     One perfectly fine BridgeOtherConfig
+        //        (TestOneGoodOtherConfigOneMalformedOtherConfigValue_BridgeOtherConfigKey_1,
+        //        TestOneGoodOtherConfigOneMalformedOtherConfig_BridgeOtherConfigValue_1)
+        //     and one malformed BridgeOtherConfig which only has key specified
+        //        (TestOneGoodOtherConfigOneMalformedOtherConfigValue_NoValueForKey_2,
+        //        UNSPECIFIED)
+        // Expected:     A bridge is created without any other_config
+        final String testOneGoodOtherConfigOneMalformedOtherConfigValueName =
+                "TestOneGoodOtherConfigOneMalformedOtherConfigValue";
+        otherConfigCounter = 0;
+        BridgeOtherConfigs oneGood = new BridgeOtherConfigsBuilder()
+            .setBridgeOtherConfigKey(String.format(FORMAT_STR, testOneGoodOtherConfigOneMalformedOtherConfigValueName,
+                    GOOD_KEY, ++otherConfigCounter))
+                .setBridgeOtherConfigValue(String.format("FORMAT_STR",
+                        testOneGoodOtherConfigOneMalformedOtherConfigValueName,
+                            GOOD_VALUE, otherConfigCounter))
+                .build();
+        BridgeOtherConfigs oneBad = new BridgeOtherConfigsBuilder()
+            .setBridgeOtherConfigKey(String.format(FORMAT_STR,
+                    testOneGoodOtherConfigOneMalformedOtherConfigValueName, NO_VALUE_FOR_KEY, ++otherConfigCounter))
+                .build();
+        List<BridgeOtherConfigs> oneGoodOneBadInput = (List<BridgeOtherConfigs>) Lists.newArrayList(
+                oneGood, oneBad);
+        List<BridgeOtherConfigs> oneGoodOneBadExpected = null;
+        testCase = Maps.newHashMap();
+        testCase.put(INPUT_VALUES_KEY, oneGoodOneBadInput);
+        testCase.put(EXPECTED_VALUES_KEY, oneGoodOneBadExpected);
+
+        // Test Case 4:  TestOneGoodOtherConfigOneMalformedOtherConfigKey
+        // Test Type:    Negative
+        // Description:
+        //     One perfectly fine BridgeOtherConfig
+        //        (TestOneGoodOtherConfigOneMalformedOtherConfigValue_BridgeOtherConfigKey_1,
+        //        TestOneGoodOtherConfigOneMalformedOtherConfig_BridgeOtherConfigValue_1)
+        //     and one malformed BridgeOtherConfig which only has key specified
+        //        (UNSPECIFIED,
+        //        TestOneGoodOtherConfigOneMalformedOtherConfigKey_NoKeyForValue_2)
+        // Expected:     A bridge is created without any other_config
+        final String testOneGoodOtherConfigOneMalformedOtherConfigKeyName =
+                "TestOneGoodOtherConfigOneMalformedOtherConfigIdKey";
+        otherConfigCounter = 0;
+        oneGood = new BridgeOtherConfigsBuilder()
+            .setBridgeOtherConfigKey(String.format(FORMAT_STR, testOneGoodOtherConfigOneMalformedOtherConfigKeyName,
+                    GOOD_KEY, ++otherConfigCounter))
+                .setBridgeOtherConfigValue(String.format("FORMAT_STR",
+                        testOneGoodOtherConfigOneMalformedOtherConfigKeyName,
+                            GOOD_VALUE, otherConfigCounter))
+                .build();
+        oneBad = new BridgeOtherConfigsBuilder()
+            .setBridgeOtherConfigKey(String.format(FORMAT_STR,
+                    testOneGoodOtherConfigOneMalformedOtherConfigKeyName, NO_KEY_FOR_VALUE, ++otherConfigCounter))
+                .build();
+        oneGoodOneBadInput = (List<BridgeOtherConfigs>) Lists.newArrayList(
+                oneGood, oneBad);
+        oneGoodOneBadExpected = null;
+        testCase = Maps.newHashMap();
+        testCase.put(INPUT_VALUES_KEY, oneGoodOneBadInput);
+        testCase.put(EXPECTED_VALUES_KEY, oneGoodOneBadExpected);
+
+        return testMap;
+    }
+
+    /*
+     * @see <code>SouthboundIT.generateBridgeOtherConfigsTestCases()</code> for specific test case information.
+     */
+    @Test
+    public void testBridgeOtherConfigs() throws InterruptedException {
+        final String TEST_BRIDGE_PREFIX = "BridgeOtherConfig";
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        connectOvsdbNode(connectionInfo);
+
+        Map<String,Map<String, List<BridgeOtherConfigs>>> testCases =
+                generateBridgeOtherConfigsTestCases();
+        List<BridgeOtherConfigs> inputBridgeOtherConfigs = null;
+        List<BridgeOtherConfigs> expectedBridgeOtherConfigs = null;
+        List<BridgeOtherConfigs> actualBridgeOtherConfigs = null;
+        String testBridgeName = null;
+        boolean bridgeAdded = false;
+        for (String testCaseKey : testCases.keySet()) {
+            testBridgeName = String.format("%s_%s", TEST_BRIDGE_PREFIX, testCaseKey);
+            inputBridgeOtherConfigs = testCases.get(testCaseKey).get(INPUT_VALUES_KEY);
+            expectedBridgeOtherConfigs = testCases.get(testCaseKey).get(EXPECTED_VALUES_KEY);
+            bridgeAdded = addBridge(connectionInfo, null, testBridgeName, null, true,
+                    SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"), true, null,
+                    null, inputBridgeOtherConfigs);
+            Assert.assertTrue(bridgeAdded);
+
+            actualBridgeOtherConfigs = getBridge(connectionInfo, testBridgeName).getBridgeOtherConfigs();
+
+            // Verify the expected other_config are present, or no (null) other_config are present
+            if (expectedBridgeOtherConfigs != null) {
+                for (BridgeOtherConfigs expectedOtherConfig : expectedBridgeOtherConfigs) {
+                    Assert.assertTrue(actualBridgeOtherConfigs.contains(expectedOtherConfig));
+                }
+            } else {
+                Assert.assertNull(actualBridgeOtherConfigs);
+            }
+            Assert.assertTrue(deleteBridge(connectionInfo, testBridgeName));
+        }
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
 

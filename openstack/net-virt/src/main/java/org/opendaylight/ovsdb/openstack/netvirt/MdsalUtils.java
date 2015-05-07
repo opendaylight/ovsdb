@@ -45,6 +45,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.OptionsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.OptionsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
@@ -420,8 +422,11 @@ public class MdsalUtils {
     }
 
     public static Boolean addTerminationPoint(Node bridgeNode, String bridgeName, String portName) {
-        InstanceIdentifier<TerminationPoint> tpIid = MdsalHelper.createTerminationPointInstanceIdentifier(bridgeNode, portName);
-        OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder = new OvsdbTerminationPointAugmentationBuilder();
+        InstanceIdentifier<TerminationPoint> tpIid =
+                MdsalHelper.createTerminationPointInstanceIdentifier(bridgeNode, portName);
+        OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder =
+                new OvsdbTerminationPointAugmentationBuilder();
+
         tpAugmentationBuilder.setName(portName);
         tpAugmentationBuilder.setInterfaceType(InterfaceTypeInternal.class);
         TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
@@ -433,9 +438,29 @@ public class MdsalUtils {
         return false;
     }
 
-    public static Boolean addTunnelTerminationPoint(Node node, String bridgeName, String portName, String type,
+    public static Boolean addTunnelTerminationPoint(Node bridgeNode, String bridgeName, String portName, String type,
                                         Map<String, String> options) {
-        return false;
+        InstanceIdentifier<TerminationPoint> tpIid =
+                MdsalHelper.createTerminationPointInstanceIdentifier(bridgeNode, portName);
+        OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder =
+                new OvsdbTerminationPointAugmentationBuilder();
+
+        tpAugmentationBuilder.setName(portName);
+        tpAugmentationBuilder.setInterfaceType(MdsalHelper.OVSDB_INTERFACE_TYPE_MAP.get(type));
+
+        List<Options> optionsList = new ArrayList<Options>();
+        for(Map.Entry<String,String> entry : options.entrySet()){
+            OptionsBuilder optionsBuilder = new OptionsBuilder();
+            optionsBuilder.setKey(new OptionsKey(entry.getKey()));
+            optionsBuilder.setOption(entry.getKey());
+            optionsBuilder.setValue(entry.getValue());
+            optionsList.add(optionsBuilder.build());
+        }
+        tpAugmentationBuilder.setOptions(optionsList);
+
+        TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
+        tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
+        return put(LogicalDatastoreType.CONFIGURATION,tpIid,tpBuilder.build());
     }
 
     public static Boolean addPatchTerminationPoint(Node node, String bridgeName, String portName, String peerPortName) {

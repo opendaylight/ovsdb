@@ -11,6 +11,22 @@ package org.opendaylight.ovsdb.openstack.netvirt;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeBase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeDpdk;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeDpdkr;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeDpdkvhost;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeDpdkvhostuser;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeGeneve;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeGre;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeGre64;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeInternal;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeIpsecGre;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeIpsecGre64;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeLisp;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypePatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeSystem;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeTap;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeVxlan;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
@@ -26,12 +42,34 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableBiMap;
+
 public class MdsalHelper {
     private static final Logger LOG = LoggerFactory.getLogger(MdsalUtils.class);
     public static final TopologyId OVSDB_TOPOLOGY_ID = new TopologyId(new Uri("ovsdb:1"));
     public static final String OVSDB_URI_PREFIX = "ovsdb";
     public static final String BRIDGE_URI_PREFIX = "bridge";
     public static final String TP_URI_PREFIX = "termination-point";
+
+    public static final ImmutableBiMap<String, Class<? extends InterfaceTypeBase>> OVSDB_INTERFACE_TYPE_MAP
+    = new ImmutableBiMap.Builder<String, Class<? extends InterfaceTypeBase>>()
+        .put("internal", InterfaceTypeInternal.class)
+        .put("vxlan", InterfaceTypeVxlan.class)
+        .put("patch", InterfaceTypePatch.class)
+        .put("system", InterfaceTypeSystem.class)
+        .put("tap", InterfaceTypeTap.class)
+        .put("geneve", InterfaceTypeGeneve.class)
+        .put("gre", InterfaceTypeGre.class)
+        .put("ipsec_gre", InterfaceTypeIpsecGre.class)
+        .put("gre64", InterfaceTypeGre64.class)
+        .put("ipsec_gre64", InterfaceTypeIpsecGre64.class)
+        .put("lisp", InterfaceTypeLisp.class)
+        .put("dpdk", InterfaceTypeDpdk.class)
+        .put("dpdkr", InterfaceTypeDpdkr.class)
+        .put("dpdkvhost", InterfaceTypeDpdkvhost.class)
+        .put("dpdkvhostuser", InterfaceTypeDpdkvhostuser.class)
+        .build();
+
 
     public static NodeId createManagedNodeId(ConnectionInfo key, String bridgeName) {
         return createManagedNodeId(key.getRemoteIp(),key.getRemotePort(),bridgeName);

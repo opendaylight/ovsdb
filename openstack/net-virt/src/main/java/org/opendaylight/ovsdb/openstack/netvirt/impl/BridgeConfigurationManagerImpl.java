@@ -65,7 +65,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
 
     @Override
     public boolean isPortOnBridge (Node node, String portName) {
-        return MdsalUtils.getPort(node, portName) != null;
+        return MdsalUtils.extractTerminationPointAugmentation(node, portName) != null;
     }
 
     @Override
@@ -87,7 +87,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
 
         /* Check if physical device is added to br-int. */
         String phyNetName = this.getPhysicalInterfaceName(node, network.getProviderPhysicalNetwork());
-        if (MdsalUtils.getPort(node, phyNetName) == null) {
+        if (MdsalUtils.extractTerminationPointAugmentation(node, phyNetName) == null) {
             LOGGER.trace("isNodeVlanReady: node: {}, eth missing", node);
             return false;
         }
@@ -307,8 +307,8 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     private boolean addPortToBridge (Node node, String bridgeName, String portName) throws Exception {
         boolean rv = true;
 
-        if (MdsalUtils.getPort(node, portName) == null) {
-            rv = MdsalUtils.addPort(node, bridgeName, portName);
+        if (MdsalUtils.extractTerminationPointAugmentation(node, portName) == null) {
+            rv = MdsalUtils.addTerminationPoint(node, bridgeName, portName);
         }
 
         return rv;
@@ -320,8 +320,8 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     private boolean addPatchPort (Node node, String bridgeName, String portName, String peerPortName) throws Exception {
         boolean rv = true;
 
-        if (MdsalUtils.getPort(node, portName) == null) {
-            rv = MdsalUtils.addPatchPort(node, bridgeName, portName, peerPortName);
+        if (MdsalUtils.extractTerminationPointAugmentation(node, portName) == null) {
+            rv = MdsalUtils.addPatchTerminationPoint(node, bridgeName, portName, peerPortName);
         }
 
         return rv;

@@ -258,7 +258,7 @@ public class InstructionUtils {
 
         int index = 0;
         boolean isPortDeleted = false;
-        boolean removeFlow = true;
+        boolean removeFlow = false;
         for (Action action : actionList) {
             if (action.getAction() instanceof OutputActionCase) {
                 OutputActionCase opAction = (OutputActionCase) action.getAction();
@@ -274,20 +274,24 @@ public class InstructionUtils {
         }
 
         if (isPortDeleted) {
-            for (int i = index; i < actionList.size(); i++) {
+            int actionListSize = actionList.size();
+            for (int i = 0; i < index; i++) {
                 Action action = actionList.get(i);
-                if (action.getOrder() != i) {
+                int newOrder = actionListSize -i -1;
+                if (action.getOrder() != newOrder) {
                     /* Shift the action order */
                     ab = new ActionBuilder();
                     ab.setAction(action.getAction());
-                    ab.setOrder(i);
-                    ab.setKey(new ActionKey(i));
+                    ab.setOrder(newOrder);
+                    ab.setKey(new ActionKey(newOrder));
                     Action actionNewOrder = ab.build();
                     actionList.remove(action);
                     actionList.add(i, actionNewOrder);
                 }
                 if (action.getAction() instanceof OutputActionCase) {
                     removeFlow = false;
+                } else if(actionListSize == 0) {
+                    removeFlow = true;
                 }
             }
         }

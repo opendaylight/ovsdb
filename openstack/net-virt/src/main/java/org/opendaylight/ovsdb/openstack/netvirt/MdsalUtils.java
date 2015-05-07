@@ -434,8 +434,10 @@ public class MdsalUtils {
         return put(LogicalDatastoreType.CONFIGURATION,tpIid,tpBuilder.build());
     }
 
-    public static Boolean deleteTerminationPoint(Node node, String portName) {
-        return false;
+    public static Boolean deleteTerminationPoint(Node bridgeNode, String portName) {
+        InstanceIdentifier<TerminationPoint> tpIid =
+                MdsalHelper.createTerminationPointInstanceIdentifier(bridgeNode, portName);
+        return delete(LogicalDatastoreType.CONFIGURATION,tpIid);
     }
 
     public static Boolean addTunnelTerminationPoint(Node bridgeNode, String bridgeName, String portName, String type,

@@ -318,20 +318,30 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
     private void processBridgeUpdate(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
         LOG.info("processBridgeUpdate - Received changes : {}", changes);
-        
+
         for (Map.Entry<InstanceIdentifier<?>, DataObject> updatedBridge : changes.getUpdatedData().entrySet()) {
             if(updatedBridge.getKey() instanceof OvsdbBridgeAugmentation){
                 LOG.info("Processing update on a bridge : {}",updatedBridge);
-                Node bridgeParentNode  = getNode(changes.getUpdatedData(), updatedBridge);
+                /* XXX (NOTE): Extract parent node data from originalData(), rather then extracting it from
+                 updatedData() because, extracting it from originalData() will give all the
+                 (existing data of parent node + old data of the OvsdbBridgeAugmentation).
+                 If we extract parent node data from updatedData, it will give us
+                 ( Node data + new OvsdbBridgeAugmentation data). To determine the update in
+                 OvsdbBridgeAugmentation, we need to compare it's old and new values, so parent
+                 node data from originalData will contain old value and OvsdbBridgeAugmentation
+                 from updateData() will provide new data.
+                 */
+
+                Node bridgeParentNode  = getNode(changes.getOriginalData(), updatedBridge);
                 if(bridgeParentNode == null){
                     // Logging this warning, to catch any change in southbound plugin behavior
-                    LOG.warn("Parent Node for bridge is not found. Bridge creation must provide the Node "
-                            + "details in create Data Changes. This condition should not occure" );
+                    LOG.warn("Parent Node for bridge is not found. Bridge update must provide the Node "
+                            + "details in original Data Changes. This condition should not occure" );
                     continue;
                 }
                 LOG.debug("Process bridge {} update on Node : {}", updatedBridge.getValue(),bridgeParentNode);
                 ovsdbUpdate(bridgeParentNode, updatedBridge.getValue(),
-                        OvsdbInventoryListener.OvsdbType.BRIDGE, Action.ADD);
+                        OvsdbInventoryListener.OvsdbType.BRIDGE, Action.UPDATE);
             }
         }
     }

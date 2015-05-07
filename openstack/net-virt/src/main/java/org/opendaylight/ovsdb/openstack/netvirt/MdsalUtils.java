@@ -14,6 +14,7 @@ import com.google.common.util.concurrent.CheckedFuture;
 import java.math.BigInteger;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -68,6 +69,7 @@ public class MdsalUtils {
     private static final Logger LOG = LoggerFactory.getLogger(MdsalUtils.class);
     private static DataBroker databroker = null;
     private static final int OVSDB_UPDATE_TIMEOUT = 500;
+    private static final String PORT_TYPE = "patch";
 
     /**
      * Class constructor setting the data broker.
@@ -464,7 +466,9 @@ public class MdsalUtils {
     }
 
     public static Boolean addPatchTerminationPoint(Node node, String bridgeName, String portName, String peerPortName) {
-        return false;
+        Map<String, String> option = new HashMap<String, String>();
+        option.put("peer", peerPortName);
+        return addTunnelTerminationPoint(node, bridgeName, portName, PORT_TYPE, option);
     }
 
     public static String getExternalId(Node node, OvsdbTables table, String key) {

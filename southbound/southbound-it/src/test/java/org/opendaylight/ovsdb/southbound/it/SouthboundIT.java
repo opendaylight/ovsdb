@@ -618,19 +618,63 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         return getBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME);
     }
 
-    private OvsdbBridgeAugmentation getBridge(ConnectionInfo connectionInfo, String bridgeName) {
-        Node bridgeNode = getBridgeNode(connectionInfo, bridgeName);
+    /**
+     * Extract the <code>store</code> type data store contents for the particular bridge identified by
+     * <code>bridgeName</code>.
+     *
+     * @param connectionInfo
+     * @param bridgeName
+     * @param store defined by the <code>LogicalDatastoreType</code> enumeration
+     * @return <code>store</code> type data store contents
+     */
+    private OvsdbBridgeAugmentation getBridge(ConnectionInfo connectionInfo, String bridgeName,
+            LogicalDatastoreType store) {
+        Node bridgeNode = getBridgeNode(connectionInfo, bridgeName, store);
         Assert.assertNotNull(bridgeNode);
         OvsdbBridgeAugmentation ovsdbBridgeAugmentation = bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class);
         Assert.assertNotNull(ovsdbBridgeAugmentation);
         return ovsdbBridgeAugmentation;
     }
 
-    private Node getBridgeNode(ConnectionInfo connectionInfo, String bridgeName) {
+    /**
+     * extract the <code>LogicalDataStoreType.OPERATIONAL</code> type data store contents for the particular bridge
+     * identified by <code>bridgeName</code>
+     *
+     * @param connectionInfo
+     * @param bridgeName
+     * @see <code>SouthboundIT.getBridge(ConnectionInfo, String, LogicalDatastoreType)</code>
+     * @return <code>LogicalDatastoreType.OPERATIONAL</code> type data store contents
+     */
+    private OvsdbBridgeAugmentation getBridge(ConnectionInfo connectionInfo, String bridgeName) {
+        return getBridge(connectionInfo, bridgeName, LogicalDatastoreType.OPERATIONAL);
+    }
+
+    /**
+     * Extract the node contents from <code>store</code> type data store for the
+     * bridge identified by <code>bridgeName</code>
+     *
+     * @param connectionInfo
+     * @param bridgeName
+     * @param store defined by the <code>LogicalDatastoreType</code> enumeration
+     * @return <code>store</code> type data store contents
+     */
+    private Node getBridgeNode(ConnectionInfo connectionInfo, String bridgeName, LogicalDatastoreType store) {
         InstanceIdentifier<Node> bridgeIid =
                 SouthboundMapper.createInstanceIdentifier(connectionInfo,
                     new OvsdbBridgeName(bridgeName));
-        return mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
+        return mdsalUtils.read(store, bridgeIid);
+    }
+
+    /**
+     * Extract the node contents from <code>LogicalDataStoreType.OPERATIONAL</code> data store for the
+     * bridge identified by <code>bridgeName</code>
+     *
+     * @param connectionInfo
+     * @param bridgeName
+     * @return <code>LogicalDatastoreType.OPERATIONAL</code> type data store contents
+     */
+    private Node getBridgeNode(ConnectionInfo connectionInfo, String bridgeName) {
+        return getBridgeNode(connectionInfo, bridgeName, LogicalDatastoreType.OPERATIONAL);
     }
 
     private boolean deleteBridge(ConnectionInfo connectionInfo) throws InterruptedException {
@@ -1298,46 +1342,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     /*
-     * @see <code>SouthboundIT.generateBridgeExternalIdsTestCases()</code> for specific test case information
-     */
-    @Test
-    public void testBridgeExternalIds() throws InterruptedException {
-        final String TEST_BRIDGE_PREFIX = "BridgeExtIds";
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
-        connectOvsdbNode(connectionInfo);
-
-        Map<String,Map<String, List<BridgeExternalIds>>> testCases =
-                generateBridgeExternalIdsTestCases();
-        List<BridgeExternalIds> inputBridgeExternalIds = null;
-        List<BridgeExternalIds> expectedBridgeExternalIds = null;
-        List<BridgeExternalIds> actualBridgeExternalIds = null;
-        String testBridgeName = null;
-        boolean bridgeAdded = false;
-        for (String testCaseKey : testCases.keySet()) {
-            testBridgeName = String.format("%s_%s", TEST_BRIDGE_PREFIX, testCaseKey);
-            inputBridgeExternalIds = testCases.get(testCaseKey).get(INPUT_VALUES_KEY);
-            expectedBridgeExternalIds = testCases.get(testCaseKey).get(EXPECTED_VALUES_KEY);
-            bridgeAdded = addBridge(connectionInfo, null, testBridgeName, null, true,
-                    SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"), true, null,
-                    inputBridgeExternalIds, null);
-            Assert.assertTrue(bridgeAdded);
-
-            actualBridgeExternalIds = getBridge(connectionInfo, testBridgeName).getBridgeExternalIds();
-
-            // Verify the expected external_ids are present, or no (null) external_ids are present
-            if (expectedBridgeExternalIds != null) {
-                for (BridgeExternalIds expectedExternalId : expectedBridgeExternalIds) {
-                    Assert.assertTrue(actualBridgeExternalIds.contains(expectedExternalId));
-                }
-            } else {
-                Assert.assertNull(actualBridgeExternalIds);
-            }
-            Assert.assertTrue(deleteBridge(connectionInfo, testBridgeName));
-        }
-        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
-    }
-
-    /*
      * Generates the test cases involved in testing BridgeOtherConfigs.  See inline comments for descriptions of
      * the particular cases considered.
      *
@@ -1521,6 +1525,123 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 Assert.assertNull(actualBridgeOtherConfigs);
             }
             Assert.assertTrue(deleteBridge(connectionInfo, testBridgeName));
+        }
+        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+    }
+
+    /*
+     * @see <code>SouthboundIT.generateBridgeExternalIdsTestCases()</code> for specific test case information
+     */
+    @Test
+    public void testCRUDBridgeExternalIds() throws InterruptedException {
+        final String TEST_BRIDGE_PREFIX = "UpdateBridgeExternalIds";
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        connectOvsdbNode(connectionInfo);
+        // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
+        // the update has been performed.
+        Map<String, Map<String, List<BridgeExternalIds>>> updateFromTestCases = generateBridgeExternalIdsTestCases();
+        Map<String, Map<String, List<BridgeExternalIds>>> updateToTestCases = generateBridgeExternalIdsTestCases();
+        List<BridgeExternalIds> updateFromTestCase = null;
+        List<BridgeExternalIds> actualBridgeExternalIds = null;
+        List<BridgeExternalIds> configuredBridgeExternalIds = null;
+        String testBridgeName = null;
+        for (String updateFromTestCaseKey : updateFromTestCases.keySet()) {
+            updateFromTestCase = updateFromTestCases.get(updateFromTestCaseKey).get(INPUT_VALUES_KEY);
+            for (String testCaseKey : updateToTestCases.keySet()) {
+                // CREATE: Create the test bridge
+                testBridgeName = String.format("%s_%s", TEST_BRIDGE_PREFIX, testCaseKey);
+                Map<String, List<BridgeExternalIds>> testCase = updateToTestCases.get(testCaseKey);
+                List<BridgeExternalIds> inputBridgeExternalIds = testCase.get(INPUT_VALUES_KEY);
+                List<BridgeExternalIds> expectedBridgeExternalIds = testCase.get(EXPECTED_VALUES_KEY);
+                boolean bridgeAdded = addBridge(connectionInfo, null,
+                        testBridgeName, null, true, SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
+                        true, null, updateFromTestCase, null);
+                Assert.assertTrue(bridgeAdded);
+
+                // READ: Read the test bridge
+                // Test that the changes are propagated to the CONFIGURATION data store
+                configuredBridgeExternalIds = getBridge(connectionInfo, testBridgeName,
+                        LogicalDatastoreType.CONFIGURATION).getBridgeExternalIds();
+                // Verify the expected external_ids are present in the CONFIGURATION data store,
+                // or no (null) external_ids are present
+                if (expectedBridgeExternalIds != null) {
+                    for (BridgeExternalIds expectedExternalId : expectedBridgeExternalIds) {
+                        Assert.assertTrue(configuredBridgeExternalIds.contains(expectedExternalId));
+                    }
+                } else {
+                    Assert.assertNull(configuredBridgeExternalIds);
+                }
+
+                actualBridgeExternalIds = getBridge(connectionInfo, testBridgeName).getBridgeExternalIds();
+                // Verify the expected external_ids are present, or no (null) external_ids are present
+                if (expectedBridgeExternalIds != null) {
+                    for (BridgeExternalIds expectedExternalId : expectedBridgeExternalIds) {
+                        Assert.assertTrue(actualBridgeExternalIds.contains(expectedExternalId));
+                    }
+                } else {
+                    Assert.assertNull(actualBridgeExternalIds);
+                }
+
+                // UPDATE:  update the external_ids from <code>updateFromTestCase</code> to
+                //          <code>inputBridgeExternalIds</code>
+                // Modify the test bridge with the appropriate inputExternalIds in the config datastore
+                OvsdbBridgeAugmentationBuilder bridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
+                bridgeAugmentationBuilder.setBridgeExternalIds(inputBridgeExternalIds);
+                InstanceIdentifier<Node> bridgeIid =
+                        SouthboundMapper.createInstanceIdentifier(connectionInfo,
+                            new OvsdbBridgeName(testBridgeName));
+                NodeBuilder bridgeNodeBuilder = new NodeBuilder();
+                Node bridgeNode = getBridgeNode(connectionInfo, testBridgeName);
+                bridgeNodeBuilder.setNodeId(bridgeNode.getNodeId());
+                bridgeNodeBuilder.setKey(bridgeNode.getKey());
+                bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, bridgeAugmentationBuilder.build());
+                boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, bridgeIid, 
+                        bridgeNodeBuilder.build());
+                Thread.sleep(OVSDB_UPDATE_TIMEOUT);
+                Assert.assertTrue(result);
+
+                // Test that the changes are propagated to the CONFIGURATION data store
+                configuredBridgeExternalIds = getBridge(connectionInfo, testBridgeName,
+                        LogicalDatastoreType.CONFIGURATION).getBridgeExternalIds();
+                // Verify the expected external_ids are present in the CONFIGURATION data store,
+                // or no (null) external_ids are present
+                if (expectedBridgeExternalIds != null) {
+                    for (BridgeExternalIds expectedExternalId : expectedBridgeExternalIds) {
+                        Assert.assertTrue(configuredBridgeExternalIds.contains(expectedExternalId));
+                    }
+                } else {
+                    Assert.assertNull(configuredBridgeExternalIds);
+                }
+
+                // Make sure the old bridge external ids aren't present in the CONFIGURATION data store
+                for (BridgeExternalIds erasedExternalId : updateFromTestCase) {
+                    if (!expectedBridgeExternalIds.contains(erasedExternalId)) {
+                        Assert.assertTrue(!configuredBridgeExternalIds.contains(erasedExternalId));
+                    }
+                }
+
+                // Test that the changes are propagated to the OPERATIONAL data store
+                actualBridgeExternalIds = getBridge(connectionInfo, testBridgeName)
+                        .getBridgeExternalIds();
+                // Verify the expected external_ids are present in the OPERATIONAL data store,
+                // or no (null) external_ids are present
+                if (expectedBridgeExternalIds != null) {
+                    for (BridgeExternalIds expectedExternalId : expectedBridgeExternalIds) {
+                        Assert.assertTrue(actualBridgeExternalIds.contains(expectedExternalId));
+                    }
+                } else {
+                    Assert.assertNull(actualBridgeExternalIds);
+                }
+                // Make sure the old bridge external ids aren't present in the OPERATIONAL data store
+                for (BridgeExternalIds erasedExternalId : updateFromTestCase) {
+                    if (!expectedBridgeExternalIds.contains(erasedExternalId)) {
+                        Assert.assertTrue(!actualBridgeExternalIds.contains(erasedExternalId));
+                    }
+                }
+
+                // DELETE
+                Assert.assertTrue(deleteBridge(connectionInfo, testBridgeName));
+            }
         }
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }

@@ -794,7 +794,7 @@ public class OF13Provider implements NetworkingProvider {
                 return;
             }
 
-            List<OvsdbTerminationPointAugmentation> intfs = MdsalUtils.getPorts(node);
+            List<OvsdbTerminationPointAugmentation> intfs = MdsalUtils.getTerminationPointsOfBridge(node);
             for (OvsdbTerminationPointAugmentation tunIntf : intfs) {
                 Long ofPort = 0L;
                 if (tunIntf.getName().equals(getTunnelName(tunnelType, dst))) {
@@ -844,7 +844,7 @@ public class OF13Provider implements NetworkingProvider {
                 return;
             }
 
-            List<OvsdbTerminationPointAugmentation> intfs = MdsalUtils.getPorts(node);
+            List<OvsdbTerminationPointAugmentation> intfs = MdsalUtils.getTerminationPointsOfBridge(node);
             for (OvsdbTerminationPointAugmentation tunIntf : intfs) {
                 Long ofPort = 0L;
                 if (tunIntf.getName().equals(getTunnelName(tunnelType, dst))) {
@@ -889,7 +889,7 @@ public class OF13Provider implements NetworkingProvider {
             return;
         }
 
-        List<OvsdbTerminationPointAugmentation> intfs = MdsalUtils.getPorts(node);
+        List<OvsdbTerminationPointAugmentation> intfs = MdsalUtils.getTerminationPointsOfBridge(node);
         for (OvsdbTerminationPointAugmentation ethIntf : intfs) {
             Long ofPort = 0L;
             if (ethIntf.getName().equalsIgnoreCase(bridgeConfigurationManager.getPhysicalInterfaceName(
@@ -924,7 +924,7 @@ public class OF13Provider implements NetworkingProvider {
             return;
         }
 
-        List<OvsdbTerminationPointAugmentation> intfs = MdsalUtils.getPorts(node);
+        List<OvsdbTerminationPointAugmentation> intfs = MdsalUtils.getTerminationPointsOfBridge(node);
         for (OvsdbTerminationPointAugmentation ethIntf : intfs) {
             Long ofPort = 0L;
             if (ethIntf.getName().equalsIgnoreCase(bridgeConfigurationManager.getPhysicalInterfaceName(
@@ -981,7 +981,7 @@ public class OF13Provider implements NetworkingProvider {
     }
 
     private void triggerInterfaceUpdates(Node node) {
-        List<TerminationPoint> tps = MdsalUtils.getTerminationPoints(node);
+        List<TerminationPoint> tps = MdsalUtils.extractTerminationPoints(node);
         if (tps != null) {
             for (TerminationPoint tp : tps) {
                 OvsdbTerminationPointAugmentation port = tp.getAugmentation(OvsdbTerminationPointAugmentation.class);

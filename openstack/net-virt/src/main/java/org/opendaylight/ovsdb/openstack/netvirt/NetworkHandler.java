@@ -148,7 +148,7 @@ public class NetworkHandler extends AbstractHandler
                 for (Node node : nodes) {
                     List<String> phyIfName = bridgeConfigurationManager.getAllPhysicalInterfaceNames(node);
                     try {
-                        List<OvsdbTerminationPointAugmentation> ports = MdsalUtils.getPorts(node);
+                        List<OvsdbTerminationPointAugmentation> ports = MdsalUtils.getTerminationPointsOfBridge(node);
                         for (OvsdbTerminationPointAugmentation port : ports) {
                             if (MdsalUtils.isTunnel(port)) {
                                 logger.trace("Delete tunnel interface {}", port.getName());

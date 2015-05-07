@@ -139,7 +139,7 @@ public class SouthboundHandler extends AbstractHandler
                 processBridgeUpdate(node, bridge);
             }
 
-            List<TerminationPoint> tps = MdsalUtils.getTerminationPoints(node);
+            List<TerminationPoint> tps = MdsalUtils.extractTerminationPoints(node);
             for (TerminationPoint tp : tps) {
                 OvsdbTerminationPointAugmentation port = tp.getAugmentation(OvsdbTerminationPointAugmentation.class);
                 if (port != null) {
@@ -265,14 +265,14 @@ public class SouthboundHandler extends AbstractHandler
     }
 
     private void processPortDelete(Node node) {
-        List<TerminationPoint> terminationPoints = MdsalUtils.getTerminationPoints(node);
+        List<TerminationPoint> terminationPoints = MdsalUtils.extractTerminationPoints(node);
         for (TerminationPoint terminationPoint : terminationPoints) {
             processPortDelete(node, terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class), null);
         }
     }
 
     private void processPortUpdate(Node node) {
-        List<TerminationPoint> terminationPoints = MdsalUtils.getTerminationPoints(node);
+        List<TerminationPoint> terminationPoints = MdsalUtils.extractTerminationPoints(node);
         for (TerminationPoint terminationPoint : terminationPoints) {
             processPortUpdate(node, terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class));
         }
@@ -301,14 +301,14 @@ public class SouthboundHandler extends AbstractHandler
     private void processOpenVSwitchUpdate(Node node) {
         // TODO this node might be the OvsdbNode and not have termination points
         // Would need to change listener or grab tp nodes in here.
-        List<TerminationPoint> terminationPoints = MdsalUtils.getTerminationPoints(node);
+        List<TerminationPoint> terminationPoints = MdsalUtils.extractTerminationPoints(node);
         for (TerminationPoint terminationPoint : terminationPoints) {
             processPortUpdate(node, terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class));
         }
     }
 
     private void processBridgeUpdate(Node node, Action action) {
-        OvsdbBridgeAugmentation bridge = MdsalUtils.readBridge(node);
+        OvsdbBridgeAugmentation bridge = MdsalUtils.extractBridgeAugmentation(node);
         switch (action) {
             case ADD:
             case UPDATE:

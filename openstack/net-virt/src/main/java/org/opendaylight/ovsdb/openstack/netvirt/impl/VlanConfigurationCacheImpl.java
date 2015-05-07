@@ -47,14 +47,14 @@ public class VlanConfigurationCacheImpl implements VlanConfigurationCache {
     }
 
     private String getNodeUUID(Node node) {
-        return MdsalUtils.getNodeUUID(node);
+        return MdsalUtils.getOvsdbNodeUUID(node);
     }
 
     private void initializeNodeConfiguration(Node node, String nodeUuid) {
         NodeConfiguration nodeConfiguration = new NodeConfiguration();
         Integer vlan = 0;
         String networkId = null;
-        List<OvsdbTerminationPointAugmentation> ports = MdsalUtils.getPorts(node);
+        List<OvsdbTerminationPointAugmentation> ports = MdsalUtils.getTerminationPointsOfBridge(node);
         for (OvsdbTerminationPointAugmentation port : ports) {
             vlan = port.getVlanTag().getValue();
             networkId = tenantNetworkManager.getTenantNetwork(port).getNetworkUUID();

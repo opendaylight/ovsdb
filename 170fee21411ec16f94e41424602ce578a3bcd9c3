@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_ed46004f",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/MdsalUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-05-08T14:10:26Z",
+      "side": 1,
+      "message": "merge this log.info into the log.info in line 249.",
+      "revId": "170fee21411ec16f94e41424602ce578a3bcd9c3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_2d64e8e3",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundEvent.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-05-08T14:10:26Z",
+      "side": 1,
+      "message": "please add new field into (1) toString, (2) hash, etc...",
+      "range": {
+        "startLine": 96,
+        "startChar": 25,
+        "endLine": 96,
+        "endChar": 29
+      },
+      "revId": "170fee21411ec16f94e41424602ce578a3bcd9c3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

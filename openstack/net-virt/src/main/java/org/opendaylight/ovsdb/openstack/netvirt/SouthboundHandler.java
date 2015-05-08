@@ -9,15 +9,18 @@ package org.opendaylight.ovsdb.openstack.netvirt;
 
 import java.util.List;
 
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.ovsdb.openstack.netvirt.api.*;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,15 +79,33 @@ public class SouthboundHandler extends AbstractHandler
     @Override
     public void ovsdbUpdate(Node node, DataObject resourceAugmentationData, OvsdbType ovsdbType, Action action) {
         logger.info("ovsdbUpdate: {} - {} - {}", node, ovsdbType, action);
-        this.enqueueEvent(new SouthboundEvent(node, ovsdbTypeToSouthboundEventType(ovsdbType), action));
+        this.enqueueEvent(new SouthboundEvent(node, resourceAugmentationData, ovsdbTypeToSouthboundEventType(ovsdbType), action));
     }
 
     public void processOvsdbNodeUpdate(Node node, Action action) {
-        if (action == Action.ADD) {
+        switch (action) {
+        case ADD:
             logger.info("processOvsdbNodeUpdate {}", node);
             bridgeConfigurationManager.prepareNode(node);
+            break;
+        case UPDATE:
+            break;
+        case DELETE:
+            processNodeDelete(node);
+            break;
+    }
+        if (action == Action.ADD) {
         } else {
             logger.info("Not implemented yet: {}", action);
+        }
+    }
+
+    private void processNodeDelete(Node node) {
+        OvsdbNodeAugmentation nodeAugmentation = node.getAugmentation(OvsdbNodeAugmentation.class);
+        if(nodeAugmentation != null){
+            InstanceIdentifier<Node> bridgeNodeIid =
+                    MdsalHelper.createInstanceIdentifier(nodeAugmentation.getConnectionInfo(), Constants.INTEGRATION_BRIDGE);
+            MdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, bridgeNodeIid);
         }
     }
 
@@ -320,8 +341,9 @@ public class SouthboundHandler extends AbstractHandler
         }
     }
 
-    private void processBridgeDelete(Node node, OvsdbBridgeAugmentation bridge) {
-        logger.debug("processBridgeUpdate {}, {}", node, bridge);
+    private void processBridgeDelete(Node bridgeNode, OvsdbBridgeAugmentation bridge) {
+        logger.debug("Delete bridge from config data store : {}", bridgeNode.getNodeId());
+        MdsalUtils.deleteBridge(bridgeNode);
     }
 
     private void processBridgeUpdate(Node node, OvsdbBridgeAugmentation bridge) {

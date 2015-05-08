@@ -210,7 +210,7 @@ public class MdsalUtils {
             throws InterruptedException, InvalidParameterException {
         boolean result = false;
 
-        LOG.info("addBridge: node: {}, bridgeName: {}, target: {}", ovsdbNode, bridgeName, target);
+        LOG.info("Add Bridge: node: {}, bridgeName: {}, target: {}", ovsdbNode, bridgeName, target);
         ConnectionInfo connectionInfo = getConnectionInfo(ovsdbNode);
         if (connectionInfo != null) {
             NodeBuilder bridgeNodeBuilder = new NodeBuilder();
@@ -219,7 +219,7 @@ public class MdsalUtils {
             NodeId bridgeNodeId = SouthboundMapper.createManagedNodeId(bridgeIid);
             bridgeNodeBuilder.setNodeId(bridgeNodeId);
             OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
-            //ovsdbBridgeAugmentationBuilder.setControllerEntry(setControllerEntries(target));
+            ovsdbBridgeAugmentationBuilder.setControllerEntry(createControllerEntries(target));
             ovsdbBridgeAugmentationBuilder.setBridgeName(new OvsdbBridgeName(bridgeName));
             ovsdbBridgeAugmentationBuilder.setProtocolEntry(createMdsalProtocols());
             ovsdbBridgeAugmentationBuilder.setFailMode(
@@ -227,14 +227,21 @@ public class MdsalUtils {
             setManagedByForBridge(ovsdbBridgeAugmentationBuilder, connectionInfo);
             bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbBridgeAugmentationBuilder.build());
 
-            result = merge(LogicalDatastoreType.CONFIGURATION, bridgeIid, bridgeNodeBuilder.build());
+            result = put(LogicalDatastoreType.CONFIGURATION, bridgeIid, bridgeNodeBuilder.build());
             LOG.info("addBridge: result: {}", result);
-            Thread.sleep(OVSDB_UPDATE_TIMEOUT);
-            setControllerForBridge(ovsdbNode, bridgeName, target);
-            Thread.sleep(OVSDB_UPDATE_TIMEOUT);
         } else {
             throw new InvalidParameterException("Could not find ConnectionInfo");
         }
+        return result;
+    }
+
+    public static boolean deleteBridge(Node ovsdbNode) {
+        boolean result = false;
+        InstanceIdentifier<Node> bridgeIid =
+                SouthboundMapper.createInstanceIdentifier(ovsdbNode.getNodeId());
+
+        result = delete(LogicalDatastoreType.CONFIGURATION, bridgeIid);
+        LOG.info("Delete bridge node: {}, bridgeName: {} result : {}", ovsdbNode, ovsdbNode.getNodeId(),result);
         return result;
     }
 

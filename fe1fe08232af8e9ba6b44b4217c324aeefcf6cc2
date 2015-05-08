@@ -25,6 +25,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_2d914852",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/MdsalUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-05-08T15:32:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_7bedc924",
+      "revId": "fe1fe08232af8e9ba6b44b4217c324aeefcf6cc2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_5bea4d10",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/MdsalUtils.java",
         "patchSetId": 1
@@ -42,6 +60,24 @@
         "endLine": 471,
         "endChar": 40
       },
+      "revId": "fe1fe08232af8e9ba6b44b4217c324aeefcf6cc2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_ed9a806d",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/MdsalUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 471,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-05-08T15:32:36Z",
+      "side": 1,
+      "message": "I agree to rename addTunnelTerminationPoint() to addTerminationPoint(), keeping its signature as is.\nThen have addTunnelTerminationPoint() and addPatchTerminationPoint() delegate to addTerminationPoint().",
+      "parentUuid": "3aa0d159_5bea4d10",
       "revId": "fe1fe08232af8e9ba6b44b4217c324aeefcf6cc2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

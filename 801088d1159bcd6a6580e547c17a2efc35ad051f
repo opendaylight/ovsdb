@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_fb91d99a",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/MdsalUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 351,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-05-08T02:16:16Z",
+      "side": 1,
+      "message": "maybe call this managedNode and then you can name node1 bridgeNode?",
+      "range": {
+        "startLine": 351,
+        "startChar": 30,
+        "endLine": 351,
+        "endChar": 40
+      },
+      "revId": "801088d1159bcd6a6580e547c17a2efc35ad051f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_9b90d596",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/MdsalUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-05-08T02:16:16Z",
+      "side": 1,
+      "message": "the read could fail so we should check for null, maybe even log this or have an assert to catch the condition since it shouldn\u0027t happen",
+      "range": {
+        "startLine": 354,
+        "startChar": 12,
+        "endLine": 354,
+        "endChar": 17
+      },
+      "revId": "801088d1159bcd6a6580e547c17a2efc35ad051f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

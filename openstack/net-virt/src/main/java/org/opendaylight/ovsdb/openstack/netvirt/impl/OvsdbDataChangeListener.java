@@ -69,7 +69,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
      */
     @Override
     public void onDataChanged(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        LOG.info(">>>>> onDataChanged: {}", changes);
+        LOG.debug(">>>>> onDataChanged: {}", changes);
         //TODO: off load this process to execution service, blocking md-sal notification thread
         // has performance impact on overall controller performance. With new notification broker
         //it might create weird issues.
@@ -88,7 +88,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
     }
 
     private void processOvsdbConnections(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        LOG.trace("processOvsdbConnections - Received changes : {}",changes);
+
         for (Map.Entry<InstanceIdentifier<?>, DataObject> created : changes.getCreatedData().entrySet()) {
             if (created.getValue() instanceof OvsdbNodeAugmentation) {
                 LOG.info("Processing ovsdb connections : {}", created);
@@ -101,7 +101,6 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
     private void processOvsdbDisconnect(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        LOG.info("processOvsdbDisconnect - Received changes : {}", changes);
 
         for(InstanceIdentifier<?> removedOvsdbNode : changes.getRemovedPaths()) {
             if(removedOvsdbNode.getTargetType().equals(OvsdbNodeAugmentation.class)){
@@ -130,7 +129,6 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
     private void processOvsdbConnectionAttributeUpdates(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        LOG.info("processOvsdbConnectionAttributeUpdates - Received changes : {}", changes);
 
         for(Map.Entry<InstanceIdentifier<?>, DataObject> updatedOvsdbNode : changes.getUpdatedData().entrySet()){
             if(updatedOvsdbNode.getKey() instanceof OvsdbNodeAugmentation){
@@ -161,7 +159,6 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
     }
 
     private void processOpenflowConnections(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        LOG.trace("processOpenflowConnections - processOpenflowConnections created: {}", changes);
         for (Map.Entry<InstanceIdentifier<?>, DataObject> change : changes.getCreatedData().entrySet()) {
             if (change.getValue() instanceof OvsdbBridgeAugmentation) {
                 LOG.info("Processing OpenFlow connections : {}",change);
@@ -213,7 +210,6 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
     private void processPortCreation(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        LOG.info("processPortCreation - Received changes : {}", changes);
         for(Map.Entry<InstanceIdentifier<?>, DataObject> newPort : changes.getCreatedData().entrySet()){
             if(newPort.getKey() instanceof OvsdbTerminationPointAugmentation){
                 LOG.info("Processing creation of new port : {}",newPort);
@@ -239,7 +235,6 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
     private void processPortDeletion(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        LOG.info("processPortDeletion - Received changes : {}", changes);
 
         for(InstanceIdentifier<?> removedPort : changes.getRemovedPaths()) {
             if(removedPort.getTargetType().equals(OvsdbTerminationPointAugmentation.class)){
@@ -265,7 +260,6 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
     private void processPortUpdate(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        LOG.info("processPortUpdate - Received changes : {}", changes);
 
         for(Map.Entry<InstanceIdentifier<?>, DataObject> updatedPort : changes.getUpdatedData().entrySet()){
             if(updatedPort.getKey() instanceof OvsdbTerminationPointAugmentation){
@@ -296,7 +290,6 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
     private void processBridgeCreation(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        LOG.info("processBridgeCreation - Received changes : {}", changes);
 
         for(Map.Entry<InstanceIdentifier<?>, DataObject> newBridge : changes.getCreatedData().entrySet()){
             if(newBridge.getKey() instanceof OvsdbBridgeAugmentation){
@@ -318,7 +311,6 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
     private void processBridgeUpdate(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        LOG.info("processBridgeUpdate - Received changes : {}", changes);
 
         for (Map.Entry<InstanceIdentifier<?>, DataObject> updatedBridge : changes.getUpdatedData().entrySet()) {
             if(updatedBridge.getKey() instanceof OvsdbBridgeAugmentation){
@@ -349,7 +341,6 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
     private void processBridgeDeletion(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        LOG.info("processBridgeDeletion - Received changes : {}", changes);
 
         for(InstanceIdentifier<?> removedBridge : changes.getRemovedPaths()) {
             if(removedBridge.getTargetType().equals(OvsdbBridgeAugmentation.class)){

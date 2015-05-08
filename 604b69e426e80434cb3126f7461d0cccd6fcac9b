@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_7cd4dc1f",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 3576
+      },
+      "writtenOn": "2015-05-08T23:27:18Z",
+      "side": 1,
+      "message": "There is no point to check for \"!externalIds.isEmpty()\" if you\u0027re going to check for the presence of keys in the same expression.",
+      "revId": "604b69e426e80434cb3126f7461d0cccd6fcac9b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_5c87a0d7",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 3576
+      },
+      "writtenOn": "2015-05-08T23:27:18Z",
+      "side": 1,
+      "message": "This is going to compile that string regex to a Pattern every time it\u0027s executed.  It would be better to define this as a static Pattern.",
+      "revId": "604b69e426e80434cb3126f7461d0cccd6fcac9b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

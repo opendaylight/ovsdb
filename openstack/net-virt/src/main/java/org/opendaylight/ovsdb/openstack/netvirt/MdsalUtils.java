@@ -7,10 +7,6 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableBiMap;
-import com.google.common.util.concurrent.CheckedFuture;
-
 import java.math.BigInteger;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -37,16 +33,19 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.OptionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.OptionsKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
@@ -58,6 +57,10 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableBiMap;
+import com.google.common.util.concurrent.CheckedFuture;
 
 /**
  * Utility class to wrap mdsal transactions.
@@ -347,6 +350,10 @@ public class MdsalUtils {
     public static List<Node> getAllBridgesOnOvsdbNode(Node node) {
         return null;
     }
+    
+    public static OvsdbNodeAugmentation extractOvsdbNodeAugmentation(Node node) {
+        return node.getAugmentation(OvsdbNodeAugmentation.class);
+    }
 
     /**
      * Method read ports from bridge node. Method will check if the provided node
@@ -474,7 +481,34 @@ public class MdsalUtils {
     }
 
     public static String getOtherConfig(Node node, OvsdbTables table, String key) {
-        return null;
+        switch (table) {
+            case BRIDGE:
+                for (BridgeOtherConfigs bridgeOtherConfigs :extractBridgeAugmentation(node).getBridgeOtherConfigs()) {
+                    if (bridgeOtherConfigs.getBridgeOtherConfigKey().equals(key)) {
+                        return bridgeOtherConfigs.getBridgeOtherConfigValue();
+                    }
+                }
+            case CONTROLLER:
+                LOG.info("There is no other_config for OvsdbTables: ", table);
+                return null;
+            case OPENVSWITCH:
+                for ( OpenvswitchOtherConfigs openvswitchOtherConfigs :extractOvsdbNodeAugmentation(node).getOpenvswitchOtherConfigs()) {
+                    if (openvswitchOtherConfigs.getOtherConfigKey().equals(key)) {
+                        return openvswitchOtherConfigs.getOtherConfigValue();
+                    }
+                }
+            case PORT:
+                for (OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation :extractTerminationPointAugmentations(node)) {
+                    for (PortOtherConfigs portOtherConfigs :ovsdbTerminationPointAugmentation.getPortOtherConfigs()) {
+                        if (portOtherConfigs.getOtherConfigKey().equals(key)) {
+                            return portOtherConfigs.getOtherConfigValue();
+                        }
+                    }
+                }
+            default:
+                LOG.info("Couldn't find the specified OvsdbTables: ", table);
+                return null;
+        }
     }
 
     public static boolean addVlanToTp(long vlan) {

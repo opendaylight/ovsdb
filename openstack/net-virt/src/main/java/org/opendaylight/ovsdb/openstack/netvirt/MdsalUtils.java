@@ -227,7 +227,7 @@ public class MdsalUtils {
             setManagedByForBridge(ovsdbBridgeAugmentationBuilder, connectionInfo);
             bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbBridgeAugmentationBuilder.build());
 
-            result = merge(LogicalDatastoreType.CONFIGURATION, bridgeIid, bridgeNodeBuilder.build());
+            result = put(LogicalDatastoreType.CONFIGURATION, bridgeIid, bridgeNodeBuilder.build());
             LOG.info("addBridge: result: {}", result);
             Thread.sleep(OVSDB_UPDATE_TIMEOUT);
             setControllerForBridge(ovsdbNode, bridgeName, target);
@@ -235,6 +235,18 @@ public class MdsalUtils {
         } else {
             throw new InvalidParameterException("Could not find ConnectionInfo");
         }
+        return result;
+    }
+
+    public static boolean deleteBridge(Node ovsdbNode) {
+        boolean result = false;
+        LOG.info("deleteBridge: node: {}, bridgeName: {}", ovsdbNode, ovsdbNode.getNodeId());
+
+        InstanceIdentifier<Node> bridgeIid =
+                SouthboundMapper.createInstanceIdentifier(ovsdbNode.getNodeId());
+
+        result = delete(LogicalDatastoreType.CONFIGURATION, bridgeIid);
+        LOG.info("deleteBridge: result: {}", result);
         return result;
     }
 

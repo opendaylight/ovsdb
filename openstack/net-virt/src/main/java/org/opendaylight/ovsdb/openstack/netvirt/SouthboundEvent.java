@@ -13,6 +13,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 
 public class SouthboundEvent extends AbstractEvent {
     public enum Type { NODE, OPENVSWITCH, BRIDGE, CONTROLLER, PORT }
@@ -21,6 +22,7 @@ public class SouthboundEvent extends AbstractEvent {
     private String tableName;
     private String uuid;
     private Object context;
+    private DataObject augmentationData;
     private OvsdbBridgeAugmentation bridge;
     private OvsdbTerminationPointAugmentation port;
     private String portName;
@@ -42,11 +44,20 @@ public class SouthboundEvent extends AbstractEvent {
         this.port = port;
         this.portName = portName;
     }
+
     public SouthboundEvent(Node node, Type type, Action action) {
         super(HandlerType.SOUTHBOUND, action);
         this.type = type;
         this.node = node;
     }
+
+    public SouthboundEvent(Node node, DataObject resourceAugmentationData, Type type, Action action) {
+        super(HandlerType.SOUTHBOUND, action);
+        this.type = type;
+        this.node = node;
+        this.augmentationData = resourceAugmentationData;
+    }
+
 
     public Type getType() {
         return type;
@@ -72,6 +83,11 @@ public class SouthboundEvent extends AbstractEvent {
     public String getPortName() {
         return portName;
     }
+
+    public DataObject getAugmentationData() {
+        return augmentationData;
+    }
+
     @Override
     public String toString() {
         //if (type == Type.NODE) {

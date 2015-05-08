@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_7bedc924",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/MdsalUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-05-08T02:26:21Z",
+      "side": 1,
+      "message": "rename this to PATCH_PORT_TYPE since we would likely add other port types.",
+      "range": {
+        "startLine": 72,
+        "startChar": 32,
+        "endLine": 72,
+        "endChar": 41
+      },
+      "revId": "fe1fe08232af8e9ba6b44b4217c324aeefcf6cc2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_5bea4d10",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/MdsalUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 471,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-05-08T02:26:21Z",
+      "side": 1,
+      "message": "we should probably make something like addTunnelTerminationPoint\u0027s api signature but call it addTerminationPoint(..., options) and return builder. then have the other addTerminationPoint and addTunnelTerminationPoint call this new api which just checks if options is !null to add them. The other methods will ahve the builder and can add to it if needed, like adding the patch type",
+      "range": {
+        "startLine": 471,
+        "startChar": 15,
+        "endLine": 471,
+        "endChar": 40
+      },
+      "revId": "fe1fe08232af8e9ba6b44b4217c324aeefcf6cc2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

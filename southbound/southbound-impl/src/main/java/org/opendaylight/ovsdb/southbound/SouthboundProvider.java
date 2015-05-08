@@ -7,7 +7,11 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
+import java.net.UnknownHostException;
+import java.util.List;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
@@ -17,11 +21,13 @@ import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvokerImpl;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopologyBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +68,7 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
         OvsdbConnection ovsdbConnection = new OvsdbConnectionService();
         ovsdbConnection.registerConnectionListener(cm);
         ovsdbConnection.startOvsdbManager(SouthboundConstants.DEFAULT_OVSDB_PORT);
+        establishOvsdbNodeConnections();
     }
 
     @Override
@@ -107,4 +114,33 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
             LOG.error("Error initializing ovsdb topology {}",e);
         }
     }
+
+    private void establishOvsdbNodeConnections() {
+        InstanceIdentifier<Topology> path = InstanceIdentifier
+                .create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
+        ReadOnlyTransaction transaction = db.newReadOnlyTransaction();
+        CheckedFuture<Optional<Topology>, ReadFailedException> ovsdbTopology =
+                transaction.read(LogicalDatastoreType.CONFIGURATION, path);
+        try {
+            if (ovsdbTopology.get().isPresent()) {
+                List<Node> nodeList = ovsdbTopology.get().get().getNode();
+                if (nodeList != null) {
+                    for (Node node : nodeList) {
+                        OvsdbNodeAugmentation ovsdbNode = node.getAugmentation(OvsdbNodeAugmentation.class);
+                        try {
+                            if (ovsdbNode != null) {
+                                cm.connect(SouthboundMapper.createInstanceIdentifier(node.getNodeId()), ovsdbNode);
+                            }
+                        } catch (UnknownHostException e) {
+                            LOG.warn("Failed to connect to ovsdbNode", e);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOG.error("Error establishing ovsdb node connections", e);
+        }
+    }
+
 }

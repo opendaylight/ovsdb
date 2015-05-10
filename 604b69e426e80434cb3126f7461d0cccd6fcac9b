@@ -37,6 +37,29 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_3242fb10",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-05-10T01:36:06Z",
+      "side": 1,
+      "message": "can this if () be made more readable: \n\nif (externalIds \u003d\u003d null || externalIds.isEmpty) || !externalIds.containsKey() || !externalIds.containsKey())\n\nOr even better just remove this first check and use the next two:\n\nconnectionId \u003d createinstanceIdentifier\nif (externalIds !\u003d null) {\n  if (containskey()) {\n    connectionId\u003d\n  else if (containskey()) {\n    connectionId\u003d\n  }\n}\nreturn connectionId",
+      "range": {
+        "startLine": 185,
+        "startChar": 11,
+        "endLine": 185,
+        "endChar": 14
+      },
+      "revId": "604b69e426e80434cb3126f7461d0cccd6fcac9b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_5c87a0d7",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundMapper.java",
         "patchSetId": 3

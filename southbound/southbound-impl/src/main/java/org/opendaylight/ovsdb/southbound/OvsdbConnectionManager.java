@@ -19,7 +19,6 @@ import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
-import org.opendaylight.ovsdb.southbound.transactions.md.OvsdbNodeCreateCommand;
 import org.opendaylight.ovsdb.southbound.transactions.md.OvsdbNodeRemoveCommand;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAttributes;
@@ -55,7 +54,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         ConnectionInfo key = SouthboundMapper.createConnectionInfo(externalClient);
         OvsdbConnectionInstance client = new OvsdbConnectionInstance(key,externalClient,txInvoker);
         putConnectionInstance(key, client);
-        txInvoker.invoke(new OvsdbNodeCreateCommand(key, null,null));
+        client.init();
     }
 
     @Override

@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "3aa0d159_0cdfa33c",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionInstance.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 3558
+      },
+      "writtenOn": "2015-05-11T23:31:53Z",
+      "side": 1,
+      "message": "One question, there is already a \"this.connectionInfo \u003d key;\"\nCould you please let me know the need for another attribute.",
+      "range": {
+        "startLine": 60,
+        "startChar": 22,
+        "endLine": 60,
+        "endChar": 23
+      },
+      "revId": "23d2611b2436695524d6b270f2189e3db471d246",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_a1e1d89b",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionInstance.java",
         "patchSetId": 5

@@ -15,9 +15,9 @@ import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.ovsdb.openstack.netvirt.MdsalHelper;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryListener;
-import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
@@ -46,7 +46,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
         this.dataBroker = dataBroker;
         InstanceIdentifier<Node> path = InstanceIdentifier
                 .create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+                .child(Topology.class, new TopologyKey(MdsalHelper.OVSDB_TOPOLOGY_ID))
                 .child(Node.class);
         registration = dataBroker.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, path, this,
                 DataChangeScope.SUBTREE);
@@ -102,7 +102,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                 //Fetch data of removed connection info from original data
                 @SuppressWarnings("unchecked")
                 OvsdbNodeAugmentation removedOvsdbNodeAugmentationData = getDataChanges(changes.getOriginalData(),
-                        (InstanceIdentifier<OvsdbNodeAugmentation>)removedOvsdbNode);
+                        (InstanceIdentifier<OvsdbNodeAugmentation>) removedOvsdbNode);
 
                 LOG.debug("Process ovsdb node delete : {} ", removedOvsdbNode);
                 ////Assuming Openvswitch type represent the ovsdb node connection and not OvsdbType.NODE

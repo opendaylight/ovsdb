@@ -9,7 +9,7 @@
 */
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreType;
+//import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.junit.Test;

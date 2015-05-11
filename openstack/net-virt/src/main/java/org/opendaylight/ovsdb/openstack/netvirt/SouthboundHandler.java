@@ -12,7 +12,6 @@ import java.util.List;
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.ovsdb.openstack.netvirt.api.*;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
-import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
@@ -189,10 +188,10 @@ public class SouthboundHandler extends AbstractHandler
     }
 
     private boolean isInterfaceOfInterest(OvsdbTerminationPointAugmentation terminationPoint, List<String> phyIfName) {
-        return (SouthboundMapper.createOvsdbInterfaceType(
+        return (MdsalHelper.createOvsdbInterfaceType(
                 terminationPoint.getInterfaceType()).equals(NetworkHandler.NETWORK_TYPE_VXLAN)
                 ||
-                SouthboundMapper.createOvsdbInterfaceType(
+                MdsalHelper.createOvsdbInterfaceType(
                         terminationPoint.getInterfaceType()).equals(NetworkHandler.NETWORK_TYPE_GRE)
                 ||
                 phyIfName.contains(terminationPoint.getName()));

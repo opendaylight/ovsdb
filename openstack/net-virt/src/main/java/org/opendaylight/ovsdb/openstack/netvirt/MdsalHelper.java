@@ -8,6 +8,7 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt;
 
+import com.google.common.base.Preconditions;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
@@ -27,6 +28,17 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeSystem;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeTap;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeVxlan;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolBase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolOpenflow10;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolOpenflow11;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolOpenflow12;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolOpenflow13;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolOpenflow14;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolOpenflow15;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbFailModeBase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbFailModeSecure;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbFailModeStandalone;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
@@ -51,6 +63,22 @@ public class MdsalHelper {
     public static final String BRIDGE_URI_PREFIX = "bridge";
     public static final String TP_URI_PREFIX = "termination-point";
 
+    public static final ImmutableBiMap<Class<? extends OvsdbBridgeProtocolBase>,String> OVSDB_PROTOCOL_MAP
+            = new ImmutableBiMap.Builder<Class<? extends OvsdbBridgeProtocolBase>,String>()
+            .put(OvsdbBridgeProtocolOpenflow10.class,"OpenFlow10")
+            .put(OvsdbBridgeProtocolOpenflow11.class,"OpenFlow11")
+            .put(OvsdbBridgeProtocolOpenflow12.class,"OpenFlow12")
+            .put(OvsdbBridgeProtocolOpenflow13.class,"OpenFlow13")
+            .put(OvsdbBridgeProtocolOpenflow14.class,"OpenFlow14")
+            .put(OvsdbBridgeProtocolOpenflow15.class,"OpenFlow15")
+            .build();
+
+    public static final ImmutableBiMap<Class<? extends OvsdbFailModeBase>,String> OVSDB_FAIL_MODE_MAP
+            = new ImmutableBiMap.Builder<Class<? extends OvsdbFailModeBase>,String>()
+            .put(OvsdbFailModeStandalone.class,"standalone")
+            .put(OvsdbFailModeSecure.class,"secure")
+            .build();
+
     public static final ImmutableBiMap<String, Class<? extends InterfaceTypeBase>> OVSDB_INTERFACE_TYPE_MAP
     = new ImmutableBiMap.Builder<String, Class<? extends InterfaceTypeBase>>()
         .put("internal", InterfaceTypeInternal.class)
@@ -71,8 +99,13 @@ public class MdsalHelper {
         .build();
 
 
+    public static NodeId createManagedNodeId(InstanceIdentifier<Node> iid) {
+        NodeKey nodeKey = iid.firstKeyOf(Node.class, NodeKey.class);
+        return nodeKey.getNodeId();
+    }
+
     public static NodeId createManagedNodeId(ConnectionInfo key, String bridgeName) {
-        return createManagedNodeId(key.getRemoteIp(),key.getRemotePort(),bridgeName);
+        return createManagedNodeId(key.getRemoteIp(), key.getRemotePort(), bridgeName);
     }
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(NodeId nodeId) {
@@ -83,8 +116,38 @@ public class MdsalHelper {
         return nodePath;
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key,String bridgeName) {
+    public static InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key) {
+        return createInstanceIdentifier(key.getRemoteIp(), key.getRemotePort());
+    }
+
+    public static InstanceIdentifier<Node> createInstanceIdentifier(IpAddress ip, PortNumber port) {
+        InstanceIdentifier<Node> path = InstanceIdentifier
+                .create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(OVSDB_TOPOLOGY_ID))
+                .child(Node.class,createNodeKey(ip,port));
+        LOG.debug("Created ovsdb path: {}",path);
+        return path;
+    }
+
+    public static NodeKey createNodeKey(IpAddress ip, PortNumber port) {
+        return new NodeKey(createNodeId(ip,port));
+    }
+
+    public static InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key, String bridgeName) {
         return createInstanceIdentifier(createManagedNodeId(key, bridgeName));
+    }
+
+    public static InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key,OvsdbBridgeName bridgeName) {
+        return createInstanceIdentifier(createManagedNodeId(key, bridgeName));
+    }
+
+    public static NodeId createManagedNodeId(IpAddress ip, PortNumber port, OvsdbBridgeName bridgeName) {
+        return new NodeId(createNodeId(ip,port).getValue()
+                + "/" + BRIDGE_URI_PREFIX + "/" + bridgeName.getValue());
+    }
+
+    public static NodeId createManagedNodeId(ConnectionInfo key, OvsdbBridgeName bridgeName) {
+        return createManagedNodeId(key.getRemoteIp(), key.getRemotePort(), bridgeName);
     }
 
     public static NodeId createManagedNodeId(IpAddress ip, PortNumber port, String bridgeName) {
@@ -104,7 +167,8 @@ public class MdsalHelper {
         return createNodeId(connectionInfo.getRemoteIp(), connectionInfo.getRemotePort());
     }
 
-    public static InstanceIdentifier<TerminationPoint> createTerminationPointInstanceIdentifier(IpAddress ip, PortNumber port , String bridgeName, String portName){
+    public static InstanceIdentifier<TerminationPoint> createTerminationPointInstanceIdentifier(
+            IpAddress ip, PortNumber port, String bridgeName, String portName) {
         String tpUri = createManagedNodeId(ip, port, bridgeName) + "/" + TP_URI_PREFIX + "/" + portName;
         InstanceIdentifier<TerminationPoint> nodePath = InstanceIdentifier
                 .create(NetworkTopology.class)
@@ -130,5 +194,12 @@ public class MdsalHelper {
 
         LOG.debug("Termination point InstanceIdentigier generated : {}",nodePath);
         return nodePath;
+    }
+
+    public static String createOvsdbInterfaceType(Class<? extends InterfaceTypeBase> mdsaltype) {
+        Preconditions.checkNotNull(mdsaltype);
+        ImmutableBiMap<Class<? extends InterfaceTypeBase>, String> mapper =
+                OVSDB_INTERFACE_TYPE_MAP.inverse();
+        return mapper.get(mdsaltype);
     }
 }

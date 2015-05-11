@@ -14,6 +14,7 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.neutron.spi.NeutronNetwork;
+import org.opendaylight.ovsdb.openstack.netvirt.MdsalHelper;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ClassifierProvider;
@@ -29,7 +30,6 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
 import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
-import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.GroupActionCase;
@@ -70,7 +70,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
@@ -153,7 +152,7 @@ public class OF13Provider implements NetworkingProvider {
         }
 
         if (!tenantNetworkManager.isTenantNetworkPresentInNode(node, tunnelKey)) {
-            logger.debug(node+" has no VM corresponding to segment "+ tunnelKey);
+            logger.debug(node + " has no VM corresponding to segment " + tunnelKey);
             return new Status(StatusCode.NOTACCEPTABLE, node+" has no VM corresponding to segment "+ tunnelKey);
         }
         return new Status(StatusCode.SUCCESS);
@@ -1017,7 +1016,7 @@ public class OF13Provider implements NetworkingProvider {
                 InetAddress dst = InetAddress.getByName(
                         MdsalUtils.getOptionsValue(intf.getOptions(), "remote_ip"));
                 deleteTunnelPort(srcNode,
-                        SouthboundMapper.createOvsdbInterfaceType(intf.getInterfaceType()),
+                        MdsalHelper.createOvsdbInterfaceType(intf.getInterfaceType()),
                         src, dst);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
@@ -1509,7 +1508,7 @@ public class OF13Provider implements NetworkingProvider {
         ReadWriteTransaction modification = dataBroker.newReadWriteTransaction();
         InstanceIdentifier<Flow> path1 =
                 InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
-                .rev130819.nodes.Node.class,
+                                .rev130819.nodes.Node.class,
                         nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Table.class,
                         new TableKey(flowBuilder.getTableId())).child(Flow.class, flowBuilder.getKey()).build();
 

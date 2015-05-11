@@ -21,8 +21,6 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;
-import org.opendaylight.ovsdb.southbound.SouthboundConstants;
-import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeInternal;
@@ -227,15 +225,15 @@ public class MdsalUtils {
         if (connectionInfo != null) {
             NodeBuilder bridgeNodeBuilder = new NodeBuilder();
             InstanceIdentifier<Node> bridgeIid =
-                    SouthboundMapper.createInstanceIdentifier(connectionInfo, new OvsdbBridgeName(bridgeName));
-            NodeId bridgeNodeId = SouthboundMapper.createManagedNodeId(bridgeIid);
+                    MdsalHelper.createInstanceIdentifier(connectionInfo, new OvsdbBridgeName(bridgeName));
+            NodeId bridgeNodeId = MdsalHelper.createManagedNodeId(bridgeIid);
             bridgeNodeBuilder.setNodeId(bridgeNodeId);
             OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
             ovsdbBridgeAugmentationBuilder.setControllerEntry(createControllerEntries(target));
             ovsdbBridgeAugmentationBuilder.setBridgeName(new OvsdbBridgeName(bridgeName));
             ovsdbBridgeAugmentationBuilder.setProtocolEntry(createMdsalProtocols());
             ovsdbBridgeAugmentationBuilder.setFailMode(
-                    SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"));
+                    MdsalHelper.OVSDB_FAIL_MODE_MAP.inverse().get("secure"));
             setManagedByForBridge(ovsdbBridgeAugmentationBuilder, connectionInfo);
             bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbBridgeAugmentationBuilder.build());
 
@@ -250,7 +248,7 @@ public class MdsalUtils {
     public static boolean deleteBridge(Node ovsdbNode) {
         boolean result = false;
         InstanceIdentifier<Node> bridgeIid =
-                SouthboundMapper.createInstanceIdentifier(ovsdbNode.getNodeId());
+                MdsalHelper.createInstanceIdentifier(ovsdbNode.getNodeId());
 
         result = delete(LogicalDatastoreType.CONFIGURATION, bridgeIid);
         LOG.info("Delete bridge node: {}, bridgeName: {} result : {}", ovsdbNode, ovsdbNode.getNodeId(),result);
@@ -262,8 +260,7 @@ public class MdsalUtils {
         ConnectionInfo connectionInfo = getConnectionInfo(node);
         if (connectionInfo != null) {
             InstanceIdentifier<Node> bridgeIid =
-                    SouthboundMapper.createInstanceIdentifier(connectionInfo,
-                            new OvsdbBridgeName(name));
+                    MdsalHelper.createInstanceIdentifier(connectionInfo, new OvsdbBridgeName(name));
             Node bridgeNode = read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
             if (bridgeNode != null) {
                 ovsdbBridgeAugmentation = bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class);
@@ -283,7 +280,7 @@ public class MdsalUtils {
 
     private static void setManagedByForBridge(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
                                      ConnectionInfo connectionInfo) {
-        InstanceIdentifier<Node> connectionNodePath = SouthboundMapper.createInstanceIdentifier(connectionInfo);
+        InstanceIdentifier<Node> connectionNodePath = MdsalHelper.createInstanceIdentifier(connectionInfo);
         ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath));
     }
 
@@ -292,7 +289,7 @@ public class MdsalUtils {
         if (connectionInfo != null) {
             for (ControllerEntry controllerEntry: createControllerEntries(targetString)) {
                 InstanceIdentifier<ControllerEntry> iid =
-                        SouthboundMapper.createInstanceIdentifier(connectionInfo, new OvsdbBridgeName(bridgeName))
+                        MdsalHelper.createInstanceIdentifier(connectionInfo, new OvsdbBridgeName(bridgeName))
                                 .augmentation(OvsdbBridgeAugmentation.class)
                                 .child(ControllerEntry.class, controllerEntry.getKey());
 
@@ -313,7 +310,7 @@ public class MdsalUtils {
     private static List<ProtocolEntry> createMdsalProtocols() {
         List<ProtocolEntry> protocolList = new ArrayList<ProtocolEntry>();
         ImmutableBiMap<String, Class<? extends OvsdbBridgeProtocolBase>> mapper =
-                SouthboundConstants.OVSDB_PROTOCOL_MAP.inverse();
+                MdsalHelper.OVSDB_PROTOCOL_MAP.inverse();
         protocolList.add(new ProtocolEntryBuilder().
                 setProtocol((Class<? extends OvsdbBridgeProtocolBase>) mapper.get("OpenFlow13")).build());
         return protocolList;
@@ -445,7 +442,7 @@ public class MdsalUtils {
     }
 
     public static List<OvsdbTerminationPointAugmentation> readTerminationPointAugmentationFromDataStore( Node node ) {
-        InstanceIdentifier<Node> bridgeNodeIid = SouthboundMapper.createInstanceIdentifier(node.getNodeId());
+        InstanceIdentifier<Node> bridgeNodeIid = MdsalHelper.createInstanceIdentifier(node.getNodeId());
         Node operNode = read(LogicalDatastoreType.OPERATIONAL, bridgeNodeIid);
         if(operNode != null){
             return extractTerminationPointAugmentations(operNode);
@@ -617,9 +614,9 @@ public class MdsalUtils {
     }
 
     public static boolean isTunnel(OvsdbTerminationPointAugmentation port) {
-        return SouthboundMapper.createOvsdbInterfaceType(
+        return MdsalHelper.createOvsdbInterfaceType(
                 port.getInterfaceType()).equals(NetworkHandler.NETWORK_TYPE_VXLAN)
-                || SouthboundMapper.createOvsdbInterfaceType(
+                || MdsalHelper.createOvsdbInterfaceType(
                 port.getInterfaceType()).equals(NetworkHandler.NETWORK_TYPE_GRE);
     }
 
@@ -636,7 +633,7 @@ public class MdsalUtils {
     private static Topology getOvsdbTopology() {
         InstanceIdentifier<Topology> path = InstanceIdentifier
                 .create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
+                .child(Topology.class, new TopologyKey(MdsalHelper.OVSDB_TOPOLOGY_ID));
 
         Topology topology = read(LogicalDatastoreType.OPERATIONAL, path);
         return topology;

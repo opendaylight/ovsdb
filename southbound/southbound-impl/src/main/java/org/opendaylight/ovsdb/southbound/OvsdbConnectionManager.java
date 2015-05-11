@@ -56,6 +56,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         OvsdbConnectionInstance client = new OvsdbConnectionInstance(key,externalClient,txInvoker);
         putConnectionInstance(key, client);
         txInvoker.invoke(new OvsdbNodeCreateCommand(key, null,null));
+        client.registerCallBack();
     }
 
     @Override

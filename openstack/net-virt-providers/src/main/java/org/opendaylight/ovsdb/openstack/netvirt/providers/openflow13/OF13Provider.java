@@ -686,7 +686,7 @@ public class OF13Provider implements NetworkingProvider {
 
     private Long getIntegrationBridgeOFDPID(Node node) {
         Long dpid = 0L;
-        if (getBridgeName(node).equals(configurationService.getIntegrationBridgeName())) {
+        if (MdsalUtils.getBridgeName(node).equals(configurationService.getIntegrationBridgeName())) {
             dpid = getDpid(node);
         }
         return dpid;
@@ -694,7 +694,7 @@ public class OF13Provider implements NetworkingProvider {
 
     private Long getExternalBridgeDpid(Node node) {
         Long dpid = 0L;
-        if (getBridgeName(node).equals(configurationService.getExternalBridgeName())) {
+        if (MdsalUtils.getBridgeName(node).equals(configurationService.getExternalBridgeName())) {
             dpid = getDpid(node);
         }
         return dpid;
@@ -946,7 +946,7 @@ public class OF13Provider implements NetworkingProvider {
     public boolean handleInterfaceUpdate(NeutronNetwork network, Node srcNode,
                                          OvsdbTerminationPointAugmentation intf) {
         //Preconditions.checkNotNull(connectionService);
-        //List<Node> nodes = connectionService.getNodes();
+        //List<Node> nodes = connectionService.getBridgeNodes();
         Preconditions.checkNotNull(nodeCacheManager);
         List<Node> nodes = nodeCacheManager.getOvsdbNodes();
         nodes.remove(srcNode);
@@ -1002,7 +1002,7 @@ public class OF13Provider implements NetworkingProvider {
     public boolean handleInterfaceDelete(String tunnelType, NeutronNetwork network, Node srcNode,
                                          OvsdbTerminationPointAugmentation intf, boolean isLastInstanceOnNode) {
         //Preconditions.checkNotNull(connectionService);
-        //List<Node> nodes = connectionService.getNodes();
+        //List<Node> nodes = connectionService.getBridgeNodes();
         Preconditions.checkNotNull(nodeCacheManager);
         List<Node> nodes = nodeCacheManager.getOvsdbNodes();
         nodes.remove(srcNode);
@@ -1838,13 +1838,9 @@ public class OF13Provider implements NetworkingProvider {
         }
     }
 
-    private String getBridgeName(Node node) {
-        return (node.getAugmentation(OvsdbBridgeAugmentation.class).getBridgeName().getValue());
-    }
-
     @Override
     public void initializeOFFlowRules(Node openflowNode) {
-        String bridgeName = getBridgeName(openflowNode);
+        String bridgeName = MdsalUtils.getBridgeName(openflowNode);
         logger.info("initializeOFFlowRules: bridgeName: {}", bridgeName);
         if (bridgeName.equals(configurationService.getIntegrationBridgeName())) {
             initializeFlowRules(openflowNode, configurationService.getIntegrationBridgeName());

@@ -89,7 +89,7 @@ public class AbstractServiceInstanceTest {
         List<Node> nodes = new ArrayList();
         nodes.add(node);
         /* TODO SB_MIGRATION */
-        //when(connectionService.getNodes()).thenReturn(nodes);
+        //when(connectionService.getBridgeNodes()).thenReturn(nodes);
 
         //ConcurrentMap<String, Row> bridges = new ConcurrentHashMap();
         //bridges.put("key", mock(Row.class));
@@ -229,7 +229,7 @@ public class AbstractServiceInstanceTest {
         List<Node> nodes = new ArrayList();
         nodes.add(node);
         /* TODO SB_MIGRATION */
-        //when(connectionService.getNodes()).thenReturn(nodes);
+        //when(connectionService.getBridgeNodes()).thenReturn(nodes);
 
         //ConcurrentMap<String, Row> bridges = new ConcurrentHashMap();
         //bridges.put("key", mock(Row.class));

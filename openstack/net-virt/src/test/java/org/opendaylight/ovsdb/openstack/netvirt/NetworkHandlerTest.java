@@ -111,7 +111,7 @@ public class NetworkHandlerTest {
         //List<Node> nodes = new ArrayList();
         //nodes.add(node);
         /* TODO SB_MIGRATION */
-        //when(connectionService.getNodes()).thenReturn(nodes);
+        //when(connectionService.getBridgeNodes()).thenReturn(nodes);
         /*
         ConcurrentMap<String, Row> ports = new ConcurrentHashMap<>();
         Row row = mock(Row.class);

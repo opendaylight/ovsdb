@@ -74,7 +74,7 @@ public class LBaaSHandler extends AbstractHandler
     private void doNeutronLoadBalancerCreate(NeutronLoadBalancer neutronLB) {
         Preconditions.checkNotNull(loadBalancerProvider);
         LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLB);
-        final List<Node> nodes = nodeCacheManager.getNodes();
+        final List<Node> nodes = nodeCacheManager.getBridgeNodes();
 
         if (!lbConfig.isValid()) {
             logger.debug("Neutron LB pool configuration invalid for {} ", lbConfig.getName());
@@ -114,7 +114,7 @@ public class LBaaSHandler extends AbstractHandler
     private void doNeutronLoadBalancerDelete(NeutronLoadBalancer neutronLB) {
         Preconditions.checkNotNull(loadBalancerProvider);
         LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLB);
-        final List<Node> nodes = nodeCacheManager.getNodes();
+        final List<Node> nodes = nodeCacheManager.getBridgeNodes();
 
         if (!lbConfig.isValid()) {
             logger.debug("Neutron LB pool configuration invalid for {} ", lbConfig.getName());

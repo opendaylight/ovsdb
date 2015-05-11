@@ -78,7 +78,7 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
         Preconditions.checkNotNull(loadBalancerProvider);
         LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLBPoolMember);
         final List<Node> nodes =
-                nodeCacheManager.getNodes();
+                nodeCacheManager.getBridgeNodes();
         if (lbConfig == null) {
             logger.debug("Neutron LB configuration invalid for member {} ", neutronLBPoolMember.getPoolMemberAddress());
         } else if (lbConfig.getVip() == null) {
@@ -129,7 +129,7 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
         Preconditions.checkNotNull(loadBalancerProvider);
 
         LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLBPoolMember);
-        final List<Node> nodes = nodeCacheManager.getNodes();
+        final List<Node> nodes = nodeCacheManager.getBridgeNodes();
         if (lbConfig == null) {
             logger.debug("Neutron LB configuration invalid for member {} ", neutronLBPoolMember.getPoolMemberAddress());
         } else if (lbConfig.getVip() == null) {

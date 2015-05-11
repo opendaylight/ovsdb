@@ -93,7 +93,7 @@ public class SouthboundEvent extends AbstractEvent {
         //if (type == Type.NODE) {
             return "SouthboundEvent [type=" + type
                     + ", action=" + super.getAction()
-                    + ",augmentationData="+augmentationData
+                    + ", augmentationData=" + augmentationData
                     + ", node=" + node + "]";
         //} else {
         //    return "SouthboundEvent [type=" + type + "]";

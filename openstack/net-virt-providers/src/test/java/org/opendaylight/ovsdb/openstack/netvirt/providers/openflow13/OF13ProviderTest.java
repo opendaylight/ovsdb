@@ -154,7 +154,7 @@ public class OF13ProviderTest {
         nodeList.add(node3);
 
         /* TODO SB_MIGRATION
-        //when(connectionService.getNodes()).thenReturn(nodeList);
+        //when(connectionService.getBridgeNodes()).thenReturn(nodeList);
 
         final String key = "key";
         ConcurrentHashMap<String, Row> bridgeTable = new ConcurrentHashMap();
@@ -273,7 +273,7 @@ public class OF13ProviderTest {
     public void initializeOFFlowRulesTest(){
         /* TODO SB_MIGRATION */
         //of13Provider.initializeOFFlowRules(openflowNode);
-        //verify(connectionService, times(1)).getNodes();
+        //verify(connectionService, times(1)).getBridgeNodes();
     }
 
     /**

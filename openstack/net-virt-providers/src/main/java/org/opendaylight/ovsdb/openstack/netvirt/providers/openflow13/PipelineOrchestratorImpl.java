@@ -18,6 +18,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -94,7 +95,9 @@ public class PipelineOrchestratorImpl implements NodeCacheListener, PipelineOrch
                             AbstractServiceInstance serviceInstance = getServiceInstance(service);
                             logger.info("pipeline: {} - {}", service, serviceInstance);
                             if (serviceInstance != null) {
-                                serviceInstance.programDefaultPipelineRule(node);
+                                if (MdsalUtils.getBridge(node) != null) {
+                                    serviceInstance.programDefaultPipelineRule(node);
+                                }
                             }
                         }
                     }
@@ -127,6 +130,10 @@ public class PipelineOrchestratorImpl implements NodeCacheListener, PipelineOrch
 
     @Override
     public void notifyNode(Node node, Action action) {
-        enqueue(node);
+        if (action == Action.ADD) {
+            enqueue(node);
+        } else {
+            logger.info("update ignored: {}", node);
+        }
     }
 }

@@ -176,7 +176,7 @@ public class NeutronL3AdapterTest {
         when(status.isSuccess()).thenReturn(true);
 
         /* TODO SB_MIGRATION */
-        //when(connectionService.getNodes()).thenReturn(list_nodes);
+        //when(connectionService.getBridgeNodes()).thenReturn(list_nodes);
 
         when(configurationService.getDefaultGatewayMacAddress(any(Node.class))).thenReturn("defaultGatewayMacAddress");
         when(configurationService.getIntegrationBridgeName()).thenReturn("brName");

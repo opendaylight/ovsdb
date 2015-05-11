@@ -74,14 +74,10 @@ public abstract class AbstractServiceInstance {
         logger.info(">>>>> init service: {}", this.getClass());
     }
 
-    private String getBridgeName(Node node) {
-        return (node.getAugmentation(OvsdbBridgeAugmentation.class).getBridgeName().getValue());
-    }
-
     public boolean isBridgeInPipeline (Node node){
-        String bridgeName = getBridgeName(node);
+        String bridgeName = MdsalUtils.getBridgeName(node);
         logger.debug("isBridgeInPipeline: node {} bridgeName {}", node, bridgeName);
-        if (bridgeName != null && Constants.INTEGRATION_BRIDGE.equalsIgnoreCase(bridgeName)) {
+        if (bridgeName != null && Constants.INTEGRATION_BRIDGE.equals(bridgeName)) {
             return true;
         }
         return false;
@@ -247,6 +243,11 @@ public abstract class AbstractServiceInstance {
         }
         MatchBuilder matchBuilder = new MatchBuilder();
         FlowBuilder flowBuilder = new FlowBuilder();
+        Long dpid = getDpid(node);
+        if (dpid == 0L) {
+            logger.info("could not find dpid: {}", node.getNodeId());
+            return;
+        }
         String nodeName = OPENFLOW + getDpid(node);
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
 

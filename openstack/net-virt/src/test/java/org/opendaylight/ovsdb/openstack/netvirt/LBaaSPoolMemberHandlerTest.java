@@ -168,7 +168,7 @@ public class LBaaSPoolMemberHandlerTest {
 
         List<Node> list_node = new ArrayList();
         list_node .add(mock(Node.class));
-        when(nodeCacheManager.getNodes()).thenReturn(list_node);
+        when(nodeCacheManager.getBridgeNodes()).thenReturn(list_node);
 
         when(ev.getAction()).thenReturn(Action.ADD);
         lbaasPoolMemberHandlerSpy.processEvent(ev);

@@ -17,10 +17,8 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
-import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryListener;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
-import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
@@ -43,7 +41,6 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbDataChangeListener.class);
     private DataBroker dataBroker = null;
     private ListenerRegistration<DataChangeListener> registration;
-    private NodeCacheManager nodeCacheManager = null;
 
     public OvsdbDataChangeListener (DataBroker dataBroker) {
         LOG.info(">>>>> Registering OvsdbNodeDataChangeListener: dataBroker= {}", dataBroker);
@@ -62,38 +59,29 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
         registration.close();
     }
 
-    /* TODO
-     * Recognize when netvirt added a bridge to config and then the operational update comes in
-     * can it be ignored or just viewed as a new switch? ports and interfaces can likely be mapped
-     * to the old path where there were updates for them for update and insert row.
-     */
     @Override
     public void onDataChanged(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
         LOG.debug(">>>>> onDataChanged: {}", changes);
-        //TODO: off load this process to execution service, blocking md-sal notification thread
+        //TODO SB_MIGRATION: off load this process to execution service, blocking md-sal notification thread
         // has performance impact on overall controller performance. With new notification broker
         //it might create weird issues.
         processOvsdbConnections(changes);
-        processOvsdbDisconnect(changes);
         processOvsdbConnectionAttributeUpdates(changes);
         processOpenflowConnections(changes);
         processBridgeCreation(changes);
-        processBridgeDeletion(changes);
         processBridgeUpdate(changes);
         processPortCreation(changes);
-        processPortDeletion(changes);
         processPortUpdate(changes);
-
-
+        processPortDeletion(changes);
+        processBridgeDeletion(changes);
+        processOvsdbDisconnect(changes);
     }
 
     private void processOvsdbConnections(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-
         for (Map.Entry<InstanceIdentifier<?>, DataObject> created : changes.getCreatedData().entrySet()) {
             if (created.getValue() instanceof OvsdbNodeAugmentation) {
-                LOG.info("Processing ovsdb connections : {}", created);
                 Node ovsdbNode = getNode(changes.getCreatedData(), created);
-                LOG.info("ovsdbNode: {}", ovsdbNode);
+                LOG.info("Processing ovsdb connections : {}, ovsdbNode: {}", created, ovsdbNode);
                 ovsdbUpdate(ovsdbNode, created.getValue(), OvsdbInventoryListener.OvsdbType.NODE, Action.ADD);
             }
         }
@@ -119,10 +107,10 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                         (InstanceIdentifier<OvsdbNodeAugmentation>)removedOvsdbNode);
 
                 LOG.debug("Process ovsdb node delete : {} ", removedOvsdbNode);
-                //Assuming Openvswitch type represent the ovsdb node connection and not OvsdbType.NODE
+                ////Assuming Openvswitch type represent the ovsdb node connection and not OvsdbType.NODE
 
                 ovsdbUpdate(parentNode, removedOvsdbNodeAugmentationData,
-                        OvsdbInventoryListener.OvsdbType.OPENVSWITCH, Action.DELETE);
+                        OvsdbInventoryListener.OvsdbType.NODE, Action.DELETE);
             }
         }
     }
@@ -145,15 +133,15 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                 if(parentNode == null){
                     // Logging this warning, to catch any change in southbound plugin's behavior.
                     LOG.warn("Parent Node for OvsdbNodeAugmentation is not found. On OvsdbNodeAugmentation update "
-                            + "data store must provide the parent node update. This condition should not occure "
-                            + "with the existing models define in southbound plugin." );
+                            + "data store must provide the parent node update. This condition should not occur "
+                            + "with the existing models defined in southbound plugin." );
                     continue;
                 }
-                LOG.debug("Process ovsdb conenction  {} related update on Node : {}",
-                        updatedOvsdbNode.getValue(),parentNode);
+                LOG.debug("Process ovsdb connection  {} related update on Node : {}",
+                        updatedOvsdbNode.getValue(), parentNode);
 
                 ovsdbUpdate(parentNode, updatedOvsdbNode.getValue(),
-                        OvsdbInventoryListener.OvsdbType.OPENVSWITCH, Action.UPDATE);
+                        OvsdbInventoryListener.OvsdbType.NODE, Action.UPDATE);
             }
         }
     }
@@ -174,12 +162,8 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                     LOG.warn("node not found");
                     continue;
                 }
-                // This value is not being set right now - OvsdbBridgeUpdateCommand
-                //if (ovsdbBridgeAugmentation.getBridgeOpenflowNodeRef() != null) {
-                    nodeCacheManager =
-                            (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
-                    nodeCacheManager.nodeAdded(node);
-                //}
+                ovsdbUpdate(node, ovsdbBridgeAugmentation,
+                        OvsdbInventoryListener.OvsdbType.BRIDGE, Action.ADD);
             }
         }
 
@@ -198,12 +182,8 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                     LOG.warn("node not found");
                     continue;
                 }
-                // This value is not being set right now - OvsdbBridgeUpdateCommand
-                // if (ovsdbBridgeAugmentation.getBridgeOpenflowNodeRef() != null) {
-                    nodeCacheManager =
-                            (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
-                    nodeCacheManager.nodeAdded(node);
-                //}
+                ovsdbUpdate(node, ovsdbBridgeAugmentation,
+                        OvsdbInventoryListener.OvsdbType.BRIDGE, Action.UPDATE);
             }
         }
     }
@@ -325,7 +305,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                  from updateData() will provide new data.
                  */
 
-                Node bridgeParentNode  = getNode(changes.getOriginalData(), updatedBridge);
+                Node bridgeParentNode = getNode(changes.getOriginalData(), updatedBridge);
                 if(bridgeParentNode == null){
                     // Logging this warning, to catch any change in southbound plugin behavior
                     LOG.warn("Parent Node for bridge is not found. Bridge update must provide the Node "

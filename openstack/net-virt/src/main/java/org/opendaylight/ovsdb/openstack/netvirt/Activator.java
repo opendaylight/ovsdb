@@ -170,7 +170,7 @@ public class Activator extends DependencyActivatorBase {
                 .add(createServiceDependency().setService(NetworkingProviderManager.class).setRequired(true))
                 .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
                 .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
-                //.add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true))
+                .add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true))
                 .add(createServiceDependency().setService(OvsdbInventoryService.class).setRequired(true))
                 .add(createServiceDependency().setService(NodeCacheManager.class).setRequired(true)));
 

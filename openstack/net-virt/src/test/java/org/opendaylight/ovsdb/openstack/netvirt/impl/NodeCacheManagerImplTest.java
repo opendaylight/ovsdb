@@ -8,7 +8,6 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -23,10 +22,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.NodeCacheManagerEvent;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
 //import org.opendaylight.ovsdb.utils.mdsal.node.NodeUtils;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.osgi.framework.ServiceReference;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.google.common.collect.Maps;
@@ -52,11 +48,11 @@ public class NodeCacheManagerImplTest {
 
         when(ev.getAction()).thenReturn(Action.ADD);
         nodeCacheManagerImpl.processEvent(ev);
-        assertEquals("Error, did not add the event", 1, nodeCacheManagerImpl.getNodes().size());
+        assertEquals("Error, did not add the event", 1, nodeCacheManagerImpl.getBridgeNodes().size());
 
         when(ev.getAction()).thenReturn(Action.DELETE);
         nodeCacheManagerImpl.processEvent(ev);
-        assertEquals("Error, did not delete the event", 0, nodeCacheManagerImpl.getNodes().size());
+        assertEquals("Error, did not delete the event", 0, nodeCacheManagerImpl.getBridgeNodes().size());
     }
 
     @Test

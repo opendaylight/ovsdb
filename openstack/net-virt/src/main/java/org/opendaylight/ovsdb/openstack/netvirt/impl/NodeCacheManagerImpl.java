@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent;
 import org.opendaylight.ovsdb.openstack.netvirt.AbstractHandler;
+import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.NodeCacheManagerEvent;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
@@ -41,10 +42,15 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
 
     @Override
     public void nodeAdded(Node node) {
-        logger.debug("nodeAdded: Node added: {}", node);
         if (addNodeToCache(node)) {
+            logger.debug("nodeAdded: Node type {} added: {}",
+                    MdsalUtils.getBridge(node) != null ? "BridgeNode" : "OvsdbNode",
+                    node);
             enqueueEvent(new NodeCacheManagerEvent(node, Action.ADD));
         } else {
+            logger.debug("nodeAdded: Node type {} updated: {}",
+                    MdsalUtils.getBridge(node) != null ? "BridgeNode" : "OvsdbNode",
+                    node);
             enqueueEvent(new NodeCacheManagerEvent(node, Action.UPDATE));
         }
 
@@ -58,24 +64,19 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
         }
     }
 
-    @Override
-    public List<Node> getNodes() {
-        return nodeCache;
-    }
-
     /**
      * This method returns the true if node was added to the nodeCache. If param node
      * is already in the cache, this method is expected to return false.
      *
-     * @param openFlowNode the node to be added to the cache, if needed
+     * @param node the node to be added to the cache, if needed
      * @return whether new node entry was added to cache
      */
-    private Boolean addNodeToCache (Node openFlowNode) {
+    private Boolean addNodeToCache (Node node) {
         synchronized (nodeCacheLock) {
-            if (nodeCache.contains(openFlowNode)) {
+            if (nodeCache.contains(node)) {
                 return false;
             }
-            return nodeCache.add(openFlowNode);
+            return nodeCache.add(node);
         }
     }
 
@@ -83,15 +84,19 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
      * This method returns the true if node was removed from the nodeCache. If param node
      * is not in the cache, this method is expected to return false.
      *
-     * @param openFlowNode the node to be removed from the cache, if needed
+     * @param node the node to be removed from the cache, if needed
      * @return whether new node entry was removed from cache
      */
-    private Boolean removeNodeFromCache (Node openFlowNode) {
+    private Boolean removeNodeFromCache (Node node) {
         synchronized (nodeCacheLock) {
-            return nodeCache.remove(openFlowNode);
+            return nodeCache.remove(node);
         }
     }
 
+    // TODO SB_MIGRATION
+    // might need to creak this into two different events
+    // notifyOvsdbNode, notifyBridgeNode or just make sure the
+    // classes implementing the interface check for ovsdbNode or bridgeNode
     private void processNodeAdded(Node node) {
         nodeCache.add(node);
         for (NodeCacheListener handler : handlers.values()) {
@@ -102,6 +107,7 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
             }
         }
     }
+
     private void processNodeRemoved(Node node) {
         nodeCache.remove(node);
         for (NodeCacheListener handler : handlers.values()) {
@@ -158,7 +164,7 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
     public List<Node> getOvsdbNodes() {
         List<Node> nodes = Lists.newArrayList();
         for (Node node: nodeCache) {
-            if (node.getAugmentation(OvsdbNodeAugmentation.class) != null) {
+            if (MdsalUtils.getOvsdbNode(node) != null) {
                 nodes.add(node);
             }
         }
@@ -169,10 +175,15 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
     public List<Node> getBridgeNodes() {
         List<Node> nodes = Lists.newArrayList();
         for (Node node: nodeCache) {
-            if (node.getAugmentation(OvsdbBridgeAugmentation.class) != null) {
+            if (MdsalUtils.getBridge(node) != null) {
                 nodes.add(node);
             }
         }
         return nodes;
+    }
+
+    @Override
+    public List<Node> getNodes() {
+        return nodeCache;
     }
 }

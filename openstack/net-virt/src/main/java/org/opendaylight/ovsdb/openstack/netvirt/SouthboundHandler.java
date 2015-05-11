@@ -9,7 +9,6 @@ package org.opendaylight.ovsdb.openstack.netvirt;
 
 import java.util.List;
 
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.ovsdb.openstack.netvirt.api.*;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
@@ -20,7 +19,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +39,7 @@ public class SouthboundHandler extends AbstractHandler
     private volatile NetworkingProviderManager networkingProviderManager;
     private volatile OvsdbConnectionService connectionService;
     private volatile NeutronL3Adapter neutronL3Adapter;
+    private volatile NodeCacheManager nodeCacheManager = null;
 
     void start() {
         this.triggerUpdates();
@@ -78,39 +77,13 @@ public class SouthboundHandler extends AbstractHandler
 
     @Override
     public void ovsdbUpdate(Node node, DataObject resourceAugmentationData, OvsdbType ovsdbType, Action action) {
-        logger.info("ovsdbUpdate: {} - {} - {}", node, ovsdbType, action);
-        this.enqueueEvent(new SouthboundEvent(node, resourceAugmentationData, ovsdbTypeToSouthboundEventType(ovsdbType), action));
-    }
-
-    public void processOvsdbNodeUpdate(Node node, Action action) {
-        switch (action) {
-        case ADD:
-            logger.info("processOvsdbNodeUpdate {}", node);
-            bridgeConfigurationManager.prepareNode(node);
-            break;
-        case UPDATE:
-            break;
-        case DELETE:
-            processNodeDelete(node);
-            break;
-    }
-        if (action == Action.ADD) {
-        } else {
-            logger.info("Not implemented yet: {}", action);
-        }
-    }
-
-    private void processNodeDelete(Node node) {
-        OvsdbNodeAugmentation nodeAugmentation = node.getAugmentation(OvsdbNodeAugmentation.class);
-        if(nodeAugmentation != null){
-            InstanceIdentifier<Node> bridgeNodeIid =
-                    MdsalHelper.createInstanceIdentifier(nodeAugmentation.getConnectionInfo(), Constants.INTEGRATION_BRIDGE);
-            MdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, bridgeNodeIid);
-        }
+        logger.info("ovsdbUpdate: {} - {} - {}", ovsdbType, action, node);
+        this.enqueueEvent(new SouthboundEvent(node, resourceAugmentationData,
+                ovsdbTypeToSouthboundEventType(ovsdbType), action));
     }
 
     private void handleInterfaceUpdate (Node node, OvsdbTerminationPointAugmentation tp) {
-        logger.trace("handleInterfaceUpdate node: {}, tp: {}", node, tp);
+        logger.debug("handleInterfaceUpdate node: {}, tp: {}", node, tp);
         NeutronNetwork network = tenantNetworkManager.getTenantNetwork(tp);
         if (network != null && !network.getRouterExternal()) {
             logger.trace("handleInterfaceUpdate node: {}, tp: {}, network: {}", node, tp, network.getNetworkUUID());
@@ -181,7 +154,11 @@ public class SouthboundHandler extends AbstractHandler
         }
         List<String> phyIfName = bridgeConfigurationManager.getAllPhysicalInterfaceNames(node);
         if (isInterfaceOfInterest(ovsdbTerminationPointAugmentation, phyIfName)) {
-            this.handleInterfaceDelete(node, ovsdbTerminationPointAugmentation, false, null);
+            if (network != null) {
+                this.handleInterfaceDelete(node, ovsdbTerminationPointAugmentation, false, network);
+            } else {
+                logger.warn("processPortDelete: network was null");
+            }
         } else if (network != null && !network.getRouterExternal()) {
             logger.debug("Network {} : Delete interface {} attached to bridge {}", network.getNetworkUUID(),
                     ovsdbTerminationPointAugmentation.getInterfaceUuid(), node);
@@ -201,7 +178,8 @@ public class SouthboundHandler extends AbstractHandler
                                 break;
                             }
                         }
-                        this.handleInterfaceDelete(node, ovsdbTerminationPointAugmentation, isLastInstanceOnNode, network);
+                        this.handleInterfaceDelete(node, ovsdbTerminationPointAugmentation,
+                                isLastInstanceOnNode, network);
                     }
                 }
             } catch (Exception e) {
@@ -223,16 +201,18 @@ public class SouthboundHandler extends AbstractHandler
     /**
      * Notification about an OpenFlow Node
      *
-     * @param openFlowNode the {@link Node Node} of interest in the notification
+     * @param node the {@link Node Node} of interest in the notification
      * @param action the {@link Action}
      * @see NodeCacheListener#notifyNode
      */
     @Override
-    public void notifyNode (Node openFlowNode, Action action) {
-        logger.info("notifyNode: Node {} update {}", openFlowNode, action);
+    public void notifyNode (Node node, Action action) {
+        logger.info("notifyNode: Node {} update {}", node, action);
 
         if (action.equals(Action.ADD)) {
-            networkingProviderManager.getProvider(openFlowNode).initializeOFFlowRules(openFlowNode);
+            if (MdsalUtils.getBridge(node) != null) {
+                networkingProviderManager.getProvider(node).initializeOFFlowRules(node);
+            }
         }
     }
 
@@ -252,18 +232,18 @@ public class SouthboundHandler extends AbstractHandler
         logger.info("processEvent: {}", ev);
         switch (ev.getType()) {
             case NODE:
-                processOvsdbNodeUpdate(ev.getNode(), ev.getAction());
+                processOvsdbNodeEvent(ev);
                 break;
             case BRIDGE:
-                processBridgeUpdate(ev.getNode(), ev.getAction());
+                processBridgeEvent(ev);
                 break;
 
             case PORT:
-                processPortUpdate(ev.getNode(), ev.getAction());
+                processPortEvent(ev);
                 break;
 
             case OPENVSWITCH:
-                processOpenVSwitchUpdate(ev.getNode(), ev.getAction());
+                processOpenVSwitchEvent(ev);
                 break;
 
             default:
@@ -273,29 +253,51 @@ public class SouthboundHandler extends AbstractHandler
         }
     }
 
-    private void processPortUpdate(Node node, Action action) {
-        switch (action) {
+    private void processOvsdbNodeEvent(SouthboundEvent ev) {
+        switch (ev.getAction()) {
             case ADD:
+                processOvsdbNodeCreate(ev.getNode(), (OvsdbNodeAugmentation) ev.getAugmentationData());
             case UPDATE:
-                processPortUpdate(node);
+                processOvsdbNodeUpdate(ev.getNode(), (OvsdbNodeAugmentation) ev.getAugmentationData());
                 break;
             case DELETE:
-                processPortDelete(node);
+                processOvsdbNodeDelete(ev.getNode(), (OvsdbNodeAugmentation) ev.getAugmentationData());
                 break;
         }
     }
 
-    private void processPortDelete(Node node) {
-        List<TerminationPoint> terminationPoints = MdsalUtils.extractTerminationPoints(node);
-        for (TerminationPoint terminationPoint : terminationPoints) {
-            processPortDelete(node, terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class), null);
-        }
+    private void processOvsdbNodeCreate(Node node, OvsdbNodeAugmentation ovsdbNode) {
+        logger.info("processOvsdbNodeCreate {} - {}", node, ovsdbNode);
+        nodeCacheManager.nodeAdded(node);
+        bridgeConfigurationManager.prepareNode(node);
     }
 
-    private void processPortUpdate(Node node) {
-        List<TerminationPoint> terminationPoints = MdsalUtils.extractTerminationPoints(node);
-        for (TerminationPoint terminationPoint : terminationPoints) {
-            processPortUpdate(node, terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class));
+    private void processOvsdbNodeUpdate(Node node, OvsdbNodeAugmentation ovsdbNode) {
+        logger.info("processOvsdbNodeUpdate {} - {}", node, ovsdbNode);
+        nodeCacheManager.nodeAdded(node);
+    }
+
+    private void processOvsdbNodeDelete(Node node, OvsdbNodeAugmentation ovsdbNode) {
+        logger.info("processOvsdbNodeDelete {} - {}", node, ovsdbNode);
+        nodeCacheManager.nodeRemoved(node);
+        /* TODO SB_MIGRATION
+        * I don't think we want to do this yet
+        InstanceIdentifier<Node> bridgeNodeIid =
+                MdsalHelper.createInstanceIdentifier(ovsdbNode.getConnectionInfo(),
+                        Constants.INTEGRATION_BRIDGE);
+        MdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, bridgeNodeIid);
+        */
+    }
+
+    private void processPortEvent(SouthboundEvent ev) {
+        switch (ev.getAction()) {
+            case ADD:
+            case UPDATE:
+                processPortUpdate(ev.getNode(), (OvsdbTerminationPointAugmentation) ev.getAugmentationData());
+                break;
+            case DELETE:
+                processPortDelete(ev.getNode(), (OvsdbTerminationPointAugmentation) ev.getAugmentationData(), null);
+                break;
         }
     }
 
@@ -308,11 +310,11 @@ public class SouthboundHandler extends AbstractHandler
 
     }
 
-    private void processOpenVSwitchUpdate(Node node, Action action) {
-        switch (action) {
+    private void processOpenVSwitchEvent(SouthboundEvent ev) {
+        switch (ev.getAction()) {
             case ADD:
             case UPDATE:
-                processOpenVSwitchUpdate(node);
+                processOpenVSwitchUpdate(ev.getNode());
                 break;
             case DELETE:
                 break;
@@ -320,6 +322,7 @@ public class SouthboundHandler extends AbstractHandler
     }
 
     private void processOpenVSwitchUpdate(Node node) {
+        logger.debug("processOpenVSwitchUpdate {}", node);
         // TODO this node might be the OvsdbNode and not have termination points
         // Would need to change listener or grab tp nodes in here.
         List<TerminationPoint> terminationPoints = MdsalUtils.extractTerminationPoints(node);
@@ -328,25 +331,34 @@ public class SouthboundHandler extends AbstractHandler
         }
     }
 
-    private void processBridgeUpdate(Node node, Action action) {
-        OvsdbBridgeAugmentation bridge = MdsalUtils.extractBridgeAugmentation(node);
-        switch (action) {
+    private void processBridgeEvent(SouthboundEvent ev) {
+        switch (ev.getAction()) {
             case ADD:
             case UPDATE:
-                processBridgeUpdate(node, bridge);
+                processBridgeUpdate(ev.getNode(), (OvsdbBridgeAugmentation) ev.getAugmentationData());
                 break;
             case DELETE:
-                processBridgeDelete(node, bridge);
+                processBridgeDelete(ev.getNode(), (OvsdbBridgeAugmentation) ev.getAugmentationData());
                 break;
         }
     }
 
-    private void processBridgeDelete(Node bridgeNode, OvsdbBridgeAugmentation bridge) {
-        logger.debug("Delete bridge from config data store : {}", bridgeNode.getNodeId());
-        MdsalUtils.deleteBridge(bridgeNode);
-    }
-
     private void processBridgeUpdate(Node node, OvsdbBridgeAugmentation bridge) {
         logger.debug("processBridgeUpdate {}, {}", node, bridge);
+        String datapathId = MdsalUtils.getDatapathId(bridge);
+        // Having a datapathId means the bridge has connected so it exists
+        if (datapathId != null) {
+            nodeCacheManager.nodeAdded(node);
+        } else {
+            logger.info("dataPathId not found");
+        }
+    }
+
+    private void processBridgeDelete(Node node, OvsdbBridgeAugmentation bridge) {
+        logger.debug("processBridgeDelete: Delete bridge from config data store : {}", node.getNodeId());
+        nodeCacheManager.nodeRemoved(node);
+        // TODO SB_MIGRATION
+        // Not sure if we want to do this yet
+        //MdsalUtils.deleteBridge(node);
     }
 }

@@ -93,7 +93,7 @@ public class PortHandlerTest {
         //List<Node> nodes = new ArrayList();
         //nodes.add(node);
         /* TODO SB_MIGRATION */
-        //when(connectionService.getNodes()).thenReturn(nodes);
+        //when(connectionService.getBridgeNodes()).thenReturn(nodes);
 
         //Row row = mock(Row.class);
         //ConcurrentMap<String, Row> portRows = new ConcurrentHashMap();

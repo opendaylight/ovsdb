@@ -193,6 +193,10 @@ public class MdsalUtils {
         return connectionInfo;
     }
 
+    public static OvsdbNodeAugmentation getOvsdbNode(Node node) {
+        return node.getAugmentation(OvsdbNodeAugmentation.class);
+    }
+
     public static String getOvsdbNodeUUID(Node node) {
         String nodeUUID = null;
         OvsdbNodeAugmentation ovsdbNodeAugmentation = node.getAugmentation(OvsdbNodeAugmentation.class);
@@ -351,6 +355,20 @@ public class MdsalUtils {
         return bridge;
     }
 
+    public static OvsdbBridgeAugmentation getBridge(Node node) {
+        OvsdbBridgeAugmentation bridge = node.getAugmentation(OvsdbBridgeAugmentation.class);
+        return bridge;
+    }
+
+    public static String getBridgeName(Node node) {
+        String bridgeName = null;
+        OvsdbBridgeAugmentation bridge = getBridge(node);
+        if (bridge != null) {
+            bridgeName = bridge.getBridgeName().getValue();
+        }
+        return bridgeName;
+    }
+
     public static String extractBridgeName(Node node) {
         return (node.getAugmentation(OvsdbBridgeAugmentation.class).getBridgeName().getValue());
     }
@@ -383,7 +401,7 @@ public class MdsalUtils {
      * @return
      */
     public static List<OvsdbTerminationPointAugmentation> getTerminationPointsOfBridge(Node node) {
-        List<OvsdbTerminationPointAugmentation> tpAugmentations = extractTerminationPointAugmentations( node);
+        List<OvsdbTerminationPointAugmentation> tpAugmentations = extractTerminationPointAugmentations(node);
         if(tpAugmentations.isEmpty()){
             tpAugmentations = readTerminationPointAugmentationFromDataStore(node);
         }
@@ -459,13 +477,13 @@ public class MdsalUtils {
         tpAugmentationBuilder.setInterfaceType(InterfaceTypeInternal.class);
         TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
         tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
-        return put(LogicalDatastoreType.CONFIGURATION,tpIid,tpBuilder.build());
+        return put(LogicalDatastoreType.CONFIGURATION, tpIid, tpBuilder.build());
     }
 
     public static Boolean deleteTerminationPoint(Node bridgeNode, String portName) {
         InstanceIdentifier<TerminationPoint> tpIid =
                 MdsalHelper.createTerminationPointInstanceIdentifier(bridgeNode, portName);
-        return delete(LogicalDatastoreType.CONFIGURATION,tpIid);
+        return delete(LogicalDatastoreType.CONFIGURATION, tpIid);
     }
 
     public static Boolean addTerminationPoint(Node bridgeNode, String bridgeName, String portName,
@@ -539,32 +557,46 @@ public class MdsalUtils {
     public static String getOtherConfig(Node node, OvsdbTables table, String key) {
         switch (table) {
             case BRIDGE:
-                for (BridgeOtherConfigs bridgeOtherConfigs :extractBridgeAugmentation(node).getBridgeOtherConfigs()) {
-                    if (bridgeOtherConfigs.getBridgeOtherConfigKey().equals(key)) {
-                        return bridgeOtherConfigs.getBridgeOtherConfigValue();
-                    }
-                }
-            case CONTROLLER:
-                LOG.debug("There is no other_config for OvsdbTables: ", table);
-                return null;
-            case OPENVSWITCH:
-                for ( OpenvswitchOtherConfigs openvswitchOtherConfigs :extractOvsdbNodeAugmentation(node).getOpenvswitchOtherConfigs()) {
-                    if (openvswitchOtherConfigs.getOtherConfigKey().equals(key)) {
-                        return openvswitchOtherConfigs.getOtherConfigValue();
-                    }
-                }
-            case PORT:
-                for (OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation :extractTerminationPointAugmentations(node)) {
-                    for (PortOtherConfigs portOtherConfigs :ovsdbTerminationPointAugmentation.getPortOtherConfigs()) {
-                        if (portOtherConfigs.getOtherConfigKey().equals(key)) {
-                            return portOtherConfigs.getOtherConfigValue();
+                OvsdbBridgeAugmentation bridge = extractBridgeAugmentation(node);
+                if (bridge != null) {
+                    for (BridgeOtherConfigs bridgeOtherConfigs : bridge.getBridgeOtherConfigs()) {
+                        if (bridgeOtherConfigs.getBridgeOtherConfigKey().equals(key)) {
+                            return bridgeOtherConfigs.getBridgeOtherConfigValue();
                         }
                     }
                 }
+                break;
+            case CONTROLLER:
+                LOG.debug("There is no other_config for OvsdbTables: ", table);
+                return null;
+
+            case OPENVSWITCH:
+                OvsdbNodeAugmentation ovsdbNode = extractOvsdbNodeAugmentation(node);
+                if (ovsdbNode != null) {
+                    for (OpenvswitchOtherConfigs openvswitchOtherConfigs :ovsdbNode.getOpenvswitchOtherConfigs()){
+                        if (openvswitchOtherConfigs.getOtherConfigKey().equals(key)) {
+                            return openvswitchOtherConfigs.getOtherConfigValue();
+                        }
+                    }
+                }
+                break;
+            case PORT:
+                List <OvsdbTerminationPointAugmentation> ports = extractTerminationPointAugmentations(node);
+                for (OvsdbTerminationPointAugmentation port : ports) {
+                    if (port != null && port.getPortOtherConfigs() != null) {
+                        for (PortOtherConfigs portOtherConfigs : port.getPortOtherConfigs()) {
+                            if (portOtherConfigs.getOtherConfigKey().equals(key)) {
+                                return portOtherConfigs.getOtherConfigValue();
+                            }
+                        }
+                    }
+                }
+                break;
             default:
                 LOG.debug("Couldn't find the specified OvsdbTables: ", table);
                 return null;
         }
+        return null;
     }
 
     public static boolean addVlanToTp(long vlan) {

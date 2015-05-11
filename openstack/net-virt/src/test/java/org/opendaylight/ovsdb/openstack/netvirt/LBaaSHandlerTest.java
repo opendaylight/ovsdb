@@ -107,7 +107,7 @@ public class LBaaSHandlerTest {
         when(neutronLBCache.getAllNeutronLoadBalancers()).thenReturn(list_neutronLB );
 
         list_node.add(mock(Node.class));
-        when(nodeCacheManager.getNodes()).thenReturn(list_node);
+        when(nodeCacheManager.getBridgeNodes()).thenReturn(list_node);
     }
 
     @Test

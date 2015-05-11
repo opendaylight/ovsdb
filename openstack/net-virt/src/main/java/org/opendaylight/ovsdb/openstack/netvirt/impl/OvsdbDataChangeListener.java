@@ -131,7 +131,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
 
         for(Map.Entry<InstanceIdentifier<?>, DataObject> updatedOvsdbNode : changes.getUpdatedData().entrySet()){
-            if(updatedOvsdbNode.getKey() instanceof OvsdbNodeAugmentation){
+            if(updatedOvsdbNode.getKey().getTargetType().equals(OvsdbNodeAugmentation.class)){
                 LOG.info("Processing Ovsdb Node attributes update : {}",updatedOvsdbNode);
                 // XXX (NOTE):Extract parent node data from originalData(),rather then extracting it from
                 // updatedData() because, extracting it from originalData() will give all the

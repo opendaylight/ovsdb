@@ -390,7 +390,7 @@ public class MdsalUtils {
         return nodes;
     }
 
-    public static OvsdbNodeAugmentation extractOvsdbNodeAugmentation(Node node) {
+    public static OvsdbNodeAugmentation extractNodeAugmentation(Node node) {
         return node.getAugmentation(OvsdbNodeAugmentation.class);
     }
 
@@ -526,32 +526,45 @@ public class MdsalUtils {
     public static String getExternalId(Node node, OvsdbTables table, String key) {
         switch (table) {
         case BRIDGE:
-            for (BridgeExternalIds bridgeExternaIds :extractBridgeAugmentation(node).getBridgeExternalIds()) {
+            OvsdbBridgeAugmentation bridge = extractBridgeAugmentation(node);
+            if (bridge != null) {
+                for (BridgeExternalIds bridgeExternaIds :bridge.getBridgeExternalIds()) {
                 if (bridgeExternaIds.getBridgeExternalIdKey().equals(key)) {
-                    return bridgeExternaIds.getBridgeExternalIdValue();
+                        return bridgeExternaIds.getBridgeExternalIdValue();
+                    }
                 }
             }
+            break;
         case CONTROLLER:
             LOG.debug("There is no external_id for OvsdbTables: ", table);
             return null;
         case OPENVSWITCH:
-            for ( OpenvswitchExternalIds openvswitchExternalIds :extractOvsdbNodeAugmentation(node).getOpenvswitchExternalIds()) {
-                if (openvswitchExternalIds.getExternalIdKey().equals(key)) {
-                    return openvswitchExternalIds.getExternalIdValue();
-                }
-            }
-        case PORT:
-            for (OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation :extractTerminationPointAugmentations(node)) {
-                for (PortExternalIds portExternalIds :ovsdbTerminationPointAugmentation.getPortExternalIds()) {
-                    if (portExternalIds.getExternalIdKey().equals(key)) {
-                        return portExternalIds.getExternalIdValue();
+            OvsdbNodeAugmentation ovsdbNode = extractNodeAugmentation(node);
+            if (ovsdbNode != null) {
+                for ( OpenvswitchExternalIds openvswitchExternalIds :ovsdbNode.getOpenvswitchExternalIds()) {
+                    if (openvswitchExternalIds.getExternalIdKey().equals(key)) {
+                        return openvswitchExternalIds.getExternalIdValue();
                     }
                 }
             }
+            break;
+        case PORT:
+            List <OvsdbTerminationPointAugmentation> ports = extractTerminationPointAugmentations(node);
+            for (OvsdbTerminationPointAugmentation port : ports) {
+                if (port != null && port.getPortExternalIds() != null) {
+                    for (PortExternalIds portExternalIds :port.getPortExternalIds()) {
+                        if (portExternalIds.getExternalIdKey().equals(key)) {
+                            return portExternalIds.getExternalIdValue();
+                        }
+                    }
+                }
+            }
+            break;
         default:
             LOG.debug("Couldn't find the specified OvsdbTables: ", table);
             return null;
         }
+        return null;
     }
 
     public static String getOtherConfig(Node node, OvsdbTables table, String key) {
@@ -571,7 +584,7 @@ public class MdsalUtils {
                 return null;
 
             case OPENVSWITCH:
-                OvsdbNodeAugmentation ovsdbNode = extractOvsdbNodeAugmentation(node);
+                OvsdbNodeAugmentation ovsdbNode = extractNodeAugmentation(node);
                 if (ovsdbNode != null) {
                     for (OpenvswitchOtherConfigs openvswitchOtherConfigs :ovsdbNode.getOpenvswitchOtherConfigs()){
                         if (openvswitchOtherConfigs.getOtherConfigKey().equals(key)) {

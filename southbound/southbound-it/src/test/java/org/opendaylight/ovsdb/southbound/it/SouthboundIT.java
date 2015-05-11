@@ -178,17 +178,16 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     @Override
     public Option[] getLoggingOptions(final boolean extras) {
-        Option[] options = new Option[] {
-                editConfigurationFilePut(SouthboundITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
-                        "log4j.logger.org.opendaylight.ovsdb",
-                        LogLevelOption.LogLevel.DEBUG.name()),
-                /*editConfigurationFilePut(SouthboundITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
-                        "log4j.logger.org.opendaylight.ovsdb.southbound-impl",
-                        LogLevelOption.LogLevel.DEBUG.name())*/
-        };
+        Option[] options;
 
-        if (extras == true) {
-            Option[] extraOptions = new Option[] {
+        if (!extras) {
+            options = new Option[] {
+                editConfigurationFilePut(SouthboundITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
+                        "log4j.logger.org.opendaylight.ovsdb.southbound-impl",
+                        LogLevelOption.LogLevel.DEBUG.name())
+            };
+        } else {
+            options = new Option[] {
                 editConfigurationFilePut(SouthboundITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
                         "log4j.logger.org.opendaylight.ovsdb",
                         LogLevelOption.LogLevel.DEBUG.name()),
@@ -199,7 +198,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         "log4j.logger.org.opendaylight.ovsdb.openstack.net-virt",
                         LogLevelOption.LogLevel.DEBUG.name())*/
             };
-            options = ObjectArrays.concat(options, extraOptions, Option.class);
         }
 
         options = ObjectArrays.concat(options, super.getLoggingOptions(extras), Option.class);

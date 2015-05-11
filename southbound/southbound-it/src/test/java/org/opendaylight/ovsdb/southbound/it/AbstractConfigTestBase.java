@@ -77,18 +77,25 @@ public abstract class AbstractConfigTestBase {
         return new Option[]{};
     }
 
-    public MavenArtifactUrlReference getKarafDistro() {
-        /*MavenArtifactUrlReference karafUrl = maven()
-                .groupId("org.opendaylight.controller")
-                .artifactId("opendaylight-karaf-empty")
-                .version("1.5.0-SNAPSHOT")
-                .type("zip");*/
-        MavenArtifactUrlReference karafUrl = maven()
-                .groupId("org.opendaylight.ovsdb")
-                //.artifactId("southbound-karaf")
-                .artifactId("karaf")
-                .version("1.1.0-SNAPSHOT")
-                .type("zip");
+    public MavenArtifactUrlReference getKarafDistro(boolean extras) {
+        MavenArtifactUrlReference karafUrl;
+        if (!extras) {
+            karafUrl = maven()
+                    // karaf-empty is busted
+                    //.groupId("org.opendaylight.controller")
+                    //.artifactId("opendaylight-karaf-empty")
+                    //.version("1.5.0-SNAPSHOT")
+                    .groupId("org.opendaylight.ovsdb")
+                    .artifactId("southbound-karaf")
+                    .version("1.1.0-SNAPSHOT")
+                    .type("zip");
+        } else {
+            karafUrl = maven()
+                    .groupId("org.opendaylight.ovsdb")
+                    .artifactId("karaf")
+                    .version("1.1.0-SNAPSHOT")
+                    .type("zip");
+        }
         return karafUrl;
     }
 
@@ -100,7 +107,7 @@ public abstract class AbstractConfigTestBase {
         Option[] options = new Option[] {
                 //KarafDistributionOption.debugConfiguration("5005", true),
                 karafDistributionConfiguration()
-                        .frameworkUrl(getKarafDistro())
+                        .frameworkUrl(getKarafDistro(extras))
                         .unpackDirectory(new File("target/exam"))
                         .useDeployFolder(false),
                 keepRuntimeFolder(),

@@ -51,13 +51,13 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     private TransactionInvoker txInvoker;
     private Map<DatabaseSchema,TransactInvoker> transactInvokers = new HashMap<DatabaseSchema,TransactInvoker>();
     private MonitorCallBack callback;
+    private ConnectionInfo key;
 
     OvsdbConnectionInstance(ConnectionInfo key,OvsdbClient client,TransactionInvoker txInvoker) {
         this.connectionInfo = key;
         this.client = client;
         this.txInvoker = txInvoker;
-        registerCallBack();
-        txInvoker.invoke(new OvsdbNodeCreateCommand(key, null,null));
+        this.key = key;
     }
 
     public void transact(TransactCommand command) {
@@ -66,25 +66,28 @@ public class OvsdbConnectionInstance implements OvsdbClient {
         }
     }
 
-    private void registerCallBack() {
-        this.callback = new OvsdbMonitorCallback(connectionInfo,txInvoker);
-        try {
-            List<String> databases = getDatabases().get();
-            if (databases != null) {
-                for (String database : databases) {
-                    DatabaseSchema dbSchema = getSchema(database).get();
-                    if (dbSchema != null) {
-                        transactInvokers.put(dbSchema, new TransactInvokerImpl(this,dbSchema));
-                        monitorAllTables(database, dbSchema);
-                    } else {
-                        LOG.warn("No schema reported for database {} for key {}",database,connectionInfo);
+    public void init() {
+        if ( this.callback == null) {
+            txInvoker.invoke(new OvsdbNodeCreateCommand(key, null,null));
+            this.callback = new OvsdbMonitorCallback(connectionInfo,txInvoker);
+            try {
+                List<String> databases = getDatabases().get();
+                if (databases != null) {
+                    for (String database : databases) {
+                        DatabaseSchema dbSchema = getSchema(database).get();
+                        if (dbSchema != null) {
+                            transactInvokers.put(dbSchema, new TransactInvokerImpl(this,dbSchema));
+                            monitorAllTables(database, dbSchema);
+                        } else {
+                            LOG.warn("No schema reported for database {} for key {}",database,connectionInfo);
+                        }
                     }
+                } else {
+                    LOG.warn("No databases reported from {}",connectionInfo);
                 }
-            } else {
-                LOG.warn("No databases reported from {}",connectionInfo);
+            } catch (InterruptedException | ExecutionException e) {
+                LOG.warn("Exception attempting to initialize {}: {}",connectionInfo,e);
             }
-        } catch (InterruptedException | ExecutionException e) {
-            LOG.warn("Exception attempting to initialize {}: {}",connectionInfo,e);
         }
     }
 

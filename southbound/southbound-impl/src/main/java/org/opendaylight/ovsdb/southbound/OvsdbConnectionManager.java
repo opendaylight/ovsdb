@@ -55,7 +55,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         ConnectionInfo key = SouthboundMapper.createConnectionInfo(externalClient);
         OvsdbConnectionInstance client = new OvsdbConnectionInstance(key,externalClient,txInvoker);
         putConnectionInstance(key, client);
-        txInvoker.invoke(new OvsdbNodeCreateCommand(key, null,null));
+        client.init();
     }
 
     @Override

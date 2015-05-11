@@ -15,7 +15,6 @@ import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryListener;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
@@ -67,7 +66,6 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
         //it might create weird issues.
         processOvsdbConnections(changes);
         processOvsdbConnectionAttributeUpdates(changes);
-        processOpenflowConnections(changes);
         processBridgeCreation(changes);
         processBridgeUpdate(changes);
         processPortCreation(changes);
@@ -121,15 +119,12 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
         for(Map.Entry<InstanceIdentifier<?>, DataObject> updatedOvsdbNode : changes.getUpdatedData().entrySet()){
             if(updatedOvsdbNode.getKey().getTargetType().equals(OvsdbNodeAugmentation.class)){
                 LOG.info("Processing Ovsdb Node attributes update : {}",updatedOvsdbNode);
-                // XXX (NOTE):Extract parent node data from originalData(),rather then extracting it from
-                // updatedData() because, extracting it from originalData() will give all the
-                // (existing data of parent node + old data of the OvsdbNodeAugmentation).
-                // If we extract parent node data from updatedData, it will give us
-                // ( Node data + new OvsdbNodeAugmentation data). To determine the update in
-                // OvsdbNodeAugmentation, we need to compare it's old and new values, so parent
-                // node data from originalData will contain old value and OvsdbNodeAugmentation
-                // from updateData() will provide new data.
-                Node parentNode  = getNode(changes.getOriginalData(),updatedOvsdbNode);
+                /* XXX (NOTE): Till now we don't really need the old ovsdb connection attributes data before update.
+                 * I am passing the updated data of both Node and resource augmentation data (connection attributes).
+                 * If in future we need old OvsdbNodeAugmentation attributes data, we will extract it from
+                 * original data and pass it as a resourceAugmentationData.
+                 */
+                Node parentNode  = getNode(changes.getUpdatedData(),updatedOvsdbNode);
                 if(parentNode == null){
                     // Logging this warning, to catch any change in southbound plugin's behavior.
                     LOG.warn("Parent Node for OvsdbNodeAugmentation is not found. On OvsdbNodeAugmentation update "
@@ -142,48 +137,6 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
                 ovsdbUpdate(parentNode, updatedOvsdbNode.getValue(),
                         OvsdbInventoryListener.OvsdbType.NODE, Action.UPDATE);
-            }
-        }
-    }
-
-    private void processOpenflowConnections(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        for (Map.Entry<InstanceIdentifier<?>, DataObject> change : changes.getCreatedData().entrySet()) {
-            if (change.getValue() instanceof OvsdbBridgeAugmentation) {
-                LOG.info("Processing OpenFlow connections : {}",change);
-                OvsdbBridgeAugmentation ovsdbBridgeAugmentation = (OvsdbBridgeAugmentation)change.getValue();
-                String datapathId = MdsalUtils.getDatapathId(ovsdbBridgeAugmentation);
-                // Having a datapathId means the bridge has connected so it exists
-                if (datapathId == null) {
-                    LOG.info("dataPathId not found");
-                    continue;
-                }
-                Node node = getNode(changes.getCreatedData(), change);
-                if (node == null) {
-                    LOG.warn("node not found");
-                    continue;
-                }
-                ovsdbUpdate(node, ovsdbBridgeAugmentation,
-                        OvsdbInventoryListener.OvsdbType.BRIDGE, Action.ADD);
-            }
-        }
-
-        for (Map.Entry<InstanceIdentifier<?>, DataObject> change : changes.getUpdatedData().entrySet()) {
-            if (change.getValue() instanceof OvsdbBridgeAugmentation) {
-                LOG.info("Processing OpenFlow connections updates: {}",change);
-                OvsdbBridgeAugmentation ovsdbBridgeAugmentation = (OvsdbBridgeAugmentation)change.getValue();
-                String datapathId = MdsalUtils.getDatapathId(ovsdbBridgeAugmentation);
-                // Having a datapathId means the bridge has connected so it exists
-                if (datapathId == null) {
-                    LOG.info("dataPathId not found");
-                    continue;
-                }
-                Node node = getNode(changes.getUpdatedData(), change);
-                if (node == null) {
-                    LOG.warn("node not found");
-                    continue;
-                }
-                ovsdbUpdate(node, ovsdbBridgeAugmentation,
-                        OvsdbInventoryListener.OvsdbType.BRIDGE, Action.UPDATE);
             }
         }
     }
@@ -244,15 +197,12 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
         for(Map.Entry<InstanceIdentifier<?>, DataObject> updatedPort : changes.getUpdatedData().entrySet()){
             if(updatedPort.getKey().getTargetType().equals(OvsdbTerminationPointAugmentation.class)){
                 LOG.info("Processing port update : {}",updatedPort);
-                // XXX (NOTE): Extract parent node data from originalData(), rather then extracting it from
-                // updatedData() because, extracting it from originalData() will give all the
-                // (existing data of parent node + old data of the OvsdbTerminationPointAugmentation).
-                // If we extract parent node data from updatedData, it will give us
-                // ( Node data + new OvsdbTerminationPointAugmentation data). To determine the update in
-                // OvsdbTerminationPointAugmentation, we need to compare it's old and new values, so parent
-                // node data from originalData will contain old value and OvsdbTerminationPointAugmentation
-                // from updateData() will provide new data.
-                Node tpParentNode  = getNode(changes.getOriginalData(),updatedPort);
+                /* XXX (NOTE): Till now we don't really need the old termination point data before update.
+                 * I am passing the updated data of both Node and resource augmentation data (termination-point).
+                 * If in future we need old TerminationPointAugmentation data, we will extract it from
+                 * original data and pass it as a resourceAugmentationData.
+                 */
+                Node tpParentNode  = getNode(changes.getUpdatedData(),updatedPort);
                 if(tpParentNode == null){
                     // Logging this warning, to catch any change in southbound plugin's behavior.
                     LOG.warn("Parent Node for port is not found. On Port/Interface update data store"
@@ -295,21 +245,17 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
         for (Map.Entry<InstanceIdentifier<?>, DataObject> updatedBridge : changes.getUpdatedData().entrySet()) {
             if(updatedBridge.getKey().getTargetType().equals(OvsdbBridgeAugmentation.class)){
                 LOG.info("Processing update on a bridge : {}",updatedBridge);
-                /* XXX (NOTE): Extract parent node data from originalData(), rather then extracting it from
-                 updatedData() because, extracting it from originalData() will give all the
-                 (existing data of parent node + old data of the OvsdbBridgeAugmentation).
-                 If we extract parent node data from updatedData, it will give us
-                 ( Node data + new OvsdbBridgeAugmentation data). To determine the update in
-                 OvsdbBridgeAugmentation, we need to compare it's old and new values, so parent
-                 node data from originalData will contain old value and OvsdbBridgeAugmentation
-                 from updateData() will provide new data.
+                /* XXX (NOTE): Till now we don't really need the old bridge data before update.
+                 * I am passing the updated data of both Node and resource augmentation data.
+                 * If in future we need old bridgeAugmentationData, we will extract it from
+                 * original data and pass it as a resourceAugmentationData.
                  */
 
-                Node bridgeParentNode = getNode(changes.getOriginalData(), updatedBridge);
+                Node bridgeParentNode = getNode(changes.getUpdatedData(), updatedBridge);
                 if(bridgeParentNode == null){
                     // Logging this warning, to catch any change in southbound plugin behavior
                     LOG.warn("Parent Node for bridge is not found. Bridge update must provide the Node "
-                            + "details in original Data Changes. This condition should not occure" );
+                            + "details in updated Data Changes. This condition should not occure" );
                     continue;
                 }
                 LOG.debug("Process bridge {} update on Node : {}", updatedBridge.getValue(),bridgeParentNode);

@@ -35,6 +35,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactCommand;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactInvoker;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactInvokerImpl;
+import org.opendaylight.ovsdb.southbound.transactions.md.OvsdbNodeCreateCommand;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.slf4j.Logger;
@@ -55,6 +56,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
         this.connectionInfo = key;
         this.client = client;
         this.txInvoker = txInvoker;
+        txInvoker.invoke(new OvsdbNodeCreateCommand(key, null,null));
         registerCallBack();
     }
 

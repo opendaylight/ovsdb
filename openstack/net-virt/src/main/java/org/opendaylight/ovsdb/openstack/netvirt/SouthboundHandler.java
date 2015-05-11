@@ -257,6 +257,7 @@ public class SouthboundHandler extends AbstractHandler
         switch (ev.getAction()) {
             case ADD:
                 processOvsdbNodeCreate(ev.getNode(), (OvsdbNodeAugmentation) ev.getAugmentationData());
+                break;
             case UPDATE:
                 processOvsdbNodeUpdate(ev.getNode(), (OvsdbNodeAugmentation) ev.getAugmentationData());
                 break;

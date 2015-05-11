@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_218868e6",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionInstance.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-05-11T19:59:21Z",
+      "side": 1,
+      "message": "[15:57:40]  \u003cflaviof\u003e\tedwarnicke: if we make registerCallBack public, can we make it thread safe and idem-potent?\n[15:57:43]  \u003cedwarnicke\u003e\tvishnoianil: I am kind of with you actually that I\u0027d rather have ConnectionInstance do that work personally\n[15:57:49]  \u003cedwarnicke\u003e\tbut it shouldn\u0027t in its constructor\n[15:57:53] flaviof\tworries about multiple threads calling registerCallBack at once/etc.",
+      "range": {
+        "startLine": 67,
+        "startChar": 16,
+        "endLine": 67,
+        "endChar": 32
+      },
+      "revId": "203ad7587bd7e07eba3f0528c557a97160dfb506",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

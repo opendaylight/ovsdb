@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_f8e9d580",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/internal/Activator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-05-11T10:31:34Z",
+      "side": 1,
+      "message": "In this case we might as well just remove logger and also remove the imports. Could you amend the gerrit with those changes?",
+      "revId": "a5ba1dcf72db01a08f2e1c23140b8348f42c9b4a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

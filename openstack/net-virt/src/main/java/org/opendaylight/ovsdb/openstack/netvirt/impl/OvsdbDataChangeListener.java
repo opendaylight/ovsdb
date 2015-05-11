@@ -211,7 +211,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
     private void processPortCreation(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
         for(Map.Entry<InstanceIdentifier<?>, DataObject> newPort : changes.getCreatedData().entrySet()){
-            if(newPort.getKey() instanceof OvsdbTerminationPointAugmentation){
+            if(newPort.getKey().getTargetType().equals(OvsdbTerminationPointAugmentation.class)){
                 LOG.info("Processing creation of new port : {}",newPort);
                 //If user created termination point only, Node will get updated
                 Node tpParentNode  = getNode(changes.getUpdatedData(), newPort);
@@ -262,7 +262,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
 
         for(Map.Entry<InstanceIdentifier<?>, DataObject> updatedPort : changes.getUpdatedData().entrySet()){
-            if(updatedPort.getKey() instanceof OvsdbTerminationPointAugmentation){
+            if(updatedPort.getKey().getTargetType().equals(OvsdbTerminationPointAugmentation.class)){
                 LOG.info("Processing port update : {}",updatedPort);
                 // XXX (NOTE): Extract parent node data from originalData(), rather then extracting it from
                 // updatedData() because, extracting it from originalData() will give all the
@@ -292,7 +292,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
 
         for(Map.Entry<InstanceIdentifier<?>, DataObject> newBridge : changes.getCreatedData().entrySet()){
-            if(newBridge.getKey() instanceof OvsdbBridgeAugmentation){
+            if(newBridge.getKey().equals(OvsdbBridgeAugmentation.class)){
                 LOG.info("Processing creation of new bridge : {}",newBridge);
                 //Bridge augmentation happens directly on the Node so Node details should also exist in created data.
                 Node bridgeParentNode  = getNode(changes.getCreatedData(),newBridge);
@@ -313,7 +313,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
 
         for (Map.Entry<InstanceIdentifier<?>, DataObject> updatedBridge : changes.getUpdatedData().entrySet()) {
-            if(updatedBridge.getKey() instanceof OvsdbBridgeAugmentation){
+            if(updatedBridge.getKey().getTargetType().equals(OvsdbBridgeAugmentation.class)){
                 LOG.info("Processing update on a bridge : {}",updatedBridge);
                 /* XXX (NOTE): Extract parent node data from originalData(), rather then extracting it from
                  updatedData() because, extracting it from originalData() will give all the

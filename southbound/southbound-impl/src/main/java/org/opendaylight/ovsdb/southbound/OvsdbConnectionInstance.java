@@ -57,7 +57,6 @@ public class OvsdbConnectionInstance implements OvsdbClient {
         this.client = client;
         this.txInvoker = txInvoker;
         registerCallBack();
-        txInvoker.invoke(new OvsdbNodeCreateCommand(key, null,null));
     }
 
     public void transact(TransactCommand command) {

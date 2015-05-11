@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class Activator extends DependencyActivatorBase {
-    protected static final Logger logger = LoggerFactory
+    protected static final Logger LOGGER = LoggerFactory
             .getLogger(Activator.class);
 
     @Override

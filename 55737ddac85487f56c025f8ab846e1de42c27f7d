@@ -16,6 +16,24 @@
       "revId": "55737ddac85487f56c025f8ab846e1de42c27f7d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_4279ef91",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 3558
+      },
+      "writtenOn": "2015-05-12T17:52:54Z",
+      "side": 1,
+      "message": "It is necessary as this is the iid which is created in config store by the user. This method is only called in ptcp connection. So this iid is saved in ovs.",
+      "parentUuid": "3aa0d159_5f30e800",
+      "revId": "55737ddac85487f56c025f8ab846e1de42c27f7d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

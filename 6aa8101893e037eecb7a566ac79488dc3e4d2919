@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_ff5c54ef",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/internal/NodeDatabase.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-05-12T15:54:00Z",
+      "side": 1,
+      "message": "this should be NodeDatabase.class",
+      "range": {
+        "startLine": 28,
+        "startChar": 23,
+        "endLine": 28,
+        "endChar": 32
+      },
+      "revId": "6aa8101893e037eecb7a566ac79488dc3e4d2919",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

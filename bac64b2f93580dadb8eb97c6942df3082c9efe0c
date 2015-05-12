@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_559447e1",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 1587,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-05-12T23:13:48Z",
+      "side": 1,
+      "message": "I am looking at the output of \"ovs-vsctl list Bridge\" before and after the update, they look same.",
+      "revId": "bac64b2f93580dadb8eb97c6942df3082c9efe0c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_35a65bc2",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 1589,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-05-12T23:13:48Z",
+      "side": 1,
+      "message": "don\u0027t see a lot of value in getting and asserting fro bridgeAugmentation. Are you using it later?",
+      "revId": "bac64b2f93580dadb8eb97c6942df3082c9efe0c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

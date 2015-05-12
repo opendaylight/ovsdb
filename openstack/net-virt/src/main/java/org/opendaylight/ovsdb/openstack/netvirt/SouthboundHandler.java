@@ -359,6 +359,6 @@ public class SouthboundHandler extends AbstractHandler
         nodeCacheManager.nodeRemoved(node);
         // TODO SB_MIGRATION
         // Not sure if we want to do this yet
-        //MdsalUtils.deleteBridge(node);
+        MdsalUtils.deleteBridge(node);
     }
 }

@@ -68,8 +68,6 @@ public class OvsdbConnectionInstance implements OvsdbClient {
 
     public void init() {
         if ( this.callback == null) {
-            txInvoker.invoke(new OvsdbNodeCreateCommand(key, null,null));
-            this.callback = new OvsdbMonitorCallback(connectionInfo,txInvoker);
             try {
                 List<String> databases = getDatabases().get();
                 if (databases != null) {
@@ -77,6 +75,13 @@ public class OvsdbConnectionInstance implements OvsdbClient {
                         DatabaseSchema dbSchema = getSchema(database).get();
                         if (dbSchema != null) {
                             transactInvokers.put(dbSchema, new TransactInvokerImpl(this,dbSchema));
+                        }
+                    }
+                    txInvoker.invoke(new OvsdbNodeCreateCommand(key, null,null));
+                    this.callback = new OvsdbMonitorCallback(connectionInfo,txInvoker);
+                    for (String database : databases) {
+                        DatabaseSchema dbSchema = getSchema(database).get();
+                        if (dbSchema != null) {
                             monitorAllTables(database, dbSchema);
                         } else {
                             LOG.warn("No schema reported for database {} for key {}",database,connectionInfo);

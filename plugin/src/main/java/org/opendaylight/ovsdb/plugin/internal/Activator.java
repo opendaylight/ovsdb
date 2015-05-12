@@ -22,8 +22,6 @@ import org.opendaylight.ovsdb.plugin.impl.ConnectionServiceImpl;
 import org.opendaylight.ovsdb.plugin.impl.InventoryServiceImpl;
 
 import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * OVSDB protocol plugin Activator
@@ -31,8 +29,6 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class Activator extends DependencyActivatorBase {
-    protected static final Logger logger = LoggerFactory
-            .getLogger(Activator.class);
 
     @Override
     public void init(BundleContext context, DependencyManager manager) throws Exception {

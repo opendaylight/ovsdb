@@ -77,6 +77,11 @@ public class OvsdbConnectionInstance implements OvsdbClient {
                         DatabaseSchema dbSchema = getSchema(database).get();
                         if (dbSchema != null) {
                             transactInvokers.put(dbSchema, new TransactInvokerImpl(this,dbSchema));
+                        }
+                    }
+                    for (String database : databases) {
+                        DatabaseSchema dbSchema = getSchema(database).get();
+                        if (dbSchema != null) {
                             monitorAllTables(database, dbSchema);
                         } else {
                             LOG.warn("No schema reported for database {} for key {}",database,connectionInfo);

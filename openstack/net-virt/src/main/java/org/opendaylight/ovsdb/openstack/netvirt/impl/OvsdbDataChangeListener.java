@@ -9,6 +9,8 @@ package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
@@ -40,6 +42,8 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbDataChangeListener.class);
     private DataBroker dataBroker = null;
     private ListenerRegistration<DataChangeListener> registration;
+    private final ExecutorService executorService = Executors.newFixedThreadPool(1);
+
 
     public OvsdbDataChangeListener (DataBroker dataBroker) {
         LOG.info(">>>>> Registering OvsdbNodeDataChangeListener: dataBroker= {}", dataBroker);
@@ -56,23 +60,28 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
     @Override
     public void close () throws Exception {
         registration.close();
+        executorService.shutdown();
     }
 
     @Override
-    public void onDataChanged(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        LOG.debug(">>>>> onDataChanged: {}", changes);
-        //TODO SB_MIGRATION: off load this process to execution service, blocking md-sal notification thread
-        // has performance impact on overall controller performance. With new notification broker
-        //it might create weird issues.
-        processOvsdbConnections(changes);
-        processOvsdbConnectionAttributeUpdates(changes);
-        processBridgeCreation(changes);
-        processBridgeUpdate(changes);
-        processPortCreation(changes);
-        processPortUpdate(changes);
-        processPortDeletion(changes);
-        processBridgeDeletion(changes);
-        processOvsdbDisconnect(changes);
+    public void onDataChanged(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
+
+        executorService.submit(new Runnable(){
+
+            @Override
+            public void run() {
+                LOG.debug(">>>>> onDataChanged: {}", changes);
+                processOvsdbConnections(changes);
+                processOvsdbConnectionAttributeUpdates(changes);
+                processBridgeCreation(changes);
+                processBridgeUpdate(changes);
+                processPortCreation(changes);
+                processPortUpdate(changes);
+                processPortDeletion(changes);
+                processBridgeDeletion(changes);
+                processOvsdbDisconnect(changes);
+            }
+        });
     }
 
     private void processOvsdbConnections(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {

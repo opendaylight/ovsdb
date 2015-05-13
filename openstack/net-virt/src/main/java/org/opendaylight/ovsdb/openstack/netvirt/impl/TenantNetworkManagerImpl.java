@@ -9,6 +9,8 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
+import com.google.common.base.Preconditions;
+import java.util.List;
 import org.opendaylight.neutron.spi.INeutronNetworkCRUD;
 import org.opendaylight.neutron.spi.INeutronPortCRUD;
 import org.opendaylight.neutron.spi.NeutronNetwork;
@@ -17,11 +19,8 @@ import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
-//import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,6 +96,7 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
 
     @Override
     public String getNetworkId(String segmentationId) {
+        Preconditions.checkNotNull(neutronNetworkCache);
         List <NeutronNetwork> networks = neutronNetworkCache.getAllNetworks();
         for (NeutronNetwork network : networks) {
             if (network.getProviderSegmentationID().equalsIgnoreCase(segmentationId)) return network.getNetworkUUID();
@@ -106,14 +106,11 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
 
     @Override
     public NeutronNetwork getTenantNetwork(OvsdbTerminationPointAugmentation terminationPointAugmentation) {
+        Preconditions.checkNotNull(neutronNetworkCache);
+        Preconditions.checkNotNull(neutronPortCache);
         NeutronNetwork neutronNetwork = null;
-        //neutronPortCache = (INeutronPortCRUD) ServiceHelper.getGlobalInstance(INeutronPortCRUD.class, this);
-        //neutronNetworkCache = (INeutronNetworkCRUD) ServiceHelper.getGlobalInstance(INeutronNetworkCRUD.class, this);
-        if (neutronPortCache == null || neutronNetworkCache == null) {
-            logger.error("neutron interfaces are null");
-            return neutronNetwork;
-        }
-        logger.debug("getTenantNetwork for {}", terminationPointAugmentation.getName());
+
+        logger.debug("getTenantNetwork for {}", terminationPointAugmentation);
         String neutronPortId = MdsalUtils.getInterfaceExternalIdsValue(terminationPointAugmentation,
                 Constants.EXTERNAL_ID_INTERFACE_ID);
         if (neutronPortId != null) {
@@ -122,8 +119,14 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
                 neutronNetwork = neutronNetworkCache.getNetwork(neutronPort.getNetworkUUID());
                 if (neutronNetwork != null) {
                     logger.debug("mapped to {}", neutronNetwork);
+                } else {
+                    logger.debug("getTenantNetwork: did not find neutronNetwork in cache");
                 }
+            } else {
+                logger.debug("getTenantNetwork: did not find neutronPort in cache");
             }
+        } else {
+            logger.debug("getTenantNetwork: did not find {} in external_ids", Constants.EXTERNAL_ID_INTERFACE_ID);
         }
         if (neutronNetwork != null) {
             logger.debug("mapped to {}", neutronNetwork);
@@ -135,12 +138,9 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
 
     @Override
     public NeutronPort getTenantPort(OvsdbTerminationPointAugmentation terminationPointAugmentation) {
+        Preconditions.checkNotNull(neutronPortCache);
         NeutronPort neutronPort = null;
-        //neutronPortCache = (INeutronPortCRUD) ServiceHelper.getGlobalInstance(INeutronPortCRUD.class, this);
-        if (neutronPortCache == null) {
-            logger.error("neutron port is null");
-            return neutronPort;
-        }
+
         logger.trace("getTenantPort for {}", terminationPointAugmentation.getName());
         String neutronPortId = MdsalUtils.getInterfaceExternalIdsValue(terminationPointAugmentation,
             Constants.EXTERNAL_ID_INTERFACE_ID);

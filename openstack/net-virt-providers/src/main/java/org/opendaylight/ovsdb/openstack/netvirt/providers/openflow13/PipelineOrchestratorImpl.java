@@ -93,7 +93,7 @@ public class PipelineOrchestratorImpl implements NodeCacheListener, PipelineOrch
                         Thread.sleep(1000);
                         for (Service service : staticPipeline) {
                             AbstractServiceInstance serviceInstance = getServiceInstance(service);
-                            logger.info("pipeline: {} - {}", service, serviceInstance);
+                            //logger.info("pipeline: {} - {}", service, serviceInstance);
                             if (serviceInstance != null) {
                                 if (MdsalUtils.getBridge(node) != null) {
                                     serviceInstance.programDefaultPipelineRule(node);

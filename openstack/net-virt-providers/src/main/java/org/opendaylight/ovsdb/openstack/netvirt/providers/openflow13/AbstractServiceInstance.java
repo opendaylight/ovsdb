@@ -76,7 +76,7 @@ public abstract class AbstractServiceInstance {
 
     public boolean isBridgeInPipeline (Node node){
         String bridgeName = MdsalUtils.getBridgeName(node);
-        logger.debug("isBridgeInPipeline: node {} bridgeName {}", node, bridgeName);
+        //logger.trace("isBridgeInPipeline: node {} bridgeName {}", node, bridgeName);
         if (bridgeName != null && Constants.INTEGRATION_BRIDGE.equals(bridgeName)) {
             return true;
         }
@@ -238,7 +238,7 @@ public abstract class AbstractServiceInstance {
      */
     protected void programDefaultPipelineRule(Node node) {
         if (!isBridgeInPipeline(node)) {
-            logger.debug("Bridge {} is not in pipeline", node);
+            //logger.trace("Bridge is not in pipeline {} ", node);
             return;
         }
         MatchBuilder matchBuilder = new MatchBuilder();

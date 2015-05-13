@@ -86,7 +86,6 @@ public class SouthboundHandler extends AbstractHandler
         NeutronNetwork network = tenantNetworkManager.getTenantNetwork(tp);
         if (network != null && !network.getRouterExternal()) {
             logger.trace("handleInterfaceUpdate <{}> <{}> network: {}", node, tp, network.getNetworkUUID());
-            tenantNetworkManager.programInternalVlan(node, tp, network);
             neutronL3Adapter.handleInterfaceEvent(node, tp, network, Action.UPDATE);
             if (bridgeConfigurationManager.createLocalNetwork(node, network)) {
                 networkingProviderManager.getProvider(node).handleInterfaceUpdate(network, node, tp);
@@ -114,9 +113,6 @@ public class SouthboundHandler extends AbstractHandler
                     logger.error("Tunnel end-point configuration missing. Please configure it in OpenVSwitch Table");
                     return;
                 }
-            }
-            if (isLastInstanceOnNode & networkingProviderManager.getProvider(node).hasPerTenantTunneling()) {
-                tenantNetworkManager.reclaimInternalVlan(node, network);
             }
             networkingProviderManager.getProvider(node).handleInterfaceDelete(network.getProviderNetworkType(),
                     network, node, intf, isLastInstanceOnNode);

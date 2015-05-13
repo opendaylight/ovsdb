@@ -1,0 +1,19 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+    <reference id="httpService" availability="mandatory" activation="eager" interface="org.osgi.service.http.HttpService"/>
+    <reference id="loader" availability="mandatory" activation="eager" interface="org.opendaylight.dlux.loader.DluxModuleLoader"/>
+
+    <bean id="bundle" init-method="initialize" destroy-method="clean" class="org.opendaylight.dlux.loader.DluxModule">
+        <property name="httpService" ref="httpService"/>
+        <property name="loader" ref="loader"/>
+        <property name="moduleName" value="ovsdb-ui"/>
+        <property name="url" value="/src/ovsdb-ui"/>
+        <property name="directory" value="ovsdb-ui"/>
+        <property name="requireJs" value="ovsdb-ui/ovsdb.module"/>
+        <property name="angularJs" value="app.ovsdb"/>
+        <property name="cssDependencies">
+            <list>
+                <value>src/ovsdb-ui/ovsdb.css</value>
+            </list>
+        </property>
+    </bean>
+</blueprint>

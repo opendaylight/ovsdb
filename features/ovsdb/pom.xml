@@ -140,6 +140,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>utils.servicehelper</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>ovsdb-ui</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
       <scope>compile</scope>

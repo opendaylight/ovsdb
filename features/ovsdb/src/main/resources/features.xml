@@ -64,4 +64,9 @@
         <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt/${openstack.netvirt.version}</bundle>
         <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt-providers/${openstack.netvirt.providers.version}</bundle>
     </feature>
+
+    <feature name="odl-ovsdb-ui" description="OpenDaylight :: OVSDB :: DLUX Integration Plugin" version='${ovsdb.ui.version}'>
+        <feature version="${dlux.core.version}">odl-dlux-core</feature>
+        <bundle>mvn:org.opendaylight.ovsdb/ovsdb-ui/${ovsdb.ui.version}</bundle>
+    </feature>
 </features>

@@ -168,7 +168,8 @@ public class OF13Provider implements NetworkingProvider {
         String tunnelBridgeName = configurationService.getIntegrationBridgeName();
         String portName = getTunnelName(tunnelType, dst);
         logger.info("addTunnelPort enter: portName: {}", portName);
-        if (MdsalUtils.extractTerminationPointAugmentation(node, portName) != null) {
+        if (MdsalUtils.extractTerminationPointAugmentation(node, portName) != null
+                || MdsalUtils.isTunnelTerminationPointExist(node,tunnelBridgeName,portName)) {
             logger.info("Tunnel {} is present in {} of {}", portName, tunnelBridgeName, node);
             return true;
         }

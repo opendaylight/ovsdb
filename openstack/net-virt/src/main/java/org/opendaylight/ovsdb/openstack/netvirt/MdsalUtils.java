@@ -557,10 +557,16 @@ public class MdsalUtils {
         tpAugmentationBuilder.setOptions(optionsList);
 
         TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
-        tpBuilder.setKey(new TerminationPointKey(new TpId(portName)));
+        tpBuilder.setKey(InstanceIdentifier.keyOf(tpIid));
         tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
         /* TODO SB_MIGRATION should this be merge or put */
         return put(LogicalDatastoreType.CONFIGURATION, tpIid, tpBuilder.build());
+    }
+
+    public static Boolean readTerminationPoint(Node bridgeNode, String bridgeName, String portName) {
+        InstanceIdentifier<TerminationPoint> tpIid = MdsalHelper.createTerminationPointInstanceIdentifier(
+                bridgeNode, portName);
+        return read(LogicalDatastoreType.OPERATIONAL, tpIid) != null;
     }
 
     public static Boolean addTunnelTerminationPoint(Node bridgeNode, String bridgeName, String portName, String type,
@@ -568,6 +574,9 @@ public class MdsalUtils {
         return addTerminationPoint(bridgeNode, bridgeName, portName, type, options);
     }
 
+    public static Boolean isTunnelTerminationPointExist(Node bridgeNode, String bridgeName, String portName){
+        return readTerminationPoint(bridgeNode, bridgeName, portName);
+    }
     public static Boolean addPatchTerminationPoint(Node node, String bridgeName, String portName, String peerPortName) {
         Map<String, String> option = new HashMap<String, String>();
         option.put("peer", peerPortName);

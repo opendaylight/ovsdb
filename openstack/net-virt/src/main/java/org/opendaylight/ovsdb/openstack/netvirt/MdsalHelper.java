@@ -169,12 +169,11 @@ public class MdsalHelper {
 
     public static InstanceIdentifier<TerminationPoint> createTerminationPointInstanceIdentifier(
             IpAddress ip, PortNumber port, String bridgeName, String portName) {
-        String tpUri = createManagedNodeId(ip, port, bridgeName) + "/" + TP_URI_PREFIX + "/" + portName;
         InstanceIdentifier<TerminationPoint> nodePath = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(OVSDB_TOPOLOGY_ID))
                 .child(Node.class,new NodeKey(createNodeId(ip,port)))
-                .child(TerminationPoint.class, new TerminationPointKey(new TpId(tpUri)));
+                .child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)));
         LOG.debug("Termination point InstanceIdentigier generated : {}",nodePath);
         return nodePath;
     }
@@ -184,15 +183,14 @@ public class MdsalHelper {
     }
 
     public static InstanceIdentifier<TerminationPoint> createTerminationPointInstanceIdentifier(Node node, String portName){
-        String tpUri = node.getNodeId().getValue() + "/" + TP_URI_PREFIX + "/" + portName;
 
         InstanceIdentifier<TerminationPoint> nodePath = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(OVSDB_TOPOLOGY_ID))
                 .child(Node.class,node.getKey())
-                .child(TerminationPoint.class, new TerminationPointKey(new TpId(tpUri)));
+                .child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)));
 
-        LOG.debug("Termination point InstanceIdentigier generated : {}",nodePath);
+        LOG.debug("Termination point InstanceIdentifier generated : {}",nodePath);
         return nodePath;
     }
 

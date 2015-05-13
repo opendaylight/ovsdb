@@ -93,7 +93,7 @@ public class EventDispatcherImpl implements EventDispatcher {
             return;
         }
 
-        logger.info("EventDispatcherImpl: enqueueEvent: {}", ev);
+        logger.info("EventDispatcherImpl: dispatchEvent: {}", ev);
         handler.processEvent(ev);
     }
 

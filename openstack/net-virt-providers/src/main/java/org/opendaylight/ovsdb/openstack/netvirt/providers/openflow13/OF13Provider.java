@@ -165,8 +165,9 @@ public class OF13Provider implements NetworkingProvider {
     private boolean addTunnelPort (Node node, String tunnelType, InetAddress src, InetAddress dst) {
         String tunnelBridgeName = configurationService.getIntegrationBridgeName();
         String portName = getTunnelName(tunnelType, dst);
+        logger.info("addTunnelPort enter: portName: {}", portName);
         if (MdsalUtils.extractTerminationPointAugmentation(node, portName) != null) {
-            logger.trace("Tunnel {} is present in {} of {}", portName, tunnelBridgeName, node);
+            logger.info("Tunnel {} is present in {} of {}", portName, tunnelBridgeName, node);
             return true;
         }
 
@@ -180,6 +181,7 @@ public class OF13Provider implements NetworkingProvider {
             return false;
         }
 
+        logger.info("addTunnelPort exit: portName: {}", portName);
         return true;
     }
 
@@ -704,11 +706,16 @@ public class OF13Provider implements NetworkingProvider {
         try {
             Long dpid = getIntegrationBridgeOFDPID(node);
             if (dpid == 0L) {
-                logger.debug("Openflow Datapath-ID not set for the integration bridge in {}", node);
+                logger.debug("programLocalRules: Openflow Datapath-ID not set for the integration bridge in {}",
+                        node);
                 return;
             }
 
-            long localPort = (Long)intf.getOfport();
+            long localPort = MdsalUtils.getOFPort(intf);
+            if (localPort == 0) {
+                logger.info("programLocalRules: could not find ofPort");
+                return;
+            }
 
             String attachedMac = MdsalUtils.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
             if (attachedMac == null) {
@@ -750,11 +757,15 @@ public class OF13Provider implements NetworkingProvider {
         try {
             Long dpid = getIntegrationBridgeOFDPID(node);
             if (dpid == 0L) {
-                logger.debug("Openflow Datapath-ID not set for the integration bridge in {}", node);
+                logger.debug("removeLocalRules: Openflow Datapath-ID not set for the integration bridge in {}", node);
                 return;
             }
 
-            long localPort = (Long)intf.getOfport();
+            long localPort = MdsalUtils.getOFPort(intf);
+            if (localPort == 0) {
+                logger.info("removeLocalRules: could not find ofPort");
+                return;
+            }
 
             String attachedMac = MdsalUtils.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
             if (attachedMac == null) {
@@ -785,7 +796,11 @@ public class OF13Provider implements NetworkingProvider {
                 return;
             }
 
-            long localPort = (Long)intf.getOfport();
+            long localPort = MdsalUtils.getOFPort(intf);
+            if (localPort == 0) {
+                logger.info("programTunnelRules: could not find ofPort");
+                return;
+            }
 
             String attachedMac = MdsalUtils.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
             if (attachedMac == null) {
@@ -797,9 +812,8 @@ public class OF13Provider implements NetworkingProvider {
             for (OvsdbTerminationPointAugmentation tunIntf : intfs) {
                 Long ofPort = 0L;
                 if (tunIntf.getName().equals(getTunnelName(tunnelType, dst))) {
-                    long tunnelOFPort = (Long)intf.getOfport();
-
-                    if (tunnelOFPort == -1) {
+                    long tunnelOFPort = MdsalUtils.getOFPort(tunIntf);
+                    if (tunnelOFPort == 0) {
                         logger.error("Could not Identify Tunnel port {} -> OF ({}) on {}",
                                 tunIntf.getName(), tunnelOFPort, node);
                         return;
@@ -831,15 +845,19 @@ public class OF13Provider implements NetworkingProvider {
         try {
             Long dpid = getIntegrationBridgeOFDPID(node);
             if (dpid == 0L) {
-                logger.debug("Openflow Datapath-ID not set for the integration bridge in {}", node);
+                logger.debug("removeTunnelRules: Openflow Datapath-ID not set for the integration bridge in {}", node);
                 return;
             }
 
-            long localPort = (Long)intf.getOfport();
+            long localPort = MdsalUtils.getOFPort(intf);
+            if (localPort == 0) {
+                logger.info("removeTunnelRules: could not find ofPort");
+                return;
+            }
 
             String attachedMac = MdsalUtils.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
             if (attachedMac == null) {
-                logger.error("No AttachedMac seen in {}", intf);
+                logger.error("removeTunnelRules: No AttachedMac seen in {}", intf);
                 return;
             }
 
@@ -847,8 +865,7 @@ public class OF13Provider implements NetworkingProvider {
             for (OvsdbTerminationPointAugmentation tunIntf : intfs) {
                 Long ofPort = 0L;
                 if (tunIntf.getName().equals(getTunnelName(tunnelType, dst))) {
-                    long tunnelOFPort = (Long)intf.getOfport();
-
+                    long tunnelOFPort = MdsalUtils.getOFPort(tunIntf);
                     if (tunnelOFPort == -1) {
                         logger.error("Could not Identify Tunnel port {} -> OF ({}) on {}",
                                 tunIntf.getName(), tunnelOFPort, node);
@@ -876,15 +893,19 @@ public class OF13Provider implements NetworkingProvider {
         logger.debug("Program vlan rules for interface {}", intf.getName());
         Long dpid = getIntegrationBridgeOFDPID(node);
         if (dpid == 0L) {
-            logger.debug("Openflow Datapath-ID not set for the integration bridge in {}", node);
+            logger.debug("programVlanRules: Openflow Datapath-ID not set for the integration bridge in {}", node);
             return;
         }
 
-        long localPort = (Long)intf.getOfport();
+        long localPort = MdsalUtils.getOFPort(intf);
+        if (localPort == 0) {
+            logger.info("programVlanRules: could not find ofPort");
+            return;
+        }
 
         String attachedMac = MdsalUtils.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
         if (attachedMac == null) {
-            logger.error("No AttachedMac seen in {}", intf);
+            logger.error("programVlanRules: No AttachedMac seen in {}", intf);
             return;
         }
 
@@ -893,7 +914,7 @@ public class OF13Provider implements NetworkingProvider {
             Long ofPort = 0L;
             if (ethIntf.getName().equalsIgnoreCase(bridgeConfigurationManager.getPhysicalInterfaceName(
                     node, network.getProviderPhysicalNetwork()))) {
-                long ethOFPort = (Long)ethIntf.getOfport();
+                long ethOFPort = MdsalUtils.getOFPort(ethIntf);
                 logger.debug("Identified eth port {} -> OF ({}) on {}",
                         ethIntf.getName(), ethOFPort, node);
                 // TODO: add logic to only add rule on remote nodes
@@ -911,15 +932,19 @@ public class OF13Provider implements NetworkingProvider {
         logger.debug("Program vlan rules for interface {}", intf.getName());
         Long dpid = getIntegrationBridgeOFDPID(node);
         if (dpid == 0L) {
-            logger.debug("Openflow Datapath-ID not set for the integration bridge in {}", node);
+            logger.debug("removeVlanRules: Openflow Datapath-ID not set for the integration bridge in {}", node);
             return;
         }
 
-        long localPort = (Long)intf.getOfport();
+        long localPort = MdsalUtils.getOFPort(intf);
+        if (localPort == 0) {
+            logger.info("removeVlanRules: programVlanRules: could not find ofPort");
+            return;
+        }
 
         String attachedMac = MdsalUtils.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
         if (attachedMac == null) {
-            logger.error("No AttachedMac seen in {}", intf);
+            logger.error("removeVlanRules: No AttachedMac seen in {}", intf);
             return;
         }
 
@@ -944,14 +969,13 @@ public class OF13Provider implements NetworkingProvider {
     @Override
     public boolean handleInterfaceUpdate(NeutronNetwork network, Node srcNode,
                                          OvsdbTerminationPointAugmentation intf) {
-        //Preconditions.checkNotNull(connectionService);
-        //List<Node> nodes = connectionService.getBridgeNodes();
         Preconditions.checkNotNull(nodeCacheManager);
         List<Node> nodes = nodeCacheManager.getOvsdbNodes();
         nodes.remove(srcNode);
         String networkType = network.getProviderNetworkType();
         String segmentationId = network.getProviderSegmentationID();
-        programLocalRules(networkType, network.getProviderSegmentationID(), srcNode, intf);
+        Node srcBridgeNode = MdsalUtils.getBridgeNode(srcNode,configurationService.getIntegrationBridgeName());
+        programLocalRules(networkType, network.getProviderSegmentationID(), srcBridgeNode, intf);
 
         if (networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
             programVlanRules(network, srcNode, intf);
@@ -961,11 +985,13 @@ public class OF13Provider implements NetworkingProvider {
                 InetAddress src = configurationService.getTunnelEndPoint(srcNode);
                 InetAddress dst = configurationService.getTunnelEndPoint(dstNode);
                 if ((src != null) && (dst != null)) {
-                    if (addTunnelPort(srcNode, networkType, src, dst)) {
-                        programTunnelRules(networkType, segmentationId, dst, srcNode, intf, true);
+                    Node dstBridgeNode = MdsalUtils.getBridgeNode(dstNode,
+                            configurationService.getIntegrationBridgeName());
+                    if (addTunnelPort(srcBridgeNode, networkType, src, dst)) {
+                        programTunnelRules(networkType, segmentationId, dst, srcBridgeNode, intf, true);
                     }
-                    if (addTunnelPort(dstNode, networkType, dst, src)) {
-                        programTunnelRules(networkType, segmentationId, src, dstNode, intf, false);
+                    if (addTunnelPort(dstBridgeNode, networkType, dst, src)) {
+                        programTunnelRules(networkType, segmentationId, src, dstBridgeNode, intf, false);
                     }
                 } else {
                     logger.warn("Tunnel end-point configuration missing. Please configure it in OpenVSwitch Table. "

@@ -20,6 +20,7 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
@@ -51,12 +52,14 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -290,6 +293,31 @@ public class MdsalUtils {
             }
         }
         return ovsdbBridgeAugmentation;
+    }
+
+    public static Node readBridgeNode(Node node, String name) {
+        Node bridgeNode = null;
+        ConnectionInfo connectionInfo = getConnectionInfo(node);
+        if (connectionInfo != null) {
+            InstanceIdentifier<Node> bridgeIid =
+                    MdsalHelper.createInstanceIdentifier(connectionInfo, new OvsdbBridgeName(name));
+            bridgeNode = read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
+        }
+        return bridgeNode;
+    }
+
+    public static Node getBridgeNode(Node node, String bridgeName) {
+        Node bridgeNode = null;
+        OvsdbBridgeAugmentation bridge = extractBridgeAugmentation(node);
+        if (bridge != null) {
+            if (bridge.getBridgeName().getValue().equals(bridgeName)) {
+                bridgeNode = node;
+            }
+        } else {
+            bridgeNode = readBridgeNode(node, bridgeName);
+        }
+
+        return bridgeNode;
     }
 
     public static Uuid getBridgeUuid(Node node, String name) {
@@ -529,7 +557,9 @@ public class MdsalUtils {
         tpAugmentationBuilder.setOptions(optionsList);
 
         TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
+        tpBuilder.setKey(new TerminationPointKey(new TpId(portName)));
         tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
+        /* TODO SB_MIGRATION should this be merge or put */
         return put(LogicalDatastoreType.CONFIGURATION, tpIid, tpBuilder.build());
     }
 
@@ -606,7 +636,7 @@ public class MdsalUtils {
 
             case OPENVSWITCH:
                 OvsdbNodeAugmentation ovsdbNode = extractNodeAugmentation(node);
-                if (ovsdbNode != null){
+                if (ovsdbNode == null){
                     ovsdbNode = readOvsdbNode(node);
                 }
                 if (ovsdbNode != null) {
@@ -666,4 +696,11 @@ public class MdsalUtils {
         return topology;
     }
 
+    public static Long getOFPort(OvsdbTerminationPointAugmentation port) {
+        Long ofPort = 0L;
+        if (port.getOfport() != null) {
+            ofPort = port.getOfport();
+        }
+        return ofPort;
+    }
 }

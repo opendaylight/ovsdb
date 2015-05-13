@@ -74,74 +74,12 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
                 OvsdbNodeAugmentation ovsdbNode = SouthboundMapper
                         .createOvsdbAugmentation(getConnectionInfo());
                 OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = new OvsdbNodeAugmentationBuilder();
-                try {
-                    ovsdbNodeBuilder.setOvsVersion(openVSwitch.getOvsVersionColumn().getData().iterator().next());
-                } catch (NoSuchElementException e) {
-                    LOG.debug("ovs_version is not set for this switch",e);
-                }
-                try {
-                    Set<String> dptypes = openVSwitch.getDatapathTypesColumn()
-                            .getData();
-                    List<DatapathTypeEntry> dpEntryList = new ArrayList<DatapathTypeEntry>();
-                    for (String dpType : dptypes) {
-                        DatapathTypeEntry dpEntry = new DatapathTypeEntryBuilder()
-                                .setDatapathType(
-                                        SouthboundMapper.createDatapathType(dpType))
-                                .build();
-                        dpEntryList.add(dpEntry);
-                    }
-                    ovsdbNodeBuilder.setDatapathTypeEntry(dpEntryList);
-                } catch (SchemaVersionMismatchException e) {
-                    LOG.debug("Datapath types not supported by this version of ovsdb",e);
-                }
-                try {
-                    Set<String> iftypes = openVSwitch.getIfaceTypesColumn().getData();
-                    List<InterfaceTypeEntry> ifEntryList = new ArrayList<InterfaceTypeEntry>();
-                    for (String ifType : iftypes) {
-                        InterfaceTypeEntry ifEntry = new InterfaceTypeEntryBuilder()
-                                .setInterfaceType(
-                                        SouthboundMapper.createInterfaceType(ifType))
-                                .build();
-                        ifEntryList.add(ifEntry);
-                    }
-                    ovsdbNodeBuilder.setInterfaceTypeEntry(ifEntryList);
-                } catch (SchemaVersionMismatchException e) {
-                    LOG.debug("Iface types  not supported by this version of ovsdb",e);;
-                }
 
-                Map<String, String> externalIds = openVSwitch.getExternalIdsColumn().getData();
-                if (externalIds != null && !externalIds.isEmpty()) {
-                    Set<String> externalIdKeys = externalIds.keySet();
-                    List<OpenvswitchExternalIds> externalIdsList = new ArrayList<OpenvswitchExternalIds>();
-                    String externalIdValue;
-                    for (String externalIdKey : externalIdKeys) {
-                        externalIdValue = externalIds.get(externalIdKey);
-                        if (externalIdKey != null && externalIdValue != null) {
-                            externalIdsList.add(new OpenvswitchExternalIdsBuilder()
-                                    .setExternalIdKey(externalIdKey)
-                                    .setExternalIdValue(externalIdValue)
-                                    .build());
-                        }
-                    }
-                    ovsdbNodeBuilder.setOpenvswitchExternalIds(externalIdsList);
-                }
-
-                Map<String, String> otherConfigs = openVSwitch.getOtherConfigColumn().getData();
-                if (otherConfigs != null && !otherConfigs.isEmpty()) {
-                    Set<String> otherConfigKeys = otherConfigs.keySet();
-                    List<OpenvswitchOtherConfigs> otherConfigsList = new ArrayList<OpenvswitchOtherConfigs>();
-                    String otherConfigValue;
-                    for (String otherConfigKey : otherConfigKeys) {
-                        otherConfigValue = otherConfigs.get(otherConfigKey);
-                        if (otherConfigKey != null && otherConfigValue != null) {
-                            otherConfigsList.add(new OpenvswitchOtherConfigsBuilder()
-                                    .setOtherConfigKey(otherConfigKey)
-                                    .setOtherConfigValue(otherConfigValue)
-                                    .build());
-                        }
-                    }
-                    ovsdbNodeBuilder.setOpenvswitchOtherConfigs(otherConfigsList);
-                }
+                setVersion(ovsdbNodeBuilder, openVSwitch);
+                setDataPathTypes(ovsdbNodeBuilder, openVSwitch);
+                setInterfaceTypes(ovsdbNodeBuilder, openVSwitch);
+                setExternalIds(ovsdbNodeBuilder, openVSwitch);
+                setOtherConfig(ovsdbNodeBuilder, openVSwitch);
 
                 NodeBuilder nodeBuilder = new NodeBuilder();
                 ConnectionInfo connectionInfo = ovsdbNode.getConnectionInfo();
@@ -152,6 +90,94 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
                 transaction.merge(LogicalDatastoreType.OPERATIONAL, nodePath,
                         nodeBuilder.build());
             }
+        }
+    }
+
+    private void setOtherConfig(OvsdbNodeAugmentationBuilder ovsdbNodeBuilder,
+            OpenVSwitch openVSwitch) {
+        Map<String, String> otherConfigs = openVSwitch.getOtherConfigColumn().getData();
+        if (otherConfigs != null && !otherConfigs.isEmpty()) {
+            Set<String> otherConfigKeys = otherConfigs.keySet();
+            List<OpenvswitchOtherConfigs> otherConfigsList = new ArrayList<OpenvswitchOtherConfigs>();
+            String otherConfigValue;
+            for (String otherConfigKey : otherConfigKeys) {
+                otherConfigValue = otherConfigs.get(otherConfigKey);
+                if (otherConfigKey != null && otherConfigValue != null) {
+                    otherConfigsList.add(new OpenvswitchOtherConfigsBuilder()
+                            .setOtherConfigKey(otherConfigKey)
+                            .setOtherConfigValue(otherConfigValue)
+                            .build());
+                }
+            }
+            ovsdbNodeBuilder.setOpenvswitchOtherConfigs(otherConfigsList);
+        }
+    }
+
+    private void setExternalIds(OvsdbNodeAugmentationBuilder ovsdbNodeBuilder,
+            OpenVSwitch openVSwitch) {
+        Map<String, String> externalIds = openVSwitch.getExternalIdsColumn().getData();
+        if (externalIds != null && !externalIds.isEmpty()) {
+            Set<String> externalIdKeys = externalIds.keySet();
+            List<OpenvswitchExternalIds> externalIdsList = new ArrayList<OpenvswitchExternalIds>();
+            String externalIdValue;
+            for (String externalIdKey : externalIdKeys) {
+                externalIdValue = externalIds.get(externalIdKey);
+                if (externalIdKey != null && externalIdValue != null) {
+                    externalIdsList.add(new OpenvswitchExternalIdsBuilder()
+                            .setExternalIdKey(externalIdKey)
+                            .setExternalIdValue(externalIdValue)
+                            .build());
+                }
+            }
+            ovsdbNodeBuilder.setOpenvswitchExternalIds(externalIdsList);
+        }
+    }
+
+    private void setInterfaceTypes(
+            OvsdbNodeAugmentationBuilder ovsdbNodeBuilder,
+            OpenVSwitch openVSwitch) {
+        try {
+            Set<String> iftypes = openVSwitch.getIfaceTypesColumn().getData();
+            List<InterfaceTypeEntry> ifEntryList = new ArrayList<InterfaceTypeEntry>();
+            for (String ifType : iftypes) {
+                InterfaceTypeEntry ifEntry = new InterfaceTypeEntryBuilder()
+                        .setInterfaceType(
+                                SouthboundMapper.createInterfaceType(ifType))
+                        .build();
+                ifEntryList.add(ifEntry);
+            }
+            ovsdbNodeBuilder.setInterfaceTypeEntry(ifEntryList);
+        } catch (SchemaVersionMismatchException e) {
+            LOG.debug("Iface types  not supported by this version of ovsdb",e);;
+        }
+    }
+
+    private void setDataPathTypes(
+            OvsdbNodeAugmentationBuilder ovsdbNodeBuilder,
+            OpenVSwitch openVSwitch) {
+        try {
+            Set<String> dptypes = openVSwitch.getDatapathTypesColumn()
+                    .getData();
+            List<DatapathTypeEntry> dpEntryList = new ArrayList<DatapathTypeEntry>();
+            for (String dpType : dptypes) {
+                DatapathTypeEntry dpEntry = new DatapathTypeEntryBuilder()
+                        .setDatapathType(
+                                SouthboundMapper.createDatapathType(dpType))
+                        .build();
+                dpEntryList.add(dpEntry);
+            }
+            ovsdbNodeBuilder.setDatapathTypeEntry(dpEntryList);
+        } catch (SchemaVersionMismatchException e) {
+            LOG.debug("Datapath types not supported by this version of ovsdb",e);
+        }
+    }
+
+    private void setVersion(OvsdbNodeAugmentationBuilder ovsdbNodeBuilder,
+            OpenVSwitch openVSwitch) {
+        try {
+            ovsdbNodeBuilder.setOvsVersion(openVSwitch.getOvsVersionColumn().getData().iterator().next());
+        } catch (NoSuchElementException e) {
+            LOG.debug("ovs_version is not set for this switch",e);
         }
     }
 }

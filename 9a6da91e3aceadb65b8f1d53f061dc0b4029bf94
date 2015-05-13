@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_a4731b7f",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/MdsalUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 609,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-05-13T14:25:13Z",
+      "side": 1,
+      "message": "shouldn\u0027t this be \u003d\u003d null?",
+      "range": {
+        "startLine": 609,
+        "startChar": 32,
+        "endLine": 609,
+        "endChar": 33
+      },
+      "revId": "9a6da91e3aceadb65b8f1d53f061dc0b4029bf94",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

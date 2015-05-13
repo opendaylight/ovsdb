@@ -349,7 +349,7 @@ public class MdsalUtils {
     public static OvsdbBridgeAugmentation getBridge(Node node, String name) {
         OvsdbBridgeAugmentation bridge = node.getAugmentation(OvsdbBridgeAugmentation.class);
         if (bridge != null) {
-            if (!bridge.getBridgeName().equals(name)) {
+            if (!bridge.getBridgeName().getValue().equals(name)) {
                 bridge = null;
             }
         }

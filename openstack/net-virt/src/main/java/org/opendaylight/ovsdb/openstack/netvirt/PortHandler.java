@@ -117,7 +117,7 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware {
     private void doNeutronPortDeleted(NeutronPort neutronPort) {
         logger.debug("Handling neutron delete port " + neutronPort);
         neutronL3Adapter.handleNeutronPortEvent(neutronPort, Action.DELETE);
-
+        //TODO: Need to implement getNodes
         List<Node> nodes = connectionService.getNodes();
         for (Node node : nodes) {
             try {

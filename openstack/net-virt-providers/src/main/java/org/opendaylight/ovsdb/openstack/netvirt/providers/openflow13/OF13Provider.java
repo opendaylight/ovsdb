@@ -716,7 +716,7 @@ public class OF13Provider implements NetworkingProvider {
 
             long localPort = MdsalUtils.getOFPort(intf);
             if (localPort == 0) {
-                logger.info("programLocalRules: could not find ofPort");
+                logger.info("programLocalRules: could not find ofPort for intf {}", intf);
                 return;
             }
 
@@ -747,7 +747,9 @@ public class OF13Provider implements NetworkingProvider {
             }*/
             if (networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE) ||
                     networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN)) {
-                logger.debug("Program local bridge rules for interface {}", intf.getName());
+                logger.debug("Program local bridge rules for node {} bridge {} segmId {} attachedMac {} localPort {} interface {}",
+                        node.getNodeId(), dpid, segmentationId, attachedMac, localPort,
+                        intf.getName());
                 programLocalBridgeRules(node, dpid, segmentationId, attachedMac, localPort);
             }
         } catch (Exception e) {
@@ -869,7 +871,7 @@ public class OF13Provider implements NetworkingProvider {
                 Long ofPort = 0L;
                 if (tunIntf.getName().equals(getTunnelName(tunnelType, dst))) {
                     long tunnelOFPort = MdsalUtils.getOFPort(tunIntf);
-                    if (tunnelOFPort == -1) {
+                    if (tunnelOFPort == 0) {
                         logger.error("Could not Identify Tunnel port {} -> OF ({}) on {}",
                                 tunIntf.getName(), tunnelOFPort, node);
                         return;
@@ -956,7 +958,7 @@ public class OF13Provider implements NetworkingProvider {
             Long ofPort = 0L;
             if (ethIntf.getName().equalsIgnoreCase(bridgeConfigurationManager.getPhysicalInterfaceName(
                     node, network.getProviderPhysicalNetwork()))) {
-                long ethOFPort = (Long)ethIntf.getOfport();
+                long ethOFPort = MdsalUtils.getOFPort(ethIntf);
                 logger.debug("Identified eth port {} -> OF ({}) on {}",
                         ethIntf.getName(), ethOFPort, node);
                 removeRemoteEgressVlanRules(node, dpid, network.getProviderSegmentationID(),

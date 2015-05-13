@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_ce73e8e5",
+        "filename": "plugin/src/main/java/org/opendaylight/ovsdb/plugin/internal/NodeDatabase.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-05-13T10:52:15Z",
+      "side": 1,
+      "message": "where does this logger get used?",
+      "range": {
+        "startLine": 27,
+        "startChar": 32,
+        "endLine": 27,
+        "endChar": 38
+      },
+      "revId": "31f0540ec1cc012daf0aefee687bf0d1e8223629",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

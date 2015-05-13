@@ -460,6 +460,7 @@ public class MdsalUtils {
             for (InterfaceExternalIds pair : pairs) {
                 if (pair.getExternalIdKey().equals(key)) {
                     value = pair.getExternalIdValue();
+                    break;
                 }
             }
         }

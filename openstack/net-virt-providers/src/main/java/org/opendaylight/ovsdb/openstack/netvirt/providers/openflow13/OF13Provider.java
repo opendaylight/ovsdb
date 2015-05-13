@@ -970,8 +970,8 @@ public class OF13Provider implements NetworkingProvider {
     public boolean handleInterfaceUpdate(NeutronNetwork network, Node srcNode,
                                          OvsdbTerminationPointAugmentation intf) {
         Preconditions.checkNotNull(nodeCacheManager);
-        List<Node> nodes = nodeCacheManager.getOvsdbNodes();
-        nodes.remove(srcNode);
+        Map<org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId,Node> nodes = nodeCacheManager.getOvsdbNodes();
+        nodes.remove(srcNode.getNodeId());
         String networkType = network.getProviderNetworkType();
         String segmentationId = network.getProviderSegmentationID();
         Node srcBridgeNode = MdsalUtils.getBridgeNode(srcNode,configurationService.getIntegrationBridgeName());
@@ -981,7 +981,7 @@ public class OF13Provider implements NetworkingProvider {
             programVlanRules(network, srcNode, intf);
         } else if (networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)
                 || networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN)){
-            for (Node dstNode : nodes) {
+            for (Node dstNode : nodes.values()) {
                 InetAddress src = configurationService.getTunnelEndPoint(srcNode);
                 InetAddress dst = configurationService.getTunnelEndPoint(dstNode);
                 if ((src != null) && (dst != null)) {
@@ -1042,8 +1042,8 @@ public class OF13Provider implements NetworkingProvider {
         //Preconditions.checkNotNull(connectionService);
         //List<Node> nodes = connectionService.getBridgeNodes();
         Preconditions.checkNotNull(nodeCacheManager);
-        List<Node> nodes = nodeCacheManager.getOvsdbNodes();
-        nodes.remove(srcNode);
+        Map<org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId,Node> nodes = nodeCacheManager.getOvsdbNodes();
+        nodes.remove(srcNode.getNodeId());
 
         logger.info("Delete intf " + intf.getName() + " isLastInstanceOnNode " + isLastInstanceOnNode);
         List<String> phyIfName = bridgeConfigurationManager.getAllPhysicalInterfaceNames(srcNode);
@@ -1072,7 +1072,7 @@ public class OF13Provider implements NetworkingProvider {
             } else if (network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)
                     || network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN)) {
 
-                for (Node dstNode : nodes) {
+                for (Node dstNode : nodes.values()) {
                     InetAddress src = configurationService.getTunnelEndPoint(srcNode);
                     InetAddress dst = configurationService.getTunnelEndPoint(dstNode);
                     if ((src != null) && (dst != null)) {

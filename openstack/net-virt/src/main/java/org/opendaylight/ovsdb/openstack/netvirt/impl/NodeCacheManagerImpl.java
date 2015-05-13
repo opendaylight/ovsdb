@@ -133,14 +133,14 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
     }
 
     @Override
-    public List<Node> getOvsdbNodes() {
-        List<Node> nodes = Lists.newArrayList();
-        for (Node node : nodeCache.values()) {
-            if (MdsalUtils.extractOvsdbNode(node) != null) {
-                nodes.add(node);
+    public Map<NodeId,Node> getOvsdbNodes() {
+        Map<NodeId,Node> ovsdbNodesMap = new ConcurrentHashMap<NodeId,Node>();
+        for (Map.Entry<NodeId, Node> ovsdbNodeEntry : nodeCache.entrySet()) {
+            if (MdsalUtils.extractOvsdbNode(ovsdbNodeEntry.getValue()) != null) {
+                ovsdbNodesMap.put(ovsdbNodeEntry.getKey(), ovsdbNodeEntry.getValue());
             }
         }
-        return nodes;
+        return ovsdbNodesMap;
     }
 
     @Override

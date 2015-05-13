@@ -192,8 +192,27 @@ public class MdsalUtils {
         return connectionInfo;
     }
 
-    public static OvsdbNodeAugmentation getOvsdbNode(Node node) {
+    public static OvsdbNodeAugmentation extractOvsdbNode(Node node) {
         return node.getAugmentation(OvsdbNodeAugmentation.class);
+    }
+
+    public static OvsdbNodeAugmentation readOvsdbNode(Node bridgeNode) {
+        OvsdbNodeAugmentation nodeAugmentation = null;
+        OvsdbBridgeAugmentation bridgeAugmentation = extractBridgeAugmentation(bridgeNode);
+        if(bridgeAugmentation != null){
+            InstanceIdentifier<Node> ovsdbNodeIid = (InstanceIdentifier<Node>) bridgeAugmentation.getManagedBy().getValue();
+            Node node = read(LogicalDatastoreType.OPERATIONAL, ovsdbNodeIid);
+            if (node != null){
+                nodeAugmentation = node.getAugmentation(OvsdbNodeAugmentation.class);
+                LOG.debug("Ovsdb node {} found that manages bridge {}", nodeAugmentation != null?nodeAugmentation:"not",bridgeAugmentation);
+            }else {
+                LOG.debug ("Ovsdb node that manages bridge {} not found. ",bridgeAugmentation);
+            }
+
+        }else{
+            LOG.debug("Provided node is not a bridge node : {}",bridgeNode);
+        }
+        return nodeAugmentation;
     }
 
     public static String getOvsdbNodeUUID(Node node) {
@@ -587,6 +606,9 @@ public class MdsalUtils {
 
             case OPENVSWITCH:
                 OvsdbNodeAugmentation ovsdbNode = extractNodeAugmentation(node);
+                if (ovsdbNode != null){
+                    ovsdbNode = readOvsdbNode(node);
+                }
                 if (ovsdbNode != null) {
                     for (OpenvswitchOtherConfigs openvswitchOtherConfigs :ovsdbNode.getOpenvswitchOtherConfigs()){
                         if (openvswitchOtherConfigs.getOtherConfigKey().equals(key)) {

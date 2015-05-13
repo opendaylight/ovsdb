@@ -407,7 +407,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
 
     private String getControllerTarget(Node node) {
         String target = null;
-        OvsdbNodeAugmentation ovsdbNodeAugmentation = MdsalUtils.getOvsdbNode(node);
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = MdsalUtils.extractOvsdbNode(node);
         if (ovsdbNodeAugmentation != null) {
             ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
             String addressStr = new String(connectionInfo.getLocalIp().getValue());

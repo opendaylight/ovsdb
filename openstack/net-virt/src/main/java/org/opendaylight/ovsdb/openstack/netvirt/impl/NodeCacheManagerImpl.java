@@ -136,7 +136,7 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
     public List<Node> getOvsdbNodes() {
         List<Node> nodes = Lists.newArrayList();
         for (Node node : nodeCache.values()) {
-            if (MdsalUtils.getOvsdbNode(node) != null) {
+            if (MdsalUtils.extractOvsdbNode(node) != null) {
                 nodes.add(node);
             }
         }

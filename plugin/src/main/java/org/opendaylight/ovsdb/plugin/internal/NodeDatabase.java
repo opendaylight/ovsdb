@@ -19,18 +19,29 @@ import org.opendaylight.ovsdb.lib.notation.Row;
 
 import com.google.common.collect.Maps;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class NodeDatabase {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(NodeDatabase.class);
+
     ConcurrentMap<String, TableDB> dbCache = Maps.newConcurrentMap();
 
     public ConcurrentMap<String, ConcurrentMap<String, Row>> getDatabase(String dbName) {
         TableDB tdb = dbCache.get(dbName);
-        if (tdb == null) return null;
+        if (tdb == null) {
+           return null;
+        }
         return tdb.getTableCache();
     }
 
     public ConcurrentMap<String, Row> getTableCache(String dbName, String tableName) {
         ConcurrentMap<String, ConcurrentMap<String,Row>> tdbMap = getDatabase(dbName);
-        if (tdbMap == null) return null;
+        if (tdbMap == null) {
+           return null;
+        }
         return tdbMap.get(tableName);
     }
 
@@ -40,7 +51,9 @@ public class NodeDatabase {
 
     public Row getRow (String dbName, String tableName, String uuid) {
         ConcurrentMap<String, Row> tdb = this.getTableCache(dbName, tableName);
-        if (tdb == null) return null;
+        if (tdb == null) {
+           return null;
+        }
         return tdb.get(uuid);
     }
 
@@ -55,7 +68,9 @@ public class NodeDatabase {
 
     public void removeRow(String dbName, String tableName, String uuid) {
         TableDB db = dbCache.get(dbName);
-        if (db == null) return;
+        if (db == null) {
+           return;
+        }
         db.removeRow(tableName, uuid);
     }
 
@@ -63,7 +78,9 @@ public class NodeDatabase {
         for (String dbName : dbCache.keySet()) {
             System.out.println("Database "+dbName);
             ConcurrentMap<String, ConcurrentMap<String,Row>> tableDB = this.getDatabase(dbName);
-            if (tableDB == null) continue;
+            if (tableDB == null) {
+               continue;
+            }
             for (String tableName : tableDB.keySet()) {
                 ConcurrentMap<String, Row> tableRows = this.getTableCache(dbName, tableName);
                 System.out.println("\tTable "+tableName);
@@ -72,7 +89,9 @@ public class NodeDatabase {
                     Collection<Column> columns = row.getColumns();
                     System.out.print("\t\t"+uuid+ "==");
                     for (Column column : columns) {
-                        if (column.getData() != null) System.out.print(column.getSchema().getName()+" : "+ column.getData()+" ");
+                        if (column.getData() != null) {
+                           System.out.print(column.getSchema().getName()+" : "+ column.getData()+" ");
+                        }
                     }
                     System.out.println("");
                 }

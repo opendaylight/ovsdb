@@ -70,6 +70,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
@@ -84,6 +85,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.CheckedFuture;
+
 import java.net.InetAddress;
 import java.util.List;
 import java.util.Map;
@@ -970,8 +972,11 @@ public class OF13Provider implements NetworkingProvider {
     public boolean handleInterfaceUpdate(NeutronNetwork network, Node srcNode,
                                          OvsdbTerminationPointAugmentation intf) {
         Preconditions.checkNotNull(nodeCacheManager);
-        List<Node> nodes = nodeCacheManager.getOvsdbNodes();
-        nodes.remove(srcNode);
+        Map<org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId,Node> nodes = nodeCacheManager.getOvsdbNodes();
+        OvsdbBridgeAugmentation bridgeAugmentation = srcNode.getAugmentation(OvsdbBridgeAugmentation.class);
+        @SuppressWarnings("unchecked")
+        InstanceIdentifier<Node> ovsdbNodeIid = (InstanceIdentifier<Node>) (bridgeAugmentation.getManagedBy().getValue());
+        nodes.remove(InstanceIdentifier.keyOf(ovsdbNodeIid).getNodeId());
         String networkType = network.getProviderNetworkType();
         String segmentationId = network.getProviderSegmentationID();
         Node srcBridgeNode = MdsalUtils.getBridgeNode(srcNode,configurationService.getIntegrationBridgeName());
@@ -981,7 +986,7 @@ public class OF13Provider implements NetworkingProvider {
             programVlanRules(network, srcNode, intf);
         } else if (networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)
                 || networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN)){
-            for (Node dstNode : nodes) {
+            for (Node dstNode : nodes.values()) {
                 InetAddress src = configurationService.getTunnelEndPoint(srcNode);
                 InetAddress dst = configurationService.getTunnelEndPoint(dstNode);
                 if ((src != null) && (dst != null)) {
@@ -1042,8 +1047,8 @@ public class OF13Provider implements NetworkingProvider {
         //Preconditions.checkNotNull(connectionService);
         //List<Node> nodes = connectionService.getBridgeNodes();
         Preconditions.checkNotNull(nodeCacheManager);
-        List<Node> nodes = nodeCacheManager.getOvsdbNodes();
-        nodes.remove(srcNode);
+        Map<org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId,Node> nodes = nodeCacheManager.getOvsdbNodes();
+        nodes.remove(srcNode.getNodeId());
 
         logger.info("Delete intf " + intf.getName() + " isLastInstanceOnNode " + isLastInstanceOnNode);
         List<String> phyIfName = bridgeConfigurationManager.getAllPhysicalInterfaceNames(srcNode);
@@ -1072,7 +1077,7 @@ public class OF13Provider implements NetworkingProvider {
             } else if (network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)
                     || network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN)) {
 
-                for (Node dstNode : nodes) {
+                for (Node dstNode : nodes.values()) {
                     InetAddress src = configurationService.getTunnelEndPoint(srcNode);
                     InetAddress dst = configurationService.getTunnelEndPoint(dstNode);
                     if ((src != null) && (dst != null)) {

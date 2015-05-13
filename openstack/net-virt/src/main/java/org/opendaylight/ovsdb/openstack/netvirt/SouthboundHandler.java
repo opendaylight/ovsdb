@@ -232,7 +232,7 @@ public class SouthboundHandler extends AbstractHandler
             return;
         }
         SouthboundEvent ev = (SouthboundEvent) abstractEvent;
-        logger.warn("processEvent: {}", ev);
+        logger.debug("processEvent: {}", ev);
         switch (ev.getType()) {
             case NODE:
                 processOvsdbNodeEvent(ev);

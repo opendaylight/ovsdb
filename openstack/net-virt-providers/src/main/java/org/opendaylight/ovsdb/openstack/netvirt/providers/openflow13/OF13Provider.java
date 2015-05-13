@@ -980,6 +980,17 @@ public class OF13Provider implements NetworkingProvider {
     }
 
     private void triggerInterfaceUpdates(Node node) {
+        logger.warn("enter triggerInterfaceUpdates for {}", node.getNodeId());
+        List<OvsdbTerminationPointAugmentation> ports = MdsalUtils.extractTerminationPointAugmentations(node);
+        if (ports != null && !ports.isEmpty()) {
+            for (OvsdbTerminationPointAugmentation port : ports) {
+                NeutronNetwork neutronNetwork = tenantNetworkManager.getTenantNetwork(port);
+                if (neutronNetwork != null) {
+                    logger.warn("Trigger Interface update for {}", port);
+                    handleInterfaceUpdate(neutronNetwork, node, port);
+                }
+            }
+        /*
         List<TerminationPoint> tps = MdsalUtils.extractTerminationPoints(node);
         if (tps != null) {
             for (TerminationPoint tp : tps) {
@@ -987,14 +998,16 @@ public class OF13Provider implements NetworkingProvider {
                 if (port != null) {
                     NeutronNetwork neutronNetwork = tenantNetworkManager.getTenantNetwork(port);
                     if (neutronNetwork != null) {
-                        logger.debug("Trigger Interface update for {}", port);
+                        logger.warn("Trigger Interface update for {}", port);
                         handleInterfaceUpdate(neutronNetwork, node, port);
                     }
                 }
             }
+            */
         } else {
             logger.warn("triggerInterfaceUpdates: tps are null");
         }
+        logger.warn("exit triggerInterfaceUpdates for {}", node.getNodeId());
     }
 
     @Override
@@ -1846,7 +1859,9 @@ public class OF13Provider implements NetworkingProvider {
             triggerInterfaceUpdates(openflowNode);
         } else if (bridgeName.equals(configurationService.getExternalBridgeName())) {
             initializeFlowRules(openflowNode, configurationService.getExternalBridgeName());
+            logger.info("initializeOFFlowRules after writeFlow: bridgeName: {}", bridgeName);
             triggerInterfaceUpdates(openflowNode);
+            logger.info("initializeOFFlowRules after triggerUpdates: bridgeName: {}", bridgeName);
         }
     }
 

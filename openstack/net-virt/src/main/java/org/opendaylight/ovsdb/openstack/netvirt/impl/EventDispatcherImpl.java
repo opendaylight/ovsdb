@@ -43,6 +43,10 @@ public class EventDispatcherImpl implements EventDispatcher {
         eventHandler.submit(new Runnable()  {
             @Override
             public void run() {
+                Thread t = Thread.currentThread();
+                logger.info("Thread = {}", t);
+                t.setName("EventDispatcherImpl");
+                logger.info("Thread = {}", t);
                 while (true) {
                     AbstractEvent ev;
                     try {
@@ -89,6 +93,7 @@ public class EventDispatcherImpl implements EventDispatcher {
             return;
         }
 
+        logger.info("EventDispatcherImpl: enqueueEvent: {}", ev);
         handler.processEvent(ev);
     }
 
@@ -127,10 +132,12 @@ public class EventDispatcherImpl implements EventDispatcher {
     @Override
     public void enqueueEvent(AbstractEvent event) {
         if (event == null) {
+            logger.warn("enqueueEvent: event is null");
             return;
         }
 
         try {
+            logger.info("EventDispatcherImpl: enqueueEvent: {}", event);
             events.put(event);
         } catch (InterruptedException e) {
             logger.error("Thread was interrupted while trying to enqueue event ", e);

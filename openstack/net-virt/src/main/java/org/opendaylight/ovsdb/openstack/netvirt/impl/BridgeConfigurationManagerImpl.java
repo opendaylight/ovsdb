@@ -16,6 +16,8 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 import com.google.common.base.Preconditions;
@@ -334,7 +336,8 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
                               String localPatchName, String remotePatchName) throws Exception {
         Preconditions.checkNotNull(networkingProviderManager);
         //sb will also add port and interface if this is a new bridge
-        return MdsalUtils.addBridge(node, bridgeName, getControllerTarget());
+
+        return MdsalUtils.addBridge(node, bridgeName, getControllerTarget(node));
     }
 
     private InetAddress getControllerIPAddress() {
@@ -400,6 +403,19 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
             }
         }
         return openFlowPort;
+    }
+
+    private String getControllerTarget(Node node) {
+        String target = null;
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = MdsalUtils.getOvsdbNode(node);
+        if (ovsdbNodeAugmentation != null) {
+            ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
+            String addressStr = new String(connectionInfo.getLocalIp().getValue());
+            target = "tcp:" + addressStr + ":6633";
+        } else{
+            target = getControllerTarget();
+        }
+        return target;
     }
 
     private String getControllerTarget() {

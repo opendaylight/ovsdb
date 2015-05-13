@@ -208,9 +208,11 @@ public class MdsalUtils {
     public static String getOsdbNodeExternalIdsValue(OvsdbNodeAugmentation ovsdbNodeAugmentation, String key) {
         String value = null;
         List<OpenvswitchExternalIds> pairs = ovsdbNodeAugmentation.getOpenvswitchExternalIds();
-        for (OpenvswitchExternalIds pair : pairs) {
-            if (pair.getKey().equals(key)) {
-                value = pair.getExternalIdValue();
+        if (pairs != null && !pairs.isEmpty()) {
+            for (OpenvswitchExternalIds pair : pairs) {
+                if (pair.getExternalIdKey().equals(key)) {
+                    value = pair.getExternalIdValue();
+                }
             }
         }
         return value;
@@ -451,12 +453,12 @@ public class MdsalUtils {
     }
 
     public static String getInterfaceExternalIdsValue(
-            OvsdbTerminationPointAugmentation terminationPointAugmentation,String key) {
+            OvsdbTerminationPointAugmentation terminationPointAugmentation, String key) {
         String value = null;
         List<InterfaceExternalIds> pairs = terminationPointAugmentation.getInterfaceExternalIds();
-        if (pairs != null) {
+        if (pairs != null && !pairs.isEmpty()) {
             for (InterfaceExternalIds pair : pairs) {
-                if (pair.getKey().equals(key)) {
+                if (pair.getExternalIdKey().equals(key)) {
                     value = pair.getExternalIdValue();
                 }
             }

@@ -628,7 +628,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private Node getBridgeNode(ConnectionInfo connectionInfo, String bridgeName) {
         InstanceIdentifier<Node> bridgeIid =
                 SouthboundMapper.createInstanceIdentifier(connectionInfo,
-                    new OvsdbBridgeName(bridgeName));
+                        new OvsdbBridgeName(bridgeName));
         return mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
     }
 
@@ -1549,10 +1549,28 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
+    private void netVirtAddPort(ConnectionInfo connectionInfo) throws InterruptedException {
+        OvsdbBridgeAugmentation bridge = getBridge(connectionInfo, "br-int");
+        Assert.assertNotNull(bridge);
+        LOG.info("bridge: {}", bridge);
+        NodeId nodeId = SouthboundMapper.createManagedNodeId(SouthboundMapper.createInstanceIdentifier(
+                connectionInfo, bridge.getBridgeName()));
+        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
+                createGenericOvsdbTerminationPointAugmentationBuilder();
+        String portName = "testOfPort";
+        ovsdbTerminationBuilder.setName(portName);
+        Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
+        InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
+        Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
+        Assert.assertNotNull(terminationPointNode);
+    }
+
     @Test
     public void testNetVirt() throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
         connectOvsdbNode(connectionInfo);
+        Thread.sleep(10000);
+        netVirtAddPort(connectionInfo);
 
         LOG.info(">>>>> waiting");
         Thread.sleep(10000);

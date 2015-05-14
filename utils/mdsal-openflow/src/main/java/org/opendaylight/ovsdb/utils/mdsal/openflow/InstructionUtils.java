@@ -237,7 +237,8 @@ public class InstructionUtils {
     public static boolean removeOutputPortFromInstructions(InstructionBuilder ib,
             Long dpidLong, Long port, List<Instruction> instructions) {
 
-        NodeConnectorId ncid = new NodeConnectorId("openflow:" + dpidLong + ":" + port);
+        final NodeConnectorId ncid = new NodeConnectorId("openflow:" + dpidLong + ":" + port);
+        final Uri ncidUri = new Uri(ncid);
         logger.debug(
                 "removeOutputPortFromInstructions() Node Connector ID is - Type=openflow: DPID={} port={} existingInstructions={}",
                 dpidLong, port, instructions);
@@ -245,6 +246,8 @@ public class InstructionUtils {
         List<Action> actionList = Lists.newArrayList();
         ActionBuilder ab;
 
+        // Start of by locating actions that will have port removed, from the existing instructionList
+        //
         List<Action> existingActions;
         if (instructions != null) {
             for (Instruction in : instructions) {
@@ -256,38 +259,67 @@ public class InstructionUtils {
             }
         }
 
-        int index = 0;
+        int removedActionOrder = 0;
         boolean isPortDeleted = false;
         boolean removeFlow = true;
+
+        // Locate specific action that has the port to be removed. Then, take note on its action order
+        // and remove it from list, in addition to flag that it was found.
+        //
         for (Action action : actionList) {
             if (action.getAction() instanceof OutputActionCase) {
                 OutputActionCase opAction = (OutputActionCase) action.getAction();
-                if (opAction.getOutputAction().getOutputNodeConnector().equals(new Uri(ncid))) {
+                if (opAction.getOutputAction().getOutputNodeConnector().equals(ncidUri)) {
                     /* Find the output port in action list and remove */
-                    index = actionList.indexOf(action);
+                    removedActionOrder = action.getOrder();
                     actionList.remove(action);
                     isPortDeleted = true;
                     break;
                 }
-                removeFlow = false;
             }
         }
 
         if (isPortDeleted) {
-            for (int i = index; i < actionList.size(); i++) {
+            // Iterate through all actions in the modified list and adjust the order of
+            // the actions left behind. With that, all actions that have order higher than
+            // the action removed gets their value decremented by 1. Note that this iteration
+            // visits all entries to account for cases where the list order is not the same
+            // as the action's order.
+            //
+            for (int i = 0; i < actionList.size(); i++) {
                 Action action = actionList.get(i);
-                if (action.getOrder() != i) {
-                    /* Shift the action order */
+                if (action.getOrder() > removedActionOrder) {
+                    /* Shift the action by rebuilding action, using adjusted order */
                     ab = new ActionBuilder();
                     ab.setAction(action.getAction());
-                    ab.setOrder(i);
+                    ab.setOrder(action.getOrder() - 1);
                     ab.setKey(new ActionKey(i));
                     Action actionNewOrder = ab.build();
                     actionList.remove(action);
                     actionList.add(i, actionNewOrder);
+                } else if (action.getOrder() == removedActionOrder) {
+                    // Sanity: implementation assumes no two actions have the same order
+                    //
+                    logger.error("Found action with same order as the action removed for {}, order {} index {}: {}",
+                            ncid, removedActionOrder, i, action);
                 }
+
+                // If action refers to a port output, then flow should be preserved.
+                // We do this, so that if we are only left with non-output port actions,
+                // we still remove the flow
+                //
                 if (action.getAction() instanceof OutputActionCase) {
                     removeFlow = false;
+                }
+            }
+        } else {
+            // If port we are asked to delete is not found, this implementation will leave actions
+            // alone and not remove the flow, as long as a remaining OutputActionCase is found.
+            //
+            for (int i = 0; i < actionList.size(); i++) {
+                if (actionList.get(i).getAction() instanceof OutputActionCase) {
+                    removeFlow = false;
+                    break;
                 }
             }
         }
@@ -300,7 +332,7 @@ public class InstructionUtils {
             logger.debug("removeOutputPortFromInstructions() : applyAction {}", aab.build());
             return false;
         } else {
-            /* if all output port are removed. Return true to indicate flow remove */
+            /* if all output ports are removed. Return true to indicate flow remove */
             return true;
         }
     }

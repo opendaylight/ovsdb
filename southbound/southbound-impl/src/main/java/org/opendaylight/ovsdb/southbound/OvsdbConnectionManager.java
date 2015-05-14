@@ -41,6 +41,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     private DataBroker db;
     private TransactionInvoker txInvoker;
+    private Map<ConnectionInfo,InstanceIdentifier<Node>> instanceIdentifiers =
+            new ConcurrentHashMap<ConnectionInfo,InstanceIdentifier<Node>>();
 
     public OvsdbConnectionManager(DataBroker db,TransactionInvoker txInvoker) {
         this.db = db;
@@ -49,12 +51,19 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     @Override
     public void connected(final OvsdbClient externalClient) {
+        OvsdbConnectionInstance client = connectedButCallBacksNotRegistered(externalClient);
+        client.registerCallbacks();
+    }
+
+    public OvsdbConnectionInstance connectedButCallBacksNotRegistered(final OvsdbClient externalClient) {
         LOG.info("OVSDB Connection from {}:{}",externalClient.getConnectionInfo().getRemoteAddress(),
                 externalClient.getConnectionInfo().getRemotePort());
         ConnectionInfo key = SouthboundMapper.createConnectionInfo(externalClient);
-        OvsdbConnectionInstance client = new OvsdbConnectionInstance(key,externalClient,txInvoker);
+        OvsdbConnectionInstance client = new OvsdbConnectionInstance(key,externalClient,txInvoker,
+                getInstanceIdentifier(key));
         putConnectionInstance(key, client);
-        client.init();
+        client.createTransactInvokers();
+        return client;
     }
 
     @Override
@@ -66,16 +75,18 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         clients.remove(key);
     }
 
-    public OvsdbClient connect(OvsdbNodeAugmentation ovsdbNode) throws UnknownHostException {
+    public OvsdbClient connect(InstanceIdentifier<Node> iid,
+            OvsdbNodeAugmentation ovsdbNode) throws UnknownHostException {
         // TODO handle case where we already have a connection
         // TODO use transaction chains to handle ordering issues between disconnected
         // and connected when writing to the operational store
         InetAddress ip = SouthboundMapper.createInetAddress(ovsdbNode.getConnectionInfo().getRemoteIp());
         OvsdbClient client = OvsdbConnectionService.getService().connect(ip,
                 ovsdbNode.getConnectionInfo().getRemotePort().getValue().intValue());
+        putInstanceIdentifier(ovsdbNode.getConnectionInfo(), iid);
         // For connections from the controller to the ovs instance, the library doesn't call
         // this method for us
-        connected(client);
+        connectedButCallBacksNotRegistered(client);
         return client;
     }
 
@@ -83,6 +94,17 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         OvsdbClient client = getConnectionInstance(ovsdbNode.getConnectionInfo());
         if (client != null) {
             client.disconnect();
+        }
+    }
+
+    public void init(ConnectionInfo key) {
+        OvsdbConnectionInstance client = getConnectionInstance(key);
+        if (client != null) {
+            /*
+             *  Note: registerCallbacks() is idemPotent... so if you call it repeatedly all is safe,
+             *  it only registersCallbacks on the *first* call.
+             */
+            client.registerCallbacks();
         }
     }
 
@@ -98,9 +120,19 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         clients.put(connectionInfo, instance);
     }
 
+    private void putInstanceIdentifier(ConnectionInfo key,InstanceIdentifier<Node> iid) {
+        ConnectionInfo connectionInfo = SouthboundMapper.suppressLocalIpPort(key);
+        instanceIdentifiers.put(connectionInfo, iid);
+    }
+
     public OvsdbConnectionInstance getConnectionInstance(ConnectionInfo key) {
         ConnectionInfo connectionInfo = SouthboundMapper.suppressLocalIpPort(key);
         return clients.get(connectionInfo);
+    }
+
+    public InstanceIdentifier<Node> getInstanceIdentifier(ConnectionInfo key) {
+        ConnectionInfo connectionInfo = SouthboundMapper.suppressLocalIpPort(key);
+        return instanceIdentifiers.get(connectionInfo);
     }
 
     public OvsdbConnectionInstance getConnectionInstance(OvsdbBridgeAttributes mn) {

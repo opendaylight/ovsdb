@@ -706,6 +706,8 @@ public class OF13Provider implements NetworkingProvider {
 
     private void programLocalRules (String networkType, String segmentationId, Node node,
                                     OvsdbTerminationPointAugmentation intf) {
+        logger.debug("programLocalRules: node: {}, intf: {}, networkType: {}, segmentationId: {}",
+                node.getNodeId(), intf.getName(), networkType, segmentationId);
         try {
             Long dpid = getIntegrationBridgeOFDPID(node);
             if (dpid == 0L) {
@@ -747,7 +749,9 @@ public class OF13Provider implements NetworkingProvider {
             }*/
             if (networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE) ||
                     networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN)) {
-                logger.debug("Program local bridge rules for interface {}", intf.getName());
+                logger.debug("Program local bridge rules for interface {}, "
+                        + "dpid: {}, segmentationId: {}, attachedMac: {}, localPort: {}",
+                        intf.getName(), dpid, segmentationId, attachedMac, localPort);
                 programLocalBridgeRules(node, dpid, segmentationId, attachedMac, localPort);
             }
         } catch (Exception e) {
@@ -757,6 +761,8 @@ public class OF13Provider implements NetworkingProvider {
 
     private void removeLocalRules (String networkType, String segmentationId, Node node,
                                    OvsdbTerminationPointAugmentation intf) {
+        logger.debug("removeLocalRules: node: {}, intf: {}, networkType: {}, segmentationId: {}",
+                node.getNodeId(), intf.getName(), networkType, segmentationId);
         try {
             Long dpid = getIntegrationBridgeOFDPID(node);
             if (dpid == 0L) {
@@ -790,12 +796,19 @@ public class OF13Provider implements NetworkingProvider {
         }
     }
 
+    // TODO SB_MIGRATION
+    // Need to handle case where a node comes online after a network and tunnels have
+    // already been created. The interface update is what triggers creating the l2 forwarding flows
+    // so we don't see those updates in this case - we only see the new nodes interface updates.
     private void programTunnelRules (String tunnelType, String segmentationId, InetAddress dst, Node node,
                                      OvsdbTerminationPointAugmentation intf, boolean local) {
+        logger.debug("programTunnelRules: node: {}, intf: {}, local: {}, tunnelType: {}, "
+                + "segmentationId: {}, dstAddr: {}",
+                node.getNodeId(), intf.getName(), local, tunnelType, segmentationId, dst);
         try {
             Long dpid = getIntegrationBridgeOFDPID(node);
             if (dpid == 0L) {
-                logger.debug("Openflow Datapath-ID not set for the integration bridge in {}", node);
+                logger.debug("programTunnelRules: Openflow Datapath-ID not set for the integration bridge in {}", node);
                 return;
             }
 
@@ -807,30 +820,32 @@ public class OF13Provider implements NetworkingProvider {
 
             String attachedMac = MdsalUtils.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
             if (attachedMac == null) {
-                logger.warn("No AttachedMac seen in {}", intf);
+                logger.warn("programTunnelRules: No AttachedMac seen in {}", intf);
                 return;
             }
 
             List<OvsdbTerminationPointAugmentation> intfs = MdsalUtils.getTerminationPointsOfBridge(node);
             for (OvsdbTerminationPointAugmentation tunIntf : intfs) {
-                Long ofPort = 0L;
                 if (tunIntf.getName().equals(getTunnelName(tunnelType, dst))) {
                     long tunnelOFPort = MdsalUtils.getOFPort(tunIntf);
                     if (tunnelOFPort == 0) {
-                        logger.error("Could not Identify Tunnel port {} -> OF ({}) on {}",
+                        logger.error("programTunnelRules: Could not Identify Tunnel port {} -> OF ({}) on {}",
                                 tunIntf.getName(), tunnelOFPort, node);
                         return;
                     }
-                    logger.debug("Identified Tunnel port {} -> OF ({}) on {}",
+                    logger.debug("programTunnelRules: Identified Tunnel port {} -> OF ({}) on {}",
                             tunIntf.getName(), tunnelOFPort, node);
 
                     if (!local) {
+                        logger.trace("programTunnelRules: program remote egress tunnel rules: node {}, intf {}",
+                            node.getNodeId().getValue(), intf.getName());
                         programRemoteEgressTunnelBridgeRules(node, dpid, segmentationId, attachedMac,
                                 tunnelOFPort, localPort);
                     }
-                    logger.trace("program local ingress tunnel rules: node {}, intf {}",
-                            node.getNodeId().getValue(), intf.getName());
+
                     if (local) {
+                        logger.trace("programTunnelRules: program local ingress tunnel rules: node {}, intf {}",
+                                node.getNodeId().getValue(), intf.getName());
                         programLocalIngressTunnelBridgeRules(node, dpid, segmentationId, attachedMac,
                                 tunnelOFPort, localPort);
                     }
@@ -845,6 +860,9 @@ public class OF13Provider implements NetworkingProvider {
     private void removeTunnelRules (String tunnelType, String segmentationId, InetAddress dst, Node node,
                                     OvsdbTerminationPointAugmentation intf,
                                     boolean local, boolean isLastInstanceOnNode) {
+        logger.debug("removeTunnelRules: node: {}, intf: {}, local: {}, tunnelType: {}, "
+                        + "segmentationId: {}, dstAddr: {}, isLastinstanceOnNode: {}",
+                node.getNodeId(), intf.getName(), local, tunnelType, segmentationId, dst, isLastInstanceOnNode);
         try {
             Long dpid = getIntegrationBridgeOFDPID(node);
             if (dpid == 0L) {
@@ -866,7 +884,6 @@ public class OF13Provider implements NetworkingProvider {
 
             List<OvsdbTerminationPointAugmentation> intfs = MdsalUtils.getTerminationPointsOfBridge(node);
             for (OvsdbTerminationPointAugmentation tunIntf : intfs) {
-                Long ofPort = 0L;
                 if (tunIntf.getName().equals(getTunnelName(tunnelType, dst))) {
                     long tunnelOFPort = MdsalUtils.getOFPort(tunIntf);
                     if (tunnelOFPort == -1) {
@@ -893,7 +910,8 @@ public class OF13Provider implements NetworkingProvider {
     }
 
     private void programVlanRules (NeutronNetwork network, Node node, OvsdbTerminationPointAugmentation intf) {
-        logger.debug("Program vlan rules for interface {}", intf.getName());
+        logger.debug("programVlanRules: node: {}, network: {}, intf: {}",
+                node.getNodeId(), network.getNetworkUUID(), intf.getName());
         Long dpid = getIntegrationBridgeOFDPID(node);
         if (dpid == 0L) {
             logger.debug("programVlanRules: Openflow Datapath-ID not set for the integration bridge in {}", node);
@@ -914,10 +932,13 @@ public class OF13Provider implements NetworkingProvider {
 
         List<OvsdbTerminationPointAugmentation> intfs = MdsalUtils.getTerminationPointsOfBridge(node);
         for (OvsdbTerminationPointAugmentation ethIntf : intfs) {
-            Long ofPort = 0L;
             if (ethIntf.getName().equalsIgnoreCase(bridgeConfigurationManager.getPhysicalInterfaceName(
                     node, network.getProviderPhysicalNetwork()))) {
                 long ethOFPort = MdsalUtils.getOFPort(ethIntf);
+                if (ethOFPort == 0) {
+                    logger.warn("programVlanRules: could not find ofPort for physical port");
+                    return;
+                }
                 logger.debug("Identified eth port {} -> OF ({}) on {}",
                         ethIntf.getName(), ethOFPort, node);
                 // TODO: add logic to only add rule on remote nodes
@@ -932,7 +953,8 @@ public class OF13Provider implements NetworkingProvider {
 
     private void removeVlanRules (NeutronNetwork network, Node node, OvsdbTerminationPointAugmentation intf,
                                   boolean isLastInstanceOnNode) {
-        logger.debug("Program vlan rules for interface {}", intf.getName());
+        logger.debug("removeVlanRules: node: {}, network: {}, intf: {}, isLastInstanceOnNode",
+                node.getNodeId(), network.getNetworkUUID(), intf.getName(), isLastInstanceOnNode);
         Long dpid = getIntegrationBridgeOFDPID(node);
         if (dpid == 0L) {
             logger.debug("removeVlanRules: Openflow Datapath-ID not set for the integration bridge in {}", node);
@@ -953,11 +975,14 @@ public class OF13Provider implements NetworkingProvider {
 
         List<OvsdbTerminationPointAugmentation> intfs = MdsalUtils.getTerminationPointsOfBridge(node);
         for (OvsdbTerminationPointAugmentation ethIntf : intfs) {
-            Long ofPort = 0L;
             if (ethIntf.getName().equalsIgnoreCase(bridgeConfigurationManager.getPhysicalInterfaceName(
                     node, network.getProviderPhysicalNetwork()))) {
-                long ethOFPort = (Long)ethIntf.getOfport();
-                logger.debug("Identified eth port {} -> OF ({}) on {}",
+                long ethOFPort = MdsalUtils.getOFPort(ethIntf);
+                if (ethOFPort == 0) {
+                    logger.info("removeVlanRules: programVlanRules: could not find ofPort");
+                    return;
+                }
+                logger.debug("removeVlanRules: Identified eth port {} -> OF ({}) on {}",
                         ethIntf.getName(), ethOFPort, node);
                 removeRemoteEgressVlanRules(node, dpid, network.getProviderSegmentationID(),
                         attachedMac, localPort, ethOFPort);
@@ -968,16 +993,23 @@ public class OF13Provider implements NetworkingProvider {
             }
         }
     }
-
+/*
+    private removeNode(List<Node> nodes, Node node) {
+        OvsdbBridgeAugmentation bridgeAugmentation = extractBridgeAugmentation(bridgeNode);
+        if(bridgeAugmentation != null){
+            InstanceIdentifier<Node> ovsdbNodeIid = (InstanceIdentifier<Node>) bridgeAugmentation.getManagedBy().getValue();
+    }
+*/
     @Override
     public boolean handleInterfaceUpdate(NeutronNetwork network, Node srcNode,
                                          OvsdbTerminationPointAugmentation intf) {
         Preconditions.checkNotNull(nodeCacheManager);
-        Map<org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId,Node> nodes = nodeCacheManager.getOvsdbNodes();
-        OvsdbBridgeAugmentation bridgeAugmentation = srcNode.getAugmentation(OvsdbBridgeAugmentation.class);
-        @SuppressWarnings("unchecked")
-        InstanceIdentifier<Node> ovsdbNodeIid = (InstanceIdentifier<Node>) (bridgeAugmentation.getManagedBy().getValue());
-        nodes.remove(InstanceIdentifier.keyOf(ovsdbNodeIid).getNodeId());
+        Map<org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId,Node> nodes =
+                nodeCacheManager.getOvsdbNodes();
+        //OvsdbBridgeAugmentation bridgeAugmentation = srcNode.getAugmentation(OvsdbBridgeAugmentation.class);
+        //@SuppressWarnings("unchecked")
+        //InstanceIdentifier<Node> ovsdbNodeIid = (InstanceIdentifier<Node>) (bridgeAugmentation.getManagedBy().getValue());
+        nodes.remove(MdsalUtils.extractBridgeOvsdbNodeId(srcNode));
         String networkType = network.getProviderNetworkType();
         String segmentationId = network.getProviderSegmentationID();
         Node srcBridgeNode = MdsalUtils.getBridgeNode(srcNode,configurationService.getIntegrationBridgeName());
@@ -1045,11 +1077,9 @@ public class OF13Provider implements NetworkingProvider {
     @Override
     public boolean handleInterfaceDelete(String tunnelType, NeutronNetwork network, Node srcNode,
                                          OvsdbTerminationPointAugmentation intf, boolean isLastInstanceOnNode) {
-        //Preconditions.checkNotNull(connectionService);
-        //List<Node> nodes = connectionService.getBridgeNodes();
-        Preconditions.checkNotNull(nodeCacheManager);
-        Map<org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId,Node> nodes = nodeCacheManager.getOvsdbNodes();
-        nodes.remove(srcNode.getNodeId());
+        Map<org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId,Node> nodes =
+                nodeCacheManager.getOvsdbNodes();
+        nodes.remove(MdsalUtils.extractBridgeOvsdbNodeId(srcNode));
 
         logger.info("Delete intf " + intf.getName() + " isLastInstanceOnNode " + isLastInstanceOnNode);
         List<String> phyIfName = bridgeConfigurationManager.getAllPhysicalInterfaceNames(srcNode);
@@ -1539,6 +1569,8 @@ public class OF13Provider implements NetworkingProvider {
 
     private void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
         Preconditions.checkNotNull(mdsalConsumer);
+        logger.debug("writeFlow: flowBuilder: {}, nodeBuilder: {}",
+                flowBuilder.build(), nodeBuilder.build());
         if (mdsalConsumer == null) {
             logger.error("ERROR finding MDSAL Service. Its possible that writeFlow is called too soon ?");
             return;

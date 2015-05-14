@@ -120,7 +120,7 @@ public class SouthboundHandler extends AbstractHandler
     }
 
     private void triggerUpdates() {
-        List<Node> nodes = connectionService.getBridgeNodes();
+        List<Node> nodes = null; // nodeCacheManager.getBridgeNodes();
         if (nodes == null) return;
         for (Node node : nodes) {
             OvsdbBridgeAugmentation bridge = node.getAugmentation(OvsdbBridgeAugmentation.class);

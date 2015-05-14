@@ -199,6 +199,18 @@ public class MdsalUtils {
         return node.getAugmentation(OvsdbNodeAugmentation.class);
     }
 
+    public static NodeId extractBridgeOvsdbNodeId(Node bridgeNode) {
+        NodeId ovsdbNodeId = null;
+        OvsdbBridgeAugmentation bridgeAugmentation = extractBridgeAugmentation(bridgeNode);
+        if (bridgeAugmentation != null) {
+            @SuppressWarnings("unchecked")
+            InstanceIdentifier<Node> ovsdbNodeIid =
+                    (InstanceIdentifier<Node>) (bridgeAugmentation.getManagedBy().getValue());
+            ovsdbNodeId = InstanceIdentifier.keyOf(ovsdbNodeIid).getNodeId();
+        }
+        return ovsdbNodeId;
+    }
+
     public static OvsdbNodeAugmentation readOvsdbNode(Node bridgeNode) {
         OvsdbNodeAugmentation nodeAugmentation = null;
         OvsdbBridgeAugmentation bridgeAugmentation = extractBridgeAugmentation(bridgeNode);
@@ -516,15 +528,18 @@ public class MdsalUtils {
         return value;
     }
 
-    public static Boolean addTerminationPoint(Node bridgeNode, String bridgeName, String portName) {
+    public static Boolean addTerminationPoint(Node bridgeNode, String bridgeName, String portName, String type) {
         InstanceIdentifier<TerminationPoint> tpIid =
                 MdsalHelper.createTerminationPointInstanceIdentifier(bridgeNode, portName);
         OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder =
                 new OvsdbTerminationPointAugmentationBuilder();
 
         tpAugmentationBuilder.setName(portName);
-        tpAugmentationBuilder.setInterfaceType(InterfaceTypeInternal.class);
+        if (type != null) {
+            tpAugmentationBuilder.setInterfaceType(MdsalHelper.OVSDB_INTERFACE_TYPE_MAP.get(type));
+        }
         TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
+        tpBuilder.setKey(InstanceIdentifier.keyOf(tpIid));
         tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
         return put(LogicalDatastoreType.CONFIGURATION, tpIid, tpBuilder.build());
     }

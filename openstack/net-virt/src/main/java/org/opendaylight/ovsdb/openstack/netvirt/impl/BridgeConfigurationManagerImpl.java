@@ -310,7 +310,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
         boolean rv = true;
 
         if (MdsalUtils.extractTerminationPointAugmentation(node, portName) == null) {
-            rv = MdsalUtils.addTerminationPoint(node, bridgeName, portName);
+            rv = MdsalUtils.addTerminationPoint(node, bridgeName, portName, null);
         }
 
         return rv;
@@ -334,10 +334,11 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
      */
     private boolean addBridge(Node node, String bridgeName,
                               String localPatchName, String remotePatchName) throws Exception {
-        Preconditions.checkNotNull(networkingProviderManager);
-        //sb will also add port and interface if this is a new bridge
-
-        return MdsalUtils.addBridge(node, bridgeName, getControllerTarget(node));
+        boolean rv = true;
+        if (MdsalUtils.getBridge(node, bridgeName) == null) {
+            rv = MdsalUtils.addBridge(node, bridgeName, getControllerTarget(node));
+        }
+        return rv;
     }
 
     private InetAddress getControllerIPAddress() {

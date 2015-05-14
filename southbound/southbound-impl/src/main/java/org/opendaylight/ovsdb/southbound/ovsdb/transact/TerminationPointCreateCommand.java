@@ -26,6 +26,7 @@ import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes.VlanMode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
@@ -100,8 +101,8 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
         ovsInterface.setName(terminationPoint.getName());
-        ovsInterface.setType(SouthboundMapper.createOvsdbInterfaceType(terminationPoint.getInterfaceType()));
 
+        createInterfaceType(terminationPoint, ovsInterface);
         createOfPort(terminationPoint, ovsInterface);
         createOfPortRequest(terminationPoint, ovsInterface);
         createInterfaceOptions(terminationPoint, ovsInterface);
@@ -109,6 +110,15 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
         createInterfaceExternalIds(terminationPoint, ovsInterface);
     }
 
+    private void createInterfaceType(final OvsdbTerminationPointAugmentation terminationPoint,
+                                     final Interface ovsInterface) {
+
+        Class<? extends InterfaceTypeBase> mdsaltype = terminationPoint.getInterfaceType();
+        if (mdsaltype != null) {
+            ovsInterface.setType(SouthboundMapper.createOvsdbInterfaceType(mdsaltype));
+        }
+    }
+    
     private void createPort(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Port port, final String interfaceUuid) {

@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_30366204",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-05-14T01:24:06Z",
+      "side": 1,
+      "message": "remove the {}",
+      "range": {
+        "startLine": 143,
+        "startChar": 65,
+        "endLine": 143,
+        "endChar": 69
+      },
+      "revId": "d2968963e723c6c3d25aa16e9d34b493549dbb38",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -697,6 +697,12 @@ public class MdsalUtils {
     }
 
     public static boolean isTunnel(OvsdbTerminationPointAugmentation port) {
+        LOG.trace("MdsalUtils#isTunnel: Interface : {}", port);
+
+        if(port.getInterfaceType() == null){
+            LOG.warn("No type found for the interface : {}", port);
+            return false;
+        }
         return MdsalHelper.createOvsdbInterfaceType(
                 port.getInterfaceType()).equals(NetworkHandler.NETWORK_TYPE_VXLAN)
                 || MdsalHelper.createOvsdbInterfaceType(

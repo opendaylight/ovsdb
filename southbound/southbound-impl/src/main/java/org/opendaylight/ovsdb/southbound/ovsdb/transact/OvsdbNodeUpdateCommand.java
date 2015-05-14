@@ -19,6 +19,8 @@ import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
+import org.opendaylight.ovsdb.southbound.SouthboundConstants;
+import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchExternalIds;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -41,7 +43,7 @@ public class OvsdbNodeUpdateCommand implements TransactCommand {
     @Override
     public void execute(TransactionBuilder transaction) {
         Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated =
-                TransactUtils.extractUpdated(changes, OvsdbNodeAugmentation.class);
+                TransactUtils.extractCreatedOrUpdated(changes, OvsdbNodeAugmentation.class);
         for (Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> ovsdbNodeEntry:
             updated.entrySet()) {
             OvsdbNodeAugmentation ovsdbNode = ovsdbNodeEntry.getValue();
@@ -51,21 +53,24 @@ public class OvsdbNodeUpdateCommand implements TransactCommand {
 
             // OpenVSwitchPart
             OpenVSwitch ovs = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), OpenVSwitch.class);
+            HashMap<String, String> externalIdsMap = new HashMap<String, String>();
+            externalIdsMap.put(SouthboundConstants.IID_EXTERNAL_ID_KEY,
+                    SouthboundUtil.serializeInstanceIdentifier(ovsdbNodeEntry.getKey()));
 
             List<OpenvswitchExternalIds> externalIds = ovsdbNode.getOpenvswitchExternalIds();
+
             if (externalIds != null) {
-                HashMap<String, String> externalIdsMap = new HashMap<String, String>();
                 for (OpenvswitchExternalIds externalId : externalIds) {
                     externalIdsMap.put(externalId.getExternalIdKey(), externalId.getExternalIdValue());
                 }
-                try {
-                    ovs.setExternalIds(ImmutableMap.copyOf(externalIdsMap));
-                    transaction.add(op.mutate(ovs).addMutation(ovs.getExternalIdsColumn().getSchema(),
-                        Mutator.INSERT,
-                        ovs.getExternalIdsColumn().getData()));
-                } catch (NullPointerException e) {
-                    LOG.warn("Incomplete OVSDB Node external IDs");
-                }
+            }
+            try {
+                ovs.setExternalIds(ImmutableMap.copyOf(externalIdsMap));
+                transaction.add(op.mutate(ovs).addMutation(ovs.getExternalIdsColumn().getSchema(),
+                    Mutator.INSERT,
+                    ovs.getExternalIdsColumn().getData()));
+            } catch (NullPointerException e) {
+                LOG.warn("Incomplete OVSDB Node external IDs");
             }
 
             List<OpenvswitchOtherConfigs> otherConfigs = ovsdbNode.getOpenvswitchOtherConfigs();

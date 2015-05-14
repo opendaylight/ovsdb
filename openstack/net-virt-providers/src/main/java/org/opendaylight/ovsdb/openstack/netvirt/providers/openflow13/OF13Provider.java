@@ -1117,10 +1117,13 @@ public class OF13Provider implements NetworkingProvider {
                                 + intf.getName() + " on srcNode " + srcNode.getNodeId().getValue());
                         removeTunnelRules(tunnelType, network.getProviderSegmentationID(),
                                 dst, srcNode, intf, true, isLastInstanceOnNode);
-                        logger.info("Remove tunnel rules for interface "
-                                + intf.getName() + " on dstNode " + dstNode.getNodeId().getValue());
-                        removeTunnelRules(tunnelType, network.getProviderSegmentationID(),
-                                src, dstNode, intf, false, isLastInstanceOnNode);
+                        Node dstBridgeNode = MdsalUtils.readIntegrationBridge(dstNode);
+                        if(dstBridgeNode != null){
+                            logger.info("Remove tunnel rules for interface "
+                                    + intf.getName() + " on dstNode " + dstNode.getNodeId().getValue());
+                            removeTunnelRules(tunnelType, network.getProviderSegmentationID(),
+                                    src, dstBridgeNode, intf, false, isLastInstanceOnNode);
+                        }
                     } else {
                         logger.warn("Tunnel end-point configuration missing. Please configure it in "
                                 + "OpenVSwitch Table. "

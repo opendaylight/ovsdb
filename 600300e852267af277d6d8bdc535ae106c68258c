@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_9e9259f5",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 944,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-05-14T21:29:44Z",
+      "side": 1,
+      "message": "there is an extractBridgeAugementation in MdsalUtils you can use to hide the getAugmentation call\n\nthere is also a getBridge(node, name) call you can use to gt back the bridge and then do a getdpid off the bridgeaugmentation. I think I like that the best\n\ncould you also break the return to be more readable?",
+      "range": {
+        "startLine": 944,
+        "startChar": 32,
+        "endLine": 944,
+        "endChar": 55
+      },
+      "revId": "600300e852267af277d6d8bdc535ae106c68258c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

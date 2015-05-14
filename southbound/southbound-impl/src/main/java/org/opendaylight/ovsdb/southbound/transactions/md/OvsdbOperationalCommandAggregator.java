@@ -6,21 +6,22 @@ import java.util.List;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
+import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 
 public class OvsdbOperationalCommandAggregator implements TransactionCommand {
 
 
     private List<TransactionCommand> commands = new ArrayList<TransactionCommand>();
 
-    public OvsdbOperationalCommandAggregator(ConnectionInfo key,TableUpdates updates, DatabaseSchema dbSchema) {
+    public OvsdbOperationalCommandAggregator(OvsdbConnectionInstance key,TableUpdates updates,
+            DatabaseSchema dbSchema) {
+        commands.add(new OpenVSwitchUpdateCommand(key, updates, dbSchema));
         commands.add(new OvsdbBridgeUpdateCommand(key, updates,  dbSchema));
         commands.add(new OvsdbBridgeRemovedCommand(key, updates,  dbSchema));
         commands.add(new OvsdbControllerUpdateCommand(key, updates,  dbSchema));
         commands.add(new OvsdbControllerRemovedCommand(key, updates,  dbSchema));
         commands.add(new OvsdbPortUpdateCommand(key, updates, dbSchema));
         commands.add(new OvsdbPortRemoveCommand(key, updates, dbSchema));
-        commands.add(new OpenVSwitchUpdateCommand(key, updates, dbSchema));
     }
 
     @Override

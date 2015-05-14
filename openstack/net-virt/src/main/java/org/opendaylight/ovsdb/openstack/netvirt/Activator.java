@@ -269,7 +269,6 @@ public class Activator extends DependencyActivatorBase {
                 .setImplementation(NeutronL3Adapter.class)
                 .add(createServiceDependency().setService(ConfigurationService.class).setRequired(true))
                 .add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true))
-                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true))
@@ -277,7 +276,8 @@ public class Activator extends DependencyActivatorBase {
                 .add(createServiceDependency().setService(InboundNatProvider.class).setRequired(false))
                 .add(createServiceDependency().setService(OutboundNatProvider.class).setRequired(false))
                 .add(createServiceDependency().setService(RoutingProvider.class).setRequired(false))
-                .add(createServiceDependency().setService(L3ForwardingProvider.class).setRequired(false)));
+                .add(createServiceDependency().setService(L3ForwardingProvider.class).setRequired(false))
+                .add(createServiceDependency().setService(NodeCacheManager.class).setRequired(true)));
 
         manager.add(createComponent()
                 .setInterface(MultiTenantAwareRouter.class.getName(), null)

@@ -24,6 +24,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.api.*;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 import com.google.common.base.Preconditions;
@@ -53,7 +54,7 @@ public class NeutronL3Adapter {
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile ConfigurationService configurationService;
     private volatile TenantNetworkManager tenantNetworkManager;
-    private volatile OvsdbConnectionService connectionService;
+    private volatile NodeCacheManager nodeCacheManager;
     private volatile INeutronNetworkCRUD neutronNetworkCache;
     private volatile INeutronSubnetCRUD neutronSubnetCache;
     private volatile INeutronPortCRUD neutronPortCache;
@@ -247,11 +248,11 @@ public class NeutronL3Adapter {
         }
 
         final Action action = isDelete ? Action.DELETE : Action.ADD;
-        List<Node> nodes = connectionService.getBridgeNodes();
+        Map<NodeId, Node> nodes = nodeCacheManager.getOvsdbNodes();
         if (nodes.isEmpty()) {
             logger.trace("updateL3ForNeutronPort has no nodes to work with");
         }
-        for (Node node : nodes) {
+        for (Node node : nodes.values()) {
             final Long dpid = getDpid(node);
             final boolean tenantNetworkPresentInNode =
                     tenantNetworkManager.isTenantNetworkPresentInNode(node, providerSegmentationId);
@@ -370,11 +371,11 @@ public class NeutronL3Adapter {
             subnetIdToRouterInterfaceCache.put(subnet.getSubnetUUID(), destNeutronRouterInterface);
         }
 
-        List<Node> nodes = connectionService.getBridgeNodes();
+        Map<NodeId, Node> nodes = nodeCacheManager.getOvsdbNodes();
         if (nodes.isEmpty()) {
             logger.trace("programFlowsForNeutronRouterInterface has no nodes to work with");
         }
-        for (Node node : nodes) {
+        for (Node node : nodes.values()) {
             final Long dpid = getDpid(node);
             final Action actionForNode =
                     tenantNetworkManager.isTenantNetworkPresentInNode(node, destinationSegmentationId) ?
@@ -801,11 +802,11 @@ public class NeutronL3Adapter {
         }
 
         final Action action = isDelete ? Action.DELETE : Action.ADD;
-        List<Node> nodes = connectionService.getBridgeNodes();
+        Map<NodeId, Node> nodes = nodeCacheManager.getOvsdbNodes();
         if (nodes.isEmpty()) {
             logger.trace("programFlowsForFloatingIP has no nodes to work with");
         }
-        for (Node node : nodes) {
+        for (Node node : nodes.values()) {
             final Long dpid = getDpid(node);
             final Action actionForNode =
                     tenantNetworkManager.isTenantNetworkPresentInNode(node, providerSegmentationId) ?

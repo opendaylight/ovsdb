@@ -53,7 +53,7 @@ public class NeutronL3Adapter {
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile ConfigurationService configurationService;
     private volatile TenantNetworkManager tenantNetworkManager;
-    private volatile OvsdbConnectionService connectionService;
+    private volatile NodeCacheManager nodeCacheManager;
     private volatile INeutronNetworkCRUD neutronNetworkCache;
     private volatile INeutronSubnetCRUD neutronSubnetCache;
     private volatile INeutronPortCRUD neutronPortCache;
@@ -247,7 +247,7 @@ public class NeutronL3Adapter {
         }
 
         final Action action = isDelete ? Action.DELETE : Action.ADD;
-        List<Node> nodes = connectionService.getBridgeNodes();
+        List<Node> nodes = nodeCacheManager.getBridgeNodes();
         if (nodes.isEmpty()) {
             logger.trace("updateL3ForNeutronPort has no nodes to work with");
         }
@@ -370,7 +370,7 @@ public class NeutronL3Adapter {
             subnetIdToRouterInterfaceCache.put(subnet.getSubnetUUID(), destNeutronRouterInterface);
         }
 
-        List<Node> nodes = connectionService.getBridgeNodes();
+        List<Node> nodes = nodeCacheManager.getBridgeNodes();
         if (nodes.isEmpty()) {
             logger.trace("programFlowsForNeutronRouterInterface has no nodes to work with");
         }
@@ -801,7 +801,7 @@ public class NeutronL3Adapter {
         }
 
         final Action action = isDelete ? Action.DELETE : Action.ADD;
-        List<Node> nodes = connectionService.getBridgeNodes();
+        List<Node> nodes = nodeCacheManager.getBridgeNodes();
         if (nodes.isEmpty()) {
             logger.trace("programFlowsForFloatingIP has no nodes to work with");
         }

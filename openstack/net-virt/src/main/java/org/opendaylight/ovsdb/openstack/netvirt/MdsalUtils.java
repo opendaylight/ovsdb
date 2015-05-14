@@ -20,12 +20,9 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeInternal;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
@@ -52,14 +49,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -215,17 +210,19 @@ public class MdsalUtils {
         OvsdbNodeAugmentation nodeAugmentation = null;
         OvsdbBridgeAugmentation bridgeAugmentation = extractBridgeAugmentation(bridgeNode);
         if(bridgeAugmentation != null){
-            InstanceIdentifier<Node> ovsdbNodeIid = (InstanceIdentifier<Node>) bridgeAugmentation.getManagedBy().getValue();
+            InstanceIdentifier<Node> ovsdbNodeIid =
+                    (InstanceIdentifier<Node>) bridgeAugmentation.getManagedBy().getValue();
             Node node = read(LogicalDatastoreType.OPERATIONAL, ovsdbNodeIid);
             if (node != null){
                 nodeAugmentation = node.getAugmentation(OvsdbNodeAugmentation.class);
-                LOG.debug("Ovsdb node {} found that manages bridge {}", nodeAugmentation != null?nodeAugmentation:"not",bridgeAugmentation);
+                LOG.debug("readOvsdbNode: Ovsdb node {} found that manages bridge {}",
+                        nodeAugmentation != null?nodeAugmentation:"not",bridgeAugmentation);
             }else {
-                LOG.debug ("Ovsdb node that manages bridge {} not found. ",bridgeAugmentation);
+                LOG.debug ("readOvsdbNode: Ovsdb node that manages bridge {} not found. ",bridgeAugmentation);
             }
 
         }else{
-            LOG.debug("Provided node is not a bridge node : {}",bridgeNode);
+            LOG.debug("readOvsdbNode: Provided node is not a bridge node : {}",bridgeNode);
         }
         return nodeAugmentation;
     }
@@ -258,7 +255,7 @@ public class MdsalUtils {
             throws InterruptedException, InvalidParameterException {
         boolean result = false;
 
-        LOG.info("Add Bridge: node: {}, bridgeName: {}, target: {}", ovsdbNode, bridgeName, target);
+        LOG.info("addBridge: node: {}, bridgeName: {}, target: {}", ovsdbNode, bridgeName, target);
         ConnectionInfo connectionInfo = getConnectionInfo(ovsdbNode);
         if (connectionInfo != null) {
             NodeBuilder bridgeNodeBuilder = new NodeBuilder();
@@ -289,7 +286,7 @@ public class MdsalUtils {
                 MdsalHelper.createInstanceIdentifier(ovsdbNode.getNodeId());
 
         result = delete(LogicalDatastoreType.CONFIGURATION, bridgeIid);
-        LOG.info("Delete bridge node: {}, bridgeName: {} result : {}", ovsdbNode, ovsdbNode.getNodeId(),result);
+        LOG.info("deleteBridge node: {}, bridgeName: {} result : {}", ovsdbNode, ovsdbNode.getNodeId(),result);
         return result;
     }
 
@@ -611,7 +608,7 @@ public class MdsalUtils {
             }
             break;
         case CONTROLLER:
-            LOG.debug("There is no external_id for OvsdbTables: ", table);
+            LOG.warn("getExternalId: There is no external_id for OvsdbTables: ", table);
             return null;
         case OPENVSWITCH:
             OvsdbNodeAugmentation ovsdbNode = extractNodeAugmentation(node);
@@ -636,7 +633,7 @@ public class MdsalUtils {
             }
             break;
         default:
-            LOG.debug("Couldn't find the specified OvsdbTables: ", table);
+            LOG.debug("getExternalId: Couldn't find the specified OvsdbTable: ", table);
             return null;
         }
         return null;
@@ -655,7 +652,7 @@ public class MdsalUtils {
                 }
                 break;
             case CONTROLLER:
-                LOG.debug("There is no other_config for OvsdbTables: ", table);
+                LOG.warn("getOtherConfig: There is no other_config for OvsdbTables: ", table);
                 return null;
 
             case OPENVSWITCH:
@@ -684,7 +681,7 @@ public class MdsalUtils {
                 }
                 break;
             default:
-                LOG.debug("Couldn't find the specified OvsdbTables: ", table);
+                LOG.debug("getOtherConfig: Couldn't find the specified OvsdbTable: ", table);
                 return null;
         }
         return null;

@@ -930,10 +930,11 @@ public class OF13Provider implements NetworkingProvider {
             return;
         }
 
+        String phyIfName =
+                bridgeConfigurationManager.getPhysicalInterfaceName(node, network.getProviderPhysicalNetwork());
         List<OvsdbTerminationPointAugmentation> intfs = MdsalUtils.getTerminationPointsOfBridge(node);
         for (OvsdbTerminationPointAugmentation ethIntf : intfs) {
-            if (ethIntf.getName().equalsIgnoreCase(bridgeConfigurationManager.getPhysicalInterfaceName(
-                    node, network.getProviderPhysicalNetwork()))) {
+            if (ethIntf.getName().equals(phyIfName)) {
                 long ethOFPort = MdsalUtils.getOFPort(ethIntf);
                 if (ethOFPort == 0) {
                     logger.warn("programVlanRules: could not find ofPort for physical port");
@@ -947,6 +948,9 @@ public class OF13Provider implements NetworkingProvider {
                 programLocalIngressVlanRules(node, dpid, network.getProviderSegmentationID(),
                         attachedMac, localPort, ethOFPort);
                 return;
+            } else {
+                logger.debug("programVlanRules: intf {} does not match phyIfName: {}",
+                        ethIntf.getName(), phyIfName);
             }
         }
     }
@@ -1006,9 +1010,6 @@ public class OF13Provider implements NetworkingProvider {
         Preconditions.checkNotNull(nodeCacheManager);
         Map<org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId,Node> nodes =
                 nodeCacheManager.getOvsdbNodes();
-        //OvsdbBridgeAugmentation bridgeAugmentation = srcNode.getAugmentation(OvsdbBridgeAugmentation.class);
-        //@SuppressWarnings("unchecked")
-        //InstanceIdentifier<Node> ovsdbNodeIid = (InstanceIdentifier<Node>) (bridgeAugmentation.getManagedBy().getValue());
         nodes.remove(MdsalUtils.extractBridgeOvsdbNodeId(srcNode));
         String networkType = network.getProviderNetworkType();
         String segmentationId = network.getProviderSegmentationID();

@@ -12,8 +12,6 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfi
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 
-import com.google.common.collect.ObjectArrays;
-
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.util.Calendar;
@@ -34,6 +32,8 @@ import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
 import org.ops4j.pax.exam.options.MavenUrlReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ObjectArrays;
 
 public abstract class AbstractConfigTestBase {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractConfigTestBase.class);
@@ -98,6 +98,7 @@ public abstract class AbstractConfigTestBase {
                         .unpackDirectory(new File("target/exam"))
                         .useDeployFolder(false),
                 keepRuntimeFolder(),
+                //debugConfiguration("5005", true),
                 //features(getFeatureRepo() , getFeatureName())
         };
         options = ObjectArrays.concat(options, getFeaturesOptions(), Option.class);

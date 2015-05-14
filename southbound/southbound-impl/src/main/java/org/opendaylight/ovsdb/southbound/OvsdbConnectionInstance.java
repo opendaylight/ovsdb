@@ -77,8 +77,8 @@ public class OvsdbConnectionInstance implements OvsdbClient {
                             transactInvokers.put(dbSchema, new TransactInvokerImpl(this,dbSchema));
                         }
                     }
-                    txInvoker.invoke(new OvsdbNodeCreateCommand(key, null,null));
-                    this.callback = new OvsdbMonitorCallback(connectionInfo,txInvoker);
+                    txInvoker.invoke(new OvsdbNodeCreateCommand(this, null,null));
+                    this.callback = new OvsdbMonitorCallback(this,txInvoker);
                     for (String database : databases) {
                         DatabaseSchema dbSchema = getSchema(database).get();
                         if (dbSchema != null) {

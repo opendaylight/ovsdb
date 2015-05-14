@@ -15,19 +15,27 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.ovsdb.lib.notation.Mutation;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
+import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
+import org.opendaylight.ovsdb.lib.operations.Mutate;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
+import org.opendaylight.ovsdb.southbound.SouthboundConstants;
+import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchExternalIds;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigs;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 public class OvsdbNodeUpdateCommand implements TransactCommand {
     private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes;
@@ -41,7 +49,7 @@ public class OvsdbNodeUpdateCommand implements TransactCommand {
     @Override
     public void execute(TransactionBuilder transaction) {
         Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated =
-                TransactUtils.extractUpdated(changes, OvsdbNodeAugmentation.class);
+                TransactUtils.extractCreatedOrUpdated(changes, OvsdbNodeAugmentation.class);
         for (Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> ovsdbNodeEntry:
             updated.entrySet()) {
             OvsdbNodeAugmentation ovsdbNode = ovsdbNodeEntry.getValue();
@@ -51,21 +59,33 @@ public class OvsdbNodeUpdateCommand implements TransactCommand {
 
             // OpenVSwitchPart
             OpenVSwitch ovs = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), OpenVSwitch.class);
+            HashMap<String, String> externalIdsMap = new HashMap<String, String>();
 
             List<OpenvswitchExternalIds> externalIds = ovsdbNode.getOpenvswitchExternalIds();
+
             if (externalIds != null) {
-                HashMap<String, String> externalIdsMap = new HashMap<String, String>();
                 for (OpenvswitchExternalIds externalId : externalIds) {
                     externalIdsMap.put(externalId.getExternalIdKey(), externalId.getExternalIdValue());
                 }
-                try {
-                    ovs.setExternalIds(ImmutableMap.copyOf(externalIdsMap));
-                    transaction.add(op.mutate(ovs).addMutation(ovs.getExternalIdsColumn().getSchema(),
-                        Mutator.INSERT,
-                        ovs.getExternalIdsColumn().getData()));
-                } catch (NullPointerException e) {
-                    LOG.warn("Incomplete OVSDB Node external IDs");
-                }
+            }
+
+            externalIdsMap.put(SouthboundConstants.IID_EXTERNAL_ID_KEY,
+                    SouthboundUtil.serializeInstanceIdentifier(ovsdbNodeEntry.getKey()));
+            try {
+                ovs.setExternalIds(ImmutableMap.copyOf(externalIdsMap));
+                Mutate<GenericTableSchema> mutate = op.mutate(ovs)
+                            .addMutation(ovs.getExternalIdsColumn().getSchema(),
+                                Mutator.INSERT,
+                                ovs.getExternalIdsColumn().getData());
+                Mutation deleteIidMutation = new Mutation(ovs.getExternalIdsColumn().getSchema().getName(),
+                        Mutator.DELETE,
+                        OvsdbSet.fromSet(Sets.newHashSet(SouthboundConstants.IID_EXTERNAL_ID_KEY)));
+                List<Mutation> mutations = Lists.newArrayList(Sets.newHashSet(deleteIidMutation));
+                mutations.addAll(mutate.getMutations());
+                mutate.setMutations(mutations);
+                transaction.add(mutate);
+            } catch (NullPointerException e) {
+                LOG.warn("Incomplete OVSDB Node external IDs");
             }
 
             List<OpenvswitchOtherConfigs> otherConfigs = ovsdbNode.getOpenvswitchOtherConfigs();

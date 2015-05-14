@@ -187,7 +187,12 @@ public class SouthboundHandler extends AbstractHandler
     }
 
     private boolean isInterfaceOfInterest(OvsdbTerminationPointAugmentation terminationPoint, List<String> phyIfName) {
-        logger.warn("SouthboundHandler#isInterfaceOfInterest: getInterfaceType: {}", terminationPoint.getInterfaceType());
+        logger.trace("SouthboundHandler#isInterfaceOfInterest: Interface : {}", terminationPoint);
+
+        if(terminationPoint.getInterfaceType() == null){
+            logger.warn("No type found for the interface : {}", terminationPoint);
+            return false;
+        }
         return (MdsalHelper.createOvsdbInterfaceType(
                 terminationPoint.getInterfaceType()).equals(NetworkHandler.NETWORK_TYPE_VXLAN)
                 ||

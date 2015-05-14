@@ -16,7 +16,6 @@ import java.util.Set;
 
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -42,8 +41,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-
 public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
 
     private static final Logger LOG = LoggerFactory
@@ -63,34 +60,24 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
         for (Entry<UUID, OpenVSwitch> entry : updatedOpenVSwitchRows.entrySet()) {
             OpenVSwitch openVSwitch = entry.getValue();
             final InstanceIdentifier<Node> nodePath = SouthboundMapper.createInstanceIdentifier(getConnectionInfo());
-            Optional<Node> node = Optional.absent();
-            try {
-                node = transaction.read(LogicalDatastoreType.OPERATIONAL,
-                        nodePath).checkedGet();
-            } catch (final ReadFailedException e) {
-                LOG.debug("Read Operational/DS for Node fail! {}", nodePath, e);
-            }
-            if (node.isPresent()) {
-                LOG.debug("Node {} is present", node);
-                OvsdbNodeAugmentation ovsdbNode = SouthboundMapper
-                        .createOvsdbAugmentation(getConnectionInfo());
-                OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = new OvsdbNodeAugmentationBuilder();
 
-                setVersion(ovsdbNodeBuilder, openVSwitch);
-                setDataPathTypes(ovsdbNodeBuilder, openVSwitch);
-                setInterfaceTypes(ovsdbNodeBuilder, openVSwitch);
-                setExternalIds(ovsdbNodeBuilder, openVSwitch);
-                setOtherConfig(ovsdbNodeBuilder, openVSwitch);
+            OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = new OvsdbNodeAugmentationBuilder();
 
-                NodeBuilder nodeBuilder = new NodeBuilder();
-                ConnectionInfo connectionInfo = ovsdbNode.getConnectionInfo();
-                nodeBuilder.setNodeId(SouthboundMapper.createNodeId(
-                        connectionInfo.getRemoteIp(), connectionInfo.getRemotePort()));
-                nodeBuilder.addAugmentation(OvsdbNodeAugmentation.class,
-                        ovsdbNodeBuilder.build());
-                transaction.merge(LogicalDatastoreType.OPERATIONAL, nodePath,
-                        nodeBuilder.build());
-            }
+            setVersion(ovsdbNodeBuilder, openVSwitch);
+            setDataPathTypes(ovsdbNodeBuilder, openVSwitch);
+            setInterfaceTypes(ovsdbNodeBuilder, openVSwitch);
+            setExternalIds(ovsdbNodeBuilder, openVSwitch);
+            setOtherConfig(ovsdbNodeBuilder, openVSwitch);
+            ovsdbNodeBuilder.setConnectionInfo(getConnectionInfo());
+
+            NodeBuilder nodeBuilder = new NodeBuilder();
+            ConnectionInfo connectionInfo = getConnectionInfo();
+            nodeBuilder.setNodeId(SouthboundMapper.createNodeId(
+                    connectionInfo.getRemoteIp(), connectionInfo.getRemotePort()));
+            nodeBuilder.addAugmentation(OvsdbNodeAugmentation.class,
+                    ovsdbNodeBuilder.build());
+            transaction.merge(LogicalDatastoreType.OPERATIONAL, nodePath,
+                    nodeBuilder.build());
         }
     }
 

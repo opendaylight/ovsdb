@@ -23,6 +23,7 @@ import org.opendaylight.neutron.spi.Neutron_IPs;
 import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.api.*;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
@@ -252,7 +253,11 @@ public class NeutronL3Adapter {
             logger.trace("updateL3ForNeutronPort has no nodes to work with");
         }
         for (Node node : nodes) {
-            final Long dpid = getDpid(node);
+            final Long dpid = getDpidForIntegrationBridge(node);
+            if (dpid == null) {
+                continue;
+            }
+
             final boolean tenantNetworkPresentInNode =
                     tenantNetworkManager.isTenantNetworkPresentInNode(node, providerSegmentationId);
             for (Neutron_IPs neutronIP : neutronPort.getFixedIPs()) {
@@ -375,7 +380,11 @@ public class NeutronL3Adapter {
             logger.trace("programFlowsForNeutronRouterInterface has no nodes to work with");
         }
         for (Node node : nodes) {
-            final Long dpid = getDpid(node);
+            final Long dpid = getDpidForIntegrationBridge(node);
+            if (dpid == null) {
+                continue;
+            }
+
             final Action actionForNode =
                     tenantNetworkManager.isTenantNetworkPresentInNode(node, destinationSegmentationId) ?
                     action : Action.DELETE;
@@ -806,7 +815,11 @@ public class NeutronL3Adapter {
             logger.trace("programFlowsForFloatingIP has no nodes to work with");
         }
         for (Node node : nodes) {
-            final Long dpid = getDpid(node);
+            final Long dpid = getDpidForIntegrationBridge(node);
+            if (dpid == null) {
+                continue;
+            }
+
             final Action actionForNode =
                     tenantNetworkManager.isTenantNetworkPresentInNode(node, providerSegmentationId) ?
                     action : Action.DELETE;
@@ -925,10 +938,12 @@ public class NeutronL3Adapter {
         return result;
     }
 
-    private Long getDpid(Node node) {
-        /* TODO SB_MIGRATION */
-        // may need to go from OvsdbNode to BridgeNode
-        // get integration bridge on this node and then get dpid
-        return MdsalUtils.getDataPathId(node);
+    private Long getDpidForIntegrationBridge(Node node) {
+        // Check if node is a OvsdbBridgeAugmentation; and return its dpid only if this is the
+        // integration bridge
+        OvsdbBridgeAugmentation ovsdbBridgeAugmentation = node.getAugmentation(OvsdbBridgeAugmentation.class);
+        return (ovsdbBridgeAugmentation != null &&
+                ovsdbBridgeAugmentation.getBridgeName().equals(configurationService.getIntegrationBridgeName())) ?
+                MdsalUtils.getDataPathId(node) : null;
     }
 }

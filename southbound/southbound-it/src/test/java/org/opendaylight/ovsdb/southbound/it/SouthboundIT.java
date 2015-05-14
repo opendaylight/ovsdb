@@ -810,48 +810,312 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
 
-    @Test
-    public void testTerminationPointPortExternalIds() throws InterruptedException {
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
-        connectOvsdbNode(connectionInfo);
-        Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
-        OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
-        Assert.assertNotNull(bridge);
-        NodeId nodeId = SouthboundMapper.createManagedNodeId(SouthboundMapper.createInstanceIdentifier(
-                connectionInfo, bridge.getBridgeName()));
-        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
-                createGenericOvsdbTerminationPointAugmentationBuilder();
-        String portName = "testPortExternalIds";
-        ovsdbTerminationBuilder.setName(portName);
-        //setup
-        PortExternalIdsBuilder externalIdsBuilder1 = new PortExternalIdsBuilder();
-        externalIdsBuilder1.setExternalIdKey("portExternalIdKey1");
-        externalIdsBuilder1.setExternalIdValue("portExternalIdValue1");
-        PortExternalIdsBuilder externalIdsBuilder2 = new PortExternalIdsBuilder();
-        externalIdsBuilder2.setExternalIdKey("portExternalIdKey2");
-        externalIdsBuilder2.setExternalIdValue("portExternalIdValue2");
-        List<PortExternalIds> portExternalIds = Lists.newArrayList(externalIdsBuilder1.build(),
-                externalIdsBuilder2.build());
-        ovsdbTerminationBuilder.setPortExternalIds(portExternalIds);
+    /*
+     * Generates the test cases involved in testing PortExternalIds.  See inline comments for descriptions of
+     * the particular cases considered.
+     *
+     * The return value is a Map in the form (K,V)=(testCaseName,testCase).
+     * - testCaseName is a String
+     * - testCase is a Map in the form (K,V) s.t. K=(EXPECTED_VALUES_KEY|INPUT_VALUES_KEY) and V is a List of
+     *     either corresponding INPUT port external_ids, or EXPECTED port external_ids
+     *     INPUT    is the List we use when calling
+     *              <code>TerminationPointAugmentationBuilder.setPortExternalIds()</code>
+     *     EXPECTED is the List we expect to receive after calling
+     *              <code>TerminationPointAugmentationBuilder.getPortExternalIds()</code>
+     */
+    private Map<String, Map<String, List<PortExternalIds>>> generatePortExternalIdsTestCases() {
+        Map<String, Map<String, List<PortExternalIds>>> testMap =
+                new HashMap<String, Map<String, List<PortExternalIds>>>();
 
-        Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
-        InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
-        Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
-        Assert.assertNotNull(terminationPointNode);
+        final String PORT_EXTERNAL_ID_KEY = "PortExternalIdKey";
+        final String PORT_EXTERNAL_ID_VALUE = "PortExternalIdValue";
+        final String FORMAT_STR = "%s_%s_%d";
+        final String GOOD_KEY = "GoodKey";
+        final String GOOD_VALUE = "GoodValue";
+        final String NO_VALUE_FOR_KEY = "NoValueForKey";
+        final String NO_KEY_FOR_VALUE = "NoKeyForValue";
 
-        List<TerminationPoint> terminationPoints = terminationPointNode.getTerminationPoint();
-        for (TerminationPoint terminationPoint : terminationPoints) {
-            OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
-                    terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
-            if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
-                List<PortExternalIds> actualPortExternalIds = ovsdbTerminationPointAugmentation.getPortExternalIds();
-                Assert.assertTrue((portExternalIds.size() == actualPortExternalIds.size()));
-                for (PortExternalIds portExternalId : portExternalIds) {
-                    Assert.assertTrue(actualPortExternalIds.contains(portExternalId));
-                }
+        // Test Case 1:  TestOneExternalId
+        // Test Type:    Positive
+        // Description:  Create a termination point with one PortExternalIds
+        // Expected:     A port is created with the single external_ids specified below
+        final String testOneExternalIdName = "TestOneExternalId";
+        int externalIdCounter = 0;
+        List<PortExternalIds> oneExternalId = (List<PortExternalIds>) Lists.newArrayList(
+            (new PortExternalIdsBuilder()
+                .setExternalIdKey(String.format(FORMAT_STR, testOneExternalIdName,
+                            PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
+                    .setExternalIdValue(String.format(FORMAT_STR, testOneExternalIdName,
+                            PORT_EXTERNAL_ID_VALUE, externalIdCounter))
+                    .build()));
+        Map<String,List<PortExternalIds>> testCase = Maps.newHashMap();
+        testCase.put(EXPECTED_VALUES_KEY, oneExternalId);
+        testCase.put(INPUT_VALUES_KEY, oneExternalId);
+        testMap.put(testOneExternalIdName, testCase);
+
+        // Test Case 2:  TestFiveExternalId
+        // Test Type:    Positive
+        // Description:  Create a termination point with multiple (five) PortExternalIds
+        // Expected:     A port is created with the five external_ids specified below
+        final String testFiveExternalIdName = "TestFiveExternalId";
+        externalIdCounter = 0;
+        List<PortExternalIds> fiveExternalId = (List<PortExternalIds>) Lists.newArrayList(
+            (new PortExternalIdsBuilder()
+                .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
+                            PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
+                    .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
+                            PORT_EXTERNAL_ID_VALUE, externalIdCounter))
+                    .build()),
+            (new PortExternalIdsBuilder()
+                .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
+                            PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
+                    .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
+                            PORT_EXTERNAL_ID_VALUE, externalIdCounter))
+                    .build()),
+            (new PortExternalIdsBuilder()
+                .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
+                            PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
+                    .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
+                            PORT_EXTERNAL_ID_VALUE, externalIdCounter))
+                    .build()),
+            (new PortExternalIdsBuilder()
+                .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
+                            PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
+                    .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
+                            PORT_EXTERNAL_ID_VALUE, externalIdCounter))
+                    .build()),
+            (new PortExternalIdsBuilder()
+                .setExternalIdKey(String.format(FORMAT_STR, testFiveExternalIdName,
+                        PORT_EXTERNAL_ID_KEY, ++externalIdCounter))
+                    .setExternalIdValue(String.format(FORMAT_STR, testFiveExternalIdName,
+                            PORT_EXTERNAL_ID_VALUE, externalIdCounter))
+                    .build()));
+        testCase = Maps.newHashMap();
+        testCase.put(EXPECTED_VALUES_KEY, fiveExternalId);
+        testCase.put(INPUT_VALUES_KEY, fiveExternalId);
+        testMap.put(testOneExternalIdName, testCase);
+
+        // Test Case 3:  TestOneGoodExternalIdOneMalformedExternalIdValue
+        // Test Type:    Negative
+        // Description:
+        //     One perfectly fine PortExternalId
+        //        (TestOneGoodExternalIdOneMalformedExternalIdValue_PortExternalIdKey_1,
+        //        TestOneGoodExternalIdOneMalformedExternalId_PortExternalIdValue_1)
+        //     and one malformed PortExternalId which only has key specified
+        //        (TestOneGoodExternalIdOneMalformedExternalIdValue_NoValueForKey_2,
+        //        UNSPECIFIED)
+        // Expected:     A port is created without any external_ids
+        final String testOneGoodExternalIdOneMalformedExternalIdValueName =
+                "TestOneGoodExternalIdOneMalformedExternalIdValue";
+        externalIdCounter = 0;
+        PortExternalIds oneGood = new PortExternalIdsBuilder()
+            .setExternalIdKey(String.format(FORMAT_STR, testOneGoodExternalIdOneMalformedExternalIdValueName,
+                    GOOD_KEY, ++externalIdCounter))
+                .setExternalIdValue(String.format("FORMAT_STR",
+                        testOneGoodExternalIdOneMalformedExternalIdValueName,
+                            GOOD_VALUE, externalIdCounter))
+                .build();
+        PortExternalIds oneBad = new PortExternalIdsBuilder()
+            .setExternalIdKey(String.format(FORMAT_STR,
+                    testOneGoodExternalIdOneMalformedExternalIdValueName, NO_VALUE_FOR_KEY, ++externalIdCounter))
+                .build();
+        List<PortExternalIds> oneGoodOneBadInput = (List<PortExternalIds>) Lists.newArrayList(
+                oneGood, oneBad);
+        List<PortExternalIds> oneGoodOneBadExpected = null;
+        testCase = Maps.newHashMap();
+        testCase.put(INPUT_VALUES_KEY, oneGoodOneBadInput);
+        testCase.put(EXPECTED_VALUES_KEY, oneGoodOneBadExpected);
+
+        // Test Case 4:  TestOneGoodExternalIdOneMalformedExternalIdKey
+        // Test Type:    Negative
+        // Description:
+        //     One perfectly fine PortExternalId
+        //        (TestOneGoodExternalIdOneMalformedExternalIdValue_PortExternalIdKey_1,
+        //        TestOneGoodExternalIdOneMalformedExternalId_PortExternalIdValue_1)
+        //     and one malformed PortExternalId which only has key specified
+        //        (UNSPECIFIED,
+        //        TestOneGoodExternalIdOneMalformedExternalIdKey_NoKeyForValue_2)
+        // Expected:     A port is created without any external_ids
+        final String testOneGoodExternalIdOneMalformedExternalIdKeyName =
+                "TestOneGoodExternalIdOneMalformedExternalIdKey";
+        externalIdCounter = 0;
+        oneGood = new PortExternalIdsBuilder()
+            .setExternalIdKey(String.format(FORMAT_STR, testOneGoodExternalIdOneMalformedExternalIdKeyName,
+                    GOOD_KEY, ++externalIdCounter))
+                .setExternalIdValue(String.format("FORMAT_STR",
+                        testOneGoodExternalIdOneMalformedExternalIdKeyName,
+                            GOOD_VALUE, externalIdCounter))
+                .build();
+        oneBad = new PortExternalIdsBuilder()
+            .setExternalIdKey(String.format(FORMAT_STR,
+                    testOneGoodExternalIdOneMalformedExternalIdKeyName, NO_KEY_FOR_VALUE, ++externalIdCounter))
+                .build();
+        oneGoodOneBadInput = (List<PortExternalIds>) Lists.newArrayList(
+                oneGood, oneBad);
+        oneGoodOneBadExpected = null;
+        testCase = Maps.newHashMap();
+        testCase.put(INPUT_VALUES_KEY, oneGoodOneBadInput);
+        testCase.put(EXPECTED_VALUES_KEY, oneGoodOneBadExpected);
+
+        return testMap;
+    }
+
+    /*
+     * @see <code>SouthboundIT.testCRUDPortExternalIds()</code>
+     * This is helper test method to compare a test "set" of BridgeExternalIds against an expected "set"
+     */
+    private void assertExpectedPortExternalIdsExist( List<PortExternalIds> expected,
+            List<PortExternalIds> test ) {
+
+        if (expected != null) {
+            for (PortExternalIds expectedExternalId : expected) {
+                Assert.assertTrue(test.contains(expectedExternalId));
+            }
+        } else {
+            Assert.assertNull(test);
+        }
+    }
+
+    /*
+     * @see <code>SouthboundIT.testCRUDPortExternalIds()</code>
+     * This is a helper test method.  The method only checks if
+     * <code>updateFromInputExternalIds != updateToInputExternalIds</code>,  (i.e., the updateTo "set" isn't the same
+     * as the updateFrom "set".  Then, the method ensures each element of erase is not an element of test, as the input
+     * test cases are divergent.
+     */
+    private void assertPortExternalIdsErased( List<PortExternalIds> updateFromInputExternalIds,
+            List<PortExternalIds> updateToInputExternalIds,
+            List<PortExternalIds> updateFromExpectedExternalIds,
+            List<PortExternalIds> updateToTestExternalIds ) {
+
+        if (!updateFromInputExternalIds.containsAll(updateToInputExternalIds)) {
+            for (PortExternalIds erasedExternalId : updateFromExpectedExternalIds) {
+                Assert.assertTrue(!updateToTestExternalIds.contains(erasedExternalId));
             }
         }
-        Assert.assertTrue(deleteBridge(connectionInfo));
+    }
+
+    /*
+     * Tests the CRUD operations for <code>Port</code> <code>external_ids</code>.
+     *
+     * @see <code>SouthboundIT.generatePortExternalIdsTestCases()</code> for specific test case information
+     */
+    @Test
+    public void testCRUDTerminationPointPortExternalIds() throws InterruptedException {
+        final String TEST_PREFIX = "CRUDTPPortExternalIds";
+        final int TERMINATION_POINT_TEST_INDEX = 0;
+
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        connectOvsdbNode(connectionInfo);
+
+        // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
+        // the update has been performed.
+        Map<String, Map<String, List<PortExternalIds>>> updateFromTestCases = generatePortExternalIdsTestCases();
+        Map<String, Map<String, List<PortExternalIds>>> updateToTestCases = generatePortExternalIdsTestCases();
+        Map<String, List<PortExternalIds>> updateFromTestCase = null;
+        List<PortExternalIds> updateFromInputExternalIds = null;
+        List<PortExternalIds> updateFromExpectedExternalIds = null;
+        List<PortExternalIds> updateFromConfigurationExternalIds = null;
+        List<PortExternalIds> updateFromOperationalExternalIds = null;
+        Map<String, List<PortExternalIds>> updateToTestCase = null;
+        List<PortExternalIds> updateToInputExternalIds = null;
+        List<PortExternalIds> updateToExpectedExternalIds = null;
+        List<PortExternalIds> updateToConfigurationExternalIds = null;
+        List<PortExternalIds> updateToOperationalExternalIds = null;
+        String testBridgeName = null;
+        String testPortName = null;
+        OvsdbTerminationPointAugmentation updateFromConfigurationTerminationPointAugmentation = null;
+        OvsdbTerminationPointAugmentation updateFromOperationalTerminationPointAugmenation = null;
+        OvsdbTerminationPointAugmentation updateToConfigurationTerminationPointAugmentation = null;
+        OvsdbTerminationPointAugmentation updateToOperationalTerminationPointAugmentation = null;
+        OvsdbTerminationPointAugmentationBuilder tpCreateAugmentationBuilder = null;
+        OvsdbTerminationPointAugmentationBuilder tpUpdateAugmentationBuilder = null;
+        TerminationPointBuilder tpUpdateBuilder = null;
+        NodeBuilder portUpdateNodeBuilder = null;
+        NodeId testBridgeNodeId = null;
+        NodeId portUpdateNodeId = null;
+        InstanceIdentifier<Node> portIid = null;
+        boolean result = false;
+
+        for (String updateFromTestCaseKey : updateFromTestCases.keySet()) {
+            updateFromTestCase = updateFromTestCases.get(updateFromTestCaseKey);
+            updateFromInputExternalIds = updateFromTestCase.get(INPUT_VALUES_KEY);
+            updateFromExpectedExternalIds = updateFromTestCase.get(EXPECTED_VALUES_KEY);
+            for (String testCaseKey : updateToTestCases.keySet()) {
+                testPortName = testBridgeName = String.format("%s_%s", TEST_PREFIX, testCaseKey);
+                updateToTestCase = updateToTestCases.get(testCaseKey);
+                updateToInputExternalIds = updateToTestCase.get(INPUT_VALUES_KEY);
+                updateToExpectedExternalIds = updateToTestCase.get(EXPECTED_VALUES_KEY);
+
+                // CREATE: Create the test bridge
+                Assert.assertTrue(addBridge(connectionInfo, null,
+                        testBridgeName, null, true, SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
+                        true, null, null, null));
+                testBridgeNodeId = SouthboundMapper.createManagedNodeId(SouthboundMapper.createInstanceIdentifier(
+                        connectionInfo, new OvsdbBridgeName(testBridgeName)));
+                tpCreateAugmentationBuilder = createGenericOvsdbTerminationPointAugmentationBuilder();
+                tpCreateAugmentationBuilder.setName(testPortName);
+                tpCreateAugmentationBuilder.setPortExternalIds(updateFromInputExternalIds);
+                Assert.assertTrue(addTerminationPoint(testBridgeNodeId, testPortName, tpCreateAugmentationBuilder));
+
+                // READ: Read the test port and ensure changes are propagated to the CONFIGURATION data store,
+                // then repeat for OPERATIONAL data store
+                updateFromConfigurationTerminationPointAugmentation =
+                        getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
+                                LogicalDatastoreType.CONFIGURATION, TERMINATION_POINT_TEST_INDEX);
+                updateFromConfigurationExternalIds = updateFromConfigurationTerminationPointAugmentation
+                        .getPortExternalIds();
+                assertExpectedPortExternalIdsExist(updateFromExpectedExternalIds, updateFromConfigurationExternalIds);
+                updateFromOperationalTerminationPointAugmenation =
+                        getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
+                                LogicalDatastoreType.OPERATIONAL, TERMINATION_POINT_TEST_INDEX);
+                updateFromOperationalExternalIds = updateFromOperationalTerminationPointAugmenation
+                        .getPortExternalIds();
+                assertExpectedPortExternalIdsExist(updateFromExpectedExternalIds, updateFromOperationalExternalIds);
+
+                // UPDATE:  update the external_ids
+                testBridgeNodeId = getBridgeNode(connectionInfo, testBridgeName).getNodeId();
+                tpUpdateAugmentationBuilder = new OvsdbTerminationPointAugmentationBuilder();
+                tpUpdateAugmentationBuilder.setPortExternalIds(updateToInputExternalIds);
+                portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
+                portUpdateNodeBuilder = new NodeBuilder();
+                portUpdateNodeId = SouthboundMapper.createManagedNodeId(portIid);
+                portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
+                tpUpdateBuilder = new TerminationPointBuilder();
+                tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(testPortName)));
+                tpUpdateBuilder.addAugmentation(
+                        OvsdbTerminationPointAugmentation.class,
+                        tpUpdateAugmentationBuilder.build());
+                portUpdateNodeBuilder.setTerminationPoint(Lists.newArrayList(tpUpdateBuilder.build()));
+                result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
+                        portIid, portUpdateNodeBuilder.build());
+                Thread.sleep(OVSDB_UPDATE_TIMEOUT);
+                Assert.assertTrue(result);
+
+                // READ: the test port and ensure changes are propagated to the CONFIGURATION data store,
+                // then repeat for OPERATIONAL data store
+                updateToConfigurationTerminationPointAugmentation =
+                        getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
+                                LogicalDatastoreType.CONFIGURATION, TERMINATION_POINT_TEST_INDEX);
+                updateToConfigurationExternalIds = updateToConfigurationTerminationPointAugmentation
+                        .getPortExternalIds();
+                assertExpectedPortExternalIdsExist(updateToExpectedExternalIds, updateToConfigurationExternalIds);
+                updateToOperationalTerminationPointAugmentation =
+                        getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
+                                LogicalDatastoreType.OPERATIONAL, TERMINATION_POINT_TEST_INDEX);
+                updateToOperationalExternalIds = updateToOperationalTerminationPointAugmentation.getPortExternalIds();
+                assertExpectedPortExternalIdsExist(updateToExpectedExternalIds, updateToOperationalExternalIds);
+
+                // Make sure the old port external ids aren't present in the CONFIGURATION data store
+                assertPortExternalIdsErased(updateFromInputExternalIds, updateToInputExternalIds,
+                        updateFromExpectedExternalIds, updateToConfigurationExternalIds);
+                assertPortExternalIdsErased(updateFromInputExternalIds, updateToInputExternalIds,
+                        updateFromExpectedExternalIds, updateToConfigurationExternalIds);
+
+                // DELETE
+                Assert.assertTrue(deleteBridge(connectionInfo, testBridgeName));
+            }
+        }
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
 

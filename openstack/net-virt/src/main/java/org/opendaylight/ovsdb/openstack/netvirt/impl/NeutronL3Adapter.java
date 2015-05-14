@@ -252,7 +252,11 @@ public class NeutronL3Adapter {
             logger.trace("updateL3ForNeutronPort has no nodes to work with");
         }
         for (Node node : nodes) {
-            final Long dpid = getDpid(node);
+            final Long dpid = getDpidForIntegrationBridge(node);
+            if (dpid == null) {
+                continue;
+            }
+
             final boolean tenantNetworkPresentInNode =
                     tenantNetworkManager.isTenantNetworkPresentInNode(node, providerSegmentationId);
             for (Neutron_IPs neutronIP : neutronPort.getFixedIPs()) {
@@ -375,7 +379,11 @@ public class NeutronL3Adapter {
             logger.trace("programFlowsForNeutronRouterInterface has no nodes to work with");
         }
         for (Node node : nodes) {
-            final Long dpid = getDpid(node);
+            final Long dpid = getDpidForIntegrationBridge(node);
+            if (dpid == null) {
+                continue;
+            }
+
             final Action actionForNode =
                     tenantNetworkManager.isTenantNetworkPresentInNode(node, destinationSegmentationId) ?
                     action : Action.DELETE;
@@ -806,7 +814,11 @@ public class NeutronL3Adapter {
             logger.trace("programFlowsForFloatingIP has no nodes to work with");
         }
         for (Node node : nodes) {
-            final Long dpid = getDpid(node);
+            final Long dpid = getDpidForIntegrationBridge(node);
+            if (dpid == null) {
+                continue;
+            }
+
             final Action actionForNode =
                     tenantNetworkManager.isTenantNetworkPresentInNode(node, providerSegmentationId) ?
                     action : Action.DELETE;
@@ -925,10 +937,11 @@ public class NeutronL3Adapter {
         return result;
     }
 
-    private Long getDpid(Node node) {
-        /* TODO SB_MIGRATION */
-        // may need to go from OvsdbNode to BridgeNode
-        // get integration bridge on this node and then get dpid
-        return MdsalUtils.getDataPathId(node);
+    private Long getDpidForIntegrationBridge(Node node) {
+        // Check if node is integration bridge; and only then return its dpid
+        if (MdsalUtils.getBridge(node, configurationService.getIntegrationBridgeName()) != null) {
+            return MdsalUtils.getDataPathId(node);
+        }
+        return null;
     }
 }

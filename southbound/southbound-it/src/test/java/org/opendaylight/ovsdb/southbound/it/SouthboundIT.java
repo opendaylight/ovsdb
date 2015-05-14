@@ -1387,49 +1387,317 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
 
-    @Test
-    public void testTerminationPointOptions() throws InterruptedException {
-        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
-        connectOvsdbNode(connectionInfo);
-        Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
-        OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
-        Assert.assertNotNull(bridge);
-        NodeId nodeId = SouthboundMapper.createManagedNodeId(SouthboundMapper.createInstanceIdentifier(
-                connectionInfo, bridge.getBridgeName()));
-        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
-                createGenericOvsdbTerminationPointAugmentationBuilder();
-        String portName = "testInterfaceOptions";
-        ovsdbTerminationBuilder.setName(portName);
-        //setup
-        OptionsBuilder optionsBuilder1 = new OptionsBuilder();
-        optionsBuilder1.setOption("option1");
-        optionsBuilder1.setValue("optionValue1");
-        OptionsBuilder optionsBuilder2 = new OptionsBuilder();
-        optionsBuilder2.setOption("option2");
-        optionsBuilder2.setValue("optionValue2");
-        List<Options> options = Lists.newArrayList(optionsBuilder1.build(),
-                optionsBuilder2.build());
-        ovsdbTerminationBuilder.setOptions(options);
+    /*
+     * Generates the test cases involved in testing TP Options.  See inline comments for descriptions of
+     * the particular cases considered.
+     *
+     * The return value is a Map in the form (K,V)=(testCaseName,testCase).
+     * - testCaseName is a String
+     * - testCase is a Map in the form (K,V) s.t. K=(EXPECTED_VALUES_KEY|INPUT_VALUES_KEY) and V is a List of
+     *     either corresponding INPUT TP Options, or EXPECTED TP Options
+     *     INPUT    is the List we use when calling
+     *              <code>TerminationPointAugmentationBuilder.setOptions()</code>
+     *     EXPECTED is the List we expect to receive after calling
+     *              <code>TerminationPointAugmentationBuilder.getOptions()</code>
+     */
+    private Map<String, Map<String, List<Options>>> generateTerminationPointOptionsTestCases() {
+        Map<String, Map<String, List<Options>>> testMap =
+                new HashMap<String, Map<String, List<Options>>>();
 
-        Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
-        InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
-        Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
-        Assert.assertNotNull(terminationPointNode);
+        final String TP_OPTIONS_KEY = "TPOptionsKey";
+        final String TP_OPTIONS_VALUE = "TPOptionsValue";
+        final String FORMAT_STR = "%s_%s_%d";
+        final String GOOD_KEY = "GoodKey";
+        final String GOOD_VALUE = "GoodValue";
+        final String NO_VALUE_FOR_KEY = "NoValueForKey";
+        final String NO_KEY_FOR_VALUE = "NoKeyForValue";
 
-        List<TerminationPoint> terminationPoints = terminationPointNode.getTerminationPoint();
-        for (TerminationPoint terminationPoint : terminationPoints) {
-            OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
-                    terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
-            if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
-                List<Options> actualOptions = ovsdbTerminationPointAugmentation.
-                        getOptions();
-                Assert.assertTrue((options.size() == actualOptions.size()));
-                for (Options option : options) {
-                    Assert.assertTrue(actualOptions.contains(option));
-                }
+        // Test Case 1:  TestOneOptions
+        // Test Type:    Positive
+        // Description:  Create a termination point with one Options
+        // Expected:     A termination point is created with the single Options specified below
+        final String testOneOptionsName = "TestOneOptions";
+        int optionsCounter = 0;
+        List<Options> oneOptions = (List<Options>) Lists.newArrayList(
+            (new OptionsBuilder()
+                .setOption(String.format(FORMAT_STR, testOneOptionsName,
+                            TP_OPTIONS_KEY, ++optionsCounter))
+                    .setValue(String.format(FORMAT_STR, testOneOptionsName,
+                            TP_OPTIONS_VALUE, optionsCounter))
+                    .build()));
+        Map<String,List<Options>> testCase = Maps.newHashMap();
+        testCase.put(EXPECTED_VALUES_KEY, oneOptions);
+        testCase.put(INPUT_VALUES_KEY, oneOptions);
+        testMap.put(testOneOptionsName, testCase);
+
+        // Test Case 2:  TestFiveOptions
+        // Test Type:    Positive
+        // Description:  Create a termination point with multiple (five) Options
+        // Expected:     A termination point is created with the five options specified below
+        final String testFiveOptions = "TestFiveOptions";
+        optionsCounter = 0;
+        List<Options> fiveOptions = (List<Options>) Lists.newArrayList(
+            (new OptionsBuilder()
+                .setOption(String.format(FORMAT_STR, testFiveOptions,
+                            TP_OPTIONS_KEY, ++optionsCounter))
+                    .setValue(String.format(FORMAT_STR, testFiveOptions,
+                            TP_OPTIONS_VALUE, optionsCounter))
+                    .build()),
+            (new OptionsBuilder()
+                .setOption(String.format(FORMAT_STR, testFiveOptions,
+                            TP_OPTIONS_KEY, ++optionsCounter))
+                    .setValue(String.format(FORMAT_STR, testFiveOptions,
+                            TP_OPTIONS_VALUE, optionsCounter))
+                    .build()),
+            (new OptionsBuilder()
+                .setOption(String.format(FORMAT_STR, testFiveOptions,
+                            TP_OPTIONS_KEY, ++optionsCounter))
+                    .setValue(String.format(FORMAT_STR, testFiveOptions,
+                            TP_OPTIONS_VALUE, optionsCounter))
+                    .build()),
+            (new OptionsBuilder()
+                .setOption(String.format(FORMAT_STR, testFiveOptions,
+                            TP_OPTIONS_KEY, ++optionsCounter))
+                    .setValue(String.format(FORMAT_STR, testFiveOptions,
+                            TP_OPTIONS_VALUE, optionsCounter))
+                    .build()),
+            (new OptionsBuilder()
+                .setOption(String.format(FORMAT_STR, testFiveOptions,
+                        TP_OPTIONS_KEY, ++optionsCounter))
+                    .setValue(String.format(FORMAT_STR, testFiveOptions,
+                            TP_OPTIONS_VALUE, optionsCounter))
+                    .build()));
+        testCase = Maps.newHashMap();
+        testCase.put(EXPECTED_VALUES_KEY, fiveOptions);
+        testCase.put(INPUT_VALUES_KEY, fiveOptions);
+        testMap.put(testOneOptionsName, testCase);
+
+        // Test Case 3:  TestOneGoodOptionsOneMalformedOptionsValue
+        // Test Type:    Negative
+        // Description:
+        //     One perfectly fine Options
+        //        (TestOneGoodOptionsOneMalformedOptionsValue_OptionsKey_1,
+        //        TestOneGoodOptionsOneMalformedOptions_OptionsValue_1)
+        //     and one malformed Options which only has key specified
+        //        (TestOneGoodOptionsOneMalformedOptionsValue_NoValueForKey_2,
+        //        UNSPECIFIED)
+        // Expected:     A termination point is created without any options
+        final String testOneGoodOptionsOneMalformedOptionsValueName =
+                "TestOneGoodOptionsOneMalformedOptionsValue";
+        optionsCounter = 0;
+        Options oneGood = new OptionsBuilder()
+            .setOption(String.format(FORMAT_STR, testOneGoodOptionsOneMalformedOptionsValueName,
+                    GOOD_KEY, ++optionsCounter))
+                .setValue(String.format("FORMAT_STR",
+                        testOneGoodOptionsOneMalformedOptionsValueName,
+                            GOOD_VALUE, optionsCounter))
+                .build();
+        Options oneBad = new OptionsBuilder()
+            .setOption(String.format(FORMAT_STR,
+                    testOneGoodOptionsOneMalformedOptionsValueName, NO_VALUE_FOR_KEY, ++optionsCounter))
+                .build();
+        List<Options> oneGoodOneBadInput = (List<Options>) Lists.newArrayList(
+                oneGood, oneBad);
+        List<Options> oneGoodOneBadExpected = null;
+        testCase = Maps.newHashMap();
+        testCase.put(INPUT_VALUES_KEY, oneGoodOneBadInput);
+        testCase.put(EXPECTED_VALUES_KEY, oneGoodOneBadExpected);
+
+        // Test Case 4:  TestOneGoodOptionsOneMalformedOptionsKey
+        // Test Type:    Negative
+        // Description:
+        //     One perfectly fine Options
+        //        (TestOneGoodOptionsOneMalformedOptionsValue_OptionsKey_1,
+        //        TestOneGoodOptionsOneMalformedOptions_OptionsValue_1)
+        //     and one malformed Options which only has key specified
+        //        (UNSPECIFIED,
+        //        TestOneGoodOptionsOneMalformedOptionsKey_NoKeyForValue_2)
+        // Expected:     A termination point is created without any options
+        final String testOneGoodOptionsOneMalformedOptionsKeyName =
+                "TestOneGoodOptionsOneMalformedOptionsKey";
+        optionsCounter = 0;
+        oneGood = new OptionsBuilder()
+            .setOption(String.format(FORMAT_STR, testOneGoodOptionsOneMalformedOptionsKeyName,
+                    GOOD_KEY, ++optionsCounter))
+                .setValue(String.format("FORMAT_STR",
+                        testOneGoodOptionsOneMalformedOptionsKeyName,
+                            GOOD_VALUE, optionsCounter))
+                .build();
+        oneBad = new OptionsBuilder()
+            .setOption(String.format(FORMAT_STR,
+                    testOneGoodOptionsOneMalformedOptionsKeyName, NO_KEY_FOR_VALUE, ++optionsCounter))
+                .build();
+        oneGoodOneBadInput = (List<Options>) Lists.newArrayList(
+                oneGood, oneBad);
+        oneGoodOneBadExpected = null;
+        testCase = Maps.newHashMap();
+        testCase.put(INPUT_VALUES_KEY, oneGoodOneBadInput);
+        testCase.put(EXPECTED_VALUES_KEY, oneGoodOneBadExpected);
+
+        return testMap;
+    }
+
+    /*
+     * @see <code>SouthboundIT.testCRUDTerminationPointOptions()</code>
+     * This is helper test method to compare a test "set" of Options against an expected "set"
+     */
+    private void assertExpectedOptionsExist( List<Options> expected,
+            List<Options> test ) {
+
+        if (expected != null) {
+            for (Options expectedOption : expected) {
+                Assert.assertTrue(test.contains(expectedOption));
+            }
+        } else {
+            Assert.assertNull(test);
+        }
+    }
+
+    /*
+     * @see <code>SouthboundIT.testCRUDTPOptions()</code>
+     * This is a helper test method.  The method only checks if
+     * <code>updateFromInputOptions != updateToInputOptions</code>,  (i.e., the updateTo "set" isn't the same
+     * as the updateFrom "set".  Then, the method ensures each element of erase is not an element of test, as the input
+     * test cases are divergent.
+     */
+    private void assertOptionsErased( List<Options> updateFromInputOptions,
+            List<Options> updateToInputOptions,
+            List<Options> updateFromExpectedOptions,
+            List<Options> updateToTestOptions ) {
+
+        if (!updateFromInputOptions.containsAll(updateToInputOptions)) {
+            for (Options erasedOption : updateFromExpectedOptions) {
+                Assert.assertTrue(!updateToTestOptions.contains(erasedOption));
             }
         }
-        Assert.assertTrue(deleteBridge(connectionInfo));
+    }
+
+    /*
+     * Tests the CRUD operations for <code>TerminationPoint</code> <code>options</code>.
+     *
+     * @see <code>SouthboundIT.generateTerminationPointOptions()</code> for specific test case information
+     */
+    @Test
+    public void testCRUDTerminationPointOptions() throws InterruptedException {
+        final String TEST_PREFIX = "CRUDTPOptions";
+        final int TERMINATION_POINT_TEST_INDEX = 0;
+
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
+        connectOvsdbNode(connectionInfo);
+
+        // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
+        // the update has been performed.
+        Map<String, Map<String, List<Options>>> updateFromTestCases =
+                generateTerminationPointOptionsTestCases();
+        Map<String, Map<String, List<Options>>> updateToTestCases =
+                generateTerminationPointOptionsTestCases();
+        Map<String, List<Options>> updateFromTestCase = null;
+        List<Options> updateFromInputOptions = null;
+        List<Options> updateFromExpectedOptions = null;
+        List<Options> updateFromConfigurationOptions = null;
+        List<Options> updateFromOperationalOptions = null;
+        Map<String, List<Options>> updateToTestCase = null;
+        List<Options> updateToInputOptions = null;
+        List<Options> updateToExpectedOptions = null;
+        List<Options> updateToConfigurationOptions = null;
+        List<Options> updateToOperationalOptions = null;
+        String testBridgeName = null;
+        String testPortName = null;
+        OvsdbTerminationPointAugmentation updateFromConfigurationTerminationPointAugmentation = null;
+        OvsdbTerminationPointAugmentation updateFromOperationalTerminationPointAugmenation = null;
+        OvsdbTerminationPointAugmentation updateToConfigurationTerminationPointAugmentation = null;
+        OvsdbTerminationPointAugmentation updateToOperationalTerminationPointAugmentation = null;
+        OvsdbTerminationPointAugmentationBuilder tpCreateAugmentationBuilder = null;
+        OvsdbTerminationPointAugmentationBuilder tpUpdateAugmentationBuilder = null;
+        TerminationPointBuilder tpUpdateBuilder = null;
+        NodeBuilder portUpdateNodeBuilder = null;
+        NodeId testBridgeNodeId = null;
+        NodeId portUpdateNodeId = null;
+        InstanceIdentifier<Node> portIid = null;
+        boolean result = false;
+
+        for (String updateFromTestCaseKey : updateFromTestCases.keySet()) {
+            updateFromTestCase = updateFromTestCases.get(updateFromTestCaseKey);
+            updateFromInputOptions = updateFromTestCase.get(INPUT_VALUES_KEY);
+            updateFromExpectedOptions = updateFromTestCase.get(EXPECTED_VALUES_KEY);
+            for (String testCaseKey : updateToTestCases.keySet()) {
+                testPortName = testBridgeName = String.format("%s_%s", TEST_PREFIX, testCaseKey);
+                updateToTestCase = updateToTestCases.get(testCaseKey);
+                updateToInputOptions = updateToTestCase.get(INPUT_VALUES_KEY);
+                updateToExpectedOptions = updateToTestCase.get(EXPECTED_VALUES_KEY);
+
+                // CREATE: Create the test interface
+                Assert.assertTrue(addBridge(connectionInfo, null,
+                        testBridgeName, null, true, SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
+                        true, null, null, null));
+                testBridgeNodeId = SouthboundMapper.createManagedNodeId(SouthboundMapper.createInstanceIdentifier(
+                        connectionInfo, new OvsdbBridgeName(testBridgeName)));
+                tpCreateAugmentationBuilder = createGenericOvsdbTerminationPointAugmentationBuilder();
+                tpCreateAugmentationBuilder.setName(testPortName);
+                tpCreateAugmentationBuilder.setOptions(updateFromInputOptions);
+                Assert.assertTrue(addTerminationPoint(testBridgeNodeId, testPortName, tpCreateAugmentationBuilder));
+
+                // READ: Read the test interface and ensure changes are propagated to the CONFIGURATION data store,
+                // then repeat for OPERATIONAL data store
+                updateFromConfigurationTerminationPointAugmentation =
+                        getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
+                                LogicalDatastoreType.CONFIGURATION, TERMINATION_POINT_TEST_INDEX);
+                updateFromConfigurationOptions = updateFromConfigurationTerminationPointAugmentation
+                        .getOptions();
+                assertExpectedOptionsExist(updateFromExpectedOptions,
+                        updateFromConfigurationOptions);
+                updateFromOperationalTerminationPointAugmenation =
+                        getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
+                                LogicalDatastoreType.OPERATIONAL, TERMINATION_POINT_TEST_INDEX);
+                updateFromOperationalOptions = updateFromOperationalTerminationPointAugmenation
+                        .getOptions();
+                assertExpectedOptionsExist(updateFromExpectedOptions,
+                        updateFromOperationalOptions);
+
+                // UPDATE:  update the external_ids
+                testBridgeNodeId = getBridgeNode(connectionInfo, testBridgeName).getNodeId();
+                tpUpdateAugmentationBuilder = new OvsdbTerminationPointAugmentationBuilder();
+                tpUpdateAugmentationBuilder.setOptions(updateToInputOptions);
+                portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
+                portUpdateNodeBuilder = new NodeBuilder();
+                portUpdateNodeId = SouthboundMapper.createManagedNodeId(portIid);
+                portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
+                tpUpdateBuilder = new TerminationPointBuilder();
+                tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(testPortName)));
+                tpUpdateBuilder.addAugmentation(
+                        OvsdbTerminationPointAugmentation.class,
+                        tpUpdateAugmentationBuilder.build());
+                portUpdateNodeBuilder.setTerminationPoint(Lists.newArrayList(tpUpdateBuilder.build()));
+                result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
+                        portIid, portUpdateNodeBuilder.build());
+                Thread.sleep(OVSDB_UPDATE_TIMEOUT);
+                Assert.assertTrue(result);
+
+                // READ: the test interface and ensure changes are propagated to the CONFIGURATION data store,
+                // then repeat for OPERATIONAL data store
+                updateToConfigurationTerminationPointAugmentation =
+                        getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
+                                LogicalDatastoreType.CONFIGURATION, TERMINATION_POINT_TEST_INDEX);
+                updateToConfigurationOptions = updateToConfigurationTerminationPointAugmentation
+                        .getOptions();
+                assertExpectedOptionsExist(updateToExpectedOptions, updateToConfigurationOptions);
+                updateToOperationalTerminationPointAugmentation =
+                        getOvsdbTerminationPointAugmentation(connectionInfo, testBridgeName,
+                                LogicalDatastoreType.OPERATIONAL, TERMINATION_POINT_TEST_INDEX);
+                updateToOperationalOptions = updateToOperationalTerminationPointAugmentation
+                        .getOptions();
+                assertExpectedOptionsExist(updateToExpectedOptions, updateToOperationalOptions);
+
+                // Make sure the old interface external ids aren't present in the CONFIGURATION data store
+                assertOptionsErased(updateFromInputOptions, updateToInputOptions,
+                        updateFromExpectedOptions, updateToConfigurationOptions);
+                assertOptionsErased(updateFromInputOptions, updateToInputOptions,
+                        updateFromExpectedOptions, updateToConfigurationOptions);
+
+                // DELETE
+                Assert.assertTrue(deleteBridge(connectionInfo, testBridgeName));
+            }
+        }
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
 

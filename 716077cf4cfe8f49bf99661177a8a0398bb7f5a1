@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_1e35e945",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 3576
+      },
+      "writtenOn": "2015-05-14T20:45:20Z",
+      "side": 1,
+      "message": "This isn\u0027t a line you changed, so I don\u0027t know if you have any responsibility for this, but note that \"String.isEmpty()\" just returns true if the length of the string is zero. It doesn\u0027t work if the string is null, and it doesn\u0027t work if the string is all white space.  If those are impossible states, then that\u0027s fine.  If they are not impossible, then you should be using the commons-lang \"StringUtils.isEmpty()\" method.\n\nI see this method being used several times in this class, so I would ask the same question there.",
+      "revId": "716077cf4cfe8f49bf99661177a8a0398bb7f5a1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_fe3b5d36",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 797,
+      "author": {
+        "id": 3576
+      },
+      "writtenOn": "2015-05-14T20:45:20Z",
+      "side": 1,
+      "message": "Expressions like this are more succinct with commons-lang \"StringUtils.isEmpty()\".  Also note that your code isn\u0027t checking for the string being all white space.  Again, if that\u0027s an impossible state, then it doesn\u0027t matter too much.",
+      "revId": "716077cf4cfe8f49bf99661177a8a0398bb7f5a1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

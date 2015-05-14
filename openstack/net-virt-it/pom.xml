@@ -16,18 +16,35 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.ovsdb</groupId>
-  <artifactId>netvirt-it</artifactId>
+  <artifactId>openstack.net-virt-it</artifactId>
   <version>1.1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
+  <description>The OVSDB Plugin integration project is a project for OpenDaylight that will implement the Open vSwitch Database RFC 7047 management protocol allowing the Southbound configuration of vSwitches and a network virtualization implementation.</description>
+  <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
+  <licenses>
+    <license>
+      <name>Eclipse Public License v1.0</name>
+      <url>http://www.eclipse.org/legal/epl-v10.html</url>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <name>Sam Hague</name>
+      <email>shague@gmail.com</email>
+      <url>https://github.com/shague</url>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
+  </scm>
+  <properties>
+    <skip.integrationtest>true</skip.integrationtest>
+  </properties>
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>openstack.net-virt</artifactId>
-        <version>${project.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>config-artifacts</artifactId>
@@ -52,13 +69,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-common-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>features-ovsdb</artifactId>
-      <version>1.1.0-SNAPSHOT</version>
-      <classifier>features</classifier>
-      <type>xml</type>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -108,13 +118,15 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.karaf.tooling</groupId>
-      <artifactId>karaf-maven-plugin</artifactId>
-      <version>${karaf.version}</version>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>${project.groupId}</groupId>
+      <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>openstack.net-virt</artifactId>
+      <version>1.1.0-SNAPSHOT</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
   <build>
@@ -128,6 +140,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
               <goal>integration-test</goal>
               <goal>verify</goal>
             </goals>
+            <configuration>
+              <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+              <skipTests>${skip.integrationtest}</skipTests>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -145,7 +161,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           </execution>
         </executions>
       </plugin>
-      <plugin>
+      <!--<plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
         <configuration>
@@ -157,11 +173,22 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           <includes>**/*.java,**/*.xml,**/*.ini,**/*.sh,**/*.bat</includes>
           <excludes>**/yang/</excludes>
         </configuration>
-      </plugin>
+      </plugin>-->
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
+  <profiles>
+    <profile>
+      <id>integrationtest</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <properties>
+        <skip.integrationtest>false</skip.integrationtest>
+      </properties>
+    </profile>
+  </profiles>
 </project>

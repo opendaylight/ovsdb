@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (C) 2015 Red Hat, Inc. and others
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -9,18 +9,14 @@ package org.opendaylight.ovsdb.openstack.netvirt.it;
 
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 
 import com.google.common.collect.ObjectArrays;
-
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.util.Calendar;
-
 import javax.management.InstanceNotFoundException;
-
 import org.junit.Rule;
 import org.junit.internal.AssumptionViolatedException;
 import org.junit.rules.TestRule;
@@ -36,6 +32,11 @@ import org.ops4j.pax.exam.options.MavenUrlReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+//import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
+
+/**
+ * @author Sam Hague (shague@redhat.com)
+ */
 public abstract class AbstractConfigTestBase {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractConfigTestBase.class);
 
@@ -43,6 +44,7 @@ public abstract class AbstractConfigTestBase {
      * Wait up to 10s for our configured module to come up
      */
     private static final int MODULE_TIMEOUT = 10000;
+    private static int configTimes = 0;
 
     public abstract String getModuleName();
 
@@ -52,11 +54,9 @@ public abstract class AbstractConfigTestBase {
 
     public abstract String getFeatureName();
 
-    public void setExtras() {}
-
     public Option[] getLoggingOptions() {
         Option[] options = new Option[] {
-                editConfigurationFilePut(SouthboundITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
+                editConfigurationFilePut(NetvirtITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
                         logConfiguration(AbstractConfigTestBase.class),
                         LogLevel.INFO.name())
         };
@@ -76,14 +76,9 @@ public abstract class AbstractConfigTestBase {
     }
 
     public MavenArtifactUrlReference getKarafDistro() {
-        /*MavenArtifactUrlReference karafUrl = maven()
-                .groupId("org.opendaylight.controller")
-                .artifactId("opendaylight-karaf-empty")
-                .version("1.5.0-SNAPSHOT")
-                .type("zip");*/
-        MavenArtifactUrlReference karafUrl = maven()
+        MavenArtifactUrlReference karafUrl;
+        karafUrl = maven()
                 .groupId("org.opendaylight.ovsdb")
-                //.artifactId("southbound-karaf")
                 .artifactId("karaf")
                 .version("1.1.0-SNAPSHOT")
                 .type("zip");
@@ -92,9 +87,10 @@ public abstract class AbstractConfigTestBase {
 
     @Configuration
     public Option[] config() {
-        setExtras();
+        LOG.info("Calling config, configTimes: {}", configTimes);
+        configTimes++;
         Option[] options = new Option[] {
-                // KarafDistributionOption.debugConfiguration("5005", true),
+                //KarafDistributionOption.debugConfiguration("5005", true),
                 karafDistributionConfiguration()
                         .frameworkUrl(getKarafDistro())
                         .unpackDirectory(new File("target/exam"))
@@ -102,10 +98,9 @@ public abstract class AbstractConfigTestBase {
                 keepRuntimeFolder(),
                 //features(getFeatureRepo() , getFeatureName())
         };
-        //options = ObjectArrays.concat(options, getFeaturesOptions(), Option.class);
+        options = ObjectArrays.concat(options, getFeaturesOptions(), Option.class);
         options = ObjectArrays.concat(options, getLoggingOptions(), Option.class);
         options = ObjectArrays.concat(options, getPropertiesOptions(), Option.class);
-        LOG.info("options: {}", options);
         return options;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (C) 2015 Red Hat, Inc. and others
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -9,10 +9,9 @@ package org.opendaylight.ovsdb.openstack.netvirt.it;
 
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 
+import com.google.common.collect.ObjectArrays;
 import java.util.Calendar;
-
 import javax.inject.Inject;
-
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
@@ -21,8 +20,6 @@ import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
 import org.ops4j.pax.exam.util.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ObjectArrays;
 
 public abstract class AbstractMdsalTestBase extends AbstractConfigTestBase implements BindingAwareProvider {
 
@@ -63,7 +60,7 @@ public abstract class AbstractMdsalTestBase extends AbstractConfigTestBase imple
     @Override
     public Option[] getLoggingOptions() {
         Option[] options = new Option[] {
-                editConfigurationFilePut(SouthboundITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
+                editConfigurationFilePut(NetvirtITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
                         logConfiguration(AbstractMdsalTestBase.class),
                         LogLevel.INFO.name()),
         };

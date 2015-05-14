@@ -10,8 +10,8 @@ package org.opendaylight.ovsdb.openstack.netvirt.it;
 /**
  * Constants for SouthboundIT
  */
-public final class SouthboundITConstants {
-    private SouthboundITConstants() {
+public final class NetvirtITConstants {
+    private NetvirtITConstants() {
         throw new AssertionError("This class should not be instantiated.");
     }
 
@@ -28,4 +28,6 @@ public final class SouthboundITConstants {
     public static final String DEFAULT_SERVER_PORT = "6640";
     public static final String DEFAULT_SERVER_EXTRAS = "false";
     public static final String BRIDGE_NAME = "brtest";
+    public static final String PORT_NAME = "porttest";
+    public static final String INTEGRATION_BRIDGE_NAME = "br-int";
 }

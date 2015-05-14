@@ -70,6 +70,11 @@ import com.google.common.util.concurrent.CheckedFuture;
  */
 public class MdsalUtils {
     private static final Logger LOG = LoggerFactory.getLogger(MdsalUtils.class);
+
+    public static DataBroker getDatabroker() {
+        return databroker;
+    }
+
     private static DataBroker databroker = null;
     private static final int OVSDB_UPDATE_TIMEOUT = 500;
     private static final String PATCH_PORT_TYPE = "patch";

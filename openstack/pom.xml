@@ -50,5 +50,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <modules>
     <module>net-virt</module>
     <module>net-virt-providers</module>
+    <module>net-virt-it</module>
   </modules>
 </project>

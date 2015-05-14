@@ -48,7 +48,6 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OutboundNatProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryListener;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
@@ -119,7 +118,7 @@ public class Activator extends DependencyActivatorBase {
                 .setImplementation(NetworkHandler.class)
                 .add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true))
                 .add(createServiceDependency().setService(BridgeConfigurationManager.class).setRequired(true))
-                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
+                .add(createServiceDependency().setService(NodeCacheManager.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
                 .add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true)));
@@ -141,7 +140,7 @@ public class Activator extends DependencyActivatorBase {
                 .setInterface(new String[]{INeutronPortAware.class.getName(), AbstractHandler.class.getName()},
                         portHandlerProperties)
                 .setImplementation(PortHandler.class)
-                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
+                .add(createServiceDependency().setService(NodeCacheManager.class).setRequired(true))
                 .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
                 .add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true)));
 
@@ -168,7 +167,6 @@ public class Activator extends DependencyActivatorBase {
                 .add(createServiceDependency().setService(BridgeConfigurationManager.class).setRequired(true))
                 .add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true))
                 .add(createServiceDependency().setService(NetworkingProviderManager.class).setRequired(true))
-                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
                 .add(createServiceDependency().setService(EventDispatcher.class).setRequired(true))
                 .add(createServiceDependency().setService(NeutronL3Adapter.class).setRequired(true))
                 .add(createServiceDependency().setService(OvsdbInventoryService.class).setRequired(true))
@@ -269,7 +267,7 @@ public class Activator extends DependencyActivatorBase {
                 .setImplementation(NeutronL3Adapter.class)
                 .add(createServiceDependency().setService(ConfigurationService.class).setRequired(true))
                 .add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true))
-                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
+                .add(createServiceDependency().setService(NodeCacheManager.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronNetworkCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronSubnetCRUD.class).setRequired(true))
                 .add(createServiceDependency().setService(INeutronPortCRUD.class).setRequired(true))
@@ -294,8 +292,7 @@ public class Activator extends DependencyActivatorBase {
                         .setCallbacks("cacheListenerAdded", "cacheListenerRemoved")));
 
         manager.add(createComponent()
-                .setInterface(new String[] {OvsdbConnectionService.class.getName(),
-                        OvsdbInventoryService.class.getName()}, null)
+                .setInterface(new String[] {OvsdbInventoryService.class.getName()}, null)
                 .setImplementation(OvsdbInventoryServiceImpl.class)
                 .add(createServiceDependency().setService(OvsdbInventoryListener.class)
                         .setCallbacks("listenerAdded", "listenerRemoved"))

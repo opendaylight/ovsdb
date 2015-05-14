@@ -13,11 +13,10 @@ import org.opendaylight.neutron.spi.INeutronPortAware;
 import org.opendaylight.neutron.spi.NeutronPort;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConnectionService;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +30,7 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware {
     static final Logger logger = LoggerFactory.getLogger(PortHandler.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
-    private volatile OvsdbConnectionService connectionService;
+    private volatile NodeCacheManager nodeCacheManager;
     private volatile NeutronL3Adapter neutronL3Adapter;
 
     /**
@@ -118,7 +117,7 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware {
         logger.debug("Handling neutron delete port " + neutronPort);
         neutronL3Adapter.handleNeutronPortEvent(neutronPort, Action.DELETE);
         //TODO: Need to implement getNodes
-        List<Node> nodes = connectionService.getNodes();
+        List<Node> nodes = nodeCacheManager.getNodes();
         for (Node node : nodes) {
             try {
                 List<OvsdbTerminationPointAugmentation> ports = MdsalUtils.getTerminationPointsOfBridge(node);

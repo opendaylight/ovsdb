@@ -62,7 +62,6 @@ public class Activator extends DependencyActivatorBase {
                 .add(createServiceDependency().setService(BridgeConfigurationManager.class).setRequired(true))
                 .add(createServiceDependency().setService(TenantNetworkManager.class).setRequired(true))
                 .add(createServiceDependency().setService(SecurityServicesManager.class).setRequired(true))
-                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
                 .add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true))
                 .add(createServiceDependency().setService(ClassifierProvider.class).setRequired(true))
                 .add(createServiceDependency().setService(IngressAclProvider.class).setRequired(true))
@@ -98,7 +97,6 @@ public class Activator extends DependencyActivatorBase {
                 .setInterface(new String[]{AbstractServiceInstance.class.getName(), ArpProvider.class.getName()},
                         props3)
                 .setImplementation(ArpResponderService.class)
-                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
                 .add(createServiceDependency().setService(PipelineOrchestrator.class).setRequired(true))
                 .add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true)));
 
@@ -110,7 +108,6 @@ public class Activator extends DependencyActivatorBase {
                 .setInterface(new String[]{AbstractServiceInstance.class.getName(),
                         InboundNatProvider.class.getName()}, props4)
                 .setImplementation(InboundNatService.class)
-                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
                 .add(createServiceDependency().setService(PipelineOrchestrator.class).setRequired(true))
                 .add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true)));
 
@@ -122,7 +119,6 @@ public class Activator extends DependencyActivatorBase {
                 .setInterface(new String[]{AbstractServiceInstance.class.getName(), IngressAclProvider.class.getName()},
                         props5)
                 .setImplementation(IngressAclService.class)
-                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
                 .add(createServiceDependency().setService(PipelineOrchestrator.class).setRequired(true))
                 .add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true)));
 
@@ -134,7 +130,6 @@ public class Activator extends DependencyActivatorBase {
                 .setInterface(new String[] {AbstractServiceInstance.class.getName(),
                                 LoadBalancerProvider.class.getName()}, props6)
                 .setImplementation(LoadBalancerService.class)
-                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
                 .add(createServiceDependency().setService(PipelineOrchestrator.class).setRequired(true))
                 .add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true)));
 
@@ -146,7 +141,6 @@ public class Activator extends DependencyActivatorBase {
                 .setInterface(new String[] {AbstractServiceInstance.class.getName(), RoutingProvider.class.getName()},
                         props7)
                 .setImplementation(RoutingService.class)
-                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
                 .add(createServiceDependency().setService(PipelineOrchestrator.class).setRequired(true))
                 .add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true)));
 
@@ -158,7 +152,6 @@ public class Activator extends DependencyActivatorBase {
                 .setInterface(new String[] {AbstractServiceInstance.class.getName(),
                                 L3ForwardingProvider.class.getName()}, props8)
                 .setImplementation(L3ForwardingService.class)
-                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
                 .add(createServiceDependency().setService(PipelineOrchestrator.class).setRequired(true))
                 .add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true)));
 
@@ -169,7 +162,6 @@ public class Activator extends DependencyActivatorBase {
         manager.add(createComponent()
                 .setInterface(AbstractServiceInstance.class.getName(), props9)
                 .setImplementation(L2RewriteService.class)
-                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
                 .add(createServiceDependency().setService(PipelineOrchestrator.class).setRequired(true))
                 .add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true)));
 
@@ -182,7 +174,6 @@ public class Activator extends DependencyActivatorBase {
                                 L2ForwardingProvider.class.getName()},
                         props10)
                 .setImplementation(L2ForwardingService.class)
-                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
                 .add(createServiceDependency().setService(PipelineOrchestrator.class).setRequired(true))
                 .add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true)));
 
@@ -194,7 +185,6 @@ public class Activator extends DependencyActivatorBase {
                 .setInterface(new String[]{AbstractServiceInstance.class.getName(), EgressAclProvider.class.getName()},
                         props11)
                 .setImplementation(EgressAclService.class)
-                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
                 .add(createServiceDependency().setService(PipelineOrchestrator.class).setRequired(true))
                 .add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true)));
 
@@ -206,7 +196,6 @@ public class Activator extends DependencyActivatorBase {
                 .setInterface(new String[]{AbstractServiceInstance.class.getName(),
                         OutboundNatProvider.class.getName()}, props12)
                 .setImplementation(OutboundNatService.class)
-                .add(createServiceDependency().setService(OvsdbConnectionService.class).setRequired(true))
                 .add(createServiceDependency().setService(PipelineOrchestrator.class).setRequired(true))
                 .add(createServiceDependency().setService(MdsalConsumer.class).setRequired(true)));
     }

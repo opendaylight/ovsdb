@@ -14,12 +14,11 @@ import org.opendaylight.neutron.spi.INeutronNetworkCRUD;
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
-import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConnectionService;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +44,7 @@ public class NetworkHandler extends AbstractHandler
     private volatile TenantNetworkManager tenantNetworkManager;
     private volatile BridgeConfigurationManager bridgeConfigurationManager;
     /* TODO SB_MIGRATION */
-    private volatile OvsdbConnectionService connectionService;
+    private volatile NodeCacheManager nodeCacheManager;
     private volatile INeutronNetworkCRUD neutronNetworkCache;
     private volatile NeutronL3Adapter neutronL3Adapter;
 
@@ -143,7 +142,7 @@ public class NetworkHandler extends AbstractHandler
             networks = neutronNetworkCache.getAllNetworks();
             if (networks.isEmpty()) {
                 logger.trace("neutronNetworkDeleted: last tenant network, delete tunnel ports...");
-                List<Node> nodes = connectionService.getNodes();
+                List<Node> nodes = nodeCacheManager.getNodes();
 
                 for (Node node : nodes) {
                     List<String> phyIfName = bridgeConfigurationManager.getAllPhysicalInterfaceNames(node);

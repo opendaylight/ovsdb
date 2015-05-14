@@ -36,7 +36,6 @@ public class SouthboundHandler extends AbstractHandler
     private volatile BridgeConfigurationManager bridgeConfigurationManager;
     private volatile TenantNetworkManager tenantNetworkManager;
     private volatile NetworkingProviderManager networkingProviderManager;
-    private volatile OvsdbConnectionService connectionService;
     private volatile NeutronL3Adapter neutronL3Adapter;
     private volatile NodeCacheManager nodeCacheManager = null;
 

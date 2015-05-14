@@ -17,7 +17,6 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
 import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
-import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryListener;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -30,8 +29,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Sam Hague (shague@redhat.com)
  */
-public class OvsdbInventoryServiceImpl implements BindingAwareConsumer,
-        OvsdbConnectionService, OvsdbInventoryService {
+public class OvsdbInventoryServiceImpl implements BindingAwareConsumer, OvsdbInventoryService {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbInventoryServiceImpl.class);
     private static DataBroker dataBroker = null;
 
@@ -98,25 +96,5 @@ public class OvsdbInventoryServiceImpl implements BindingAwareConsumer,
 
     public static Set<OvsdbInventoryListener> getMdsalConsumerListeners () {
         return mdsalConsumerListeners;
-    }
-
-    @Override
-    public List<Node> getNodes() {
-        return null;
-    }
-
-    @Override
-    public List<Node> getOvsdbNodes() {
-        return null;
-    }
-
-    @Override
-    public List<Node> getBridgeNodes() {
-        return null;
-    }
-
-    @Override
-    public Node getNode(String identifier) {
-        return null;
     }
 }

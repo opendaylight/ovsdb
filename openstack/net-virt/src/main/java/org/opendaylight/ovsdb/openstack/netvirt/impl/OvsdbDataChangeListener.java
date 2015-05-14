@@ -88,7 +88,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
         for (Map.Entry<InstanceIdentifier<?>, DataObject> created : changes.getCreatedData().entrySet()) {
             if (created.getValue() instanceof OvsdbNodeAugmentation) {
                 Node ovsdbNode = getNode(changes.getCreatedData(), created);
-                LOG.trace("OvsdbDataChangeListner#processOvsdbConnections: <{}>, ovsdbNode: <{}>", created, ovsdbNode);
+                LOG.trace("processOvsdbConnections: <{}>, ovsdbNode: <{}>", created, ovsdbNode);
                 ovsdbUpdate(ovsdbNode, created.getValue(), OvsdbInventoryListener.OvsdbType.NODE, Action.ADD);
             }
         }
@@ -99,8 +99,6 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
         for(InstanceIdentifier<?> removedOvsdbNode : changes.getRemovedPaths()) {
             if(removedOvsdbNode.getTargetType().equals(OvsdbNodeAugmentation.class)){
-                LOG.trace("OvsdbDataChangeListner#processOvsdbDisconnect: {}", removedOvsdbNode);
-
                 //Get top node to get details of all the bridge/termination point augmentation
                 // in case we want to do any cleanup task while processing node disconnection
                 Node parentNode = getNode(changes.getOriginalData(), removedOvsdbNode);
@@ -129,7 +127,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
         for(Map.Entry<InstanceIdentifier<?>, DataObject> updatedOvsdbNode : changes.getUpdatedData().entrySet()){
             if(updatedOvsdbNode.getKey().getTargetType().equals(OvsdbNodeAugmentation.class)){
-                LOG.trace("OvsdbDataChangeListner#processOvsdbConnectionAttributeUpdates: {}", updatedOvsdbNode);
+                LOG.trace("processOvsdbConnectionAttributeUpdates: {}", updatedOvsdbNode);
                 /* XXX (NOTE): Till now we don't really need the old ovsdb connection attributes data before update.
                  * I am passing the updated data of both Node and resource augmentation data (connection attributes).
                  * If in future we need old OvsdbNodeAugmentation attributes data, we will extract it from
@@ -156,7 +154,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
         for(Map.Entry<InstanceIdentifier<?>, DataObject> newPort : changes.getCreatedData().entrySet()){
             if(newPort.getKey().getTargetType().equals(OvsdbTerminationPointAugmentation.class)){
-                LOG.trace("OvsdbDataChangeListner#processPortCreation: {}", newPort);
+                //LOG.trace("processPortCreation: {}", newPort);
                 //If user created termination point only, Node will get updated
                 Node tpParentNode  = getNode(changes.getUpdatedData(), newPort);
                 if(tpParentNode == null){
@@ -182,7 +180,6 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
         for(InstanceIdentifier<?> removedPort : changes.getRemovedPaths()) {
             if(removedPort.getTargetType().equals(OvsdbTerminationPointAugmentation.class)){
-                LOG.trace("OvsdbDataChangeListner#processPortDeletion: {}", removedPort);
                 Node tpParentNode = getNode(changes.getOriginalData(), removedPort);
                 if(tpParentNode == null){
                     //Throwing this warning in case behavior of southbound plugin changes.
@@ -207,7 +204,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
         for (Map.Entry<InstanceIdentifier<?>, DataObject> updatedPort : changes.getUpdatedData().entrySet()){
             if (updatedPort.getKey().getTargetType().equals(OvsdbTerminationPointAugmentation.class)){
-                LOG.trace("OvsdbDataChangeListner#processPortUpdate: <{}>", updatedPort);
+                //LOG.trace("processPortUpdate: <{}>", updatedPort);
                 /* XXX (NOTE): Till now we don't really need the old termination point data before update.
                  * I am passing the updated data of both Node and resource augmentation data (termination-point).
                  * If in future we need old TerminationPointAugmentation data, we will extract it from
@@ -234,7 +231,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
         for(Map.Entry<InstanceIdentifier<?>, DataObject> newBridge : changes.getCreatedData().entrySet()){
             if(newBridge.getKey().getTargetType().equals(OvsdbBridgeAugmentation.class)){
-                LOG.trace("OvsdbDataChangeListner#processBridgeCreation <{}>", newBridge);
+                //LOG.trace("processBridgeCreation <{}>", newBridge);
                 //Bridge augmentation happens directly on the Node so Node details should also exist in created data.
                 Node bridgeParentNode  = getNode(changes.getCreatedData(),newBridge);
                 if(bridgeParentNode == null){
@@ -255,7 +252,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
         for (Map.Entry<InstanceIdentifier<?>, DataObject> updatedBridge : changes.getUpdatedData().entrySet()) {
             if(updatedBridge.getKey().getTargetType().equals(OvsdbBridgeAugmentation.class)){
-                LOG.trace("OvsdbDataChangeListner#processBridgeUpdate <{}>", updatedBridge);
+                //LOG.trace("processBridgeUpdate <{}>", updatedBridge);
                 /* XXX (NOTE): Till now we don't really need the old bridge data before update.
                  * I am passing the updated data of both Node and resource augmentation data.
                  * If in future we need old bridgeAugmentationData, we will extract it from
@@ -281,7 +278,6 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
         for(InstanceIdentifier<?> removedBridge : changes.getRemovedPaths()) {
             if(removedBridge.getTargetType().equals(OvsdbBridgeAugmentation.class)){
-                LOG.trace("OvsdbDataChangeListner#processBridgeDeletion <{}>", removedBridge);
                 Node bridgeParentNode = getNode(changes.getOriginalData(), removedBridge);
                 if(bridgeParentNode == null){
                     //Throwing this warning to catch the behavior change of southbound plugin.

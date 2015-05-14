@@ -44,19 +44,16 @@ public abstract class AbstractConfigTestBase {
      */
     private static final int MODULE_TIMEOUT = 10000;
     private static int configTimes = 0;
-    private static boolean extras = false;
 
     public abstract String getModuleName();
 
     public abstract String getInstanceName();
 
-    public abstract boolean setExtras();
-
     public abstract MavenUrlReference getFeatureRepo();
 
     public abstract String getFeatureName();
 
-    public Option[] getLoggingOptions(boolean extras) {
+    public Option[] getLoggingOptions() {
         Option[] options = new Option[] {
                 editConfigurationFilePut(SouthboundITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
                         logConfiguration(AbstractConfigTestBase.class),
@@ -69,11 +66,11 @@ public abstract class AbstractConfigTestBase {
         return "log4j.logger." + klazz.getPackage().getName();
     }
 
-    public Option[] getFeaturesOptions(boolean extras) {
+    public Option[] getFeaturesOptions() {
         return new Option[]{};
     }
 
-    public Option[] getPropertiesOptions(boolean extras) {
+    public Option[] getPropertiesOptions() {
         return new Option[]{};
     }
 
@@ -95,7 +92,6 @@ public abstract class AbstractConfigTestBase {
     public Option[] config() {
         LOG.info("Calling config, configTimes: {}", configTimes);
         configTimes++;
-        extras = setExtras();
         Option[] options = new Option[] {
                 // KarafDistributionOption.debugConfiguration("5005", true),
                 karafDistributionConfiguration()
@@ -105,9 +101,9 @@ public abstract class AbstractConfigTestBase {
                 keepRuntimeFolder(),
                 //features(getFeatureRepo() , getFeatureName())
         };
-        options = ObjectArrays.concat(options, getFeaturesOptions(extras), Option.class);
-        options = ObjectArrays.concat(options, getLoggingOptions(extras), Option.class);
-        options = ObjectArrays.concat(options, getPropertiesOptions(extras), Option.class);
+        options = ObjectArrays.concat(options, getFeaturesOptions(), Option.class);
+        options = ObjectArrays.concat(options, getLoggingOptions(), Option.class);
+        options = ObjectArrays.concat(options, getPropertiesOptions(), Option.class);
         return options;
     }
 

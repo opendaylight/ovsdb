@@ -11,7 +11,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Lists;
@@ -96,7 +95,6 @@ import org.ops4j.pax.exam.karaf.options.LogLevelOption;
 import org.ops4j.pax.exam.options.MavenUrlReference;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,10 +116,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static String addressStr;
     private static String portStr;
     private static String connectionType;
-    private static String extrasStr;
     private static Boolean setup = false;
     private static MdsalUtils mdsalUtils = null;
-    //private static String extras = "false";
     private static final String NETVIRT = "org.opendaylight.ovsdb.openstack.net-virt";
     private static final String NETVIRTPROVIDERS = "org.opendaylight.ovsdb.openstack.net-virt-providers";
 
@@ -155,7 +151,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     @Override
     public String getFeatureName() {
-        //setExtras();
         return "odl-ovsdb-southbound-impl-ui";
     }
 
@@ -166,46 +161,24 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Override
-    public Option[] getFeaturesOptions(final boolean extras) {
-        if (extras == true) {
-            Option[] options = new Option[] {
-                    features("mvn:org.opendaylight.ovsdb/features-ovsdb/1.1.0-SNAPSHOT/xml/features",
-                            "odl-ovsdb-openstack-sb")};
-            return options;
-        } else {
-            return new Option[]{};
-        }
+    public Option[] getFeaturesOptions() {
+        return new Option[]{};
     }
 
     @Override
-    public Option[] getLoggingOptions(final boolean extras) {
+    public Option[] getLoggingOptions() {
         Option[] options = new Option[] {
-                /*editConfigurationFilePut(SouthboundITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
-                        "log4j.logger.org.opendaylight.ovsdb",
-                        LogLevelOption.LogLevel.DEBUG.name()),*/
                 editConfigurationFilePut(SouthboundITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
                         "log4j.logger.org.opendaylight.ovsdb.southbound-impl",
                         LogLevelOption.LogLevel.DEBUG.name())
         };
 
-        if (extras == true) {
-            Option[] extraOptions = new Option[] {
-                editConfigurationFilePut(SouthboundITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
-                        "log4j.logger.org.opendaylight.ovsdb",
-                        LogLevelOption.LogLevel.DEBUG.name()),
-                editConfigurationFilePut(SouthboundITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
-                        "log4j.logger.org.opendaylight.ovsdb.openstack.net-virt",
-                        LogLevelOption.LogLevel.DEBUG.name())
-            };
-            options = ObjectArrays.concat(options, extraOptions, Option.class);
-        }
-
-        options = ObjectArrays.concat(options, super.getLoggingOptions(extras), Option.class);
+        options = ObjectArrays.concat(options, super.getLoggingOptions(), Option.class);
         return options;
     }
 
     @Override
-    public Option[] getPropertiesOptions(final boolean extras) {
+    public Option[] getPropertiesOptions() {
         Properties props = new Properties(System.getProperties());
         String addressStr = props.getProperty(SouthboundITConstants.SERVER_IPADDRESS,
                 SouthboundITConstants.DEFAULT_SERVER_IPADDRESS);
@@ -213,11 +186,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 SouthboundITConstants.DEFAULT_SERVER_PORT);
         String connectionType = props.getProperty(SouthboundITConstants.CONNECTION_TYPE,
                 SouthboundITConstants.CONNECTION_TYPE_ACTIVE);
-        String extrasStr = props.getProperty(SouthboundITConstants.SERVER_EXTRAS,
-                SouthboundITConstants.DEFAULT_SERVER_EXTRAS);
 
-        LOG.info("getPropertiesOptions: Using the following properties: mode= {}, ip:port= {}:{}, extras= {}",
-                connectionType, addressStr, portStr, extrasStr);
+        LOG.info("getPropertiesOptions: Using the following properties: mode= {}, ip:port= {}:{}",
+                connectionType, addressStr, portStr);
 
         Option[] options = new Option[] {
                 editConfigurationFilePut(SouthboundITConstants.CUSTOM_PROPERTIES,
@@ -226,19 +197,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         SouthboundITConstants.SERVER_PORT, portStr),
                 editConfigurationFilePut(SouthboundITConstants.CUSTOM_PROPERTIES,
                         SouthboundITConstants.CONNECTION_TYPE, connectionType),
-                editConfigurationFilePut(SouthboundITConstants.CUSTOM_PROPERTIES,
-                        SouthboundITConstants.SERVER_EXTRAS, extrasStr)
         };
         return options;
-    }
-
-
-    public boolean setExtras() {
-        Properties props = new Properties(System.getProperties());
-        boolean extras = props.getProperty(SouthboundITConstants.SERVER_EXTRAS,
-                SouthboundITConstants.DEFAULT_SERVER_EXTRAS).equals("true");
-        LOG.info("setExtras: {}", extras);
-        return extras;
     }
 
     @Before
@@ -261,10 +221,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         addressStr = bundleContext.getProperty(SouthboundITConstants.SERVER_IPADDRESS);
         portStr = bundleContext.getProperty(SouthboundITConstants.SERVER_PORT);
         connectionType = bundleContext.getProperty(SouthboundITConstants.CONNECTION_TYPE);
-        extrasStr = bundleContext.getProperty(SouthboundITConstants.SERVER_EXTRAS);
 
-        LOG.info("setUp: Using the following properties: mode= {}, ip:port= {}:{}, extras= {}",
-                connectionType, addressStr, portStr, extrasStr);
+        LOG.info("setUp: Using the following properties: mode= {}, ip:port= {}:{}",
+                connectionType, addressStr, portStr);
         if (connectionType.equalsIgnoreCase(SouthboundITConstants.CONNECTION_TYPE_ACTIVE)) {
             if (addressStr == null) {
                 fail(usage());
@@ -273,11 +232,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         mdsalUtils = new MdsalUtils(dataBroker);
         setup = true;
-
-        if (extrasStr.equals("true")) {
-            isBundleReady(bundleContext, NETVIRT);
-            isBundleReady(bundleContext, NETVIRTPROVIDERS);
-        }
     }
 
     /**
@@ -2198,30 +2152,5 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             }
         }
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
-    }
-
-    /**
-     * isBundleReady is used to check if the requested bundle is Active
-     */
-    public void isBundleReady(BundleContext bundleContext, String bundleName) throws InterruptedException {
-        boolean ready = false;
-
-        while (!ready) {
-            int state = Bundle.UNINSTALLED;
-            Bundle[] bundles = bundleContext.getBundles();
-            for (Bundle element : bundles) {
-                if (element.getSymbolicName().equals(bundleName)) {
-                    state = element.getState();
-                    LOG.info(">>>>> bundle is ready {}", bundleName);
-                    break;
-                }
-            }
-            if (state != Bundle.ACTIVE) {
-                LOG.info(">>>>> bundle not ready {}", bundleName);
-                Thread.sleep(5000);
-            } else {
-                ready = true;
-            }
-        }
     }
 }

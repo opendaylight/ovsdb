@@ -72,6 +72,8 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
         // Finally disconnect if we need to
         disconnect(changes);
 
+        init(changes);
+
     }
 
     private void updateData(
@@ -111,7 +113,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                         if (original.getValue() instanceof OvsdbNodeAugmentation) {
                             try {
                                 cm.disconnect((OvsdbNodeAugmentation) original.getValue());
-                                cm.connect(value);
+                                cm.connect((InstanceIdentifier<Node>) original.getKey(),value);
                             } catch (UnknownHostException e) {
                                 LOG.warn("Failed to disconnect to ovsdbNode", e);
                             }
@@ -128,12 +130,24 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
             // TODO validate we have the correct kind of InstanceIdentifier
             if (created.getValue() instanceof OvsdbNodeAugmentation) {
                 try {
-                    cm.connect((OvsdbNodeAugmentation) created.getValue());
+                    cm.connect((InstanceIdentifier<Node>) created.getKey(),
+                            (OvsdbNodeAugmentation) created.getValue());
                 } catch (UnknownHostException e) {
                     LOG.warn("Failed to connect to ovsdbNode", e);
                 }
             }
         }
+    }
+
+    private void init(
+            AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
+        for (Entry<InstanceIdentifier<?>, DataObject> created : changes.getCreatedData().entrySet()) {
+            if (created.getValue() instanceof OvsdbNodeAugmentation) {
+                OvsdbNodeAugmentation ovsdbNode = (OvsdbNodeAugmentation)created.getValue();
+                cm.init(ovsdbNode.getConnectionInfo());
+            }
+        }
+
     }
 
     public Set<OvsdbConnectionInstance> connectionInstancesFromChanges(

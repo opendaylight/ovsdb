@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.ovsdb.lib.EchoServiceCallbackFilters;
@@ -52,7 +53,25 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     private Map<DatabaseSchema,TransactInvoker> transactInvokers = new HashMap<DatabaseSchema,TransactInvoker>();
     private MonitorCallBack callback;
     private ConnectionInfo key;
-
+    //The columns to skip in each table to avoid update notifications with all the data
+    //every 3 seconds. This is a ConcurrentHashMap as I do not know the scope and if the method
+    //can be called by multiple threads, hence did not use a Set. I i get a clear to
+    //use a Set, will do so.
+    //Also need to think of a way to make this configurable.
+    private static final Map<String,String> toSkipColumns = new ConcurrentHashMap<>();
+    static {
+        //We skip statistics as it is updating the record every 3 seconds or so.
+        //If there is a business case of using the ovsdb statistics it should be
+        //handled with a dedicated module as its performance requirements are
+        //different. e.g. somehting like the StatisticsManager for openflow...
+        toSkipColumns.put("statistics", "statistics");
+        //Due to the statistics, the column is being updated every 3 seconds with a new UUID
+        //Have to remove it so the only update every 3 seconds will be an echo update (keep alive).
+        toSkipColumns.put("_version", "_version");
+        //Status is being change also every 3 seconds, need to see if we can move those updates
+        //to some polling mechanism that just poll the status...
+        toSkipColumns.put("status", "status");
+    }
     OvsdbConnectionInstance(ConnectionInfo key,OvsdbClient client,TransactionInvoker txInvoker) {
         this.connectionInfo = key;
         this.client = client;
@@ -105,7 +124,12 @@ public class OvsdbConnectionInstance implements OvsdbClient {
                 Set<String> columns = tableSchema.getColumns();
                 MonitorRequestBuilder<GenericTableSchema> monitorBuilder = MonitorRequestBuilder.builder(tableSchema);
                 for (String column : columns) {
-                    monitorBuilder.addColumn(column);
+                    if (toSkipColumns.containsKey(column.toLowerCase())) {
+                        //Warn and skip this column to avoid constant updates every 3 seconds
+                        LOG.warn("Skipping column " + column + " in table " + tableName);
+                    } else {
+                        monitorBuilder.addColumn(column);
+                    }
                 }
                 monitorRequests.add(monitorBuilder.with(new MonitorSelect(true, true, true, true)).build());
             }

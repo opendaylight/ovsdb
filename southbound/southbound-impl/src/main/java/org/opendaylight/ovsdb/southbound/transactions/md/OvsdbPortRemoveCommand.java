@@ -21,7 +21,6 @@ import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
@@ -39,7 +38,6 @@ public class OvsdbPortRemoveCommand extends AbstractTransactionCommand {
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        String bridgeName = null;
         String portName = null;
         Collection<Port> portRemovedRows = TyperUtils.extractRowsRemoved(
                 Port.class, getUpdates(), getDbSchema()).values();
@@ -48,24 +46,24 @@ public class OvsdbPortRemoveCommand extends AbstractTransactionCommand {
         Map<UUID,Bridge> bridgeUpdatedOldRows = TyperUtils.extractRowsOld(
                 Bridge.class, getUpdates(), getDbSchema());
         for (Port port : portRemovedRows) {
+            Bridge updatedBridgeData = null;
             for (UUID bridgeUUID : bridgeUpdatedOldRows.keySet()) {
                 Bridge oldBridgeData = bridgeUpdatedOldRows.get(bridgeUUID);
                 if (oldBridgeData.getPortsColumn() != null
                         && oldBridgeData.getPortsColumn().getData().contains(port.getUuidColumn().getData())
                         && (! bridgeUpdatedRows.isEmpty())) {
-                    Bridge updatedBridgeData = bridgeUpdatedRows.get(bridgeUUID);
-                    bridgeName = updatedBridgeData.getName();
+                    updatedBridgeData = bridgeUpdatedRows.get(bridgeUUID);
                     break;
                 }
             }
-            if (bridgeName == null) {
+            if (updatedBridgeData == null) {
                 LOG.warn("Bridge not found for port {}",port);
                 continue;
             }
             portName = port.getName();
             final InstanceIdentifier<TerminationPoint> nodePath = SouthboundMapper
-                    .createInstanceIdentifier(getConnectionInfo(),
-                            new OvsdbBridgeName(bridgeName)).child(
+                    .createInstanceIdentifier(getOvsdbConnectionInstance(),
+                            updatedBridgeData).child(
                             TerminationPoint.class,
                             new TerminationPointKey(new TpId(portName)));
             transaction.delete(LogicalDatastoreType.OPERATIONAL, nodePath);

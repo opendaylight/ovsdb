@@ -7,6 +7,8 @@
  */
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
+import static org.opendaylight.ovsdb.lib.operations.Operations.op;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,12 +18,20 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.ovsdb.lib.notation.Mutation;
+import org.opendaylight.ovsdb.lib.notation.Mutator;
+import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.Insert;
+import org.opendaylight.ovsdb.lib.operations.Mutate;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
+import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
+import org.opendaylight.ovsdb.lib.schema.TableSchema;
+import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
+import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -29,7 +39,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 public class TransactUtils {
     private static final Logger LOG = LoggerFactory.getLogger(TransactUtils.class);
@@ -153,5 +166,23 @@ public class TransactUtils {
         insert.setUuidName(uuidString);
         UUID uuid = new UUID(uuidString);
         return uuid;
+    }
+
+    public static <T  extends TableSchema<T>> void stampInstanceIdentifier(TransactionBuilder transaction,
+            InstanceIdentifier<?> iid, TableSchema<T> tableSchema,
+            ColumnSchema<T, Map<String,String>> columnSchema) {
+        Map<String,String> externalIdsMap = ImmutableMap.of(SouthboundConstants.IID_EXTERNAL_ID_KEY,
+                SouthboundUtil.serializeInstanceIdentifier(iid));
+        Mutate<T> mutate = op.mutate(tableSchema)
+                .addMutation(columnSchema,
+                    Mutator.INSERT,
+                    externalIdsMap);
+        Mutation deleteIidMutation = new Mutation(columnSchema.getName(),
+                Mutator.DELETE,
+                OvsdbSet.fromSet(Sets.newHashSet(SouthboundConstants.IID_EXTERNAL_ID_KEY)));
+        List<Mutation> mutations = Lists.newArrayList(Sets.newHashSet(deleteIidMutation));
+        mutations.addAll(mutate.getMutations());
+        mutate.setMutations(mutations);
+        transaction.add(mutate);
     }
 }

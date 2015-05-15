@@ -83,7 +83,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         InetAddress ip = SouthboundMapper.createInetAddress(ovsdbNode.getConnectionInfo().getRemoteIp());
         OvsdbClient client = OvsdbConnectionService.getService().connect(ip,
                 ovsdbNode.getConnectionInfo().getRemotePort().getValue().intValue());
-        putInstanceIdentifier(ovsdbNode.getConnectionInfo(), iid);
+        putInstanceIdentifier(ovsdbNode.getConnectionInfo(), iid.firstIdentifierOf(Node.class));
         // For connections from the controller to the ovs instance, the library doesn't call
         // this method for us
         connectedButCallBacksNotRegistered(client);
@@ -132,7 +132,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     public InstanceIdentifier<Node> getInstanceIdentifier(ConnectionInfo key) {
         ConnectionInfo connectionInfo = SouthboundMapper.suppressLocalIpPort(key);
-        return instanceIdentifiers.get(connectionInfo);
+        InstanceIdentifier<Node> iid = instanceIdentifiers.get(connectionInfo);
+        return iid;
     }
 
     public OvsdbConnectionInstance getConnectionInstance(OvsdbBridgeAttributes mn) {

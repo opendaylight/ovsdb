@@ -114,18 +114,20 @@ public class JsonRpcDecoderTest {
         ch.writeInbound(copiedBuffer(testJson, CharsetUtil.UTF_16));
         ch.finish();
     }
-
+    /* Disabling this test as the limit was changed 
+     * from exception to a log warning...
     /**
      * Test whether decoder throws appropriate TooLongFrameException
      * when passing a Json string longer than the decoder's maximum
      * frame length.
      * @throws Exception
      */
+    /*
     @Test(expected=TooLongFrameException.class)
     public void testDecodeFrameLengthExceed() {
         decoder = new JsonRpcDecoder(testJson_BYTES -1);
         ch = new EmbeddedChannel(decoder);
         ch.writeInbound(copiedBuffer(testJson, CharsetUtil.UTF_8));
         ch.finish();
-    }
+    }*/
 }

@@ -19,13 +19,11 @@ public final class SouthboundITConstants {
     public static final String CUSTOM_PROPERTIES = "etc/custom.properties";
     public static final String SERVER_IPADDRESS = "ovsdbserver.ipaddress";
     public static final String SERVER_PORT = "ovsdbserver.port";
-    public static final String SERVER_EXTRAS = "ovsdbserver.extras";
     public static final String CONNECTION_TYPE = "ovsdbserver.connection";
     public static final String CONNECTION_TYPE_ACTIVE = "active";
     public static final String CONNECTION_TYPE_PASSIVE = "passive";
     public static final int CONNECTION_INIT_TIMEOUT = 10000;
     public static final String DEFAULT_SERVER_IPADDRESS = "127.0.0.1";
     public static final String DEFAULT_SERVER_PORT = "6640";
-    public static final String DEFAULT_SERVER_EXTRAS = "false";
     public static final String BRIDGE_NAME = "brtest";
 }

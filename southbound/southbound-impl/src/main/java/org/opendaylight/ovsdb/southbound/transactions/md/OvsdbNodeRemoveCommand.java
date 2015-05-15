@@ -6,7 +6,6 @@ import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
-import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -26,7 +25,7 @@ public class OvsdbNodeRemoveCommand extends AbstractTransactionCommand {
     @Override
     public void execute(ReadWriteTransaction transaction) {
         CheckedFuture<Optional<Node>, ReadFailedException> ovsdbNodeFuture = transaction.read(
-                LogicalDatastoreType.OPERATIONAL, SouthboundMapper.createInstanceIdentifier(getConnectionInfo()));
+                LogicalDatastoreType.OPERATIONAL, getOvsdbConnectionInstance().getInstanceIdentifier());
         Optional<Node> ovsdbNodeOptional;
         try {
             ovsdbNodeOptional = ovsdbNodeFuture.get();
@@ -41,7 +40,7 @@ public class OvsdbNodeRemoveCommand extends AbstractTransactionCommand {
                     LOG.warn("{} had no OvsdbNodeAugmentation", ovsdbNode);
                 }
                 transaction.delete(LogicalDatastoreType.OPERATIONAL,
-                        SouthboundMapper.createInstanceIdentifier(getConnectionInfo()));
+                        getOvsdbConnectionInstance().getInstanceIdentifier());
             }
         } catch (Exception e) {
             LOG.warn("Failure to delete ovsdbNode {}",e);

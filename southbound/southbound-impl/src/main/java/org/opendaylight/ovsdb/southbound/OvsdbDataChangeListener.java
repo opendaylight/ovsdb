@@ -1,7 +1,7 @@
 package org.opendaylight.ovsdb.southbound;
 
 import java.net.UnknownHostException;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -78,11 +78,13 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
     private void updateData(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        for (OvsdbConnectionInstance connectionInstance : connectionInstancesFromChanges(changes)) {
+        for (Entry<InstanceIdentifier<Node>, OvsdbConnectionInstance> connectionInstanceEntry :
+                connectionInstancesFromChanges(changes).entrySet()) {
+            OvsdbConnectionInstance connectionInstance = connectionInstanceEntry.getValue();
             connectionInstance.transact(new TransactCommandAggregator(
                     new BridgeOperationalState(db, changes),
                     new DataChangesManagedByOvsdbNodeEvent(
-                            SouthboundMapper.createInstanceIdentifier(connectionInstance.getMDConnectionInfo()),
+                            connectionInstance.getInstanceIdentifier(),
                             changes)));
         }
     }
@@ -150,19 +152,22 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
     }
 
-    public Set<OvsdbConnectionInstance> connectionInstancesFromChanges(
+    public Map<InstanceIdentifier<Node>,OvsdbConnectionInstance> connectionInstancesFromChanges(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
-        Set<OvsdbConnectionInstance> result = new HashSet<OvsdbConnectionInstance>();
-        result.addAll(connectionInstancesFromMap(changes.getCreatedData()));
-        result.addAll(connectionInstancesFromMap(changes.getUpdatedData()));
-        result.addAll(connectionInstancesFromMap(
+        Map<InstanceIdentifier<Node>,OvsdbConnectionInstance> result =
+                new HashMap<InstanceIdentifier<Node>,OvsdbConnectionInstance>();
+        result.putAll(connectionInstancesFromMap(changes.getCreatedData()));
+        result.putAll(connectionInstancesFromMap(changes.getUpdatedData()));
+        result.putAll(connectionInstancesFromMap(
                 Maps.filterKeys(changes.getOriginalData(), Predicates.in(changes.getRemovedPaths()))));
         return result;
     }
 
-    public Set<OvsdbConnectionInstance> connectionInstancesFromMap(Map<InstanceIdentifier<?>, DataObject> map) {
+    public Map<InstanceIdentifier<Node>,OvsdbConnectionInstance> connectionInstancesFromMap(Map<InstanceIdentifier<?>,
+            DataObject> map) {
         Preconditions.checkNotNull(map);
-        Set<OvsdbConnectionInstance> result = new HashSet<OvsdbConnectionInstance>();
+        Map<InstanceIdentifier<Node>,OvsdbConnectionInstance> result =
+                new HashMap<InstanceIdentifier<Node>,OvsdbConnectionInstance>();
         for ( Entry<InstanceIdentifier<?>, DataObject> created : map.entrySet()) {
             if (created.getValue() instanceof Node) {
                 LOG.debug("Received request for {}",created.getValue());
@@ -172,7 +177,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                     OvsdbConnectionInstance client = cm.getConnectionInstance(bridge);
                     if (client != null) {
                         LOG.debug("Found client for {}", created.getValue());
-                        result.add(client);
+                        result.put((InstanceIdentifier<Node>) created.getKey(), client);
                     } else {
                         LOG.debug("Did not find client for {}",created.getValue());
                     }
@@ -183,7 +188,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                         OvsdbConnectionInstance client = cm.getConnectionInstance(ovsNode.getConnectionInfo());
                         if (client != null) {
                             LOG.debug("Found client for {}", created.getValue());
-                            result.add(client);
+                            result.put((InstanceIdentifier<Node>) created.getKey(), client);
                         } else {
                             LOG.debug("Did not find client for {}",created.getValue());
                         }

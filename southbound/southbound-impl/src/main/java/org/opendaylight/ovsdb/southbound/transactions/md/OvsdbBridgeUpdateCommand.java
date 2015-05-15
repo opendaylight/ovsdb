@@ -79,7 +79,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
 
     private void updateBridge(ReadWriteTransaction transaction,
             Bridge bridge) {
-        final InstanceIdentifier<Node> connectionIId = SouthboundMapper.createInstanceIdentifier(getConnectionInfo());
+        final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         Optional<Node> connection = readNode(transaction, connectionIId);
         if (connection.isPresent()) {
             LOG.debug("Connection {} is present",connection);
@@ -89,7 +89,8 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
             transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
 
             // Update the bridge node with whatever data we are getting
-            InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getConnectionInfo(),bridge);
+            InstanceIdentifier<Node> bridgeIid =
+                    SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(),bridge);
             Node bridgeNode = buildBridgeNode(bridge);
             transaction.merge(LogicalDatastoreType.OPERATIONAL, bridgeIid, bridgeNode);
             deleteEntries(transaction, protocolEntriesToRemove(bridgeIid,bridge));
@@ -199,12 +200,12 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
             Bridge bridge) {
         //Update node with managed node reference
         NodeBuilder connectionNode = new NodeBuilder();
-        connectionNode.setNodeId(SouthboundMapper.createNodeId(getConnectionInfo().getRemoteIp(),
-                getConnectionInfo().getRemotePort()));
+        connectionNode.setNodeId(getOvsdbConnectionInstance().getNodeId());
 
         OvsdbNodeAugmentationBuilder ovsdbConnectionAugmentationBuilder = new OvsdbNodeAugmentationBuilder();
         List<ManagedNodeEntry> managedBridges = new ArrayList<ManagedNodeEntry>();
-        InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getConnectionInfo(),bridge);
+        InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(),
+                bridge);
         ManagedNodeEntry managedBridge = new ManagedNodeEntryBuilder().setBridgeRef(
                 new OvsdbBridgeRef(bridgeIid)).build();
         managedBridges.add(managedBridge);
@@ -218,7 +219,8 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
 
     private Node buildBridgeNode(Bridge bridge) {
         NodeBuilder bridgeNodeBuilder = new NodeBuilder();
-        InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getConnectionInfo(),bridge);
+        InstanceIdentifier<Node> bridgeIid =
+                SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(),bridge);
         NodeId bridgeNodeId = SouthboundMapper.createManagedNodeId(bridgeIid);
         bridgeNodeBuilder.setNodeId(bridgeNodeId);
         OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
@@ -240,7 +242,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
     }
 
     private void setManagedBy(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder) {
-        InstanceIdentifier<Node> connectionNodePath = SouthboundMapper.createInstanceIdentifier(getConnectionInfo());
+        InstanceIdentifier<Node> connectionNodePath = getOvsdbConnectionInstance().getInstanceIdentifier();
         ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath));
     }
 
@@ -353,8 +355,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                             if (bridgeControllerIpAddress.getIpv4Address().getValue()
                                     .equals(networkInterfaceAddress.getHostAddress())) {
                                 ovsdbBridgeAugmentationBuilder.setBridgeOpenflowNodeRef(
-                                        SouthboundMapper.createInstanceIdentifier(bridgeControllerIpAddress,
-                                                bridgeControllerPortNumber));
+                                        getOvsdbConnectionInstance().getInstanceIdentifier());
                                 break networkInterfacesLoop;
                             }
                         }

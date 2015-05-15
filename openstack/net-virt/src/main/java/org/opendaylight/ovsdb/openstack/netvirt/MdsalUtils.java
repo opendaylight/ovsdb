@@ -465,7 +465,7 @@ public class MdsalUtils {
     public static List<OvsdbTerminationPointAugmentation> getTerminationPointsOfBridge(Node node) {
         List<OvsdbTerminationPointAugmentation> tpAugmentations = extractTerminationPointAugmentations(node);
         if(tpAugmentations.isEmpty()){
-            tpAugmentations = readTerminationPointAugmentationFromDataStore(node);
+            tpAugmentations = readTerminationPointAugmentations(node);
         }
         return tpAugmentations;
     }
@@ -506,7 +506,7 @@ public class MdsalUtils {
         return tpAugmentations;
     }
 
-    public static List<OvsdbTerminationPointAugmentation> readTerminationPointAugmentationFromDataStore( Node node ) {
+    public static List<OvsdbTerminationPointAugmentation> readTerminationPointAugmentations(Node node) {
         InstanceIdentifier<Node> bridgeNodeIid = MdsalHelper.createInstanceIdentifier(node.getNodeId());
         Node operNode = read(LogicalDatastoreType.OPERATIONAL, bridgeNodeIid);
         if(operNode != null){
@@ -580,10 +580,10 @@ public class MdsalUtils {
         return put(LogicalDatastoreType.CONFIGURATION, tpIid, tpBuilder.build());
     }
 
-    public static Boolean readTerminationPoint(Node bridgeNode, String bridgeName, String portName) {
+    public static TerminationPoint readTerminationPoint(Node bridgeNode, String bridgeName, String portName) {
         InstanceIdentifier<TerminationPoint> tpIid = MdsalHelper.createTerminationPointInstanceIdentifier(
                 bridgeNode, portName);
-        return read(LogicalDatastoreType.OPERATIONAL, tpIid) != null;
+        return read(LogicalDatastoreType.OPERATIONAL, tpIid);
     }
 
     public static Boolean addTunnelTerminationPoint(Node bridgeNode, String bridgeName, String portName, String type,
@@ -592,8 +592,9 @@ public class MdsalUtils {
     }
 
     public static Boolean isTunnelTerminationPointExist(Node bridgeNode, String bridgeName, String portName){
-        return readTerminationPoint(bridgeNode, bridgeName, portName);
+        return readTerminationPoint(bridgeNode, bridgeName, portName) != null;
     }
+
     public static Boolean addPatchTerminationPoint(Node node, String bridgeName, String portName, String peerPortName) {
         Map<String, String> option = new HashMap<String, String>();
         option.put("peer", peerPortName);
@@ -732,6 +733,23 @@ public class MdsalUtils {
         Long ofPort = 0L;
         if (port.getOfport() != null) {
             ofPort = port.getOfport();
+        }
+        return ofPort;
+    }
+
+    public static Long getOFPort(Node bridgeNode, String portName) {
+        Long ofPort = 0L;
+        OvsdbTerminationPointAugmentation port = extractTerminationPointAugmentation(bridgeNode, portName);
+        if (port != null) {
+            ofPort = getOFPort(port);
+        } else {
+            TerminationPoint tp = readTerminationPoint(bridgeNode, null, portName);
+            if (tp != null) {
+                port = tp.getAugmentation(OvsdbTerminationPointAugmentation.class);
+                if (port != null) {
+                    ofPort = getOFPort(port);
+                }
+            }
         }
         return ofPort;
     }

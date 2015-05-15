@@ -189,7 +189,8 @@ public class SouthboundHandler extends AbstractHandler
         logger.trace("SouthboundHandler#isInterfaceOfInterest: Interface : {}", terminationPoint);
 
         if(terminationPoint.getInterfaceType() == null){
-            logger.warn("No type found for the interface : {}", terminationPoint);
+            // This is OK since eth ports don't have an interface type
+            logger.info("No type found for the interface : {}", terminationPoint);
             return false;
         }
         return (MdsalHelper.createOvsdbInterfaceType(

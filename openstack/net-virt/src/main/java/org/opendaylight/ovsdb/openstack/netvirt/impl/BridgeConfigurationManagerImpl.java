@@ -299,7 +299,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
             }
         }
 
-        LOGGER.debug("createNetNetwork: node: {}, status: success", node);
+        LOGGER.debug("createBridges: node: {}, status: success", node);
         return true;
     }
 

@@ -174,7 +174,7 @@ public class MdsalHelper {
                 .child(Topology.class, new TopologyKey(OVSDB_TOPOLOGY_ID))
                 .child(Node.class,new NodeKey(createNodeId(ip,port)))
                 .child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)));
-        LOG.debug("Termination point InstanceIdentigier generated : {}",nodePath);
+        LOG.debug("Termination point InstanceIdentifier generated : {}",nodePath);
         return nodePath;
     }
 

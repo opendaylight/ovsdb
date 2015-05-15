@@ -920,39 +920,30 @@ public class OF13Provider implements NetworkingProvider {
 
         long localPort = MdsalUtils.getOFPort(intf);
         if (localPort == 0) {
-            logger.info("programVlanRules: could not find ofPort");
+            logger.debug("programVlanRules: could not find ofPort for {}", intf.getName());
             return;
         }
 
         String attachedMac = MdsalUtils.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
         if (attachedMac == null) {
-            logger.error("programVlanRules: No AttachedMac seen in {}", intf);
+            logger.debug("programVlanRules: No AttachedMac seen in {}", intf);
             return;
         }
 
         String phyIfName =
                 bridgeConfigurationManager.getPhysicalInterfaceName(node, network.getProviderPhysicalNetwork());
-        List<OvsdbTerminationPointAugmentation> intfs = MdsalUtils.getTerminationPointsOfBridge(node);
-        for (OvsdbTerminationPointAugmentation ethIntf : intfs) {
-            if (ethIntf.getName().equals(phyIfName)) {
-                long ethOFPort = MdsalUtils.getOFPort(ethIntf);
-                if (ethOFPort == 0) {
-                    logger.warn("programVlanRules: could not find ofPort for physical port");
-                    return;
-                }
-                logger.debug("Identified eth port {} -> OF ({}) on {}",
-                        ethIntf.getName(), ethOFPort, node);
-                // TODO: add logic to only add rule on remote nodes
-                programRemoteEgressVlanRules(node, dpid, network.getProviderSegmentationID(),
-                        attachedMac, ethOFPort);
-                programLocalIngressVlanRules(node, dpid, network.getProviderSegmentationID(),
-                        attachedMac, localPort, ethOFPort);
-                return;
-            } else {
-                logger.debug("programVlanRules: intf {} does not match phyIfName: {}",
-                        ethIntf.getName(), phyIfName);
-            }
+        long ethOFPort = MdsalUtils.getOFPort(node, phyIfName);
+        if (ethOFPort == 0) {
+            logger.warn("programVlanRules: could not find ofPort for physical port {}", phyIfName);
+            return;
         }
+        logger.debug("programVlanRules: Identified eth port {} -> ofPort ({}) on {}",
+                phyIfName, ethOFPort, node);
+        // TODO: add logic to only add rule on remote nodes
+        programRemoteEgressVlanRules(node, dpid, network.getProviderSegmentationID(),
+                attachedMac, ethOFPort);
+        programLocalIngressVlanRules(node, dpid, network.getProviderSegmentationID(),
+                attachedMac, localPort, ethOFPort);
     }
 
     private void removeVlanRules (NeutronNetwork network, Node node, OvsdbTerminationPointAugmentation intf,
@@ -967,43 +958,33 @@ public class OF13Provider implements NetworkingProvider {
 
         long localPort = MdsalUtils.getOFPort(intf);
         if (localPort == 0) {
-            logger.info("removeVlanRules: programVlanRules: could not find ofPort");
+            logger.debug("removeVlanRules: programVlanRules: could not find ofPort for {}", intf.getName());
             return;
         }
 
         String attachedMac = MdsalUtils.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
         if (attachedMac == null) {
-            logger.error("removeVlanRules: No AttachedMac seen in {}", intf);
+            logger.debug("removeVlanRules: No AttachedMac seen in {}", intf);
             return;
         }
 
-        List<OvsdbTerminationPointAugmentation> intfs = MdsalUtils.getTerminationPointsOfBridge(node);
-        for (OvsdbTerminationPointAugmentation ethIntf : intfs) {
-            if (ethIntf.getName().equalsIgnoreCase(bridgeConfigurationManager.getPhysicalInterfaceName(
-                    node, network.getProviderPhysicalNetwork()))) {
-                long ethOFPort = MdsalUtils.getOFPort(ethIntf);
-                if (ethOFPort == 0) {
-                    logger.info("removeVlanRules: programVlanRules: could not find ofPort");
-                    return;
-                }
-                logger.debug("removeVlanRules: Identified eth port {} -> OF ({}) on {}",
-                        ethIntf.getName(), ethOFPort, node);
-                removeRemoteEgressVlanRules(node, dpid, network.getProviderSegmentationID(),
-                        attachedMac, localPort, ethOFPort);
-                if (isLastInstanceOnNode) {
-                    removePerVlanRules(node, dpid, network.getProviderSegmentationID(), localPort, ethOFPort);
-                }
-                return;
-            }
+        String phyIfName =
+                bridgeConfigurationManager.getPhysicalInterfaceName(node, network.getProviderPhysicalNetwork());
+        long ethOFPort = MdsalUtils.getOFPort(node, phyIfName);
+        if (ethOFPort == 0) {
+            logger.warn("removeVlanRules: could not find ofPort for physical port {}", phyIfName);
+            return;
+        }
+        logger.debug("removeVlanRules: Identified eth port {} -> ofPort ({}) on {}",
+                phyIfName, ethOFPort, node);
+
+        removeRemoteEgressVlanRules(node, dpid, network.getProviderSegmentationID(),
+                attachedMac, localPort, ethOFPort);
+        if (isLastInstanceOnNode) {
+            removePerVlanRules(node, dpid, network.getProviderSegmentationID(), localPort, ethOFPort);
         }
     }
-/*
-    private removeNode(List<Node> nodes, Node node) {
-        OvsdbBridgeAugmentation bridgeAugmentation = extractBridgeAugmentation(bridgeNode);
-        if(bridgeAugmentation != null){
-            InstanceIdentifier<Node> ovsdbNodeIid = (InstanceIdentifier<Node>) bridgeAugmentation.getManagedBy().getValue();
-    }
-*/
+
     @Override
     public boolean handleInterfaceUpdate(NeutronNetwork network, Node srcNode,
                                          OvsdbTerminationPointAugmentation intf) {

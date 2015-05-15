@@ -50,7 +50,8 @@ public class OvsdbPortRemoveCommand extends AbstractTransactionCommand {
         for (Port port : portRemovedRows) {
             for (UUID bridgeUUID : bridgeUpdatedOldRows.keySet()) {
                 Bridge oldBridgeData = bridgeUpdatedOldRows.get(bridgeUUID);
-                if (oldBridgeData.getPortsColumn().getData().contains(port.getUuidColumn().getData())
+                if (oldBridgeData.getPortsColumn() != null
+                        && oldBridgeData.getPortsColumn().getData().contains(port.getUuidColumn().getData())
                         && (! bridgeUpdatedRows.isEmpty())) {
                     Bridge updatedBridgeData = bridgeUpdatedRows.get(bridgeUUID);
                     bridgeName = updatedBridgeData.getName();

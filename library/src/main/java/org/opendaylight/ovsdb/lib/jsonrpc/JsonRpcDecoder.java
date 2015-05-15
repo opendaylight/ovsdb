@@ -45,9 +45,9 @@ import com.fasterxml.jackson.databind.MappingJsonFactory;
 public class JsonRpcDecoder extends ByteToMessageDecoder {
 
     protected static final Logger logger = LoggerFactory.getLogger(JsonRpcDecoder.class);
-
     private int maxFrameLength;
-
+    //Indicates if the frame limit warning was issued
+    private boolean maxFrameLimitWasReached = false;
     private JsonFactory jacksonJsonFactory = new MappingJsonFactory();
 
     private IOContext jacksonIOContext = new IOContext(new BufferRecycler(), null, false);
@@ -120,7 +120,21 @@ public class JsonRpcDecoder extends ByteToMessageDecoder {
             }
 
             if (index - buf.readerIndex() >= maxFrameLength) {
-                fail(ctx, index - buf.readerIndex());
+                /*
+                 * Changing this limit to being a warning, we do not wish to "break" in scale environment
+                 * and currently this limits the ovs of having only around 50 ports defined...
+                 * I do acknowledge the fast that this might be risky in case of huge amount of strings
+                 * in which the controller can crash with an OOM, however seems that we need a really huge
+                 * ovs to reach that limit.
+                 */
+                //fail(ctx, index - buf.readerIndex());
+
+                //We do not want to issue a log message on every extent of the buffer
+                //hence logging only once
+                if (!maxFrameLimitWasReached) {
+                    maxFrameLimitWasReached = true;
+                    logger.warn("***** OVSDB Frame limit of " + this.maxFrameLength + " bytes has been reached! *****");
+                }
             }
         }
 

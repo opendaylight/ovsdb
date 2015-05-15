@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.openstack.netvirt.it;
 
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 
@@ -77,11 +78,18 @@ public abstract class AbstractConfigTestBase {
 
     public MavenArtifactUrlReference getKarafDistro() {
         MavenArtifactUrlReference karafUrl;
+        /*karafUrl = maven()
+                .groupId("org.opendaylight.controller")
+                .artifactId("opendaylight-karaf-empty")
+                .version("1.5.0-SNAPSHOT")
+                .type("zip");*/
+
         karafUrl = maven()
                 .groupId("org.opendaylight.ovsdb")
                 .artifactId("karaf")
                 .version("1.1.0-SNAPSHOT")
                 .type("zip");
+
         return karafUrl;
     }
 

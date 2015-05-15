@@ -106,7 +106,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
 
     @Override
     public String getFeatureName() {
-        return "odl-ovsdb-openstack-sb";
+        return "odl-ovsdb-openstack";
     }
 
     protected String usage() {

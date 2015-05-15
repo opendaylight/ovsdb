@@ -49,7 +49,7 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
     private void setController(ReadWriteTransaction transaction, Bridge bridge) {
         for (ControllerEntry controllerEntry: SouthboundMapper.createControllerEntries(bridge, updatedControllerRows)) {
             InstanceIdentifier<ControllerEntry> iid =
-                    SouthboundMapper.createInstanceIdentifier(getConnectionInfo(), bridge)
+                    SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), bridge)
                     .augmentation(OvsdbBridgeAugmentation.class)
                     .child(ControllerEntry.class,controllerEntry.getKey());
             transaction.put(LogicalDatastoreType.OPERATIONAL, iid, controllerEntry);

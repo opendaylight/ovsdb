@@ -37,7 +37,9 @@ import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactInvoker;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactInvokerImpl;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +55,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     private Map<DatabaseSchema,TransactInvoker> transactInvokers;
     private MonitorCallBack callback;
     private ConnectionInfo key;
-    private InstanceIdentifier instanceIdentifier;
+    private InstanceIdentifier<Node> instanceIdentifier;
 
     OvsdbConnectionInstance(ConnectionInfo key,OvsdbClient client,TransactionInvoker txInvoker,
             InstanceIdentifier<Node> iid) {
@@ -213,7 +215,19 @@ public class OvsdbConnectionInstance implements OvsdbClient {
         this.connectionInfo = key;
     }
 
-    public InstanceIdentifier getInstanceIdentifier() {
+    public InstanceIdentifier<Node> getInstanceIdentifier() {
         return instanceIdentifier;
+    }
+
+    public NodeKey getNodeKey() {
+        return getInstanceIdentifier().firstKeyOf(Node.class, NodeKey.class);
+    }
+
+    public NodeId getNodeId() {
+        return getNodeKey().getNodeId();
+    }
+
+    public void setInstanceIdentifier(InstanceIdentifier<Node> iid) {
+        this.instanceIdentifier = iid;
     }
 }

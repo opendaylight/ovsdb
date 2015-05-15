@@ -22,7 +22,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,7 +80,7 @@ public class LBaaSPoolHandler extends AbstractHandler
     private void doNeutronLoadBalancerPoolCreate(NeutronLoadBalancerPool neutronLBPool) {
         Preconditions.checkNotNull(loadBalancerProvider);
         List<LoadBalancerConfiguration> lbConfigList = extractLBConfiguration(neutronLBPool);
-        final List<Node> nodes = nodeCacheManager.getNodes();
+        final List<Node> nodes = nodeCacheManager.getBridgeNodes();
         if (lbConfigList == null) {
             logger.debug("Neutron LB configuration invalid for pool {} ", neutronLBPool.getLoadBalancerPoolID());
         } else if (lbConfigList.size() == 0) {
@@ -136,7 +136,7 @@ public class LBaaSPoolHandler extends AbstractHandler
         Preconditions.checkNotNull(loadBalancerProvider);
 
         List<LoadBalancerConfiguration> lbConfigList = extractLBConfiguration(neutronLBPool);
-        final List<Node> nodes = nodeCacheManager.getNodes();
+        final List<Node> nodes = nodeCacheManager.getBridgeNodes();
         if (lbConfigList == null) {
             logger.debug("Neutron LB configuration invalid for pool {} ", neutronLBPool.getLoadBalancerPoolID());
         } else if (lbConfigList.size() == 0) {

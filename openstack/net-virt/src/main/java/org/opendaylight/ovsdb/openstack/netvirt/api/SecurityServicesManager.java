@@ -10,7 +10,7 @@
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
 import org.opendaylight.neutron.spi.NeutronSecurityGroup;
-import org.opendaylight.ovsdb.schema.openvswitch.Interface;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.*;
 
 /**
  * Open vSwitch isolates Tenant Networks using VLANs on the Integration Bridge
@@ -23,13 +23,13 @@ public interface SecurityServicesManager {
      * @param intf the intf
      * @return the boolean
      */
-    public boolean isPortSecurityReady(Interface intf);
+    public boolean isPortSecurityReady(OvsdbTerminationPointAugmentation intf);
     /**
      * Gets security group in port.
      *
      * @param intf the intf
      * @return the security group in port
      */
-    public NeutronSecurityGroup getSecurityGroupInPort(Interface intf);
+    public NeutronSecurityGroup getSecurityGroupInPort(OvsdbTerminationPointAugmentation intf);
 
 }

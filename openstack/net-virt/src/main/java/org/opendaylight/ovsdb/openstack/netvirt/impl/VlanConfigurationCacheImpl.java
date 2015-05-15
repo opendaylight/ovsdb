@@ -1,42 +1,38 @@
 /*
- * Copyright (c) 2013 Hewlett-Packard Development Company, L.P.
+ * Copyright (c) 2013 Hewlett-Packard Development Company, L.P. and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors: Dave Tucker
 */
-
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
-import org.opendaylight.ovsdb.lib.notation.Row;
-import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.NodeConfiguration;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
-import org.opendaylight.ovsdb.schema.openvswitch.Interface;
-import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
-import org.opendaylight.ovsdb.schema.openvswitch.Port;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-import java.util.Set;
-
+/**
+ * @author Dave Tucker
+ * @author Sam Hague
+ */
 public class VlanConfigurationCacheImpl implements VlanConfigurationCache {
     static final Logger logger = LoggerFactory.getLogger(VlanConfigurationCacheImpl.class);
-
     private Map<String, NodeConfiguration> configurationCache = Maps.newConcurrentMap();
-
     private volatile TenantNetworkManager tenantNetworkManager;
-    private volatile OvsdbConfigurationService ovsdbConfigurationService;
+
+    void init() {
+        logger.info(">>>>>> init {}", this.getClass());
+    }
 
     private NodeConfiguration getNodeConfiguration(Node node){
         String nodeUuid = getNodeUUID(node);
@@ -45,88 +41,34 @@ public class VlanConfigurationCacheImpl implements VlanConfigurationCache {
         }
 
         // Cache miss
-        initializeNodeConfiguration(nodeUuid, node);
+        initializeNodeConfiguration(node, nodeUuid);
 
         return configurationCache.get(nodeUuid);
     }
 
     private String getNodeUUID(Node node) {
-        Preconditions.checkNotNull(ovsdbConfigurationService);
-        String nodeUuid = new String();
-        try {
-            Map<String, Row> ovsTable = ovsdbConfigurationService.getRows(node, ovsdbConfigurationService.getTableName(node, OpenVSwitch.class));
-            nodeUuid = (String)ovsTable.keySet().toArray()[0];
-        }
-        catch (Exception e) {
-            logger.error("Unable to get the Open_vSwitch table for Node {}", node, e);
-        }
-
-        return nodeUuid;
+        return MdsalUtils.getOvsdbNodeUUID(node);
     }
 
-    private void initializeNodeConfiguration(String nodeUuid, Node node) {
-
+    private void initializeNodeConfiguration(Node node, String nodeUuid) {
         NodeConfiguration nodeConfiguration = new NodeConfiguration();
-        Integer vlan;
+        Integer vlan = 0;
         String networkId = null;
-
-        try {
-            Map<String, Row> portRows = ovsdbConfigurationService.getRows(node, ovsdbConfigurationService.getTableName(node, Port.class));
-
-            if (portRows == null){
-                logger.debug("Port table is null for Node {}", node);
-                return;
+        List<OvsdbTerminationPointAugmentation> ports = MdsalUtils.getTerminationPointsOfBridge(node);
+        for (OvsdbTerminationPointAugmentation port : ports) {
+            vlan = port.getVlanTag().getValue();
+            networkId = tenantNetworkManager.getTenantNetwork(port).getNetworkUUID();
+            if (vlan != 0 && networkId != null) {
+                internalVlanInUse(nodeConfiguration, vlan);
+                nodeConfiguration.getTenantVlanMap().put(networkId, vlan);
+            } else {
+                logger.debug("Node: {} initialized without a vlan", node);
             }
-
-            for (Row row : portRows.values()) {
-                Port port = ovsdbConfigurationService.getTypedRow(node, Port.class, row);
-
-                if (port.getTagColumn() == null) continue;
-                Set<Long> tags = port.getTagColumn().getData();
-                if (tags.size() == 1)
-                {
-                    //There is only one tag here
-                    vlan = tags.iterator().next().intValue();
-                }
-                else {
-                   logger.debug("This port ({}) has {} tags", port.getName(), tags.size());
-                   continue;
-                }
-
-                for (UUID ifaceId : port.getInterfacesColumn().getData()) {
-                    Row ifaceRow = ovsdbConfigurationService
-                            .getRow(node, ovsdbConfigurationService.getTableName(node, Interface.class),
-                                    ifaceId.toString());
-                    Interface iface = ovsdbConfigurationService.getTypedRow(node, Interface.class, ifaceRow);
-
-                    if (iface == null) {
-                        logger.debug("Interface table is null");
-                        continue;
-                    }
-
-                    networkId = tenantNetworkManager.getTenantNetwork(iface).getNetworkUUID();
-
-                    if (networkId != null) break;
-                }
-
-                if (vlan != 0 && networkId != null) {
-
-                    this.internalVlanInUse(nodeConfiguration, vlan);
-                    nodeConfiguration.getTenantVlanMap().put(networkId, vlan);
-
-                } else {
-                    logger.debug("Node: {} initialized without a vlan", node);
-                }
-            }
-
-            configurationCache.put(nodeUuid, nodeConfiguration);
         }
-        catch (Exception e) {
-            logger.debug("Error getting Port table for Node {}", node, e);
-        }
+        configurationCache.put(nodeUuid, nodeConfiguration);
     }
 
-    /*
+    /**
      * Return the currently mapped internal vlan or get the next
      * free internal vlan from the available pool and map it to the networkId.
      */
@@ -144,11 +86,11 @@ public class VlanConfigurationCacheImpl implements VlanConfigurationCache {
         return mappedVlan;
     }
 
-    /*
+    /**
      * Return the mapped internal vlan to the available pool.
      */
     @Override
-    public Integer reclaimInternalVlan (Node node, String networkId) {
+    public Integer reclaimInternalVlan(Node node, String networkId) {
         NodeConfiguration nodeConfiguration = getNodeConfiguration(node);
         Integer mappedVlan = nodeConfiguration.getTenantVlanMap().get(networkId);
         if (mappedVlan != null) {
@@ -159,16 +101,14 @@ public class VlanConfigurationCacheImpl implements VlanConfigurationCache {
         return 0;
     }
 
-    private void internalVlanInUse (NodeConfiguration nodeConfiguration, Integer vlan) {
+    private void internalVlanInUse(NodeConfiguration nodeConfiguration, Integer vlan) {
         nodeConfiguration.getInternalVlans().remove(vlan);
     }
 
     @Override
-    public Integer getInternalVlan (Node node, String networkId) {
+    public Integer getInternalVlan(Node node, String networkId) {
         NodeConfiguration nodeConfiguration = getNodeConfiguration(node);
         Integer vlan = nodeConfiguration.getTenantVlanMap().get(networkId);
-        if (vlan == null) return 0;
-        return vlan;
+        return vlan == null ? 0 : vlan;
     }
-
 }

@@ -103,7 +103,7 @@ public class IngressAclServiceTest {
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(1);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn(HOST_ADDRESS);
 
-        ingressAclServiceSpy.programPortSecurityACL(mock(Node.class), Long.valueOf(1554), SEGMENTATION_ID, MAC_ADDRESS, 124, securityGroup);
+        ingressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), SEGMENTATION_ID, MAC_ADDRESS, 124, securityGroup);
         verify(ingressAclServiceSpy, times(1)).ingressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
         verify(ingressAclServiceSpy, times(1)).ingressACLTcpPortWithPrefix(anyLong(), anyString(), anyString(), anyBoolean(), anyInt(), anyString(), anyInt());
         verify(readWriteTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
@@ -122,7 +122,7 @@ public class IngressAclServiceTest {
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(1);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn(HOST_ADDRESS);
 
-        ingressAclServiceSpy.programPortSecurityACL(mock(Node.class), Long.valueOf(1554), SEGMENTATION_ID, MAC_ADDRESS, 124, securityGroup);
+        ingressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), SEGMENTATION_ID, MAC_ADDRESS, 124, securityGroup);
         verify(ingressAclServiceSpy, times(1)).ingressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
         verify(ingressAclServiceSpy, times(1)).ingressACLTcpPortWithPrefix(anyLong(), anyString(), anyString(), anyBoolean(), anyInt(), anyString(), anyInt());
         verify(readWriteTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
@@ -140,7 +140,7 @@ public class IngressAclServiceTest {
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(null);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn(HOST_ADDRESS);
 
-        ingressAclServiceSpy.programPortSecurityACL(mock(Node.class), Long.valueOf(1554), SEGMENTATION_ID, MAC_ADDRESS, 124, securityGroup);
+        ingressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), SEGMENTATION_ID, MAC_ADDRESS, 124, securityGroup);
         verify(ingressAclServiceSpy, times(1)).ingressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
         verify(ingressAclServiceSpy, times(1)).ingressACLPermitAllProto(anyLong(), anyString(), anyString(), anyBoolean(), anyString(), anyInt());
         verify(readWriteTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
@@ -158,7 +158,7 @@ public class IngressAclServiceTest {
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(null);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn(HOST_ADDRESS);
 
-        ingressAclServiceSpy.programPortSecurityACL(mock(Node.class), Long.valueOf(1554), SEGMENTATION_ID, MAC_ADDRESS, 124, securityGroup);
+        ingressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), SEGMENTATION_ID, MAC_ADDRESS, 124, securityGroup);
         verify(ingressAclServiceSpy, times(1)).ingressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
         verify(ingressAclServiceSpy, times(1)).ingressACLPermitAllProto(anyLong(), anyString(), anyString(), anyBoolean(), anyString(), anyInt());
         verify(readWriteTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
@@ -176,7 +176,7 @@ public class IngressAclServiceTest {
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(1);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn(null);
 
-        ingressAclServiceSpy.programPortSecurityACL(mock(Node.class), Long.valueOf(1554), SEGMENTATION_ID, MAC_ADDRESS, 124, securityGroup);
+        ingressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), SEGMENTATION_ID, MAC_ADDRESS, 124, securityGroup);
         verify(ingressAclServiceSpy, times(1)).ingressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
         verify(ingressAclServiceSpy, times(1)).ingressACLTcpSyn(anyLong(), anyString(), anyString(), anyBoolean(), anyInt(), anyInt());
         verify(readWriteTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
@@ -194,7 +194,7 @@ public class IngressAclServiceTest {
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(1);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn(null);
 
-        ingressAclServiceSpy.programPortSecurityACL(mock(Node.class), Long.valueOf(1554), SEGMENTATION_ID, MAC_ADDRESS, 124, securityGroup);
+        ingressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), SEGMENTATION_ID, MAC_ADDRESS, 124, securityGroup);
         verify(ingressAclServiceSpy, times(1)).ingressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
         verify(ingressAclServiceSpy, times(1)).ingressACLTcpSyn(anyLong(), anyString(), anyString(), anyBoolean(), anyInt(), anyInt());
         verify(readWriteTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
@@ -212,7 +212,7 @@ public class IngressAclServiceTest {
         when(portSecurityRule.getSecurityRulePortMin()).thenReturn(null);
         when(portSecurityRule.getSecurityRuleRemoteIpPrefix()).thenReturn(null);
 
-        ingressAclServiceSpy.programPortSecurityACL(mock(Node.class), Long.valueOf(1554), SEGMENTATION_ID, MAC_ADDRESS, 124, securityGroup);
+        ingressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), SEGMENTATION_ID, MAC_ADDRESS, 124, securityGroup);
         verify(ingressAclServiceSpy, times(1)).handleIngressAllowProto(anyLong(), anyString(), anyString(), anyBoolean(), anyString(), anyInt());
         verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
         verify(readWriteTransaction, times(1)).submit();

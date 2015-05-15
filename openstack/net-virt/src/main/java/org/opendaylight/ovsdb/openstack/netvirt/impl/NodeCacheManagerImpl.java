@@ -1,64 +1,87 @@
 /*
- * Copyright (C) 2015 Red Hat, Inc.
+ * Copyright (c) 2015 Red Hat, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- *  Authors : Flavio Fernandes
  */
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent;
 import org.opendaylight.ovsdb.openstack.netvirt.AbstractHandler;
+import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.NodeCacheManagerEvent;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
-import org.opendaylight.ovsdb.utils.mdsal.node.NodeUtils;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Map;
-
-public class NodeCacheManagerImpl extends AbstractHandler
-        implements NodeCacheManager {
+/**
+ * @author Flavio Fernandes (ffernand@redhat.com)
+ * @author Sam Hague (shague@redhat.com)
+ */
+public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheManager {
 
     private static final Logger logger = LoggerFactory.getLogger(NodeCacheManagerImpl.class);
-    private List<Node> nodeCache = Lists.newArrayList();
+    private final Object nodeCacheLock = new Object();
+    private Map<NodeId, Node> nodeCache = new ConcurrentHashMap<>();
     private Map<Long, NodeCacheListener> handlers = Maps.newHashMap();
 
-    @Override
-    public void nodeAdded(String nodeIdentifier) {
-        logger.debug(">>>>> enqueue: Node added : {}", nodeIdentifier);
-        enqueueEvent(new NodeCacheManagerEvent(nodeIdentifier, Action.ADD));
-    }
-    @Override
-    public void nodeRemoved(String nodeIdentifier) {
-        logger.debug(">>>>> enqueue: Node removed : {}", nodeIdentifier);
-        enqueueEvent(new NodeCacheManagerEvent(nodeIdentifier, Action.DELETE));
-    }
-    @Override
-    public List<Node> getNodes() {
-        return nodeCache;
+    void init() {
+        logger.info(">>>>> init {}", this.getClass());
     }
 
-    private void _processNodeAdded(Node node) {
-        nodeCache.add(node);
+    @Override
+    public void nodeAdded(Node node) {
+        logger.debug("nodeAdded: {}", node);
+        enqueueEvent(new NodeCacheManagerEvent(node, Action.UPDATE));
+    }
+
+    @Override
+    public void nodeRemoved(Node node) {
+        logger.debug("nodeRemoved: {}", node);
+        enqueueEvent(new NodeCacheManagerEvent(node, Action.DELETE));
+    }
+
+    // TODO SB_MIGRATION
+    // might need to break this into two different events
+    // notifyOvsdbNode, notifyBridgeNode or just make sure the
+    // classes implementing the interface check for ovsdbNode or bridgeNode
+    private void processNodeUpdate(Node node) {
+        Action action = Action.UPDATE;
+
+        NodeId nodeId = node.getNodeId();
+        if (nodeCache.get(nodeId) == null) {
+            action = Action.ADD;
+        }
+        nodeCache.put(nodeId, node);
+
+        logger.debug("processNodeUpdate: {} Node type {} {}: {}",
+                nodeCache.size(),
+                MdsalUtils.getBridge(node) != null ? "BridgeNode" : "OvsdbNode",
+                action == Action.ADD ? "ADD" : "UPDATE",
+                node);
+
         for (NodeCacheListener handler : handlers.values()) {
             try {
-                handler.notifyNode(node, Action.ADD);
+                handler.notifyNode(node, action);
             } catch (Exception e) {
                 logger.error("Failed notifying node add event", e);
             }
         }
+        logger.warn("processNodeUpdate returns");
     }
-    private void _processNodeRemoved(Node node) {
+
+    private void processNodeRemoved(Node node) {
         nodeCache.remove(node);
         for (NodeCacheListener handler : handlers.values()) {
             try {
@@ -67,6 +90,7 @@ public class NodeCacheManagerImpl extends AbstractHandler
                 logger.error("Failed notifying node remove event", e);
             }
         }
+        logger.warn("processNodeRemoved returns");
     }
 
     /**
@@ -82,15 +106,13 @@ public class NodeCacheManagerImpl extends AbstractHandler
             return;
         }
         NodeCacheManagerEvent ev = (NodeCacheManagerEvent) abstractEvent;
-        logger.debug(">>>>> dequeue: {}", ev);
+        logger.debug("NodeCacheManagerImpl: dequeue: {}", ev);
         switch (ev.getAction()) {
-            case ADD:
-                _processNodeAdded(NodeUtils.getOpenFlowNode(ev.getNodeIdentifier()));
-                break;
             case DELETE:
-                _processNodeRemoved(NodeUtils.getOpenFlowNode(ev.getNodeIdentifier()));
+                processNodeRemoved(ev.getNode());
                 break;
             case UPDATE:
+                processNodeUpdate(ev.getNode());
                 break;
             default:
                 logger.warn("Unable to process event action " + ev.getAction());
@@ -108,5 +130,36 @@ public class NodeCacheManagerImpl extends AbstractHandler
         Long pid = (Long) ref.getProperty(org.osgi.framework.Constants.SERVICE_ID);
         handlers.remove(pid);
         logger.debug("Node cache listener unregistered, pid {}", pid);
+    }
+
+    @Override
+    public Map<NodeId,Node> getOvsdbNodes() {
+        Map<NodeId,Node> ovsdbNodesMap = new ConcurrentHashMap<NodeId,Node>();
+        for (Map.Entry<NodeId, Node> ovsdbNodeEntry : nodeCache.entrySet()) {
+            if (MdsalUtils.extractOvsdbNode(ovsdbNodeEntry.getValue()) != null) {
+                ovsdbNodesMap.put(ovsdbNodeEntry.getKey(), ovsdbNodeEntry.getValue());
+            }
+        }
+        return ovsdbNodesMap;
+    }
+
+    @Override
+    public List<Node> getBridgeNodes() {
+        List<Node> nodes = Lists.newArrayList();
+        for (Node node : nodeCache.values()) {
+            if (MdsalUtils.getBridge(node) != null) {
+                nodes.add(node);
+            }
+        }
+        return nodes;
+    }
+
+    @Override
+    public List<Node> getNodes() {
+        List<Node> nodes = Lists.newArrayList();
+        for (Node node : nodeCache.values()) {
+            nodes.add(node);
+        }
+        return nodes;
     }
 }

@@ -19,5 +19,4 @@ public interface MdsalConsumer {
     public ConsumerContext getConsumerContext();
     public DataBroker getDataBroker();
     public NotificationProviderService getNotificationService();
-    public void notifyFlowCapableNodeCreateEvent(String openFlowId, Action action);
 }

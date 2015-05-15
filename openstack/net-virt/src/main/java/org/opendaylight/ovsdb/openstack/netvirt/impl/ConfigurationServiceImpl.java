@@ -9,28 +9,24 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
+import com.google.common.collect.Maps;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.opendaylight.ovsdb.lib.notation.Row;
+import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
-import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Maps;
-
 public class ConfigurationServiceImpl implements ConfigurationService {
     static final Logger logger = LoggerFactory.getLogger(ConfigurationServiceImpl.class);
-
-    private volatile OvsdbConfigurationService ovsdbConfigurationService;
 
     private String integrationBridgeName;
     private String networkBridgeName;
@@ -40,6 +36,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private Map<Pair<String, String>, String> patchPortNames = Maps.newHashMap();
     private String providerMappingsKey;
     private String providerMapping;
+
+    void init() {
+        logger.info(">>>>>> init {}", this.getClass());
+    }
 
     public ConfigurationServiceImpl() {
         tunnelEndpointKey = Constants.TUNNEL_ENDPOINT_KEY;
@@ -132,40 +132,15 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @Override
     public InetAddress getTunnelEndPoint(Node node) {
         InetAddress address = null;
-        try {
-            Map<String, Row> ovsTable = ovsdbConfigurationService.getRows(node,
-                    ovsdbConfigurationService.getTableName(node, OpenVSwitch.class));
-
-            if (ovsTable == null) {
-                logger.error("OpenVSwitch table is null for Node {} ", node);
-                return null;
-            }
-
-            // While there is only one entry in the HashMap, we can't access it by index...
-            for (Row row : ovsTable.values()) {
-                OpenVSwitch ovsRow = ovsdbConfigurationService.getTypedRow(node, OpenVSwitch.class, row);
-                Map<String, String> configs = ovsRow.getOtherConfigColumn().getData();
-
-                if (configs == null) {
-                    logger.debug("OpenVSwitch table is null for Node {} ", node);
-                    continue;
-                }
-
-                String tunnelEndpoint = configs.get(tunnelEndpointKey);
-
-                if (tunnelEndpoint == null) {
-                    continue;
-                }
-
+        String tunnelEndpoint = MdsalUtils.getOtherConfig(node, OvsdbTables.OPENVSWITCH, tunnelEndpointKey);
+        if (tunnelEndpoint != null) {
+            try {
                 address = InetAddress.getByName(tunnelEndpoint);
-                logger.debug("Tunnel Endpoint for Node {} {}", node, address.getHostAddress());
-                break;
+            } catch (UnknownHostException e) {
+                logger.error("Error populating Tunnel Endpoint for Node {} ", node, e);
             }
+            logger.debug("Tunnel Endpoint for Node {} {}", node, address.getHostAddress());
         }
-        catch (Exception e) {
-            logger.error("Error populating Tunnel Endpoint for Node {} ", node, e);
-        }
-
         return address;
     }
 
@@ -176,10 +151,14 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     @Override
     public String getDefaultGatewayMacAddress(Node node) {
-        final String l3gatewayForNode =
-            node != null ?
-            ConfigProperties.getProperty(this.getClass(), "ovsdb.l3gateway.mac." + node.getId().getValue()) : null;
-        return l3gatewayForNode != null ?
-               l3gatewayForNode : ConfigProperties.getProperty(this.getClass(), "ovsdb.l3gateway.mac");
+        String l3gatewayForNode = null;
+        if (node != null) {
+            l3gatewayForNode = ConfigProperties.getProperty(this.getClass(),
+                    "ovsdb.l3gateway.mac." + node.getNodeId().getValue());
+            if (l3gatewayForNode == null) {
+                l3gatewayForNode = ConfigProperties.getProperty(this.getClass(), "ovsdb.l3gateway.mac");
+            }
+        }
+        return l3gatewayForNode;
     }
 }

@@ -12,11 +12,10 @@ package org.opendaylight.ovsdb.openstack.netvirt.impl;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +29,10 @@ public class ProviderNetworkManagerImpl implements NetworkingProviderManager {
     static final Logger logger = LoggerFactory.getLogger(ProviderNetworkManagerImpl.class);
     private HashMap<Long, ProviderEntry> providers = Maps.newHashMap();
     private HashMap<Node, NetworkingProvider> nodeToProviderMapping = Maps.newHashMap();
+
+    public void init() {
+        logger.info(">>>>>> init ProviderNetworkManagerImpl");
+    }
 
     @Override
     public NetworkingProvider getProvider(Node node) {
@@ -61,11 +64,14 @@ public class ProviderNetworkManagerImpl implements NetworkingProviderManager {
     public void providerAdded(final ServiceReference ref, final NetworkingProvider provider){
         Map <String, String> properties = Maps.newHashMap();
         Long pid = (Long) ref.getProperty(org.osgi.framework.Constants.SERVICE_ID);
-        properties.put(Constants.SOUTHBOUND_PROTOCOL_PROPERTY, (String) ref.getProperty(Constants.SOUTHBOUND_PROTOCOL_PROPERTY));
-        properties.put(Constants.OPENFLOW_VERSION_PROPERTY, (String) ref.getProperty(Constants.OPENFLOW_VERSION_PROPERTY));
+        properties.put(Constants.SOUTHBOUND_PROTOCOL_PROPERTY,
+                (String) ref.getProperty(Constants.SOUTHBOUND_PROTOCOL_PROPERTY));
+        properties.put(Constants.OPENFLOW_VERSION_PROPERTY,
+                (String) ref.getProperty(Constants.OPENFLOW_VERSION_PROPERTY));
         properties.put(Constants.PROVIDER_TYPE_PROPERTY, (String) ref.getProperty(Constants.PROVIDER_TYPE_PROPERTY));
         providers.put(pid, new ProviderEntry(provider, properties));
-        logger.info("Neutron Networking Provider Registered: {}, with {} and pid={}", provider.getClass().getName(), properties.toString(), pid);
+        logger.info("Neutron Networking Provider Registered: {}, with {} and pid={}",
+                provider.getClass().getName(), properties.toString(), pid);
     }
 
     public void providerRemoved(final ServiceReference ref){

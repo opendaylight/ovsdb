@@ -11,40 +11,26 @@ package org.opendaylight.ovsdb.openstack.netvirt;
 
 import org.opendaylight.neutron.spi.INeutronPortAware;
 import org.opendaylight.neutron.spi.NeutronPort;
-import org.opendaylight.ovsdb.lib.notation.Row;
-import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
-import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
-import org.opendaylight.ovsdb.schema.openvswitch.Interface;
-import org.opendaylight.ovsdb.schema.openvswitch.Port;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.HttpURLConnection;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * Handle requests for Neutron Port.
  */
-public class PortHandler extends AbstractHandler
-                         implements INeutronPortAware {
-
-    /**
-     * Logger instance.
-     */
+public class PortHandler extends AbstractHandler implements INeutronPortAware {
     static final Logger logger = LoggerFactory.getLogger(PortHandler.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
-    private volatile OvsdbConfigurationService ovsdbConfigurationService;
-    private volatile OvsdbConnectionService connectionService;
+    private volatile NodeCacheManager nodeCacheManager;
     private volatile NeutronL3Adapter neutronL3Adapter;
 
     /**
@@ -130,43 +116,18 @@ public class PortHandler extends AbstractHandler
     private void doNeutronPortDeleted(NeutronPort neutronPort) {
         logger.debug("Handling neutron delete port " + neutronPort);
         neutronL3Adapter.handleNeutronPortEvent(neutronPort, Action.DELETE);
-
-        List<Node> nodes = connectionService.getNodes();
+        //TODO: Need to implement getNodes
+        List<Node> nodes = nodeCacheManager.getNodes();
         for (Node node : nodes) {
             try {
-                ConcurrentMap<String, Row> portRows =
-                        this.ovsdbConfigurationService.getRows(node,
-                                                        ovsdbConfigurationService.getTableName(node, Port.class));
-                if (portRows != null) {
-                    for (Row portRow : portRows.values()) {
-                        Port port = ovsdbConfigurationService.getTypedRow(node, Port.class, portRow);
-                        for (UUID interfaceUuid : port.getInterfacesColumn().getData()) {
-                            Row ifaceRow = ovsdbConfigurationService
-                                    .getRow(node,
-                                            ovsdbConfigurationService.getTableName(node, Interface.class),
-                                            interfaceUuid.toString());
-                            Interface iface = ovsdbConfigurationService.getTypedRow(node, Interface.class, ifaceRow);
-                            Map<String, String> externalIds = iface.getExternalIdsColumn().getData();
-
-                            if (externalIds == null) {
-                                logger.trace("No external_ids seen in {}", iface.getName());
-                                continue;
-                            }
-
-                            /* Compare Neutron port uuid */
-                            String neutronPortId = externalIds.get(Constants.EXTERNAL_ID_INTERFACE_ID);
-                            if (neutronPortId == null) {
-                                continue;
-                            }
-
-                            if (neutronPortId.equalsIgnoreCase(neutronPort.getPortUUID())) {
-                                logger.trace("neutronPortDeleted: Delete interface {}", iface.getName());
-                                ovsdbConfigurationService.deleteRow(node,
-                                                             ovsdbConfigurationService.getTableName(node, Port.class),
-                                                             port.getUuid().toString());
-                                break;
-                            }
-                        }
+                List<OvsdbTerminationPointAugmentation> ports = MdsalUtils.getTerminationPointsOfBridge(node);
+                for (OvsdbTerminationPointAugmentation port : ports) {
+                    String neutronPortId =
+                            MdsalUtils.getInterfaceExternalIdsValue(port, Constants.EXTERNAL_ID_INTERFACE_ID);
+                    if (neutronPortId != null && neutronPortId.equalsIgnoreCase(neutronPort.getPortUUID())) {
+                        logger.trace("neutronPortDeleted: Delete interface {}", port.getName());
+                        MdsalUtils.deleteTerminationPoint(node, port.getName());
+                        break;
                     }
                 }
             } catch (Exception e) {
@@ -177,7 +138,6 @@ public class PortHandler extends AbstractHandler
                      " network-id - {}, port-id - {}",
                      neutronPort.getTenantID(), neutronPort.getNetworkUUID(),
                      neutronPort.getID());
-
     }
 
     /**

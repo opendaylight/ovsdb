@@ -324,6 +324,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
             Bridge bridge) {
         Map<UUID, Controller> updatedControllerRows =
                 TyperUtils.extractRowsUpdated(Controller.class, getUpdates(), getDbSchema());
+        LOG.debug("setOpenFlowNodeRef: updatedControllerRows: {}", updatedControllerRows);
         for (ControllerEntry controllerEntry: SouthboundMapper.createControllerEntries(bridge, updatedControllerRows)) {
             if (controllerEntry != null
                 && controllerEntry.isIsConnected() != null && controllerEntry.isIsConnected()) {

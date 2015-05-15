@@ -9,23 +9,14 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
-import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
-import org.opendaylight.ovsdb.utils.mdsal.node.StringConvertor;
+import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
@@ -41,17 +32,20 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.CheckedFuture;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Any ServiceInstance class that extends AbstractServiceInstance to be a part of the pipeline
@@ -68,47 +62,25 @@ public abstract class AbstractServiceInstance {
     // OSGi Services that we are dependent on.
     private volatile MdsalConsumer mdsalConsumer;
     private volatile PipelineOrchestrator orchestrator;
-    private volatile OvsdbConfigurationService ovsdbConfigService;
-    private volatile OvsdbConnectionService connectionService;
 
-    // Concrete Service that this AbstractServiceInstance represent
+    // Concrete Service that this AbstractServiceInstance represents
     private Service service;
 
     public AbstractServiceInstance (Service service) {
         this.service = service;
     }
 
-    public boolean isBridgeInPipeline (String nodeId){
-        String bridgeName = getBridgeName(nodeId.split(":")[1]);
-        logger.debug("isBridgeInPipeline: nodeId {} bridgeName {}", nodeId, bridgeName);
-        if (bridgeName != null && Constants.INTEGRATION_BRIDGE.equalsIgnoreCase(bridgeName)) {
+    void init() {
+        logger.info(">>>>> init service: {}", this.getClass());
+    }
+
+    public boolean isBridgeInPipeline (Node node){
+        String bridgeName = MdsalUtils.getBridgeName(node);
+        //logger.trace("isBridgeInPipeline: node {} bridgeName {}", node, bridgeName);
+        if (bridgeName != null && Constants.INTEGRATION_BRIDGE.equals(bridgeName)) {
             return true;
         }
         return false;
-    }
-
-    private String getBridgeName(String nodeId){
-        List<Node> ovsNodes = connectionService.getNodes();
-
-        for (Node ovsNode : ovsNodes) {
-            Map<String, Row> bridges = ovsdbConfigService.getRows(ovsNode, ovsdbConfigService.getTableName(ovsNode, Bridge.class));
-            if (bridges == null) continue;
-            for (String brUuid : bridges.keySet()) {
-                Bridge bridge = ovsdbConfigService.getTypedRow(ovsNode, Bridge.class, bridges.get(brUuid));
-
-                Set<String> dpids = bridge.getDatapathIdColumn().getData();
-                if (dpids == null || dpids.size() == 0) return null;
-                Long dpid = StringConvertor.dpidStringToLong((String) dpids.toArray()[0]);
-                logger.debug("getBridgeName: bridgeDpid {} ofNodeDpid {}", bridge.getDatapathIdColumn().getData().toArray()[0], nodeId);
-                if (dpid.equals(Long.parseLong(nodeId))){
-                    // Found the bridge
-                    logger.debug("getOvsNode: found ovsNode {} bridge {} for ofNode {}",
-                            ovsNode.getId().getValue(), bridge.getName(), nodeId);
-                    return bridge.getName();
-                }
-            }
-        }
-        return null;
     }
 
     public short getTable() {
@@ -132,18 +104,23 @@ public abstract class AbstractServiceInstance {
 
     private static final InstanceIdentifier<Flow> createFlowPath(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
         return InstanceIdentifier.builder(Nodes.class)
-                .child(Node.class, nodeBuilder.getKey())
+                .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class,
+                        nodeBuilder.getKey())
                 .augmentation(FlowCapableNode.class)
                 .child(Table.class, new TableKey(flowBuilder.getTableId()))
                 .child(Flow.class, flowBuilder.getKey()).build();
     }
 
-    private static final InstanceIdentifier<Node> createNodePath(NodeBuilder nodeBuilder) {
-        return InstanceIdentifier.builder(Nodes.class).child(Node.class, nodeBuilder.getKey()).build();
+    private static final
+    InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node>
+    createNodePath(NodeBuilder nodeBuilder) {
+        return InstanceIdentifier.builder(Nodes.class)
+                .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class,
+                        nodeBuilder.getKey()).build();
     }
 
     /**
-     * This method returns the required Pipeline Instructions to by used by any matching flows that needs
+     * This method returns the required Pipeline Instructions to by used by any matching flows that need
      * to be further processed by next service in the pipeline.
      *
      * Important to note that this is a convenience method which returns a mutable instructionBuilder which
@@ -161,6 +138,8 @@ public abstract class AbstractServiceInstance {
 
     protected void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
         Preconditions.checkNotNull(mdsalConsumer);
+        logger.debug("writeFlow: flowBuilder: {}, nodeBuilder: {}",
+                flowBuilder.build(), nodeBuilder.build());
         if (mdsalConsumer == null) {
             logger.error("ERROR finding MDSAL Service. Its possible that writeFlow is called too soon ?");
             return;
@@ -208,7 +187,7 @@ public abstract class AbstractServiceInstance {
         CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
         try {
             commitFuture.get();  // TODO: Make it async (See bug 1362)
-            logger.debug("Transaction success for deletion of Flow "+flowBuilder.getFlowName());
+            logger.debug("Transaction success for deletion of Flow " + flowBuilder.getFlowName());
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             modification.cancel();
@@ -243,19 +222,34 @@ public abstract class AbstractServiceInstance {
         return null;
     }
 
+    private Long getDpid(Node node) {
+        Long dpid = 0L;
+        dpid = MdsalUtils.getDataPathId(node);
+        if (dpid == 0) {
+            logger.warn("getDpid: dpid not found: {}", node);
+        }
+        return dpid;
+    }
+
     /**
      * Program Default Pipeline Flow.
      *
      * @param nodeId Node on which the default pipeline flow is programmed.
      */
-    protected void programDefaultPipelineRule(String nodeId) {
-        if (!isBridgeInPipeline(nodeId)) {
-            logger.debug("Bridge {} is not in pipeline", nodeId);
+    protected void programDefaultPipelineRule(Node node) {
+        if (!isBridgeInPipeline(node)) {
+            //logger.trace("Bridge is not in pipeline {} ", node);
             return;
         }
         MatchBuilder matchBuilder = new MatchBuilder();
         FlowBuilder flowBuilder = new FlowBuilder();
-        NodeBuilder nodeBuilder = createNodeBuilder(nodeId);
+        Long dpid = getDpid(node);
+        if (dpid == 0L) {
+            logger.info("could not find dpid: {}", node.getNodeId());
+            return;
+        }
+        String nodeName = OPENFLOW + getDpid(node);
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
 
         // Create the OF Actions and Instructions
         InstructionsBuilder isb = new InstructionsBuilder();

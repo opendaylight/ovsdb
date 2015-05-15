@@ -325,6 +325,7 @@ public class SouthboundMapper {
                         .setControllerUuid(uuid).build());
             }
         }
+        LOG.debug("controllerEntries: {}", controllerEntries.toString());
         return controllerEntries;
     }
 

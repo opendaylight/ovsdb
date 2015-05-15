@@ -11,9 +11,8 @@
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
 import org.opendaylight.neutron.spi.NeutronNetwork;
-import org.opendaylight.ovsdb.plugin.api.Status;
-import org.opendaylight.ovsdb.schema.openvswitch.Interface;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 /**
  * The NetworkingProvider interface is implemented by Neutron Networking Providers
@@ -38,17 +37,13 @@ public interface NetworkingProvider {
     /**
      * Handle Interface Update Callback Method
      */
-    public Status handleInterfaceUpdate(String tunnelType, String tunnelKey);
-
-    /**
-     * Handle Interface Update Callback Method
-     */
-    public Status handleInterfaceUpdate(NeutronNetwork network, Node source, Interface intf);
+    public boolean handleInterfaceUpdate(NeutronNetwork network, Node source, OvsdbTerminationPointAugmentation intf);
 
     /**
      * Handle Interface Delete Callback Method
      */
-    public Status handleInterfaceDelete(String tunnelType, NeutronNetwork network, Node source, Interface intf, boolean isLastInstanceOnNode);
+    public boolean handleInterfaceDelete(String tunnelType, NeutronNetwork network, Node source,
+                                         OvsdbTerminationPointAugmentation intf, boolean isLastInstanceOnNode);
 
     /**
      * Initialize the Flow rules given the OVSDB node.
@@ -62,11 +57,4 @@ public interface NetworkingProvider {
      * Initialize the Flow rules for a given OpenFlow node
      */
     public void initializeOFFlowRules(Node openflowNode);
-
-    /**
-     * Generate event to announce flow capable node.
-     * @param dpid the data path id of the node
-     * @param action the type of update for the given dpid
-     */
-    public void notifyFlowCapableNodeEvent(Long dpid, Action action);
 }

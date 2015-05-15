@@ -29,12 +29,9 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
+import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.MdsalConsumer;
-import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestrator;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
-import org.opendaylight.ovsdb.plugin.api.Status;
-import org.opendaylight.ovsdb.plugin.api.StatusCode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
@@ -74,14 +71,14 @@ public class ArpResponderServiceTest {
         when(mdsalConsumer.getDataBroker()).thenReturn(dataBroker);
 
         // test for Action.ADD
-        assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.SUCCESS), arpResponderService.programStaticArpEntry(mock(Node.class), Long.valueOf(12), "2", MAC_ADDRESS, ipAddress, Action.ADD));
+        assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.SUCCESS), arpResponderService.programStaticArpEntry(Long.valueOf(12), "2", MAC_ADDRESS, ipAddress, Action.ADD));
 
         verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
         verify(readWriteTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         // test other Action, here Action.DELETE
-        assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.SUCCESS), arpResponderService.programStaticArpEntry(mock(Node.class), Long.valueOf(12), "2", MAC_ADDRESS, ipAddress, Action.DELETE));
+        assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.SUCCESS), arpResponderService.programStaticArpEntry(Long.valueOf(12), "2", MAC_ADDRESS, ipAddress, Action.DELETE));
 
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
         verify(commitFuture, times(2)).get(); // 1 + 1 above

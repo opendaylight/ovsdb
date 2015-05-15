@@ -53,6 +53,22 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>mockito-all</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-binding-it</artifactId>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.ops4j.pax.exam</groupId>
+          <artifactId>pax-exam-container-native</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-binding-broker-impl</artifactId>
+      <scope>test</scope>
+    </dependency>
 
     <!-- Cache surefire in Maven Local repo for offline builds -->
     <dependency>
@@ -97,6 +113,18 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     </pluginManagement>
     <plugins>
       <plugin>
+        <groupId>org.ops4j.pax.exam</groupId>
+        <artifactId>maven-paxexam-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>generate-config</id>
+            <goals>
+              <goal>generate-depends-file</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.apache.servicemix.tooling</groupId>
         <artifactId>depends-maven-plugin</artifactId>
         <version>1.2</version>
@@ -134,7 +162,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
               <parallel>none</parallel>
               <threadCount>1</threadCount>
               <excludes>
-                <exclude>**/NetVirtIT.java</exclude>
+                <exclude>**/NetVirtIT.java,**/NeutronIT.java</exclude>
               </excludes>
             </configuration>
           </execution>

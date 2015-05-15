@@ -9,40 +9,56 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt;
 
-import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 
 public class SouthboundEvent extends AbstractEvent {
-    public enum Type { NODE, ROW }
+    public enum Type { NODE, OPENVSWITCH, BRIDGE, CONTROLLER, PORT }
     private Type type;
     private Node node;
     private String tableName;
     private String uuid;
-    private Row row;
     private Object context;
+    private DataObject augmentationData;
+    private OvsdbBridgeAugmentation bridge;
+    private OvsdbTerminationPointAugmentation port;
+    private String portName;
     public SouthboundEvent(Node node, Action action) {
         super(HandlerType.SOUTHBOUND, action);
         this.type = Type.NODE;
         this.node = node;
     }
-    public SouthboundEvent(Node node, String tableName, String uuid, Row row, Action action) {
+    public SouthboundEvent(Node node, OvsdbBridgeAugmentation bridge, Action action) {
         super(HandlerType.SOUTHBOUND, action);
-        this.type = Type.ROW;
+        this.type = Type.BRIDGE;
         this.node = node;
-        this.tableName = tableName;
-        this.uuid = uuid;
-        this.row = row;
+        this.bridge = bridge;
     }
-    public SouthboundEvent(Node node, String tableName, String uuid, Row row, Object context, Action action) {
+    public SouthboundEvent(Node node, OvsdbTerminationPointAugmentation port, String portName, Action action) {
         super(HandlerType.SOUTHBOUND, action);
-        this.type = Type.ROW;
+        this.type = Type.PORT;
         this.node = node;
-        this.tableName = tableName;
-        this.uuid = uuid;
-        this.row = row;
-        this.context = context;
+        this.port = port;
+        this.portName = portName;
     }
+
+    public SouthboundEvent(Node node, Type type, Action action) {
+        super(HandlerType.SOUTHBOUND, action);
+        this.type = type;
+        this.node = node;
+    }
+
+    public SouthboundEvent(Node node, DataObject resourceAugmentationData, Type type, Action action) {
+        super(HandlerType.SOUTHBOUND, action);
+        this.type = type;
+        this.node = node;
+        this.augmentationData = resourceAugmentationData;
+    }
+
+
     public Type getType() {
         return type;
     }
@@ -55,29 +71,33 @@ public class SouthboundEvent extends AbstractEvent {
     public String getUuid() {
         return uuid;
     }
-    public Row getRow() {
-        return row;
-    }
     public Object getContext() {
         return context;
     }
+    public OvsdbBridgeAugmentation getBridge() {
+        return bridge;
+    }
+    public OvsdbTerminationPointAugmentation getPort() {
+        return port;
+    }
+    public String getPortName() {
+        return portName;
+    }
+
+    public DataObject getAugmentationData() {
+        return augmentationData;
+    }
+
     @Override
     public String toString() {
-        if (type == Type.NODE) {
+        //if (type == Type.NODE) {
             return "SouthboundEvent [type=" + type
                     + ", action=" + super.getAction()
+                    + ", augmentationData=" + augmentationData
                     + ", node=" + node + "]";
-        } else if (type == Type.ROW) {
-            return "SouthboundEvent [type=" + type
-                    + ", action=" + super.getAction()
-                    + ", node=" + node
-                    + ", tableName=" + tableName
-                    + ", uuid=" + uuid
-                    + ", row=" + row
-                    + ", context=" + context + "]";
-        } else {
-            return "SouthboundEvent [type=" + type + "]";
-        }
+        //} else {
+        //    return "SouthboundEvent [type=" + type + "]";
+        //}
     }
 
     @Override
@@ -88,6 +108,7 @@ public class SouthboundEvent extends AbstractEvent {
         result = prime * result + ((tableName == null) ? 0 : tableName.hashCode());
         result = prime * result + ((type == null) ? 0 : type.hashCode());
         result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+        result = prime * result + ((augmentationData == null) ? 0 : augmentationData.hashCode());
         return result;
     }
     @Override

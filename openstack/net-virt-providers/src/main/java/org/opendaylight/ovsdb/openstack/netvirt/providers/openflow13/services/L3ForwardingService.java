@@ -17,11 +17,11 @@ import java.util.List;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
+import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.OF13Provider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
-import org.opendaylight.ovsdb.plugin.api.Status;
-import org.opendaylight.ovsdb.plugin.api.StatusCode;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
@@ -49,7 +49,7 @@ public class L3ForwardingService extends AbstractServiceInstance implements L3Fo
     }
 
     @Override
-    public Status programForwardingTableEntry(Node node, Long dpid, String segmentationId, InetAddress ipAddress,
+    public Status programForwardingTableEntry(Long dpid, String segmentationId, InetAddress ipAddress,
                                               String macAddress, Action action) {
         String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpid;
 

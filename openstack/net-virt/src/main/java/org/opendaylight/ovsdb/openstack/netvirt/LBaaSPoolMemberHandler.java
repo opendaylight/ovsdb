@@ -7,7 +7,6 @@
  *
  * Authors : Srini Seetharaman
  */
-
 package org.opendaylight.ovsdb.openstack.netvirt;
 
 import org.opendaylight.neutron.spi.INeutronLoadBalancerCRUD;
@@ -23,7 +22,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +77,8 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
     private void doNeutronLoadBalancerPoolMemberCreate(NeutronLoadBalancerPoolMember neutronLBPoolMember) {
         Preconditions.checkNotNull(loadBalancerProvider);
         LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLBPoolMember);
-        final List<Node> nodes = nodeCacheManager.getNodes();
+        final List<Node> nodes =
+                nodeCacheManager.getBridgeNodes();
         if (lbConfig == null) {
             logger.debug("Neutron LB configuration invalid for member {} ", neutronLBPoolMember.getPoolMemberAddress());
         } else if (lbConfig.getVip() == null) {
@@ -129,7 +129,7 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
         Preconditions.checkNotNull(loadBalancerProvider);
 
         LoadBalancerConfiguration lbConfig = extractLBConfiguration(neutronLBPoolMember);
-        final List<Node> nodes = nodeCacheManager.getNodes();
+        final List<Node> nodes = nodeCacheManager.getBridgeNodes();
         if (lbConfig == null) {
             logger.debug("Neutron LB configuration invalid for member {} ", neutronLBPoolMember.getPoolMemberAddress());
         } else if (lbConfig.getVip() == null) {

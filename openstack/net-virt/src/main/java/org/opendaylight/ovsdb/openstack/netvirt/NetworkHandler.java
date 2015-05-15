@@ -12,26 +12,18 @@ package org.opendaylight.ovsdb.openstack.netvirt;
 import org.opendaylight.neutron.spi.INeutronNetworkAware;
 import org.opendaylight.neutron.spi.INeutronNetworkCRUD;
 import org.opendaylight.neutron.spi.NeutronNetwork;
-import org.opendaylight.ovsdb.lib.notation.Row;
-import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
-//import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService;
-import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
-//import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryListener;
-import org.opendaylight.ovsdb.schema.openvswitch.Interface;
-import org.opendaylight.ovsdb.schema.openvswitch.Port;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.HttpURLConnection;
 import java.util.List;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * Handle requests for Neutron Network.
@@ -51,11 +43,9 @@ public class NetworkHandler extends AbstractHandler
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile TenantNetworkManager tenantNetworkManager;
     private volatile BridgeConfigurationManager bridgeConfigurationManager;
-    //private volatile ConfigurationService configurationService;
-    private volatile OvsdbConfigurationService ovsdbConfigurationService;
-    private volatile OvsdbConnectionService connectionService;
+    /* TODO SB_MIGRATION */
+    private volatile NodeCacheManager nodeCacheManager;
     private volatile INeutronNetworkCRUD neutronNetworkCache;
-    //private volatile OvsdbInventoryListener ovsdbInventoryListener;
     private volatile NeutronL3Adapter neutronL3Adapter;
 
     /**
@@ -152,41 +142,19 @@ public class NetworkHandler extends AbstractHandler
             networks = neutronNetworkCache.getAllNetworks();
             if (networks.isEmpty()) {
                 logger.trace("neutronNetworkDeleted: last tenant network, delete tunnel ports...");
-                List<Node> nodes = connectionService.getNodes();
+                List<Node> nodes = nodeCacheManager.getNodes();
 
                 for (Node node : nodes) {
                     List<String> phyIfName = bridgeConfigurationManager.getAllPhysicalInterfaceNames(node);
                     try {
-                        ConcurrentMap<String, Row> ports =
-                                this.ovsdbConfigurationService.getRows(node,
-                                                                ovsdbConfigurationService.getTableName(node, Port.class));
-                        if (ports != null) {
-                            for (Row portRow : ports.values()) {
-                                Port port = ovsdbConfigurationService.getTypedRow(node, Port.class, portRow);
-                                for (UUID interfaceUuid : port.getInterfacesColumn().getData()) {
-                                    Row ifaceRow = ovsdbConfigurationService
-                                            .getRow(node,
-                                                    ovsdbConfigurationService.getTableName(node, Interface.class),
-                                                    interfaceUuid.toString());
-                                    Interface iface = ovsdbConfigurationService.getTypedRow(node, Interface.class, ifaceRow);
-                                    String interfaceType = iface.getTypeColumn().getData();
-                                    if (interfaceType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN)
-                                        || interfaceType.equalsIgnoreCase(
-                                            NetworkHandler.NETWORK_TYPE_GRE)) {
-                                        /* delete tunnel ports on this node */
-                                        logger.trace("Delete tunnel interface {}", iface.getName());
-                                        ovsdbConfigurationService.deleteRow(node,
-                                                                     ovsdbConfigurationService.getTableName(node, Port.class),
-                                                                     port.getUuid().toString());
-                                        break;
-                                    } else if (!phyIfName.isEmpty() && phyIfName.contains(iface.getName())) {
-                                        logger.trace("Delete physical interface {}", iface.getName());
-                                        ovsdbConfigurationService.deleteRow(node,
-                                                                     ovsdbConfigurationService.getTableName(node, Port.class),
-                                                                     port.getUuid().toString());
-                                        break;
-                                    }
-                                }
+                        List<OvsdbTerminationPointAugmentation> ports = MdsalUtils.getTerminationPointsOfBridge(node);
+                        for (OvsdbTerminationPointAugmentation port : ports) {
+                            if (MdsalUtils.isTunnel(port)) {
+                                logger.trace("Delete tunnel interface {}", port.getName());
+                                MdsalUtils.deleteTerminationPoint(node, port.getName());
+                            } else if (!phyIfName.isEmpty() && phyIfName.contains(port.getName())) {
+                                logger.trace("Delete physical interface {}", port.getName());
+                                MdsalUtils.deleteTerminationPoint(node, port.getName());
                             }
                         }
                     } catch (Exception e) {

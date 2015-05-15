@@ -10,9 +10,6 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
-import org.opendaylight.ovsdb.plugin.api.Status;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-
 import java.net.InetAddress;
 
 /**
@@ -20,7 +17,7 @@ import java.net.InetAddress;
  */
 public interface L3ForwardingProvider {
 
-    Status programForwardingTableEntry(Node node, Long dpid, String segmentationId, InetAddress ipAddress,
+    Status programForwardingTableEntry(Long dpid, String segmentationId, InetAddress ipAddress,
                                        String macAddress, Action action);
 
 }

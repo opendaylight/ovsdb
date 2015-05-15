@@ -18,10 +18,10 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration.LoadBalancerPoolMember;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
+import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
-import org.opendaylight.ovsdb.plugin.api.Status;
-import org.opendaylight.ovsdb.plugin.api.StatusCode;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.ActionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
@@ -40,7 +40,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
@@ -82,7 +82,8 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
      */
     @Override
     public Status programLoadBalancerPoolMemberRules(Node node,
-            LoadBalancerConfiguration lbConfig, LoadBalancerPoolMember member, org.opendaylight.ovsdb.openstack.netvirt.api.Action action) {
+                                                     LoadBalancerConfiguration lbConfig, LoadBalancerPoolMember member,
+                                                     org.opendaylight.ovsdb.openstack.netvirt.api.Action action) {
         if (lbConfig == null || member == null) {
             logger.error("Null value for LB config {} or Member {}", lbConfig, member);
             return new Status(StatusCode.BADREQUEST);
@@ -95,7 +96,7 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
                 action, member.getIP(), member.getIndex(), lbConfig.getVip(), lbConfig.getMembers().size());
 
         NodeBuilder nodeBuilder = new NodeBuilder();
-        nodeBuilder.setId(new NodeId(Constants.OPENFLOW_NODE_PREFIX + node.getId().getValue()));
+        nodeBuilder.setId(new NodeId(Constants.OPENFLOW_NODE_PREFIX + node.getNodeId().getValue()));
         nodeBuilder.setKey(new NodeKey(nodeBuilder.getId()));
 
         //Update the multipath rule
@@ -119,7 +120,8 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
      * 3. Append reverse rules for all the members, specific to the protocol/port
      */
     @Override
-    public Status programLoadBalancerRules(Node node, LoadBalancerConfiguration lbConfig, org.opendaylight.ovsdb.openstack.netvirt.api.Action action) {
+    public Status programLoadBalancerRules(Node node, LoadBalancerConfiguration lbConfig,
+                                           org.opendaylight.ovsdb.openstack.netvirt.api.Action action) {
         if (lbConfig == null) {
             logger.error("LB config is invalid: {}", lbConfig);
             return new Status(StatusCode.BADREQUEST);
@@ -131,7 +133,7 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         logger.debug("Performing {} rules for VIP {} and {} members", action, lbConfig.getVip(), lbConfig.getMembers().size());
 
         NodeBuilder nodeBuilder = new NodeBuilder();
-        nodeBuilder.setId(new NodeId(Constants.OPENFLOW_NODE_PREFIX + node.getId().getValue()));
+        nodeBuilder.setId(new NodeId(Constants.OPENFLOW_NODE_PREFIX + node.getNodeId().getValue()));
         nodeBuilder.setKey(new NodeKey(nodeBuilder.getId()));
 
         if (action.equals(org.opendaylight.ovsdb.openstack.netvirt.api.Action.ADD)) {

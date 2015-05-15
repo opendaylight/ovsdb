@@ -10,12 +10,11 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-
-import org.apache.commons.lang3.tuple.Pair;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 import java.net.InetAddress;
 import java.util.Map;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * The ConfigurationService handles the configuration of the OpenStack Neutron Integration

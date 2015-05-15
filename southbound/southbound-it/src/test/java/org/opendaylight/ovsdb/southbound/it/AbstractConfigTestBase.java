@@ -9,7 +9,6 @@ package org.opendaylight.ovsdb.southbound.it;
 
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
-//import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 
@@ -75,12 +74,12 @@ public abstract class AbstractConfigTestBase {
     }
 
     public MavenArtifactUrlReference getKarafDistro() {
-        /*MavenArtifactUrlReference karafUrl = maven()
-                .groupId("org.opendaylight.controller")
-                .artifactId("opendaylight-karaf-empty")
-                .version("1.5.0-SNAPSHOT")
-                .type("zip");*/
-        MavenArtifactUrlReference karafUrl = maven()
+        MavenArtifactUrlReference karafUrl;
+        karafUrl = maven()
+                // karaf-empty is busted
+                //.groupId("org.opendaylight.controller")
+                //.artifactId("opendaylight-karaf-empty")
+                //.version("1.5.0-SNAPSHOT")
                 .groupId("org.opendaylight.ovsdb")
                 .artifactId("southbound-karaf")
                 .version("1.1.0-SNAPSHOT")
@@ -93,7 +92,7 @@ public abstract class AbstractConfigTestBase {
         LOG.info("Calling config, configTimes: {}", configTimes);
         configTimes++;
         Option[] options = new Option[] {
-                // KarafDistributionOption.debugConfiguration("5005", true),
+                //KarafDistributionOption.debugConfiguration("5005", true),
                 karafDistributionConfiguration()
                         .frameworkUrl(getKarafDistro())
                         .unpackDirectory(new File("target/exam"))

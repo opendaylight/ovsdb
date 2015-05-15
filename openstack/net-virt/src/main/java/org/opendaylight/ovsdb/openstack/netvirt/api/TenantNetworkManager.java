@@ -4,19 +4,21 @@
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- *  Authors : Dave Tucker
  */
 
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
 import org.opendaylight.neutron.spi.NeutronNetwork;
-import org.opendaylight.ovsdb.schema.openvswitch.Interface;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.neutron.spi.NeutronPort;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 /**
  * Open vSwitch isolates Tenant Networks using VLANs on the Integration Bridge
  * This class manages the provisioning of these VLANs
+ *
+ * @author Dave Tucker
+ * @author Sam Hague (shague@redhat.com)
  */
 public interface TenantNetworkManager {
 
@@ -31,18 +33,17 @@ public interface TenantNetworkManager {
     /**
      * Reclaim the assigned VLAN for the given Network
      * @param node the {@link Node} to query
-     * @param portUUID the UUID of the neutron Port
      * @param network the Neutron Network ID
      */
-    public void reclaimInternalVlan(Node node, String portUUID, NeutronNetwork network);
+    public void reclaimInternalVlan(Node node, NeutronNetwork network);
 
     /**
      * Configures the VLAN for a Tenant Network
      * @param node the {@link Node} to configure
-     * @param portUUID the UUID of the port to configure
+     * @param tp the termination point
      * @param network the Neutron Network ID
      */
-    public void programInternalVlan(Node node, String portUUID, NeutronNetwork network);
+    public void programInternalVlan(Node node, OvsdbTerminationPointAugmentation tp, NeutronNetwork network);
 
     /**
      * Check is the given network is present on a Node
@@ -58,11 +59,6 @@ public interface TenantNetworkManager {
     public String getNetworkId (String segmentationId);
 
     /**
-     * Get the {@link org.opendaylight.neutron.spi.NeutronNetwork} for a given Interface
-     */
-    public NeutronNetwork getTenantNetwork(Interface intf);
-
-    /**
      * Network Created Callback
      */
     public int networkCreated (Node node, String networkId);
@@ -71,4 +67,6 @@ public interface TenantNetworkManager {
      * Network Deleted Callback
      */
     public void networkDeleted(String id);
+    NeutronNetwork getTenantNetwork(OvsdbTerminationPointAugmentation terminationPointAugmentation);
+    public NeutronPort getTenantPort(OvsdbTerminationPointAugmentation terminationPointAugmentation);
 }

@@ -10,19 +10,16 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
-import org.opendaylight.ovsdb.plugin.api.Status;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-
 import java.net.InetAddress;
 
 /**
  *  This interface allows NAT flows to be written to devices
  */
 public interface OutboundNatProvider {
-    Status programIpRewriteRule(Node node, Long dpid, String segmentationId, InetAddress matchAddress,
+    Status programIpRewriteRule(Long dpid, String segmentationId, InetAddress matchAddress,
                                 InetAddress rewriteAddress, Action action);
 
-    Status programIpRewriteExclusion(Node node, Long dpid, String segmentationId,
+    Status programIpRewriteExclusion(Long dpid, String segmentationId,
                                      String excludedCidr, Action action);
 
 }

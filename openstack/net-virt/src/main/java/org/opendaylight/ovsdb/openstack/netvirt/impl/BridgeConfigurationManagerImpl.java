@@ -8,6 +8,7 @@
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import org.opendaylight.neutron.spi.NeutronNetwork;
+import org.opendaylight.ovsdb.openstack.netvirt.NetvirtInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
@@ -15,6 +16,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
@@ -28,6 +30,8 @@ import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.List;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,16 +40,12 @@ import org.slf4j.LoggerFactory;
  * @author Brent Salisbury
  * @author Sam Hague (shague@redhat.com)
  */
-public class BridgeConfigurationManagerImpl implements BridgeConfigurationManager {
+public class BridgeConfigurationManagerImpl implements BridgeConfigurationManager, NetvirtInterface {
     static final Logger LOGGER = LoggerFactory.getLogger(BridgeConfigurationManagerImpl.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile ConfigurationService configurationService;
     private volatile NetworkingProviderManager networkingProviderManager;
-
-    void init() {
-        LOGGER.info(">>>>>> init {}", this.getClass());
-    }
 
     @Override
     public String getBridgeUuid(Node node, String bridgeName) {
@@ -445,4 +445,15 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
         }
         return "tcp:"+ipaddress+":6633";
     }
+
+    @Override
+    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+        configurationService =
+                (ConfigurationService) ServiceHelper.getGlobalInstance(ConfigurationService.class, this);
+        networkingProviderManager =
+                (NetworkingProviderManager) ServiceHelper.getGlobalInstance(NetworkingProviderManager.class, this);
+    }
+
+    @Override
+    public void setDependencies(Object impl) {}
 }

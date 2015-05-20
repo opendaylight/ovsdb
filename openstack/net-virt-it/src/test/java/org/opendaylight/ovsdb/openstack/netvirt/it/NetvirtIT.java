@@ -125,9 +125,15 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         Option[] options;
 
         options = new Option[] {
+                /*editConfigurationFilePut(NetvirtITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
+                        "log4j.logger.org.opendaylight",
+                        LogLevelOption.LogLevel.TRACE.name()),
+                editConfigurationFilePut(NetvirtITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
+                        "log4j.logger.org.opendaylight.controller.config-manager",
+                        LogLevelOption.LogLevel.DEBUG.name()),*/
             editConfigurationFilePut(NetvirtITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
                     "log4j.logger.org.opendaylight.ovsdb",
-                    LogLevelOption.LogLevel.DEBUG.name()),
+                    LogLevelOption.LogLevel.TRACE.name()),
             editConfigurationFilePut(NetvirtITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
                     "log4j.logger.org.opendaylight.ovsdb.lib",
                     LogLevelOption.LogLevel.TRACE.name()),
@@ -192,8 +198,9 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         isBundleReady(bundleContext, NETVIRT);
         isBundleReady(bundleContext, NETVIRTPROVIDERS);
 
+        Thread.sleep(10000);
         //dataBroker = getSession().getSALService(DataBroker.class);
-        Thread.sleep(3000);
+        //Thread.sleep(3000);
         //dataBroker = OvsdbInventoryServiceImpl.getDataBroker();
         dataBroker = org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils.getDatabroker();
         Assert.assertNotNull("db should not be null", dataBroker);
@@ -568,5 +575,10 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         Assert.assertTrue(deleteBridge(connectionInfo, NetvirtITConstants.INTEGRATION_BRIDGE_NAME));
         Thread.sleep(10000);
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+    }
+
+    @Test
+    public void testNetVirt2() throws InterruptedException {
+        Thread.sleep(60000);
     }
 }

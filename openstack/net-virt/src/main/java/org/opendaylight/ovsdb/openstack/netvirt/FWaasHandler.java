@@ -15,6 +15,10 @@ import org.opendaylight.neutron.spi.INeutronFirewallRuleAware;
 import org.opendaylight.neutron.spi.NeutronFirewall;
 import org.opendaylight.neutron.spi.NeutronFirewallPolicy;
 import org.opendaylight.neutron.spi.NeutronFirewallRule;
+import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,11 +28,12 @@ import java.net.HttpURLConnection;
  * Handle requests for OpenStack Neutron v2.0 Port Firewall API calls.
  */
 public class FWaasHandler extends AbstractHandler
-                          implements INeutronFirewallAware,
-                                     INeutronFirewallRuleAware,
-                                     INeutronFirewallPolicyAware {
+        implements INeutronFirewallAware, INeutronFirewallRuleAware,
+        INeutronFirewallPolicyAware, NetvirtInterface {
 
     static final Logger logger = LoggerFactory.getLogger(FWaasHandler.class);
+    private volatile EventDispatcher eventDispatcher;
+
     /**
      * Invoked when a Firewall Rules creation is requested
      * to indicate if the specified Rule can be created.
@@ -199,4 +204,16 @@ public class FWaasHandler extends AbstractHandler
                 break;
         }
     }
+
+    @Override
+    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+        eventDispatcher =
+                (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
+        eventDispatcher.eventHandlerAdded(
+                bundleContext.getServiceReference(INeutronFirewallAware.class.getName()), this);
+        super.setDispatcher(eventDispatcher);
+    }
+
+    @Override
+    public void setDependencies(Object impl) {}
 }

@@ -8,16 +8,20 @@
 */
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
+import org.opendaylight.ovsdb.openstack.netvirt.NetvirtInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.NodeConfiguration;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,14 +29,10 @@ import org.slf4j.LoggerFactory;
  * @author Dave Tucker
  * @author Sam Hague
  */
-public class VlanConfigurationCacheImpl implements VlanConfigurationCache {
+public class VlanConfigurationCacheImpl implements NetvirtInterface, VlanConfigurationCache {
     static final Logger logger = LoggerFactory.getLogger(VlanConfigurationCacheImpl.class);
     private Map<String, NodeConfiguration> configurationCache = Maps.newConcurrentMap();
     private volatile TenantNetworkManager tenantNetworkManager;
-
-    void init() {
-        logger.info(">>>>>> init {}", this.getClass());
-    }
 
     private NodeConfiguration getNodeConfiguration(Node node){
         String nodeUuid = getNodeUUID(node);
@@ -110,5 +110,16 @@ public class VlanConfigurationCacheImpl implements VlanConfigurationCache {
         NodeConfiguration nodeConfiguration = getNodeConfiguration(node);
         Integer vlan = nodeConfiguration.getTenantVlanMap().get(networkId);
         return vlan == null ? 0 : vlan;
+    }
+
+    @Override
+    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+        tenantNetworkManager =
+                (TenantNetworkManager) ServiceHelper.getGlobalInstance(TenantNetworkManager.class, this);
+    }
+
+    @Override
+    public void setDependencies(Object impl) {
+
     }
 }

@@ -12,10 +12,12 @@ package org.opendaylight.ovsdb.openstack.netvirt.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.opendaylight.ovsdb.openstack.netvirt.NetvirtInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,15 +26,10 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 
-public class ProviderNetworkManagerImpl implements NetworkingProviderManager {
-
+public class ProviderNetworkManagerImpl implements NetvirtInterface, NetworkingProviderManager {
     static final Logger logger = LoggerFactory.getLogger(ProviderNetworkManagerImpl.class);
     private HashMap<Long, ProviderEntry> providers = Maps.newHashMap();
     private HashMap<Node, NetworkingProvider> nodeToProviderMapping = Maps.newHashMap();
-
-    public void init() {
-        logger.info(">>>>>> init ProviderNetworkManagerImpl");
-    }
 
     @Override
     public NetworkingProvider getProvider(Node node) {
@@ -78,6 +75,16 @@ public class ProviderNetworkManagerImpl implements NetworkingProviderManager {
         Long pid = (Long)ref.getProperty(org.osgi.framework.Constants.SERVICE_ID);
         providers.remove(pid);
         logger.info("Neutron Networking Provider Removed: {}", pid);
+    }
+
+    @Override
+    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+
+    }
+
+    @Override
+    public void setDependencies(Object impl) {
+
     }
 
     private class ProviderEntry {

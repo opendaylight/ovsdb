@@ -12,12 +12,15 @@ import java.util.List;
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.ovsdb.openstack.netvirt.api.*;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * @author Sam Hague (shague@redhat.com)
  */
 public class SouthboundHandler extends AbstractHandler
-        implements NodeCacheListener, OvsdbInventoryListener {
+        implements NetvirtInterface, NodeCacheListener, OvsdbInventoryListener {
     static final Logger logger = LoggerFactory.getLogger(SouthboundHandler.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
@@ -38,14 +41,16 @@ public class SouthboundHandler extends AbstractHandler
     private volatile NetworkingProviderManager networkingProviderManager;
     private volatile NeutronL3Adapter neutronL3Adapter;
     private volatile NodeCacheManager nodeCacheManager = null;
+    private volatile EventDispatcher eventDispatcher;
+    private volatile OvsdbInventoryService ovsdbInventoryService;
 
     void start() {
         this.triggerUpdates();
     }
 
-    void init() {
+    /*void init() {
         logger.info(">>>>>> init {}", this.getClass());
-    }
+    }*/
 
     private SouthboundEvent.Type ovsdbTypeToSouthboundEventType(OvsdbType ovsdbType) {
         SouthboundEvent.Type type = SouthboundEvent.Type.NODE;
@@ -76,7 +81,7 @@ public class SouthboundHandler extends AbstractHandler
     @Override
     public void ovsdbUpdate(Node node, DataObject resourceAugmentationData, OvsdbType ovsdbType, Action action) {
         logger.info("ovsdbUpdate: {} - {} - <<{}>> <<{}>>", ovsdbType, action, node, resourceAugmentationData);
-        this.enqueueEvent(new SouthboundEvent(node, resourceAugmentationData,
+        enqueueEvent(new SouthboundEvent(node, resourceAugmentationData,
                 ovsdbTypeToSouthboundEventType(ovsdbType), action));
     }
 
@@ -400,5 +405,36 @@ public class SouthboundHandler extends AbstractHandler
         // TODO SB_MIGRATION
         // Not sure if we want to do this yet
         MdsalUtils.deleteBridge(node);
+    }
+
+    @Override
+    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+        configurationService =
+                (ConfigurationService) ServiceHelper.getGlobalInstance(ConfigurationService.class, this);
+        networkingProviderManager =
+                (NetworkingProviderManager) ServiceHelper.getGlobalInstance(NetworkingProviderManager.class, this);
+        tenantNetworkManager =
+                (TenantNetworkManager) ServiceHelper.getGlobalInstance(TenantNetworkManager.class, this);
+        bridgeConfigurationManager =
+                (BridgeConfigurationManager) ServiceHelper.getGlobalInstance(BridgeConfigurationManager.class, this);
+        nodeCacheManager =
+                (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
+        nodeCacheManager.cacheListenerAdded(
+                bundleContext.getServiceReference(OvsdbInventoryListener.class.getName()), this);
+        neutronL3Adapter =
+                (NeutronL3Adapter) ServiceHelper.getGlobalInstance(NeutronL3Adapter.class, this);
+        eventDispatcher =
+                (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
+        eventDispatcher.eventHandlerAdded(
+                bundleContext.getServiceReference(OvsdbInventoryListener.class.getName()), this);
+        super.setDispatcher(eventDispatcher);
+        ovsdbInventoryService =
+                (OvsdbInventoryService) ServiceHelper.getGlobalInstance(OvsdbInventoryService.class, this);
+        ovsdbInventoryService.listenerAdded(this);
+    }
+
+    @Override
+    public void setDependencies(Object impl) {
+
     }
 }

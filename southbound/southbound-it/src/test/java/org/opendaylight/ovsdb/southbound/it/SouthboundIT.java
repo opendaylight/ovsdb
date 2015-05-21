@@ -685,10 +685,13 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testTerminationPointOfPort() throws InterruptedException {
+    public void testCRDTerminationPointOfPort() throws InterruptedException {
+        final Long OFPORT_EXPECTED = new Long(45002);
+
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
         connectOvsdbNode(connectionInfo);
 
+        // CREATE
         Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
         OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
         Assert.assertNotNull(bridge);
@@ -699,13 +702,14 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 createGenericOvsdbTerminationPointAugmentationBuilder();
         String portName = "testOfPort";
         ovsdbTerminationBuilder.setName(portName);
-        Long ofPortExpected = new Long(45002);
-        ovsdbTerminationBuilder.setOfport(ofPortExpected);
+
+        ovsdbTerminationBuilder.setOfport(OFPORT_EXPECTED);
         Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
         InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
         Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
         Assert.assertNotNull(terminationPointNode);
 
+        // READ
         List<TerminationPoint> terminationPoints = terminationPointNode.getTerminationPoint();
         for (TerminationPoint terminationPoint : terminationPoints) {
             OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
@@ -713,18 +717,30 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
                 Long ofPort = ovsdbTerminationPointAugmentation.getOfport();
                 // if ephemeral port 45002 is in use, ofPort is set to 1
-                Assert.assertTrue(ofPort.equals(ofPortExpected) || ofPort.equals(new Long(1)));
+                Assert.assertTrue(ofPort.equals(OFPORT_EXPECTED) || ofPort.equals(new Long(1)));
                 LOG.info("ofPort: {}", ofPort);
             }
         }
+
+        // UPDATE- Not Applicable.  From the OpenVSwitch Documentation:
+        //   "A client should ideally set this column’s value in the same database transaction that it uses to create
+        //   the interface."
+
+        // DELETE
         Assert.assertTrue(deleteBridge(connectionInfo));
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
 
     @Test
-    public void testTerminationPointOfPortRequest() throws InterruptedException {
+    public void testCRDTerminationPointOfPortRequest() throws InterruptedException {
+        final Long OFPORT_EXPECTED = new Long(45008);
+        final Long OFPORT_INPUT = new Long(45008);
+        final Long OFPORT_UPDATE = new Long(45009);
+
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
         connectOvsdbNode(connectionInfo);
+
+        // CREATE
         Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
         OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
         Assert.assertNotNull(bridge);
@@ -734,24 +750,23 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 createGenericOvsdbTerminationPointAugmentationBuilder();
         String portName = "testOfPortRequest";
         ovsdbTerminationBuilder.setName(portName);
-        Long ofPortExpected = new Long(45008);
-        Integer ofPortRequestExpected = ofPortExpected.intValue();
-        Long ofPortInput = new Long(45008);
-        ovsdbTerminationBuilder.setOfport(ofPortInput);
+        Integer ofPortRequestExpected = OFPORT_EXPECTED.intValue();
+        ovsdbTerminationBuilder.setOfport(OFPORT_INPUT);
         ovsdbTerminationBuilder.setOfportRequest(ofPortRequestExpected);
         Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
         InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
         Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
         Assert.assertNotNull(terminationPointNode);
 
+        // READ
         List<TerminationPoint> terminationPoints = terminationPointNode.getTerminationPoint();
         for (TerminationPoint terminationPoint : terminationPoints) {
             OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
                     terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
             if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
                 Long ofPort = ovsdbTerminationPointAugmentation.getOfport();
-                // if ephemeral port 45002 is in use, ofPort is set to 1
-                Assert.assertTrue(ofPort.equals(ofPortExpected) || ofPort.equals(new Long(1)));
+                // if ephemeral port 45008 is in use, ofPort is set to 1
+                Assert.assertTrue(ofPort.equals(OFPORT_EXPECTED) || ofPort.equals(new Long(1)));
                 LOG.info("ofPort: {}", ofPort);
 
                 Integer ofPortRequest = ovsdbTerminationPointAugmentation.getOfportRequest();
@@ -759,6 +774,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 LOG.info("ofPortRequest: {}", ofPortRequest);
             }
         }
+
+        // UPDATE- Not Applicable.  From the OpenVSwitch documentation:
+        //   "A client should ideally set this column’s value in the same database transaction that it uses to create
+        //   the interface. "
+
+        // DELETE
         Assert.assertTrue(deleteBridge(connectionInfo));
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }

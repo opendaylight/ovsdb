@@ -35,7 +35,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeSystem;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryBuilder;
@@ -96,17 +95,28 @@ public class SouthboundMapper {
     }
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(OvsdbConnectionInstance client,Bridge bridge) {
-        return createInstanceIdentifier(createManagedNodeId(client, new OvsdbBridgeName(bridge.getName())));
+        InstanceIdentifier<Node> iid;
+        if (bridge.getExternalIdsColumn() != null
+                && bridge.getExternalIdsColumn().getData() != null
+                && bridge.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
+            String iidString = bridge.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY);
+            iid = (InstanceIdentifier<Node>) SouthboundUtil.deserializeInstanceIdentifier(iidString);
+        } else {
+            String nodeString = client.getNodeKey().getNodeId().getValue()
+                    + "/bridge/" + bridge.getName();
+            NodeId nodeId = new NodeId(new Uri(nodeString));
+            NodeKey nodeKey = new NodeKey(nodeId);
+            iid = InstanceIdentifier.builder(NetworkTopology.class)
+                    .child(Topology.class,new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+                    .child(Node.class,nodeKey)
+                    .build();
+        }
+        return iid;
     }
 
     public static NodeId createManagedNodeId(InstanceIdentifier<Node> iid) {
         NodeKey nodeKey = iid.firstKeyOf(Node.class, NodeKey.class);
         return nodeKey.getNodeId();
-    }
-
-    public static NodeId createManagedNodeId(OvsdbConnectionInstance client, OvsdbBridgeName bridgeName) {
-        return new NodeId(client.getNodeId().getValue()
-                + "/" + SouthboundConstants.BRIDGE_URI_PREFIX + "/" + bridgeName.getValue());
     }
 
     public static InetAddress createInetAddress(IpAddress ip) throws UnknownHostException {

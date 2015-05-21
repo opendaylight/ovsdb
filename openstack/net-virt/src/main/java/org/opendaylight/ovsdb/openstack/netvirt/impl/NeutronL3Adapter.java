@@ -7,7 +7,6 @@
  *
  * Authors : Dave Tucker, Flavio Fernandes
  */
-
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import org.opendaylight.neutron.spi.INeutronNetworkCRUD;
@@ -21,12 +20,16 @@ import org.opendaylight.neutron.spi.NeutronRouter_Interface;
 import org.opendaylight.neutron.spi.NeutronSubnet;
 import org.opendaylight.neutron.spi.Neutron_IPs;
 import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
+import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.api.*;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 import com.google.common.base.Preconditions;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,11 +46,7 @@ import java.util.Set;
  * these events, the abstract router callbacks can be generated to the multi-tenant aware router,
  * as well as the multi-tenant router forwarding provider.
  */
-public class NeutronL3Adapter {
-
-    /**
-     * Logger instance.
-     */
+public class NeutronL3Adapter implements ConfigInterface {
     static final Logger logger = LoggerFactory.getLogger(NeutronL3Adapter.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
@@ -75,8 +74,8 @@ public class NeutronL3Adapter {
     private Map<String, NeutronRouter_Interface> subnetIdToRouterInterfaceCache;
     private Boolean enabled = false;
 
-    void init() {
-        logger.info(">>>>>> init {}", this.getClass());
+    public NeutronL3Adapter() {
+        logger.info(">>>>>> NeutronL3Adapter constructor {}", this.getClass());
         final String enabledPropertyStr = ConfigProperties.getProperty(this.getClass(), "ovsdb.l3.fwd.enabled");
         if (enabledPropertyStr != null && enabledPropertyStr.equalsIgnoreCase("yes")) {
             this.inboundIpRewriteCache = new HashSet<>();
@@ -943,5 +942,46 @@ public class NeutronL3Adapter {
             return MdsalUtils.getDataPathId(node);
         }
         return null;
+    }
+
+    @Override
+    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+        tenantNetworkManager =
+                (TenantNetworkManager) ServiceHelper.getGlobalInstance(TenantNetworkManager.class, this);
+        configurationService =
+                (ConfigurationService) ServiceHelper.getGlobalInstance(ConfigurationService.class, this);
+        arpProvider =
+                (ArpProvider) ServiceHelper.getGlobalInstance(ArpProvider.class, this);
+        inboundNatProvider =
+                (InboundNatProvider) ServiceHelper.getGlobalInstance(InboundNatProvider.class, this);
+        outboundNatProvider =
+                (OutboundNatProvider) ServiceHelper.getGlobalInstance(OutboundNatProvider.class, this);
+        routingProvider =
+                (RoutingProvider) ServiceHelper.getGlobalInstance(RoutingProvider.class, this);
+        l3ForwardingProvider =
+                (L3ForwardingProvider) ServiceHelper.getGlobalInstance(L3ForwardingProvider.class, this);
+        nodeCacheManager =
+                (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
+    }
+
+    @Override
+    public void setDependencies(Object impl) {
+        if (impl instanceof INeutronNetworkCRUD) {
+            neutronNetworkCache = (INeutronNetworkCRUD)impl;
+        } else if (impl instanceof INeutronPortCRUD) {
+            neutronPortCache = (INeutronPortCRUD)impl;
+        } else if (impl instanceof INeutronSubnetCRUD) {
+            neutronSubnetCache = (INeutronSubnetCRUD)impl;
+        } else if (impl instanceof ArpProvider) {
+            arpProvider = (ArpProvider)impl;
+        } else if (impl instanceof InboundNatProvider) {
+            inboundNatProvider = (InboundNatProvider)impl;
+        } else if (impl instanceof OutboundNatProvider) {
+            outboundNatProvider = (OutboundNatProvider)impl;
+        } else if (impl instanceof RoutingProvider) {
+            routingProvider = (RoutingProvider)impl;
+        } else if (impl instanceof L3ForwardingProvider) {
+            l3ForwardingProvider = (L3ForwardingProvider)impl;
+        }
     }
 }

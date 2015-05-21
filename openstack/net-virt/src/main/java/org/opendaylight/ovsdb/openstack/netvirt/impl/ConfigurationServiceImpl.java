@@ -16,16 +16,19 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConfigurationServiceImpl implements ConfigurationService {
+public class ConfigurationServiceImpl implements ConfigurationService, ConfigInterface {
     static final Logger logger = LoggerFactory.getLogger(ConfigurationServiceImpl.class);
 
     private String integrationBridgeName;
@@ -36,10 +39,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     private Map<Pair<String, String>, String> patchPortNames = Maps.newHashMap();
     private String providerMappingsKey;
     private String providerMapping;
-
-    void init() {
-        logger.info(">>>>>> init {}", this.getClass());
-    }
 
     public ConfigurationServiceImpl() {
         tunnelEndpointKey = Constants.TUNNEL_ENDPOINT_KEY;
@@ -160,5 +159,13 @@ public class ConfigurationServiceImpl implements ConfigurationService {
             }
         }
         return l3gatewayForNode;
+    }
+
+    @Override
+    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+    }
+
+    @Override
+    public void setDependencies(Object impl) {
     }
 }

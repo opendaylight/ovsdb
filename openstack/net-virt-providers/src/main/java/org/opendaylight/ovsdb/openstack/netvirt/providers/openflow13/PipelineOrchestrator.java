@@ -7,6 +7,7 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.osgi.framework.ServiceReference;
 
 /**
  * A PipelineOrchestrator provides the necessary orchestration logic to allow multiple network services
@@ -19,4 +20,6 @@ public interface PipelineOrchestrator {
     public Service getNextServiceInPipeline(Service service);
     AbstractServiceInstance getServiceInstance(Service service);
     public void enqueue(Node node);
+    public void registerService(final ServiceReference ref, AbstractServiceInstance serviceInstance);
+    public void unregisterService(final ServiceReference ref);
 }

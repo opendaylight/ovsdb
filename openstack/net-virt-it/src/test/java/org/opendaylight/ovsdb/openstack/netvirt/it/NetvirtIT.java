@@ -86,12 +86,12 @@ public class NetvirtIT extends AbstractMdsalTestBase {
 
     @Override
     public String getModuleName() {
-        return "openstack.net-virt";
+        return "openstack.net-virt-providers";
     }
 
     @Override
     public String getInstanceName() {
-        return "net-virt-default";
+        return "net-virt-providers-default";
     }
 
     @Override
@@ -130,7 +130,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
                     LogLevelOption.LogLevel.DEBUG.name()),
             editConfigurationFilePut(NetvirtITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
                     "log4j.logger.org.opendaylight.ovsdb.lib",
-                    LogLevelOption.LogLevel.TRACE.name()),
+                    LogLevelOption.LogLevel.INFO.name()),
             /*editConfigurationFilePut(NetvirtITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
                     "log4j.logger.org.opendaylight.ovsdb.openstack.net-virt",
                     LogLevelOption.LogLevel.DEBUG.name())*/
@@ -193,10 +193,20 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         isBundleReady(bundleContext, NETVIRTPROVIDERS);
 
         //dataBroker = getSession().getSALService(DataBroker.class);
-        Thread.sleep(3000);
+        //Thread.sleep(3000);
         //dataBroker = OvsdbInventoryServiceImpl.getDataBroker();
-        dataBroker = org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils.getDatabroker();
-        Assert.assertNotNull("db should not be null", dataBroker);
+        for (int i=0; i<10; i++) {
+            dataBroker = org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils.getDatabroker();
+            if (dataBroker == null) {
+                LOG.warn("NetvirtIT: dataBroker is null");
+                Thread.sleep(5000);
+                continue;
+            } else {
+                break;
+            }
+        }
+        Assert.assertNotNull("dataBroker should not be null", dataBroker);
+        Thread.sleep(5000);
 
         mdsalUtils = new MdsalUtils(dataBroker);
         setup = true;
@@ -568,5 +578,10 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         Assert.assertTrue(deleteBridge(connectionInfo, NetvirtITConstants.INTEGRATION_BRIDGE_NAME));
         Thread.sleep(10000);
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+    }
+
+    @Test
+    public void testNetVirt2() throws InterruptedException {
+        Thread.sleep(60000);
     }
 }

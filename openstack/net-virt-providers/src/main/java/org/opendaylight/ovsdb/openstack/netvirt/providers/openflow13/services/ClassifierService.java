@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ClassifierProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.ActionUtils;
@@ -43,10 +45,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev14
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.dst.choice.grouping.dst.choice.DstNxRegCaseBuilder;
 
 import com.google.common.collect.Lists;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ClassifierService extends AbstractServiceInstance implements ClassifierProvider {
+public class ClassifierService extends AbstractServiceInstance implements ClassifierProvider, ConfigInterface {
     public final static long REG_VALUE_FROM_LOCAL = 0x1L;
     public final static long REG_VALUE_FROM_REMOTE = 0x2L;
     public static final Class<? extends NxmNxReg> REG_FIELD = NxmNxReg0.class;
@@ -453,4 +457,12 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
         flowBuilder.setIdleTimeout(0);
         writeFlow(flowBuilder, nodeBuilder);
     }
+
+    @Override
+    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+        super.setOrchestrator(bundleContext.getServiceReference(ClassifierProvider.class.getName()), this);
+    }
+
+    @Override
+    public void setDependencies(Object impl) {}
 }

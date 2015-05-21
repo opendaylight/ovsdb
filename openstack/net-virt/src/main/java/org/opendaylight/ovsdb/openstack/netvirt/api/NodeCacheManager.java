@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.osgi.framework.ServiceReference;
 
 /**
  * This interface is used to cache ids of nodes that are needed by net-virt.
@@ -26,4 +27,7 @@ public interface NodeCacheManager {
     public List<Node> getNodes();
     public Map<NodeId, Node> getOvsdbNodes();
     public List<Node> getBridgeNodes();
+    public void cacheListenerAdded(final ServiceReference ref, NodeCacheListener handler);
+    public void cacheListenerRemoved(final ServiceReference ref);
+
 }

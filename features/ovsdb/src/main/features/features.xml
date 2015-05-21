@@ -2,13 +2,13 @@
 <features name="ovsdb-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
-  <repository>mvn:org.opendaylight.controller/features-base/${odl.karaf.base.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.controller/features-adsal/${sal.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.controller/features-nsf/${nsf.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin-extension/${openflowplugin.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin/${openflowplugin.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.neutron/features-neutron/${networkconfig.neutron.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.ovsdb/southbound-features/1.1.0-SNAPSHOT/xml/features</repository>
+  <repository>mvn:org.opendaylight.controller/features-mdsal/${mdsal.version}/xml/features</repository>
 
   <feature name="odl-ovsdb-all" description="OpenDaylight :: OVSDB :: all"
            version='${project.version}'>
@@ -62,9 +62,9 @@
     </bundle>
   </feature>
 
-  <feature name="odl-ovsdb-openstack" description="OpenDaylight :: OVSDB :: OpenStack Network Virtualization SB"
+  <feature name="odl-ovsdb-openstack" description="OpenDaylight :: OVSDB :: OpenStack Network Virtualization"
            version='${openstack.netvirt.version}'>
-    <feature version="${odl.karaf.base.version}">odl-base-all</feature>
+    <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
     <feature version="${openflowplugin.version}">odl-openflowplugin-flow-services</feature>
     <feature version="${openflowplugin.version}">odl-openflowplugin-nxm-extensions</feature>
     <feature version="${networkconfig.neutron.version}">odl-neutron-service</feature>
@@ -72,5 +72,7 @@
     <bundle>mvn:org.opendaylight.ovsdb/utils.servicehelper/${ovsdb.utils.servicehelper.version}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt/${openstack.netvirt.version}</bundle>
     <bundle>mvn:org.opendaylight.ovsdb/openstack.net-virt-providers/${openstack.netvirt.providers.version}</bundle>
+    <configfile finalname="etc/opendaylight/karaf/netvirt-impl-default-config.xml">mvn:org.opendaylight.ovsdb/openstack.net-virt/${project.version}/xml/config</configfile>
+    <configfile finalname="etc/opendaylight/karaf/netvirt-providers-impl-default-config.xml">mvn:org.opendaylight.ovsdb/openstack.net-virt-providers/${project.version}/xml/config</configfile>
   </feature>
 </features>

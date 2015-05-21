@@ -20,11 +20,15 @@ import org.opendaylight.neutron.spi.NeutronLoadBalancer;
 import org.opendaylight.neutron.spi.NeutronLoadBalancerPool;
 import org.opendaylight.neutron.spi.NeutronLoadBalancerPoolMember;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
+import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,18 +45,18 @@ import java.util.Map;
 //TODO: Implement INeutronLoadBalancerHealthMonitorAware, INeutronLoadBalancerListenerAware, INeutronLoadBalancerPoolMemberAware,
 
 public class LBaaSHandler extends AbstractHandler
-        implements INeutronLoadBalancerAware, NodeCacheListener {
-
+        implements INeutronLoadBalancerAware, ConfigInterface, NodeCacheListener {
     private static final Logger logger = LoggerFactory.getLogger(LBaaSHandler.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile INeutronLoadBalancerCRUD neutronLBCache;
     private volatile INeutronLoadBalancerPoolCRUD neutronLBPoolCache;
-    private volatile INeutronPortCRUD neutronPortsCache;
+    private volatile INeutronPortCRUD neutronPortCache;
     private volatile INeutronNetworkCRUD neutronNetworkCache;
     private volatile INeutronSubnetCRUD neutronSubnetCache;
     private volatile LoadBalancerProvider loadBalancerProvider;
     private volatile NodeCacheManager nodeCacheManager;
+    private volatile EventDispatcher eventDispatcher;
 
     @Override
     public int canCreateNeutronLoadBalancer(NeutronLoadBalancer neutronLB) {
@@ -172,12 +176,13 @@ public class LBaaSHandler extends AbstractHandler
         String loadBalancerSubnetID = neutronLB.getLoadBalancerVipSubnetID();
 
         LoadBalancerConfiguration lbConfig = new LoadBalancerConfiguration(loadBalancerName, loadBalancerVip);
-        Map.Entry<String,String> providerInfo = NeutronCacheUtils.getProviderInformation(neutronNetworkCache, neutronSubnetCache, loadBalancerSubnetID);
+        Map.Entry<String,String> providerInfo =
+                NeutronCacheUtils.getProviderInformation(neutronNetworkCache, neutronSubnetCache, loadBalancerSubnetID);
         if (providerInfo != null) {
             lbConfig.setProviderNetworkType(providerInfo.getKey());
             lbConfig.setProviderSegmentationId(providerInfo.getValue());
         }
-        lbConfig.setVmac(NeutronCacheUtils.getMacAddress(neutronPortsCache, loadBalancerSubnetID, loadBalancerVip));
+        lbConfig.setVmac(NeutronCacheUtils.getMacAddress(neutronPortCache, loadBalancerSubnetID, loadBalancerVip));
 
         String memberID, memberIP, memberMAC, memberProtocol, memberSubnetID;
         Integer memberPort;
@@ -209,7 +214,7 @@ public class LBaaSHandler extends AbstractHandler
                         logger.debug("Neutron LB pool member details incomplete: {}", neutronLBPoolMember);
                         continue;
                     }
-                    memberMAC = NeutronCacheUtils.getMacAddress(neutronPortsCache, memberSubnetID, memberIP);
+                    memberMAC = NeutronCacheUtils.getMacAddress(neutronPortCache, memberSubnetID, memberIP);
                     if (memberMAC == null) {
                         continue;
                     }
@@ -249,6 +254,38 @@ public class LBaaSHandler extends AbstractHandler
                    continue;
                }
             }
+        }
+    }
+
+    @Override
+    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+        loadBalancerProvider =
+                (LoadBalancerProvider) ServiceHelper.getGlobalInstance(LoadBalancerProvider.class, this);
+        nodeCacheManager =
+                (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
+        nodeCacheManager.cacheListenerAdded(
+                bundleContext.getServiceReference(INeutronLoadBalancerAware.class.getName()), this);
+        eventDispatcher =
+                (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
+        eventDispatcher.eventHandlerAdded(
+                bundleContext.getServiceReference(INeutronLoadBalancerAware.class.getName()), this);
+        super.setDispatcher(eventDispatcher);
+    }
+
+    @Override
+    public void setDependencies(Object impl) {
+        if (impl instanceof INeutronNetworkCRUD) {
+            neutronNetworkCache = (INeutronNetworkCRUD)impl;
+        } else if (impl instanceof INeutronPortCRUD) {
+            neutronPortCache = (INeutronPortCRUD)impl;
+        } else if (impl instanceof INeutronSubnetCRUD) {
+            neutronSubnetCache = (INeutronSubnetCRUD)impl;
+        } else if (impl instanceof INeutronLoadBalancerCRUD) {
+            neutronLBCache = (INeutronLoadBalancerCRUD)impl;
+        } else if (impl instanceof INeutronLoadBalancerPoolCRUD) {
+            neutronLBPoolCache = (INeutronLoadBalancerPoolCRUD)impl;
+        } else if (impl instanceof LoadBalancerProvider) {
+            loadBalancerProvider = (LoadBalancerProvider)impl;
         }
     }
 }

@@ -12,8 +12,9 @@ package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services;
 import java.math.BigInteger;
 import java.util.List;
 
-//import java.util.ListIterator;
+import org.opendaylight.ovsdb.openstack.netvirt.api.IngressAclProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.L2ForwardingProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.ActionUtils;
@@ -44,12 +45,14 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeCon
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.dst.choice.grouping.dst.choice.DstNxRegCaseBuilder;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
-public class L2ForwardingService extends AbstractServiceInstance implements L2ForwardingProvider {
+public class L2ForwardingService extends AbstractServiceInstance implements ConfigInterface, L2ForwardingProvider {
     private static final Logger logger = LoggerFactory.getLogger(L2ForwardingService.class);
     public L2ForwardingService() {
         super(Service.L2_FORWARDING);
@@ -1053,5 +1056,15 @@ public class L2ForwardingService extends AbstractServiceInstance implements L2Fo
         ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
         logger.debug("createOutputPortInstructions() : applyAction {}", aab.build());
         return ib;
+    }
+
+    @Override
+    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+        super.setOrchestrator(bundleContext.getServiceReference(L2ForwardingProvider.class.getName()), this);
+    }
+
+    @Override
+    public void setDependencies(Object impl) {
+
     }
 }

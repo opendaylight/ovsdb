@@ -13,10 +13,14 @@ import org.opendaylight.neutron.spi.INeutronPortAware;
 import org.opendaylight.neutron.spi.NeutronPort;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,12 +30,13 @@ import java.util.List;
 /**
  * Handle requests for Neutron Port.
  */
-public class PortHandler extends AbstractHandler implements INeutronPortAware {
+public class PortHandler extends AbstractHandler implements INeutronPortAware, ConfigInterface {
     static final Logger logger = LoggerFactory.getLogger(PortHandler.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile NodeCacheManager nodeCacheManager;
     private volatile NeutronL3Adapter neutronL3Adapter;
+    private volatile EventDispatcher eventDispatcher;
 
     /**
      * Invoked when a port creation is requested
@@ -168,4 +173,20 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware {
                 break;
         }
     }
+
+    @Override
+    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+        nodeCacheManager =
+                (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
+        neutronL3Adapter =
+                (NeutronL3Adapter) ServiceHelper.getGlobalInstance(NeutronL3Adapter.class, this);
+        eventDispatcher =
+                (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
+        eventDispatcher.eventHandlerAdded(
+                bundleContext.getServiceReference(INeutronPortAware.class.getName()), this);
+        super.setDispatcher(eventDispatcher);
+    }
+
+    @Override
+    public void setDependencies(Object impl) {}
 }

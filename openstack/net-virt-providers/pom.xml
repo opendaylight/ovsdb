@@ -10,13 +10,14 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
-    <artifactId>commons</artifactId>
-    <groupId>org.opendaylight.ovsdb</groupId>
-    <version>1.3.0-SNAPSHOT</version>
-    <relativePath>../../commons/parent/pom.xml</relativePath>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>config-parent</artifactId>
+    <version>0.3.0-SNAPSHOT</version>
+    <relativePath/>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
+  <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>openstack.net-virt-providers</artifactId>
   <version>1.1.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
@@ -42,6 +43,15 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
   </scm>
 
+  <properties>
+    <networkconfig.neutron.version>0.5.0-SNAPSHOT</networkconfig.neutron.version>
+    <openflowjava-nicira.version>0.1.0-SNAPSHOT</openflowjava-nicira.version>
+    <openflowplugin.version>0.1.0-SNAPSHOT</openflowplugin.version>
+    <ovsdb.utils.config.version>1.1.0-SNAPSHOT</ovsdb.utils.config.version>
+    <ovsdb.utils.mdsal.openflow.version>1.1.0-SNAPSHOT</ovsdb.utils.mdsal.openflow.version>
+    <ovsdb.utils.servicehelper.version>1.1.0-SNAPSHOT</ovsdb.utils.servicehelper.version>
+    <powermock.version>1.5.2</powermock.version>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -57,31 +67,66 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
+      <artifactId>config-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-binding-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-binding-config</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-common-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.neutron</groupId>
-      <artifactId>neutron-spi</artifactId>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-common-util</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>openstack.net-virt</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.openflowplugin.model</groupId>
-      <artifactId>model-flow-base</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.openflowplugin.model</groupId>
-      <artifactId>model-flow-service</artifactId>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-core-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller.model</groupId>
       <artifactId>model-inventory</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.neutron</groupId>
+      <artifactId>neutron-spi</artifactId>
+      <version>${networkconfig.neutron.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.openflowplugin.model</groupId>
+      <artifactId>model-flow-base</artifactId>
+      <version>${openflowplugin.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.openflowplugin.model</groupId>
+      <artifactId>model-flow-service</artifactId>
+      <version>${openflowplugin.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.openflowplugin</groupId>
+      <artifactId>openflowjava-extension-nicira</artifactId>
+      <version>${openflowjava-nicira.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.openflowplugin</groupId>
+      <artifactId>openflowplugin-extension-nicira</artifactId>
+      <version>${openflowplugin.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>openstack.net-virt</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>utils.mdsal-openflow</artifactId>
+      <version>${ovsdb.utils.mdsal.openflow.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
@@ -98,18 +143,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>org.opendaylight.yangtools.model</groupId>
       <artifactId>opendaylight-l2-types</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>utils.mdsal-openflow</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.openflowplugin</groupId>
-      <artifactId>openflowjava-extension-nicira</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.openflowplugin</groupId>
-      <artifactId>openflowplugin-extension-nicira</artifactId>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -129,11 +162,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>org.powermock</groupId>
       <artifactId>powermock-module-junit4</artifactId>
+      <version>${powermock.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.powermock</groupId>
       <artifactId>powermock-api-mockito</artifactId>
+      <version>${powermock.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -148,16 +183,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <!--<version>2.4.0</version>-->
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <!--<Import-Package>org.opendaylight.ovsdb.netvirt.api</Import-Package>-->
-            <Embed-Dependency>
-              utils.config,utils.mdsal-openflow;type=!pom;inline=false
-            </Embed-Dependency>
+            <Embed-Dependency>utils.config,utils.mdsal-openflow;type=!pom;inline=false</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
-            <Bundle-Activator>org.opendaylight.ovsdb.openstack.netvirt.providers.Activator</Bundle-Activator>
           </instructions>
         </configuration>
       </plugin>

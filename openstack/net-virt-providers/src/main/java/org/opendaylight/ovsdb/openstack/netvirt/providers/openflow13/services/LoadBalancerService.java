@@ -15,11 +15,13 @@ import java.util.Map;
 
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration.LoadBalancerPoolMember;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
 import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.ActionUtils;
@@ -51,12 +53,14 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev14
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.dst.choice.grouping.dst.choice.DstNxRegCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.action.rev140421.OfjNxHashFields;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.action.rev140421.OfjNxMpAlgorithm;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
-public class LoadBalancerService extends AbstractServiceInstance implements LoadBalancerProvider {
+public class LoadBalancerService extends AbstractServiceInstance implements LoadBalancerProvider, ConfigInterface {
 
     private static final Logger logger = LoggerFactory.getLogger(LoadBalancerProvider.class);
     private static final int DEFAULT_FLOW_PRIORITY = 32768;
@@ -439,5 +443,15 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         } else {
             removeFlow(flowBuilder, nodeBuilder);
         }
+    }
+
+    @Override
+    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+        super.setOrchestrator(bundleContext.getServiceReference(LoadBalancerProvider.class.getName()), this);
+    }
+
+    @Override
+    public void setDependencies(Object impl) {
+
     }
 }

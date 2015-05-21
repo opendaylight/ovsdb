@@ -17,7 +17,9 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.NetvirtProvidersProvider;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
@@ -44,6 +46,7 @@ import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,8 +62,8 @@ public abstract class AbstractServiceInstance {
     public static final String SERVICE_PROPERTY ="serviceProperty";
     private static final Logger logger = LoggerFactory.getLogger(AbstractServiceInstance.class);
     public static final String OPENFLOW = "openflow:";
+    private DataBroker dataBroker = null;
     // OSGi Services that we are dependent on.
-    private volatile MdsalConsumer mdsalConsumer;
     private volatile PipelineOrchestrator orchestrator;
 
     // Concrete Service that this AbstractServiceInstance represents
@@ -68,15 +71,17 @@ public abstract class AbstractServiceInstance {
 
     public AbstractServiceInstance (Service service) {
         this.service = service;
+        this.dataBroker = NetvirtProvidersProvider.getDataBroker();
     }
 
-    void init() {
-        logger.info(">>>>> init service: {}", this.getClass());
+    protected void setOrchestrator(final ServiceReference ref, AbstractServiceInstance serviceInstance) {
+        this.orchestrator =
+                (PipelineOrchestrator) ServiceHelper.getGlobalInstance(PipelineOrchestrator.class, serviceInstance);
+        orchestrator.registerService(ref, serviceInstance);
     }
 
     public boolean isBridgeInPipeline (Node node){
         String bridgeName = MdsalUtils.getBridgeName(node);
-        //logger.trace("isBridgeInPipeline: node {} bridgeName {}", node, bridgeName);
         if (bridgeName != null && Constants.INTEGRATION_BRIDGE.equals(bridgeName)) {
             return true;
         }
@@ -137,20 +142,8 @@ public abstract class AbstractServiceInstance {
     }
 
     protected void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
-        Preconditions.checkNotNull(mdsalConsumer);
         logger.debug("writeFlow: flowBuilder: {}, nodeBuilder: {}",
                 flowBuilder.build(), nodeBuilder.build());
-        if (mdsalConsumer == null) {
-            logger.error("ERROR finding MDSAL Service. Its possible that writeFlow is called too soon ?");
-            return;
-        }
-
-        DataBroker dataBroker = mdsalConsumer.getDataBroker();
-        if (dataBroker == null) {
-            logger.error("ERROR finding reference for DataBroker. Please check MD-SAL support on the Controller.");
-            return;
-        }
-
         ReadWriteTransaction modification = dataBroker.newReadWriteTransaction();
         modification.put(LogicalDatastoreType.CONFIGURATION, createNodePath(nodeBuilder),
                 nodeBuilder.build(), true /*createMissingParents*/);
@@ -169,18 +162,6 @@ public abstract class AbstractServiceInstance {
     }
 
     protected void removeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
-        Preconditions.checkNotNull(mdsalConsumer);
-        if (mdsalConsumer == null) {
-            logger.error("ERROR finding MDSAL Service.");
-            return;
-        }
-
-        DataBroker dataBroker = mdsalConsumer.getDataBroker();
-        if (dataBroker == null) {
-            logger.error("ERROR finding reference for DataBroker. Please check MD-SAL support on the Controller.");
-            return;
-        }
-
         WriteTransaction modification = dataBroker.newWriteOnlyTransaction();
         modification.delete(LogicalDatastoreType.CONFIGURATION, createFlowPath(flowBuilder, nodeBuilder));
 
@@ -195,18 +176,6 @@ public abstract class AbstractServiceInstance {
     }
 
     public Flow getFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
-        Preconditions.checkNotNull(mdsalConsumer);
-        if (mdsalConsumer == null) {
-            logger.error("ERROR finding MDSAL Service. Its possible that writeFlow is called too soon ?");
-            return null;
-        }
-
-        DataBroker dataBroker = mdsalConsumer.getDataBroker();
-        if (dataBroker == null) {
-            logger.error("ERROR finding reference for DataBroker. Please check MD-SAL support on the Controller.");
-            return null;
-        }
-
         ReadOnlyTransaction readTx = dataBroker.newReadOnlyTransaction();
         try {
             Optional<Flow> data =
@@ -234,7 +203,7 @@ public abstract class AbstractServiceInstance {
     /**
      * Program Default Pipeline Flow.
      *
-     * @param nodeId Node on which the default pipeline flow is programmed.
+     * @param Node on which the default pipeline flow is programmed.
      */
     protected void programDefaultPipelineRule(Node node) {
         if (!isBridgeInPipeline(node)) {

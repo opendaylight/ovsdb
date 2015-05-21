@@ -16,8 +16,10 @@ import java.util.List;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
 import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.OF13Provider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
@@ -43,8 +45,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
 
 import com.google.common.collect.Lists;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
-public class ArpResponderService extends AbstractServiceInstance implements ArpProvider {
+public class ArpResponderService extends AbstractServiceInstance implements ArpProvider, ConfigInterface {
     public ArpResponderService() {
         super(Service.ARP_RESPONDER);
     }
@@ -154,4 +158,12 @@ public class ArpResponderService extends AbstractServiceInstance implements ArpP
         // ToDo: WriteFlow/RemoveFlow should return something we can use to check success
         return new Status(StatusCode.SUCCESS);
     }
+
+    @Override
+    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+        super.setOrchestrator(bundleContext.getServiceReference(ArpProvider.class.getName()), this);
+    }
+
+    @Override
+    public void setDependencies(Object impl) {}
 }

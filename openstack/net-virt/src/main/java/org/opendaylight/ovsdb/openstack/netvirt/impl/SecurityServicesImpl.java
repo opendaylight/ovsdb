@@ -5,30 +5,25 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
+import java.util.List;
 import org.opendaylight.neutron.spi.INeutronPortCRUD;
 import org.opendaylight.neutron.spi.NeutronPort;
 import org.opendaylight.neutron.spi.NeutronSecurityGroup;
 import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
+import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
-
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-
-public class SecurityServicesImpl implements SecurityServicesManager {
-
+public class SecurityServicesImpl implements ConfigInterface, SecurityServicesManager {
     static final Logger logger = LoggerFactory.getLogger(TenantNetworkManagerImpl.class);
     private volatile INeutronPortCRUD neutronPortCache;
-
-    void init() {
-        logger.info(">>>>>> init {}", this.getClass());
-    }
 
     /**
      * Is security group ready.
@@ -96,6 +91,16 @@ public class SecurityServicesImpl implements SecurityServicesManager {
             return neutronSecurityGroup;
         } else {
             return null;
+        }
+    }
+
+    @Override
+    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {}
+
+    @Override
+    public void setDependencies(Object impl) {
+        if (impl instanceof INeutronPortCRUD) {
+            neutronPortCache = (INeutronPortCRUD)impl;
         }
     }
 }

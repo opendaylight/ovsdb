@@ -605,9 +605,9 @@ public class MdsalUtils {
         switch (table) {
         case BRIDGE:
             OvsdbBridgeAugmentation bridge = extractBridgeAugmentation(node);
-            if (bridge != null) {
+            if (bridge != null && bridge.getBridgeExternalIds() != null) {
                 for (BridgeExternalIds bridgeExternaIds :bridge.getBridgeExternalIds()) {
-                if (bridgeExternaIds.getBridgeExternalIdKey().equals(key)) {
+                    if (bridgeExternaIds.getBridgeExternalIdKey().equals(key)) {
                         return bridgeExternaIds.getBridgeExternalIdValue();
                     }
                 }
@@ -618,8 +618,8 @@ public class MdsalUtils {
             return null;
         case OPENVSWITCH:
             OvsdbNodeAugmentation ovsdbNode = extractNodeAugmentation(node);
-            if (ovsdbNode != null) {
-                for ( OpenvswitchExternalIds openvswitchExternalIds :ovsdbNode.getOpenvswitchExternalIds()) {
+            if (ovsdbNode != null && ovsdbNode.getOpenvswitchExternalIds() != null) {
+                for (OpenvswitchExternalIds openvswitchExternalIds : ovsdbNode.getOpenvswitchExternalIds()) {
                     if (openvswitchExternalIds.getExternalIdKey().equals(key)) {
                         return openvswitchExternalIds.getExternalIdValue();
                     }
@@ -649,7 +649,7 @@ public class MdsalUtils {
         switch (table) {
             case BRIDGE:
                 OvsdbBridgeAugmentation bridge = extractBridgeAugmentation(node);
-                if (bridge != null) {
+                if (bridge != null && bridge.getBridgeOtherConfigs() != null) {
                     for (BridgeOtherConfigs bridgeOtherConfigs : bridge.getBridgeOtherConfigs()) {
                         if (bridgeOtherConfigs.getBridgeOtherConfigKey().equals(key)) {
                             return bridgeOtherConfigs.getBridgeOtherConfigValue();
@@ -666,8 +666,8 @@ public class MdsalUtils {
                 if (ovsdbNode == null){
                     ovsdbNode = readOvsdbNode(node);
                 }
-                if (ovsdbNode != null) {
-                    for (OpenvswitchOtherConfigs openvswitchOtherConfigs :ovsdbNode.getOpenvswitchOtherConfigs()){
+                if (ovsdbNode != null && ovsdbNode.getOpenvswitchOtherConfigs() != null) {
+                    for (OpenvswitchOtherConfigs openvswitchOtherConfigs : ovsdbNode.getOpenvswitchOtherConfigs()) {
                         if (openvswitchOtherConfigs.getOtherConfigKey().equals(key)) {
                             return openvswitchOtherConfigs.getOtherConfigValue();
                         }

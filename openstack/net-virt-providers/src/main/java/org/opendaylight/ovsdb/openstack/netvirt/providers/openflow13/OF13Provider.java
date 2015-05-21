@@ -16,21 +16,12 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFaile
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.ovsdb.openstack.netvirt.MdsalHelper;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
-import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
-import org.opendaylight.ovsdb.openstack.netvirt.api.ClassifierProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
-import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.openstack.netvirt.api.EgressAclProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.IngressAclProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.L2ForwardingProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
-import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
-import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
-import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
-import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.*;
 import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.NetvirtProvidersProvider;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.GroupActionCase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.GroupActionCaseBuilder;
@@ -70,13 +61,13 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,20 +91,18 @@ import java.util.concurrent.ExecutionException;
  * @author Dave Tucker
  * @author Sam Hague
  */
-public class OF13Provider implements NetworkingProvider {
+public class OF13Provider implements ConfigInterface, NetworkingProvider {
     private static final Logger logger = LoggerFactory.getLogger(OF13Provider.class);
-    private DataBroker dataBroker;
     private static final short TABLE_0_DEFAULT_INGRESS = 0;
     private static final short TABLE_1_ISOLATE_TENANT = 10;
     private static final short TABLE_2_LOCAL_FORWARD = 20;
     private static Long groupId = 1L;
+    private DataBroker dataBroker = null;
 
     private volatile ConfigurationService configurationService;
     private volatile BridgeConfigurationManager bridgeConfigurationManager;
     private volatile TenantNetworkManager tenantNetworkManager;
     private volatile SecurityServicesManager securityServicesManager;
-    //private volatile OvsdbConnectionService connectionService;
-    private volatile MdsalConsumer mdsalConsumer;
     private volatile ClassifierProvider classifierProvider;
     private volatile IngressAclProvider ingressAclProvider;
     private volatile EgressAclProvider egressAclProvider;
@@ -121,9 +110,11 @@ public class OF13Provider implements NetworkingProvider {
     private volatile L2ForwardingProvider l2ForwardingProvider;
 
     public static final String NAME = "OF13Provider";
+    private volatile NetworkingProviderManager networkingProviderManager;
+    private volatile BundleContext bundleContext;
 
-    public void init() {
-        logger.info(">>>>>> init OF13Provider {}", this.getClass());
+    public OF13Provider() {
+        this.dataBroker = NetvirtProvidersProvider.getDataBroker();
     }
 
     @Override
@@ -1026,7 +1017,7 @@ public class OF13Provider implements NetworkingProvider {
     }
 
     private void triggerInterfaceUpdates(Node node) {
-        logger.warn("enter triggerInterfaceUpdates for {}", node.getNodeId());
+        logger.debug("enter triggerInterfaceUpdates for {}", node.getNodeId());
         List<OvsdbTerminationPointAugmentation> ports = MdsalUtils.extractTerminationPointAugmentations(node);
         if (ports != null && !ports.isEmpty()) {
             for (OvsdbTerminationPointAugmentation port : ports) {
@@ -1036,24 +1027,10 @@ public class OF13Provider implements NetworkingProvider {
                     handleInterfaceUpdate(neutronNetwork, node, port);
                 }
             }
-        /*
-        List<TerminationPoint> tps = MdsalUtils.extractTerminationPoints(node);
-        if (tps != null) {
-            for (TerminationPoint tp : tps) {
-                OvsdbTerminationPointAugmentation port = tp.getAugmentation(OvsdbTerminationPointAugmentation.class);
-                if (port != null) {
-                    NeutronNetwork neutronNetwork = tenantNetworkManager.getTenantNetwork(port);
-                    if (neutronNetwork != null) {
-                        logger.warn("Trigger Interface update for {}", port);
-                        handleInterfaceUpdate(neutronNetwork, node, port);
-                    }
-                }
-            }
-            */
         } else {
             logger.warn("triggerInterfaceUpdates: tps are null");
         }
-        logger.warn("exit triggerInterfaceUpdates for {}", node.getNodeId());
+        logger.debug("exit triggerInterfaceUpdates for {}", node.getNodeId());
     }
 
     @Override
@@ -1436,18 +1413,6 @@ public class OF13Provider implements NetworkingProvider {
     }
 
     private Group getGroup(GroupBuilder groupBuilder, NodeBuilder nodeBuilder) {
-        Preconditions.checkNotNull(mdsalConsumer);
-        if (mdsalConsumer == null) {
-            logger.error("ERROR finding MDSAL Service. Its possible that writeFlow is called too soon ?");
-            return null;
-        }
-
-        dataBroker = mdsalConsumer.getDataBroker();
-        if (dataBroker == null) {
-            logger.error("ERROR finding reference for DataBroker. Please check MD-SAL support on the Controller.");
-            return null;
-        }
-
         InstanceIdentifier<Group> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
                 .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Group.class,
                         new GroupKey(groupBuilder.getGroupId())).build();
@@ -1466,18 +1431,6 @@ public class OF13Provider implements NetworkingProvider {
     }
 
     private void writeGroup(GroupBuilder groupBuilder, NodeBuilder nodeBuilder) {
-        Preconditions.checkNotNull(mdsalConsumer);
-        if (mdsalConsumer == null) {
-            logger.error("ERROR finding MDSAL Service. Its possible that writeFlow is called too soon ?");
-            return;
-        }
-
-        dataBroker = mdsalConsumer.getDataBroker();
-        if (dataBroker == null) {
-            logger.error("ERROR finding reference for DataBroker. Please check MD-SAL support on the Controller.");
-            return;
-        }
-
         ReadWriteTransaction modification = dataBroker.newReadWriteTransaction();
         InstanceIdentifier<Group> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
                 .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Group.class,
@@ -1494,18 +1447,6 @@ public class OF13Provider implements NetworkingProvider {
     }
 
     private void removeGroup(GroupBuilder groupBuilder, NodeBuilder nodeBuilder) {
-        Preconditions.checkNotNull(mdsalConsumer);
-        if (mdsalConsumer == null) {
-            logger.error("ERROR finding MDSAL Service. Its possible that writeFlow is called too soon ?");
-            return;
-        }
-
-        dataBroker = mdsalConsumer.getDataBroker();
-        if (dataBroker == null) {
-            logger.error("ERROR finding reference for DataBroker. Please check MD-SAL support on the Controller.");
-            return;
-        }
-
         WriteTransaction modification = dataBroker.newWriteOnlyTransaction();
         InstanceIdentifier<Group> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
                 .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Group.class,
@@ -1522,18 +1463,6 @@ public class OF13Provider implements NetworkingProvider {
     }
 
     private Flow getFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
-        Preconditions.checkNotNull(mdsalConsumer);
-        if (mdsalConsumer == null) {
-            logger.error("ERROR finding MDSAL Service. Its possible that writeFlow is called too soon ?");
-            return null;
-        }
-
-        dataBroker = mdsalConsumer.getDataBroker();
-        if (dataBroker == null) {
-            logger.error("ERROR finding reference for DataBroker. Please check MD-SAL support on the Controller.");
-            return null;
-        }
-
         InstanceIdentifier<Flow> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
                 .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Table.class,
                         new TableKey(flowBuilder.getTableId())).child(Flow.class, flowBuilder.getKey()).build();
@@ -1553,20 +1482,6 @@ public class OF13Provider implements NetworkingProvider {
     }
 
     private void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
-        Preconditions.checkNotNull(mdsalConsumer);
-        logger.debug("writeFlow: flowBuilder: {}, nodeBuilder: {}",
-                flowBuilder.build(), nodeBuilder.build());
-        if (mdsalConsumer == null) {
-            logger.error("ERROR finding MDSAL Service. Its possible that writeFlow is called too soon ?");
-            return;
-        }
-
-        dataBroker = mdsalConsumer.getDataBroker();
-        if (dataBroker == null) {
-            logger.error("ERROR finding reference for DataBroker. Please check MD-SAL support on the Controller.");
-            return;
-        }
-
         ReadWriteTransaction modification = dataBroker.newReadWriteTransaction();
         InstanceIdentifier<Flow> path1 =
                 InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
@@ -1589,18 +1504,6 @@ public class OF13Provider implements NetworkingProvider {
     }
 
     private void removeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
-        Preconditions.checkNotNull(mdsalConsumer);
-        if (mdsalConsumer == null) {
-            logger.error("ERROR finding MDSAL Service.");
-            return;
-        }
-
-        dataBroker = mdsalConsumer.getDataBroker();
-        if (dataBroker == null) {
-            logger.error("ERROR finding reference for DataBroker. Please check MD-SAL support on the Controller.");
-            return;
-        }
-
         WriteTransaction modification = dataBroker.newWriteOnlyTransaction();
         InstanceIdentifier<Flow> path1 = InstanceIdentifier.builder(Nodes.class)
                 .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
@@ -1919,5 +1822,38 @@ public class OF13Provider implements NetworkingProvider {
         builder.setId(new NodeId(nodeId));
         builder.setKey(new NodeKey(builder.getId()));
         return builder;
+    }
+
+    @Override
+    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+        this.bundleContext = bundleContext;
+        configurationService =
+                (ConfigurationService) ServiceHelper.getGlobalInstance(ConfigurationService.class, this);
+        tenantNetworkManager =
+                (TenantNetworkManager) ServiceHelper.getGlobalInstance(TenantNetworkManager.class, this);
+        bridgeConfigurationManager =
+                (BridgeConfigurationManager) ServiceHelper.getGlobalInstance(BridgeConfigurationManager.class, this);
+        nodeCacheManager =
+                (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
+        classifierProvider =
+                (ClassifierProvider) ServiceHelper.getGlobalInstance(ClassifierProvider.class, this);
+        ingressAclProvider =
+                (IngressAclProvider) ServiceHelper.getGlobalInstance(IngressAclProvider.class, this);
+        egressAclProvider =
+                (EgressAclProvider) ServiceHelper.getGlobalInstance(EgressAclProvider.class, this);
+        l2ForwardingProvider =
+                (L2ForwardingProvider) ServiceHelper.getGlobalInstance(L2ForwardingProvider.class, this);
+        securityServicesManager =
+                (SecurityServicesManager) ServiceHelper.getGlobalInstance(SecurityServicesManager.class, this);
+
+    }
+
+    @Override
+    public void setDependencies(Object impl) {
+        if (impl instanceof NetworkingProviderManager) {
+            networkingProviderManager = (NetworkingProviderManager)impl;
+            networkingProviderManager.providerAdded(
+                    bundleContext.getServiceReference(NetworkingProvider.class.getName()),this);
+        }
     }
 }

@@ -11,6 +11,8 @@
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
 import org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent;
+import org.opendaylight.ovsdb.openstack.netvirt.AbstractHandler;
+import org.osgi.framework.ServiceReference;
 
 /**
  * Openstack related events will be enqueued into a common event queue.
@@ -23,5 +25,7 @@ public interface EventDispatcher {
      * @param event the {@link org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent} event to be handled.
      */
     public void enqueueEvent(AbstractEvent event);
+    public void eventHandlerAdded(final ServiceReference ref, AbstractHandler handler);
+    public void eventHandlerRemoved(final ServiceReference ref);
 }
 

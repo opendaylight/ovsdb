@@ -15,31 +15,31 @@ import org.opendaylight.neutron.spi.INeutronNetworkCRUD;
 import org.opendaylight.neutron.spi.INeutronPortCRUD;
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.neutron.spi.NeutronPort;
+import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TenantNetworkManagerImpl implements TenantNetworkManager {
+public class TenantNetworkManagerImpl implements ConfigInterface, TenantNetworkManager {
     static final Logger logger = LoggerFactory.getLogger(TenantNetworkManagerImpl.class);
-
-    // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile INeutronNetworkCRUD neutronNetworkCache;
     private volatile INeutronPortCRUD neutronPortCache;
     private volatile VlanConfigurationCache vlanConfigurationCache;
 
-    void init() {
-        logger.info(">>>>>> init {}", this.getClass());
-    }
-
     @Override
     public int getInternalVlan(Node node, String networkId) {
         Integer vlan = vlanConfigurationCache.getInternalVlan(node, networkId);
-        if (vlan == null) return 0;
+        if (vlan == null) {
+            return 0;
+        }
         return vlan;
     }
 
@@ -169,5 +169,20 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
     private boolean isInterfacePresentInTenantNetwork (String portId, String networkId) {
         NeutronPort neutronPort = neutronPortCache.getPort(portId);
         return neutronPort != null && neutronPort.getNetworkUUID().equalsIgnoreCase(networkId);
+    }
+
+    @Override
+    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+        vlanConfigurationCache =
+                (VlanConfigurationCache) ServiceHelper.getGlobalInstance(VlanConfigurationCache.class, this);
+    }
+
+    @Override
+    public void setDependencies(Object impl) {
+        if (impl instanceof INeutronNetworkCRUD) {
+            neutronNetworkCache = (INeutronNetworkCRUD)impl;
+        } else if (impl instanceof INeutronPortCRUD) {
+            neutronPortCache = (INeutronPortCRUD)impl;
+        }
     }
 }

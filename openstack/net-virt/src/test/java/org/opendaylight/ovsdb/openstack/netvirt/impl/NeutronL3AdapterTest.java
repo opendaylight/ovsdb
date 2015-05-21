@@ -85,7 +85,7 @@ public class NeutronL3AdapterTest {
         PowerMockito.mockStatic(ConfigProperties.class);
         PowerMockito.when(ConfigProperties.getProperty(neutronL3Adapter.getClass(), "ovsdb.l3.fwd.enabled")).thenReturn("yes");
 
-        neutronL3Adapter.init();
+        //neutronL3Adapter.init();
 
         this.getNeutronL3AdapterFields();
         this.setUpVar();

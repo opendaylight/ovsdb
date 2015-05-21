@@ -187,8 +187,23 @@ public class JsonRpcEndpoint {
             }
             return;
         }
+        
+        // send a null response for list_dbs
+        if (request.getMethod().equals("list_dbs")) {
+            JsonRpc10Response response = new JsonRpc10Response(request.getId());
+            response.setError(null);
+            String jsonString = null;
+            try {
+                jsonString = objectMapper.writeValueAsString(response);
+                nettyChannel.writeAndFlush(jsonString);
+            } catch (JsonProcessingException e) {
+                logger.error("Exception while processing JSON string " + jsonString, e );
+            }
+            return;
+        }
 
         logger.error("No handler for Request : {} on {}",requestJson.toString(), context);
+        return;
     }
 
     public Map<String, CallContext> getMethodContext() {

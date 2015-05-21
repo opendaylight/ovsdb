@@ -70,7 +70,7 @@ public class OvsdbConnectionInstance implements OvsdbClient {
         if ( this.callback == null) {
             try {
                 List<String> databases = getDatabases().get();
-                if (databases != null) {
+                if (databases != null && !databases.isEmpty()) {
                     for (String database : databases) {
                         DatabaseSchema dbSchema = getSchema(database).get();
                         if (dbSchema != null) {

@@ -76,14 +76,18 @@ public class OvsdbConnectionInstance implements OvsdbClient {
         if ( this.callback == null) {
             try {
                 List<String> databases = getDatabases().get();
-                this.callback = new OvsdbMonitorCallback(this,txInvoker);
-                for (String database : databases) {
-                    DatabaseSchema dbSchema = getSchema(database).get();
-                    if (dbSchema != null) {
-                        monitorAllTables(database, dbSchema);
-                    } else {
-                        LOG.warn("No schema reported for database {} for key {}",database,connectionInfo);
+                if (databases != null && !databases.isEmpty()) {
+                    this.callback = new OvsdbMonitorCallback(this,txInvoker);
+                    for (String database : databases) {
+                        DatabaseSchema dbSchema = getSchema(database).get();
+                        if (dbSchema != null) {
+                            monitorAllTables(database, dbSchema);
+                        } else {
+                            LOG.warn("No schema reported for database {} for key {}",database,connectionInfo);
+                        }
                     }
+                } else {
+                    LOG.warn("No databases reported for key {}",connectionInfo);
                 }
             } catch (InterruptedException | ExecutionException e) {
                 LOG.warn("Exception attempting to registerCallbacks {}: {}",connectionInfo,e);

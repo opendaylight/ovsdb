@@ -96,7 +96,23 @@ public class SouthboundMapper {
     }
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(OvsdbConnectionInstance client,Bridge bridge) {
-        return createInstanceIdentifier(createManagedNodeId(client, new OvsdbBridgeName(bridge.getName())));
+        InstanceIdentifier<Node> iid;
+        if (bridge.getExternalIdsColumn() != null
+                && bridge.getExternalIdsColumn().getData() != null
+                && bridge.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
+            String iidString = bridge.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY);
+            iid = (InstanceIdentifier<Node>) SouthboundUtil.deserializeInstanceIdentifier(iidString);
+        } else {
+            String nodeString = client.getNodeKey().getNodeId().getValue()
+                    + "/bridge/" + bridge.getName();
+            NodeId nodeId = new NodeId(new Uri(nodeString));
+            NodeKey nodeKey = new NodeKey(nodeId);
+            iid = InstanceIdentifier.builder(NetworkTopology.class)
+                    .child(Topology.class,new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+                    .child(Node.class,nodeKey)
+                    .build();
+        }
+        return iid;
     }
 
     public static NodeId createManagedNodeId(InstanceIdentifier<Node> iid) {

@@ -49,6 +49,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -89,8 +90,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
             transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
 
             // Update the bridge node with whatever data we are getting
-            InstanceIdentifier<Node> bridgeIid =
-                    SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(),bridge);
+            InstanceIdentifier<Node> bridgeIid = getInstanceIdentifier(bridge);
             Node bridgeNode = buildBridgeNode(bridge);
             transaction.merge(LogicalDatastoreType.OPERATIONAL, bridgeIid, bridgeNode);
             deleteEntries(transaction, protocolEntriesToRemove(bridgeIid,bridge));
@@ -219,9 +219,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
 
     private Node buildBridgeNode(Bridge bridge) {
         NodeBuilder bridgeNodeBuilder = new NodeBuilder();
-        InstanceIdentifier<Node> bridgeIid =
-                SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(),bridge);
-        NodeId bridgeNodeId = SouthboundMapper.createManagedNodeId(bridgeIid);
+        NodeId bridgeNodeId = getNodeId(bridge);
         bridgeNodeBuilder.setNodeId(bridgeNodeId);
         OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
         ovsdbBridgeAugmentationBuilder.setBridgeName(new OvsdbBridgeName(bridge.getName()));
@@ -365,5 +363,14 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                 }
             }
         }
+    }
+    private InstanceIdentifier<Node> getInstanceIdentifier(Bridge bridge) {
+        return SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(),
+                bridge);
+    }
+
+    private NodeId getNodeId(Bridge bridge) {
+        NodeKey nodeKey = getInstanceIdentifier(bridge).firstKeyOf(Node.class, NodeKey.class);
+        return nodeKey.getNodeId();
     }
 }

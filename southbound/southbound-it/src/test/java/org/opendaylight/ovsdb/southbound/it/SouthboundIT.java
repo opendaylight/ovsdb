@@ -382,7 +382,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     LOG.info("Found a DPDK node; adding a corresponding netdev device");
                     InstanceIdentifier<Node> bridgeIid = createInstanceIdentifier(connectionInfo,
                             new OvsdbBridgeName(SouthboundITConstants.BRIDGE_NAME));
-                    NodeId bridgeNodeId = SouthboundMapper.createManagedNodeId(bridgeIid);
+                    NodeId bridgeNodeId = createManagedNodeId(bridgeIid);
                     addBridge(connectionInfo, bridgeIid, SouthboundITConstants.BRIDGE_NAME, bridgeNodeId, false, null,
                             true, dpType, null, null);
 
@@ -763,7 +763,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
         OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
         Assert.assertNotNull(bridge);
-        NodeId nodeId = SouthboundMapper.createManagedNodeId(createInstanceIdentifier(
+        NodeId nodeId = createManagedNodeId(createInstanceIdentifier(
                 connectionInfo, bridge.getBridgeName()));
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
                 createGenericOvsdbTerminationPointAugmentationBuilder();
@@ -1025,7 +1025,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 Assert.assertTrue(addBridge(connectionInfo, null,
                         testBridgeName, null, true, SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
                         true, null, null, null));
-                testBridgeNodeId = SouthboundMapper.createManagedNodeId(createInstanceIdentifier(
+                testBridgeNodeId = createManagedNodeId(createInstanceIdentifier(
                         connectionInfo, new OvsdbBridgeName(testBridgeName)));
                 tpCreateAugmentationBuilder = createGenericOvsdbTerminationPointAugmentationBuilder();
                 tpCreateAugmentationBuilder.setName(testPortName);
@@ -1053,7 +1053,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 tpUpdateAugmentationBuilder.setPortExternalIds(updateToInputExternalIds);
                 portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
                 portUpdateNodeBuilder = new NodeBuilder();
-                portUpdateNodeId = SouthboundMapper.createManagedNodeId(portIid);
+                portUpdateNodeId = createManagedNodeId(portIid);
                 portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
                 tpUpdateBuilder = new TerminationPointBuilder();
                 tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(testPortName)));
@@ -1317,7 +1317,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 Assert.assertTrue(addBridge(connectionInfo, null,
                         testBridgeName, null, true, SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
                         true, null, null, null));
-                testBridgeNodeId = SouthboundMapper.createManagedNodeId(createInstanceIdentifier(
+                testBridgeNodeId = createManagedNodeId(createInstanceIdentifier(
                         connectionInfo, new OvsdbBridgeName(testBridgeName)));
                 tpCreateAugmentationBuilder = createGenericOvsdbTerminationPointAugmentationBuilder();
                 tpCreateAugmentationBuilder.setName(testPortName);
@@ -1347,7 +1347,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 tpUpdateAugmentationBuilder.setInterfaceExternalIds(updateToInputExternalIds);
                 portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
                 portUpdateNodeBuilder = new NodeBuilder();
-                portUpdateNodeId = SouthboundMapper.createManagedNodeId(portIid);
+                portUpdateNodeId = createManagedNodeId(portIid);
                 portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
                 tpUpdateBuilder = new TerminationPointBuilder();
                 tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(testPortName)));
@@ -1615,7 +1615,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 Assert.assertTrue(addBridge(connectionInfo, null,
                         testBridgeName, null, true, SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
                         true, null, null, null));
-                testBridgeNodeId = SouthboundMapper.createManagedNodeId(createInstanceIdentifier(
+                testBridgeNodeId = createManagedNodeId(createInstanceIdentifier(
                         connectionInfo, new OvsdbBridgeName(testBridgeName)));
                 tpCreateAugmentationBuilder = createGenericOvsdbTerminationPointAugmentationBuilder();
                 tpCreateAugmentationBuilder.setName(testPortName);
@@ -1645,7 +1645,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 tpUpdateAugmentationBuilder.setOptions(updateToInputOptions);
                 portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
                 portUpdateNodeBuilder = new NodeBuilder();
-                portUpdateNodeId = SouthboundMapper.createManagedNodeId(portIid);
+                portUpdateNodeId = createManagedNodeId(portIid);
                 portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
                 tpUpdateBuilder = new TerminationPointBuilder();
                 tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(testPortName)));
@@ -1912,7 +1912,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 Assert.assertTrue(addBridge(connectionInfo, null,
                         testBridgeName, null, true, SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
                         true, null, null, null));
-                testBridgeNodeId = SouthboundMapper.createManagedNodeId(createInstanceIdentifier(
+                testBridgeNodeId = createManagedNodeId(createInstanceIdentifier(
                         connectionInfo, new OvsdbBridgeName(testBridgeName)));
                 tpCreateAugmentationBuilder = createGenericOvsdbTerminationPointAugmentationBuilder();
                 tpCreateAugmentationBuilder.setName(testPortName);
@@ -1950,7 +1950,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 tpUpdateAugmentationBuilder.setInterfaceOtherConfigs(updateToInputOtherConfigs);
                 portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
                 portUpdateNodeBuilder = new NodeBuilder();
-                portUpdateNodeId = SouthboundMapper.createManagedNodeId(portIid);
+                portUpdateNodeId = createManagedNodeId(portIid);
                 portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
                 tpUpdateBuilder = new TerminationPointBuilder();
                 tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(testPortName)));
@@ -2221,7 +2221,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 Assert.assertTrue(addBridge(connectionInfo, null,
                         testBridgeName, null, true, SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
                         true, null, null, null));
-                testBridgeNodeId = SouthboundMapper.createManagedNodeId(createInstanceIdentifier(
+                testBridgeNodeId = createManagedNodeId(createInstanceIdentifier(
                         connectionInfo, new OvsdbBridgeName(testBridgeName)));
                 tpCreateAugmentationBuilder = createGenericOvsdbTerminationPointAugmentationBuilder();
                 tpCreateAugmentationBuilder.setName(testPortName);
@@ -2259,7 +2259,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 tpUpdateAugmentationBuilder.setPortOtherConfigs(updateToInputOtherConfigs);
                 portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
                 portUpdateNodeBuilder = new NodeBuilder();
-                portUpdateNodeId = SouthboundMapper.createManagedNodeId(portIid);
+                portUpdateNodeId = createManagedNodeId(portIid);
                 portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
                 tpUpdateBuilder = new TerminationPointBuilder();
                 tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(testPortName)));
@@ -2314,7 +2314,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
         OvsdbBridgeAugmentation bridge = getBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME);
         Assert.assertNotNull(bridge);
-        NodeId nodeId = SouthboundMapper.createManagedNodeId(createInstanceIdentifier(
+        NodeId nodeId = createManagedNodeId(createInstanceIdentifier(
                 connectionInfo, bridge.getBridgeName()));
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
                 createGenericOvsdbTerminationPointAugmentationBuilder();
@@ -2347,7 +2347,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         tpUpdateAugmentationBuilder.setVlanTag(new VlanId(UPDATED_VLAN_ID));
         InstanceIdentifier<Node> portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
         NodeBuilder portUpdateNodeBuilder = new NodeBuilder();
-        NodeId portUpdateNodeId = SouthboundMapper.createManagedNodeId(portIid);
+        NodeId portUpdateNodeId = createManagedNodeId(portIid);
         portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
         TerminationPointBuilder tpUpdateBuilder = new TerminationPointBuilder();
         tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(portName)));
@@ -2390,7 +2390,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
             OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
             Assert.assertNotNull(bridge);
-            NodeId nodeId = SouthboundMapper.createManagedNodeId(createInstanceIdentifier(
+            NodeId nodeId = createManagedNodeId(createInstanceIdentifier(
                     connectionInfo, bridge.getBridgeName()));
             OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
                     createGenericOvsdbTerminationPointAugmentationBuilder();
@@ -2420,7 +2420,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             tpUpdateAugmentationBuilder.setVlanMode(UPDATED_VLAN_MODE);
             InstanceIdentifier<Node> portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
             NodeBuilder portUpdateNodeBuilder = new NodeBuilder();
-            NodeId portUpdateNodeId = SouthboundMapper.createManagedNodeId(portIid);
+            NodeId portUpdateNodeId = createManagedNodeId(portIid);
             portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
             TerminationPointBuilder tpUpdateBuilder = new TerminationPointBuilder();
             tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(portName)));
@@ -2501,7 +2501,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
             OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
             Assert.assertNotNull(bridge);
-            NodeId nodeId = SouthboundMapper.createManagedNodeId(createInstanceIdentifier(
+            NodeId nodeId = createManagedNodeId(createInstanceIdentifier(
                     connectionInfo, bridge.getBridgeName()));
             OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
                     createGenericOvsdbTerminationPointAugmentationBuilder();
@@ -2535,7 +2535,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             tpUpdateAugmentationBuilder.setTrunks(UPDATED_TRUNKS);
             InstanceIdentifier<Node> portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
             NodeBuilder portUpdateNodeBuilder = new NodeBuilder();
-            NodeId portUpdateNodeId = SouthboundMapper.createManagedNodeId(portIid);
+            NodeId portUpdateNodeId = createManagedNodeId(portIid);
             portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
             TerminationPointBuilder tpUpdateBuilder = new TerminationPointBuilder();
             tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(portName)));
@@ -3125,6 +3125,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = new OvsdbNodeAugmentationBuilder();
         ovsdbNodeBuilder.setConnectionInfo(key);
         return ovsdbNodeBuilder.build();
+    }
+
+    public static NodeId createManagedNodeId(InstanceIdentifier<Node> iid) {
+        NodeKey nodeKey = iid.firstKeyOf(Node.class, NodeKey.class);
+        return nodeKey.getNodeId();
     }
 }
 

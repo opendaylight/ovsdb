@@ -171,6 +171,13 @@ public class TransactUtils {
     public static <T  extends TableSchema<T>> void stampInstanceIdentifier(TransactionBuilder transaction,
             InstanceIdentifier<?> iid, TableSchema<T> tableSchema,
             ColumnSchema<T, Map<String,String>> columnSchema) {
+        transaction.add(stampInstanceIdentifierMutation(transaction,iid,
+                tableSchema,columnSchema));
+    }
+
+    public static <T  extends TableSchema<T>> Mutate<T> stampInstanceIdentifierMutation(TransactionBuilder transaction,
+            InstanceIdentifier<?> iid, TableSchema<T> tableSchema,
+            ColumnSchema<T, Map<String,String>> columnSchema) {
         Map<String,String> externalIdsMap = ImmutableMap.of(SouthboundConstants.IID_EXTERNAL_ID_KEY,
                 SouthboundUtil.serializeInstanceIdentifier(iid));
         Mutate<T> mutate = op.mutate(tableSchema)
@@ -183,6 +190,6 @@ public class TransactUtils {
         List<Mutation> mutations = Lists.newArrayList(Sets.newHashSet(deleteIidMutation));
         mutations.addAll(mutate.getMutations());
         mutate.setMutations(mutations);
-        transaction.add(mutate);
+        return mutate;
     }
 }

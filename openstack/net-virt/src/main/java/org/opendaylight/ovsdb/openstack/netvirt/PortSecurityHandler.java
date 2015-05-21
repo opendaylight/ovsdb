@@ -15,6 +15,10 @@ import org.opendaylight.neutron.spi.INeutronSecurityRuleAware;
 import org.opendaylight.neutron.spi.NeutronSecurityGroup;
 import org.opendaylight.neutron.spi.NeutronSecurityRule;
 
+import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,9 +28,10 @@ import java.net.HttpURLConnection;
  * Handle requests for OpenStack Neutron v2.0 Port Security API calls.
  */
 public class PortSecurityHandler extends AbstractHandler
-        implements INeutronSecurityGroupAware, INeutronSecurityRuleAware{
+        implements INeutronSecurityGroupAware, INeutronSecurityRuleAware, ConfigInterface {
 
     static final Logger logger = LoggerFactory.getLogger(PortSecurityHandler.class);
+    private volatile EventDispatcher eventDispatcher;
 
     @Override
     public int canCreateNeutronSecurityGroup(NeutronSecurityGroup neutronSecurityGroup) {
@@ -139,4 +144,15 @@ public class PortSecurityHandler extends AbstractHandler
         }
     }
 
+    @Override
+    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+        eventDispatcher =
+                (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
+        eventDispatcher.eventHandlerAdded(
+                bundleContext.getServiceReference(INeutronSecurityGroupAware.class.getName()), this);
+        super.setDispatcher(eventDispatcher);
+    }
+
+    @Override
+    public void setDependencies(Object impl) {}
 }

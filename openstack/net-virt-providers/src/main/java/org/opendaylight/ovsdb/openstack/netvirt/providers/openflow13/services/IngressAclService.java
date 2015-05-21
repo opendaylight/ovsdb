@@ -15,7 +15,9 @@ import java.util.List;
 import org.opendaylight.neutron.spi.NeutronSecurityGroup;
 import org.opendaylight.neutron.spi.NeutronSecurityRule;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.openstack.netvirt.api.InboundNatProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.IngressAclProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
@@ -32,12 +34,14 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
-public class IngressAclService extends AbstractServiceInstance implements IngressAclProvider {
+public class IngressAclService extends AbstractServiceInstance implements IngressAclProvider, ConfigInterface {
 
     static final Logger logger = LoggerFactory.getLogger(IngressAclService.class);
 
@@ -459,5 +463,15 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         } else {
             removeFlow(flowBuilder, nodeBuilder);
         }
+    }
+
+    @Override
+    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+        super.setOrchestrator(bundleContext.getServiceReference(IngressAclProvider.class.getName()), this);
+    }
+
+    @Override
+    public void setDependencies(Object impl) {
+
     }
 }

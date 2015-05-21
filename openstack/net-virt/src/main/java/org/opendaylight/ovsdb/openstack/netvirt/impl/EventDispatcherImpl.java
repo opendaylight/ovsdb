@@ -12,9 +12,11 @@ package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent;
 import org.opendaylight.ovsdb.openstack.netvirt.AbstractHandler;
+import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,18 +27,17 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-public class EventDispatcherImpl implements EventDispatcher {
-
+public class EventDispatcherImpl implements EventDispatcher, ConfigInterface {
     static final Logger logger = LoggerFactory.getLogger(EventDispatcher.class);
     private ExecutorService eventHandler;
     private volatile BlockingQueue<AbstractEvent> events;
-
     private AbstractHandler[] handlers;
 
-    void init() {
+    public EventDispatcherImpl() {
+        events = new LinkedBlockingQueue<>();
+        handlers = new AbstractHandler[AbstractEvent.HandlerType.size];
         eventHandler = Executors.newSingleThreadExecutor();
-        this.events = new LinkedBlockingQueue<>();
-        this.handlers = new AbstractHandler[AbstractEvent.HandlerType.size];
+        start();
     }
 
     void start() {
@@ -44,9 +45,8 @@ public class EventDispatcherImpl implements EventDispatcher {
             @Override
             public void run() {
                 Thread t = Thread.currentThread();
-                logger.info("Thread = {}", t);
                 t.setName("EventDispatcherImpl");
-                logger.info("Thread = {}", t);
+                logger.info("EventDispatcherImpl: started {}", t.getName());
                 while (true) {
                     AbstractEvent ev;
                     try {
@@ -89,11 +89,10 @@ public class EventDispatcherImpl implements EventDispatcher {
     private void dispatchEvent(AbstractEvent ev) {
         AbstractHandler handler = handlers[ev.getHandlerType().ordinal()];
         if (handler == null) {
-            logger.warn("event dispatcher found no handler for " + ev);
+            logger.warn("event dispatcher found no handler for {}", ev);
             return;
         }
 
-        logger.info("EventDispatcherImpl: dispatchEvent: {}", ev);
         handler.processEvent(ev);
     }
 
@@ -101,12 +100,11 @@ public class EventDispatcherImpl implements EventDispatcher {
         Long pid = (Long) ref.getProperty(org.osgi.framework.Constants.SERVICE_ID);
         Object handlerTypeObject = ref.getProperty(Constants.EVENT_HANDLER_TYPE_PROPERTY);
         if (!(handlerTypeObject instanceof AbstractEvent.HandlerType)){
-            logger.error("Abstract handler reg failed to provide a valid handler type " + handlerTypeObject);
+            logger.error("Abstract handler reg failed to provide a valid handler type {}", handlerTypeObject);
             return;
         }
         AbstractEvent.HandlerType handlerType = (AbstractEvent.HandlerType) handlerTypeObject;
         handlers[handlerType.ordinal()] = handler;
-
         logger.debug("Event handler for type {} registered for {}, pid {}",
                      handlerType, handler.getClass().getName(), pid);
     }
@@ -120,7 +118,6 @@ public class EventDispatcherImpl implements EventDispatcher {
         }
         AbstractEvent.HandlerType handlerType = (AbstractEvent.HandlerType) handlerTypeObject;
         handlers[handlerType.ordinal()] = null;
-
         logger.debug("Event handler for type {} unregistered pid {}", handlerType, pid);
     }
 
@@ -137,10 +134,15 @@ public class EventDispatcherImpl implements EventDispatcher {
         }
 
         try {
-            logger.info("EventDispatcherImpl: enqueueEvent: {}", event);
             events.put(event);
         } catch (InterruptedException e) {
             logger.error("Thread was interrupted while trying to enqueue event ", e);
         }
     }
+
+    @Override
+    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {}
+
+    @Override
+    public void setDependencies(Object impl) {}
 }

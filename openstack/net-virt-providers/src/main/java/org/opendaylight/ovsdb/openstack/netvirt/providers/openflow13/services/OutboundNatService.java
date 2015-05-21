@@ -16,9 +16,11 @@ import java.util.List;
 
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OutboundNatProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
 import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.OF13Provider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
@@ -36,8 +38,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instru
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 
 import com.google.common.collect.Lists;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
-public class OutboundNatService extends AbstractServiceInstance implements OutboundNatProvider {
+public class OutboundNatService extends AbstractServiceInstance implements OutboundNatProvider, ConfigInterface {
     public OutboundNatService() {
         super(Service.OUTBOUND_NAT);
     }
@@ -146,5 +150,15 @@ public class OutboundNatService extends AbstractServiceInstance implements Outbo
 
         // ToDo: WriteFlow/RemoveFlow should return something we can use to check success
         return new Status(StatusCode.SUCCESS);
+    }
+
+    @Override
+    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+        super.setOrchestrator(bundleContext.getServiceReference(OutboundNatProvider.class.getName()), this);
+    }
+
+    @Override
+    public void setDependencies(Object impl) {
+
     }
 }

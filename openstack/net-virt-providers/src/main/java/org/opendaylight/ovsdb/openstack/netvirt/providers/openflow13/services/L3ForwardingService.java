@@ -16,9 +16,11 @@ import java.util.List;
 
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.openstack.netvirt.api.L2ForwardingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
 import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.OF13Provider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
@@ -38,8 +40,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 
 import com.google.common.collect.Lists;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
-public class L3ForwardingService extends AbstractServiceInstance implements L3ForwardingProvider {
+public class L3ForwardingService extends AbstractServiceInstance implements L3ForwardingProvider, ConfigInterface {
     public L3ForwardingService() {
         super(Service.L3_FORWARDING);
     }
@@ -99,5 +103,15 @@ public class L3ForwardingService extends AbstractServiceInstance implements L3Fo
 
         // ToDo: WriteFlow/RemoveFlow should return something we can use to check success
         return new Status(StatusCode.SUCCESS);
+    }
+
+    @Override
+    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+        super.setOrchestrator(bundleContext.getServiceReference(L3ForwardingProvider.class.getName()), this);
+    }
+
+    @Override
+    public void setDependencies(Object impl) {
+
     }
 }

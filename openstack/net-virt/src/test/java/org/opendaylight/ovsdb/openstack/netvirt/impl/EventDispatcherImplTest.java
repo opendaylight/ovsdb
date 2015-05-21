@@ -47,7 +47,8 @@ public class EventDispatcherImplTest {
     public void setUp() {
         Random r = new Random();
 
-        eventDispatcherImpl.init();
+        /* TODO SB_MIGRATION */
+        //eventDispatcherImpl.init();
         eventDispatcherImpl.start();
 
         when(ref.getProperty(org.osgi.framework.Constants.SERVICE_ID)).thenReturn(r.nextLong());

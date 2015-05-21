@@ -21,13 +21,16 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PipelineOrchestratorImpl implements NodeCacheListener, PipelineOrchestrator {
-
+public class PipelineOrchestratorImpl implements ConfigInterface, NodeCacheListener, PipelineOrchestrator {
     private static final Logger logger = LoggerFactory.getLogger(PipelineOrchestratorImpl.class);
     private List<Service> staticPipeline = Lists.newArrayList(
             Service.CLASSIFIER,
@@ -45,7 +48,12 @@ public class PipelineOrchestratorImpl implements NodeCacheListener, PipelineOrch
     Map<Service, AbstractServiceInstance> serviceRegistry = Maps.newConcurrentMap();
     private volatile BlockingQueue<Node> queue;
     private ExecutorService eventHandler;
+
     public PipelineOrchestratorImpl() {
+        eventHandler = Executors.newSingleThreadExecutor();
+        this.queue = new LinkedBlockingQueue<Node>();
+        logger.info("PipelineOrchestratorImpl constructor");
+        start();
     }
 
     public void registerService(final ServiceReference ref, AbstractServiceInstance serviceInstance){
@@ -68,12 +76,6 @@ public class PipelineOrchestratorImpl implements NodeCacheListener, PipelineOrch
     public AbstractServiceInstance getServiceInstance(Service service) {
         if (service == null) return null;
         return serviceRegistry.get(service);
-    }
-
-    public void init() {
-        eventHandler = Executors.newSingleThreadExecutor();
-        this.queue = new LinkedBlockingQueue<Node>();
-        logger.info(">>>>> init PipelineOrchestratorImpl");
     }
 
     public void start() {
@@ -135,5 +137,18 @@ public class PipelineOrchestratorImpl implements NodeCacheListener, PipelineOrch
         } else {
             logger.info("update ignored: {}", node);
         }
+    }
+
+    @Override
+    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+        NodeCacheManager nodeCacheManager =
+                (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
+        nodeCacheManager.cacheListenerAdded(
+                bundleContext.getServiceReference(PipelineOrchestrator.class.getName()), this);
+    }
+
+    @Override
+    public void setDependencies(Object impl) {
+
     }
 }

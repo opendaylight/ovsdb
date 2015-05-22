@@ -416,18 +416,19 @@ public class ConfigActivator implements BundleActivator {
     @Override
     public void stop(BundleContext context) throws Exception {
         LOG.info("ConfigActivator stop");
-        /*INeutronNetworkCRUDTracker.close();
+        /* ServiceTrackers and services are already released when bundle stops
+        INeutronNetworkCRUDTracker.close();
         INeutronPortCRUDTracker.close();
         INeutronSubnetCRUDTracker.close();
         INeutronLoadBalancerCRUDTracker.close();
         INeutronLoadBalancerPoolCRUDTracker.close();
         LoadBalancerProviderTracker.close();
-        */
+
         for (ServiceRegistration registration : registrations) {
             if (registration != null) {
                 registration.unregister();
             }
-        }
+        }*/
     }
 
     private ServiceRegistration<?> registerService(BundleContext bundleContext, String[] interfaces,

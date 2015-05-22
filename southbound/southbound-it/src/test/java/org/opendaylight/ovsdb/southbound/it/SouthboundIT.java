@@ -16,6 +16,7 @@ import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.ObjectArrays;
+import com.google.common.collect.Sets;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -2286,11 +2287,16 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testTerminationPointVlan() throws InterruptedException {
+    public void testCRUDTerminationPointVlan() throws InterruptedException {
+        final Integer CREATED_VLAN_ID = new Integer(4000);
+        final Integer UPDATED_VLAN_ID = new Integer(4001);
+
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
         connectOvsdbNode(connectionInfo);
+
+        // CREATE
         Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
-        OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
+        OvsdbBridgeAugmentation bridge = getBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME);
         Assert.assertNotNull(bridge);
         NodeId nodeId = SouthboundMapper.createManagedNodeId(SouthboundMapper.createInstanceIdentifier(
                 connectionInfo, bridge.getBridgeName()));
@@ -2298,38 +2304,73 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 createGenericOvsdbTerminationPointAugmentationBuilder();
         String portName = "testTerminationPointVlanId";
         ovsdbTerminationBuilder.setName(portName);
-        //setup
-        Integer vlanId = new Integer(4000);
-        ovsdbTerminationBuilder.setVlanTag(new VlanId(vlanId));
-
+        ovsdbTerminationBuilder.setVlanTag(new VlanId(CREATED_VLAN_ID));
         Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
         InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
         Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
         Assert.assertNotNull(terminationPointNode);
 
+        // READ
         List<TerminationPoint> terminationPoints = terminationPointNode.getTerminationPoint();
+        OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation = null;
         for (TerminationPoint terminationPoint : terminationPoints) {
-            OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
-                    terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
+            ovsdbTerminationPointAugmentation = terminationPoint.getAugmentation(
+                    OvsdbTerminationPointAugmentation.class);
             if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
-                //test
                 VlanId actualVlanId = ovsdbTerminationPointAugmentation.getVlanTag();
                 Assert.assertNotNull(actualVlanId);
                 Integer actualVlanIdInt = actualVlanId.getValue();
-                Assert.assertTrue(actualVlanIdInt.equals(vlanId));
+                Assert.assertEquals(CREATED_VLAN_ID, actualVlanIdInt);
             }
         }
+
+        // UPDATE
+        NodeId testBridgeNodeId = getBridgeNode(connectionInfo, SouthboundITConstants.BRIDGE_NAME).getNodeId();
+        OvsdbTerminationPointAugmentationBuilder tpUpdateAugmentationBuilder =
+                new OvsdbTerminationPointAugmentationBuilder();
+        tpUpdateAugmentationBuilder.setVlanTag(new VlanId(UPDATED_VLAN_ID));
+        InstanceIdentifier<Node> portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
+        NodeBuilder portUpdateNodeBuilder = new NodeBuilder();
+        NodeId portUpdateNodeId = SouthboundMapper.createManagedNodeId(portIid);
+        portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
+        TerminationPointBuilder tpUpdateBuilder = new TerminationPointBuilder();
+        tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(portName)));
+        tpUpdateBuilder.addAugmentation(
+                OvsdbTerminationPointAugmentation.class,
+                tpUpdateAugmentationBuilder.build());
+        tpUpdateBuilder.setTpId(new TpId(portName));
+        portUpdateNodeBuilder.setTerminationPoint(Lists.newArrayList(tpUpdateBuilder.build()));
+        boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
+                portIid, portUpdateNodeBuilder.build());
+        Assert.assertTrue(result);
+        Thread.sleep(OVSDB_UPDATE_TIMEOUT);
+
+        terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
+        terminationPoints = terminationPointNode.getTerminationPoint();
+        for (TerminationPoint terminationPoint : terminationPoints) {
+            ovsdbTerminationPointAugmentation = terminationPoint.getAugmentation(
+                    OvsdbTerminationPointAugmentation.class);
+            if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
+                VlanId actualVlanId = ovsdbTerminationPointAugmentation.getVlanTag();
+                Assert.assertNotNull(actualVlanId);
+                Integer actualVlanIdInt = actualVlanId.getValue();
+                Assert.assertEquals(UPDATED_VLAN_ID, actualVlanIdInt);
+            }
+        }
+
+        // DELETE
         Assert.assertTrue(deleteBridge(connectionInfo));
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
 
     @Test
-    public void testTerminationPointVlanModes() throws InterruptedException {
+    public void testCRUDTerminationPointVlanModes() throws InterruptedException {
+        final VlanMode UPDATED_VLAN_MODE = VlanMode.Access;
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
         connectOvsdbNode(connectionInfo);
         VlanMode []vlanModes = VlanMode.values();
         for (VlanMode vlanMode : vlanModes) {
-
+            // CREATE
             Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
             OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
             Assert.assertNotNull(bridge);
@@ -2339,13 +2380,13 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     createGenericOvsdbTerminationPointAugmentationBuilder();
             String portName = "testTerminationPointVlanMode" + vlanMode.toString();
             ovsdbTerminationBuilder.setName(portName);
-            //setup
             ovsdbTerminationBuilder.setVlanMode(vlanMode);
             Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
             InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
             Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
             Assert.assertNotNull(terminationPointNode);
 
+            // READ
             List<TerminationPoint> terminationPoints = terminationPointNode.getTerminationPoint();
             for (TerminationPoint terminationPoint : terminationPoints) {
                 OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
@@ -2355,6 +2396,40 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     Assert.assertTrue(ovsdbTerminationPointAugmentation.getVlanMode().equals(vlanMode));
                 }
             }
+
+            // UPDATE
+            NodeId testBridgeNodeId = getBridgeNode(connectionInfo, SouthboundITConstants.BRIDGE_NAME).getNodeId();
+            OvsdbTerminationPointAugmentationBuilder tpUpdateAugmentationBuilder =
+                    new OvsdbTerminationPointAugmentationBuilder();
+            tpUpdateAugmentationBuilder.setVlanMode(UPDATED_VLAN_MODE);
+            InstanceIdentifier<Node> portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
+            NodeBuilder portUpdateNodeBuilder = new NodeBuilder();
+            NodeId portUpdateNodeId = SouthboundMapper.createManagedNodeId(portIid);
+            portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
+            TerminationPointBuilder tpUpdateBuilder = new TerminationPointBuilder();
+            tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(portName)));
+            tpUpdateBuilder.addAugmentation(
+                    OvsdbTerminationPointAugmentation.class,
+                    tpUpdateAugmentationBuilder.build());
+            tpUpdateBuilder.setTpId(new TpId(portName));
+            portUpdateNodeBuilder.setTerminationPoint(Lists.newArrayList(tpUpdateBuilder.build()));
+            boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
+                    portIid, portUpdateNodeBuilder.build());
+            Assert.assertTrue(result);
+            Thread.sleep(OVSDB_UPDATE_TIMEOUT);
+
+            terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
+            terminationPoints = terminationPointNode.getTerminationPoint();
+            for (TerminationPoint terminationPoint : terminationPoints) {
+                OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
+                        terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
+                if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
+                    //test
+                    Assert.assertEquals(UPDATED_VLAN_MODE, ovsdbTerminationPointAugmentation.getVlanMode());
+                }
+            }
+
+            // DELETE
             Assert.assertTrue(deleteBridge(connectionInfo));
         }
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
@@ -2398,13 +2473,15 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testTerminationPointVlanTrunks() throws InterruptedException {
+    public void testCRUDTerminationPointVlanTrunks() throws InterruptedException {
+        final List<Trunks> UPDATED_TRUNKS = buildTrunkList(Sets.newHashSet(2011));
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
         connectOvsdbNode(connectionInfo);
         ArrayList<Set<Integer>> vlanSets = generateVlanSets();
         int testCase = 0;
         for (Set<Integer> vlanSet : vlanSets) {
             ++testCase;
+            // CREATE
             Assert.assertTrue(addBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME));
             OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
             Assert.assertNotNull(bridge);
@@ -2414,7 +2491,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     createGenericOvsdbTerminationPointAugmentationBuilder();
             String portName = "testTerminationPointVlanTrunks" + testCase;
             ovsdbTerminationBuilder.setName(portName);
-            //setup
             List<Trunks> trunks = buildTrunkList(vlanSet);
             ovsdbTerminationBuilder.setTrunks(trunks);
             Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
@@ -2422,6 +2498,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
             Assert.assertNotNull(terminationPointNode);
 
+            // READ
             List<TerminationPoint> terminationPoints = terminationPointNode.getTerminationPoint();
             for (TerminationPoint terminationPoint : terminationPoints) {
                 OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
@@ -2433,6 +2510,40 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     }
                 }
             }
+
+            // UPDATE
+            NodeId testBridgeNodeId = getBridgeNode(connectionInfo, SouthboundITConstants.BRIDGE_NAME).getNodeId();
+            OvsdbTerminationPointAugmentationBuilder tpUpdateAugmentationBuilder =
+                    new OvsdbTerminationPointAugmentationBuilder();
+            tpUpdateAugmentationBuilder.setTrunks(UPDATED_TRUNKS);
+            InstanceIdentifier<Node> portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
+            NodeBuilder portUpdateNodeBuilder = new NodeBuilder();
+            NodeId portUpdateNodeId = SouthboundMapper.createManagedNodeId(portIid);
+            portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
+            TerminationPointBuilder tpUpdateBuilder = new TerminationPointBuilder();
+            tpUpdateBuilder.setKey(new TerminationPointKey(new TpId(portName)));
+            tpUpdateBuilder.addAugmentation(
+                    OvsdbTerminationPointAugmentation.class,
+                    tpUpdateAugmentationBuilder.build());
+            tpUpdateBuilder.setTpId(new TpId(portName));
+            portUpdateNodeBuilder.setTerminationPoint(Lists.newArrayList(tpUpdateBuilder.build()));
+            boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
+                    portIid, portUpdateNodeBuilder.build());
+            Assert.assertTrue(result);
+            Thread.sleep(OVSDB_UPDATE_TIMEOUT);
+
+            terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
+            terminationPoints = terminationPointNode.getTerminationPoint();
+            for (TerminationPoint terminationPoint : terminationPoints) {
+                OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
+                        terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class);
+                if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
+                    //test
+                    Assert.assertEquals(UPDATED_TRUNKS, ovsdbTerminationPointAugmentation.getTrunks());
+                }
+            }
+
+            // DELETE
             Assert.assertTrue(deleteBridge(connectionInfo));
         }
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));

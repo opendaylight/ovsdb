@@ -126,12 +126,13 @@ public class ConfigActivator implements BundleActivator {
     @Override
     public void stop(BundleContext context) throws Exception {
         LOG.info("ConfigActivator stop");
-        //NetworkingProviderManagerTracker.close();
+        /* ServiceTrackers and services are already released when bundle stops
+        NetworkingProviderManagerTracker.close();
         for (ServiceRegistration registration : registrations) {
             if (registration != null) {
                 registration.unregister();
             }
-        }
+        }*/
     }
 
     private ServiceRegistration<?> registerService(BundleContext bundleContext, String[] interfaces,

@@ -44,14 +44,6 @@ public class SouthboundHandler extends AbstractHandler
     private volatile EventDispatcher eventDispatcher;
     private volatile OvsdbInventoryService ovsdbInventoryService;
 
-    void start() {
-        this.triggerUpdates();
-    }
-
-    /*void init() {
-        logger.info(">>>>>> init {}", this.getClass());
-    }*/
-
     private SouthboundEvent.Type ovsdbTypeToSouthboundEventType(OvsdbType ovsdbType) {
         SouthboundEvent.Type type = SouthboundEvent.Type.NODE;
 
@@ -123,22 +115,13 @@ public class SouthboundHandler extends AbstractHandler
         }
     }
 
-    private void triggerUpdates() {
-        List<Node> nodes = null; // nodeCacheManager.getBridgeNodes();
-        if (nodes == null) return;
-        for (Node node : nodes) {
-            OvsdbBridgeAugmentation bridge = node.getAugmentation(OvsdbBridgeAugmentation.class);
-            if (bridge != null) {
-                processBridgeUpdate(node, bridge);
-            }
-
-            List<TerminationPoint> tps = MdsalUtils.extractTerminationPoints(node);
-            for (TerminationPoint tp : tps) {
-                OvsdbTerminationPointAugmentation port = tp.getAugmentation(OvsdbTerminationPointAugmentation.class);
-                if (port != null) {
-                    processPortUpdate(node, port);
-                }
-            }
+    @Override
+    public void triggerUpdates() {
+        logger.info("triggerUpdates");
+        List<Node> ovsdbNodes = MdsalUtils.readOvsdbTopologyNodes();
+        for (Node node : ovsdbNodes) {
+            ovsdbUpdate(node, node.getAugmentation(OvsdbNodeAugmentation.class),
+                    OvsdbInventoryListener.OvsdbType.NODE, Action.ADD);
         }
     }
 

@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Flavio Fernandes <ffernand@redhat.com>
+Submitted-by: Flavio Fernandes <ffernand@redhat.com>
+Submitted-at: Tue, 26 May 2015 21:14:30 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/21152
+Project: ovsdb
+Branch: refs/heads/stable/helium

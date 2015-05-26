@@ -123,6 +123,16 @@ public class SouthboundHandler extends AbstractHandler
         }
     }
 
+    @Override
+    public void triggerUpdates() {
+        logger.info("triggerUpdates");
+        List<Node> ovsdbNodes = MdsalUtils.readOvsdbTopologyNodes();
+        for (Node node : ovsdbNodes) {
+            ovsdbUpdate(node, node.getAugmentation(OvsdbNodeAugmentation.class),
+                    OvsdbInventoryListener.OvsdbType.NODE, Action.ADD);
+        }
+    }
+/*
     private void triggerUpdates() {
         List<Node> nodes = null; // nodeCacheManager.getBridgeNodes();
         if (nodes == null) return;
@@ -141,7 +151,7 @@ public class SouthboundHandler extends AbstractHandler
             }
         }
     }
-
+*/
     private void processPortDelete(Node node, OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation,
                                    Object context) {
         logger.debug("processPortDelete <{}> <{}>", node, ovsdbTerminationPointAugmentation);

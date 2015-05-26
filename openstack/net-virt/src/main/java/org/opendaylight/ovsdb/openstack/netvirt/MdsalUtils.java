@@ -22,7 +22,6 @@ import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
@@ -211,6 +210,21 @@ public class MdsalUtils {
         return ovsdbNodeId;
     }
 
+    public static List<Node> readOvsdbTopologyNodes() {
+        List<Node> ovsdbNodes = new ArrayList<>();
+        InstanceIdentifier<Topology> topologyInstanceIdentifier = MdsalHelper.createInstanceIdentifier();
+        Topology topology = read(LogicalDatastoreType.OPERATIONAL, topologyInstanceIdentifier);
+        if (topology != null && topology.getNode() != null) {
+            for (Node node : topology.getNode()) {
+                OvsdbNodeAugmentation ovsdbNodeAugmentation = node.getAugmentation(OvsdbNodeAugmentation.class);
+                if (ovsdbNodeAugmentation != null) {
+                    ovsdbNodes.add(node);
+                }
+            }
+        }
+        return ovsdbNodes;
+    }
+
     public static OvsdbNodeAugmentation readOvsdbNode(Node bridgeNode) {
         OvsdbNodeAugmentation nodeAugmentation = null;
         OvsdbBridgeAugmentation bridgeAugmentation = extractBridgeAugmentation(bridgeNode);
@@ -334,11 +348,11 @@ public class MdsalUtils {
         return bridgeNode;
     }
 
-    public static Uuid getBridgeUuid(Node node, String name) {
-        Uuid uuid = null;
+    public static String getBridgeUuid(Node node, String name) {
+        String uuid = null;
         OvsdbBridgeAugmentation ovsdbBridgeAugmentation = readBridge(node, name);
         if (ovsdbBridgeAugmentation != null) {
-            uuid = ovsdbBridgeAugmentation.getBridgeUuid();
+            uuid = ovsdbBridgeAugmentation.getBridgeUuid().getValue();
         }
         return uuid;
     }

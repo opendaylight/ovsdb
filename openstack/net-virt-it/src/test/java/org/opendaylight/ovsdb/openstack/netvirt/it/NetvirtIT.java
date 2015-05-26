@@ -584,4 +584,13 @@ public class NetvirtIT extends AbstractMdsalTestBase {
     public void testNetVirt2() throws InterruptedException {
         Thread.sleep(60000);
     }
+
+    @Test
+    public void testReadOvsdbTopologyNodes() throws InterruptedException {
+        Thread.sleep(10000);
+        List<Node> ovsdbNodes = org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils.readOvsdbTopologyNodes();
+        for (Node node : ovsdbNodes) {
+            LOG.info(">>>>> node: {}", node);
+        }
+    }
 }

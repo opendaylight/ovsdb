@@ -108,6 +108,13 @@ public class MdsalHelper {
         return createManagedNodeId(key.getRemoteIp(), key.getRemotePort(), bridgeName);
     }
 
+    public static InstanceIdentifier<Topology> createInstanceIdentifier() {
+        InstanceIdentifier<Topology> path = InstanceIdentifier
+                .create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(OVSDB_TOPOLOGY_ID));
+        return path;
+    }
+
     public static InstanceIdentifier<Node> createInstanceIdentifier(NodeId nodeId) {
         InstanceIdentifier<Node> nodePath = InstanceIdentifier
                 .create(NetworkTopology.class)

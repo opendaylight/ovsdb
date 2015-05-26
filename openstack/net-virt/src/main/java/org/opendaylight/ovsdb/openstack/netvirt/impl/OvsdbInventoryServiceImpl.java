@@ -86,6 +86,11 @@ public class OvsdbInventoryServiceImpl implements ConfigInterface, OvsdbInventor
         LOG.info("listenerRemoved: {}", listener);
     }
 
+    @Override
+    public void providersReady() {
+        ovsdbDataChangeListener.start();
+    }
+
     public static Set<OvsdbInventoryListener> getMdsalConsumerListeners() {
         return mdsalConsumerListeners;
     }

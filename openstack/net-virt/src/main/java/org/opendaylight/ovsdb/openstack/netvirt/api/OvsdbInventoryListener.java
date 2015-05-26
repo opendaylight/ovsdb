@@ -13,5 +13,5 @@ public interface OvsdbInventoryListener {
         PORT
     }
     public void ovsdbUpdate(Node node, DataObject augmentationDataChanges, OvsdbType type, Action action);
-
+    public void triggerUpdates();
 }

@@ -75,8 +75,8 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     }
 
     @Override
-    public boolean isPortOnBridge (Node node, String portName) {
-        return southbound.extractTerminationPointAugmentation(node, portName) != null;
+    public boolean isPortOnBridge (Node bridgeNode, String portName) {
+        return southbound.extractTerminationPointAugmentation(bridgeNode, portName) != null;
     }
 
     @Override
@@ -116,6 +116,19 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
             LOGGER.error("Error creating Integration Bridge on {}", node, e);
             return;
         }
+
+        /** Create External bridge only if needed. In this particular case, that
+         *  is only the case if L3 forwarding is enabled
+         */
+        if (configurationService.isL3ForwardinfgEnabled()) {
+            try {
+                createExternalBridge(node);
+            } catch (Exception e) {
+                LOGGER.error("Error creating External Bridge on {}", node, e);
+                return;
+            }
+        }
+
         // this node is an ovsdb node so it doesn't have a bridge
         // so either look up the bridges or just wait for the bridge update to come in
         // and add the flows there.
@@ -126,29 +139,34 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
      * Check if the full network setup is available. If not, create it.
      */
     @Override
-    public boolean createLocalNetwork (Node node, NeutronNetwork network) {
+    public boolean createLocalNetwork(Node bridgeNode, NeutronNetwork network) {
         boolean isCreated = false;
         if (network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
-            if (!isNodeVlanReady(node, network)) {
+            if (!isNodeVlanReady(bridgeNode, network)) {
                 try {
-                    isCreated = createBridges(node, network);
+                    isCreated = configureBridge(bridgeNode, network);
                 } catch (Exception e) {
-                    LOGGER.error("Error creating internal net network " + node, e);
+                    LOGGER.error("Error creating internal net network " + bridgeNode.getNodeId().getValue(), e);
                 }
             } else {
                 isCreated = true;
             }
         } else if (network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) ||
                    network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)) {
-            if (!isNodeTunnelReady(node)) {
+            if (!isNodeTunnelReady(bridgeNode)) {
                 try {
-                    isCreated = createBridges(node, network);
+                    isCreated = configureBridge(bridgeNode, network);
                 } catch (Exception e) {
-                    LOGGER.error("Error creating internal net network " + node, e);
+                    LOGGER.error("Error creating internal net network " + bridgeNode.getNodeId().getValue(), e);
                 }
             } else {
                 isCreated = true;
             }
+        }
+        try {
+            createIntegrationToExternalPatch(bridgeNode);
+        } catch (Exception e) {
+            LOGGER.error("Error creating integration to external patch ports " + bridgeNode.getNodeId().getValue(), e);
         }
         return isCreated;
     }
@@ -201,35 +219,72 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     }
 
     /**
-     * Returns true if a patch port exists between the Integration Bridge and Network Bridge
+     * Creates patch ports between Integration and External bridges, if needed
      */
-    private boolean isNetworkPatchCreated(Node node, Node intBridge, Node netBridge) {
+    private boolean createIntegrationToExternalPatch(Node bridgeNode) throws Exception {
         Preconditions.checkNotNull(configurationService);
 
-        boolean isPatchCreated = false;
-
-        String portName = configurationService.getPatchPortName(new ImmutablePair<>(intBridge, netBridge));
-        if (isPortOnBridge(intBridge, portName)) {
-            portName = configurationService.getPatchPortName(new ImmutablePair<>(netBridge, intBridge));
-            if (isPortOnBridge(netBridge, portName)) {
-                isPatchCreated = true;
-            }
+        /** Create patch port in bridge only if needed. In this particular case, that
+         *  is only the case if L3 forwarding is enabled
+         */
+        if (! configurationService.isL3ForwardinfgEnabled()) {
+            return true;
         }
 
-        return isPatchCreated;
+        final String brIntName = configurationService.getIntegrationBridgeName();
+        final String brExtName = configurationService.getExternalBridgeName();
+
+        final boolean isExternalBridge = (southbound.getBridge(bridgeNode, brIntName) == null);
+        if (isExternalBridge && southbound.getBridge(bridgeNode, brExtName) == null) {
+            // If we made it here, param bridge node is neither integration nor external. Noop.
+            return true;
+        }
+
+        final String portNameInt = configurationService.getPatchPortName(new ImmutablePair<>(brIntName, brExtName));
+        final String portNameExt = configurationService.getPatchPortName(new ImmutablePair<>(brExtName, brIntName));
+        Preconditions.checkNotNull(portNameInt);
+        Preconditions.checkNotNull(portNameExt);
+
+        if (isExternalBridge) {
+            return addPatchPort(bridgeNode, brExtName, portNameExt, portNameInt);
+        }
+
+        // If we made it here, we are adding a patch port to the integration bridge
+        addPatchPort(bridgeNode, brIntName, portNameInt, portNameExt);
+
+        // Add patch port on the external bridge as well, if there is one
+        Node extBridgeNode = southbound.getBridgeNode(bridgeNode, brExtName);
+        return (extBridgeNode == null) ?
+                true :
+                createIntegrationToExternalPatch(extBridgeNode);
     }
 
     /**
      * Creates the Integration Bridge
      */
-    private void createIntegrationBridge(Node node) throws Exception {
+    private boolean createIntegrationBridge(Node ovsdbNode) throws Exception {
         Preconditions.checkNotNull(configurationService);
 
         String brIntName = configurationService.getIntegrationBridgeName();
-
-        if (!addBridge(node, brIntName, null, null)) {
-            LOGGER.debug("Integration Bridge Creation failed");
+        if (! addBridge(ovsdbNode, brIntName)) {
+            LOGGER.warn("{} Integration Bridge creation failed");
+            return false;
         }
+        return true;
+    }
+
+    /**
+     * Creates the Integration Bridge
+     */
+    private boolean createExternalBridge(Node ovsdbNode) throws Exception {
+        Preconditions.checkNotNull(configurationService);
+
+        String brExtName = configurationService.getExternalBridgeName();
+        if (! addBridge(ovsdbNode, brExtName)) {
+            LOGGER.warn("{} External Bridge creation failed");
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -287,20 +342,16 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
                 Interface br-int
                     type: internal
      */
-    private boolean createBridges(Node node, NeutronNetwork network) throws Exception {
+    private boolean configureBridge(Node node, NeutronNetwork network) throws Exception {
         Preconditions.checkNotNull(configurationService);
         Preconditions.checkNotNull(networkingProviderManager);
 
-        LOGGER.debug("createBridges: node: {}, network type: {}", node, network.getProviderNetworkType());
-
-        String brInt = configurationService.getIntegrationBridgeName();
-        if (!addBridge(node, brInt, null, null)) {
-            LOGGER.debug("{} Bridge creation failed", brInt);
-            return false;
-        }
+        LOGGER.debug("configureBridge: node: {}, network type: {}", node.getNodeId().getValue(),
+                network.getProviderNetworkType());
 
         /* For vlan network types add physical port to br-int. */
         if (network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
+            String brInt = configurationService.getIntegrationBridgeName();
             String phyNetName = this.getPhysicalInterfaceName(node, network.getProviderPhysicalNetwork());
             if (!addPortToBridge(node, brInt, phyNetName)) {
                 LOGGER.debug("Add Port {} to Bridge {} failed", phyNetName, brInt);
@@ -308,18 +359,18 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
             }
         }
 
-        LOGGER.debug("createBridges: node: {}, status: success", node);
+        LOGGER.debug("configureBridge: node: {}, status: success", node);
         return true;
     }
 
     /**
      * Add a Port to a Bridge
      */
-    private boolean addPortToBridge (Node node, String bridgeName, String portName) throws Exception {
+    private boolean addPortToBridge (Node bridgeNode, String bridgeName, String portName) throws Exception {
         boolean rv = true;
 
-        if (southbound.extractTerminationPointAugmentation(node, portName) == null) {
-            rv = southbound.addTerminationPoint(node, bridgeName, portName, null);
+        if (southbound.extractTerminationPointAugmentation(bridgeNode, portName) == null) {
+            rv = southbound.addTerminationPoint(bridgeNode, bridgeName, portName, null);
         }
 
         return rv;
@@ -328,11 +379,12 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     /**
      * Add a Patch Port to a Bridge
      */
-    private boolean addPatchPort (Node node, String bridgeName, String portName, String peerPortName) throws Exception {
+    private boolean addPatchPort (Node bridgeNode, String bridgeName, String portName, String peerPortName) throws Exception {
         boolean rv = true;
 
-        if (southbound.extractTerminationPointAugmentation(node, portName) == null) {
-            rv = southbound.addPatchTerminationPoint(node, bridgeName, portName, peerPortName);
+        if (! isPortOnBridge(bridgeNode, portName) &&
+                southbound.extractTerminationPointAugmentation(bridgeNode, portName) == null) {
+            rv = southbound.addPatchTerminationPoint(bridgeNode, bridgeName, portName, peerPortName);
         }
 
         return rv;
@@ -341,11 +393,10 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     /**
      * Add Bridge to a Node
      */
-    private boolean addBridge(Node node, String bridgeName,
-                              String localPatchName, String remotePatchName) throws Exception {
+    private boolean addBridge(Node ovsdbNode, String bridgeName) throws Exception {
         boolean rv = true;
-        if (southbound.getBridge(node, bridgeName) == null) {
-            rv = southbound.addBridge(node, bridgeName, getControllerTarget(node));
+        if (southbound.getBridgeNode(ovsdbNode, bridgeName) == null) {
+            rv = southbound.addBridge(ovsdbNode, bridgeName, getControllerTarget(ovsdbNode));
         }
         return rv;
     }

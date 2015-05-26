@@ -236,10 +236,9 @@ public class SouthboundImpl implements Southbound {
     public Node getBridgeNode(Node node, String bridgeName) {
         Node bridgeNode = null;
         OvsdbBridgeAugmentation bridge = extractBridgeAugmentation(node);
-        if (bridge != null) {
-            if (bridge.getBridgeName().getValue().equals(bridgeName)) {
-                bridgeNode = node;
-            }
+        // Support cases when node is OvsdbBridgeAugmentation, but does not have expected name
+        if (bridge != null && bridge.getBridgeName().getValue().equals(bridgeName)) {
+            bridgeNode = node;
         } else {
             bridgeNode = readBridgeNode(node, bridgeName);
         }
@@ -349,6 +348,9 @@ public class SouthboundImpl implements Southbound {
     }
 
     public OvsdbBridgeAugmentation extractBridgeAugmentation(Node node) {
+        if (node == null) {
+            return null;
+        }
         return node.getAugmentation(OvsdbBridgeAugmentation.class);
     }
 

@@ -90,7 +90,6 @@ public interface BridgeConfigurationManager {
 
     /**
      * Returns true if the bridges required for the provider network type are created
-     * If the bridges are not created, this method will attempt to create them
      * @param node the {@link Node} to query
      * @param network the {@link org.opendaylight.neutron.spi.NeutronNetwork}
      * @return True or False

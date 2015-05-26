@@ -97,6 +97,12 @@ public interface ConfigurationService {
     public String getDefaultProviderMapping();
 
     /**
+     * Determine if L3 forwarding is enabled
+     * @return true if ovsdb net-virt is configured to perform L3 forwarding
+     */
+    public boolean isL3ForwardinfgEnabled();
+
+    /**
      * Sets the default provider mapping
      */
     public void setDefaultProviderMapping(String providerMapping);

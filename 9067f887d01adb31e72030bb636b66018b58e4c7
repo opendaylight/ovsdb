@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_2b772004",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-05-26T17:48:55Z",
+      "side": 1,
+      "message": "in this case, ADD could be an UPDATE... but I guess it does not really matter to consumers of this API, right?",
+      "range": {
+        "startLine": 132,
+        "startChar": 66,
+        "endLine": 132,
+        "endChar": 69
+      },
+      "revId": "9067f887d01adb31e72030bb636b66018b58e4c7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_8b6af418",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-05-26T17:48:55Z",
+      "side": 1,
+      "message": "delete the \u0027old\u0027 triggerUpdates()",
+      "range": {
+        "startLine": 136,
+        "startChar": 17,
+        "endLine": 136,
+        "endChar": 31
+      },
+      "revId": "9067f887d01adb31e72030bb636b66018b58e4c7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

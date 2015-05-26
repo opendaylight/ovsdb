@@ -15,4 +15,5 @@ package org.opendaylight.ovsdb.openstack.netvirt.api;
 public interface OvsdbInventoryService {
     public void listenerAdded(OvsdbInventoryListener listener);
     public void listenerRemoved(OvsdbInventoryListener listener);
+    public void providersReady();
 }

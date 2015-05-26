@@ -47,6 +47,9 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
     public OvsdbDataChangeListener (DataBroker dataBroker) {
         this.dataBroker = dataBroker;
+    }
+
+    public void start() {
         InstanceIdentifier<Node> path = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(MdsalHelper.OVSDB_TOPOLOGY_ID))
@@ -55,6 +58,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                 DataChangeScope.SUBTREE);
         LOG.info("netvirt OvsdbDataChangeListener: dataBroker= {}, registration= {}",
                 dataBroker, registration);
+        triggerUpdates();
     }
 
     @Override
@@ -327,6 +331,13 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
         Set<OvsdbInventoryListener> mdsalConsumerListeners = OvsdbInventoryServiceImpl.getMdsalConsumerListeners();
         for (OvsdbInventoryListener mdsalConsumerListener : mdsalConsumerListeners) {
             mdsalConsumerListener.ovsdbUpdate(node, resourceAugmentationDataChanges, ovsdbType, action);
+        }
+    }
+
+    private void triggerUpdates() {
+        Set<OvsdbInventoryListener> mdsalConsumerListeners = OvsdbInventoryServiceImpl.getMdsalConsumerListeners();
+        for (OvsdbInventoryListener mdsalConsumerListener : mdsalConsumerListeners) {
+            mdsalConsumerListener.triggerUpdates();
         }
     }
 }

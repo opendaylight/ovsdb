@@ -349,6 +349,9 @@ public class SouthboundImpl implements Southbound {
     }
 
     public OvsdbBridgeAugmentation extractBridgeAugmentation(Node node) {
+        if (node == null) {
+            return null;
+        }
         return node.getAugmentation(OvsdbBridgeAugmentation.class);
     }
 

@@ -197,10 +197,13 @@ public class BridgeConfigurationManagerImplTest {
 
     @Test
     public void testCreateLocalNetwork() throws Exception {
+        when(configurationService.isL3ForwardinfgEnabled()).thenReturn(false);
+
         NeutronNetwork neutronNetworkMock = mock(NeutronNetwork.class, RETURNS_MOCKS);
         String networkTypes[] = {"vlan", "vxlan", "gre"};
         BridgeConfigurationManagerImpl bridgeConfigurationManagerImplSpy =
                 PowerMockito.spy(new BridgeConfigurationManagerImpl());
+        bridgeConfigurationManagerImplSpy.setConfigurationService(configurationService);
 
         for (String networkType : networkTypes) {
             when(neutronNetworkMock.getProviderNetworkType()).thenReturn(networkType);

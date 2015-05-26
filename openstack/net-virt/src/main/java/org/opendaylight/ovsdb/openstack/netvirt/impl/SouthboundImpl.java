@@ -125,7 +125,8 @@ public class SouthboundImpl implements Southbound {
         return ovsdbNodes;
     }
 
-    public OvsdbNodeAugmentation readOvsdbNode(Node bridgeNode) {
+/*
+    public Node readOvsdbNode(Node bridgeNode) {
         OvsdbNodeAugmentation nodeAugmentation = null;
         OvsdbBridgeAugmentation bridgeAugmentation = extractBridgeAugmentation(bridgeNode);
         if(bridgeAugmentation != null){
@@ -144,6 +145,19 @@ public class SouthboundImpl implements Southbound {
             LOG.debug("readOvsdbNode: Provided node is not a bridge node : {}",bridgeNode);
         }
         return nodeAugmentation;
+    }
+*/
+    public Node readOvsdbNode(Node bridgeNode) {
+        Node ovsdbNode = null;
+        OvsdbBridgeAugmentation bridgeAugmentation = extractBridgeAugmentation(bridgeNode);
+        if (bridgeAugmentation != null) {
+            InstanceIdentifier<Node> ovsdbNodeIid =
+                    (InstanceIdentifier<Node>) bridgeAugmentation.getManagedBy().getValue();
+            ovsdbNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, ovsdbNodeIid);
+        } else {
+            LOG.debug("readOvsdbNode: Provided node is not a bridge node : {}", bridgeNode);
+        }
+        return ovsdbNode;
     }
 
     public String getOvsdbNodeUUID(Node node) {
@@ -236,10 +250,9 @@ public class SouthboundImpl implements Southbound {
     public Node getBridgeNode(Node node, String bridgeName) {
         Node bridgeNode = null;
         OvsdbBridgeAugmentation bridge = extractBridgeAugmentation(node);
-        if (bridge != null) {
-            if (bridge.getBridgeName().getValue().equals(bridgeName)) {
-                bridgeNode = node;
-            }
+        // Support cases when node is OvsdbBridgeAugmentation, but does not have expected name
+        if (bridge != null && bridge.getBridgeName().getValue().equals(bridgeName)) {
+            bridgeNode = node;
         } else {
             bridgeNode = readBridgeNode(node, bridgeName);
         }
@@ -349,6 +362,9 @@ public class SouthboundImpl implements Southbound {
     }
 
     public OvsdbBridgeAugmentation extractBridgeAugmentation(Node node) {
+        if (node == null) {
+            return null;
+        }
         return node.getAugmentation(OvsdbBridgeAugmentation.class);
     }
 
@@ -591,8 +607,9 @@ public class SouthboundImpl implements Southbound {
 
             case OPENVSWITCH:
                 OvsdbNodeAugmentation ovsdbNode = extractNodeAugmentation(node);
-                if (ovsdbNode == null){
-                    ovsdbNode = readOvsdbNode(node);
+                if (ovsdbNode == null) {
+                    Node nodeFromReadOvsdbNode = readOvsdbNode(node);
+                    ovsdbNode = extractNodeAugmentation(nodeFromReadOvsdbNode);
                 }
                 if (ovsdbNode != null && ovsdbNode.getOpenvswitchOtherConfigs() != null) {
                     for (OpenvswitchOtherConfigs openvswitchOtherConfigs : ovsdbNode.getOpenvswitchOtherConfigs()) {

@@ -21,6 +21,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypePatch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.osgi.framework.BundleContext;
@@ -135,7 +136,11 @@ public class TenantNetworkManagerImpl implements ConfigInterface, TenantNetworkM
         if (neutronNetwork != null) {
             logger.debug("mapped to {}", neutronNetwork);
         } else {
-            logger.warn("getTenantNetwork did not find network for {}", terminationPointAugmentation.getName());
+            if (terminationPointAugmentation.getInterfaceType().equals(InterfaceTypePatch.class)) {
+                logger.trace("getTenantNetwork did not find network for patch {}", terminationPointAugmentation.getName());
+            } else {
+                logger.warn("getTenantNetwork did not find network for {}", terminationPointAugmentation.getName());
+            }
         }
         return neutronNetwork;
     }

@@ -161,7 +161,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
         logger.info("addTunnelPort enter: portName: {}", portName);
         if (MdsalUtils.extractTerminationPointAugmentation(node, portName) != null
                 || MdsalUtils.isTunnelTerminationPointExist(node,tunnelBridgeName,portName)) {
-            logger.info("Tunnel {} is present in {} of {}", portName, tunnelBridgeName, node);
+            logger.info("Tunnel {} is present in {} of {}", portName, tunnelBridgeName, node.getNodeId().getValue());
             return true;
         }
 

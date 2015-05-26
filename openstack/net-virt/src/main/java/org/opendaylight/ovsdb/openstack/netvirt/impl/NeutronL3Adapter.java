@@ -281,7 +281,7 @@ public class NeutronL3Adapter implements ConfigInterface {
         // Based on the local cache, figure out whether programming needs to occur. To do this, we
         // will look at desired action for node.
         //
-        final String cacheKey = node.toString() + ":" + providerSegmentationId + ":" + ipStr;
+        final String cacheKey = node.getNodeId().getValue() + ":" + providerSegmentationId + ":" + ipStr;
         final Boolean isProgrammed = l3ForwardingCache.contains(cacheKey);
 
         if (actionForNode == Action.DELETE && isProgrammed == Boolean.FALSE) {
@@ -364,7 +364,7 @@ public class NeutronL3Adapter implements ConfigInterface {
             return;  // done: go no further w/out all the info needed...
         }
 
-        final Action action = isDelete ? Action.DELETE : Action.ADD;
+        final Action actionForNode = isDelete ? Action.DELETE : Action.ADD;
 
         // Keep cache for finding router's mac from network uuid -- add
         //
@@ -382,10 +382,6 @@ public class NeutronL3Adapter implements ConfigInterface {
             if (dpid == null) {
                 continue;
             }
-
-            final Action actionForNode =
-                    tenantNetworkManager.isTenantNetworkPresentInNode(node, destinationSegmentationId) ?
-                    action : Action.DELETE;
 
             for (Neutron_IPs neutronIP : ipList) {
                 final String ipStr = neutronIP.getIpAddress();
@@ -526,22 +522,23 @@ public class NeutronL3Adapter implements ConfigInterface {
         // Based on the local cache, figure out whether programming needs to occur. To do this, we
         // will look at desired action for node.
         //
-        final String cacheKey = node.toString() + ":" + sourceSegmentationId + ":" + destinationSegmentationId + ":" +
+        final String cacheKey = node.getNodeId().getValue() + ":" +
+                                sourceSegmentationId + ":" + destinationSegmentationId + ":" +
                                 ipStr + "/" + Integer.toString(mask);
         final Boolean isProgrammed = routerInterfacesCache.contains(cacheKey);
 
         if (actionForNode == Action.DELETE && isProgrammed == Boolean.FALSE) {
             logger.trace("programRouterInterfaceStage1 for node {} sourceSegId {} destSegId {} mac {} ip {} mask {}" +
-                         "action {} is already done",
+                         " action {} is already done",
                          node.getNodeId().getValue(), sourceSegmentationId, destinationSegmentationId,
-                         ipStr, mask, actionForNode);
+                         macAddress, ipStr, mask, actionForNode);
             return;
         }
         if (actionForNode == Action.ADD && isProgrammed == Boolean.TRUE) {
             logger.trace("programRouterInterfaceStage1 for node {} sourceSegId {} destSegId {} mac {} ip {} mask {}" +
-                         "action {} is already done",
+                         " action {} is already done",
                          node.getNodeId().getValue(), sourceSegmentationId, destinationSegmentationId,
-                         ipStr, mask, actionForNode);
+                         macAddress, ipStr, mask, actionForNode);
             return;
         }
 
@@ -594,7 +591,7 @@ public class NeutronL3Adapter implements ConfigInterface {
         // Based on the local cache, figure out whether programming needs to occur. To do this, we
         // will look at desired action for node.
         //
-        final String cacheKey = node.toString() + ":" + providerSegmentationId + ":" + ipStr;
+        final String cacheKey = node.getNodeId().getValue() + ":" + providerSegmentationId + ":" + ipStr;
         final Boolean isProgrammed = staticArpEntryCache.contains(cacheKey);
 
         if (actionForNode == Action.DELETE && isProgrammed == Boolean.FALSE) {
@@ -652,7 +649,7 @@ public class NeutronL3Adapter implements ConfigInterface {
         // Based on the local cache, figure out whether programming needs to occur. To do this, we
         // will look at desired action for node.
         //
-        final String cacheKey = node.toString() + ":" + providerSegmentationId + ":" + cidr;
+        final String cacheKey = node.getNodeId().getValue() + ":" + providerSegmentationId + ":" + cidr;
         final Boolean isProgrammed = isInbound ?
                                      inboundIpRewriteExclusionCache.contains(cacheKey):
                                      outboundIpRewriteExclusionCache.contains(cacheKey);
@@ -721,7 +718,7 @@ public class NeutronL3Adapter implements ConfigInterface {
         // Based on the local cache, figure out whether programming needs to occur. To do this, we
         // will look at desired action for node.
         //
-        final String cacheKey = node.toString() + ":" + providerSegmentationId + ":" + gatewayIp;
+        final String cacheKey = node.getNodeId().getValue() + ":" + providerSegmentationId + ":" + gatewayIp;
         final Boolean isProgrammed = defaultRouteCache.contains(cacheKey);
 
         if (actionForNodeDefaultRoute == Action.DELETE && isProgrammed == Boolean.FALSE) {
@@ -843,7 +840,7 @@ public class NeutronL3Adapter implements ConfigInterface {
         // Based on the local cache, figure out whether programming needs to occur. To do this, we
         // will look at desired action for node.
         //
-        final String cacheKey = node.toString() + ":" + providerSegmentationId + ":" +
+        final String cacheKey = node.getNodeId().getValue() + ":" + providerSegmentationId + ":" +
                                 matchAddress + ":" + rewriteAddress;
         final Boolean isProgrammed = isInbound ?
                                      inboundIpRewriteCache.contains(cacheKey) :

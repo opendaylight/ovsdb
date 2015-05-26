@@ -390,7 +390,7 @@ public class NeutronL3Adapter {
             return;  // done: go no further w/out all the info needed...
         }
 
-        final Action action = isDelete ? Action.DELETE : Action.ADD;
+        final Action actionForNode = isDelete ? Action.DELETE : Action.ADD;
 
         // Keep cache for finding router's mac from network uuid -- add
         //
@@ -405,9 +405,6 @@ public class NeutronL3Adapter {
         }
         for (Node node : nodes) {
             final Long dpid = getDpid(node);
-            final Action actionForNode =
-                    tenantNetworkManager.isTenantNetworkPresentInNode(node, destinationSegmentationId) ?
-                    action : Action.DELETE;
 
             for (Neutron_IPs neutronIP : ipList) {
                 final String ipStr = neutronIP.getIpAddress();
@@ -554,16 +551,16 @@ public class NeutronL3Adapter {
 
         if (actionForNode == Action.DELETE && isProgrammed == Boolean.FALSE) {
             logger.trace("programRouterInterfaceStage1 for node {} sourceSegId {} destSegId {} mac {} ip {} mask {}" +
-                         "action {} is already done",
+                         " action {} is already done",
                          node.getNodeIDString(), sourceSegmentationId, destinationSegmentationId,
-                         ipStr, mask, actionForNode);
+                         macAddress, ipStr, mask, actionForNode);
             return;
         }
         if (actionForNode == Action.ADD && isProgrammed == Boolean.TRUE) {
             logger.trace("programRouterInterfaceStage1 for node {} sourceSegId {} destSegId {} mac {} ip {} mask {}" +
-                         "action {} is already done",
+                         " action {} is already done",
                          node.getNodeIDString(), sourceSegmentationId, destinationSegmentationId,
-                         ipStr, mask, actionForNode);
+                         macAddress, ipStr, mask, actionForNode);
             return;
         }
 

@@ -33,7 +33,6 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFaile
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
 import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
-import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.MdsalConsumer;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestrator;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
@@ -50,7 +49,7 @@ public class InboundNatServiceTest {
 
     @InjectMocks private InboundNatService inboundNatService = new InboundNatService(Service.ARP_RESPONDER);
 
-    @Mock private MdsalConsumer mdsalConsumer;
+    //@Mock private MdsalConsumer mdsalConsumer;
     @Mock private PipelineOrchestrator orchestrator;
 
     @Mock private ReadWriteTransaction readWriteTransaction;
@@ -69,7 +68,7 @@ public class InboundNatServiceTest {
         when(dataBroker.newReadWriteTransaction()).thenReturn(readWriteTransaction);
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(writeTransaction);
 
-        when(mdsalConsumer.getDataBroker()).thenReturn(dataBroker);
+        //when(mdsalConsumer.getDataBroker()).thenReturn(dataBroker);
 
         when(orchestrator.getNextServiceInPipeline(any(Service.class))).thenReturn(Service.ARP_RESPONDER);
     }

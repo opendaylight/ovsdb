@@ -327,16 +327,16 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
     private void ovsdbUpdate(Node node, DataObject resourceAugmentationDataChanges,
             OvsdbInventoryListener.OvsdbType ovsdbType, Action action) {
 
-        Set<OvsdbInventoryListener> mdsalConsumerListeners = OvsdbInventoryServiceImpl.getMdsalConsumerListeners();
-        for (OvsdbInventoryListener mdsalConsumerListener : mdsalConsumerListeners) {
-            mdsalConsumerListener.ovsdbUpdate(node, resourceAugmentationDataChanges, ovsdbType, action);
+        Set<OvsdbInventoryListener> ovsdbInventoryListeners = OvsdbInventoryServiceImpl.getOvsdbInventoryListeners();
+        for (OvsdbInventoryListener ovsdbInventoryListener : ovsdbInventoryListeners) {
+            ovsdbInventoryListener.ovsdbUpdate(node, resourceAugmentationDataChanges, ovsdbType, action);
         }
     }
 
     private void triggerUpdates() {
-        Set<OvsdbInventoryListener> mdsalConsumerListeners = OvsdbInventoryServiceImpl.getMdsalConsumerListeners();
-        for (OvsdbInventoryListener mdsalConsumerListener : mdsalConsumerListeners) {
-            mdsalConsumerListener.triggerUpdates();
+        Set<OvsdbInventoryListener> ovsdbInventoryListeners = OvsdbInventoryServiceImpl.getOvsdbInventoryListeners();
+        for (OvsdbInventoryListener ovsdbInventoryListener : ovsdbInventoryListeners) {
+            ovsdbInventoryListener.triggerUpdates();
         }
     }
 }

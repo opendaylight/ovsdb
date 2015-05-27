@@ -69,8 +69,6 @@ public class AbstractServiceInstanceTest {
     /* TODO SB_MIGRATION */
     //@Mock private OvsdbConnectionService connectionService;
     @Mock private PipelineOrchestrator orchestrator;
-    @Mock private MdsalConsumer mdsalConsumer;
-
 
     private Service service = Service.L3_FORWARDING;
 
@@ -154,7 +152,7 @@ public class AbstractServiceInstanceTest {
         DataBroker dataBrocker = mock(DataBroker.class);
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         when(dataBrocker.newReadWriteTransaction()).thenReturn(transaction);
-        when(mdsalConsumer.getDataBroker()).thenReturn(dataBrocker);
+        ///when(mdsalConsumer.getDataBroker()).thenReturn(dataBrocker);
         CheckedFuture<Void, TransactionCommitFailedException> commitFuture = mock(CheckedFuture.class);
         when(transaction.submit()).thenReturn(commitFuture);
 
@@ -178,7 +176,7 @@ public class AbstractServiceInstanceTest {
         DataBroker dataBrocker = mock(DataBroker.class);
         WriteTransaction transaction = mock(WriteTransaction.class);
         when(dataBrocker.newWriteOnlyTransaction()).thenReturn(transaction);
-        when(mdsalConsumer.getDataBroker()).thenReturn(dataBrocker);
+        //when(mdsalConsumer.getDataBroker()).thenReturn(dataBrocker);
         CheckedFuture<Void, TransactionCommitFailedException> commitFuture = mock(CheckedFuture.class);
         when(transaction.submit()).thenReturn(commitFuture);
 
@@ -201,7 +199,7 @@ public class AbstractServiceInstanceTest {
         DataBroker dataBrocker = mock(DataBroker.class);
         ReadOnlyTransaction transaction = mock(ReadOnlyTransaction.class);
         when(dataBrocker.newReadOnlyTransaction()).thenReturn(transaction);
-        when(mdsalConsumer.getDataBroker()).thenReturn(dataBrocker);
+        //when(mdsalConsumer.getDataBroker()).thenReturn(dataBrocker);
 
         NodeBuilder nodeBuilder = mock(NodeBuilder.class);
         when(nodeBuilder.getKey()).thenReturn(mock(NodeKey.class));

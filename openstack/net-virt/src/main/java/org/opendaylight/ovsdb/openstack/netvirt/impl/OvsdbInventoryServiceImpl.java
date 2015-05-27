@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.openstack.netvirt.impl;
 import com.google.common.collect.Sets;
 import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryService;
@@ -21,34 +20,31 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * MdsalConsumerImpl is the implementation for {@link OvsdbInventoryService}
+ * OvsdbInventoryServiceImpl is the implementation for {@link OvsdbInventoryService}
  *
  * @author Sam Hague (shague@redhat.com)
  */
 public class OvsdbInventoryServiceImpl implements ConfigInterface, OvsdbInventoryService {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbInventoryServiceImpl.class);
     private static DataBroker dataBroker = null;
-    private static Set<OvsdbInventoryListener> mdsalConsumerListeners = Sets.newCopyOnWriteArraySet();
+    private static Set<OvsdbInventoryListener> ovsdbInventoryListeners = Sets.newCopyOnWriteArraySet();
     private OvsdbDataChangeListener ovsdbDataChangeListener = null;
-    //private static SouthboundImpl southboundImpl = null;
-    private volatile BindingAwareBroker broker;
 
     public OvsdbInventoryServiceImpl(ProviderContext providerContext) {
         dataBroker = providerContext.getSALService(DataBroker.class);
-        LOG.info("netvirt MdsalConsumer initialized");
+        LOG.info("OvsdbInventoryServiceImpl initialized");
         ovsdbDataChangeListener = new OvsdbDataChangeListener(dataBroker);
-        //southboundImpl = new SouthboundImpl(dataBroker);
     }
 
     @Override
     public void listenerAdded(OvsdbInventoryListener listener) {
-        mdsalConsumerListeners.add(listener);
+        ovsdbInventoryListeners.add(listener);
         LOG.info("listenerAdded: {}", listener);
     }
 
     @Override
     public void listenerRemoved(OvsdbInventoryListener listener) {
-        mdsalConsumerListeners.remove(listener);
+        ovsdbInventoryListeners.remove(listener);
         LOG.info("listenerRemoved: {}", listener);
     }
 
@@ -57,8 +53,8 @@ public class OvsdbInventoryServiceImpl implements ConfigInterface, OvsdbInventor
         ovsdbDataChangeListener.start();
     }
 
-    public static Set<OvsdbInventoryListener> getMdsalConsumerListeners() {
-        return mdsalConsumerListeners;
+    public static Set<OvsdbInventoryListener> getOvsdbInventoryListeners() {
+        return ovsdbInventoryListeners;
     }
 
     @Override

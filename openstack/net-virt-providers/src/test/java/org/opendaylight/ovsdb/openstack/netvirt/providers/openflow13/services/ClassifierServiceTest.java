@@ -27,7 +27,6 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.MdsalConsumer;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestrator;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
@@ -46,7 +45,7 @@ public class ClassifierServiceTest {
 
     private static final String MAC_ADDRESS = "87:1D:5E:02:40:B7";
 
-    @Mock private MdsalConsumer mdsalConsumer;
+    //@Mock private MdsalConsumer mdsalConsumer;
     @Mock private PipelineOrchestrator orchestrator;
 
     @Mock private ReadWriteTransaction readWriteTransaction;
@@ -62,7 +61,7 @@ public class ClassifierServiceTest {
         when(dataBroker.newReadWriteTransaction()).thenReturn(readWriteTransaction);
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(writeTransaction);
 
-        when(mdsalConsumer.getDataBroker()).thenReturn(dataBroker);
+        //when(mdsalConsumer.getDataBroker()).thenReturn(dataBroker);
 
         when(orchestrator.getNextServiceInPipeline(any(Service.class))).thenReturn(Service.ARP_RESPONDER);
     }

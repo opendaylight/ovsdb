@@ -100,7 +100,6 @@ public class OF13ProviderTest {
     @Mock private TenantNetworkManager tenantNetworkManager;
     /* TODO SB_MIGRATION */
     //@Mock private OvsdbConnectionService connectionService;
-    @Mock private MdsalConsumer mdsalConsumer;
     @Mock private SecurityServicesManager securityServicesManager;
     @Mock private IngressAclProvider ingressAclProvider;
     @Mock private EgressAclProvider egressAclProvider;
@@ -119,7 +118,7 @@ public class OF13ProviderTest {
         tenantNetworkManager = Mockito.mock(TenantNetworkManager.class);
         /* TODO SB_MIGRATION */
         //connectionService = Mockito.mock(OvsdbConnectionService.class);
-        mdsalConsumer = Mockito.mock(MdsalConsumer.class);
+        //mdsalConsumer = Mockito.mock(MdsalConsumer.class);
         securityServicesManager = Mockito.mock(SecurityServicesManager.class);
         ingressAclProvider = Mockito.mock(IngressAclProvider.class);
         egressAclProvider = Mockito.mock(EgressAclProvider.class);
@@ -376,7 +375,7 @@ public class OF13ProviderTest {
         /* TODO SB_MIGRATION */
         //SeedClassFieldValue(of13Provider, "ovsdbConfigurationService", ovsdbConfigurationService);
         //SeedClassFieldValue(of13Provider, "connectionService", connectionService);
-        SeedClassFieldValue(of13Provider, "mdsalConsumer", mdsalConsumer);
+        //SeedClassFieldValue(of13Provider, "mdsalConsumer", mdsalConsumer);
         SeedClassFieldValue(of13Provider, "securityServicesManager", securityServicesManager);
         SeedClassFieldValue(of13Provider, "ingressAclProvider", ingressAclProvider);
         SeedClassFieldValue(of13Provider, "egressAclProvider", egressAclProvider);

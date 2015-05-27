@@ -8,7 +8,7 @@
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
 /**
- * MdsalConsumer is the interface to the mdsal for netvirt.
+ * OvsdbInventoryService is the interface to the southbound for netvirt.
  *
  * @author Sam Hague (shague@redhat.com)
  */

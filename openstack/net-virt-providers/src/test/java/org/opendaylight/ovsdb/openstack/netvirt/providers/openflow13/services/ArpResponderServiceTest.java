@@ -32,7 +32,6 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFaile
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
 import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
-import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.MdsalConsumer;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
@@ -48,7 +47,7 @@ public class ArpResponderServiceTest {
 
     @InjectMocks private ArpResponderService arpResponderService = new ArpResponderService();
 
-    @Mock private MdsalConsumer mdsalConsumer;
+    //@Mock private MdsalConsumer mdsalConsumer;
 
     private static final String HOST_ADDRESS = "121.0.0.1";
     private static final String MAC_ADDRESS = "87:1D:5E:02:40:B7";
@@ -70,7 +69,7 @@ public class ArpResponderServiceTest {
         when(dataBroker.newReadWriteTransaction()).thenReturn(readWriteTransaction);
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(writeTransaction);
 
-        when(mdsalConsumer.getDataBroker()).thenReturn(dataBroker);
+        //when(mdsalConsumer.getDataBroker()).thenReturn(dataBroker);
 
         // test for Action.ADD
         assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.SUCCESS), arpResponderService.programStaticArpEntry(Long.valueOf(12), "2", MAC_ADDRESS, ipAddress, Action.ADD));

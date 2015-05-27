@@ -28,7 +28,6 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.MdsalConsumer;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestrator;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
@@ -47,7 +46,7 @@ public class L2FowardingServiceTest {
 
     @InjectMocks private L2ForwardingService l2ForwardingService = new L2ForwardingService(Service.ARP_RESPONDER);
 
-    @Mock private MdsalConsumer mdsalConsumer;
+    //@Mock private MdsalConsumer mdsalConsumer;
     @Mock private PipelineOrchestrator orchestrator;
 
     @Mock private ReadWriteTransaction readWriteTransaction;
@@ -78,7 +77,7 @@ public class L2FowardingServiceTest {
         Optional<Flow> data = mock(Optional.class);
         when(future.get()).thenReturn(data);
 
-        when(mdsalConsumer.getDataBroker()).thenReturn(dataBroker);
+        //when(mdsalConsumer.getDataBroker()).thenReturn(dataBroker);
 
         when(orchestrator.getNextServiceInPipeline(any(Service.class))).thenReturn(Service.ARP_RESPONDER);
     }

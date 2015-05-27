@@ -151,7 +151,10 @@ public class TenantNetworkManagerImpl implements TenantNetworkManager {
     public String getNetworkId(String segmentationId) {
         List <NeutronNetwork> networks = neutronNetworkCache.getAllNetworks();
         for (NeutronNetwork network : networks) {
-            if (network.getProviderSegmentationID().equalsIgnoreCase(segmentationId)) return network.getNetworkUUID();
+            if (network.getProviderSegmentationID() != null &&
+                    network.getProviderSegmentationID().equalsIgnoreCase(segmentationId)) {
+                return network.getNetworkUUID();
+            }
         }
         return null;
     }

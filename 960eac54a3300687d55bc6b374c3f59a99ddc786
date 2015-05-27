@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_ed5e28e9",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/MdsalHelper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-05-27T19:54:02Z",
+      "side": 1,
+      "message": "Be slightly careful here... its totally fine for you to create iids for bridges you create this way... but using this to create an iid for a bridge someone else created could blow up badly.\n\nWhich is my way of saying: its fine for you to adopt this convention, but be careful not to presume its the one true convention ;)",
+      "revId": "960eac54a3300687d55bc6b374c3f59a99ddc786",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

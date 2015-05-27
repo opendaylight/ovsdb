@@ -16,6 +16,24 @@
       "revId": "960eac54a3300687d55bc6b374c3f59a99ddc786",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_8df684d6",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/MdsalHelper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-05-27T19:59:53Z",
+      "side": 1,
+      "message": "you mean to say, we should use ovsdb://\u003covsdbNodeKey\u003e/\u003cuse-something-else-but-not-bridge\u003e/\u003cbridge-name\u003e? because in case somebody already created with the default way e.g ovsdb://\u003cip-address\u003e:\u003cport\u003e/bridge/\u003cbridge-name\u003e ?",
+      "parentUuid": "1a9dcd25_ed5e28e9",
+      "revId": "960eac54a3300687d55bc6b374c3f59a99ddc786",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

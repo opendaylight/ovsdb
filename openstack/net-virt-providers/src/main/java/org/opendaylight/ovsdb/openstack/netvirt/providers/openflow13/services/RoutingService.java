@@ -16,19 +16,15 @@ import java.util.List;
 
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
-import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryListener;
 import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.OF13Provider;
-import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestrator;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
 import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.ActionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
-import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
@@ -208,7 +204,7 @@ public class RoutingService extends AbstractServiceInstance implements RoutingPr
 
     @Override
     public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
-        super.setOrchestrator(bundleContext.getServiceReference(RoutingProvider.class.getName()), this);
+        super.setDependencies(bundleContext.getServiceReference(RoutingProvider.class.getName()), this);
     }
 
     @Override

@@ -44,7 +44,6 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
     private ListenerRegistration<DataChangeListener> registration;
     private final ExecutorService executorService = Executors.newFixedThreadPool(1);
 
-
     public OvsdbDataChangeListener (DataBroker dataBroker) {
         this.dataBroker = dataBroker;
     }

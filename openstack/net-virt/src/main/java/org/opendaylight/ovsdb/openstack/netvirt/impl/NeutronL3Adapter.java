@@ -19,7 +19,6 @@ import org.opendaylight.neutron.spi.NeutronRouter;
 import org.opendaylight.neutron.spi.NeutronRouter_Interface;
 import org.opendaylight.neutron.spi.NeutronSubnet;
 import org.opendaylight.neutron.spi.Neutron_IPs;
-import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.api.*;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
@@ -73,6 +72,7 @@ public class NeutronL3Adapter implements ConfigInterface {
     private Map<String, String> networkIdToRouterMacCache;
     private Map<String, NeutronRouter_Interface> subnetIdToRouterInterfaceCache;
     private Boolean enabled = false;
+    private Southbound southbound;
 
     public NeutronL3Adapter() {
         logger.info(">>>>>> NeutronL3Adapter constructor {}", this.getClass());
@@ -935,8 +935,8 @@ public class NeutronL3Adapter implements ConfigInterface {
 
     private Long getDpidForIntegrationBridge(Node node) {
         // Check if node is integration bridge; and only then return its dpid
-        if (MdsalUtils.getBridge(node, configurationService.getIntegrationBridgeName()) != null) {
-            return MdsalUtils.getDataPathId(node);
+        if (southbound.getBridge(node, configurationService.getIntegrationBridgeName()) != null) {
+            return southbound.getDataPathId(node);
         }
         return null;
     }
@@ -959,6 +959,8 @@ public class NeutronL3Adapter implements ConfigInterface {
                 (L3ForwardingProvider) ServiceHelper.getGlobalInstance(L3ForwardingProvider.class, this);
         nodeCacheManager =
                 (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
+        southbound =
+                (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
     }
 
     @Override

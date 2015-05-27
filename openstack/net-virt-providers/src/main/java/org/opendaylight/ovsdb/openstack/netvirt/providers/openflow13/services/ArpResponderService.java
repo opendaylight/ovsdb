@@ -16,7 +16,6 @@ import java.util.List;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ArpProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
 import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
@@ -25,7 +24,6 @@ import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.OF13Provide
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.ActionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionKey;
@@ -161,7 +159,7 @@ public class ArpResponderService extends AbstractServiceInstance implements ArpP
 
     @Override
     public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
-        super.setOrchestrator(bundleContext.getServiceReference(ArpProvider.class.getName()), this);
+        super.setDependencies(bundleContext.getServiceReference(ArpProvider.class.getName()), this);
     }
 
     @Override

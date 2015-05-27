@@ -9,12 +9,12 @@ package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
-import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
@@ -46,38 +46,43 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile ConfigurationService configurationService;
     private volatile NetworkingProviderManager networkingProviderManager;
+    private volatile Southbound southbound;
 
     public void setConfigurationService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }
 
+    public void setSouthbound(Southbound southbound) {
+        this.southbound = southbound;
+    }
+
     @Override
     public String getBridgeUuid(Node node, String bridgeName) {
-        return MdsalUtils.getBridgeUuid(node, bridgeName);
+        return southbound.getBridgeUuid(node, bridgeName);
     }
 
     @Override
     public boolean isNodeNeutronReady(Node node) {
         Preconditions.checkNotNull(configurationService);
-        return MdsalUtils.getBridge(node, configurationService.getIntegrationBridgeName()) != null;
+        return southbound.getBridge(node, configurationService.getIntegrationBridgeName()) != null;
     }
 
     @Override
     public boolean isNodeOverlayReady(Node node) {
         Preconditions.checkNotNull(configurationService);
         return isNodeNeutronReady(node)
-                && MdsalUtils.getBridge(node, configurationService.getNetworkBridgeName()) != null;
+                && southbound.getBridge(node, configurationService.getNetworkBridgeName()) != null;
     }
 
     @Override
     public boolean isPortOnBridge (Node node, String portName) {
-        return MdsalUtils.extractTerminationPointAugmentation(node, portName) != null;
+        return southbound.extractTerminationPointAugmentation(node, portName) != null;
     }
 
     @Override
     public boolean isNodeTunnelReady(Node node) {
         Preconditions.checkNotNull(configurationService);
-        return MdsalUtils.getBridge(node, configurationService.getIntegrationBridgeName()) != null;
+        return southbound.getBridge(node, configurationService.getIntegrationBridgeName()) != null;
     }
 
     @Override
@@ -85,7 +90,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
         Preconditions.checkNotNull(configurationService);
 
         /* is br-int created */
-        OvsdbBridgeAugmentation intBridge = MdsalUtils.getBridge(node, configurationService.getIntegrationBridgeName());
+        OvsdbBridgeAugmentation intBridge = southbound.getBridge(node, configurationService.getIntegrationBridgeName());
         if (intBridge == null) {
             LOGGER.trace("isNodeVlanReady: node: {}, br-int missing", node);
             return false;
@@ -93,7 +98,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
 
         /* Check if physical device is added to br-int. */
         String phyNetName = getPhysicalInterfaceName(node, network.getProviderPhysicalNetwork());
-        if (MdsalUtils.extractTerminationPointAugmentation(node, phyNetName) == null) {
+        if (southbound.extractTerminationPointAugmentation(node, phyNetName) == null) {
             LOGGER.trace("isNodeVlanReady: node: {}, eth missing", node);
             return false;
         }
@@ -151,7 +156,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     @Override
     public String getPhysicalInterfaceName (Node node, String physicalNetwork) {
         String phyIf = null;
-        String providerMaps = MdsalUtils.getOtherConfig(node, OvsdbTables.OPENVSWITCH,
+        String providerMaps = southbound.getOtherConfig(node, OvsdbTables.OPENVSWITCH,
                 configurationService.getProviderMappingsKey());
         if (providerMaps == null) {
             providerMaps = configurationService.getDefaultProviderMapping();
@@ -179,7 +184,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     public List<String> getAllPhysicalInterfaceNames(Node node) {
         List<String> phyIfName = Lists.newArrayList();
         String phyIf = null;
-        String providerMaps = MdsalUtils.getOtherConfig(node, OvsdbTables.OPENVSWITCH,
+        String providerMaps = southbound.getOtherConfig(node, OvsdbTables.OPENVSWITCH,
                 configurationService.getProviderMappingsKey());
         if (providerMaps == null) {
             providerMaps = configurationService.getDefaultProviderMapping();
@@ -313,8 +318,8 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     private boolean addPortToBridge (Node node, String bridgeName, String portName) throws Exception {
         boolean rv = true;
 
-        if (MdsalUtils.extractTerminationPointAugmentation(node, portName) == null) {
-            rv = MdsalUtils.addTerminationPoint(node, bridgeName, portName, null);
+        if (southbound.extractTerminationPointAugmentation(node, portName) == null) {
+            rv = southbound.addTerminationPoint(node, bridgeName, portName, null);
         }
 
         return rv;
@@ -326,8 +331,8 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     private boolean addPatchPort (Node node, String bridgeName, String portName, String peerPortName) throws Exception {
         boolean rv = true;
 
-        if (MdsalUtils.extractTerminationPointAugmentation(node, portName) == null) {
-            rv = MdsalUtils.addPatchTerminationPoint(node, bridgeName, portName, peerPortName);
+        if (southbound.extractTerminationPointAugmentation(node, portName) == null) {
+            rv = southbound.addPatchTerminationPoint(node, bridgeName, portName, peerPortName);
         }
 
         return rv;
@@ -339,8 +344,8 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     private boolean addBridge(Node node, String bridgeName,
                               String localPatchName, String remotePatchName) throws Exception {
         boolean rv = true;
-        if (MdsalUtils.getBridge(node, bridgeName) == null) {
-            rv = MdsalUtils.addBridge(node, bridgeName, getControllerTarget(node));
+        if (southbound.getBridge(node, bridgeName) == null) {
+            rv = southbound.addBridge(node, bridgeName, getControllerTarget(node));
         }
         return rv;
     }
@@ -412,7 +417,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
 
     private String getControllerTarget(Node node) {
         String target = null;
-        OvsdbNodeAugmentation ovsdbNodeAugmentation = MdsalUtils.extractOvsdbNode(node);
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = southbound.extractOvsdbNode(node);
         if (ovsdbNodeAugmentation != null) {
             ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
             String addressStr = new String(connectionInfo.getLocalIp().getValue());
@@ -456,6 +461,8 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
                 (ConfigurationService) ServiceHelper.getGlobalInstance(ConfigurationService.class, this);
         networkingProviderManager =
                 (NetworkingProviderManager) ServiceHelper.getGlobalInstance(NetworkingProviderManager.class, this);
+        southbound =
+                (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
     }
 
     @Override

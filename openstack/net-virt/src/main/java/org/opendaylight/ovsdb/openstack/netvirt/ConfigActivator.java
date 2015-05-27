@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.neutron.spi.*;
 import org.opendaylight.ovsdb.openstack.netvirt.api.*;
@@ -162,6 +163,10 @@ public class ConfigActivator implements BundleActivator {
         OpenstackRouter openstackRouter = new OpenstackRouter();
         registerService(context,
                 new String[]{MultiTenantAwareRouter.class.getName()}, null, openstackRouter);
+
+        Southbound southbound = new SouthboundImpl(providerContext.getSALService(DataBroker.class));
+        registerService(context,
+                new String[]{Southbound.class.getName()}, null, southbound);
 
         Dictionary<String, Object> nodeCacheManagerProperties = new Hashtable<>();
         nodeCacheManagerProperties.put(Constants.EVENT_HANDLER_TYPE_PROPERTY, AbstractEvent.HandlerType.NODE);

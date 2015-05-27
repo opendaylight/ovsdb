@@ -16,8 +16,21 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFaile
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.ovsdb.openstack.netvirt.MdsalHelper;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
-import org.opendaylight.ovsdb.openstack.netvirt.api.*;
-import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
+import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ClassifierProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.openstack.netvirt.api.EgressAclProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.IngressAclProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.L2ForwardingProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
+import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
+import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.NetvirtProvidersProvider;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
@@ -112,6 +125,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
     public static final String NAME = "OF13Provider";
     private volatile NetworkingProviderManager networkingProviderManager;
     private volatile BundleContext bundleContext;
+    private volatile Southbound southbound;
 
     public OF13Provider() {
         this.dataBroker = NetvirtProvidersProvider.getDataBroker();
@@ -159,8 +173,8 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
         String tunnelBridgeName = configurationService.getIntegrationBridgeName();
         String portName = getTunnelName(tunnelType, dst);
         logger.info("addTunnelPort enter: portName: {}", portName);
-        if (MdsalUtils.extractTerminationPointAugmentation(node, portName) != null
-                || MdsalUtils.isTunnelTerminationPointExist(node,tunnelBridgeName,portName)) {
+        if (southbound.extractTerminationPointAugmentation(node, portName) != null
+                || southbound.isTunnelTerminationPointExist(node, tunnelBridgeName, portName)) {
             logger.info("Tunnel {} is present in {} of {}", portName, tunnelBridgeName, node.getNodeId().getValue());
             return true;
         }
@@ -170,12 +184,12 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
         options.put("local_ip", src.getHostAddress());
         options.put("remote_ip", dst.getHostAddress());
 
-        if (!MdsalUtils.addTunnelTerminationPoint(node, tunnelBridgeName, portName, tunnelType, options)) {
+        if (!southbound.addTunnelTerminationPoint(node, tunnelBridgeName, portName, tunnelType, options)) {
             logger.error("Failed to insert Tunnel port {} in {}", portName, tunnelBridgeName);
             return false;
         }
 
-        logger.info("addTunnelPort exit: portName: {}", portName);
+            logger.info("addTunnelPort exit: portName: {}", portName);
         return true;
     }
 
@@ -183,7 +197,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
     private boolean deletePort(Node node, String bridgeName, String portName) {
         // TODO SB_MIGRATION
         // might need to convert from ovsdb node to bridge node
-        return MdsalUtils.deleteTerminationPoint(node, portName);
+        return southbound.deleteTerminationPoint(node, portName);
     }
 
     private boolean deleteTunnelPort(Node node, String tunnelType, InetAddress src, InetAddress dst) {
@@ -672,7 +686,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
 
     private Long getDpid(Node node) {
         Long dpid = 0L;
-        dpid = MdsalUtils.getDataPathId(node);
+        dpid = southbound.getDataPathId(node);
         if (dpid == 0) {
             logger.warn("getDpid: dpid not found: {}", node);
         }
@@ -681,7 +695,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
 
     private Long getIntegrationBridgeOFDPID(Node node) {
         Long dpid = 0L;
-        if (MdsalUtils.getBridgeName(node).equals(configurationService.getIntegrationBridgeName())) {
+        if (southbound.getBridgeName(node).equals(configurationService.getIntegrationBridgeName())) {
             dpid = getDpid(node);
         }
         return dpid;
@@ -689,7 +703,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
 
     private Long getExternalBridgeDpid(Node node) {
         Long dpid = 0L;
-        if (MdsalUtils.getBridgeName(node).equals(configurationService.getExternalBridgeName())) {
+        if (southbound.getBridgeName(node).equals(configurationService.getExternalBridgeName())) {
             dpid = getDpid(node);
         }
         return dpid;
@@ -707,13 +721,13 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                 return;
             }
 
-            long localPort = MdsalUtils.getOFPort(intf);
+            long localPort = southbound.getOFPort(intf);
             if (localPort == 0) {
                 logger.info("programLocalRules: could not find ofPort");
                 return;
             }
 
-            String attachedMac = MdsalUtils.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
+            String attachedMac = southbound.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
             if (attachedMac == null) {
                 logger.warn("No AttachedMac seen in {}", intf);
                 return;
@@ -761,13 +775,13 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                 return;
             }
 
-            long localPort = MdsalUtils.getOFPort(intf);
+            long localPort = southbound.getOFPort(intf);
             if (localPort == 0) {
                 logger.info("removeLocalRules: could not find ofPort");
                 return;
             }
 
-            String attachedMac = MdsalUtils.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
+            String attachedMac = southbound.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
             if (attachedMac == null) {
                 logger.warn("No AttachedMac seen in {}", intf);
                 return;
@@ -803,22 +817,22 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                 return;
             }
 
-            long localPort = MdsalUtils.getOFPort(intf);
+            long localPort = southbound.getOFPort(intf);
             if (localPort == 0) {
                 logger.info("programTunnelRules: could not find ofPort");
                 return;
             }
 
-            String attachedMac = MdsalUtils.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
+            String attachedMac = southbound.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
             if (attachedMac == null) {
                 logger.warn("programTunnelRules: No AttachedMac seen in {}", intf);
                 return;
             }
 
-            List<OvsdbTerminationPointAugmentation> intfs = MdsalUtils.getTerminationPointsOfBridge(node);
+            List<OvsdbTerminationPointAugmentation> intfs = southbound.getTerminationPointsOfBridge(node);
             for (OvsdbTerminationPointAugmentation tunIntf : intfs) {
                 if (tunIntf.getName().equals(getTunnelName(tunnelType, dst))) {
-                    long tunnelOFPort = MdsalUtils.getOFPort(tunIntf);
+                    long tunnelOFPort = southbound.getOFPort(tunIntf);
                     if (tunnelOFPort == 0) {
                         logger.error("programTunnelRules: Could not Identify Tunnel port {} -> OF ({}) on {}",
                                 tunIntf.getName(), tunnelOFPort, node);
@@ -861,22 +875,22 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                 return;
             }
 
-            long localPort = MdsalUtils.getOFPort(intf);
+            long localPort = southbound.getOFPort(intf);
             if (localPort == 0) {
                 logger.info("removeTunnelRules: could not find ofPort");
                 return;
             }
 
-            String attachedMac = MdsalUtils.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
+            String attachedMac = southbound.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
             if (attachedMac == null) {
                 logger.error("removeTunnelRules: No AttachedMac seen in {}", intf);
                 return;
             }
 
-            List<OvsdbTerminationPointAugmentation> intfs = MdsalUtils.getTerminationPointsOfBridge(node);
+            List<OvsdbTerminationPointAugmentation> intfs = southbound.getTerminationPointsOfBridge(node);
             for (OvsdbTerminationPointAugmentation tunIntf : intfs) {
                 if (tunIntf.getName().equals(getTunnelName(tunnelType, dst))) {
-                    long tunnelOFPort = MdsalUtils.getOFPort(tunIntf);
+                    long tunnelOFPort = southbound.getOFPort(tunIntf);
                     if (tunnelOFPort == -1) {
                         logger.error("Could not Identify Tunnel port {} -> OF ({}) on {}",
                                 tunIntf.getName(), tunnelOFPort, node);
@@ -909,13 +923,13 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
             return;
         }
 
-        long localPort = MdsalUtils.getOFPort(intf);
+        long localPort = southbound.getOFPort(intf);
         if (localPort == 0) {
             logger.debug("programVlanRules: could not find ofPort for {}", intf.getName());
             return;
         }
 
-        String attachedMac = MdsalUtils.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
+        String attachedMac = southbound.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
         if (attachedMac == null) {
             logger.debug("programVlanRules: No AttachedMac seen in {}", intf);
             return;
@@ -923,7 +937,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
 
         String phyIfName =
                 bridgeConfigurationManager.getPhysicalInterfaceName(node, network.getProviderPhysicalNetwork());
-        long ethOFPort = MdsalUtils.getOFPort(node, phyIfName);
+        long ethOFPort = southbound.getOFPort(node, phyIfName);
         if (ethOFPort == 0) {
             logger.warn("programVlanRules: could not find ofPort for physical port {}", phyIfName);
             return;
@@ -947,13 +961,13 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
             return;
         }
 
-        long localPort = MdsalUtils.getOFPort(intf);
+        long localPort = southbound.getOFPort(intf);
         if (localPort == 0) {
             logger.debug("removeVlanRules: programVlanRules: could not find ofPort for {}", intf.getName());
             return;
         }
 
-        String attachedMac = MdsalUtils.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
+        String attachedMac = southbound.getInterfaceExternalIdsValue(intf, Constants.EXTERNAL_ID_VM_MAC);
         if (attachedMac == null) {
             logger.debug("removeVlanRules: No AttachedMac seen in {}", intf);
             return;
@@ -961,7 +975,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
 
         String phyIfName =
                 bridgeConfigurationManager.getPhysicalInterfaceName(node, network.getProviderPhysicalNetwork());
-        long ethOFPort = MdsalUtils.getOFPort(node, phyIfName);
+        long ethOFPort = southbound.getOFPort(node, phyIfName);
         if (ethOFPort == 0) {
             logger.warn("removeVlanRules: could not find ofPort for physical port {}", phyIfName);
             return;
@@ -982,10 +996,10 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
         Preconditions.checkNotNull(nodeCacheManager);
         Map<org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId,Node> nodes =
                 nodeCacheManager.getOvsdbNodes();
-        nodes.remove(MdsalUtils.extractBridgeOvsdbNodeId(srcNode));
+        nodes.remove(southbound.extractBridgeOvsdbNodeId(srcNode));
         String networkType = network.getProviderNetworkType();
         String segmentationId = network.getProviderSegmentationID();
-        Node srcBridgeNode = MdsalUtils.getBridgeNode(srcNode,configurationService.getIntegrationBridgeName());
+        Node srcBridgeNode = southbound.getBridgeNode(srcNode, configurationService.getIntegrationBridgeName());
         programLocalRules(networkType, network.getProviderSegmentationID(), srcBridgeNode, intf);
 
         if (networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
@@ -996,7 +1010,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                 InetAddress src = configurationService.getTunnelEndPoint(srcNode);
                 InetAddress dst = configurationService.getTunnelEndPoint(dstNode);
                 if ((src != null) && (dst != null)) {
-                    Node dstBridgeNode = MdsalUtils.getBridgeNode(dstNode,
+                    Node dstBridgeNode = southbound.getBridgeNode(dstNode,
                             configurationService.getIntegrationBridgeName());
                     if (addTunnelPort(srcBridgeNode, networkType, src, dst)) {
                         programTunnelRules(networkType, segmentationId, dst, srcBridgeNode, intf, true);
@@ -1018,7 +1032,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
 
     private void triggerInterfaceUpdates(Node node) {
         logger.debug("enter triggerInterfaceUpdates for {}", node.getNodeId());
-        List<OvsdbTerminationPointAugmentation> ports = MdsalUtils.extractTerminationPointAugmentations(node);
+        List<OvsdbTerminationPointAugmentation> ports = southbound.extractTerminationPointAugmentations(node);
         if (ports != null && !ports.isEmpty()) {
             for (OvsdbTerminationPointAugmentation port : ports) {
                 NeutronNetwork neutronNetwork = tenantNetworkManager.getTenantNetwork(port);
@@ -1038,17 +1052,17 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                                          OvsdbTerminationPointAugmentation intf, boolean isLastInstanceOnNode) {
         Map<org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId,Node> nodes =
                 nodeCacheManager.getOvsdbNodes();
-        nodes.remove(MdsalUtils.extractBridgeOvsdbNodeId(srcNode));
+        nodes.remove(southbound.extractBridgeOvsdbNodeId(srcNode));
 
         logger.info("Delete intf " + intf.getName() + " isLastInstanceOnNode " + isLastInstanceOnNode);
         List<String> phyIfName = bridgeConfigurationManager.getAllPhysicalInterfaceNames(srcNode);
-        if (MdsalUtils.isTunnel(intf)) {
+        if (southbound.isTunnel(intf)) {
             // Delete tunnel port
             try {
                 InetAddress src = InetAddress.getByName(
-                        MdsalUtils.getOptionsValue(intf.getOptions(), "local_ip"));
+                        southbound.getOptionsValue(intf.getOptions(), "local_ip"));
                 InetAddress dst = InetAddress.getByName(
-                        MdsalUtils.getOptionsValue(intf.getOptions(), "remote_ip"));
+                        southbound.getOptionsValue(intf.getOptions(), "remote_ip"));
                 deleteTunnelPort(srcNode,
                         MdsalHelper.createOvsdbInterfaceType(intf.getInterfaceType()),
                         src, dst);
@@ -1075,7 +1089,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                                 + intf.getName() + " on srcNode " + srcNode.getNodeId().getValue());
                         removeTunnelRules(tunnelType, network.getProviderSegmentationID(),
                                 dst, srcNode, intf, true, isLastInstanceOnNode);
-                        Node dstBridgeNode = MdsalUtils.getBridgeNode(dstNode, Constants.INTEGRATION_BRIDGE);
+                        Node dstBridgeNode = southbound.getBridgeNode(dstNode, Constants.INTEGRATION_BRIDGE);
                         if(dstBridgeNode != null){
                             logger.info("Remove tunnel rules for interface "
                                     + intf.getName() + " on dstNode " + dstNode.getNodeId().getValue());
@@ -1103,8 +1117,8 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
     }
 
     private void initializeFlowRules(Node node, String bridgeName) {
-        Long dpid = MdsalUtils.getDataPathId(node);
-        String datapathId = MdsalUtils.getDatapathId(node);
+        Long dpid = southbound.getDataPathId(node);
+        String datapathId = southbound.getDatapathId(node);
         logger.info("initializeFlowRules: bridgeName: {}, dpid: {} - {}",
                 bridgeName, dpid, datapathId);
 
@@ -1804,7 +1818,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
 
     @Override
     public void initializeOFFlowRules(Node openflowNode) {
-        String bridgeName = MdsalUtils.getBridgeName(openflowNode);
+        String bridgeName = southbound.getBridgeName(openflowNode);
         logger.info("initializeOFFlowRules: bridgeName: {}", bridgeName);
         if (bridgeName.equals(configurationService.getIntegrationBridgeName())) {
             initializeFlowRules(openflowNode, configurationService.getIntegrationBridgeName());
@@ -1845,7 +1859,8 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                 (L2ForwardingProvider) ServiceHelper.getGlobalInstance(L2ForwardingProvider.class, this);
         securityServicesManager =
                 (SecurityServicesManager) ServiceHelper.getGlobalInstance(SecurityServicesManager.class, this);
-
+        southbound =
+                (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
     }
 
     @Override

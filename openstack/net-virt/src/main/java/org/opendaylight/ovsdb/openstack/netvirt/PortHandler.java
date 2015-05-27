@@ -15,6 +15,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
@@ -37,6 +38,7 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware, C
     private volatile NodeCacheManager nodeCacheManager;
     private volatile NeutronL3Adapter neutronL3Adapter;
     private volatile EventDispatcher eventDispatcher;
+    private volatile Southbound southbound;
 
     /**
      * Invoked when a port creation is requested
@@ -125,13 +127,13 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware, C
         List<Node> nodes = nodeCacheManager.getNodes();
         for (Node node : nodes) {
             try {
-                List<OvsdbTerminationPointAugmentation> ports = MdsalUtils.getTerminationPointsOfBridge(node);
+                List<OvsdbTerminationPointAugmentation> ports = southbound.getTerminationPointsOfBridge(node);
                 for (OvsdbTerminationPointAugmentation port : ports) {
                     String neutronPortId =
-                            MdsalUtils.getInterfaceExternalIdsValue(port, Constants.EXTERNAL_ID_INTERFACE_ID);
+                            southbound.getInterfaceExternalIdsValue(port, Constants.EXTERNAL_ID_INTERFACE_ID);
                     if (neutronPortId != null && neutronPortId.equalsIgnoreCase(neutronPort.getPortUUID())) {
                         logger.trace("neutronPortDeleted: Delete interface {}", port.getName());
-                        MdsalUtils.deleteTerminationPoint(node, port.getName());
+                        southbound.deleteTerminationPoint(node, port.getName());
                         break;
                     }
                 }
@@ -180,6 +182,8 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware, C
                 (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
         neutronL3Adapter =
                 (NeutronL3Adapter) ServiceHelper.getGlobalInstance(NeutronL3Adapter.class, this);
+        southbound =
+                (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
         eventDispatcher =
                 (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
         eventDispatcher.eventHandlerAdded(

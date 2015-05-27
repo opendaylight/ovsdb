@@ -16,8 +16,8 @@ import org.opendaylight.neutron.spi.INeutronPortCRUD;
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.neutron.spi.NeutronPort;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
-import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
@@ -30,9 +30,10 @@ import org.slf4j.LoggerFactory;
 
 public class TenantNetworkManagerImpl implements ConfigInterface, TenantNetworkManager {
     static final Logger logger = LoggerFactory.getLogger(TenantNetworkManagerImpl.class);
-    private volatile INeutronNetworkCRUD neutronNetworkCache;
-    private volatile INeutronPortCRUD neutronPortCache;
-    private volatile VlanConfigurationCache vlanConfigurationCache;
+    private INeutronNetworkCRUD neutronNetworkCache;
+    private INeutronPortCRUD neutronPortCache;
+    private VlanConfigurationCache vlanConfigurationCache;
+    private Southbound southbound;
 
     @Override
     public int getInternalVlan(Node node, String networkId) {
@@ -62,7 +63,7 @@ public class TenantNetworkManagerImpl implements ConfigInterface, TenantNetworkM
             return;
         }
 
-        MdsalUtils.addVlanToTp(vlan);
+        southbound.addVlanToTp(vlan);
     }
 
     @Override
@@ -74,9 +75,9 @@ public class TenantNetworkManagerImpl implements ConfigInterface, TenantNetworkM
         }
 
         try {
-            List<OvsdbTerminationPointAugmentation> ports = MdsalUtils.getTerminationPointsOfBridge(node);
+            List<OvsdbTerminationPointAugmentation> ports = southbound.getTerminationPointsOfBridge(node);
             for (OvsdbTerminationPointAugmentation port : ports) {
-                String ifaceId = MdsalUtils.getInterfaceExternalIdsValue(port, Constants.EXTERNAL_ID_INTERFACE_ID);
+                String ifaceId = southbound.getInterfaceExternalIdsValue(port, Constants.EXTERNAL_ID_INTERFACE_ID);
                 if (ifaceId != null && isInterfacePresentInTenantNetwork(ifaceId, networkId)) {
                     logger.debug("Tenant Network {} with Segmentation-id {} is present in Node {} / Interface {}",
                             networkId, segmentationId, node, port);
@@ -114,7 +115,7 @@ public class TenantNetworkManagerImpl implements ConfigInterface, TenantNetworkM
         NeutronNetwork neutronNetwork = null;
 
         logger.debug("getTenantNetwork for {}", terminationPointAugmentation);
-        String neutronPortId = MdsalUtils.getInterfaceExternalIdsValue(terminationPointAugmentation,
+        String neutronPortId = southbound.getInterfaceExternalIdsValue(terminationPointAugmentation,
                 Constants.EXTERNAL_ID_INTERFACE_ID);
         if (neutronPortId != null) {
             NeutronPort neutronPort = neutronPortCache.getPort(neutronPortId);
@@ -145,8 +146,8 @@ public class TenantNetworkManagerImpl implements ConfigInterface, TenantNetworkM
         NeutronPort neutronPort = null;
 
         logger.trace("getTenantPort for {}", terminationPointAugmentation.getName());
-        String neutronPortId = MdsalUtils.getInterfaceExternalIdsValue(terminationPointAugmentation,
-            Constants.EXTERNAL_ID_INTERFACE_ID);
+        String neutronPortId = southbound.getInterfaceExternalIdsValue(terminationPointAugmentation,
+                Constants.EXTERNAL_ID_INTERFACE_ID);
         if (neutronPortId != null) {
             neutronPort = neutronPortCache.getPort(neutronPortId);
         }
@@ -178,6 +179,8 @@ public class TenantNetworkManagerImpl implements ConfigInterface, TenantNetworkM
     public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
         vlanConfigurationCache =
                 (VlanConfigurationCache) ServiceHelper.getGlobalInstance(VlanConfigurationCache.class, this);
+        southbound =
+                (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
     }
 
     @Override

@@ -12,7 +12,6 @@ package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services;
 import java.math.BigInteger;
 import java.util.List;
 
-import org.opendaylight.ovsdb.openstack.netvirt.api.IngressAclProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.L2ForwardingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
@@ -1060,7 +1059,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
 
     @Override
     public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
-        super.setOrchestrator(bundleContext.getServiceReference(L2ForwardingProvider.class.getName()), this);
+        super.setDependencies(bundleContext.getServiceReference(L2ForwardingProvider.class.getName()), this);
     }
 
     @Override

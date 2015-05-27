@@ -16,7 +16,6 @@ import org.opendaylight.neutron.spi.NeutronSecurityGroup;
 import org.opendaylight.neutron.spi.NeutronSecurityRule;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EgressAclProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
@@ -473,7 +472,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
 
     @Override
     public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
-        super.setOrchestrator(bundleContext.getServiceReference(EgressAclProvider.class.getName()), this);
+        super.setDependencies(bundleContext.getServiceReference(EgressAclProvider.class.getName()), this);
     }
 
     @Override

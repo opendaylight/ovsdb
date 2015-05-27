@@ -15,8 +15,8 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.NetvirtProvidersProvider;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
@@ -36,12 +36,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.util.List;
@@ -65,6 +63,7 @@ public abstract class AbstractServiceInstance {
     private DataBroker dataBroker = null;
     // OSGi Services that we are dependent on.
     private volatile PipelineOrchestrator orchestrator;
+    private volatile Southbound southbound;
 
     // Concrete Service that this AbstractServiceInstance represents
     private Service service;
@@ -74,14 +73,16 @@ public abstract class AbstractServiceInstance {
         this.dataBroker = NetvirtProvidersProvider.getDataBroker();
     }
 
-    protected void setOrchestrator(final ServiceReference ref, AbstractServiceInstance serviceInstance) {
+    protected void setDependencies(final ServiceReference ref, AbstractServiceInstance serviceInstance) {
         this.orchestrator =
                 (PipelineOrchestrator) ServiceHelper.getGlobalInstance(PipelineOrchestrator.class, serviceInstance);
         orchestrator.registerService(ref, serviceInstance);
+        this.southbound =
+                (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, serviceInstance);
     }
-
+    
     public boolean isBridgeInPipeline (Node node){
-        String bridgeName = MdsalUtils.getBridgeName(node);
+        String bridgeName = southbound.getBridgeName(node);
         if (bridgeName != null && Constants.INTEGRATION_BRIDGE.equals(bridgeName)) {
             return true;
         }
@@ -193,7 +194,7 @@ public abstract class AbstractServiceInstance {
 
     private Long getDpid(Node node) {
         Long dpid = 0L;
-        dpid = MdsalUtils.getDataPathId(node);
+        dpid = southbound.getDataPathId(node);
         if (dpid == 0) {
             logger.warn("getDpid: dpid not found: {}", node);
         }

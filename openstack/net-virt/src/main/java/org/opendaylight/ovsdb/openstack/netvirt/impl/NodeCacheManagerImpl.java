@@ -14,13 +14,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent;
 import org.opendaylight.ovsdb.openstack.netvirt.AbstractHandler;
-import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.NodeCacheManagerEvent;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -38,7 +38,8 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
     private final Object nodeCacheLock = new Object();
     private Map<NodeId, Node> nodeCache = new ConcurrentHashMap<>();
     private Map<Long, NodeCacheListener> handlers = Maps.newHashMap();
-    private EventDispatcher eventDispatcher;
+    private volatile EventDispatcher eventDispatcher;
+    private volatile Southbound southbound;
 
     @Override
     public void nodeAdded(Node node) {
@@ -67,7 +68,7 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
 
         logger.debug("processNodeUpdate: {} Node type {} {}: {}",
                 nodeCache.size(),
-                MdsalUtils.getBridge(node) != null ? "BridgeNode" : "OvsdbNode",
+                southbound.getBridge(node) != null ? "BridgeNode" : "OvsdbNode",
                 action == Action.ADD ? "ADD" : "UPDATE",
                 node);
 
@@ -136,7 +137,7 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
     public Map<NodeId,Node> getOvsdbNodes() {
         Map<NodeId,Node> ovsdbNodesMap = new ConcurrentHashMap<NodeId,Node>();
         for (Map.Entry<NodeId, Node> ovsdbNodeEntry : nodeCache.entrySet()) {
-            if (MdsalUtils.extractOvsdbNode(ovsdbNodeEntry.getValue()) != null) {
+            if (southbound.extractOvsdbNode(ovsdbNodeEntry.getValue()) != null) {
                 ovsdbNodesMap.put(ovsdbNodeEntry.getKey(), ovsdbNodeEntry.getValue());
             }
         }
@@ -147,7 +148,7 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
     public List<Node> getBridgeNodes() {
         List<Node> nodes = Lists.newArrayList();
         for (Node node : nodeCache.values()) {
-            if (MdsalUtils.getBridge(node) != null) {
+            if (southbound.getBridge(node) != null) {
                 nodes.add(node);
             }
         }
@@ -165,6 +166,8 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
 
     @Override
     public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+        southbound =
+                (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
         eventDispatcher =
                 (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
         eventDispatcher.eventHandlerAdded(

@@ -27,7 +27,7 @@ public class L2RewriteService extends AbstractServiceInstance implements ConfigI
 
     @Override
     public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
-        super.setOrchestrator(bundleContext.getServiceReference(L2RewriteProvider.class.getName()), this);
+        super.setDependencies(bundleContext.getServiceReference(L2RewriteProvider.class.getName()), this);
     }
 
     @Override

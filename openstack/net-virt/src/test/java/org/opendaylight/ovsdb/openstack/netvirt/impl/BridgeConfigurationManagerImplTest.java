@@ -24,7 +24,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import java.util.List;
 import org.junit.runner.RunWith;
@@ -34,9 +33,9 @@ import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.neutron.spi.NeutronNetwork;
-import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -52,13 +51,13 @@ import org.powermock.modules.junit4.PowerMockRunner;
  * @author Sam Hague (shague@redhat.com)
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(MdsalUtils.class)
 public class BridgeConfigurationManagerImplTest {
     @Mock private Node node;
     @Mock private OvsdbBridgeAugmentation bridge;
     @Mock private OvsdbTerminationPointAugmentation port;
     @Mock private NeutronNetwork neutronNetwork;
     @Mock private ConfigurationService configurationService;
+    @Mock private Southbound southbound;
     @InjectMocks public static BridgeConfigurationManagerImpl bridgeConfigurationManagerImpl;
 
     private static final String BR_INT = "br-int";
@@ -75,8 +74,7 @@ public class BridgeConfigurationManagerImplTest {
 
     @Test
     public void testGetBridgeUuid() {
-        mockStatic(MdsalUtils.class);
-        when(MdsalUtils.getBridgeUuid(any(Node.class), anyString()))
+        when(southbound.getBridgeUuid(any(Node.class), anyString()))
                 .thenReturn(null)
                 .thenReturn(BRIDGE_UUID);
 
@@ -84,14 +82,12 @@ public class BridgeConfigurationManagerImplTest {
                 bridgeConfigurationManagerImpl.getBridgeUuid(node, BR_INT));
         assertEquals("Error, did not return UUID of correct bridge", BRIDGE_UUID,
                 bridgeConfigurationManagerImpl.getBridgeUuid(node, BR_INT));
-        verifyStatic(times(2));
-        MdsalUtils.getBridgeUuid(any(Node.class), anyString());
+        verify(southbound, times(2)).getBridgeUuid(any(Node.class), anyString());
     }
 
     @Test
     public void testIsNodeNeutronReady() throws Exception {
-        mockStatic(MdsalUtils.class);
-        when(MdsalUtils.getBridge(any(Node.class), anyString()))
+        when(southbound.getBridge(any(Node.class), anyString()))
                 .thenReturn(null)
                 .thenReturn(bridge);
 
@@ -104,14 +100,12 @@ public class BridgeConfigurationManagerImplTest {
                 bridgeConfigurationManagerImpl.isNodeNeutronReady(node));
 
         verify(configurationService, times(2)).getIntegrationBridgeName();
-        verifyStatic(times(2));
-        MdsalUtils.getBridge(any(Node.class), anyString());
+        verify(southbound, times(2)).getBridge(any(Node.class), anyString());
     }
 
     @Test
     public void testIsNodeOverlayReady() throws Exception {
-        mockStatic(MdsalUtils.class);
-        when(MdsalUtils.getBridge(any(Node.class), anyString()))
+        when(southbound.getBridge(any(Node.class), anyString()))
                 .thenReturn(null)
                 .thenReturn(bridge);
 
@@ -119,6 +113,7 @@ public class BridgeConfigurationManagerImplTest {
                 PowerMockito.spy(new BridgeConfigurationManagerImpl());
         doReturn(false).when(bridgeConfigurationManagerImplSpy).isNodeNeutronReady(any(Node.class));
         bridgeConfigurationManagerImplSpy.setConfigurationService(configurationService);
+        bridgeConfigurationManagerImplSpy.setSouthbound(southbound);
 
         verifyNoMoreInteractions(configurationService);
 
@@ -134,14 +129,12 @@ public class BridgeConfigurationManagerImplTest {
                 bridgeConfigurationManagerImplSpy.isNodeOverlayReady(node));
 
         verify(configurationService, times(2)).getNetworkBridgeName();
-        verifyStatic(times(2));
-        MdsalUtils.getBridge(any(Node.class), anyString());
+        verify(southbound, times(2)).getBridge(any(Node.class), anyString());
     }
 
     @Test
     public void testIsPortOnBridge() throws Exception {
-        mockStatic(MdsalUtils.class);
-        when(MdsalUtils.extractTerminationPointAugmentation(any(Node.class), anyString()))
+        when(southbound.extractTerminationPointAugmentation(any(Node.class), anyString()))
                 .thenReturn(null)
                 .thenReturn(port);
 
@@ -149,14 +142,12 @@ public class BridgeConfigurationManagerImplTest {
                 bridgeConfigurationManagerImpl.isPortOnBridge(node, PORT_BR_INT));
         assertTrue("Error, port " + PORT_BR_INT + " should be found",
                 bridgeConfigurationManagerImpl.isPortOnBridge(node, PORT_BR_INT));
-        verifyStatic(times(2));
-        MdsalUtils.extractTerminationPointAugmentation(any(Node.class), anyString());
+        verify(southbound, times(2)).extractTerminationPointAugmentation(any(Node.class), anyString());
     }
 
     @Test
     public void testIsNodeTunnelReady() throws Exception {
-        mockStatic(MdsalUtils.class);
-        when(MdsalUtils.getBridge(any(Node.class), anyString()))
+        when(southbound.getBridge(any(Node.class), anyString()))
                 .thenReturn(null)
                 .thenReturn(bridge);
 
@@ -169,18 +160,16 @@ public class BridgeConfigurationManagerImplTest {
                 bridgeConfigurationManagerImpl.isNodeNeutronReady(node));
 
         verify(configurationService, times(2)).getIntegrationBridgeName();
-        verifyStatic(times(2));
-        MdsalUtils.getBridge(any(Node.class), anyString());
+        verify(southbound, times(2)).getBridge(any(Node.class), anyString());
     }
 
     @Test
     public void testIsNodeVlanReady() throws Exception {
-        mockStatic(MdsalUtils.class);
-        when(MdsalUtils.getBridge(any(Node.class), anyString()))
+        when(southbound.getBridge(any(Node.class), anyString()))
                 .thenReturn(null)
                 .thenReturn(bridge);
 
-        when(MdsalUtils.extractTerminationPointAugmentation(any(Node.class), anyString()))
+        when(southbound.extractTerminationPointAugmentation(any(Node.class), anyString()))
                 .thenReturn(null)
                 .thenReturn(port);
 
@@ -194,6 +183,7 @@ public class BridgeConfigurationManagerImplTest {
                 PowerMockito.spy(new BridgeConfigurationManagerImpl());
         doReturn(ETH1).when(bridgeConfigurationManagerImplSpy).getPhysicalInterfaceName(any(Node.class), anyString());
         bridgeConfigurationManagerImplSpy.setConfigurationService(configurationService);
+        bridgeConfigurationManagerImplSpy.setSouthbound(southbound);
 
         assertFalse("Error, did not return correct boolean from isNodeVlanReady",
                 bridgeConfigurationManagerImpl.isNodeVlanReady(node, neutronNetwork));
@@ -203,10 +193,6 @@ public class BridgeConfigurationManagerImplTest {
 
         verify(configurationService, times(3)).getIntegrationBridgeName();
         verify(neutronNetwork, times(2)).getProviderPhysicalNetwork();
-        verifyStatic(times(3));
-        MdsalUtils.getBridge(any(Node.class), anyString());
-        verifyStatic(times(2));
-        MdsalUtils.extractTerminationPointAugmentation(any(Node.class), anyString());
     }
 
     @Test
@@ -255,8 +241,7 @@ public class BridgeConfigurationManagerImplTest {
 
     @Test
     public void testGetPhysicalInterfaceName() throws Exception {
-        mockStatic(MdsalUtils.class);
-        when(MdsalUtils.getOtherConfig(any(Node.class), eq(OvsdbTables.OPENVSWITCH), anyString()))
+        when(southbound.getOtherConfig(any(Node.class), eq(OvsdbTables.OPENVSWITCH), anyString()))
                 .thenReturn(null)
                 .thenReturn(null)
                 .thenReturn(PROVIDER_MAPPINGS);
@@ -279,12 +264,12 @@ public class BridgeConfigurationManagerImplTest {
         assertNull(PHYSNET1, bridgeConfigurationManagerImpl.getPhysicalInterfaceName(node, PHYSNET3));
         verify(configurationService, times(5)).getProviderMappingsKey();
         verify(configurationService, times(2)).getDefaultProviderMapping();
+        verify(southbound, times(5)).getOtherConfig(any(Node.class), eq(OvsdbTables.OPENVSWITCH), anyString());
     }
 
     @Test
     public void testGetAllPhysicalInterfaceNames() throws Exception {
-        mockStatic(MdsalUtils.class);
-        when(MdsalUtils.getOtherConfig(any(Node.class), eq(OvsdbTables.OPENVSWITCH), anyString()))
+        when(southbound.getOtherConfig(any(Node.class), eq(OvsdbTables.OPENVSWITCH), anyString()))
                 .thenReturn(null)
                 .thenReturn(PROVIDER_MAPPINGS);
 
@@ -303,7 +288,6 @@ public class BridgeConfigurationManagerImplTest {
 
         verify(configurationService, times(2)).getProviderMappingsKey();
         verify(configurationService, times(1)).getDefaultProviderMapping();
-        verifyStatic(times(2));
-        MdsalUtils.getOtherConfig(any(Node.class), eq(OvsdbTables.OPENVSWITCH), anyString());
+        verify(southbound, times(2)).getOtherConfig(any(Node.class), eq(OvsdbTables.OPENVSWITCH), anyString());
     }
 }

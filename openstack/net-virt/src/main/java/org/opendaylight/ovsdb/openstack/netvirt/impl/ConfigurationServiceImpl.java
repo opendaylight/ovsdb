@@ -17,11 +17,12 @@ import java.util.Map;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
-import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -39,6 +40,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, ConfigInt
     private Map<Pair<String, String>, String> patchPortNames = Maps.newHashMap();
     private String providerMappingsKey;
     private String providerMapping;
+    private Southbound southbound;
 
     public ConfigurationServiceImpl() {
         tunnelEndpointKey = Constants.TUNNEL_ENDPOINT_KEY;
@@ -131,7 +133,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, ConfigInt
     @Override
     public InetAddress getTunnelEndPoint(Node node) {
         InetAddress address = null;
-        String tunnelEndpoint = MdsalUtils.getOtherConfig(node, OvsdbTables.OPENVSWITCH, tunnelEndpointKey);
+        String tunnelEndpoint = southbound.getOtherConfig(node, OvsdbTables.OPENVSWITCH, tunnelEndpointKey);
         if (tunnelEndpoint != null) {
             try {
                 address = InetAddress.getByName(tunnelEndpoint);
@@ -163,6 +165,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, ConfigInt
 
     @Override
     public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+        southbound =
+                (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
     }
 
     @Override

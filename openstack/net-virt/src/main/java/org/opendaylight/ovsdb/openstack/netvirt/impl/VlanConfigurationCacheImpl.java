@@ -9,8 +9,8 @@
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
-import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.NodeConfiguration;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
@@ -33,6 +33,7 @@ public class VlanConfigurationCacheImpl implements ConfigInterface, VlanConfigur
     static final Logger logger = LoggerFactory.getLogger(VlanConfigurationCacheImpl.class);
     private Map<String, NodeConfiguration> configurationCache = Maps.newConcurrentMap();
     private volatile TenantNetworkManager tenantNetworkManager;
+    private volatile Southbound southbound;
 
     private NodeConfiguration getNodeConfiguration(Node node){
         String nodeUuid = getNodeUUID(node);
@@ -47,14 +48,14 @@ public class VlanConfigurationCacheImpl implements ConfigInterface, VlanConfigur
     }
 
     private String getNodeUUID(Node node) {
-        return MdsalUtils.getOvsdbNodeUUID(node);
+        return southbound.getOvsdbNodeUUID(node);
     }
 
     private void initializeNodeConfiguration(Node node, String nodeUuid) {
         NodeConfiguration nodeConfiguration = new NodeConfiguration();
         Integer vlan = 0;
         String networkId = null;
-        List<OvsdbTerminationPointAugmentation> ports = MdsalUtils.getTerminationPointsOfBridge(node);
+        List<OvsdbTerminationPointAugmentation> ports = southbound.getTerminationPointsOfBridge(node);
         for (OvsdbTerminationPointAugmentation port : ports) {
             vlan = port.getVlanTag().getValue();
             networkId = tenantNetworkManager.getTenantNetwork(port).getNetworkUUID();
@@ -116,6 +117,8 @@ public class VlanConfigurationCacheImpl implements ConfigInterface, VlanConfigur
     public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
         tenantNetworkManager =
                 (TenantNetworkManager) ServiceHelper.getGlobalInstance(TenantNetworkManager.class, this);
+        southbound =
+                (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
     }
 
     @Override

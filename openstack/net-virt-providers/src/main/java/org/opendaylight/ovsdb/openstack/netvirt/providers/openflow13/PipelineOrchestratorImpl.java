@@ -18,7 +18,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
@@ -48,6 +48,7 @@ public class PipelineOrchestratorImpl implements ConfigInterface, NodeCacheListe
     Map<Service, AbstractServiceInstance> serviceRegistry = Maps.newConcurrentMap();
     private volatile BlockingQueue<Node> queue;
     private ExecutorService eventHandler;
+    private Southbound southbound;
 
     public PipelineOrchestratorImpl() {
         eventHandler = Executors.newSingleThreadExecutor();
@@ -97,7 +98,7 @@ public class PipelineOrchestratorImpl implements ConfigInterface, NodeCacheListe
                             AbstractServiceInstance serviceInstance = getServiceInstance(service);
                             //logger.info("pipeline: {} - {}", service, serviceInstance);
                             if (serviceInstance != null) {
-                                if (MdsalUtils.getBridge(node) != null) {
+                                if (southbound.getBridge(node) != null) {
                                     serviceInstance.programDefaultPipelineRule(node);
                                 }
                             }
@@ -145,10 +146,10 @@ public class PipelineOrchestratorImpl implements ConfigInterface, NodeCacheListe
                 (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
         nodeCacheManager.cacheListenerAdded(
                 bundleContext.getServiceReference(PipelineOrchestrator.class.getName()), this);
+        southbound =
+                (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
     }
 
     @Override
-    public void setDependencies(Object impl) {
-
-    }
+    public void setDependencies(Object impl) {}
 }

@@ -12,7 +12,6 @@ import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
-import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryListener;
@@ -31,48 +30,15 @@ public class OvsdbInventoryServiceImpl implements ConfigInterface, OvsdbInventor
     private static DataBroker dataBroker = null;
     private static Set<OvsdbInventoryListener> mdsalConsumerListeners = Sets.newCopyOnWriteArraySet();
     private OvsdbDataChangeListener ovsdbDataChangeListener = null;
-    private static MdsalUtils mdsalUtils = null;
-    private volatile BindingAwareBroker broker; // dependency injection
-    //private ConsumerContext consumerContext = null;
+    //private static SouthboundImpl southboundImpl = null;
+    private volatile BindingAwareBroker broker;
 
     public OvsdbInventoryServiceImpl(ProviderContext providerContext) {
         dataBroker = providerContext.getSALService(DataBroker.class);
         LOG.info("netvirt MdsalConsumer initialized");
         ovsdbDataChangeListener = new OvsdbDataChangeListener(dataBroker);
-        mdsalUtils = new MdsalUtils(dataBroker);
+        //southboundImpl = new SouthboundImpl(dataBroker);
     }
-
-    /*void init(Component c) {
-        LOG.info(">>>>> init OvsdbInventoryServiceImpl");
-        LOG.info(">>>>> Netvirt Provider Registered with MD-SAL");
-        broker.registerConsumer(this, c.getDependencyManager().getBundleContext());
-    }
-
-    void start() {
-        LOG.info(">>>>> start OvsdbInventoryServiceImpl");
-    }
-
-    void destroy() {
-        // Now lets close MDSAL session
-        if (this.consumerContext != null) {
-            //this.consumerContext.close();
-            this.dataBroker = null;
-            this.consumerContext = null;
-        }
-    }
-    @Override
-    public void onSessionInitialized (ConsumerContext consumerContext) {
-        this.consumerContext = consumerContext;
-        dataBroker = consumerContext.getSALService(DataBroker.class);
-        LOG.info("netvirt MdsalConsumer initialized");
-        ovsdbDataChangeListener = new OvsdbDataChangeListener(dataBroker);
-        mdsalUtils = new MdsalUtils(dataBroker);
-    }*/
-
-    //@Override
-    /*public static DataBroker getDataBroker() {
-        return dataBroker;
-    }*/
 
     @Override
     public void listenerAdded(OvsdbInventoryListener listener) {

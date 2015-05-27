@@ -12,10 +12,7 @@ package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services;
 import java.math.BigInteger;
 import java.util.List;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ClassifierProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
@@ -460,7 +457,7 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
 
     @Override
     public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
-        super.setOrchestrator(bundleContext.getServiceReference(ClassifierProvider.class.getName()), this);
+        super.setDependencies(bundleContext.getServiceReference(ClassifierProvider.class.getName()), this);
     }
 
     @Override

@@ -19,6 +19,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.inject.Inject;
 import org.junit.Assert;
 import org.junit.Before;
@@ -27,6 +28,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.*;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.*;
@@ -71,8 +75,9 @@ public class NetvirtIT extends AbstractMdsalTestBase {
     private static String addressStr;
     private static String portStr;
     private static String connectionType;
-    private static Boolean setup = false;
+    private static AtomicBoolean setup = new AtomicBoolean(false);
     private static MdsalUtils mdsalUtils = null;
+    private static Southbound southbound = null;
     private static final String NETVIRT = "org.opendaylight.ovsdb.openstack.net-virt";
     private static final String NETVIRTPROVIDERS = "org.opendaylight.ovsdb.openstack.net-virt-providers";
 
@@ -166,7 +171,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
 
     @Before
     public void setUp() throws InterruptedException {
-        if (setup == true) {
+        if (setup.get()) {
             LOG.info("Skipping setUp, already initialized");
             return;
         }
@@ -195,21 +200,22 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         //dataBroker = getSession().getSALService(DataBroker.class);
         //Thread.sleep(3000);
         //dataBroker = OvsdbInventoryServiceImpl.getDataBroker();
-        for (int i=0; i<10; i++) {
-            dataBroker = org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils.getDatabroker();
-            if (dataBroker == null) {
-                LOG.warn("NetvirtIT: dataBroker is null");
-                Thread.sleep(5000);
-                continue;
-            } else {
-                break;
+        for (int i=0; i<20; i++) {
+            southbound = (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
+            if (southbound != null) {
+                dataBroker = southbound.getDatabroker();
+                if (dataBroker != null) {
+                    break;
+                }
             }
+            LOG.warn("NetvirtIT: dataBroker is null");
+            Thread.sleep(5000);
         }
         Assert.assertNotNull("dataBroker should not be null", dataBroker);
         Thread.sleep(5000);
 
         mdsalUtils = new MdsalUtils(dataBroker);
-        setup = true;
+        setup.set(true);
     }
 
     /**
@@ -580,6 +586,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
 
+    @Ignore
     @Test
     public void testNetVirt2() throws InterruptedException {
         Thread.sleep(60000);
@@ -588,7 +595,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
     @Test
     public void testReadOvsdbTopologyNodes() throws InterruptedException {
         Thread.sleep(10000);
-        List<Node> ovsdbNodes = org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils.readOvsdbTopologyNodes();
+        List<Node> ovsdbNodes = southbound.readOvsdbTopologyNodes();
         for (Node node : ovsdbNodes) {
             LOG.info(">>>>> node: {}", node);
         }

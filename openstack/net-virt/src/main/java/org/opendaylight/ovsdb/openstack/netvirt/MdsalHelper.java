@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableBiMap;
 
 public class MdsalHelper {
-    private static final Logger LOG = LoggerFactory.getLogger(MdsalUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MdsalHelper.class);
     public static final TopologyId OVSDB_TOPOLOGY_ID = new TopologyId(new Uri("ovsdb:1"));
     public static final String OVSDB_URI_PREFIX = "ovsdb";
     public static final String BRIDGE_URI_PREFIX = "bridge";

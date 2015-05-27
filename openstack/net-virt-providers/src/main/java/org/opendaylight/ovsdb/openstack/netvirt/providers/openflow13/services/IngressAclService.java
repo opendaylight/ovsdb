@@ -15,7 +15,6 @@ import java.util.List;
 import org.opendaylight.neutron.spi.NeutronSecurityGroup;
 import org.opendaylight.neutron.spi.NeutronSecurityRule;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.openstack.netvirt.api.InboundNatProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.IngressAclProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
@@ -467,7 +466,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
 
     @Override
     public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
-        super.setOrchestrator(bundleContext.getServiceReference(IngressAclProvider.class.getName()), this);
+        super.setDependencies(bundleContext.getServiceReference(IngressAclProvider.class.getName()), this);
     }
 
     @Override

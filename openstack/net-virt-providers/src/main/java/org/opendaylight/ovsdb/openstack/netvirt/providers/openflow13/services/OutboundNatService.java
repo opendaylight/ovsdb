@@ -16,7 +16,6 @@ import java.util.List;
 
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OutboundNatProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
 import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
@@ -154,7 +153,7 @@ public class OutboundNatService extends AbstractServiceInstance implements Outbo
 
     @Override
     public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
-        super.setOrchestrator(bundleContext.getServiceReference(OutboundNatProvider.class.getName()), this);
+        super.setDependencies(bundleContext.getServiceReference(OutboundNatProvider.class.getName()), this);
     }
 
     @Override

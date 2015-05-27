@@ -16,6 +16,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
@@ -45,6 +46,7 @@ public class NetworkHandler extends AbstractHandler implements INeutronNetworkAw
     private volatile INeutronNetworkCRUD neutronNetworkCache;
     private volatile NeutronL3Adapter neutronL3Adapter;
     private volatile EventDispatcher eventDispatcher;
+    private volatile Southbound southbound;
 
     /**
      * Invoked when a network creation is requested
@@ -145,14 +147,14 @@ public class NetworkHandler extends AbstractHandler implements INeutronNetworkAw
                 for (Node node : nodes) {
                     List<String> phyIfName = bridgeConfigurationManager.getAllPhysicalInterfaceNames(node);
                     try {
-                        List<OvsdbTerminationPointAugmentation> ports = MdsalUtils.getTerminationPointsOfBridge(node);
+                        List<OvsdbTerminationPointAugmentation> ports = southbound.getTerminationPointsOfBridge(node);
                         for (OvsdbTerminationPointAugmentation port : ports) {
-                            if (MdsalUtils.isTunnel(port)) {
+                            if (southbound.isTunnel(port)) {
                                 logger.trace("Delete tunnel interface {}", port.getName());
-                                MdsalUtils.deleteTerminationPoint(node, port.getName());
+                                southbound.deleteTerminationPoint(node, port.getName());
                             } else if (!phyIfName.isEmpty() && phyIfName.contains(port.getName())) {
                                 logger.trace("Delete physical interface {}", port.getName());
-                                MdsalUtils.deleteTerminationPoint(node, port.getName());
+                                southbound.deleteTerminationPoint(node, port.getName());
                             }
                         }
                     } catch (Exception e) {
@@ -203,6 +205,8 @@ public class NetworkHandler extends AbstractHandler implements INeutronNetworkAw
                 (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
         neutronL3Adapter =
                 (NeutronL3Adapter) ServiceHelper.getGlobalInstance(NeutronL3Adapter.class, this);
+        southbound =
+                (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
         eventDispatcher =
                 (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
         eventDispatcher.eventHandlerAdded(

@@ -150,7 +150,7 @@ public class InboundNatService extends AbstractServiceInstance implements Config
 
     @Override
     public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
-        super.setOrchestrator(bundleContext.getServiceReference(InboundNatProvider.class.getName()), this);
+        super.setDependencies(bundleContext.getServiceReference(InboundNatProvider.class.getName()), this);
     }
 
     @Override

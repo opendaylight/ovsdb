@@ -40,9 +40,10 @@ public class SouthboundHandler extends AbstractHandler
     private volatile TenantNetworkManager tenantNetworkManager;
     private volatile NetworkingProviderManager networkingProviderManager;
     private volatile NeutronL3Adapter neutronL3Adapter;
-    private volatile NodeCacheManager nodeCacheManager = null;
+    private volatile NodeCacheManager nodeCacheManager;
     private volatile EventDispatcher eventDispatcher;
     private volatile OvsdbInventoryService ovsdbInventoryService;
+    private volatile Southbound southbound;
 
     private SouthboundEvent.Type ovsdbTypeToSouthboundEventType(OvsdbType ovsdbType) {
         SouthboundEvent.Type type = SouthboundEvent.Type.NODE;
@@ -118,7 +119,7 @@ public class SouthboundHandler extends AbstractHandler
     @Override
     public void triggerUpdates() {
         logger.info("triggerUpdates");
-        List<Node> ovsdbNodes = MdsalUtils.readOvsdbTopologyNodes();
+        List<Node> ovsdbNodes = southbound.readOvsdbTopologyNodes();
         for (Node node : ovsdbNodes) {
             ovsdbUpdate(node, node.getAugmentation(OvsdbNodeAugmentation.class),
                     OvsdbInventoryListener.OvsdbType.NODE, Action.ADD);
@@ -145,7 +146,7 @@ public class SouthboundHandler extends AbstractHandler
             logger.debug("Network {}: Delete interface {} attached to bridge {}", network.getNetworkUUID(),
                     ovsdbTerminationPointAugmentation.getInterfaceUuid(), node.getNodeId());
             try {
-                OvsdbBridgeAugmentation ovsdbBridgeAugmentation = MdsalUtils.getBridge(node);
+                OvsdbBridgeAugmentation ovsdbBridgeAugmentation = southbound.getBridge(node);
                 if (ovsdbBridgeAugmentation != null) {
                     List<TerminationPoint> terminationPoints = node.getTerminationPoint();
                     if (!terminationPoints.isEmpty()){
@@ -202,7 +203,7 @@ public class SouthboundHandler extends AbstractHandler
         logger.info("notifyNode: action: {}, Node <{}>", action, node);
 
         if (action.equals(Action.ADD)) {
-            if (MdsalUtils.getBridge(node) != null) {
+            if (southbound.getBridge(node) != null) {
                 networkingProviderManager.getProvider(node).initializeOFFlowRules(node);
             }
         }
@@ -279,7 +280,7 @@ public class SouthboundHandler extends AbstractHandler
         InstanceIdentifier<Node> bridgeNodeIid =
                 MdsalHelper.createInstanceIdentifier(ovsdbNode.getConnectionInfo(),
                         Constants.INTEGRATION_BRIDGE);
-        MdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, bridgeNodeIid);
+        southbound.delete(LogicalDatastoreType.CONFIGURATION, bridgeNodeIid);
         */
     }
 
@@ -318,7 +319,7 @@ public class SouthboundHandler extends AbstractHandler
         logger.debug("processOpenVSwitchUpdate {}", node);
         // TODO this node might be the OvsdbNode and not have termination points
         // Would need to change listener or grab tp nodes in here.
-        List<TerminationPoint> terminationPoints = MdsalUtils.extractTerminationPoints(node);
+        List<TerminationPoint> terminationPoints = southbound.extractTerminationPoints(node);
         for (TerminationPoint terminationPoint : terminationPoints) {
             processPortUpdate(node, terminationPoint.getAugmentation(OvsdbTerminationPointAugmentation.class));
         }
@@ -342,12 +343,12 @@ public class SouthboundHandler extends AbstractHandler
         boolean rv = false;
         String nodeIdStr = node.getNodeId().getValue();
         String bridgeName = nodeIdStr.substring(nodeIdStr.lastIndexOf('/') + 1);
-        List<TerminationPoint> terminationPoints = MdsalUtils.extractTerminationPoints(node);
+        List<TerminationPoint> terminationPoints = southbound.extractTerminationPoints(node);
         if (terminationPoints != null && terminationPoints.size() == 1) {
         }
-        OvsdbTerminationPointAugmentation port = MdsalUtils.extractTerminationPointAugmentation(node, bridgeName);
+        OvsdbTerminationPointAugmentation port = southbound.extractTerminationPointAugmentation(node, bridgeName);
         if (port != null) {
-            String datapathId = MdsalUtils.getDatapathId(bridge);
+            String datapathId = southbound.getDatapathId(bridge);
             // Having a datapathId means the ovsdb node has connected to ODL
             if (datapathId != null) {
                 rv = true;
@@ -360,7 +361,7 @@ public class SouthboundHandler extends AbstractHandler
 
     private void processBridgeCreate(Node node, OvsdbBridgeAugmentation bridge) {
         logger.debug("processBridgeCreate <{}> <{}>", node, bridge);
-        String datapathId = MdsalUtils.getDatapathId(bridge);
+        String datapathId = southbound.getDatapathId(bridge);
         // Having a datapathId means the ovsdb node has connected to ODL
         if (datapathId != null) {
             nodeCacheManager.nodeAdded(node);
@@ -371,7 +372,7 @@ public class SouthboundHandler extends AbstractHandler
 
     private void processBridgeUpdate(Node node, OvsdbBridgeAugmentation bridge) {
         logger.debug("processBridgeUpdate <{}> <{}>", node, bridge);
-        String datapathId = MdsalUtils.getDatapathId(bridge);
+        String datapathId = southbound.getDatapathId(bridge);
         // Having a datapathId means the ovsdb node has connected to ODL
         if (datapathId != null) {
             nodeCacheManager.nodeAdded(node);
@@ -386,7 +387,7 @@ public class SouthboundHandler extends AbstractHandler
         nodeCacheManager.nodeRemoved(node);
         // TODO SB_MIGRATION
         // Not sure if we want to do this yet
-        MdsalUtils.deleteBridge(node);
+        southbound.deleteBridge(node);
     }
 
     @Override
@@ -405,6 +406,8 @@ public class SouthboundHandler extends AbstractHandler
                 bundleContext.getServiceReference(OvsdbInventoryListener.class.getName()), this);
         neutronL3Adapter =
                 (NeutronL3Adapter) ServiceHelper.getGlobalInstance(NeutronL3Adapter.class, this);
+        southbound =
+                (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
         eventDispatcher =
                 (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
         eventDispatcher.eventHandlerAdded(

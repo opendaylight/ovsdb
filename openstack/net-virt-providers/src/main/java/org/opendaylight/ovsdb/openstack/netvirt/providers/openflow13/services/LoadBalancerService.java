@@ -15,7 +15,6 @@ import java.util.Map;
 
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.openstack.netvirt.api.L3ForwardingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration.LoadBalancerPoolMember;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerProvider;
@@ -447,7 +446,7 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
 
     @Override
     public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
-        super.setOrchestrator(bundleContext.getServiceReference(LoadBalancerProvider.class.getName()), this);
+        super.setDependencies(bundleContext.getServiceReference(LoadBalancerProvider.class.getName()), this);
     }
 
     @Override

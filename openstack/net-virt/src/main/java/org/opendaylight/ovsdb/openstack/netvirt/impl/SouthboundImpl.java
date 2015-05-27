@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.ovsdb.openstack.netvirt;
+package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import java.math.BigInteger;
 import java.security.InvalidParameterException;
@@ -15,12 +15,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.ovsdb.openstack.netvirt.MdsalHelper;
+import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentationBuilder;
@@ -59,134 +58,34 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableBiMap;
-import com.google.common.util.concurrent.CheckedFuture;
 
 /**
  * Utility class to wrap mdsal transactions.
  *
  * @author Sam Hague (shague@redhat.com)
  */
-public class MdsalUtils {
-    private static final Logger LOG = LoggerFactory.getLogger(MdsalUtils.class);
-
-    public static DataBroker getDatabroker() {
-        return databroker;
-    }
-
-    private static DataBroker databroker = null;
-    private static final int OVSDB_UPDATE_TIMEOUT = 500;
+public class SouthboundImpl implements Southbound {
+    private static final Logger LOG = LoggerFactory.getLogger(SouthboundImpl.class);
+    private DataBroker databroker = null;
     private static final String PATCH_PORT_TYPE = "patch";
+    private MdsalUtils mdsalUtils = null;
 
     /**
      * Class constructor setting the data broker.
      *
      * @param dataBroker the {@link org.opendaylight.controller.md.sal.binding.api.DataBroker}
      */
-    public MdsalUtils(DataBroker dataBroker) {
+    public SouthboundImpl(DataBroker dataBroker) {
         this.databroker = dataBroker;
+        mdsalUtils = new MdsalUtils(dataBroker);
     }
 
-    /**
-     * Executes delete as a blocking transaction.
-     *
-     * @param store {@link LogicalDatastoreType} which should be modified
-     * @param path {@link InstanceIdentifier} to read from
-     * @param <D> the data object type
-     * @return the result of the request
-     */
-    public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> boolean delete(
-            final LogicalDatastoreType store, final InstanceIdentifier<D> path)  {
-        boolean result = false;
-        final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
-        transaction.delete(store, path);
-        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
-        try {
-            future.checkedGet();
-            result = true;
-        } catch (TransactionCommitFailedException e) {
-            LOG.warn("Failed to delete {} ", path, e);
-        }
-        return result;
+    public DataBroker getDatabroker() {
+        return databroker;
     }
 
-    /**
-     * Executes merge as a blocking transaction.
-     *
-     * @param logicalDatastoreType {@link LogicalDatastoreType} which should be modified
-     * @param path {@link InstanceIdentifier} for path to read
-     * @param <D> the data object type
-     * @return the result of the request
-     */
-    public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> boolean merge(
-            final LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> path, D data)  {
-        boolean result = false;
-        final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
-        transaction.merge(logicalDatastoreType, path, data, true);
-        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
-        try {
-            future.checkedGet();
-            result = true;
-        } catch (TransactionCommitFailedException e) {
-            LOG.warn("Failed to merge {} ", path, e);
-        }
-        return result;
-    }
-
-    /**
-     * Executes put as a blocking transaction.
-     *
-     * @param logicalDatastoreType {@link LogicalDatastoreType} which should be modified
-     * @param path {@link InstanceIdentifier} for path to read
-     * @param <D> the data object type
-     * @return the result of the request
-     */
-    public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> boolean put(
-            final LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> path, D data)  {
-        boolean result = false;
-        final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
-        transaction.put(logicalDatastoreType, path, data, true);
-        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
-        try {
-            future.checkedGet();
-            result = true;
-        } catch (TransactionCommitFailedException e) {
-            LOG.warn("Failed to put {} ", path, e);
-        }
-        return result;
-    }
-
-    /**
-     * Executes read as a blocking transaction.
-     *
-     * @param store {@link LogicalDatastoreType} to read
-     * @param path {@link InstanceIdentifier} for path to read
-     * @param <D> the data object type
-     * @return the result as the data object requested
-     */
-    public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> D read(
-            final LogicalDatastoreType store, final InstanceIdentifier<D> path)  {
-        D result = null;
-        final ReadOnlyTransaction transaction = databroker.newReadOnlyTransaction();
-        Optional<D> optionalDataObject;
-        CheckedFuture<Optional<D>, ReadFailedException> future = transaction.read(store, path);
-        try {
-            optionalDataObject = future.checkedGet();
-            if (optionalDataObject.isPresent()) {
-                result = optionalDataObject.get();
-            } else {
-                LOG.debug("{}: Failed to read {}",
-                        Thread.currentThread().getStackTrace()[1], path);
-            }
-        } catch (ReadFailedException e) {
-            LOG.warn("Failed to read {} ", path, e);
-        }
-        transaction.close();
-        return result;
-    }
-
-    public static ConnectionInfo getConnectionInfo(Node node) {
+    public ConnectionInfo getConnectionInfo(Node node) {
         ConnectionInfo connectionInfo = null;
         OvsdbNodeAugmentation ovsdbNodeAugmentation = node.getAugmentation(OvsdbNodeAugmentation.class);
         if (ovsdbNodeAugmentation != null) {
@@ -195,11 +94,11 @@ public class MdsalUtils {
         return connectionInfo;
     }
 
-    public static OvsdbNodeAugmentation extractOvsdbNode(Node node) {
+    public OvsdbNodeAugmentation extractOvsdbNode(Node node) {
         return node.getAugmentation(OvsdbNodeAugmentation.class);
     }
 
-    public static NodeId extractBridgeOvsdbNodeId(Node bridgeNode) {
+    public NodeId extractBridgeOvsdbNodeId(Node bridgeNode) {
         NodeId ovsdbNodeId = null;
         OvsdbBridgeAugmentation bridgeAugmentation = extractBridgeAugmentation(bridgeNode);
         if (bridgeAugmentation != null) {
@@ -211,10 +110,10 @@ public class MdsalUtils {
         return ovsdbNodeId;
     }
 
-    public static List<Node> readOvsdbTopologyNodes() {
+    public List<Node> readOvsdbTopologyNodes() {
         List<Node> ovsdbNodes = new ArrayList<>();
         InstanceIdentifier<Topology> topologyInstanceIdentifier = MdsalHelper.createInstanceIdentifier();
-        Topology topology = read(LogicalDatastoreType.OPERATIONAL, topologyInstanceIdentifier);
+        Topology topology = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, topologyInstanceIdentifier);
         if (topology != null && topology.getNode() != null) {
             for (Node node : topology.getNode()) {
                 OvsdbNodeAugmentation ovsdbNodeAugmentation = node.getAugmentation(OvsdbNodeAugmentation.class);
@@ -226,13 +125,13 @@ public class MdsalUtils {
         return ovsdbNodes;
     }
 
-    public static OvsdbNodeAugmentation readOvsdbNode(Node bridgeNode) {
+    public OvsdbNodeAugmentation readOvsdbNode(Node bridgeNode) {
         OvsdbNodeAugmentation nodeAugmentation = null;
         OvsdbBridgeAugmentation bridgeAugmentation = extractBridgeAugmentation(bridgeNode);
         if(bridgeAugmentation != null){
             InstanceIdentifier<Node> ovsdbNodeIid =
                     (InstanceIdentifier<Node>) bridgeAugmentation.getManagedBy().getValue();
-            Node node = read(LogicalDatastoreType.OPERATIONAL, ovsdbNodeIid);
+            Node node = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, ovsdbNodeIid);
             if (node != null){
                 nodeAugmentation = node.getAugmentation(OvsdbNodeAugmentation.class);
                 LOG.debug("readOvsdbNode: Ovsdb node {} found that manages bridge {}",
@@ -247,7 +146,7 @@ public class MdsalUtils {
         return nodeAugmentation;
     }
 
-    public static String getOvsdbNodeUUID(Node node) {
+    public String getOvsdbNodeUUID(Node node) {
         String nodeUUID = null;
         OvsdbNodeAugmentation ovsdbNodeAugmentation = node.getAugmentation(OvsdbNodeAugmentation.class);
         if (ovsdbNodeAugmentation != null) {
@@ -257,7 +156,7 @@ public class MdsalUtils {
         return nodeUUID;
     }
 
-    public static String getOsdbNodeExternalIdsValue(OvsdbNodeAugmentation ovsdbNodeAugmentation, String key) {
+    public String getOsdbNodeExternalIdsValue(OvsdbNodeAugmentation ovsdbNodeAugmentation, String key) {
         String value = null;
         List<OpenvswitchExternalIds> pairs = ovsdbNodeAugmentation.getOpenvswitchExternalIds();
         if (pairs != null && !pairs.isEmpty()) {
@@ -271,8 +170,7 @@ public class MdsalUtils {
         return value;
     }
 
-    public static boolean addBridge(Node ovsdbNode, String bridgeName, String target)
-            throws InterruptedException, InvalidParameterException {
+    public boolean addBridge(Node ovsdbNode, String bridgeName, String target) throws InvalidParameterException {
         boolean result = false;
 
         LOG.info("addBridge: node: {}, bridgeName: {}, target: {}", ovsdbNode, bridgeName, target);
@@ -292,7 +190,7 @@ public class MdsalUtils {
             setManagedByForBridge(ovsdbBridgeAugmentationBuilder, ovsdbNode.getKey());
             bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbBridgeAugmentationBuilder.build());
 
-            result = put(LogicalDatastoreType.CONFIGURATION, bridgeIid, bridgeNodeBuilder.build());
+            result = mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, bridgeIid, bridgeNodeBuilder.build());
             LOG.info("addBridge: result: {}", result);
         } else {
             throw new InvalidParameterException("Could not find ConnectionInfo");
@@ -300,23 +198,23 @@ public class MdsalUtils {
         return result;
     }
 
-    public static boolean deleteBridge(Node ovsdbNode) {
+    public boolean deleteBridge(Node ovsdbNode) {
         boolean result = false;
         InstanceIdentifier<Node> bridgeIid =
                 MdsalHelper.createInstanceIdentifier(ovsdbNode.getNodeId());
 
-        result = delete(LogicalDatastoreType.CONFIGURATION, bridgeIid);
+        result = mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, bridgeIid);
         LOG.info("deleteBridge node: {}, bridgeName: {} result : {}", ovsdbNode, ovsdbNode.getNodeId(),result);
         return result;
     }
 
-    public static OvsdbBridgeAugmentation readBridge(Node node, String name) {
+    public OvsdbBridgeAugmentation readBridge(Node node, String name) {
         OvsdbBridgeAugmentation ovsdbBridgeAugmentation = null;
         ConnectionInfo connectionInfo = getConnectionInfo(node);
         if (connectionInfo != null) {
             InstanceIdentifier<Node> bridgeIid =
-                    MdsalHelper.createInstanceIdentifier(node.getKey(), name);
-            Node bridgeNode = read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
+            MdsalHelper.createInstanceIdentifier(node.getKey(), name);
+            Node bridgeNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
             if (bridgeNode != null) {
                 ovsdbBridgeAugmentation = bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class);
             }
@@ -324,18 +222,18 @@ public class MdsalUtils {
         return ovsdbBridgeAugmentation;
     }
 
-    public static Node readBridgeNode(Node node, String name) {
+    public Node readBridgeNode(Node node, String name) {
         Node bridgeNode = null;
         ConnectionInfo connectionInfo = getConnectionInfo(node);
         if (connectionInfo != null) {
             InstanceIdentifier<Node> bridgeIid =
-                    MdsalHelper.createInstanceIdentifier(node.getKey(), name);
-            bridgeNode = read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
+            MdsalHelper.createInstanceIdentifier(node.getKey(), name);
+            bridgeNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
         }
         return bridgeNode;
     }
 
-    public static Node getBridgeNode(Node node, String bridgeName) {
+    public Node getBridgeNode(Node node, String bridgeName) {
         Node bridgeNode = null;
         OvsdbBridgeAugmentation bridge = extractBridgeAugmentation(node);
         if (bridge != null) {
@@ -349,7 +247,7 @@ public class MdsalUtils {
         return bridgeNode;
     }
 
-    public static String getBridgeUuid(Node node, String name) {
+    public String getBridgeUuid(Node node, String name) {
         String uuid = null;
         OvsdbBridgeAugmentation ovsdbBridgeAugmentation = readBridge(node, name);
         if (ovsdbBridgeAugmentation != null) {
@@ -358,13 +256,13 @@ public class MdsalUtils {
         return uuid;
     }
 
-    private static void setManagedByForBridge(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
-                                     NodeKey ovsdbNodeKey) {
-        InstanceIdentifier<Node> connectionNodePath = MdsalHelper.createInstanceIdentifier(ovsdbNodeKey.getNodeId());
+    private void setManagedByForBridge(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
+                NodeKey ovsdbNodeKey) {
+            InstanceIdentifier<Node> connectionNodePath = MdsalHelper.createInstanceIdentifier(ovsdbNodeKey.getNodeId());
         ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath));
     }
 
-    private static void setControllerForBridge(Node ovsdbNode, String bridgeName, String targetString) {
+    private void setControllerForBridge(Node ovsdbNode, String bridgeName, String targetString) {
         ConnectionInfo connectionInfo = getConnectionInfo(ovsdbNode);
         if (connectionInfo != null) {
             for (ControllerEntry controllerEntry: createControllerEntries(targetString)) {
@@ -373,13 +271,13 @@ public class MdsalUtils {
                                 .augmentation(OvsdbBridgeAugmentation.class)
                                 .child(ControllerEntry.class, controllerEntry.getKey());
 
-                boolean result = put(LogicalDatastoreType.CONFIGURATION, iid, controllerEntry);
+                boolean result = mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, iid, controllerEntry);
                 LOG.info("addController: result: {}", result);
             }
         }
     }
 
-    private static List<ControllerEntry> createControllerEntries(String targetString) {
+    private List<ControllerEntry> createControllerEntries(String targetString) {
         List<ControllerEntry> controllerEntries = new ArrayList<ControllerEntry>();
         ControllerEntryBuilder controllerEntryBuilder = new ControllerEntryBuilder();
         controllerEntryBuilder.setTarget(new Uri(targetString));
@@ -387,7 +285,7 @@ public class MdsalUtils {
         return controllerEntries;
     }
 
-    private static List<ProtocolEntry> createMdsalProtocols() {
+    private List<ProtocolEntry> createMdsalProtocols() {
         List<ProtocolEntry> protocolList = new ArrayList<ProtocolEntry>();
         ImmutableBiMap<String, Class<? extends OvsdbBridgeProtocolBase>> mapper =
                 MdsalHelper.OVSDB_PROTOCOL_MAP.inverse();
@@ -396,7 +294,7 @@ public class MdsalUtils {
         return protocolList;
     }
 
-    public static long getDataPathId(Node node) {
+    public long getDataPathId(Node node) {
         long dpid = 0L;
         String datapathId = getDatapathId(node);
         if (datapathId != null) {
@@ -405,7 +303,7 @@ public class MdsalUtils {
         return dpid;
     }
 
-    public static String getDatapathId(Node node) {
+    public String getDatapathId(Node node) {
         String datapathId = null;
         OvsdbBridgeAugmentation ovsdbBridgeAugmentation = node.getAugmentation(OvsdbBridgeAugmentation.class);
         if (ovsdbBridgeAugmentation != null && ovsdbBridgeAugmentation.getDatapathId() != null) {
@@ -414,7 +312,7 @@ public class MdsalUtils {
         return datapathId;
     }
 
-    public static String getDatapathId(OvsdbBridgeAugmentation ovsdbBridgeAugmentation) {
+    public String getDatapathId(OvsdbBridgeAugmentation ovsdbBridgeAugmentation) {
         String datapathId = null;
         if (ovsdbBridgeAugmentation != null && ovsdbBridgeAugmentation.getDatapathId() != null) {
             datapathId = ovsdbBridgeAugmentation.getDatapathId().getValue();
@@ -422,7 +320,7 @@ public class MdsalUtils {
         return datapathId;
     }
 
-    public static OvsdbBridgeAugmentation getBridge(Node node, String name) {
+    public OvsdbBridgeAugmentation getBridge(Node node, String name) {
         OvsdbBridgeAugmentation bridge = node.getAugmentation(OvsdbBridgeAugmentation.class);
         if (bridge != null) {
             if (!bridge.getBridgeName().getValue().equals(name)) {
@@ -432,12 +330,12 @@ public class MdsalUtils {
         return bridge;
     }
 
-    public static OvsdbBridgeAugmentation getBridge(Node node) {
+    public OvsdbBridgeAugmentation getBridge(Node node) {
         OvsdbBridgeAugmentation bridge = node.getAugmentation(OvsdbBridgeAugmentation.class);
         return bridge;
     }
 
-    public static String getBridgeName(Node node) {
+    public String getBridgeName(Node node) {
         String bridgeName = null;
         OvsdbBridgeAugmentation bridge = getBridge(node);
         if (bridge != null) {
@@ -446,20 +344,20 @@ public class MdsalUtils {
         return bridgeName;
     }
 
-    public static String extractBridgeName(Node node) {
+    public String extractBridgeName(Node node) {
         return (node.getAugmentation(OvsdbBridgeAugmentation.class).getBridgeName().getValue());
     }
 
-    public static OvsdbBridgeAugmentation extractBridgeAugmentation(Node node) {
+    public OvsdbBridgeAugmentation extractBridgeAugmentation(Node node) {
         return node.getAugmentation(OvsdbBridgeAugmentation.class);
     }
 
-    public static List<Node> getAllBridgesOnOvsdbNode(Node node) {
+    public List<Node> getAllBridgesOnOvsdbNode(Node node) {
         List<Node> nodes = new ArrayList<Node>();
         List<ManagedNodeEntry> managedNodes = node.getAugmentation(OvsdbNodeAugmentation.class).getManagedNodeEntry();
         for (ManagedNodeEntry managedNode : managedNodes) {
             InstanceIdentifier<?> bridgeIid = managedNode.getBridgeRef().getValue();
-            Node bridgeNode = (Node) read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
+            Node bridgeNode = (Node) mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
             if (bridgeNode != null) {
                 nodes.add(bridgeNode);
             }
@@ -467,7 +365,7 @@ public class MdsalUtils {
         return nodes;
     }
 
-    public static OvsdbNodeAugmentation extractNodeAugmentation(Node node) {
+    public OvsdbNodeAugmentation extractNodeAugmentation(Node node) {
         return node.getAugmentation(OvsdbNodeAugmentation.class);
     }
 
@@ -477,7 +375,7 @@ public class MdsalUtils {
      * @param node
      * @return
      */
-    public static List<OvsdbTerminationPointAugmentation> getTerminationPointsOfBridge(Node node) {
+    public List<OvsdbTerminationPointAugmentation> getTerminationPointsOfBridge(Node node) {
         List<OvsdbTerminationPointAugmentation> tpAugmentations = extractTerminationPointAugmentations(node);
         if(tpAugmentations.isEmpty()){
             tpAugmentations = readTerminationPointAugmentations(node);
@@ -485,7 +383,7 @@ public class MdsalUtils {
         return tpAugmentations;
     }
 
-    public static OvsdbTerminationPointAugmentation extractTerminationPointAugmentation(Node bridgeNode, String portName) {
+    public OvsdbTerminationPointAugmentation extractTerminationPointAugmentation(Node bridgeNode, String portName) {
         OvsdbBridgeAugmentation ovsdbBridgeAugmentation = bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class);
         if (ovsdbBridgeAugmentation != null) {
             List<TerminationPoint> terminationPoints = bridgeNode.getTerminationPoint();
@@ -501,7 +399,7 @@ public class MdsalUtils {
         return null;
     }
 
-    public static List<TerminationPoint> extractTerminationPoints(Node node) {
+    public List<TerminationPoint> extractTerminationPoints(Node node) {
         List<TerminationPoint> terminationPoints = new ArrayList<TerminationPoint>();
         OvsdbBridgeAugmentation ovsdbBridgeAugmentation = node.getAugmentation(OvsdbBridgeAugmentation.class);
         if (ovsdbBridgeAugmentation != null) {
@@ -510,7 +408,7 @@ public class MdsalUtils {
         return terminationPoints;
     }
 
-    public static List<OvsdbTerminationPointAugmentation> extractTerminationPointAugmentations( Node node ) {
+    public List<OvsdbTerminationPointAugmentation> extractTerminationPointAugmentations( Node node ) {
         List<OvsdbTerminationPointAugmentation> tpAugmentations = new ArrayList<OvsdbTerminationPointAugmentation>();
         List<TerminationPoint> terminationPoints = node.getTerminationPoint();
         if(terminationPoints != null && !terminationPoints.isEmpty()){
@@ -521,16 +419,16 @@ public class MdsalUtils {
         return tpAugmentations;
     }
 
-    public static List<OvsdbTerminationPointAugmentation> readTerminationPointAugmentations(Node node) {
+    public List<OvsdbTerminationPointAugmentation> readTerminationPointAugmentations(Node node) {
         InstanceIdentifier<Node> bridgeNodeIid = MdsalHelper.createInstanceIdentifier(node.getNodeId());
-        Node operNode = read(LogicalDatastoreType.OPERATIONAL, bridgeNodeIid);
+        Node operNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, bridgeNodeIid);
         if(operNode != null){
             return extractTerminationPointAugmentations(operNode);
         }
         return new ArrayList<OvsdbTerminationPointAugmentation>();
     }
 
-    public static String getInterfaceExternalIdsValue(
+    public String getInterfaceExternalIdsValue(
             OvsdbTerminationPointAugmentation terminationPointAugmentation, String key) {
         String value = null;
         List<InterfaceExternalIds> pairs = terminationPointAugmentation.getInterfaceExternalIds();
@@ -545,7 +443,7 @@ public class MdsalUtils {
         return value;
     }
 
-    public static Boolean addTerminationPoint(Node bridgeNode, String bridgeName, String portName, String type) {
+    public Boolean addTerminationPoint(Node bridgeNode, String bridgeName, String portName, String type) {
         InstanceIdentifier<TerminationPoint> tpIid =
                 MdsalHelper.createTerminationPointInstanceIdentifier(bridgeNode, portName);
         OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder =
@@ -558,16 +456,16 @@ public class MdsalUtils {
         TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
         tpBuilder.setKey(InstanceIdentifier.keyOf(tpIid));
         tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
-        return put(LogicalDatastoreType.CONFIGURATION, tpIid, tpBuilder.build());
+        return mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, tpIid, tpBuilder.build());
     }
 
-    public static Boolean deleteTerminationPoint(Node bridgeNode, String portName) {
+    public Boolean deleteTerminationPoint(Node bridgeNode, String portName) {
         InstanceIdentifier<TerminationPoint> tpIid =
                 MdsalHelper.createTerminationPointInstanceIdentifier(bridgeNode, portName);
-        return delete(LogicalDatastoreType.CONFIGURATION, tpIid);
+        return mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, tpIid);
     }
 
-    public static Boolean addTerminationPoint(Node bridgeNode, String bridgeName, String portName,
+    public Boolean addTerminationPoint(Node bridgeNode, String bridgeName, String portName,
             String type, Map<String, String> options) {
         InstanceIdentifier<TerminationPoint> tpIid = MdsalHelper.createTerminationPointInstanceIdentifier(
                 bridgeNode, portName);
@@ -591,32 +489,32 @@ public class MdsalUtils {
         TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
         tpBuilder.setKey(InstanceIdentifier.keyOf(tpIid));
         tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
-        /* TODO SB_MIGRATION should this be merge or put */
-        return put(LogicalDatastoreType.CONFIGURATION, tpIid, tpBuilder.build());
+        /* TODO SB_MIGRATION should this be merge or mdsalUtils.put */
+        return mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, tpIid, tpBuilder.build());
     }
 
-    public static TerminationPoint readTerminationPoint(Node bridgeNode, String bridgeName, String portName) {
+    public TerminationPoint readTerminationPoint(Node bridgeNode, String bridgeName, String portName) {
         InstanceIdentifier<TerminationPoint> tpIid = MdsalHelper.createTerminationPointInstanceIdentifier(
                 bridgeNode, portName);
-        return read(LogicalDatastoreType.OPERATIONAL, tpIid);
+        return mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, tpIid);
     }
 
-    public static Boolean addTunnelTerminationPoint(Node bridgeNode, String bridgeName, String portName, String type,
+    public Boolean addTunnelTerminationPoint(Node bridgeNode, String bridgeName, String portName, String type,
                                         Map<String, String> options) {
         return addTerminationPoint(bridgeNode, bridgeName, portName, type, options);
     }
 
-    public static Boolean isTunnelTerminationPointExist(Node bridgeNode, String bridgeName, String portName){
+    public Boolean isTunnelTerminationPointExist(Node bridgeNode, String bridgeName, String portName){
         return readTerminationPoint(bridgeNode, bridgeName, portName) != null;
     }
 
-    public static Boolean addPatchTerminationPoint(Node node, String bridgeName, String portName, String peerPortName) {
+    public Boolean addPatchTerminationPoint(Node node, String bridgeName, String portName, String peerPortName) {
         Map<String, String> option = new HashMap<String, String>();
         option.put("peer", peerPortName);
         return addTerminationPoint(node, bridgeName, portName, PATCH_PORT_TYPE, option);
     }
 
-    public static String getExternalId(Node node, OvsdbTables table, String key) {
+    public String getExternalId(Node node, OvsdbTables table, String key) {
         switch (table) {
         case BRIDGE:
             OvsdbBridgeAugmentation bridge = extractBridgeAugmentation(node);
@@ -660,7 +558,7 @@ public class MdsalUtils {
         return null;
     }
 
-    public static String getOtherConfig(Node node, OvsdbTables table, String key) {
+    public String getOtherConfig(Node node, OvsdbTables table, String key) {
         switch (table) {
             case BRIDGE:
                 OvsdbBridgeAugmentation bridge = extractBridgeAugmentation(node);
@@ -708,12 +606,12 @@ public class MdsalUtils {
         return null;
     }
 
-    public static boolean addVlanToTp(long vlan) {
+    public boolean addVlanToTp(long vlan) {
         return false;
     }
 
-    public static boolean isTunnel(OvsdbTerminationPointAugmentation port) {
-        LOG.trace("MdsalUtils#isTunnel: Interface : {}", port);
+    public boolean isTunnel(OvsdbTerminationPointAugmentation port) {
+        LOG.trace("SouthboundImpl#isTunnel: Interface : {}", port);
 
         if(port.getInterfaceType() == null){
             LOG.warn("No type found for the interface : {}", port);
@@ -725,7 +623,7 @@ public class MdsalUtils {
                 port.getInterfaceType()).equals(NetworkHandler.NETWORK_TYPE_GRE);
     }
 
-    public static String getOptionsValue(List<Options> options, String key) {
+    public String getOptionsValue(List<Options> options, String key) {
         String value = null;
         for (Options option : options) {
             if (option.getKey().equals(key)) {
@@ -735,16 +633,16 @@ public class MdsalUtils {
         return value;
     }
 
-    private static Topology getOvsdbTopology() {
+    public Topology getOvsdbTopology() {
         InstanceIdentifier<Topology> path = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(MdsalHelper.OVSDB_TOPOLOGY_ID));
 
-        Topology topology = read(LogicalDatastoreType.OPERATIONAL, path);
+        Topology topology = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, path);
         return topology;
     }
 
-    public static Long getOFPort(OvsdbTerminationPointAugmentation port) {
+    public Long getOFPort(OvsdbTerminationPointAugmentation port) {
         Long ofPort = 0L;
         if (port.getOfport() != null) {
             ofPort = port.getOfport();
@@ -752,7 +650,7 @@ public class MdsalUtils {
         return ofPort;
     }
 
-    public static Long getOFPort(Node bridgeNode, String portName) {
+    public Long getOFPort(Node bridgeNode, String portName) {
         Long ofPort = 0L;
         OvsdbTerminationPointAugmentation port = extractTerminationPointAugmentation(bridgeNode, portName);
         if (port != null) {

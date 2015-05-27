@@ -11,10 +11,11 @@ import java.util.List;
 import org.opendaylight.neutron.spi.INeutronPortCRUD;
 import org.opendaylight.neutron.spi.NeutronPort;
 import org.opendaylight.neutron.spi.NeutronSecurityGroup;
-import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.*;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -24,6 +25,7 @@ import org.slf4j.LoggerFactory;
 public class SecurityServicesImpl implements ConfigInterface, SecurityServicesManager {
     static final Logger logger = LoggerFactory.getLogger(TenantNetworkManagerImpl.class);
     private volatile INeutronPortCRUD neutronPortCache;
+    private volatile Southbound southbound;
 
     /**
      * Is security group ready.
@@ -37,7 +39,7 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
             return false;
         }
         logger.trace("isPortSecurityReady for {}", terminationPointAugmentation.getName());
-        String neutronPortId = MdsalUtils.getInterfaceExternalIdsValue(terminationPointAugmentation,
+        String neutronPortId = southbound.getInterfaceExternalIdsValue(terminationPointAugmentation,
                 Constants.EXTERNAL_ID_INTERFACE_ID);
         if (neutronPortId == null) {
             return false;
@@ -57,7 +59,7 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
                     neutronPortId);
             return false;
         }
-        String vmPort = MdsalUtils.getInterfaceExternalIdsValue(terminationPointAugmentation,
+        String vmPort = southbound.getInterfaceExternalIdsValue(terminationPointAugmentation,
                 Constants.EXTERNAL_ID_VM_MAC);
         logger.debug("Security Group Check {} DOES contain a Neutron Security Group", neutronPortId);
         return true;
@@ -75,7 +77,7 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
             return null;
         }
         logger.trace("isPortSecurityReady for {}", terminationPointAugmentation.getName());
-        String neutronPortId = MdsalUtils.getInterfaceExternalIdsValue(terminationPointAugmentation,
+        String neutronPortId = southbound.getInterfaceExternalIdsValue(terminationPointAugmentation,
                 Constants.EXTERNAL_ID_INTERFACE_ID);
         if (neutronPortId == null) {
             return null;
@@ -95,7 +97,10 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
     }
 
     @Override
-    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {}
+    public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
+        southbound =
+                (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
+    }
 
     @Override
     public void setDependencies(Object impl) {

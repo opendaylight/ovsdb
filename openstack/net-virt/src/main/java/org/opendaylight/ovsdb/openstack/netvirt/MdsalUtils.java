@@ -52,6 +52,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -279,7 +280,7 @@ public class MdsalUtils {
         if (connectionInfo != null) {
             NodeBuilder bridgeNodeBuilder = new NodeBuilder();
             InstanceIdentifier<Node> bridgeIid =
-                    MdsalHelper.createInstanceIdentifier(connectionInfo, new OvsdbBridgeName(bridgeName));
+                    MdsalHelper.createInstanceIdentifier(ovsdbNode.getKey(), bridgeName);
             NodeId bridgeNodeId = MdsalHelper.createManagedNodeId(bridgeIid);
             bridgeNodeBuilder.setNodeId(bridgeNodeId);
             OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
@@ -288,7 +289,7 @@ public class MdsalUtils {
             ovsdbBridgeAugmentationBuilder.setProtocolEntry(createMdsalProtocols());
             ovsdbBridgeAugmentationBuilder.setFailMode(
                     MdsalHelper.OVSDB_FAIL_MODE_MAP.inverse().get("secure"));
-            setManagedByForBridge(ovsdbBridgeAugmentationBuilder, connectionInfo);
+            setManagedByForBridge(ovsdbBridgeAugmentationBuilder, ovsdbNode.getKey());
             bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbBridgeAugmentationBuilder.build());
 
             result = put(LogicalDatastoreType.CONFIGURATION, bridgeIid, bridgeNodeBuilder.build());
@@ -314,7 +315,7 @@ public class MdsalUtils {
         ConnectionInfo connectionInfo = getConnectionInfo(node);
         if (connectionInfo != null) {
             InstanceIdentifier<Node> bridgeIid =
-                    MdsalHelper.createInstanceIdentifier(connectionInfo, new OvsdbBridgeName(name));
+                    MdsalHelper.createInstanceIdentifier(node.getKey(), name);
             Node bridgeNode = read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
             if (bridgeNode != null) {
                 ovsdbBridgeAugmentation = bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class);
@@ -328,7 +329,7 @@ public class MdsalUtils {
         ConnectionInfo connectionInfo = getConnectionInfo(node);
         if (connectionInfo != null) {
             InstanceIdentifier<Node> bridgeIid =
-                    MdsalHelper.createInstanceIdentifier(connectionInfo, new OvsdbBridgeName(name));
+                    MdsalHelper.createInstanceIdentifier(node.getKey(), name);
             bridgeNode = read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
         }
         return bridgeNode;
@@ -358,8 +359,8 @@ public class MdsalUtils {
     }
 
     private static void setManagedByForBridge(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
-                                     ConnectionInfo connectionInfo) {
-        InstanceIdentifier<Node> connectionNodePath = MdsalHelper.createInstanceIdentifier(connectionInfo);
+                                     NodeKey ovsdbNodeKey) {
+        InstanceIdentifier<Node> connectionNodePath = MdsalHelper.createInstanceIdentifier(ovsdbNodeKey.getNodeId());
         ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath));
     }
 
@@ -368,7 +369,7 @@ public class MdsalUtils {
         if (connectionInfo != null) {
             for (ControllerEntry controllerEntry: createControllerEntries(targetString)) {
                 InstanceIdentifier<ControllerEntry> iid =
-                        MdsalHelper.createInstanceIdentifier(connectionInfo, new OvsdbBridgeName(bridgeName))
+                        MdsalHelper.createInstanceIdentifier(ovsdbNode.getKey(), bridgeName)
                                 .augmentation(OvsdbBridgeAugmentation.class)
                                 .child(ControllerEntry.class, controllerEntry.getKey());
 

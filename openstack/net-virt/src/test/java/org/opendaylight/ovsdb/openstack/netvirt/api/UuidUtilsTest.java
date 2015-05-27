@@ -10,8 +10,6 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
-import org.opendaylight.ovsdb.openstack.netvirt.api.UuidUtils;
-
 import org.junit.Assert;
 import org.junit.Test;
 

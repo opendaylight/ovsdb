@@ -4,264 +4,217 @@
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v1.0 which accompanies this distribution,
 * and is available at http://www.eclipse.org/legal/epl-v10.html
-*
-* Authors : Marcus Koontz
 */
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
-//import com.fasterxml.jackson.annotation.JsonIgnoreType;
-import org.junit.Ignore;
-import org.junit.runner.RunWith;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
-import org.opendaylight.neutron.spi.NeutronNetwork;
-import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
-import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.same;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.RETURNS_MOCKS;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
-@Ignore // TODO SB_MIGRATION
-@RunWith(MockitoJUnitRunner.class)
+import java.util.List;
+import org.junit.runner.RunWith;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.opendaylight.neutron.spi.NeutronNetwork;
+import org.opendaylight.ovsdb.openstack.netvirt.MdsalUtils;
+import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+
+/**
+ * Test class for BridgeConfigurationManagerImpl
+ *
+ * @author Marcus Koontz
+ * @author Alexis Adetalhouet
+ * @author Sam Hague (shague@redhat.com)
+ */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(MdsalUtils.class)
 public class BridgeConfigurationManagerImplTest {
-
-    private Node nodeMock = mock(Node.class, RETURNS_DEEP_STUBS);
-    //private Bridge bridgeMock = mock(Bridge.class, RETURNS_DEEP_STUBS);
-
+    @Mock private Node node;
+    @Mock private OvsdbBridgeAugmentation bridge;
+    @Mock private OvsdbTerminationPointAugmentation port;
+    @Mock private NeutronNetwork neutronNetwork;
     @Mock private ConfigurationService configurationService;
-    @Mock private NetworkingProviderManager networkingProviderManager;
-
-
     @InjectMocks public static BridgeConfigurationManagerImpl bridgeConfigurationManagerImpl;
-    @InjectMocks public static BridgeConfigurationManagerImpl bridgeConfigMock =
-            mock(BridgeConfigurationManagerImpl.class, RETURNS_DEEP_STUBS);
-    @Spy public static BridgeConfigurationManagerImpl bridgeConfigurationManagerImplSpy;
+
+    private static final String BR_INT = "br-int";
+    private static final String ETH1 = "eth1";
+    private static final String ETH2 = "eth2";
+    private static final String ETH3 = "eth3";
+    private static final String PORT_BR_INT = "br-int";
+    private static final String BRIDGE_UUID = "f527b951-3934-4182-9f29-33fc09f6f0c6";
+    private static final String PHYSNET1 = "physnet1";
+    private static final String PHYSNET2 = "physnet2";
+    private static final String PHYSNET3 = "physnet3";
+    private static final String PROVIDER_MAPPINGS = PHYSNET1 + ":" + ETH1 + "," + PHYSNET2 + ":" + ETH2;
+    private static final String PROVIDER_MAPPINGS_DEFAULT = PHYSNET1 + ":" + ETH1;
 
     @Test
-    public void testGetBridgeUuid() throws Exception {
-        //Row row = mock(Row.class);
-        //Bridge bridge = mock(Bridge.class, RETURNS_DEEP_STUBS);
+    public void testGetBridgeUuid() {
+        mockStatic(MdsalUtils.class);
+        when(MdsalUtils.getBridgeUuid(any(Node.class), anyString()))
+                .thenReturn(null)
+                .thenReturn(BRIDGE_UUID);
 
-        //ConcurrentHashMap<String, Row> hashMap;
-        //hashMap = new ConcurrentHashMap<>();
-        //hashMap.put("mockUUID", row);
-
-        /* TODO SB_MIGRATION */
-        //verifyNoMoreInteractions(ovsdbConfigurationService);
-        verifyNoMoreInteractions(configurationService);
-        verifyNoMoreInteractions(networkingProviderManager);
-
-        //when(ovsdbConfigurationService.getRows(any(Node.class), anyString())).thenReturn(hashMap);
-        //when(ovsdbConfigurationService.getTypedRow(any(Node.class), same(Bridge.class),
-        //        any(Row.class))).thenReturn(bridge);
-        //when(bridge.getName()).thenReturn("test-bridge");
-
-        /* TODO SB_MIGRATION */
-        //assertEquals("Error, did not return UUID of correct bridge", "mockUUID",
-        //        bridgeConfigurationManagerImpl.getBridgeUuid(nodeMock, "test-bridge"));
-
-        //verify(ovsdbConfigurationService).getTableName(nodeMock, Bridge.class);
-        verifyNoMoreInteractions(configurationService);
-        verifyNoMoreInteractions(networkingProviderManager);
+        assertEquals("Error, null should have been returned", null,
+                bridgeConfigurationManagerImpl.getBridgeUuid(node, BR_INT));
+        assertEquals("Error, did not return UUID of correct bridge", BRIDGE_UUID,
+                bridgeConfigurationManagerImpl.getBridgeUuid(node, BR_INT));
+        verifyStatic(times(2));
+        MdsalUtils.getBridgeUuid(any(Node.class), anyString());
     }
 
     @Test
     public void testIsNodeNeutronReady() throws Exception {
-        //Row row = mock(Row.class);
-        //Bridge bridge = mock(Bridge.class, RETURNS_DEEP_STUBS);
+        mockStatic(MdsalUtils.class);
+        when(MdsalUtils.getBridge(any(Node.class), anyString()))
+                .thenReturn(null)
+                .thenReturn(bridge);
 
-        //ConcurrentHashMap<String, Row> hashMap;
-        //hashMap = new ConcurrentHashMap<>();
-        //hashMap.put("mockUUID", row);
-
-        /* TODO SB_MIGRATION */
-        //verifyNoMoreInteractions(ovsdbConfigurationService);
         verifyNoMoreInteractions(configurationService);
-        verifyNoMoreInteractions(networkingProviderManager);
+        assertFalse("Error, did not return correct boolean from isNodeNeutronReady",
+                bridgeConfigurationManagerImpl.isNodeNeutronReady(node));
 
-        assertEquals("Error, did not return correct boolean from isNodeNeutronReady", false,
-                bridgeConfigurationManagerImpl.isNodeNeutronReady(nodeMock));
-
-        //when(ovsdbConfigurationService.getRows(any(Node.class), anyString())).thenReturn(hashMap);
-        //when(ovsdbConfigurationService.getTypedRow(any(Node.class), same(Bridge.class),
-        //        any(Row.class))).thenReturn(bridge);
-        //when(bridge.getName()).thenReturn("test-bridge");
-        when(configurationService.getIntegrationBridgeName()).thenReturn("test-bridge");
-
-        assertEquals("Error, did not return correct boolean from isNodeNeutronReady", true,
-                bridgeConfigurationManagerImpl.isNodeNeutronReady(nodeMock));
+        when(configurationService.getIntegrationBridgeName()).thenReturn(BR_INT);
+        assertTrue("Error, did not return correct boolean from isNodeNeutronReady",
+                bridgeConfigurationManagerImpl.isNodeNeutronReady(node));
 
         verify(configurationService, times(2)).getIntegrationBridgeName();
-        verifyNoMoreInteractions(networkingProviderManager);
+        verifyStatic(times(2));
+        MdsalUtils.getBridge(any(Node.class), anyString());
     }
 
-    /* TODO SB_MIGRATION */ @Ignore
     @Test
     public void testIsNodeOverlayReady() throws Exception {
-        //Row row = mock(Row.class);
-        //Bridge bridge = mock(Bridge.class, RETURNS_DEEP_STUBS);
+        mockStatic(MdsalUtils.class);
+        when(MdsalUtils.getBridge(any(Node.class), anyString()))
+                .thenReturn(null)
+                .thenReturn(bridge);
 
-        //ConcurrentHashMap<String, Row> hashMap;
-        //hashMap = new ConcurrentHashMap<>();
-        //hashMap.put("mockUUID", row);
+        BridgeConfigurationManagerImpl bridgeConfigurationManagerImplSpy =
+                PowerMockito.spy(new BridgeConfigurationManagerImpl());
+        doReturn(false).when(bridgeConfigurationManagerImplSpy).isNodeNeutronReady(any(Node.class));
+        bridgeConfigurationManagerImplSpy.setConfigurationService(configurationService);
 
-        /* TODO SB_MIGRATION */
-        //verifyNoMoreInteractions(ovsdbConfigurationService);
         verifyNoMoreInteractions(configurationService);
-        verifyNoMoreInteractions(networkingProviderManager);
 
-        assertEquals("Error, did not return correct boolean from isNodeOverlayReady", false,
-                bridgeConfigurationManagerImpl.isNodeOverlayReady(nodeMock));
+        assertFalse("Error, did not return correct boolean from isNodeOverlayReady",
+                bridgeConfigurationManagerImplSpy.isNodeOverlayReady(node));
 
-        //when(ovsdbConfigurationService.getRows(any(Node.class), anyString())).thenReturn(hashMap);
-        //when(ovsdbConfigurationService.getTypedRow(any(Node.class), same(Bridge.class),
-        //        any(Row.class))).thenReturn(bridge);
-        //when(bridge.getName()).thenReturn("test-bridge");
-        when(configurationService.getIntegrationBridgeName()).thenReturn("test-bridge");
-        when(configurationService.getNetworkBridgeName()).thenReturn("test-bridge");
+        doReturn(true).when(bridgeConfigurationManagerImplSpy).isNodeNeutronReady(any(Node.class));
 
-        /* TODO SB_MIGRATION */
-        //assertEquals("Error, did not return correct boolean from isNodeOverlayReady", true,
-        //        bridgeConfigurationManagerImpl.isNodeOverlayReady(nodeMock));
+        assertFalse("Error, did not return correct boolean from isNodeOverlayReady",
+                bridgeConfigurationManagerImplSpy.isNodeOverlayReady(node));
 
-        verify(configurationService, times(2)).getIntegrationBridgeName();
-        verify(configurationService, times(1)).getNetworkBridgeName();
-        //verify(ovsdbConfigurationService, times(3)).getTableName(nodeMock, Bridge.class);
-        verifyNoMoreInteractions(networkingProviderManager);
+        assertTrue("Error, did not return correct boolean from isNodeOverlayReady",
+                bridgeConfigurationManagerImplSpy.isNodeOverlayReady(node));
+
+        verify(configurationService, times(2)).getNetworkBridgeName();
+        verifyStatic(times(2));
+        MdsalUtils.getBridge(any(Node.class), anyString());
     }
 
-    @Ignore // TODO SB_MIGRATION
     @Test
     public void testIsPortOnBridge() throws Exception {
-        /*
-        UUID uuid = mock(UUID.class);
-        Set<UUID> uuidSet = new HashSet<>();
-        uuidSet.add(uuid);
-        Column<GenericTableSchema, Set<UUID>> columnMock = mock(Column.class);
-        Port port = mock(Port.class, RETURNS_DEEP_STUBS);
-        String portName = "portNameMock";
+        mockStatic(MdsalUtils.class);
+        when(MdsalUtils.extractTerminationPointAugmentation(any(Node.class), anyString()))
+                .thenReturn(null)
+                .thenReturn(port);
 
-        //verifyNoMoreInteractions(ovsdbConfigurationService);
-        verifyNoMoreInteractions(configurationService);
-        verifyNoMoreInteractions(networkingProviderManager);
-
-        when(bridgeMock.getPortsColumn()).thenReturn(columnMock);
-        when(columnMock.getData()).thenReturn(uuidSet);
-        assertEquals("Error, did not return correct boolean from isPortOnBridge", false,
-                bridgeConfigurationManagerImpl.isPortOnBridge(nodeMock, bridgeMock, portName));
-
-        when(port.getName()).thenReturn(portName);
-
-        //when(ovsdbConfigurationService.getTypedRow(any(Node.class), any(Class.class), any(Row.class))).thenReturn(port);
-        when(port.getName()).thenReturn(portName);
-
-        //assertEquals("Error, did not return correct boolean from isPortOnBridge", true,
-        //        bridgeConfigurationManagerImpl.isPortOnBridge(nodeMock, bridgeMock, portName));
-
-        verify(bridgeMock, times(2)).getPortsColumn();
-        //verify(ovsdbConfigurationService, times(2)).getRow(any(Node.class), anyString(), anyString());
-        //verify(ovsdbConfigurationService, times(2)).getTableName(any(Node.class), any(Class.class));
-        //verify(ovsdbConfigurationService, times(2)).getTypedRow(any(Node.class), any(Class.class), any(Row.class));
-        verifyNoMoreInteractions(networkingProviderManager);
-        verifyNoMoreInteractions(configurationService);*/
+        assertFalse("Error, port " + PORT_BR_INT + " should not be found",
+                bridgeConfigurationManagerImpl.isPortOnBridge(node, PORT_BR_INT));
+        assertTrue("Error, port " + PORT_BR_INT + " should be found",
+                bridgeConfigurationManagerImpl.isPortOnBridge(node, PORT_BR_INT));
+        verifyStatic(times(2));
+        MdsalUtils.extractTerminationPointAugmentation(any(Node.class), anyString());
     }
 
     @Test
     public void testIsNodeTunnelReady() throws Exception {
-        String bridgeMockName = "BridgeMockName";
+        mockStatic(MdsalUtils.class);
+        when(MdsalUtils.getBridge(any(Node.class), anyString()))
+                .thenReturn(null)
+                .thenReturn(bridge);
 
-        /* TODO SB_MIGRATION */
-        //verifyNoMoreInteractions(ovsdbConfigurationService);
         verifyNoMoreInteractions(configurationService);
-        verifyNoMoreInteractions(networkingProviderManager);
+        assertFalse("Error, did not return correct boolean from isNodeTunnelReady",
+                bridgeConfigurationManagerImpl.isNodeNeutronReady(node));
 
-        when(configurationService.getIntegrationBridgeName()).thenReturn(bridgeMockName);
-        // readBridge() is private method - cannot be mocked with mockito
-        // when(bridgeConfigurationManagerImpl.readBridge(any(Node.class), anyString())).thenReturn(bridgeMock);
+        when(configurationService.getIntegrationBridgeName()).thenReturn(BR_INT);
+        assertTrue("Error, did not return correct boolean from isNodeNeutronReady",
+                bridgeConfigurationManagerImpl.isNodeNeutronReady(node));
 
-        // Negative testing only due to private method call
-        assertEquals("Error, did not return correct boolean from isNodeTunnelReady", false,
-                bridgeConfigurationManagerImpl.isNodeTunnelReady(nodeMock));
-
-        verify(configurationService, times(1)).getIntegrationBridgeName();
-        verify(networkingProviderManager, times(0)).getProvider(nodeMock);
-        verify(configurationService, times(0)).getNetworkBridgeName();
-        //verify(ovsdbConfigurationService, times(1)).getRows(any(Node.class), anyString());
-        //verify(ovsdbConfigurationService, times(1)).getTableName(any(Node.class), any(Class.class));
-        //verify(ovsdbConfigurationService, times(0)).getTypedRow(any(Node.class), any(Class.class), any(Row.class));
+        verify(configurationService, times(2)).getIntegrationBridgeName();
+        verifyStatic(times(2));
+        MdsalUtils.getBridge(any(Node.class), anyString());
     }
 
     @Test
     public void testIsNodeVlanReady() throws Exception {
-        NeutronNetwork neutronNetworkMock = mock(NeutronNetwork.class);
+        mockStatic(MdsalUtils.class);
+        when(MdsalUtils.getBridge(any(Node.class), anyString()))
+                .thenReturn(null)
+                .thenReturn(bridge);
 
-        /* TODO SB_MIGRATION */
-        //verifyNoMoreInteractions(ovsdbConfigurationService);
+        when(MdsalUtils.extractTerminationPointAugmentation(any(Node.class), anyString()))
+                .thenReturn(null)
+                .thenReturn(port);
+
+        when(neutronNetwork.getProviderPhysicalNetwork()).thenReturn("test");
+
         verifyNoMoreInteractions(configurationService);
-        verifyNoMoreInteractions(networkingProviderManager);
+        assertFalse("Error, did not return correct boolean from isNodeTunnelReady",
+                bridgeConfigurationManagerImpl.isNodeVlanReady(node, neutronNetwork));
 
-        // readBridge() is private method - cannot be mocked with mockito
-        // Negative testing only due to private method call
-        assertEquals("Error, did not return correct boolean from isNodeVlanReady", false,
-                bridgeConfigurationManagerImpl.isNodeVlanReady(nodeMock, neutronNetworkMock));
+        BridgeConfigurationManagerImpl bridgeConfigurationManagerImplSpy =
+                PowerMockito.spy(new BridgeConfigurationManagerImpl());
+        doReturn(ETH1).when(bridgeConfigurationManagerImplSpy).getPhysicalInterfaceName(any(Node.class), anyString());
+        bridgeConfigurationManagerImplSpy.setConfigurationService(configurationService);
 
-        verify(configurationService, times(1)).getIntegrationBridgeName();
-        verify(networkingProviderManager, times(0)).getProvider(any(Node.class));
-        verify(configurationService, times(0)).getNetworkBridgeName();
-        //verify(ovsdbConfigurationService, times(1)).getRows(any(Node.class), anyString());
-        //verify(ovsdbConfigurationService, times(1)).getTableName(any(Node.class), any(Class.class));
-        //verify(ovsdbConfigurationService, times(0)).getTypedRow(any(Node.class), any(Class.class), any(Row.class));
-        verify(neutronNetworkMock, times(0)).getProviderPhysicalNetwork();
-    }
+        assertFalse("Error, did not return correct boolean from isNodeVlanReady",
+                bridgeConfigurationManagerImpl.isNodeVlanReady(node, neutronNetwork));
 
-    /* TODO SB_MIGRATION */
-    @Ignore
-    @Test
-    public void testPrepareNode() throws Exception {
-        NetworkingProvider netProvider = mock(NetworkingProvider.class);
-        when(configurationService.getIntegrationBridgeName()).thenReturn("intBridgeName");
-        when(networkingProviderManager.getProvider(any(Node.class))).thenReturn(netProvider);
+        assertTrue("Error, did not return correct boolean from isNodeVlanReady",
+                bridgeConfigurationManagerImpl.isNodeVlanReady(node, neutronNetwork));
 
-        // createIntegrationBridge() is private method - cannot be mocked with mockito
-        // Negative testing only due to private method call
-        bridgeConfigurationManagerImpl.prepareNode(nodeMock);
-
-        verify(configurationService, times(1)).getIntegrationBridgeName();
-        /* TODO SB_MIGRATION */
-        //verify(networkingProviderManager, times(0)).getProvider(any(Node.class));
-        verify(netProvider, times(0)).initializeFlowRules(any(Node.class));
+        verify(configurationService, times(3)).getIntegrationBridgeName();
+        verify(neutronNetwork, times(2)).getProviderPhysicalNetwork();
+        verifyStatic(times(3));
+        MdsalUtils.getBridge(any(Node.class), anyString());
+        verifyStatic(times(2));
+        MdsalUtils.extractTerminationPointAugmentation(any(Node.class), anyString());
     }
 
     @Test
     public void testCreateLocalNetwork() throws Exception {
         NeutronNetwork neutronNetworkMock = mock(NeutronNetwork.class, RETURNS_MOCKS);
         String networkTypes[] = {"vlan", "vxlan", "gre"};
+        BridgeConfigurationManagerImpl bridgeConfigurationManagerImplSpy =
+                PowerMockito.spy(new BridgeConfigurationManagerImpl());
 
         for (String networkType : networkTypes) {
             when(neutronNetworkMock.getProviderNetworkType()).thenReturn(networkType);
@@ -281,126 +234,76 @@ public class BridgeConfigurationManagerImplTest {
             }).when(bridgeConfigurationManagerImplSpy).isNodeTunnelReady(any(Node.class));
 
             assertTrue("bridgeConfigMock.isNodeVlanReady is not true",
-                    bridgeConfigurationManagerImplSpy.isNodeVlanReady(nodeMock, neutronNetworkMock));
+                    bridgeConfigurationManagerImplSpy.isNodeVlanReady(node, neutronNetworkMock));
             assertTrue("bridgeConfigMock.isNodeTunnelReady is not true",
-                    bridgeConfigurationManagerImplSpy.isNodeTunnelReady(nodeMock));
+                    bridgeConfigurationManagerImplSpy.isNodeTunnelReady(node));
 
             assertTrue("Error, isCreated is not true for " + networkType,
-                    bridgeConfigurationManagerImplSpy.createLocalNetwork(nodeMock, neutronNetworkMock));
-            if (networkType == "vlan") {
+                    bridgeConfigurationManagerImplSpy.createLocalNetwork(node, neutronNetworkMock));
+            if (networkType.equals("vlan")) {
                 verify(neutronNetworkMock, times(1)).getProviderNetworkType();
-            } else if (networkType == "vxlan") {
+            } else if (networkType.equals("vxlan")) {
                 verify(neutronNetworkMock, times(2)).getProviderNetworkType();
-            } else if (networkType == "gre") {
+            } else if (networkType.equals("gre")) {
                 verify(neutronNetworkMock, times(3)).getProviderNetworkType();
             }
             reset(neutronNetworkMock);
-            reset(nodeMock);
+            reset(node);
             reset(bridgeConfigurationManagerImplSpy);
         }
     }
 
-    @Ignore // TODO SB_MIGRATION
     @Test
     public void testGetPhysicalInterfaceName() throws Exception {
-        ConcurrentHashMap ovsTable = mock(ConcurrentHashMap.class, RETURNS_DEEP_STUBS);
-        //Row row = mock(Row.class);
-        //OpenVSwitch ovsRowOVS = mock(OpenVSwitch.class);
-        //Column<GenericTableSchema, Map<String, String>> col = mock(Column.class);
-        Map<String, String> colMap = mock(Map.class);
+        mockStatic(MdsalUtils.class);
+        when(MdsalUtils.getOtherConfig(any(Node.class), eq(OvsdbTables.OPENVSWITCH), anyString()))
+                .thenReturn(null)
+                .thenReturn(null)
+                .thenReturn(PROVIDER_MAPPINGS);
+        String networkNames[] = {PHYSNET1, PHYSNET2};
+        String interfaceNames[] = {ETH1, ETH2};
 
-        //HashMap<String, OpenVSwitch> hashMapOVS = new HashMap<>();
-        //hashMapOVS.put("ovsRow", ovsRowOVS);
-        //ConcurrentHashMap<String, Row> hashMap;
-        //hashMap = new ConcurrentHashMap<>();
-        //hashMap.put("row1", row);
+        verifyNoMoreInteractions(configurationService);
+        when(configurationService.getDefaultProviderMapping()).thenReturn(PROVIDER_MAPPINGS_DEFAULT);
 
-        String networkNames[] = {"network-0", "network-1", "network-2", "network-3"};
-        String interfaceNames[] = {"interfaceName-0", "interfaceName-1", "interfaceName-2", "interfaceName-3"};
-        int count = 0;
-
-        for (String networkName : networkNames) {
-            /* TODO SB_MIGRATION */
-            //when(ovsdbConfigurationService.getRows(any(Node.class), anyString())).thenReturn(hashMap);
-            //when(ovsTable.values()).thenReturn(hashMapOVS.values());
-
-            //when(ovsRowOVS.getOtherConfigColumn()).thenReturn(col);
-            //when(col.getData()).thenReturn(colMap);
-            when(configurationService.getProviderMappingsKey()).thenReturn("network-0:interfaceName-0," +
-                    "network-1:interfaceName-1,network-2:interfaceName-2,network-3:interfaceName-3");
-            when(colMap.get(anyString())).thenReturn("network-0:interfaceName-0,network-1:interfaceName-1," +
-                    "network-2:interfaceName-2,network-3:interfaceName-3");
-
-            when(configurationService.getDefaultProviderMapping()).thenReturn("network-0:interfaceName-0," +
-                    "network-1:interfaceName-1,network-2:interfaceName-2,network-3:interfaceName-3");
-
-            //when(ovsdbConfigurationService.getTypedRow(any(Node.class), same(OpenVSwitch.class),
-            //        any(Row.class))).thenReturn(ovsRowOVS);
-
-            assertEquals("Error, network: " + networkName + ", did not match interface: " + interfaceNames[count],
-                    interfaceNames[count], bridgeConfigurationManagerImpl.getPhysicalInterfaceName(nodeMock,
-                            networkName));
-
-            //verify(ovsdbConfigurationService, times(count + 1)).getRows(any(Node.class), anyString());
-            //verify(ovsdbConfigurationService, times(count + 1)).getTableName(any(Node.class), any(Class.class));
-            //verify(ovsdbConfigurationService, times(count + 1)).getTypedRow(any(Node.class), any(Class.class),
-            //        any(Row.class));
-            verify(configurationService, times(count + 1)).getProviderMappingsKey();
-            verify(configurationService, times(0)).getDefaultProviderMapping();
-            count++;
+        assertNull("Error, should not have found " + PHYSNET2 + ":" + ETH2,
+                bridgeConfigurationManagerImpl.getPhysicalInterfaceName(node, PHYSNET2));
+        assertEquals("Error, should have found " + PHYSNET1 + ":" + ETH1,
+                ETH1, bridgeConfigurationManagerImpl.getPhysicalInterfaceName(node, PHYSNET1));
+        for (int i = 0; i < networkNames.length; i++) {
+            assertEquals("Error, network: " + networkNames[i]
+                            + ", did not match interface: "+ interfaceNames[i],
+                    interfaceNames[i],
+                    bridgeConfigurationManagerImpl.getPhysicalInterfaceName(node, networkNames[i]));
         }
+        assertNull(PHYSNET1, bridgeConfigurationManagerImpl.getPhysicalInterfaceName(node, PHYSNET3));
+        verify(configurationService, times(5)).getProviderMappingsKey();
+        verify(configurationService, times(2)).getDefaultProviderMapping();
     }
 
     @Test
     public void testGetAllPhysicalInterfaceNames() throws Exception {
-        String interfaceNames[] = {"interfaceName-0", "interfaceName-1", "interfaceName-2", "interfaceName-3"};
-        List<String> intNameList = new ArrayList<>();
-        for (String name: interfaceNames){
-            intNameList.add(name);
-        }
-        //Row row = mock(Row.class);
-        //OpenVSwitch ovsRowOVS = mock(OpenVSwitch.class);
-        //Column<GenericTableSchema, Map<String, String>> col = mock(Column.class);
-        Map<String, String> colMap = mock(Map.class);
-        //ConcurrentHashMap<String, Row> hashMap;
-        //hashMap = new ConcurrentHashMap<>();
-        //hashMap.put("row1", row);
+        mockStatic(MdsalUtils.class);
+        when(MdsalUtils.getOtherConfig(any(Node.class), eq(OvsdbTables.OPENVSWITCH), anyString()))
+                .thenReturn(null)
+                .thenReturn(PROVIDER_MAPPINGS);
 
-        /* TODO SB_MIGRATION */
-        //when(ovsdbConfigurationService.getRows(any(Node.class), anyString())).thenReturn(hashMap);
-        //when(ovsdbConfigurationService.getTypedRow(any(Node.class), same(OpenVSwitch.class),
-        //        any(Row.class))).thenReturn(ovsRowOVS);
-        //when(ovsRowOVS.getOtherConfigColumn()).thenReturn(col);
-        //when(col.getData()).thenReturn(colMap);
-        when(colMap.get(anyString())).thenReturn("network-0:interfaceName-0,network-1:interfaceName-1," +
-                "network-2:interfaceName-2,network-3:interfaceName-3");
+        verifyNoMoreInteractions(configurationService);
+        when(configurationService.getDefaultProviderMapping()).thenReturn(PROVIDER_MAPPINGS_DEFAULT);
 
-        assertEquals("Error, did not get all interface names", intNameList,
-                bridgeConfigurationManagerImpl.getAllPhysicalInterfaceNames(nodeMock));
-        //verify(ovsdbConfigurationService, times(1)).getRows(any(Node.class), anyString());
-        //verify(ovsdbConfigurationService, times(1)).getTableName(any(Node.class), any(Class.class));
-        //verify(ovsdbConfigurationService, times(1)).getTypedRow(any(Node.class), any(Class.class), any(Row.class));
-        verify(configurationService, times(1)).getProviderMappingsKey();
-        verify(configurationService, times(0)).getDefaultProviderMapping();
+        List<String> interfaces = bridgeConfigurationManagerImpl.getAllPhysicalInterfaceNames(node);
+        assertEquals("Error, should have found 1 interface", 1, interfaces.size());
+        assertTrue("Error, should have found " + ETH1, interfaces.contains(ETH1));
+        assertFalse("Error, should not have found " + ETH2, interfaces.contains(ETH2));
+        interfaces = bridgeConfigurationManagerImpl.getAllPhysicalInterfaceNames(node);
+        assertEquals("Error, should have found 2 interfaces", 2, interfaces.size());
+        assertTrue("Error, should have found " + ETH1, interfaces.contains(ETH1));
+        assertTrue("Error, should have found " + ETH1, interfaces.contains(ETH2));
+        assertFalse("Error, should not have found " + ETH3, interfaces.contains(ETH3));
+
+        verify(configurationService, times(2)).getProviderMappingsKey();
+        verify(configurationService, times(1)).getDefaultProviderMapping();
+        verifyStatic(times(2));
+        MdsalUtils.getOtherConfig(any(Node.class), eq(OvsdbTables.OPENVSWITCH), anyString());
     }
-    /* TODO SB_MIGRATION
-    @Test
-    public void testGetBridge() throws Exception {
-        Row row = mock(Row.class);
-        Bridge bridge = mock(Bridge.class);
-        ConcurrentHashMap<String, Row> hashMap;
-        hashMap = new ConcurrentHashMap<>();
-        hashMap.put("row1", row);
-
-        //when(ovsdbConfigurationService.getRows(any(Node.class), anyString())).thenReturn(hashMap);
-        //when(ovsdbConfigurationService.getTypedRow(any(Node.class), same(Bridge.class),
-        //        any(Row.class))).thenReturn(bridge);
-        when(bridge.getName()).thenReturn("test-bridge");
-
-        assertEquals("Error, did not get correct bridge", bridge,
-                bridgeConfigurationManagerImpl.getBridge(nodeMock, "test-bridge"));
-        //verify(ovsdbConfigurationService, times(1)).getRows(any(Node.class), anyString());
-        //verify(ovsdbConfigurationService, times(1)).getTableName(any(Node.class), any(Class.class));
-        //verify(ovsdbConfigurationService, times(1)).getTypedRow(any(Node.class), any(Class.class), any(Row.class));
-    }*/
 }

@@ -47,9 +47,13 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     private volatile ConfigurationService configurationService;
     private volatile NetworkingProviderManager networkingProviderManager;
 
+    public void setConfigurationService(ConfigurationService configurationService) {
+        this.configurationService = configurationService;
+    }
+
     @Override
     public String getBridgeUuid(Node node, String bridgeName) {
-        return MdsalUtils.getBridgeUuid(node, bridgeName).toString();
+        return MdsalUtils.getBridgeUuid(node, bridgeName);
     }
 
     @Override
@@ -78,7 +82,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
 
     @Override
     public boolean isNodeVlanReady(Node node, NeutronNetwork network) {
-        Preconditions.checkNotNull(networkingProviderManager);
+        Preconditions.checkNotNull(configurationService);
 
         /* is br-int created */
         OvsdbBridgeAugmentation intBridge = MdsalUtils.getBridge(node, configurationService.getIntegrationBridgeName());
@@ -88,7 +92,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
         }
 
         /* Check if physical device is added to br-int. */
-        String phyNetName = this.getPhysicalInterfaceName(node, network.getProviderPhysicalNetwork());
+        String phyNetName = getPhysicalInterfaceName(node, network.getProviderPhysicalNetwork());
         if (MdsalUtils.extractTerminationPointAugmentation(node, phyNetName) == null) {
             LOGGER.trace("isNodeVlanReady: node: {}, eth missing", node);
             return false;
@@ -99,7 +103,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
 
     @Override
     public void prepareNode(Node node) {
-        Preconditions.checkNotNull(networkingProviderManager);
+        //Preconditions.checkNotNull(networkingProviderManager);
 
         try {
             createIntegrationBridge(node);

@@ -99,7 +99,10 @@ public class TenantNetworkManagerImpl implements ConfigInterface, TenantNetworkM
         Preconditions.checkNotNull(neutronNetworkCache);
         List <NeutronNetwork> networks = neutronNetworkCache.getAllNetworks();
         for (NeutronNetwork network : networks) {
-            if (network.getProviderSegmentationID().equalsIgnoreCase(segmentationId)) return network.getNetworkUUID();
+            if (network.getProviderSegmentationID() != null &&
+                    network.getProviderSegmentationID().equalsIgnoreCase(segmentationId)) {
+                return network.getNetworkUUID();
+            }
         }
         return null;
     }

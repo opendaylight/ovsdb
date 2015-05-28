@@ -187,7 +187,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <executions>
           <execution>
             <id>prepare-ut-agent</id>
-            <phase>process-test-classes</phase>
             <goals>
               <goal>prepare-agent</goal>
             </goals>
@@ -197,13 +196,24 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           </execution>
           <execution>
             <id>prepare-it-agent</id>
-            <phase>pre-integration-test</phase>
             <goals>
               <goal>prepare-agent</goal>
             </goals>
             <configuration>
               <destFile>${sonar.jacoco.itReportPath}</destFile>
             </configuration>
+          </execution>
+          <execution>
+            <id>default-report</id>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>default-report-integration</id>
+            <goals>
+              <goal>report-integration</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>

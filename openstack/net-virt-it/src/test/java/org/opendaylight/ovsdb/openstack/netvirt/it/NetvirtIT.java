@@ -295,6 +295,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         return true;
     }
 
+    @Ignore//
     @Test
     public void testAddDeleteOvsdbNode() throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
@@ -574,6 +575,7 @@ public class NetvirtIT extends AbstractMdsalTestBase {
      * @throws InterruptedException
      */
     // TODO add verification of flows
+    @Ignore //
     @Test
     public void testNetVirt() throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);

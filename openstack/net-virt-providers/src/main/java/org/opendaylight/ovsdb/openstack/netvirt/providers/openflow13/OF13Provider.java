@@ -723,7 +723,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
 
             long localPort = southbound.getOFPort(intf);
             if (localPort == 0) {
-                logger.info("programLocalRules: could not find ofPort");
+                logger.info("programLocalRules: could not find ofPort for Port {} on Node {}",intf.getName(), node.getNodeId());
                 return;
             }
 
@@ -809,7 +809,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                                      OvsdbTerminationPointAugmentation intf, boolean local) {
         logger.debug("programTunnelRules: node: {}, intf: {}, local: {}, tunnelType: {}, "
                 + "segmentationId: {}, dstAddr: {}",
-                node.getNodeId(), intf.getName(), local, tunnelType, segmentationId, dst);
+                node.getNodeId(), intf.getName(), local, tunnelType, segmentationId, dst.getHostAddress());
         try {
             Long dpid = getIntegrationBridgeOFDPID(node);
             if (dpid == 0L) {
@@ -819,7 +819,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
 
             long localPort = southbound.getOFPort(intf);
             if (localPort == 0) {
-                logger.info("programTunnelRules: could not find ofPort");
+                logger.info("programTunnelRules: could not find ofPort for Port {} on Node{}",intf.getName(),node.getNodeId());
                 return;
             }
 
@@ -829,36 +829,34 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                 return;
             }
 
-            List<OvsdbTerminationPointAugmentation> intfs = southbound.getTerminationPointsOfBridge(node);
-            for (OvsdbTerminationPointAugmentation tunIntf : intfs) {
-                if (tunIntf.getName().equals(getTunnelName(tunnelType, dst))) {
-                    long tunnelOFPort = southbound.getOFPort(tunIntf);
-                    if (tunnelOFPort == 0) {
-                        logger.error("programTunnelRules: Could not Identify Tunnel port {} -> OF ({}) on {}",
-                                tunIntf.getName(), tunnelOFPort, node);
-                        return;
-                    }
-                    logger.debug("programTunnelRules: Identified Tunnel port {} -> OF ({}) on {}",
-                            tunIntf.getName(), tunnelOFPort, node);
-
-                    if (!local) {
-                        logger.trace("programTunnelRules: program remote egress tunnel rules: node {}, intf {}",
-                            node.getNodeId().getValue(), intf.getName());
-                        programRemoteEgressTunnelBridgeRules(node, dpid, segmentationId, attachedMac,
-                                tunnelOFPort, localPort);
-                    }
-
-                    if (local) {
-                        logger.trace("programTunnelRules: program local ingress tunnel rules: node {}, intf {}",
-                                node.getNodeId().getValue(), intf.getName());
-                        programLocalIngressTunnelBridgeRules(node, dpid, segmentationId, attachedMac,
-                                tunnelOFPort, localPort);
-                    }
+            OvsdbTerminationPointAugmentation tunnelPort= southbound.getTerminationPointsOfBridge(node,getTunnelName(tunnelType, dst));
+            if(tunnelPort != null){
+                long tunnelOFPort = southbound.getOFPort(tunnelPort);
+                if (tunnelOFPort == 0) {
+                    logger.error("programTunnelRules: Could not Identify Tunnel port {} -> OF ({}) on {}",
+                            tunnelPort.getName(), tunnelOFPort, node);
                     return;
                 }
+                logger.debug("programTunnelRules: Identified Tunnel port {} -> OF ({}) on {}",
+                        tunnelPort.getName(), tunnelOFPort, node);
+
+                if (!local) {
+                    logger.trace("programTunnelRules: program remote egress tunnel rules: node {}, intf {}",
+                        node.getNodeId().getValue(), intf.getName());
+                    programRemoteEgressTunnelBridgeRules(node, dpid, segmentationId, attachedMac,
+                            tunnelOFPort, localPort);
+                }
+
+                if (local) {
+                    logger.trace("programTunnelRules: program local ingress tunnel rules: node {}, intf {}",
+                            node.getNodeId().getValue(), intf.getName());
+                    programLocalIngressTunnelBridgeRules(node, dpid, segmentationId, attachedMac,
+                            tunnelOFPort, localPort);
+                }
+                return;
             }
         } catch (Exception e) {
-            logger.error("", e);
+            logger.trace("", e);
         }
     }
 
@@ -1006,24 +1004,27 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
             programVlanRules(network, srcNode, intf);
         } else if (networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)
                 || networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN)){
+
+            boolean sourceTunnelStatus = false;
+            boolean destTunnelStatus = false;
             for (Node dstNode : nodes.values()) {
                 InetAddress src = configurationService.getTunnelEndPoint(srcNode);
                 InetAddress dst = configurationService.getTunnelEndPoint(dstNode);
                 if ((src != null) && (dst != null)) {
-                    if (addTunnelPort(srcBridgeNode, networkType, src, dst)) {
-                        programTunnelRules(networkType, segmentationId, dst, srcBridgeNode, intf, true);
-                    }
+                    sourceTunnelStatus = addTunnelPort(srcBridgeNode, networkType, src, dst);
 
                     Node dstBridgeNode = southbound.getBridgeNode(dstNode,
                             configurationService.getIntegrationBridgeName());
-                    if (dstBridgeNode != null) {
-                        if (addTunnelPort(dstBridgeNode, networkType, dst, src)) {
-                            programTunnelRules(networkType, segmentationId, src, dstBridgeNode, intf, false);
-                        }
-                    } else {
-                        logger.warn("Destination bridge on node {} for tunnel end point not found. ovs node is {}",
-                                dst,
-                                (dstNode == null ? "null" : dstNode.getNodeId().getValue()));
+
+                    if(dstBridgeNode != null){
+                        destTunnelStatus = addTunnelPort(dstBridgeNode, networkType, dst, src);
+                    }
+
+                    if (sourceTunnelStatus) {
+                        programTunnelRules(networkType, segmentationId, dst, srcBridgeNode, intf, true);
+                    }
+                    if (destTunnelStatus) {
+                        programTunnelRules(networkType, segmentationId, src, dstBridgeNode, intf, false);
                     }
                 } else {
                     logger.warn("Tunnel end-point configuration missing. Please configure it in OpenVSwitch Table. "

@@ -153,11 +153,11 @@ public class BridgeConfigurationManagerImplTest {
 
         verifyNoMoreInteractions(configurationService);
         assertFalse("Error, did not return correct boolean from isNodeTunnelReady",
-                bridgeConfigurationManagerImpl.isNodeNeutronReady(node));
+                bridgeConfigurationManagerImpl.isNodeTunnelReady(node));
 
         when(configurationService.getIntegrationBridgeName()).thenReturn(BR_INT);
-        assertTrue("Error, did not return correct boolean from isNodeNeutronReady",
-                bridgeConfigurationManagerImpl.isNodeNeutronReady(node));
+        assertTrue("Error, did not return correct boolean from isNodeTunnelReady",
+                bridgeConfigurationManagerImpl.isNodeTunnelReady(node));
 
         verify(configurationService, times(2)).getIntegrationBridgeName();
         verify(southbound, times(2)).getBridge(any(Node.class), anyString());

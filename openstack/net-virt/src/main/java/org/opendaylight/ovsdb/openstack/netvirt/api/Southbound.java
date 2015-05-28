@@ -50,6 +50,7 @@ public interface Southbound {
     List<Node> getAllBridgesOnOvsdbNode(Node node);
     OvsdbNodeAugmentation extractNodeAugmentation(Node node);
     List<OvsdbTerminationPointAugmentation> getTerminationPointsOfBridge(Node node);
+    OvsdbTerminationPointAugmentation getTerminationPointsOfBridge(Node node, String terminationPoint);
     OvsdbTerminationPointAugmentation extractTerminationPointAugmentation(Node bridgeNode, String portName);
     List<TerminationPoint> extractTerminationPoints(Node node);
     List<OvsdbTerminationPointAugmentation> extractTerminationPointAugmentations(Node node);

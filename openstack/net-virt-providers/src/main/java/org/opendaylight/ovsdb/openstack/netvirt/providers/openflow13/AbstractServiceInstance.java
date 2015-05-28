@@ -11,7 +11,6 @@ package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -80,7 +79,7 @@ public abstract class AbstractServiceInstance {
         this.southbound =
                 (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, serviceInstance);
     }
-    
+
     public boolean isBridgeInPipeline (Node node){
         String bridgeName = southbound.getBridgeName(node);
         if (bridgeName != null && Constants.INTEGRATION_BRIDGE.equals(bridgeName)) {
@@ -145,7 +144,7 @@ public abstract class AbstractServiceInstance {
     protected void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
         logger.debug("writeFlow: flowBuilder: {}, nodeBuilder: {}",
                 flowBuilder.build(), nodeBuilder.build());
-        ReadWriteTransaction modification = dataBroker.newReadWriteTransaction();
+        WriteTransaction modification = dataBroker.newWriteOnlyTransaction();
         modification.put(LogicalDatastoreType.CONFIGURATION, createNodePath(nodeBuilder),
                 nodeBuilder.build(), true /*createMissingParents*/);
         modification.put(LogicalDatastoreType.CONFIGURATION, createFlowPath(flowBuilder, nodeBuilder),
@@ -155,7 +154,6 @@ public abstract class AbstractServiceInstance {
         try {
             commitFuture.get();  // TODO: Make it async (See bug 1362)
             logger.debug("Transaction success for write of Flow "+flowBuilder.getFlowName());
-            Thread.sleep(500);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             modification.cancel();

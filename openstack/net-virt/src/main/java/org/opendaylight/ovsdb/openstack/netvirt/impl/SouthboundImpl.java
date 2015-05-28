@@ -383,16 +383,33 @@ public class SouthboundImpl implements Southbound {
         return tpAugmentations;
     }
 
+    public OvsdbTerminationPointAugmentation getTerminationPointsOfBridge(Node node, String portName) {
+        OvsdbTerminationPointAugmentation tpAugmentation = extractTerminationPointAugmentation(node,portName);
+        if(tpAugmentation == null){
+            List<OvsdbTerminationPointAugmentation> tpAugmentations = readTerminationPointAugmentations(node);
+            if(tpAugmentations != null){
+                for(OvsdbTerminationPointAugmentation ovsdbTpAugmentation : tpAugmentations){
+                    if(ovsdbTpAugmentation.getName().equals(portName)){
+                        return ovsdbTpAugmentation;
+                    }
+                }
+            }
+        }
+        return tpAugmentation;
+    }
+
     public OvsdbTerminationPointAugmentation extractTerminationPointAugmentation(Node bridgeNode, String portName) {
         OvsdbBridgeAugmentation ovsdbBridgeAugmentation = bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class);
         if (ovsdbBridgeAugmentation != null) {
             List<TerminationPoint> terminationPoints = bridgeNode.getTerminationPoint();
-            for(TerminationPoint terminationPoint : terminationPoints) {
-                OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
-                        terminationPoint.getAugmentation( OvsdbTerminationPointAugmentation.class);
-                if (ovsdbTerminationPointAugmentation != null
-                        && ovsdbTerminationPointAugmentation.getName().equals(portName)) {
-                    return ovsdbTerminationPointAugmentation;
+            if(terminationPoints != null){
+                for(TerminationPoint terminationPoint : terminationPoints) {
+                    OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
+                            terminationPoint.getAugmentation( OvsdbTerminationPointAugmentation.class);
+                    if (ovsdbTerminationPointAugmentation != null
+                            && ovsdbTerminationPointAugmentation.getName().equals(portName)) {
+                        return ovsdbTerminationPointAugmentation;
+                    }
                 }
             }
         }

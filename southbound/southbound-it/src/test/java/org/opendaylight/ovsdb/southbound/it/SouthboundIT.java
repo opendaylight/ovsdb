@@ -2558,11 +2558,19 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
 
         Topology topology = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, topologyPath);
-        Assert.assertEquals("There should only be one node in the topology", 1, topology.getNode().size());
         InstanceIdentifier<Node> expectedNodeIid = SouthboundMapper.createInstanceIdentifier(connectionInfo);
-        Node node = topology.getNode().iterator().next();
         NodeId expectedNodeId = expectedNodeIid.firstKeyOf(Node.class, NodeKey.class).getNodeId();
-        Assert.assertEquals(expectedNodeId, node.getNodeId());
+        Node foundNode = null;
+        Assert.assertNotNull("Expected to find topology: " + topologyPath, topology);
+        Assert.assertNotNull("Expected to find some nodes" + topology.getNode());
+        LOG.info("expectedNodeId: {}, getNode: {}", expectedNodeId, topology.getNode());
+        for (Node node : topology.getNode()) {
+            if (node.getNodeId().getValue().equals(expectedNodeId.getValue())) {
+                foundNode = node;
+                break;
+            }
+        }
+        Assert.assertNotNull("Expected to find Node: " + expectedNodeId, foundNode);
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
 

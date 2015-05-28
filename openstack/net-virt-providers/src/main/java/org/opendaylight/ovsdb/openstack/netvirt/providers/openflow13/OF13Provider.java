@@ -1010,13 +1010,20 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                 InetAddress src = configurationService.getTunnelEndPoint(srcNode);
                 InetAddress dst = configurationService.getTunnelEndPoint(dstNode);
                 if ((src != null) && (dst != null)) {
-                    Node dstBridgeNode = southbound.getBridgeNode(dstNode,
-                            configurationService.getIntegrationBridgeName());
                     if (addTunnelPort(srcBridgeNode, networkType, src, dst)) {
                         programTunnelRules(networkType, segmentationId, dst, srcBridgeNode, intf, true);
                     }
-                    if (addTunnelPort(dstBridgeNode, networkType, dst, src)) {
-                        programTunnelRules(networkType, segmentationId, src, dstBridgeNode, intf, false);
+
+                    Node dstBridgeNode = southbound.getBridgeNode(dstNode,
+                            configurationService.getIntegrationBridgeName());
+                    if (dstBridgeNode != null) {
+                        if (addTunnelPort(dstBridgeNode, networkType, dst, src)) {
+                            programTunnelRules(networkType, segmentationId, src, dstBridgeNode, intf, false);
+                        }
+                    } else {
+                        logger.warn("Destination bridge on node {} for tunnel end point not found. ovs node is {}",
+                                dst,
+                                (dstNode == null ? "null" : dstNode.getNodeId().getValue()));
                     }
                 } else {
                     logger.warn("Tunnel end-point configuration missing. Please configure it in OpenVSwitch Table. "

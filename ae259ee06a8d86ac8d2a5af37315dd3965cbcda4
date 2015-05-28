@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_b79cea6a",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1014,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-05-28T13:07:59Z",
+      "side": 1,
+      "message": "leave the old check against just src and dst since that is easy to see that local_ip isn\u0027t configured on those openvswitch tables.\n\nthen add a new check for if dstNode !\u003d null around the second addTunnelPort() block. That way the rest of the code works and only the piece with the issue will be captured. This will help isolate the issue.\n\nRecognize in handleInterfaceDelete() that we do have these defensive checks already, so we missed having them in this code path.",
+      "range": {
+        "startLine": 1014,
+        "startChar": 34,
+        "endLine": 1014,
+        "endChar": 36
+      },
+      "revId": "ae259ee06a8d86ac8d2a5af37315dd3965cbcda4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

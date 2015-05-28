@@ -1009,9 +1009,9 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
             for (Node dstNode : nodes.values()) {
                 InetAddress src = configurationService.getTunnelEndPoint(srcNode);
                 InetAddress dst = configurationService.getTunnelEndPoint(dstNode);
-                if ((src != null) && (dst != null)) {
-                    Node dstBridgeNode = southbound.getBridgeNode(dstNode,
-                            configurationService.getIntegrationBridgeName());
+                Node dstBridgeNode = southbound.getBridgeNode(dstNode,
+                        configurationService.getIntegrationBridgeName());
+                if ((src != null) && (dst != null) && (dstBridgeNode != null)) {
                     if (addTunnelPort(srcBridgeNode, networkType, src, dst)) {
                         programTunnelRules(networkType, segmentationId, dst, srcBridgeNode, intf, true);
                     }
@@ -1020,9 +1020,10 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                     }
                 } else {
                     logger.warn("Tunnel end-point configuration missing. Please configure it in OpenVSwitch Table. "
-                                    + "Check source {} or destination {}",
+                                    + "Check source {} or destination {} dstNode {}",
                             src != null ? src.getHostAddress() : "null",
-                            dst != null ? dst.getHostAddress() : "null");
+                            dst != null ? dst.getHostAddress() : "null",
+                            dstBridgeNode != null ? dstBridgeNode.getNodeId().getValue() : "null");
                 }
             }
         }

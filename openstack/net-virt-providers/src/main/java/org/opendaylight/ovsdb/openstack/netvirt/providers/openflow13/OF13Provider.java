@@ -829,7 +829,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                 return;
             }
 
-            OvsdbTerminationPointAugmentation tunnelPort= southbound.getTerminationPointsOfBridge(node,getTunnelName(tunnelType, dst));
+            OvsdbTerminationPointAugmentation tunnelPort= southbound.getTerminationPointOfBridge(node, getTunnelName(tunnelType, dst));
             if(tunnelPort != null){
                 long tunnelOFPort = southbound.getOFPort(tunnelPort);
                 if (tunnelOFPort == 0) {
@@ -889,7 +889,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
             for (OvsdbTerminationPointAugmentation tunIntf : intfs) {
                 if (tunIntf.getName().equals(getTunnelName(tunnelType, dst))) {
                     long tunnelOFPort = southbound.getOFPort(tunIntf);
-                    if (tunnelOFPort == -1) {
+                    if (tunnelOFPort == 0) {
                         logger.error("Could not Identify Tunnel port {} -> OF ({}) on {}",
                                 tunIntf.getName(), tunnelOFPort, node);
                         return;
@@ -1004,27 +1004,24 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
             programVlanRules(network, srcNode, intf);
         } else if (networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)
                 || networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN)){
-
-            boolean sourceTunnelStatus = false;
-            boolean destTunnelStatus = false;
             for (Node dstNode : nodes.values()) {
                 InetAddress src = configurationService.getTunnelEndPoint(srcNode);
                 InetAddress dst = configurationService.getTunnelEndPoint(dstNode);
                 if ((src != null) && (dst != null)) {
-                    sourceTunnelStatus = addTunnelPort(srcBridgeNode, networkType, src, dst);
+                    if (addTunnelPort(srcBridgeNode, networkType, src, dst)) {
+                        programTunnelRules(networkType, segmentationId, dst, srcBridgeNode, intf, true);
+                    }
 
                     Node dstBridgeNode = southbound.getBridgeNode(dstNode,
                             configurationService.getIntegrationBridgeName());
-
-                    if(dstBridgeNode != null){
-                        destTunnelStatus = addTunnelPort(dstBridgeNode, networkType, dst, src);
-                    }
-
-                    if (sourceTunnelStatus) {
-                        programTunnelRules(networkType, segmentationId, dst, srcBridgeNode, intf, true);
-                    }
-                    if (destTunnelStatus) {
-                        programTunnelRules(networkType, segmentationId, src, dstBridgeNode, intf, false);
+                    if (dstBridgeNode != null) {
+                        if (addTunnelPort(dstBridgeNode, networkType, dst, src)) {
+                            programTunnelRules(networkType, segmentationId, src, dstBridgeNode, intf, false);
+                        }
+                    } else {
+                        logger.warn("Destination bridge on node {} for tunnel end point not found. ovs node is {}",
+                                dst,
+                                (dstNode == null ? "null" : dstNode.getNodeId().getValue()));
                     }
                 } else {
                     logger.warn("Tunnel end-point configuration missing. Please configure it in OpenVSwitch Table. "

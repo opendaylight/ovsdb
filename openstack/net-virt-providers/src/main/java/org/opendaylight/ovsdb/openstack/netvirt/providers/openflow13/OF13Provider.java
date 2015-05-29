@@ -829,7 +829,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                 return;
             }
 
-            OvsdbTerminationPointAugmentation tunnelPort= southbound.getTerminationPointsOfBridge(node,getTunnelName(tunnelType, dst));
+            OvsdbTerminationPointAugmentation tunnelPort= southbound.getTerminationPointOfBridge(node, getTunnelName(tunnelType, dst));
             if(tunnelPort != null){
                 long tunnelOFPort = southbound.getOFPort(tunnelPort);
                 if (tunnelOFPort == 0) {
@@ -889,7 +889,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
             for (OvsdbTerminationPointAugmentation tunIntf : intfs) {
                 if (tunIntf.getName().equals(getTunnelName(tunnelType, dst))) {
                     long tunnelOFPort = southbound.getOFPort(tunIntf);
-                    if (tunnelOFPort == -1) {
+                    if (tunnelOFPort == 0) {
                         logger.error("Could not Identify Tunnel port {} -> OF ({}) on {}",
                                 tunIntf.getName(), tunnelOFPort, node);
                         return;

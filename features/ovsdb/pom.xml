@@ -45,24 +45,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   </scm>
 
   <properties>
-    <!-- all this added to work around sun.reflect bug
-    <appauth.version>0.6.0-SNAPSHOT</appauth.version>
-    <bundlescanner.api.version>0.6.0-SNAPSHOT</bundlescanner.api.version>
-    <clustering.services.version>0.7.0-SNAPSHOT</clustering.services.version>
-    <configuration.implementation.version>0.6.0-SNAPSHOT</configuration.implementation.version>
-    <configuration.version>0.6.0-SNAPSHOT</configuration.version>
-    <containermanager.version>0.7.0-SNAPSHOT</containermanager.version>
-    <northbound.commons.version>0.6.0-SNAPSHOT</northbound.commons.version>
-    <switchmanager.api.version>0.9.0-SNAPSHOT</switchmanager.api.version>
-    <topologymanager.version>0.6.0-SNAPSHOT</topologymanager.version>
-    <usermanager.version>0.6.0-SNAPSHOT</usermanager.version>
-    all this added to work around sun.reflect bug -->
+    <dummy-console.version>1.3.0-SNAPSHOT</dummy-console.version>
     <odl.karaf.base.version>1.6.0-SNAPSHOT</odl.karaf.base.version>
     <mdsal.version>1.3.0-SNAPSHOT</mdsal.version>
+    <io.netty.version>3.8.0.Final</io.netty.version>
     <networkconfig.neutron.version>0.6.0-SNAPSHOT</networkconfig.neutron.version>
-    <nsf.version>0.6.0-SNAPSHOT</nsf.version>
     <ovsdb.library.version>1.2.0-SNAPSHOT</ovsdb.library.version>
-    <ovsdb.northbound.version>0.8.0-SNAPSHOT</ovsdb.northbound.version>
     <openstack.netvirt.version>1.2.0-SNAPSHOT</openstack.netvirt.version>
     <openstack.netvirt.providers.version>1.2.0-SNAPSHOT</openstack.netvirt.providers.version>
     <ovsdb.plugin.version>1.2.0-SNAPSHOT</ovsdb.plugin.version>
@@ -96,33 +84,145 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   </dependencyManagement>
   <dependencies>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>features-base</artifactId>
-      <version>${odl.karaf.base.version}</version>
-      <classifier>features</classifier>
-      <type>xml</type>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.dependencymanager</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${commons.lang3.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty</artifactId>
+      <version>${io.netty.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-all</artifactId>
+      <version>${netty.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-buffer</artifactId>
+      <version>${netty.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-codec</artifactId>
+      <version>${netty.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-codec-http</artifactId>
+      <version>${netty.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-common</artifactId>
+      <version>${netty.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-handler</artifactId>
+      <version>${netty.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-transport</artifactId>
+      <version>${netty.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>javax.servlet</artifactId>
+      <version>3.0.0.v201112011016</version>
+    </dependency>
+    <dependency>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>javax.servlet.jsp</artifactId>
+      <version>2.2.0.v201112011158</version>
+    </dependency>
+    <dependency>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>org.apache.felix.gogo.command</artifactId>
+      <version>0.8.0.v201108120515</version>
+    </dependency>
+    <dependency>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>org.apache.felix.gogo.runtime</artifactId>
+      <version>0.8.0.v201108120515</version>
+    </dependency>
+    <dependency>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>org.apache.felix.gogo.shell</artifactId>
+      <version>0.8.0.v201110170705</version>
+    </dependency>
+    <dependency>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>org.eclipse.equinox.cm</artifactId>
+      <version>1.0.400.v20120522-1841</version>
+    </dependency>
+    <dependency>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>org.eclipse.equinox.console</artifactId>
+      <version>1.0.0.v20120522-1841</version>
+    </dependency>
+    <dependency>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>org.eclipse.equinox.ds</artifactId>
+      <version>1.4.0.v20120522-1841</version>
+    </dependency>
+    <dependency>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>org.eclipse.equinox.launcher</artifactId>
+      <version>1.3.0.v20120522-1813</version>
+    </dependency>
+    <dependency>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>org.eclipse.equinox.util</artifactId>
+      <version>1.0.400.v20120522-2049</version>
+    </dependency>
+    <dependency>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>org.eclipse.osgi</artifactId>
+      <version>3.8.1.v20120830-144521</version>
+    </dependency>
+    <dependency>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>org.eclipse.osgi.services</artifactId>
+      <version>3.3.100.v20120522-1822</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>features-adsal</artifactId>
-      <version>${sal.version}</version>
-      <classifier>features</classifier>
-      <type>xml</type>
+      <artifactId>dummy-console</artifactId>
+      <version>${dummy-console.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>features-nsf</artifactId>
-      <version>${nsf.version}</version>
-      <classifier>features</classifier>
-      <type>xml</type>
-    </dependency>
-    <!-- sun.reflect
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>commons.northbound</artifactId>
-      <version>${northbound.commons.version}</version>
-    </dependency>
-    sun.reflect -->
     <dependency>
       <groupId>org.opendaylight.neutron</groupId>
       <artifactId>features-neutron</artifactId>
@@ -148,11 +248,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>library</artifactId>
       <version>${ovsdb.library.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>northbound</artifactId>
-      <version>${ovsdb.northbound.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>

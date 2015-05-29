@@ -383,7 +383,7 @@ public class SouthboundImpl implements Southbound {
         return tpAugmentations;
     }
 
-    public OvsdbTerminationPointAugmentation getTerminationPointsOfBridge(Node node, String portName) {
+    public OvsdbTerminationPointAugmentation getTerminationPointOfBridge(Node node, String portName) {
         OvsdbTerminationPointAugmentation tpAugmentation = extractTerminationPointAugmentation(node,portName);
         if(tpAugmentation == null){
             List<OvsdbTerminationPointAugmentation> tpAugmentations = readTerminationPointAugmentations(node);
@@ -399,17 +399,11 @@ public class SouthboundImpl implements Southbound {
     }
 
     public OvsdbTerminationPointAugmentation extractTerminationPointAugmentation(Node bridgeNode, String portName) {
-        OvsdbBridgeAugmentation ovsdbBridgeAugmentation = bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class);
-        if (ovsdbBridgeAugmentation != null) {
-            List<TerminationPoint> terminationPoints = bridgeNode.getTerminationPoint();
-            if(terminationPoints != null){
-                for(TerminationPoint terminationPoint : terminationPoints) {
-                    OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
-                            terminationPoint.getAugmentation( OvsdbTerminationPointAugmentation.class);
-                    if (ovsdbTerminationPointAugmentation != null
-                            && ovsdbTerminationPointAugmentation.getName().equals(portName)) {
-                        return ovsdbTerminationPointAugmentation;
-                    }
+        if (bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class) != null) {
+            List<OvsdbTerminationPointAugmentation> tpAugmentations = extractTerminationPointAugmentations(bridgeNode);
+            for (OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation : tpAugmentations) {
+                if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
+                    return ovsdbTerminationPointAugmentation;
                 }
             }
         }
@@ -430,7 +424,11 @@ public class SouthboundImpl implements Southbound {
         List<TerminationPoint> terminationPoints = node.getTerminationPoint();
         if(terminationPoints != null && !terminationPoints.isEmpty()){
             for(TerminationPoint tp : terminationPoints){
-                tpAugmentations.add(tp.getAugmentation(OvsdbTerminationPointAugmentation.class));
+                OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
+                        tp.getAugmentation(OvsdbTerminationPointAugmentation.class);
+                if (ovsdbTerminationPointAugmentation != null) {
+                    tpAugmentations.add(ovsdbTerminationPointAugmentation);
+                }
             }
         }
         return tpAugmentations;

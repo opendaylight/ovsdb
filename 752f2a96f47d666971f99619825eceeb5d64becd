@@ -16,6 +16,24 @@
       "revId": "752f2a96f47d666971f99619825eceeb5d64becd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_da8676b9",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1012,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-05-29T20:11:20Z",
+      "side": 1,
+      "message": "yeah, Sam was thinking that it is better to partial fail that than have no rules added. I kinda agree with him. It is true that the changes here have nothing to do with the bug you fixed, right?",
+      "parentUuid": "1a9dcd25_3a051a7a",
+      "revId": "752f2a96f47d666971f99619825eceeb5d64becd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

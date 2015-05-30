@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.Set;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.operations.Mutate;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
@@ -75,6 +77,9 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
                     createInterface(terminationPoint, ovsInterface);
                     transaction.add(op.insert(ovsInterface).withId(interfaceUuid));
 
+                    stampInstanceIdentifier(transaction, (InstanceIdentifier<TerminationPoint>) entry.getKey(),
+                            ovsInterface.getName());
+
                     // Configure port with the above interface details
                     String portUuid = "Port_" + SouthboundMapper.getRandomUUID();
                     Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
@@ -118,7 +123,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
             ovsInterface.setType(SouthboundMapper.createOvsdbInterfaceType(mdsaltype));
         }
     }
-    
+
     private void createPort(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Port port, final String interfaceUuid) {
@@ -296,6 +301,20 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
             }
         }
         return null;
+    }
+
+    public static void stampInstanceIdentifier(TransactionBuilder transaction,InstanceIdentifier<TerminationPoint> iid,
+            String interfaceName) {
+        Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
+        port.setName(interfaceName);;
+        port.setExternalIds(Collections.<String,String>emptyMap());
+        Mutate mutate = TransactUtils.stampInstanceIdentifierMutation(transaction,
+                iid,
+                port.getSchema(),
+                port.getExternalIdsColumn().getSchema());
+        transaction.add(mutate
+                .where(port.getNameColumn().getSchema().opEqual(interfaceName))
+                .build());
     }
 
 }

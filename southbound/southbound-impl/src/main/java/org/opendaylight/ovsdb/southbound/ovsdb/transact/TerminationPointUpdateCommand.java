@@ -30,6 +30,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Trunks;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -82,6 +83,9 @@ public class TerminationPointUpdateCommand extends AbstractTransactCommand {
             transaction.add(op.update(ovsInterface)
                     .where(extraInterface.getNameColumn().getSchema().opEqual(terminationPoint.getName()))
                     .build());
+
+            TerminationPointCreateCommand.stampInstanceIdentifier(transaction,
+                    iid.firstIdentifierOf(TerminationPoint.class), terminationPoint.getName());
 
             // Update port
             Port port = TyperUtils.getTypedRowWrapper(

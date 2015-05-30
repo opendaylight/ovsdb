@@ -32,6 +32,7 @@ import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
+import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
@@ -109,14 +110,11 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
             if (bridgeIid.isPresent()) {
                 NodeId bridgeId = SouthboundMapper.createManagedNodeId(bridgeIid.get());
                 TerminationPointKey tpKey = new TerminationPointKey(new TpId(portName));
-                InstanceIdentifier<TerminationPoint> tpPath = InstanceIdentifier
-                        .create(NetworkTopology.class)
-                        .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
-                        .child(Node.class,new NodeKey(bridgeId))
-                        .child(TerminationPoint.class,tpKey);
                 TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
                 tpBuilder.setKey(tpKey);
                 tpBuilder.setTpId(tpKey.getTpId());
+                InstanceIdentifier<TerminationPoint> tpPath =
+                        getInstanceIdentifier(bridgeIid.get(), portUpdate.getValue());
                 OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder =
                         new OvsdbTerminationPointAugmentationBuilder();
                 buildTerminationPoint(tpAugmentationBuilder,portUpdate.getValue());
@@ -447,6 +445,17 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                 }
             }
             ovsdbTerminationPointBuilder.setInterfaceOtherConfigs(interfaceOtherConfigs);
+        }
+    }
+
+    private InstanceIdentifier<TerminationPoint> getInstanceIdentifier(InstanceIdentifier<Node> bridgeIid,Port port) {
+        if (port.getExternalIdsColumn() != null
+                && port.getExternalIdsColumn().getData() != null
+                && port.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
+            String iidString = port.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY);
+            return (InstanceIdentifier<TerminationPoint>) SouthboundUtil.deserializeInstanceIdentifier(iidString);
+        } else {
+            return bridgeIid.child(TerminationPoint.class, new TerminationPointKey(new TpId(port.getName())));
         }
     }
 }

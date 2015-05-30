@@ -1082,8 +1082,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 if (updateFromExpectedExternalIds != null) {
                     assertExpectedPortExternalIdsExist(updateToExpectedExternalIds, updateToOperationalExternalIds);
                     assertExpectedPortExternalIdsExist(updateFromExpectedExternalIds, updateToOperationalExternalIds);
-                } else {
-                    Assert.assertNull(updateToOperationalExternalIds);
                 }
 
                 // DELETE

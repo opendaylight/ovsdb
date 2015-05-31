@@ -82,7 +82,7 @@ public abstract class AbstractConfigTestBase {
                 //.version("1.5.0-SNAPSHOT")
                 .groupId("org.opendaylight.ovsdb")
                 .artifactId("southbound-karaf")
-                .version("1.1.0-SNAPSHOT")
+                .version("1.2.0-SNAPSHOT")
                 .type("zip");
         return karafUrl;
     }

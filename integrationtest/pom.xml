@@ -161,9 +161,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
               <reuseForks>false</reuseForks>
               <parallel>none</parallel>
               <threadCount>1</threadCount>
-              <excludes>
-                <exclude>**/NetVirtIT.java,**/NeutronIT.java</exclude>
-              </excludes>
             </configuration>
           </execution>
         </executions>

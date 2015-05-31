@@ -87,7 +87,7 @@ public abstract class AbstractConfigTestBase {
         karafUrl = maven()
                 .groupId("org.opendaylight.ovsdb")
                 .artifactId("karaf")
-                .version("1.1.0-SNAPSHOT")
+                .version("1.2.0-SNAPSHOT")
                 .type("zip");
 
         return karafUrl;

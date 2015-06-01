@@ -23,7 +23,10 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
+import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
+import org.opendaylight.ovsdb.southbound.SouthboundUtil;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
@@ -35,6 +38,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigsBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -59,7 +67,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
 
         for (Entry<UUID, OpenVSwitch> entry : updatedOpenVSwitchRows.entrySet()) {
             OpenVSwitch openVSwitch = entry.getValue();
-            final InstanceIdentifier<Node> nodePath = SouthboundMapper.createInstanceIdentifier(getConnectionInfo());
+            final InstanceIdentifier<Node> nodePath = getInstanceIdentifier(openVSwitch);
 
             OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = new OvsdbNodeAugmentationBuilder();
 
@@ -72,8 +80,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
 
             NodeBuilder nodeBuilder = new NodeBuilder();
             ConnectionInfo connectionInfo = getConnectionInfo();
-            nodeBuilder.setNodeId(SouthboundMapper.createNodeId(
-                    connectionInfo.getRemoteIp(), connectionInfo.getRemotePort()));
+            nodeBuilder.setNodeId(getNodeId(openVSwitch));
             nodeBuilder.addAugmentation(OvsdbNodeAugmentation.class,
                     ovsdbNodeBuilder.build());
             transaction.merge(LogicalDatastoreType.OPERATIONAL, nodePath,
@@ -167,5 +174,32 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
         } catch (NoSuchElementException e) {
             LOG.debug("ovs_version is not set for this switch",e);
         }
+    }
+
+    private InstanceIdentifier<Node> getInstanceIdentifier(OpenVSwitch ovs) {
+        if (ovs.getExternalIdsColumn() != null
+                && ovs.getExternalIdsColumn().getData() != null
+                && ovs.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
+            String iidString = ovs.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY);
+            InstanceIdentifier<Node> iid =
+                   (InstanceIdentifier<Node>) SouthboundUtil.deserializeInstanceIdentifier(iidString);
+            getOvsdbConnectionInstance().setInstanceIdentifier(iid);
+        } else {
+            String nodeString = SouthboundConstants.OVSDB_URI_PREFIX + "://" + SouthboundConstants.UUID + "/"
+                    + ovs.getUuid().toString();
+            NodeId nodeId = new NodeId(new Uri(nodeString));
+            NodeKey nodeKey = new NodeKey(nodeId);
+            InstanceIdentifier<Node> iid = InstanceIdentifier.builder(NetworkTopology.class)
+                    .child(Topology.class,new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+                    .child(Node.class,nodeKey)
+                    .build();
+            getOvsdbConnectionInstance().setInstanceIdentifier(iid);
+        }
+        return getOvsdbConnectionInstance().getInstanceIdentifier();
+    }
+
+    private NodeId getNodeId(OpenVSwitch ovs) {
+        NodeKey nodeKey = getInstanceIdentifier(ovs).firstKeyOf(Node.class, NodeKey.class);
+        return nodeKey.getNodeId();
     }
 }

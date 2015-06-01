@@ -50,7 +50,8 @@ public class OvsdbControllerRemovedCommand extends AbstractTransactionCommand {
     @Override
     public void execute(ReadWriteTransaction transaction) {
         for (Bridge bridge : updatedBridgeRows.values()) {
-            InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(getConnectionInfo(), bridge);
+            InstanceIdentifier<Node> bridgeIid =
+                    SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), bridge);
             deleteControllers(transaction, controllerEntriesToRemove(bridgeIid,bridge));
         }
     }

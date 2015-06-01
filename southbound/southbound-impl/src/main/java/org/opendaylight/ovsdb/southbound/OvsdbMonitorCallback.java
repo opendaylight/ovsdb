@@ -12,7 +12,6 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.southbound.transactions.md.OvsdbOperationalCommandAggregator;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,9 +19,9 @@ public class OvsdbMonitorCallback implements MonitorCallBack {
 
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbMonitorCallback.class);
     private TransactionInvoker txInvoker;
-    private ConnectionInfo key;
+    private OvsdbConnectionInstance key;
 
-    OvsdbMonitorCallback(ConnectionInfo key,TransactionInvoker txInvoker) {
+    OvsdbMonitorCallback(OvsdbConnectionInstance key,TransactionInvoker txInvoker) {
         this.txInvoker = txInvoker;
         this.key = key;
     }

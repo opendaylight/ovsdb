@@ -62,7 +62,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         LOG.info("OVSDB Disconnect from {}:{}",client.getConnectionInfo().getRemoteAddress(),
                 client.getConnectionInfo().getRemotePort());
         ConnectionInfo key = SouthboundMapper.createConnectionInfo(client);
-        txInvoker.invoke(new OvsdbNodeRemoveCommand(key,null,null));
+        txInvoker.invoke(new OvsdbNodeRemoveCommand(getConnectionInstance(key),null,null));
         clients.remove(key);
     }
 

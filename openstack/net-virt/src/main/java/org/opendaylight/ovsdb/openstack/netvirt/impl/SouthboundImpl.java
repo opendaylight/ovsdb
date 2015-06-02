@@ -7,6 +7,7 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
+import com.google.common.base.Preconditions;
 import java.math.BigInteger;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -124,7 +125,7 @@ public class SouthboundImpl implements Southbound {
         }
         return ovsdbNodes;
     }
-
+/*
     public OvsdbNodeAugmentation readOvsdbNode(Node bridgeNode) {
         OvsdbNodeAugmentation nodeAugmentation = null;
         OvsdbBridgeAugmentation bridgeAugmentation = extractBridgeAugmentation(bridgeNode);
@@ -144,6 +145,19 @@ public class SouthboundImpl implements Southbound {
             LOG.debug("readOvsdbNode: Provided node is not a bridge node : {}",bridgeNode);
         }
         return nodeAugmentation;
+    }
+*/
+    public Node readOvsdbNode(Node bridgeNode) {
+        Node ovsdbNode = null;
+        OvsdbBridgeAugmentation bridgeAugmentation = extractBridgeAugmentation(bridgeNode);
+        if (bridgeAugmentation != null) {
+            InstanceIdentifier<Node> ovsdbNodeIid =
+                    (InstanceIdentifier<Node>) bridgeAugmentation.getManagedBy().getValue();
+            ovsdbNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, ovsdbNodeIid);
+        }else{
+            LOG.debug("readOvsdbNode: Provided node is not a bridge node : {}",bridgeNode);
+        }
+        return ovsdbNode;
     }
 
     public String getOvsdbNodeUUID(Node node) {
@@ -363,6 +377,18 @@ public class SouthboundImpl implements Southbound {
             }
         }
         return nodes;
+    }
+
+    public boolean isBridgeOnOvsdbNode(Node node, String bridgeName) {
+        boolean found = false;
+        List<ManagedNodeEntry> managedNodes = node.getAugmentation(OvsdbNodeAugmentation.class).getManagedNodeEntry();
+        for (ManagedNodeEntry managedNode : managedNodes) {
+            InstanceIdentifier<?> bridgeIid = managedNode.getBridgeRef().getValue();
+            if (bridgeIid.toString().contains(bridgeName)) {
+                found = true;
+            }
+        }
+        return found;
     }
 
     public OvsdbNodeAugmentation extractNodeAugmentation(Node node) {

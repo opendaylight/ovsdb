@@ -1,0 +1,337 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_9c646123",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/ConfigurationService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-02T18:09:05Z",
+      "side": 1,
+      "message": "extra f in there",
+      "range": {
+        "startLine": 103,
+        "startChar": 19,
+        "endLine": 103,
+        "endChar": 41
+      },
+      "revId": "33d0ad82cb64118f2df31e00861d8ef5481a8385",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_fca56547",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/Constants.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-02T18:09:05Z",
+      "side": 1,
+      "message": "expand EXT to EXTERNAL to match the existing code",
+      "range": {
+        "startLine": 33,
+        "startChar": 31,
+        "endLine": 33,
+        "endChar": 60
+      },
+      "revId": "33d0ad82cb64118f2df31e00861d8ef5481a8385",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_1c55b14f",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-02T18:09:05Z",
+      "side": 1,
+      "message": "where is the check to see if the patch port for l3 is there?",
+      "revId": "33d0ad82cb64118f2df31e00861d8ef5481a8385",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_7c5e3578",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-02T18:09:05Z",
+      "side": 1,
+      "message": "does vlan not need the l3 stuff? I would think vlan and tunnels could use it right?",
+      "range": {
+        "startLine": 145,
+        "startChar": 33,
+        "endLine": 145,
+        "endChar": 43
+      },
+      "revId": "33d0ad82cb64118f2df31e00861d8ef5481a8385",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_bc991d21",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-02T18:09:05Z",
+      "side": 1,
+      "message": "this doesn\u0027t follow the flow - the first step is do the required pieces already exist, and if not then go create them.",
+      "range": {
+        "startLine": 166,
+        "startChar": 12,
+        "endLine": 166,
+        "endChar": 13
+      },
+      "revId": "33d0ad82cb64118f2df31e00861d8ef5481a8385",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_5ce9f97e",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-02T18:09:05Z",
+      "side": 1,
+      "message": "this assumes you only have two bridges - brint and something else.\n\nThis will also always be true if we are only pushing br-int interface updates into the pipeline since SouthboundHandler will only allow ports with the tenant id. Not sure if the br-ex stuff will have any tenant mapping",
+      "range": {
+        "startLine": 237,
+        "startChar": 42,
+        "endLine": 237,
+        "endChar": 52
+      },
+      "revId": "33d0ad82cb64118f2df31e00861d8ef5481a8385",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_dce509a9",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-02T18:09:05Z",
+      "side": 1,
+      "message": "why separate these two patch ports? Are you assuming you will get twe different interfaceupdates - one for a br-int bridge and another for a br-ex?",
+      "range": {
+        "startLine": 248,
+        "startChar": 12,
+        "endLine": 248,
+        "endChar": 28
+      },
+      "revId": "33d0ad82cb64118f2df31e00861d8ef5481a8385",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_9c96a1ef",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-02T18:09:05Z",
+      "side": 1,
+      "message": "are these patches backwards - how do we want to name these - on brint is the patch port name brinttobrext?",
+      "range": {
+        "startLine": 253,
+        "startChar": 44,
+        "endLine": 253,
+        "endChar": 55
+      },
+      "revId": "33d0ad82cb64118f2df31e00861d8ef5481a8385",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_bccb5d1d",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-02T18:09:05Z",
+      "side": 1,
+      "message": "fix comment",
+      "range": {
+        "startLine": 278,
+        "startChar": 19,
+        "endLine": 278,
+        "endChar": 30
+      },
+      "revId": "33d0ad82cb64118f2df31e00861d8ef5481a8385",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_7c7155df",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 346,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-02T18:09:05Z",
+      "side": 1,
+      "message": "Still not sure about not creating the bridges. Technically in this code path for interfaceupdates you have to have a bridge but wonder if there is some condition where we wont.",
+      "revId": "33d0ad82cb64118f2df31e00861d8ef5481a8385",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_5cb7b986",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-02T18:09:05Z",
+      "side": 1,
+      "message": "this second check is the exact same check in isPortOnBridge so just remove it",
+      "range": {
+        "startLine": 387,
+        "startChar": 27,
+        "endLine": 387,
+        "endChar": 62
+      },
+      "revId": "33d0ad82cb64118f2df31e00861d8ef5481a8385",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_bcc03de1",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-02T18:09:05Z",
+      "side": 1,
+      "message": "use the new method. As this code is here it will always incur a mdsal read when it isn\u0027t needed since you have an ovsdb node already and can simply check the managed nodes list",
+      "range": {
+        "startLine": 399,
+        "startChar": 23,
+        "endLine": 399,
+        "endChar": 36
+      },
+      "revId": "33d0ad82cb64118f2df31e00861d8ef5481a8385",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_9c61c13b",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/ConfigurationServiceImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-02T18:09:05Z",
+      "side": 1,
+      "message": "name it expand EXT to EXTERNAL to match the other code",
+      "range": {
+        "startLine": 57,
+        "startChar": 26,
+        "endLine": 57,
+        "endChar": 55
+      },
+      "revId": "33d0ad82cb64118f2df31e00861d8ef5481a8385",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_1c6e1130",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-02T18:09:05Z",
+      "side": 1,
+      "message": "Forwardingfg - extra f",
+      "range": {
+        "startLine": 83,
+        "startChar": 33,
+        "endLine": 83,
+        "endChar": 55
+      },
+      "revId": "33d0ad82cb64118f2df31e00861d8ef5481a8385",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_7c8715d8",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/TenantNetworkManagerImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-02T18:09:05Z",
+      "side": 1,
+      "message": "does this work as expected? Southbound#isTunnel() is a method that checks the port type to vxlan or gre. It used the getInterfaceType() but then a string conversion method in the equals.",
+      "range": {
+        "startLine": 139,
+        "startChar": 14,
+        "endLine": 139,
+        "endChar": 15
+      },
+      "revId": "33d0ad82cb64118f2df31e00861d8ef5481a8385",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

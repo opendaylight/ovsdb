@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_df12e061",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/ConfigurationService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-02T02:21:13Z",
+      "side": 1,
+      "message": "extra f in here",
+      "range": {
+        "startLine": 103,
+        "startChar": 19,
+        "endLine": 103,
+        "endChar": 41
+      },
+      "revId": "f0b8a4cccdb7b7b97689a492f7898126c4b5df25",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_7372e8ae",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/Constants.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-02T02:21:13Z",
+      "side": 1,
+      "message": "use external since the other constants spell out the whole name",
+      "range": {
+        "startLine": 33,
+        "startChar": 31,
+        "endLine": 33,
+        "endChar": 60
+      },
+      "revId": "f0b8a4cccdb7b7b97689a492f7898126c4b5df25",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_330f8030",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-02T02:21:13Z",
+      "side": 1,
+      "message": "will this pass checkstyle with a space between the ! and the condition?",
+      "range": {
+        "startLine": 230,
+        "startChar": 13,
+        "endLine": 230,
+        "endChar": 14
+      },
+      "revId": "f0b8a4cccdb7b7b97689a492f7898126c4b5df25",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_5321ec9d",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-02T02:21:13Z",
+      "side": 1,
+      "message": "why not just create both sides of the patch",
+      "range": {
+        "startLine": 248,
+        "startChar": 12,
+        "endLine": 248,
+        "endChar": 31
+      },
+      "revId": "f0b8a4cccdb7b7b97689a492f7898126c4b5df25",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_735bc82e",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 377,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-02T02:21:13Z",
+      "side": 1,
+      "message": "why is this check needed - the isPortOnBridge does the exact same thing as the extractTErminaitionPointAugmentation",
+      "range": {
+        "startLine": 377,
+        "startChar": 14,
+        "endLine": 377,
+        "endChar": 28
+      },
+      "revId": "f0b8a4cccdb7b7b97689a492f7898126c4b5df25",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_939c54c2",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SouthboundImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-02T02:21:13Z",
+      "side": 1,
+      "message": "most of the methods in here declare a local var for the augmentation initialized to null and return that instead of breaking early and returning null\n\nalso don\u0027t really check for null of the nodes since in most cases all the events in net-virt have to start with some node, so I could see not even needing this check.",
+      "range": {
+        "startLine": 352,
+        "startChar": 20,
+        "endLine": 352,
+        "endChar": 24
+      },
+      "revId": "f0b8a4cccdb7b7b97689a492f7898126c4b5df25",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -287,7 +287,7 @@ public class InstructionUtils {
                     ab = new ActionBuilder();
                     ab.setAction(action.getAction());
                     ab.setOrder(action.getOrder() - 1);
-                    ab.setKey(new ActionKey(i));
+                    ab.setKey(new ActionKey(action.getOrder() -1));
                     Action actionNewOrder = ab.build();
                     actionList.remove(action);
                     actionList.add(i, actionNewOrder);

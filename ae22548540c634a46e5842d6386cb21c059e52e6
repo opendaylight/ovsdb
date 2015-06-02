@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_396e7f97",
+        "filename": "utils/mdsal-openflow/src/main/java/org/opendaylight/ovsdb/utils/mdsal/openflow/InstructionUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-02T13:51:04Z",
+      "side": 1,
+      "message": "please add a space so we do not confuse this with unary -1.\n\nab.setKey(new ActionKey(action.getOrder() - 1));",
+      "revId": "ae22548540c634a46e5842d6386cb21c059e52e6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

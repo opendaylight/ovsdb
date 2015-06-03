@@ -76,8 +76,12 @@ public class NeutronL3Adapter implements ConfigInterface {
 
     public NeutronL3Adapter() {
         logger.info(">>>>>> NeutronL3Adapter constructor {}", this.getClass());
-        final String enabledPropertyStr = ConfigProperties.getProperty(this.getClass(), "ovsdb.l3.fwd.enabled");
-        if (enabledPropertyStr != null && enabledPropertyStr.equalsIgnoreCase("yes")) {
+    }
+
+    private void initL3AdapterMembers() {
+        Preconditions.checkNotNull(configurationService);
+
+        if (configurationService.isL3ForwardinfgEnabled()) {
             this.inboundIpRewriteCache = new HashSet<>();
             this.outboundIpRewriteCache = new HashSet<>();
             this.inboundIpRewriteExclusionCache = new HashSet<>();
@@ -961,6 +965,8 @@ public class NeutronL3Adapter implements ConfigInterface {
                 (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
         southbound =
                 (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
+
+        initL3AdapterMembers();
     }
 
     @Override

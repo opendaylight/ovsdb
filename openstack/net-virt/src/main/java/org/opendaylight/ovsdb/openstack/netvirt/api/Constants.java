@@ -92,4 +92,8 @@ public final class Constants {
     public static final short OUTBOUND_SNAT = 110; // Ingress ACL table drains traffic to this table
 
     private static Long groupId = 1L;
+
+    //6653 is official openflow port.
+    public static short OPENFLOW_PORT = 6653;
+    public static String OPENFLOW_CONNECTION_PROTOCOL = "tcp";
 }

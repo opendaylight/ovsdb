@@ -12,6 +12,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
@@ -24,11 +25,13 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.List;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -350,7 +353,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
         return rv;
     }
 
-    private InetAddress getControllerIPAddress() {
+    private String getControllerIPAddress() {
         InetAddress controllerIP = null;
 
         String addressString = ConfigProperties.getProperty(this.getClass(), "ovsdb.controller.address");
@@ -358,7 +361,7 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
             try {
                 controllerIP = InetAddress.getByName(addressString);
                 if (controllerIP != null) {
-                    return controllerIP;
+                    return addressString;
                 }
             } catch (UnknownHostException e) {
                 LOGGER.error("Host {} is invalid", addressString);
@@ -370,38 +373,18 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
             try {
                 controllerIP = InetAddress.getByName(addressString);
                 if (controllerIP != null) {
-                    return controllerIP;
+                    return addressString;
                 }
             } catch (UnknownHostException e) {
                 LOGGER.error("Host {} is invalid", addressString);
             }
         }
 
-        /*
-        try {
-            controllerIP = connection.getClient().getConnectionInfo().getLocalAddress();
-            return controllerIP;
-        } catch (Exception e) {
-            LOGGER.debug("Invalid connection provided to getControllerIPAddresses", e);
-        }
-        */
-
-        if (addressString != null) {
-            try {
-                controllerIP = InetAddress.getByName(addressString);
-                if (controllerIP != null) {
-                    return controllerIP;
-                }
-            } catch (UnknownHostException e) {
-                LOGGER.error("Host {} is invalid", addressString);
-            }
-        }
-
-        return controllerIP;
+        return null;
     }
 
     private short getControllerOFPort() {
-        Short defaultOpenFlowPort = 6633;
+        Short defaultOpenFlowPort = Constants.OPENFLOW_PORT;
         Short openFlowPort = defaultOpenFlowPort;
         String portString = ConfigProperties.getProperty(this.getClass(), "of.listenPort");
         if (portString != null) {
@@ -416,30 +399,51 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     }
 
     private String getControllerTarget(Node node) {
-        String target = null;
-        OvsdbNodeAugmentation ovsdbNodeAugmentation = southbound.extractOvsdbNode(node);
-        if (ovsdbNodeAugmentation != null) {
-            ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
-            String addressStr = new String(connectionInfo.getLocalIp().getValue());
-            target = "tcp:" + addressStr + ":6633";
-        } else{
-            target = getControllerTarget();
+        String setControllerStr = null;
+        String controllerIpStr = null;
+        short openflowPort = Constants.OPENFLOW_PORT;
+        //Look at user configuration.
+        //TODO: In case we move to config subsystem to expose these user facing parameter,
+        // we will have to modify this code.
+
+        controllerIpStr = getControllerIPAddress();
+
+        if(controllerIpStr == null){
+            // Check if ovsdb node has connection info
+            OvsdbNodeAugmentation ovsdbNodeAugmentation = southbound.extractOvsdbNode(node);
+            if (ovsdbNodeAugmentation != null) {
+                ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
+                if(connectionInfo != null && connectionInfo.getLocalIp() != null) {
+                    controllerIpStr = new String(connectionInfo.getLocalIp().getValue());
+                }else{
+                    LOGGER.warn("Ovsdb Node does not contains connection info : {}",node);
+                }
+            }
+        }else {
+            openflowPort = getControllerOFPort();
         }
-        return target;
+
+        if(controllerIpStr == null) {
+            // Neither user provided ip nor ovsdb node has controller ip, Lets use local machine ip address
+            LOGGER.debug("Use local machine ip address as a OpenFlow Controller ip address");
+            controllerIpStr = getLocalControllerHostIpAddress();
+        }
+        if(controllerIpStr != null){
+            LOGGER.debug("Targe OpenFlow Controller found : {}",controllerIpStr);
+            setControllerStr = Constants.OPENFLOW_CONNECTION_PROTOCOL + ":" + controllerIpStr + ":" + openflowPort;
+        }else {
+            LOGGER.warn("Failed to determine OpenFlow controller ip address");
+        }
+        return setControllerStr;
     }
 
-    private String getControllerTarget() {
-        /* TODO SB_MIGRATION
-         * hardcoding value, need to find better way to get local ip
-         */
-        //String target = "tcp:" + getControllerIPAddress() + ":" + getControllerOFPort();
-        //TODO: dirty fix, need to remove it once we have proper solution
+    private String getLocalControllerHostIpAddress() {
         String ipaddress = null;
         try{
-            for (Enumeration ifaces = NetworkInterface.getNetworkInterfaces();ifaces.hasMoreElements();){
+            for (Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces();ifaces.hasMoreElements();){
                 NetworkInterface iface = (NetworkInterface) ifaces.nextElement();
 
-                for (Enumeration inetAddrs = iface.getInetAddresses(); inetAddrs.hasMoreElements();) {
+                for (Enumeration<InetAddress> inetAddrs = iface.getInetAddresses(); inetAddrs.hasMoreElements();) {
                     InetAddress inetAddr = (InetAddress) inetAddrs.nextElement();
                     if (!inetAddr.isLoopbackAddress()) {
                         if (inetAddr.isSiteLocalAddress()) {
@@ -450,9 +454,9 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
                 }
             }
         }catch (Exception e){
-            LOGGER.warn("ROYALLY SCREWED : Exception while fetching local host ip address ",e);
+            LOGGER.warn("Exception while fetching local host ip address ",e);
         }
-        return "tcp:"+ipaddress+":6633";
+        return ipaddress;
     }
 
     @Override

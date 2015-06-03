@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "9a6a9dd7_a6acf88d",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-03T22:35:44Z",
+      "side": 1,
+      "message": "with the network being created in this path, will interface events with the getRouterExternal still work as expected?",
+      "range": {
+        "startLine": 89,
+        "startChar": 20,
+        "endLine": 89,
+        "endChar": 45
+      },
+      "revId": "52fb098056704a8c81fca8398d46d69d20f44554",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a6a9dd7_46f87ce5",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
         "patchSetId": 5
@@ -19,6 +42,29 @@
     },
     {
       "key": {
+        "uuid": "9a6a9dd7_2699c86e",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/ConfigurationService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-03T22:35:44Z",
+      "side": 1,
+      "message": "still have Forwardinfg - the extra f at the end",
+      "range": {
+        "startLine": 124,
+        "startChar": 19,
+        "endLine": 124,
+        "endChar": 41
+      },
+      "revId": "52fb098056704a8c81fca8398d46d69d20f44554",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a6a9dd7_a6e63843",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
         "patchSetId": 5
@@ -30,6 +76,24 @@
       "writtenOn": "2015-06-03T21:34:51Z",
       "side": 1,
       "message": "we should put these strings in Constants.java",
+      "revId": "52fb098056704a8c81fca8398d46d69d20f44554",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_86bbf4c3",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-03T22:35:44Z",
+      "side": 1,
+      "message": "yeah, flavio do you have an updated patch since this was the code I originally added as a reference? \n\nDoes thsi work when the right patch names are used?",
+      "parentUuid": "9a6a9dd7_a6e63843",
       "revId": "52fb098056704a8c81fca8398d46d69d20f44554",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -64,6 +128,24 @@
       "writtenOn": "2015-06-03T21:34:51Z",
       "side": 1,
       "message": "this can create bit of race condition. Because you are creating external bridge in the same method, and then you are reading it from operational data store. This can probably return null, in case where you read operational data before external-bridge details are written in the operational data store by southbound plugin. Looking at the logic it looks like you don\u0027t have any trigger condition for creating the patch port as such, so i would suggest that you can batch config data store write for creation of external-bridge + patch port in same transaction and dump into data store. That way you can avoid the data store read for external bridge before patch port creation. You probably can do the same for integration bridge creation as well.",
+      "revId": "52fb098056704a8c81fca8398d46d69d20f44554",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_e6d0b0f9",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-03T22:35:44Z",
+      "side": 1,
+      "message": "this should never happen since the brExt is created at the same time as the brint when the ovsdb node first connects. Adding the bridges in here is just a last ditch catchall.\n\nWe could create the patches at that same time. The existing code only created the bridges on node connect and then waits for the interface updates to decide what else to add to teh bridges. This was because vlan and tunnels required different bridges and patches and when we had the openflow 1.0.\n\nI wonder if we should just call the isNetworkReadyxx() in place of createLocalNetwork in SouthboundHandler to just verify the network setup is there. And then in the createOvsdbNode patch add the createLocalNetwork(0 or both network types to ensure vlans and tunnels would be ready.\n\nOr does being able to add the network config during interface updates help or catch any weird corner cases?",
+      "parentUuid": "9a6a9dd7_465ddce8",
       "revId": "52fb098056704a8c81fca8398d46d69d20f44554",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

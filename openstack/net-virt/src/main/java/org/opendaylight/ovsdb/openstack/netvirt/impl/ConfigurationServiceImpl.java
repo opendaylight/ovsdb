@@ -51,6 +51,10 @@ public class ConfigurationServiceImpl implements ConfigurationService, ConfigInt
                            Constants.PATCH_PORT_TO_NETWORK_BRIDGE_NAME);
         patchPortNames.put(new ImmutablePair<>(networkBridgeName, integrationBridgeName),
                            Constants.PATCH_PORT_TO_INTEGRATION_BRIDGE_NAME);
+        patchPortNames.put(new ImmutablePair<>(integrationBridgeName, externalBridgeName),
+                           Constants.PATCH_PORT_TO_EXTERNAL_BRIDGE_NAME);
+        patchPortNames.put(new ImmutablePair<>(externalBridgeName, integrationBridgeName),
+                           Constants.PATCH_PORT_TO_INTEGRATION_BRIDGE_NAME);
         providerMappingsKey = Constants.PROVIDER_MAPPINGS_KEY;
         providerMapping = Constants.PROVIDER_MAPPING;
     }

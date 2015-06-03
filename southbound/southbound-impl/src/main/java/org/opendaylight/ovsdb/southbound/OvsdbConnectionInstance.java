@@ -37,6 +37,8 @@ import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactInvoker;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactInvokerImpl;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,15 +50,18 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     private OvsdbClient client;
     private ConnectionInfo connectionInfo;
     private TransactionInvoker txInvoker;
-    private Map<DatabaseSchema,TransactInvoker> transactInvokers = new HashMap<DatabaseSchema,TransactInvoker>();
+    private Map<DatabaseSchema,TransactInvoker> transactInvokers;
     private MonitorCallBack callback;
     private ConnectionInfo key;
+    private InstanceIdentifier instanceIdentifier;
 
-    OvsdbConnectionInstance(ConnectionInfo key,OvsdbClient client,TransactionInvoker txInvoker) {
+    OvsdbConnectionInstance(ConnectionInfo key,OvsdbClient client,TransactionInvoker txInvoker,
+            InstanceIdentifier<Node> iid) {
         this.connectionInfo = key;
         this.client = client;
         this.txInvoker = txInvoker;
         this.key = key;
+        this.instanceIdentifier = iid;
     }
 
     public void transact(TransactCommand command) {
@@ -65,34 +70,43 @@ public class OvsdbConnectionInstance implements OvsdbClient {
         }
     }
 
-    public void init() {
+    public void registerCallbacks() {
         if ( this.callback == null) {
             try {
                 List<String> databases = getDatabases().get();
-                if (databases != null && !databases.isEmpty()) {
-                    for (String database : databases) {
-                        DatabaseSchema dbSchema = getSchema(database).get();
-                        if (dbSchema != null) {
-                            transactInvokers.put(dbSchema, new TransactInvokerImpl(this,dbSchema));
-                        }
+                this.callback = new OvsdbMonitorCallback(this,txInvoker);
+                for (String database : databases) {
+                    DatabaseSchema dbSchema = getSchema(database).get();
+                    if (dbSchema != null) {
+                        monitorAllTables(database, dbSchema);
+                    } else {
+                        LOG.warn("No schema reported for database {} for key {}",database,connectionInfo);
                     }
-                    this.callback = new OvsdbMonitorCallback(this,txInvoker);
-                    for (String database : databases) {
-                        DatabaseSchema dbSchema = getSchema(database).get();
-                        if (dbSchema != null) {
-                            monitorAllTables(database, dbSchema);
-                        } else {
-                            LOG.warn("No schema reported for database {} for key {}",database,connectionInfo);
-                        }
-                    }
-                } else {
-                    LOG.warn("No databases reported from {}",connectionInfo);
                 }
             } catch (InterruptedException | ExecutionException e) {
-                LOG.warn("Exception attempting to initialize {}: {}",connectionInfo,e);
+                LOG.warn("Exception attempting to registerCallbacks {}: {}",connectionInfo,e);
             }
         }
     }
+
+    public void createTransactInvokers() {
+        if (transactInvokers == null) {
+            try {
+                transactInvokers = new HashMap<DatabaseSchema,TransactInvoker>();
+                List<String> databases = getDatabases().get();
+                for (String database : databases) {
+                    DatabaseSchema dbSchema = getSchema(database).get();
+                    if (dbSchema != null) {
+                        transactInvokers.put(dbSchema, new TransactInvokerImpl(this,dbSchema));
+                    }
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                LOG.warn("Exception attempting to createTransactionInvokers {}: {}",connectionInfo,e);
+            }
+        }
+    }
+
+
 
     private void monitorAllTables(String database, DatabaseSchema dbSchema) {
         Set<String> tables = dbSchema.getTables();
@@ -197,5 +211,9 @@ public class OvsdbConnectionInstance implements OvsdbClient {
 
     public void setMDConnectionInfo(ConnectionInfo key) {
         this.connectionInfo = key;
+    }
+
+    public InstanceIdentifier getInstanceIdentifier() {
+        return instanceIdentifier;
     }
 }

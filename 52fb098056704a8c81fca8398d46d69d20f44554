@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_46f87ce5",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-06-03T21:34:51Z",
+      "side": 1,
+      "message": "in the old code we are checking two condition before calling handlerInterfaceEvent(), and with the new change we are dropping a check and also calling it in case if the interface belongs to external network as well? Just want to make sure that\u0027s intentional.",
+      "revId": "52fb098056704a8c81fca8398d46d69d20f44554",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_a6e63843",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-06-03T21:34:51Z",
+      "side": 1,
+      "message": "we should put these strings in Constants.java",
+      "revId": "52fb098056704a8c81fca8398d46d69d20f44554",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_86d53445",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-06-03T21:34:51Z",
+      "side": 1,
+      "message": "can we put warn/error, if this condition should not happen?",
+      "revId": "52fb098056704a8c81fca8398d46d69d20f44554",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_465ddce8",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-06-03T21:34:51Z",
+      "side": 1,
+      "message": "this can create bit of race condition. Because you are creating external bridge in the same method, and then you are reading it from operational data store. This can probably return null, in case where you read operational data before external-bridge details are written in the operational data store by southbound plugin. Looking at the logic it looks like you don\u0027t have any trigger condition for creating the patch port as such, so i would suggest that you can batch config data store write for creation of external-bridge + patch port in same transaction and dump into data store. That way you can avoid the data store read for external bridge before patch port creation. You probably can do the same for integration bridge creation as well.",
+      "revId": "52fb098056704a8c81fca8398d46d69d20f44554",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_c6680c8a",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImplTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-06-03T21:34:51Z",
+      "side": 1,
+      "message": "please remove tab",
+      "revId": "52fb098056704a8c81fca8398d46d69d20f44554",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

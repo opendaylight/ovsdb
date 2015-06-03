@@ -147,27 +147,29 @@ public class BridgeConfigurationManagerImplTest {
 
     @Test
     public void testIsNodeTunnelReady() throws Exception {
-        when(southbound.getBridge(any(Node.class), anyString()))
-                .thenReturn(null)
-                .thenReturn(bridge);
+        when(southbound.isBridgeOnOvsdbNode(any(Node.class), anyString()))
+                .thenReturn(false)
+                .thenReturn(true);
+        when(bridgeConfigurationManagerImpl.isNodeL3Ready(any(Node.class), any(Node.class)))
+                .thenReturn(true);
 
         verifyNoMoreInteractions(configurationService);
         assertFalse("Error, did not return correct boolean from isNodeTunnelReady",
-                bridgeConfigurationManagerImpl.isNodeTunnelReady(node));
+                bridgeConfigurationManagerImpl.isNodeTunnelReady(node, node));
 
         when(configurationService.getIntegrationBridgeName()).thenReturn(BR_INT);
         assertTrue("Error, did not return correct boolean from isNodeTunnelReady",
-                bridgeConfigurationManagerImpl.isNodeTunnelReady(node));
+                bridgeConfigurationManagerImpl.isNodeTunnelReady(node, node));
 
         verify(configurationService, times(2)).getIntegrationBridgeName();
-        verify(southbound, times(2)).getBridge(any(Node.class), anyString());
+        verify(southbound, times(2)).isBridgeOnOvsdbNode(any(Node.class), anyString());
     }
 
     @Test
     public void testIsNodeVlanReady() throws Exception {
-        when(southbound.getBridge(any(Node.class), anyString()))
-                .thenReturn(null)
-                .thenReturn(bridge);
+        when(southbound.isBridgeOnOvsdbNode(any(Node.class), anyString()))
+                .thenReturn(false)
+                .thenReturn(true);
 
         when(southbound.extractTerminationPointAugmentation(any(Node.class), anyString()))
                 .thenReturn(null)
@@ -177,7 +179,7 @@ public class BridgeConfigurationManagerImplTest {
 
         verifyNoMoreInteractions(configurationService);
         assertFalse("Error, did not return correct boolean from isNodeTunnelReady",
-                bridgeConfigurationManagerImpl.isNodeVlanReady(node, neutronNetwork));
+                bridgeConfigurationManagerImpl.isNodeVlanReady(node, node, neutronNetwork));
 
         BridgeConfigurationManagerImpl bridgeConfigurationManagerImplSpy =
                 PowerMockito.spy(new BridgeConfigurationManagerImpl());
@@ -186,10 +188,10 @@ public class BridgeConfigurationManagerImplTest {
         bridgeConfigurationManagerImplSpy.setSouthbound(southbound);
 
         assertFalse("Error, did not return correct boolean from isNodeVlanReady",
-                bridgeConfigurationManagerImpl.isNodeVlanReady(node, neutronNetwork));
+                bridgeConfigurationManagerImpl.isNodeVlanReady(node, node, neutronNetwork));
 
         assertTrue("Error, did not return correct boolean from isNodeVlanReady",
-                bridgeConfigurationManagerImpl.isNodeVlanReady(node, neutronNetwork));
+                bridgeConfigurationManagerImpl.isNodeVlanReady(node, node, neutronNetwork));
 
         verify(configurationService, times(3)).getIntegrationBridgeName();
         verify(neutronNetwork, times(2)).getProviderPhysicalNetwork();
@@ -210,20 +212,20 @@ public class BridgeConfigurationManagerImplTest {
                 public Boolean answer(InvocationOnMock invocation) {
                     return Boolean.TRUE;
                 }
-            }).when(bridgeConfigurationManagerImplSpy).isNodeVlanReady(any(Node.class), any(NeutronNetwork.class));
+            }).when(bridgeConfigurationManagerImplSpy).isNodeVlanReady(any(Node.class), any(Node.class), any(NeutronNetwork.class));
 
             doAnswer(new Answer<Boolean>() {
                 @Override
                 public Boolean answer(InvocationOnMock invocation) {
                     return Boolean.TRUE;
                 }
-            }).when(bridgeConfigurationManagerImplSpy).isNodeTunnelReady(any(Node.class));
+            }).when(bridgeConfigurationManagerImplSpy).isNodeTunnelReady(any(Node.class), any(Node.class));
 
             assertTrue("bridgeConfigMock.isNodeVlanReady is not true",
-                    bridgeConfigurationManagerImplSpy.isNodeVlanReady(node, neutronNetworkMock));
+                    bridgeConfigurationManagerImplSpy.isNodeVlanReady(node, node, neutronNetworkMock));
             assertTrue("bridgeConfigMock.isNodeTunnelReady is not true",
-                    bridgeConfigurationManagerImplSpy.isNodeTunnelReady(node));
-
+                    bridgeConfigurationManagerImplSpy.isNodeTunnelReady(node, node));
+            
             assertTrue("Error, isCreated is not true for " + networkType,
                     bridgeConfigurationManagerImplSpy.createLocalNetwork(node, neutronNetworkMock));
             if (networkType.equals("vlan")) {

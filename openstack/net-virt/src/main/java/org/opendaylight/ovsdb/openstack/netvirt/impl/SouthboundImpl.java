@@ -7,6 +7,7 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
+import com.google.common.base.Preconditions;
 import java.math.BigInteger;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -85,9 +86,9 @@ public class SouthboundImpl implements Southbound {
         return databroker;
     }
 
-    public ConnectionInfo getConnectionInfo(Node node) {
+    public ConnectionInfo getConnectionInfo(Node ovsdbNode) {
         ConnectionInfo connectionInfo = null;
-        OvsdbNodeAugmentation ovsdbNodeAugmentation = node.getAugmentation(OvsdbNodeAugmentation.class);
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = extractOvsdbNode(ovsdbNode);
         if (ovsdbNodeAugmentation != null) {
             connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
         }
@@ -125,25 +126,17 @@ public class SouthboundImpl implements Southbound {
         return ovsdbNodes;
     }
 
-    public OvsdbNodeAugmentation readOvsdbNode(Node bridgeNode) {
-        OvsdbNodeAugmentation nodeAugmentation = null;
+    public Node readOvsdbNode(Node bridgeNode) {
+        Node ovsdbNode = null;
         OvsdbBridgeAugmentation bridgeAugmentation = extractBridgeAugmentation(bridgeNode);
-        if(bridgeAugmentation != null){
+        if (bridgeAugmentation != null) {
             InstanceIdentifier<Node> ovsdbNodeIid =
                     (InstanceIdentifier<Node>) bridgeAugmentation.getManagedBy().getValue();
-            Node node = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, ovsdbNodeIid);
-            if (node != null){
-                nodeAugmentation = node.getAugmentation(OvsdbNodeAugmentation.class);
-                LOG.debug("readOvsdbNode: Ovsdb node {} found that manages bridge {}",
-                        nodeAugmentation != null?nodeAugmentation:"not",bridgeAugmentation);
-            }else {
-                LOG.debug ("readOvsdbNode: Ovsdb node that manages bridge {} not found. ",bridgeAugmentation);
-            }
-
+            ovsdbNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, ovsdbNodeIid);
         }else{
             LOG.debug("readOvsdbNode: Provided node is not a bridge node : {}",bridgeNode);
         }
-        return nodeAugmentation;
+        return ovsdbNode;
     }
 
     public String getOvsdbNodeUUID(Node node) {
@@ -223,8 +216,12 @@ public class SouthboundImpl implements Southbound {
     }
 
     public Node readBridgeNode(Node node, String name) {
+        Node ovsdbNode = node;
+        if (extractNodeAugmentation(ovsdbNode) == null) {
+            ovsdbNode = readOvsdbNode(node);
+        }
         Node bridgeNode = null;
-        ConnectionInfo connectionInfo = getConnectionInfo(node);
+        ConnectionInfo connectionInfo = getConnectionInfo(ovsdbNode);
         if (connectionInfo != null) {
             InstanceIdentifier<Node> bridgeIid =
             MdsalHelper.createInstanceIdentifier(node.getKey(), name);
@@ -236,10 +233,8 @@ public class SouthboundImpl implements Southbound {
     public Node getBridgeNode(Node node, String bridgeName) {
         Node bridgeNode = null;
         OvsdbBridgeAugmentation bridge = extractBridgeAugmentation(node);
-        if (bridge != null) {
-            if (bridge.getBridgeName().getValue().equals(bridgeName)) {
+        if (bridge != null && bridge.getBridgeName().getValue().equals(bridgeName)) {
                 bridgeNode = node;
-            }
         } else {
             bridgeNode = readBridgeNode(node, bridgeName);
         }
@@ -349,6 +344,9 @@ public class SouthboundImpl implements Southbound {
     }
 
     public OvsdbBridgeAugmentation extractBridgeAugmentation(Node node) {
+        if (node == null) {
+            return null;
+        }
         return node.getAugmentation(OvsdbBridgeAugmentation.class);
     }
 
@@ -363,6 +361,24 @@ public class SouthboundImpl implements Southbound {
             }
         }
         return nodes;
+    }
+
+    public boolean isBridgeOnOvsdbNode(Node ovsdbNode, String bridgeName) {
+        boolean found = false;
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = extractNodeAugmentation(ovsdbNode);
+        if (ovsdbNodeAugmentation != null) {
+            List<ManagedNodeEntry> managedNodes = ovsdbNodeAugmentation.getManagedNodeEntry();
+            if (managedNodes != null) {
+                for (ManagedNodeEntry managedNode : managedNodes) {
+                    InstanceIdentifier<?> bridgeIid = managedNode.getBridgeRef().getValue();
+                    if (bridgeIid.toString().contains(bridgeName)) {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+        }
+        return found;
     }
 
     public OvsdbNodeAugmentation extractNodeAugmentation(Node node) {
@@ -546,6 +562,10 @@ public class SouthboundImpl implements Southbound {
             return null;
         case OPENVSWITCH:
             OvsdbNodeAugmentation ovsdbNode = extractNodeAugmentation(node);
+            if (ovsdbNode == null) {
+                Node nodeFromReadOvsdbNode = readOvsdbNode(node);
+                ovsdbNode = extractNodeAugmentation(nodeFromReadOvsdbNode);
+            }
             if (ovsdbNode != null && ovsdbNode.getOpenvswitchExternalIds() != null) {
                 for (OpenvswitchExternalIds openvswitchExternalIds : ovsdbNode.getOpenvswitchExternalIds()) {
                     if (openvswitchExternalIds.getExternalIdKey().equals(key)) {
@@ -591,8 +611,9 @@ public class SouthboundImpl implements Southbound {
 
             case OPENVSWITCH:
                 OvsdbNodeAugmentation ovsdbNode = extractNodeAugmentation(node);
-                if (ovsdbNode == null){
-                    ovsdbNode = readOvsdbNode(node);
+                if (ovsdbNode == null) {
+                    Node nodeFromReadOvsdbNode = readOvsdbNode(node);
+                    ovsdbNode = extractNodeAugmentation(nodeFromReadOvsdbNode);
                 }
                 if (ovsdbNode != null && ovsdbNode.getOpenvswitchOtherConfigs() != null) {
                     for (OpenvswitchOtherConfigs openvswitchOtherConfigs : ovsdbNode.getOpenvswitchOtherConfigs()) {

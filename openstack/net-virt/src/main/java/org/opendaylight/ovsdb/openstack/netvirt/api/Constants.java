@@ -30,6 +30,7 @@ public final class Constants {
     public static final String EXTERNAL_BRIDGE = "br-ex";
     public static final String PATCH_PORT_TO_INTEGRATION_BRIDGE_NAME = "patch-int";
     public static final String PATCH_PORT_TO_NETWORK_BRIDGE_NAME = "patch-net";
+    public static final String PATCH_PORT_TO_EXTERNAL_BRIDGE_NAME = "patch-ext";
     public static final String PROVIDER_MAPPINGS_KEY = "provider_mappings";
     public static final String PROVIDER_MAPPING = "physnet1:eth1";
 

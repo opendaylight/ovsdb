@@ -57,10 +57,11 @@ public interface BridgeConfigurationManager {
      * Checks that a Node is ready for a Tunnel Network Provider
      * For OpenFlow 1.0 the Integration, Network Bridge and corresponding patch ports are required
      * For OpenFlow 1.3 only the Integration Bridge is required
-     * @param node the {@link Node} where the bridge is configured
+     * @param bridgeNode the {@link Node} that represents bridge
+     * @param ovsdbNode the {@link Node} where the bridge is configured
      * @return True or False
      */
-    public boolean isNodeTunnelReady(Node node);
+    public boolean isNodeTunnelReady(Node bridgeNode, Node ovsdbNode);
 
     /* Determine if internal network is ready for vlan network types.
      * - OF 1.0 requires br-int, br-net, a patch connecting them and
@@ -73,11 +74,12 @@ public interface BridgeConfigurationManager {
      * For OpenFlow 1.0 the Integration Bridge, Network Bridge, patch ports and a physical device connected to the
      * Network Bridge are required.
      * For OpenFlow 1.3 the Integration Bridge is required and must have a physical device connected.
-     * @param node the {@link Node} where the bridge is configured
+     * @param bridgeNode the {@link Node} that represents bridge
+     * @param ovsdbNode the {@link Node} where the bridge is configured
      * @param network the {@link org.opendaylight.neutron.spi.NeutronNetwork}
      * @return True or False
      */
-    public boolean isNodeVlanReady(Node node, NeutronNetwork network);
+    public boolean isNodeVlanReady(Node bridgeNode, Node ovsdbNode, NeutronNetwork network);
 
     /**
      * A helper function to determine if a port exists on a given bridge

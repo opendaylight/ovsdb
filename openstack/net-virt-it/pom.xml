@@ -42,6 +42,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   </scm>
   <properties>
     <skip.integrationtest>true</skip.integrationtest>
+    <sonar-jacoco-listeners.version>2.4</sonar-jacoco-listeners.version>
+    <root.directory>${env.PWD}</root.directory>
+    <sonar.jacoco.itReportPath>${root.directory}/target/code-coverage/jacoco-it.exec</sonar.jacoco.itReportPath>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -131,12 +134,30 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>junit</artifactId>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>org.codehaus.sonar-plugins.java</groupId>
+      <artifactId>sonar-jacoco-listeners</artifactId>
+      <version>${sonar-jacoco-listeners.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <!-- Specific to generate mapping between tests and covered code -->
+          <!--<argLine>${jacoco.agent.it.arg}</argLine>-->
+          <properties>
+            <property>
+              <name>listener</name>
+              <value>org.sonar.java.jacoco.JUnitListener</value>
+            </property>
+          </properties>
+          <!-- Let's put failsafe reports with surefire to have access to tests failures/success reports in sonar -->
+          <!--<reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>-->
+        </configuration>
         <executions>
           <execution>
             <goals>
@@ -193,9 +214,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           <execution>
             <id>prepare-it-agent</id>
             <goals>
-              <goal>prepare-agent</goal>
+              <goal>prepare-agent-integration</goal>
             </goals>
             <configuration>
+              <append>true</append>
               <destFile>${sonar.jacoco.itReportPath}</destFile>
             </configuration>
           </execution>
@@ -204,14 +226,36 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <goals>
               <goal>report</goal>
             </goals>
+            <configuration>
+              <dataFile>${sonar.jacoco.reportPath}</dataFile>
+            </configuration>
           </execution>
           <execution>
             <id>default-report-integration</id>
             <goals>
               <goal>report-integration</goal>
             </goals>
+            <configuration>
+              <dataFile>${sonar.jacoco.itReportPath}</dataFile>
+            </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <!-- Specific to generate mapping between tests and covered code -->
+          <!--<argLine>${jacoco.agent.ut.arg}</argLine>-->
+          <properties>
+            <property>
+              <name>listener</name>
+              <value>org.sonar.java.jacoco.JUnitListener</value>
+            </property>
+          </properties>
+          <!-- Let's put failsafe reports with surefire to have access to tests failures/success reports in sonar -->
+          <!--<reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>-->
+        </configuration>
       </plugin>
     </plugins>
   </build>

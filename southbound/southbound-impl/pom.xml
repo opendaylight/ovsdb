@@ -128,7 +128,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           <execution>
             <id>prepare-it-agent</id>
             <goals>
-              <goal>prepare-agent</goal>
+              <goal>prepare-agent-integration</goal>
             </goals>
             <configuration>
               <destFile>${sonar.jacoco.itReportPath}</destFile>
@@ -139,12 +139,18 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <goals>
               <goal>report</goal>
             </goals>
+            <configuration>
+              <dataFile>${sonar.jacoco.reportPath}</dataFile>
+            </configuration>
           </execution>
           <execution>
             <id>default-report-integration</id>
             <goals>
               <goal>report-integration</goal>
             </goals>
+            <configuration>
+              <dataFile>${sonar.jacoco.itReportPath}</dataFile>
+            </configuration>
           </execution>
         </executions>
       </plugin>

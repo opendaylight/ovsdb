@@ -5,6 +5,9 @@ DIRECTORY ORGANIZATION
   +-- parent : Contains Parent pom.xml for all the ovsdb modules.
   +-- integrationtest : Contains the parent pom.xml for all the integrationtest needs.
 
+ANF Test.
+ANF Test 2.
+
 - distribution : Builds a working controller distribution based on the controller + ovsdb modules and other
                  dependant modules such as openflowplugin
   +-- opendaylight : older, OSGi-based distribution

@@ -21,7 +21,6 @@ import org.opendaylight.neutron.spi.NeutronSubnet;
 import org.opendaylight.neutron.spi.Neutron_IPs;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.api.*;
-import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -76,8 +75,12 @@ public class NeutronL3Adapter implements ConfigInterface {
 
     public NeutronL3Adapter() {
         logger.info(">>>>>> NeutronL3Adapter constructor {}", this.getClass());
-        final String enabledPropertyStr = ConfigProperties.getProperty(this.getClass(), "ovsdb.l3.fwd.enabled");
-        if (enabledPropertyStr != null && enabledPropertyStr.equalsIgnoreCase("yes")) {
+    }
+
+    private void initL3AdapterMembers() {
+        Preconditions.checkNotNull(configurationService);
+
+        if (configurationService.isL3ForwardingEnabled()) {
             this.inboundIpRewriteCache = new HashSet<>();
             this.outboundIpRewriteCache = new HashSet<>();
             this.inboundIpRewriteExclusionCache = new HashSet<>();
@@ -961,6 +964,8 @@ public class NeutronL3Adapter implements ConfigInterface {
                 (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
         southbound =
                 (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
+
+        initL3AdapterMembers();
     }
 
     @Override

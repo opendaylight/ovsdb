@@ -272,6 +272,24 @@
     },
     {
       "key": {
+        "uuid": "9a6a9dd7_ac6137d5",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-06-04T07:36:24Z",
+      "side": 1,
+      "message": "Nope, In general these race conditions pops up, when you just wrote something to config data store to configure the ovs, and try to read it immediately from operational data store to carry out the next action, that can cause the issue, because you might or might not find data in operational data. It will pass if southbound successfully write to operational data store before you read, else it will fail. So if you just create patch port and your next action is not dependent on the operational data of patch port, you should be fine.",
+      "parentUuid": "9a6a9dd7_b1199024",
+      "revId": "52fb098056704a8c81fca8398d46d69d20f44554",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a6a9dd7_c6680c8a",
         "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImplTest.java",
         "patchSetId": 5

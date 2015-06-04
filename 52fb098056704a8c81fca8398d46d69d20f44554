@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9a6a9dd7_3126e069",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-04T02:52:00Z",
+      "side": 1,
+      "message": "tbh, I don\u0027t quite know what to expect, yet. My intention was to keep the code unchanged, except for letting external network event percolate to the neutronL3Adapter.\n\nLet me revisit that at another gerrit, once I spend more quality time testing the floating ip handler.",
+      "parentUuid": "9a6a9dd7_a6acf88d",
+      "range": {
+        "startLine": 89,
+        "startChar": 20,
+        "endLine": 89,
+        "endChar": 45
+      },
+      "revId": "52fb098056704a8c81fca8398d46d69d20f44554",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a6a9dd7_46f87ce5",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
         "patchSetId": 5
@@ -42,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "9a6a9dd7_512b5430",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-04T02:52:00Z",
+      "side": 1,
+      "message": "My intention was to keep the code unchanged, except for letting external network event percolate to the neutronL3Adapter.\n\nLet me revisit that at another gerrit, once I spend more quality time testing the floating ip handler.",
+      "parentUuid": "9a6a9dd7_46f87ce5",
+      "revId": "52fb098056704a8c81fca8398d46d69d20f44554",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a6a9dd7_2699c86e",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/ConfigurationService.java",
         "patchSetId": 5
@@ -53,6 +95,30 @@
       "writtenOn": "2015-06-03T22:35:44Z",
       "side": 1,
       "message": "still have Forwardinfg - the extra f at the end",
+      "range": {
+        "startLine": 124,
+        "startChar": 19,
+        "endLine": 124,
+        "endChar": 41
+      },
+      "revId": "52fb098056704a8c81fca8398d46d69d20f44554",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_f1c38888",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/ConfigurationService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-04T02:52:00Z",
+      "side": 1,
+      "message": "argh... copy and paste magic. sorry for not remembering to fix that.",
+      "parentUuid": "9a6a9dd7_2699c86e",
       "range": {
         "startLine": 124,
         "startChar": 19,
@@ -100,6 +166,24 @@
     },
     {
       "key": {
+        "uuid": "9a6a9dd7_b1bd1005",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-04T02:52:00Z",
+      "side": 1,
+      "message": "yeah, I messed up here. this code should be using the constants. Let me fix that",
+      "parentUuid": "9a6a9dd7_86bbf4c3",
+      "revId": "52fb098056704a8c81fca8398d46d69d20f44554",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a6a9dd7_86d53445",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
         "patchSetId": 5
@@ -111,6 +195,24 @@
       "writtenOn": "2015-06-03T21:34:51Z",
       "side": 1,
       "message": "can we put warn/error, if this condition should not happen?",
+      "revId": "52fb098056704a8c81fca8398d46d69d20f44554",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_d1ba040a",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-04T02:52:00Z",
+      "side": 1,
+      "message": "sounds good; will do",
+      "parentUuid": "9a6a9dd7_86d53445",
       "revId": "52fb098056704a8c81fca8398d46d69d20f44554",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -152,6 +254,24 @@
     },
     {
       "key": {
+        "uuid": "9a6a9dd7_b1199024",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-04T02:52:00Z",
+      "side": 1,
+      "message": "My original change actually made no attempt to create bridges here; only patch ports. So, prepareNode() would be\nthe only place where bridge creation happened.\n\nIs there ever a chance that prepareNode() may not be called? Assuming not, it is a bit redundant to create bridges here, and we should just remove it.\n\nI like postponing the creation of the patch ports until network is created. Anil: would we still have a race if only patch ports were created here?",
+      "parentUuid": "9a6a9dd7_e6d0b0f9",
+      "revId": "52fb098056704a8c81fca8398d46d69d20f44554",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a6a9dd7_c6680c8a",
         "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImplTest.java",
         "patchSetId": 5
@@ -163,6 +283,24 @@
       "writtenOn": "2015-06-03T21:34:51Z",
       "side": 1,
       "message": "please remove tab",
+      "revId": "52fb098056704a8c81fca8398d46d69d20f44554",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_913c8c95",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImplTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-04T02:52:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a6a9dd7_c6680c8a",
       "revId": "52fb098056704a8c81fca8398d46d69d20f44554",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

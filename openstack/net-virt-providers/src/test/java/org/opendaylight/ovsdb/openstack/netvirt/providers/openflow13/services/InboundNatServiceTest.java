@@ -58,6 +58,8 @@ public class InboundNatServiceTest {
 
     private static final String HOST_ADDRESS = "127.0.0.1";
     private static final String HOST_ADDRESS_PREFIX = "127.0.0.1/32";
+    private static final String MATCH_SEGMENTATION_ID = "2";
+    private static final String SET_SEGMENTATION_ID = "3";
 
     @Before
     public void setUp() {
@@ -85,16 +87,16 @@ public class InboundNatServiceTest {
 
         assertEquals("Error, did not return the expected StatusCode",
                 new Status(StatusCode.SUCCESS),
-                inboundNatService.programIpRewriteRule(Long.valueOf(123), "2",
-                        matchAddress, rewriteAddress, Action.ADD));
+                inboundNatService.programIpRewriteRule(Long.valueOf(123), MATCH_SEGMENTATION_ID,
+                        matchAddress, SET_SEGMENTATION_ID, rewriteAddress, Action.ADD));
         verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
         verify(readWriteTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         assertEquals("Error, did not return the expected StatusCode",
                 new Status(StatusCode.SUCCESS),
-                inboundNatService.programIpRewriteRule(Long.valueOf(123), "2",
-                        matchAddress, rewriteAddress, Action.DELETE));
+                inboundNatService.programIpRewriteRule(Long.valueOf(123), MATCH_SEGMENTATION_ID,
+                        matchAddress, SET_SEGMENTATION_ID, rewriteAddress, Action.DELETE));
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
         verify(readWriteTransaction, times(1)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above
@@ -107,7 +109,8 @@ public class InboundNatServiceTest {
     public void testProgramIpRewriteExclusion() throws Exception {
         assertEquals("Error, did not return the expected StatusCode",
                 new Status(StatusCode.SUCCESS),
-                inboundNatService.programIpRewriteExclusion(Long.valueOf(123), "2", HOST_ADDRESS_PREFIX, Action.ADD));
+                inboundNatService.programIpRewriteExclusion(Long.valueOf(123), MATCH_SEGMENTATION_ID,
+                        HOST_ADDRESS_PREFIX, Action.ADD));
         verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class),
                 any(InstanceIdentifier.class), any(Node.class), anyBoolean());
         verify(readWriteTransaction, times(1)).submit();
@@ -115,7 +118,7 @@ public class InboundNatServiceTest {
 
         assertEquals("Error, did not return the expected StatusCode",
                 new Status(StatusCode.SUCCESS),
-                inboundNatService.programIpRewriteExclusion(Long.valueOf(123), "2",
+                inboundNatService.programIpRewriteExclusion(Long.valueOf(123), MATCH_SEGMENTATION_ID,
                         HOST_ADDRESS_PREFIX, Action.DELETE));
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
         verify(readWriteTransaction, times(1)).submit();

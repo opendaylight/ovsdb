@@ -136,7 +136,7 @@ public class PipelineOrchestratorImpl implements ConfigInterface, NodeCacheListe
         if (action == Action.ADD) {
             enqueue(node);
         } else {
-            logger.info("update ignored: {}", node);
+            logger.debug("update ignored: {} action {}", node.getNodeId().getValue(), action);
         }
     }
 

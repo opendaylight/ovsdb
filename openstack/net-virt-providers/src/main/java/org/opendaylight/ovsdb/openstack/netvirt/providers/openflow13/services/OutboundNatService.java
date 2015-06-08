@@ -23,14 +23,19 @@ import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.OF13Provider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
+import org.opendaylight.ovsdb.utils.mdsal.openflow.ActionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.apply.actions._case.ApplyActionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
@@ -50,8 +55,8 @@ public class OutboundNatService extends AbstractServiceInstance implements Outbo
     }
 
     @Override
-    public Status programIpRewriteRule(Long dpid, String segmentationId, InetAddress matchAddress,
-                                       InetAddress rewriteAddress, Action action) {
+    public Status programIpRewriteRule(Long dpid, String srcTunnId, InetAddress matchAddress,
+                                       String dstTunnId, InetAddress rewriteAddress, Action action) {
         String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpid;
 
         MatchBuilder matchBuilder = new MatchBuilder();
@@ -62,7 +67,12 @@ public class OutboundNatService extends AbstractServiceInstance implements Outbo
         List<Instruction> instructions = Lists.newArrayList();
         InstructionBuilder ib = new InstructionBuilder();
 
-        MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId));
+        Long OFPort = MatchUtils.parseExplicitOFPort(srcTunnId);
+        if (OFPort != null) {
+            MatchUtils.createInPortMatch(matchBuilder, dpid, OFPort);
+        } else if (srcTunnId != null) {
+            MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(srcTunnId));
+        }
         MatchUtils.createDstL3IPv4Match(matchBuilder,
                                         MatchUtils.iPv4PrefixFromIPv4Address(matchAddress.getHostAddress()));
 
@@ -73,17 +83,50 @@ public class OutboundNatService extends AbstractServiceInstance implements Outbo
         ib.setKey(new InstructionKey(0));
         instructions.add(ib.build());
 
+        int instructionOrder = 1;
+
+        // Set OF port, if provided
+        OFPort = MatchUtils.parseExplicitOFPort(dstTunnId);
+        if (OFPort != null) {
+            ib = new InstructionBuilder();
+            // Set the Output Port/Iface
+            InstructionUtils.createOutputPortInstructions(ib, dpid, OFPort);
+            ib.setOrder(instructionOrder);
+            ib.setKey(new InstructionKey(instructionOrder));
+            instructions.add(ib.build());
+            instructionOrder++;
+        } else if (dstTunnId != null) {
+            ib = new InstructionBuilder();
+            ApplyActionsBuilder aab = new ApplyActionsBuilder();
+            ActionBuilder ab = new ActionBuilder();
+            List<org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action> actionList = Lists.newArrayList();
+
+            // Set Destination Tunnel ID
+            ab.setAction(ActionUtils.setTunnelIdAction(new BigInteger(dstTunnId)));
+            ab.setOrder(0);
+            ab.setKey(new ActionKey(0));
+            actionList.add(ab.build());
+
+            // Create Apply Actions Instruction
+            aab.setAction(actionList);
+            ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+            ib.setOrder(instructionOrder);
+            ib.setKey(new InstructionKey(instructionOrder));
+            instructions.add(ib.build());
+            instructionOrder++;
+        }
+
         // Goto Next Table
         ib = getMutablePipelineInstructionBuilder();
-        ib.setOrder(1);
-        ib.setKey(new InstructionKey(1));
+        ib.setOrder(instructionOrder);
+        ib.setKey(new InstructionKey(instructionOrder));
         instructions.add(ib.build());
 
         FlowBuilder flowBuilder = new FlowBuilder();
         flowBuilder.setMatch(matchBuilder.build());
         flowBuilder.setInstructions(isb.setInstruction(instructions).build());
 
-        String flowId = "OutboundNAT_" + segmentationId + "_" + rewriteAddress.getHostAddress();
+        String flowId = "OutboundNAT_" + srcTunnId + "_" + rewriteAddress.getHostAddress();
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setBarrier(true);

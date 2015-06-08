@@ -31,6 +31,7 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
+import org.opendaylight.ovsdb.openstack.netvirt.api.OutboundNatProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
 import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestrator;
@@ -57,6 +58,7 @@ public class OutboundNatServiceTest {
     @Mock private CheckedFuture<Void, TransactionCommitFailedException> commitFuture;
 
     private static final String SEGMENTATION_ID = "2";
+    private static final String SEGMENTATION_ID2 = "4";
     private static final String HOST_ADDRESS = "127.0.0.1";
     private static final String HOST_ADDRESS_PREFIX = "127.0.0.1/24";
 
@@ -75,19 +77,19 @@ public class OutboundNatServiceTest {
     }
 
     /**
-     * Test method {@link OutboundNatService#programIpRewriteRule(Long, String, InetAddress, InetAddress, Action)}
+     * Test method {@link OutboundNatService#programIpRewriteRule(Long, String, InetAddress, String, InetAddress, Action)}
      */
     @Test
     public void testProgramIpRewriteRule() throws Exception {
         InetAddress address = mock(InetAddress.class);
         when(address.getHostAddress()).thenReturn(HOST_ADDRESS);
 
-        assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.SUCCESS), outboundNatService.programIpRewriteRule(Long.valueOf(123), SEGMENTATION_ID, address, address, Action.ADD));
+        assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.SUCCESS), outboundNatService.programIpRewriteRule(Long.valueOf(123), SEGMENTATION_ID, address, SEGMENTATION_ID2, address, Action.ADD));
         verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
         verify(readWriteTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
-        assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.SUCCESS), outboundNatService.programIpRewriteRule(Long.valueOf(123), SEGMENTATION_ID, address, address, Action.DELETE));
+        assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.SUCCESS), outboundNatService.programIpRewriteRule(Long.valueOf(123), SEGMENTATION_ID, address, SEGMENTATION_ID2, address, Action.DELETE));
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
         verify(readWriteTransaction, times(1)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above

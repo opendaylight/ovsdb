@@ -86,7 +86,7 @@ public class InboundNatServiceTest {
         assertEquals("Error, did not return the expected StatusCode",
                 new Status(StatusCode.SUCCESS),
                 inboundNatService.programIpRewriteRule(Long.valueOf(123), "2",
-                        matchAddress, rewriteAddress, Action.ADD));
+                        matchAddress, "3", rewriteAddress, Action.ADD));
         verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
         verify(readWriteTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
@@ -94,7 +94,7 @@ public class InboundNatServiceTest {
         assertEquals("Error, did not return the expected StatusCode",
                 new Status(StatusCode.SUCCESS),
                 inboundNatService.programIpRewriteRule(Long.valueOf(123), "2",
-                        matchAddress, rewriteAddress, Action.DELETE));
+                        matchAddress, "3", rewriteAddress, Action.DELETE));
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
         verify(readWriteTransaction, times(1)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above

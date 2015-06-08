@@ -9,6 +9,8 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.opendaylight.neutron.spi.INeutronNetworkCRUD;
 import org.opendaylight.neutron.spi.INeutronPortCRUD;
 import org.opendaylight.neutron.spi.INeutronSubnetCRUD;
@@ -22,6 +24,7 @@ import org.opendaylight.neutron.spi.Neutron_IPs;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.api.*;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
@@ -33,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -69,9 +73,16 @@ public class NeutronL3Adapter implements ConfigInterface {
     private Set<String> l3ForwardingCache;
     private Set<String> defaultRouteCache;
     private Map<String, String> networkIdToRouterMacCache;
+    private Map<String, List<Neutron_IPs>> networkIdToRouterIpListCache;
     private Map<String, NeutronRouter_Interface> subnetIdToRouterInterfaceCache;
+    private Map<String, Pair<Long, Uuid>> neutronPortToDpIdCache;
     private Boolean enabled = false;
     private Southbound southbound;
+
+    final static String ROUTER_INTERFACE = "network:router_interface";
+    final static String ROUTER_INTERFACE_DISTRIBUTED = "network:router_interface_distributed";
+    final static String ROUTER_GATEWAY = "network:router_gateway";
+    final static String EXTERNAL_SEGMENTATION_ID = "0";
 
     public NeutronL3Adapter() {
         logger.info(">>>>>> NeutronL3Adapter constructor {}", this.getClass());
@@ -90,7 +101,9 @@ public class NeutronL3Adapter implements ConfigInterface {
             this.l3ForwardingCache = new HashSet<>();
             this.defaultRouteCache = new HashSet<>();
             this.networkIdToRouterMacCache = new HashMap<>();
+            this.networkIdToRouterIpListCache = new HashMap<>();
             this.subnetIdToRouterInterfaceCache = new HashMap<>();
+            this.neutronPortToDpIdCache = new HashMap<>();
 
             this.enabled = true;
             logger.info("OVSDB L3 forwarding is enabled");
@@ -119,7 +132,9 @@ public class NeutronL3Adapter implements ConfigInterface {
         // Treat the port event as a router interface event if the port belongs to router. This is a
         // helper for handling cases when handleNeutronRouterInterfaceEvent is not available
         //
-        if (neutronPort.getDeviceOwner().equalsIgnoreCase("network:router_interface")) {
+        if (neutronPort.getDeviceOwner().equalsIgnoreCase(ROUTER_INTERFACE) ||
+                neutronPort.getDeviceOwner().equalsIgnoreCase(ROUTER_INTERFACE_DISTRIBUTED) ||
+                neutronPort.getDeviceOwner().equalsIgnoreCase(ROUTER_GATEWAY)) {
             for (Neutron_IPs neutronIP : neutronPort.getFixedIPs()) {
                 NeutronRouter_Interface neutronRouterInterface =
                         new NeutronRouter_Interface(neutronIP.getSubnetUUID(), neutronPort.getPortUUID());
@@ -206,16 +221,40 @@ public class NeutronL3Adapter implements ConfigInterface {
     //
     // Callbacks from OVSDB's southbound handler
     //
-    public void handleInterfaceEvent(final Node node, final OvsdbTerminationPointAugmentation intf,
+    public void handleInterfaceEvent(final Node bridgeNode, final OvsdbTerminationPointAugmentation intf,
                                      final NeutronNetwork neutronNetwork, Action action) {
         logger.debug("southbound interface {} node:{} interface:{}, neutronNetwork:{}",
-                     action, node, intf.getName(), neutronNetwork);
+                     action, bridgeNode, intf.getName(), neutronNetwork);
         if (!this.enabled)
             return;
 
         NeutronPort neutronPort = tenantNetworkManager.getTenantPort(intf);
-        if (neutronPort != null) {
+        Long dpId = getDpidForIntegrationBridge(bridgeNode);
+        if (neutronPort != null && dpId != null && intf.getInterfaceUuid() != null) {
+            if (action != Action.DELETE) {
+                Pair<Long, Uuid> dpIdTpInterfacePair = new ImmutablePair<>(dpId, intf.getInterfaceUuid());
+                neutronPortToDpIdCache.put(neutronPort.getPortUUID(), dpIdTpInterfacePair);
+                logger.trace("handleInterfaceEvent set cache entry NeutronPortUuid {} : dpid {}, ifUuid {}",
+                        neutronPort.getPortUUID(), dpId, intf.getInterfaceUuid().getValue());
+            }
+
             this.handleNeutronPortEvent(neutronPort, action);
+
+            // FIXME: handle floating ips here
+        }
+
+        if (action == Action.DELETE && dpId != null && intf.getInterfaceUuid() != null) {
+            // Remove entry from neutronPortToDpIdCache based on dpIdTpInterfacePair
+            for (Map.Entry<String, Pair<Long, Uuid>> entry : neutronPortToDpIdCache.entrySet()) {
+                final String currPortUuid = entry.getKey();
+                if (dpId.equals(entry.getValue().getLeft()) &&
+                        intf.getInterfaceUuid().equals(entry.getValue().getRight())) {
+                    logger.trace("handleInterfaceEvent removing cache entry NeutronPortUuid {} : dpid {}, ifUuid {}",
+                            currPortUuid, dpId, intf.getInterfaceUuid().getValue());
+                            neutronPortToDpIdCache.remove(currPortUuid);
+                    break;
+                }
+            }
         }
     }
 
@@ -259,8 +298,6 @@ public class NeutronL3Adapter implements ConfigInterface {
                 continue;
             }
 
-            final boolean tenantNetworkPresentInNode =
-                    tenantNetworkManager.isTenantNetworkPresentInNode(node, providerSegmentationId);
             for (Neutron_IPs neutronIP : neutronPort.getFixedIPs()) {
                 final String tenantIpStr = neutronIP.getIpAddress();
                 if (tenantIpStr.isEmpty()) {
@@ -271,9 +308,8 @@ public class NeutronL3Adapter implements ConfigInterface {
                 // still needed when routing to subnets non-local to node (bug 2076).
                 programL3ForwardingStage1(node, dpid, providerSegmentationId, tenantMac, tenantIpStr, action);
 
-                // Configure distributed ARP responder. Only needed if tenant network exists in node.
-                programStaticArpStage1(node, dpid, providerSegmentationId, tenantMac, tenantIpStr,
-                                       tenantNetworkPresentInNode ? action : Action.DELETE);
+                // Configure distributed ARP responder.
+                programStaticArpStage1(node, dpid, providerSegmentationId, tenantMac, tenantIpStr, action);
             }
         }
     }
@@ -326,12 +362,13 @@ public class NeutronL3Adapter implements ConfigInterface {
         }
 
         if (status.isSuccess()) {
-            logger.debug("ProgramL3Forwarding {} for mac:{} addr:{} node:{} action:{}",
+            logger.debug("ProgramL3Forwarding {} for mac:{} addr:{} node:{} seg:{} action:{}",
                          l3ForwardingProvider == null ? "skipped" : "programmed",
-                         macAddress, address, node, actionForNode);
+                         macAddress, address, node.getNodeId().getValue(), providerSegmentationId, actionForNode);
         } else {
-            logger.error("ProgramL3Forwarding failed for mac:{} addr:{} node:{} action:{} status:{}",
-                         macAddress, address, node, actionForNode, status);
+            logger.error("ProgramL3Forwarding failed for mac:{} addr:{} node:{} seg: {} action:{} status:{}",
+                         macAddress, address, node.getNodeId().getValue(), providerSegmentationId, actionForNode,
+                         status);
         }
         return status;
     }
@@ -343,27 +380,39 @@ public class NeutronL3Adapter implements ConfigInterface {
         Preconditions.checkNotNull(destNeutronRouterInterface);
 
         final NeutronPort neutronPort = neutronPortCache.getPort(destNeutronRouterInterface.getPortUUID());
-        final String macAddress = neutronPort != null ? neutronPort.getMacAddress() : null;
-        final List<Neutron_IPs> ipList = neutronPort != null ? neutronPort.getFixedIPs() : null;
+        String macAddress = neutronPort != null ? neutronPort.getMacAddress() : null;
+        List<Neutron_IPs> ipList = neutronPort != null ? neutronPort.getFixedIPs() : null;
         final NeutronSubnet subnet = neutronSubnetCache.getSubnet(destNeutronRouterInterface.getSubnetUUID());
         final NeutronNetwork neutronNetwork = subnet != null ?
                                               neutronNetworkCache.getNetwork(subnet.getNetworkUUID()) : null;
-        final String destinationSegmentationId = neutronNetwork != null ?
-                                                 neutronNetwork.getProviderSegmentationID() : null;
         final String gatewayIp = subnet != null ? subnet.getGatewayIP() : null;
-        final Boolean isExternal = neutronNetwork != null ? neutronNetwork.getRouterExternal() : Boolean.TRUE;
+        final Boolean isExternal = neutronNetwork != null ? neutronNetwork.getRouterExternal() : Boolean.FALSE;
+        final String destinationSegmentationId = isExternal ?
+                EXTERNAL_SEGMENTATION_ID :
+                (neutronNetwork != null ? neutronNetwork.getProviderSegmentationID() : null);
         final String cidr = subnet != null ? subnet.getCidr() : null;
         final int mask = getMaskLenFromCidr(cidr);
 
         logger.trace("programFlowsForNeutronRouterInterface called for interface {} isDelete {}",
                      destNeutronRouterInterface, isDelete);
 
+        // in delete path, mac address as well as ip address are not provided. Being so, let's find them from
+        // the local cache
+        if (neutronNetwork != null) {
+            if (macAddress == null || macAddress.isEmpty()) {
+                macAddress = networkIdToRouterMacCache.get(neutronNetwork.getNetworkUUID());
+            }
+            if (ipList == null || ipList.isEmpty()) {
+                ipList = networkIdToRouterIpListCache.get(neutronNetwork.getNetworkUUID());
+            }
+        }
+
         if (destinationSegmentationId == null || destinationSegmentationId.isEmpty() ||
             cidr == null || cidr.isEmpty() ||
             macAddress == null || macAddress.isEmpty() ||
             ipList == null || ipList.isEmpty()) {
-            logger.debug("programFlowsForNeutronRouterInterface is bailing seg:{} cidr:{} mac:{}  ip:{}",
-                         destinationSegmentationId, cidr, macAddress, ipList);
+            logger.debug("programFlowsForNeutronRouterInterface is bailing ext: {} seg:{} cidr:{} mac:{} ip:{}",
+                    isExternal, destinationSegmentationId, cidr, macAddress, ipList);
             return;  // done: go no further w/out all the info needed...
         }
 
@@ -373,6 +422,7 @@ public class NeutronL3Adapter implements ConfigInterface {
         //
         if (! isDelete) {
             networkIdToRouterMacCache.put(neutronNetwork.getNetworkUUID(), macAddress);
+            networkIdToRouterIpListCache.put(neutronNetwork.getNetworkUUID(), new ArrayList<>(ipList));
             subnetIdToRouterInterfaceCache.put(subnet.getSubnetUUID(), destNeutronRouterInterface);
         }
 
@@ -433,6 +483,7 @@ public class NeutronL3Adapter implements ConfigInterface {
         //
         if (isDelete) {
             networkIdToRouterMacCache.remove(neutronNetwork.getNetworkUUID());
+            networkIdToRouterIpListCache.remove(neutronNetwork.getNetworkUUID());
             subnetIdToRouterInterfaceCache.remove(subnet.getSubnetUUID());
         }
     }
@@ -452,7 +503,7 @@ public class NeutronL3Adapter implements ConfigInterface {
         Preconditions.checkNotNull(dstNeutronRouterInterface);
 
         final String sourceSubnetId = srcNeutronRouterInterface.getSubnetUUID();
-        if (sourceSubnetId == null) {
+        if (sourceSubnetId == null || sourceSubnetId.isEmpty()) {
             logger.error("Could not get provider Subnet ID from router interface {}",
                          srcNeutronRouterInterface.getID());
             return;
@@ -460,7 +511,7 @@ public class NeutronL3Adapter implements ConfigInterface {
 
         final NeutronSubnet sourceSubnet = neutronSubnetCache.getSubnet(sourceSubnetId);
         final String sourceNetworkId = sourceSubnet == null ? null : sourceSubnet.getNetworkUUID();
-        if (sourceNetworkId == null) {
+        if (sourceNetworkId == null || sourceNetworkId.isEmpty()) {
             logger.error("Could not get provider Network ID from subnet {}", sourceSubnetId);
             return;
         }
@@ -470,13 +521,14 @@ public class NeutronL3Adapter implements ConfigInterface {
             logger.error("Could not get provider Network for Network ID {}", sourceNetworkId);
             return;
         }
-
         if (! sourceNetwork.getTenantID().equals(dstNeutronNetwork.getTenantID())) {
             // Isolate subnets from different tenants within the same router
             return;
         }
-        final String sourceSegmentationId = sourceNetwork.getProviderSegmentationID();
-        if (sourceSegmentationId == null) {
+
+        final String sourceSegmentationId = sourceNetwork.isRouterExternal() ?
+                EXTERNAL_SEGMENTATION_ID : sourceNetwork.getProviderSegmentationID();
+        if (sourceSegmentationId == null || sourceSegmentationId.isEmpty()) {
             logger.error("Could not get provider Segmentation ID for Subnet {}", sourceSubnetId);
             return;
         }
@@ -578,12 +630,12 @@ public class NeutronL3Adapter implements ConfigInterface {
         if (status.isSuccess()) {
             logger.debug("ProgramRouterInterface {} for mac:{} addr:{}/{} node:{} srcTunId:{} destTunId:{} action:{}",
                          routingProvider == null ? "skipped" : "programmed",
-                         macAddress, address, mask, node, sourceSegmentationId, destinationSegmentationId,
-                         actionForNode);
+                         macAddress, address, mask, node.getNodeId().getValue(), sourceSegmentationId,
+                         destinationSegmentationId, actionForNode);
         } else {
             logger.error("ProgramRouterInterface failed for mac:{} addr:{}/{} node:{} srcTunId:{} destTunId:{} action:{} status:{}",
-                         macAddress, address, mask, node, sourceSegmentationId, destinationSegmentationId,
-                         actionForNode, status);
+                         macAddress, address, mask, node.getNodeId().getValue(), sourceSegmentationId,
+                         destinationSegmentationId, actionForNode, status);
         }
         return status;
     }
@@ -636,12 +688,13 @@ public class NeutronL3Adapter implements ConfigInterface {
         }
 
         if (status.isSuccess()) {
-            logger.debug("ProgramStaticArp {} for mac:{} addr:{} node:{} action:{}",
+            logger.debug("ProgramStaticArp {} for mac:{} addr:{} node:{} seg:{} action:{}",
                          arpProvider == null ? "skipped" : "programmed",
-                         macAddress, address, node, actionForNode);
+                         macAddress, address, node.getNodeId().getValue(), providerSegmentationId, actionForNode);
         } else {
-            logger.error("ProgramStaticArp failed for mac:{} addr:{} node:{} action:{} status:{}",
-                         macAddress, address, node, actionForNode, status);
+            logger.error("ProgramStaticArp failed for mac:{} addr:{} node:{} seg:{} action:{} status:{}",
+                         macAddress, address, node.getNodeId().getValue(), providerSegmentationId, actionForNode,
+                         status);
         }
         return status;
     }
@@ -705,12 +758,13 @@ public class NeutronL3Adapter implements ConfigInterface {
 
         if (status.isSuccess()) {
             final boolean isSkipped = isInbound ? inboundNatProvider == null : outboundNatProvider == null;
-            logger.debug("IpRewriteExclusion {} {} for cidr:{} node:{} action:{}",
+            logger.debug("IpRewriteExclusion {} {} for cidr:{} node:{} seg:{} action:{}",
                          (isInbound ? "inbound" : "outbound"), (isSkipped ? "skipped" : "programmed"),
-                         cidr, node, actionForNode);
+                         cidr, node.getNodeId().getValue(), providerSegmentationId, actionForNode);
         } else {
-            logger.error("IpRewriteExclusion {} failed for cidr:{} node:{} action:{} status:{}",
-                         (isInbound ? "inbound" : "outbound"), cidr, node, actionForNode, status);
+            logger.error("IpRewriteExclusion {} failed for cidr:{} node:{} seg:{} action:{} status:{}",
+                         (isInbound ? "inbound" : "outbound"), cidr, node.getNodeId().getValue(),
+                          providerSegmentationId, actionForNode, status);
         }
         return status;
     }
@@ -753,11 +807,13 @@ public class NeutronL3Adapter implements ConfigInterface {
                                           String defaultGatewayMacAddress,
                                           String gatewayIp,
                                           Action actionForNodeDefaultRoute) {
+
         // TODO: As of Helium, mac address for default gateway is required (bug 1705).
         if (defaultGatewayMacAddress == null) {
-            logger.error("ProgramDefaultRoute mac not provided. gatewayIp:{} node:{} action:{}",
-                         gatewayIp, node, actionForNodeDefaultRoute);
-            return new Status(StatusCode.NOTIMPLEMENTED);  // Bug 1705
+            logger.warn("ProgramDefaultRoute mac not provided. gatewayIp:{} node:{} action:{}",
+                    gatewayIp, node.getNodeId().getValue(), actionForNodeDefaultRoute);
+            // return new Status(StatusCode.NOTIMPLEMENTED);  // Bug 1705
+            defaultGatewayMacAddress = "00:11:22:33:44:55";  // FIXME!
         }
 
         Status status;
@@ -775,10 +831,11 @@ public class NeutronL3Adapter implements ConfigInterface {
         if (status.isSuccess()) {
             logger.debug("ProgramDefaultRoute {} for mac:{} gatewayIp:{} node:{} action:{}",
                          routingProvider == null ? "skipped" : "programmed",
-                         defaultGatewayMacAddress, gatewayIp, node, actionForNodeDefaultRoute);
+                         defaultGatewayMacAddress, gatewayIp, node.getNodeId().getValue(), actionForNodeDefaultRoute);
         } else {
             logger.error("ProgramDefaultRoute failed for mac:{} gatewayIp:{} node:{} action:{} status:{}",
-                         defaultGatewayMacAddress, gatewayIp, node, actionForNodeDefaultRoute, status);
+                         defaultGatewayMacAddress, gatewayIp, node.getNodeId().getValue(), actionForNodeDefaultRoute,
+                         status);
         }
         return status;
     }
@@ -795,17 +852,33 @@ public class NeutronL3Adapter implements ConfigInterface {
         }
 
         final NeutronNetwork neutronNetwork = neutronNetworkCache.getNetwork(networkUUID);
-        final String providerSegmentationId = neutronNetwork != null ?
-                                              neutronNetwork.getProviderSegmentationID() : null;
+        final Boolean isExternalNetwork = neutronNetwork != null ? neutronNetwork.isRouterExternal() : Boolean.FALSE;
+        final String providerSegmentationId = isExternalNetwork ?
+                EXTERNAL_SEGMENTATION_ID :
+                (neutronNetwork != null ? neutronNetwork.getProviderSegmentationID() : null);
         final String fixedIPAddress = neutronFloatingIP.getFixedIPAddress();
         final String floatingIpAddress = neutronFloatingIP.getFloatingIPAddress();
 
+        // tenantSegmentationId should be obtained from the floatingPortUuid (and not floating neutronNetwork).
+        final NeutronPort tenantNeutronPort = neutronPortCache.getPort(neutronFloatingIP.getPortUUID());
+        final NeutronNetwork tenantNeutronNetwork =
+                (tenantNeutronPort != null ? neutronNetworkCache.getNetwork(tenantNeutronPort.getNetworkUUID()) : null);
+        final String tenantSegmentationId =
+                (tenantNeutronNetwork != null ? tenantNeutronNetwork.getProviderSegmentationID() : null);
+
         if (providerSegmentationId == null || providerSegmentationId.isEmpty() ||
+            tenantSegmentationId == null || tenantSegmentationId.isEmpty() ||
             // routerMacAddress == null || routerMacAddress.isEmpty() ||
             fixedIPAddress == null || fixedIPAddress.isEmpty() ||
             floatingIpAddress == null || floatingIpAddress.isEmpty()) {
             return;  // done: go no further w/out all the info needed...
         }
+
+        final Pair<Long, Uuid> dpIdTpInterfacePair = neutronPortToDpIdCache.get(neutronFloatingIP.getPortUUID());
+        Long tenantOwnerNodeDpid = dpIdTpInterfacePair != null ? dpIdTpInterfacePair.getLeft() : null;
+
+        logger.trace("programFlowsForFloatingIP {} for fixed {} port {} is handled by dpid {}",
+                floatingIpAddress, fixedIPAddress, neutronFloatingIP.getPortUUID(), dpIdTpInterfacePair);
 
         final Action action = isDelete ? Action.DELETE : Action.ADD;
         List<Node> nodes = nodeCacheManager.getBridgeNodes();
@@ -818,32 +891,37 @@ public class NeutronL3Adapter implements ConfigInterface {
                 continue;
             }
 
-            final Action actionForNode =
-                    tenantNetworkManager.isTenantNetworkPresentInNode(node, providerSegmentationId) ?
-                    action : Action.DELETE;
+            // Note: only the node where tenant's fixed ip address resides will do the honors, all others
+            //       are expected to not handle arp/rewrite for this floating ip.
+            final Action actionForNode = dpid.equals(tenantOwnerNodeDpid) ? action : Action.DELETE;
+
+            final String externalSegmentation = isExternalNetwork ?
+                    getOFForExternalPatchPort(node) : providerSegmentationId;
 
             // Rewrite from float to fixed and vice-versa
             //
-            programIpRewriteStage1(node, dpid, providerSegmentationId, true /* isInbound */,
-                                   floatingIpAddress, fixedIPAddress, actionForNode);
-            programIpRewriteStage1(node, dpid, providerSegmentationId, false /* isInboubd */,
-                                   fixedIPAddress, floatingIpAddress, actionForNode);
+            programIpRewriteStage1(node, dpid, externalSegmentation, true /* isInbound */,
+                                   floatingIpAddress, tenantSegmentationId, fixedIPAddress, actionForNode);
+
+
+            programIpRewriteStage1(node, dpid, tenantSegmentationId, false /* isInboubd */,
+                                   fixedIPAddress, externalSegmentation, floatingIpAddress, actionForNode);
 
             // Respond to arps for the floating ip address
             //
-            programStaticArpStage1(node, dpid, providerSegmentationId, routerMacAddress, floatingIpAddress,
+            programStaticArpStage1(node, dpid, externalSegmentation, routerMacAddress, floatingIpAddress,
                                    actionForNode);
         }
     }
 
-    private void programIpRewriteStage1(Node node, Long dpid, String providerSegmentationId,
-                                        final boolean isInbound,
+    private void programIpRewriteStage1(Node node, Long dpid, String sourceSegmentationId,
+                                        final boolean isInbound, String destSegmentationId,
                                         String matchAddress, String rewriteAddress,
                                         Action actionForNode) {
         // Based on the local cache, figure out whether programming needs to occur. To do this, we
         // will look at desired action for node.
         //
-        final String cacheKey = node.getNodeId().getValue() + ":" + providerSegmentationId + ":" +
+        final String cacheKey = node.getNodeId().getValue() + ":" + sourceSegmentationId + ":" +
                                 matchAddress + ":" + rewriteAddress;
         final Boolean isProgrammed = isInbound ?
                                      inboundIpRewriteCache.contains(cacheKey) :
@@ -852,20 +930,21 @@ public class NeutronL3Adapter implements ConfigInterface {
         if (actionForNode == Action.DELETE && isProgrammed == Boolean.FALSE) {
             logger.trace("programIpRewriteStage1 node {} providerId {} {} matchAddr {} rewriteAddr {} action {}" +
                          " is already done",
-                         node.getNodeId().getValue(), providerSegmentationId, isInbound ? "inbound": "outbound",
+                         node.getNodeId().getValue(), sourceSegmentationId, isInbound ? "inbound": "outbound",
                          matchAddress, rewriteAddress, actionForNode);
             return;
         }
         if (actionForNode == Action.ADD && isProgrammed == Boolean.TRUE) {
             logger.trace("programIpRewriteStage1 node {} providerId {} {} matchAddr {} rewriteAddr {} action {}" +
                          " is already done",
-                         node.getNodeId().getValue(), providerSegmentationId, isInbound ? "inbound": "outbound",
+                         node.getNodeId().getValue(), sourceSegmentationId, isInbound ? "inbound": "outbound",
                          matchAddress, rewriteAddress, actionForNode);
             return;
         }
 
-        Status status = this.programIpRewriteStage2(node, dpid, providerSegmentationId, isInbound,
-                                                    matchAddress, rewriteAddress, actionForNode);
+        Status status = this.programIpRewriteStage2(node, dpid, sourceSegmentationId, isInbound,
+                                                    matchAddress, destSegmentationId, rewriteAddress,
+                                                    actionForNode);
         if (status.isSuccess()) {
             // Update cache
             if (actionForNode == Action.ADD) {
@@ -884,9 +963,9 @@ public class NeutronL3Adapter implements ConfigInterface {
         }
     }
 
-    private Status programIpRewriteStage2(Node node, Long dpid, String providerSegmentationId,
-                                          final boolean isInbound,
-                                          String matchAddress, String rewriteAddress,
+    private Status programIpRewriteStage2(Node node, Long dpid, String sourceSegmentationId,
+                                          final boolean isInbound, String matchAddress,
+                                          String destSegmentationId, String rewriteAddress,
                                           Action actionForNode) {
         Status status;
         try {
@@ -895,13 +974,17 @@ public class NeutronL3Adapter implements ConfigInterface {
             if (isInbound) {
                 status = inboundNatProvider == null ?
                          new Status(StatusCode.SUCCESS) :
-                         inboundNatProvider.programIpRewriteRule(dpid, providerSegmentationId,
-                                                                 inetMatchAddress, inetRewriteAddress, actionForNode);
+                         inboundNatProvider.programIpRewriteRule(dpid, sourceSegmentationId,
+                                                                 inetMatchAddress,
+                                                                 destSegmentationId,
+                                                                 inetRewriteAddress, actionForNode);
             } else {
                 status = outboundNatProvider == null ?
                          new Status(StatusCode.SUCCESS) :
-                         outboundNatProvider.programIpRewriteRule(dpid, providerSegmentationId,
-                                                                  inetMatchAddress, inetRewriteAddress, actionForNode);
+                         outboundNatProvider.programIpRewriteRule(dpid, sourceSegmentationId,
+                                                                  inetMatchAddress,
+                                                                  destSegmentationId,
+                                                                  inetRewriteAddress, actionForNode);
             }
         } catch (UnknownHostException e) {
             status = new Status(StatusCode.BADREQUEST);
@@ -909,15 +992,26 @@ public class NeutronL3Adapter implements ConfigInterface {
 
         if (status.isSuccess()) {
             final boolean isSkipped = isInbound ? inboundNatProvider == null : outboundNatProvider == null;
-            logger.debug("ProgramIpRewrite {} {} for match:{} rewrite:{} node:{} action:{}",
+            logger.debug("ProgramIpRewrite {} {} for match:{} rewrite:{} node:{} srcSeg:{} dstSeg:{} action:{}",
                          (isInbound ? "inbound" : "outbound"), (isSkipped ? "skipped" : "programmed"),
-                         matchAddress, rewriteAddress, node, actionForNode);
+                         matchAddress, rewriteAddress, node.getNodeId().getValue(),
+                         sourceSegmentationId, destSegmentationId, actionForNode);
         } else {
-            logger.error("ProgramIpRewrite {} failed for match:{} rewrite:{} node:{} action:{} status:{}",
+            logger.error("ProgramIpRewrite {} failed for match:{} rewrite:{} node:{} srcSeg:{} dstSeg:{} action:{}" +
+                         " status:{}",
                          (isInbound ? "inbound" : "outbound"),
-                         matchAddress, rewriteAddress, node, actionForNode, status);
+                         matchAddress, rewriteAddress, node.getNodeId().getValue(), sourceSegmentationId,
+                         actionForNode, destSegmentationId, status);
         }
         return status;
+    }
+
+    private String getOFForExternalPatchPort(Node node) {
+        // This member will find the termination point used in bridge node to reach out to br-ex
+        // It is expected to encode it in a way that make sense to the ip rewrite provider.
+        // Ref: MatchUtils.parseExplicitOFPort()
+        //
+        return null; // FIXME: implement me!
     }
 
     private int getMaskLenFromCidr(String cidr) {

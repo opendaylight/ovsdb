@@ -103,8 +103,8 @@ public class RoutingService extends AbstractServiceInstance implements RoutingPr
 
         // Goto Next Table
         ib = getMutablePipelineInstructionBuilder();
-        ib.setOrder(2);
-        ib.setKey(new InstructionKey(2));
+        ib.setOrder(1);
+        ib.setKey(new InstructionKey(1));
         instructions.add(ib.build());
 
         FlowBuilder flowBuilder = new FlowBuilder();

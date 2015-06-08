@@ -236,11 +236,10 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
 
         if (write) {
             // Instantiate the Builders for the OF Actions and Instructions
-            InstructionBuilder ib = new InstructionBuilder();
+            InstructionBuilder ib = this.getMutablePipelineInstructionBuilder();
             InstructionsBuilder isb = new InstructionsBuilder();
             List<Instruction> instructionsList = Lists.newArrayList();
 
-            ib = this.getMutablePipelineInstructionBuilder();
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructionsList.add(ib.build());
@@ -288,11 +287,10 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
 
         if (write) {
             // Instantiate the Builders for the OF Actions and Instructions
-            InstructionBuilder ib = new InstructionBuilder();
+            InstructionBuilder ib = this.getMutablePipelineInstructionBuilder();
             InstructionsBuilder isb = new InstructionsBuilder();
 
             List<Instruction> instructionsList = Lists.newArrayList();
-            ib = this.getMutablePipelineInstructionBuilder();
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructionsList.add(ib.build());
@@ -338,13 +336,12 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
 
         if (write) {
             // Instantiate the Builders for the OF Actions and Instructions
-            InstructionBuilder ib = new InstructionBuilder();
+            InstructionBuilder ib = this.getMutablePipelineInstructionBuilder();
             InstructionsBuilder isb = new InstructionsBuilder();
             List<Instruction> instructionsList = Lists.newArrayList();
 
-            ib = this.getMutablePipelineInstructionBuilder();
-            ib.setOrder(1);
-            ib.setKey(new InstructionKey(1));
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
             instructionsList.add(ib.build());
             isb.setInstruction(instructionsList);
             logger.debug("Instructions contain: {}", ib.getInstruction());
@@ -445,12 +442,11 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
 
         if (write) {
             // Instantiate the Builders for the OF Actions and Instructions
-            InstructionBuilder ib = new InstructionBuilder();
+            InstructionBuilder ib = this.getMutablePipelineInstructionBuilder();
             InstructionsBuilder isb = new InstructionsBuilder();
             List<Instruction> instructionsList = Lists.newArrayList();
 
-            ib = this.getMutablePipelineInstructionBuilder();
-            ib.setOrder(1);
+            ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructionsList.add(ib.build());
             isb.setInstruction(instructionsList);

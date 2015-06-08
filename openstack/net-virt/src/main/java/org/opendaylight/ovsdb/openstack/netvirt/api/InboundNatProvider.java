@@ -16,8 +16,8 @@ import java.net.InetAddress;
  *  This interface allows NAT flows to be written to devices
  */
 public interface InboundNatProvider {
-    Status programIpRewriteRule(Long dpid, String segmentationId, InetAddress matchAddress,
-                                InetAddress rewriteAddress, Action action);
+    Status programIpRewriteRule(Long dpid, String srcTunnId, InetAddress matchAddress,
+                                String dstTunnId, InetAddress rewriteAddress, Action action);
 
     Status programIpRewriteExclusion(Long dpid, String segmentationId,
                                      String excludedCidr, Action action);

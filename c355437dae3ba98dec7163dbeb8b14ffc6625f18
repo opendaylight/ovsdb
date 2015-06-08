@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_d2a0b8f6",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3AdapterTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-08T13:15:56Z",
+      "side": 1,
+      "message": "should this be more like l3.arp.responder if this is only related to l3 code? Makes the config mroe readable when related properties are named consistently.",
+      "range": {
+        "startLine": 88,
+        "startChar": 72,
+        "endLine": 88,
+        "endChar": 80
+      },
+      "revId": "c355437dae3ba98dec7163dbeb8b14ffc6625f18",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

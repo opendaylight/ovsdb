@@ -77,6 +77,7 @@ public class NeutronL3AdapterTest {
     private Set<String> defaultRouteCache;
     private Map<String, String> networkIdToRouterMacCache;
     private Map<String, NeutronRouter_Interface> subnetIdToRouterInterfaceCache;
+    private String enabledARP;
 
     private static final String HOST_ADDRESS = "127.0.0.1";
 
@@ -84,6 +85,7 @@ public class NeutronL3AdapterTest {
     public void setUp() throws Exception{
         PowerMockito.mockStatic(ConfigProperties.class);
         PowerMockito.when(ConfigProperties.getProperty(neutronL3Adapter.getClass(), "ovsdb.l3.fwd.enabled")).thenReturn("yes");
+        PowerMockito.when(ConfigProperties.getProperty(neutronL3Adapter.getClass(), "ovsdb.arp.responder.enabled")).thenReturn("yes");
 
         //neutronL3Adapter.init();
 
@@ -102,6 +104,7 @@ public class NeutronL3AdapterTest {
         defaultRouteCache = (Set<String>) getNeutronL3AdapterField("defaultRouteCache");
         networkIdToRouterMacCache = (Map<String, String>) getNeutronL3AdapterField("networkIdToRouterMacCache");
         subnetIdToRouterInterfaceCache = (Map<String, NeutronRouter_Interface>) getNeutronL3AdapterField("subnetIdToRouterInterfaceCache");
+        /* enabledARP = getNeutronL3AdapterField("enabledARP"); */ 
     }
 
     private Object getNeutronL3AdapterField(String fieldName) throws Exception {

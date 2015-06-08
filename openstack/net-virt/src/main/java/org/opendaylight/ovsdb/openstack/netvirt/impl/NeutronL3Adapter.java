@@ -21,6 +21,7 @@ import org.opendaylight.neutron.spi.NeutronSubnet;
 import org.opendaylight.neutron.spi.Neutron_IPs;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.api.*;
+import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -71,6 +72,7 @@ public class NeutronL3Adapter implements ConfigInterface {
     private Map<String, String> networkIdToRouterMacCache;
     private Map<String, NeutronRouter_Interface> subnetIdToRouterInterfaceCache;
     private Boolean enabled = false;
+    private Boolean enabledARP = false;
     private Southbound southbound;
 
     public NeutronL3Adapter() {
@@ -97,7 +99,15 @@ public class NeutronL3Adapter implements ConfigInterface {
         } else {
             logger.debug("OVSDB L3 forwarding is disabled");
         }
-    }
+    
+        final String enabledARPStr = ConfigProperties.getProperty(this.getClass(), "ovsdb.arp.responder.enabled");
+        if (enabledARPStr != null && enabledARPStr.equalsIgnoreCase("yes")) {
+            this.enabledARP = true;
+            logger.info("OVSDB ARP is enabled");
+        } else {
+            logger.debug("OVSDB ARP is disabled");
+        }
+}
 
     //
     // Callbacks from OVSDB's northbound handlers
@@ -272,8 +282,10 @@ public class NeutronL3Adapter implements ConfigInterface {
                 programL3ForwardingStage1(node, dpid, providerSegmentationId, tenantMac, tenantIpStr, action);
 
                 // Configure distributed ARP responder. Only needed if tenant network exists in node.
-                programStaticArpStage1(node, dpid, providerSegmentationId, tenantMac, tenantIpStr,
+                if (true == this.enabledARP) {
+                    programStaticArpStage1(node, dpid, providerSegmentationId, tenantMac, tenantIpStr,
                                        tenantNetworkPresentInNode ? action : Action.DELETE);
+                }
             }
         }
     }
@@ -404,7 +416,9 @@ public class NeutronL3Adapter implements ConfigInterface {
                                                               true /*isReflexsive*/);
                 }
 
-                programStaticArpStage1(node, dpid, destinationSegmentationId, macAddress, ipStr, actionForNode);
+                if (true == this.enabledARP) {
+                    programStaticArpStage1(node, dpid, destinationSegmentationId, macAddress, ipStr, actionForNode);
+                }
             }
 
             // Compute action to be programmed. In the case of rewrite exclusions, we must never program rules
@@ -831,8 +845,10 @@ public class NeutronL3Adapter implements ConfigInterface {
 
             // Respond to arps for the floating ip address
             //
-            programStaticArpStage1(node, dpid, providerSegmentationId, routerMacAddress, floatingIpAddress,
+            if (true == this.enabledARP) {
+                programStaticArpStage1(node, dpid, providerSegmentationId, routerMacAddress, floatingIpAddress,
                                    actionForNode);
+            }
         }
     }
 

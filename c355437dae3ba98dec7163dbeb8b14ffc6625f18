@@ -2,6 +2,57 @@
   "comments": [
     {
       "key": {
+        "uuid": "9a6a9dd7_72f3ec0a",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-08T13:24:17Z",
+      "side": 1,
+      "message": "let\u0027s change this to use the same code path we have in configurationService. ie similar to how isL3ForwardingEnabled() is implemnented",
+      "revId": "c355437dae3ba98dec7163dbeb8b14ffc6625f18",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_128dd07b",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 419,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-08T13:24:17Z",
+      "side": 1,
+      "message": "hm... we need this always enabled, because router interface needs to be responded, always. unlike tenant vms; failure to do this will cause l3 to not work.",
+      "revId": "c355437dae3ba98dec7163dbeb8b14ffc6625f18",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_b2e9841c",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 848,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-08T13:24:17Z",
+      "side": 1,
+      "message": "same as line 419, for floating ips",
+      "revId": "c355437dae3ba98dec7163dbeb8b14ffc6625f18",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a6a9dd7_d2a0b8f6",
         "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3AdapterTest.java",
         "patchSetId": 1

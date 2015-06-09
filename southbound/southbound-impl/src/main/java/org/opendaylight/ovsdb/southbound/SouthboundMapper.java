@@ -114,6 +114,28 @@ public class SouthboundMapper {
         return iid;
     }
 
+    public static InstanceIdentifier<Node> createInstanceIdentifier(
+            OvsdbConnectionInstance client, Controller controller, String bridgeName) {
+        InstanceIdentifier<Node> iid;
+        if (controller.getExternalIdsColumn() != null
+                && controller.getExternalIdsColumn().getData() != null
+                && controller.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
+            String iidString = controller.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY);
+            iid = (InstanceIdentifier<Node>) SouthboundUtil.deserializeInstanceIdentifier(iidString);
+        } else {
+            // TODO retrieve bridge name
+            String nodeString = client.getNodeKey().getNodeId().getValue()
+                    + "/bridge/" + bridgeName;
+            NodeId nodeId = new NodeId(new Uri(nodeString));
+            NodeKey nodeKey = new NodeKey(nodeId);
+            iid = InstanceIdentifier.builder(NetworkTopology.class)
+                    .child(Topology.class,new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+                    .child(Node.class,nodeKey)
+                    .build();
+        }
+        return iid;
+    }
+
     public static NodeId createManagedNodeId(InstanceIdentifier<Node> iid) {
         NodeKey nodeKey = iid.firstKeyOf(Node.class, NodeKey.class);
         return nodeKey.getNodeId();
@@ -234,27 +256,79 @@ public class SouthboundMapper {
         return protocolList;
     }
 
-    public static List<ControllerEntry> createControllerEntries(Bridge bridge,Map<UUID,
-            Controller> updatedControllerRows) {
-        LOG.debug("Bridge: {}, updatedControllerRows: {}",bridge,updatedControllerRows);
-        Set<UUID> controllerUUIDs = bridge.getControllerColumn().getData();
-        List<ControllerEntry> controllerEntries = new ArrayList<ControllerEntry>();
+    /**
+     * Create the {@link ControllerEntry} list given an OVSDB {@link Bridge}
+     * and {@link Controller} rows.
+     *
+     * @param bridge the {@link Bridge} to update
+     * @param updatedControllerRows the list of {@link Controller} controllers with updates
+     * @return list of {@link ControllerEntry} entries
+     */
+    public static List<ControllerEntry> createControllerEntries(Bridge bridge,
+                                                                Map<UUID, Controller> updatedControllerRows) {
+
+        LOG.debug("createControllerEntries Bridge: {}\n, updatedControllerRows: {}",
+                bridge, updatedControllerRows);
+        final Set<UUID> controllerUUIDs = bridge.getControllerColumn().getData();
+        final List<ControllerEntry> controllerEntries = new ArrayList<ControllerEntry>();
         for (UUID controllerUUID : controllerUUIDs ) {
-            Controller controller = updatedControllerRows.get(controllerUUID);
-            if (controller != null && controller.getTargetColumn() != null
-                    && controller.getTargetColumn() != null) {
-                String targetString = controller.getTargetColumn().getData();
-                org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid uuid =
-                        new org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang
-                            .ietf.yang.types.rev130715.Uuid(controller.getUuid().toString());
-                controllerEntries.add(new ControllerEntryBuilder()
-                        .setTarget(new Uri(targetString))
-                        .setIsConnected(controller.getIsConnectedColumn().getData())
-                        .setControllerUuid(uuid).build());
-            }
+            final Controller controller = updatedControllerRows.get(controllerUUID);
+            addControllerEntries(controllerEntries, controller);
         }
-        LOG.debug("controllerEntries: {}", controllerEntries.toString());
+        LOG.debug("controllerEntries: {}", controllerEntries);
         return controllerEntries;
+    }
+
+    /**
+     * Create the {@link ControllerEntry} list given an MDSAL {@link Node} bridge
+     * and {@link Controller} rows.
+     *
+     * @param bridgeNode the {@link Node} to update
+     * @param updatedControllerRows the list of {@link Controller} controllers with updates
+     * @return list of {@link ControllerEntry} entries
+     */
+    public static List<ControllerEntry> createControllerEntries(Node bridgeNode,
+                                                                Map<UUID, Controller> updatedControllerRows) {
+
+        LOG.debug("createControllerEntries Bridge 2: {}\n, updatedControllerRows: {}",
+                bridgeNode, updatedControllerRows);
+        final List<ControllerEntry> controllerEntriesCreated = new ArrayList<ControllerEntry>();
+        final OvsdbBridgeAugmentation ovsdbBridgeAugmentation =
+                bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class);
+        if (ovsdbBridgeAugmentation == null) {
+            return controllerEntriesCreated;
+        }
+
+        final List<ControllerEntry> controllerEntries = ovsdbBridgeAugmentation.getControllerEntry();
+        for (ControllerEntry controllerEntry : controllerEntries) {
+            final Controller controller = updatedControllerRows.get(
+                    new UUID(controllerEntry.getControllerUuid().getValue()));
+            addControllerEntries(controllerEntriesCreated, controller);
+        }
+        LOG.debug("controllerEntries: {}", controllerEntriesCreated);
+        return controllerEntriesCreated;
+    }
+
+    /**
+     * Add the OVSDB {@link Controller} updates to the MDSAL {@link ControllerEntry} list.
+     *
+     * @param controllerEntries the list of {@link ControllerEntry} to update
+     * @param controller the updated OVSDB {@link Controller}
+     */
+    public static void addControllerEntries(List<ControllerEntry> controllerEntries,
+                                            final Controller controller) {
+
+        if (controller != null && controller.getTargetColumn() != null) {
+            final String targetString = controller.getTargetColumn().getData();
+            final org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid uuid =
+                    new org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang
+                            .ietf.yang.types.rev130715.Uuid(controller.getUuid().toString());
+
+            controllerEntries.add(new ControllerEntryBuilder()
+                    .setTarget(new Uri(targetString))
+                    .setIsConnected(controller.getIsConnectedColumn().getData())
+                    .setControllerUuid(uuid).build());
+        }
     }
 
     public static Map<UUID, Controller> createOvsdbController(OvsdbBridgeAugmentation omn,DatabaseSchema dbSchema) {

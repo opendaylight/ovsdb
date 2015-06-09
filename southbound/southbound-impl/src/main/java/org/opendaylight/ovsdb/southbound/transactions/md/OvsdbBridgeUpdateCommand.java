@@ -12,7 +12,6 @@ import java.util.Set;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -23,6 +22,7 @@ import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
+import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
@@ -81,7 +81,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
     private void updateBridge(ReadWriteTransaction transaction,
             Bridge bridge) {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
-        Optional<Node> connection = readNode(transaction, connectionIId);
+        Optional<Node> connection = SouthboundUtil.readNode(transaction, connectionIId);
         if (connection.isPresent()) {
             LOG.debug("Connection {} is present",connection);
 
@@ -185,17 +185,6 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         return result;
     }
 
-    private Optional<Node> readNode(ReadWriteTransaction transaction,
-            final InstanceIdentifier<Node> connectionIid) {
-        Optional<Node> node = Optional.absent();
-        try {
-            node = transaction.read(LogicalDatastoreType.OPERATIONAL, connectionIid).checkedGet();
-        } catch (final ReadFailedException e) {
-            LOG.warn("Read Operational/DS for Node fail! {}", connectionIid, e);
-        }
-        return node;
-    }
-
     private Node buildConnectionNode(
             Bridge bridge) {
         //Update node with managed node reference
@@ -213,7 +202,8 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
 
         connectionNode.addAugmentation(OvsdbNodeAugmentation.class, ovsdbConnectionAugmentationBuilder.build());
 
-        LOG.debug("Update node with bridge node ref {}",ovsdbConnectionAugmentationBuilder.toString());
+        LOG.debug("Update node with bridge node ref {}",
+                ovsdbConnectionAugmentationBuilder.getManagedNodeEntry().iterator().next());
         return connectionNode.build();
     }
 
@@ -235,7 +225,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbBridgeAugmentationBuilder.build());
 
         LOG.debug("Built with the intent to store bridge data {}",
-                ovsdbBridgeAugmentationBuilder.toString());
+                ovsdbBridgeAugmentationBuilder.build());
         return bridgeNodeBuilder.build();
     }
 

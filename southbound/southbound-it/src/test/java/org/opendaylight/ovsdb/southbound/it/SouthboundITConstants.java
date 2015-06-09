@@ -25,5 +25,7 @@ public final class SouthboundITConstants {
     public static final int CONNECTION_INIT_TIMEOUT = 10000;
     public static final String DEFAULT_SERVER_IPADDRESS = "127.0.0.1";
     public static final String DEFAULT_SERVER_PORT = "6640";
+    public static final String DEFAULT_OPENFLOW_PORT = "6653";
     public static final String BRIDGE_NAME = "brtest";
+    public static final String OPENFLOW_CONNECTION_PROTOCOL = "tcp";
 }

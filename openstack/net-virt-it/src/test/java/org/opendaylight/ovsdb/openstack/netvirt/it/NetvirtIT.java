@@ -15,8 +15,10 @@ import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.ObjectArrays;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -29,13 +31,13 @@ import org.junit.runner.RunWith;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
-import org.opendaylight.ovsdb.openstack.netvirt.impl.*;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.*;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
@@ -295,13 +297,76 @@ public class NetvirtIT extends AbstractMdsalTestBase {
         return true;
     }
 
+    private String getLocalControllerHostIpAddress() {
+        String ipaddress = null;
+        try{
+            for (Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces();
+                 ifaces.hasMoreElements();) {
+                NetworkInterface iface = (NetworkInterface) ifaces.nextElement();
+
+                for (Enumeration<InetAddress> inetAddrs = iface.getInetAddresses(); inetAddrs.hasMoreElements();) {
+                    InetAddress inetAddr = (InetAddress) inetAddrs.nextElement();
+                    if (!inetAddr.isLoopbackAddress()) {
+                        if (inetAddr.isSiteLocalAddress()) {
+                            ipaddress = inetAddr.getHostAddress();
+                            break;
+                        }
+                    }
+                }
+            }
+        }catch (Exception e){
+            LOG.warn("Exception while fetching local host ip address ",e);
+        }
+        return ipaddress;
+    }
+
+    private String getControllerTarget(Node ovsdbNode) {
+        String target = null;
+        String ipAddr = null;
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+        ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
+        LOG.info("connectionInfo: {}", connectionInfo);
+        if (connectionInfo != null && connectionInfo.getLocalIp() != null) {
+            ipAddr = new String(connectionInfo.getLocalIp().getValue());
+        }
+        if (ipAddr == null) {
+            ipAddr = getLocalControllerHostIpAddress();
+        }
+
+        if (ipAddr != null) {
+            target = NetvirtITConstants.OPENFLOW_CONNECTION_PROTOCOL + ":"
+                    + ipAddr + ":" + NetvirtITConstants.DEFAULT_OPENFLOW_PORT;
+        }
+
+        return target;
+    }
+
     //@Ignore//
     @Test
     public void testAddDeleteOvsdbNode() throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
         connectOvsdbNode(connectionInfo);
+        ControllerEntry controllerEntry;
+        for (int i = 0; i < 10; i++) {
+            Node ovsdbNode = getOvsdbNode(connectionInfo);
+            Assert.assertNotNull("ovsdb node not found", ovsdbNode);
+            String controllerTarget = getControllerTarget(ovsdbNode);
+            Assert.assertNotNull("Failed to get controller target", controllerTarget);
+            OvsdbBridgeAugmentation bridge = getBridge(connectionInfo, NetvirtITConstants.INTEGRATION_BRIDGE_NAME);
+            Assert.assertNotNull(bridge);
+            Assert.assertNotNull(bridge.getControllerEntry());
+            controllerEntry = bridge.getControllerEntry().iterator().next();
+            Assert.assertEquals(controllerTarget, controllerEntry.getTarget().getValue());
+            if (controllerEntry.isIsConnected()) {
+                Assert.assertTrue(controllerEntry.isIsConnected());
+                break;
+            }
+            Thread.sleep(1000);
+        }
+
+        Assert.assertTrue(deleteBridge(connectionInfo, NetvirtITConstants.INTEGRATION_BRIDGE_NAME));
+        Thread.sleep(1000);
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
-        //Assume.assumeTrue(disconnectOvsdbNode(connectionInfo));
     }
 
     @Ignore

@@ -39,6 +39,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundProvider;
+import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
@@ -103,11 +104,6 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.ObjectArrays;
 
 /**
  * Integration tests for southbound-impl
@@ -177,8 +173,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     public Option[] getLoggingOptions() {
         Option[] options = new Option[] {
                 editConfigurationFilePut(SouthboundITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
-                        "log4j.logger.org.opendaylight.ovsdb.southbound-impl",
-                        LogLevelOption.LogLevel.DEBUG.name())
+                        //"log4j.logger.org.opendaylight.ovsdb.southbound-impl",
+                        //LogLevelOption.LogLevel.DEBUG.name())
+                        "log4j.logger.org.opendaylight.ovsdb",
+                        LogLevelOption.LogLevel.TRACE.name())
         };
 
         options = ObjectArrays.concat(options, super.getLoggingOptions(), Option.class);
@@ -465,30 +463,36 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     public void testOvsdbBridgeControllerInfo() throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr,portStr);
         Node ovsdbNode = connectOvsdbNode(connectionInfo);
-        List<ControllerEntry> setControllerEntry = createControllerEntry();
-        Uri setUri = new Uri(addressStr + ":" + portStr);
+        String controllerTarget = SouthboundUtil.getControllerTarget(ovsdbNode);
+        assertNotNull("Failed to get controller target", controllerTarget);
+        List<ControllerEntry> setControllerEntry = createControllerEntry(controllerTarget);
+        Uri setUri = new Uri(controllerTarget);
         Assert.assertTrue(addBridge(connectionInfo, null, SouthboundITConstants.BRIDGE_NAME,null, true,
                 SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"), true, null, null,
                 setControllerEntry, null));
         OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
-        Assert.assertNotNull(bridge);
-        Assert.assertNotNull(bridge.getControllerEntry());
+        Assert.assertNotNull("bridge was not found: " + SouthboundITConstants.BRIDGE_NAME,  bridge);
+        Assert.assertNotNull("ControllerEntry was not found: " + setControllerEntry.iterator().next(),
+                bridge.getControllerEntry());
         List<ControllerEntry> getControllerEntries = bridge.getControllerEntry();
         for (ControllerEntry entry : getControllerEntries) {
             if (entry.getTarget() != null) {
-                Assert.assertEquals(entry.getTarget().toString(), setUri.toString());
+                Assert.assertEquals(setUri.toString(), entry.getTarget().toString());
             }
         }
+
         Assert.assertTrue(deleteBridge(connectionInfo));
         Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
     }
-    private List<ControllerEntry> createControllerEntry() {
+
+    private List<ControllerEntry> createControllerEntry(String controllerTarget) {
         List<ControllerEntry> controllerEntriesList = new ArrayList<ControllerEntry>();
         controllerEntriesList.add(new ControllerEntryBuilder()
-                .setTarget(new Uri(addressStr + ":" + portStr))
+                .setTarget(new Uri(controllerTarget))
                 .build());
         return controllerEntriesList;
     }
+
     private void setManagedBy(final OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
                               final ConnectionInfo connectionInfo) {
         InstanceIdentifier<Node> connectionNodePath = createInstanceIdentifier(connectionInfo);

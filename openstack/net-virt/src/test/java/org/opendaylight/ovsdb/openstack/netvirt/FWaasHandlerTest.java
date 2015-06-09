@@ -17,20 +17,37 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.net.HttpURLConnection;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.opendaylight.neutron.spi.NeutronFirewall;
 import org.opendaylight.neutron.spi.NeutronFirewallPolicy;
 import org.opendaylight.neutron.spi.NeutronFirewallRule;
+import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
+import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 
 /**
  * Unit test for {@link FWaasHandler}
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(ServiceHelper.class)
 public class FWaasHandlerTest {
 
-    @InjectMocks FWaasHandler fwaasHandler = mock(FWaasHandler.class, Mockito.CALLS_REAL_METHODS);
+    @InjectMocks FWaasHandler fwaasHandler;
+
+    @Before
+    public void setUp() {
+        fwaasHandler = mock(FWaasHandler.class, Mockito.CALLS_REAL_METHODS);
+    }
 
     @Test
     public void testCanCreateNeutronFirewall(){
@@ -126,5 +143,17 @@ public class FWaasHandlerTest {
 //        NorthboundEvent ev = mock(NorthboundEvent.class);
 //        when(ev.getAction()).thenReturn(Action.ADD);
 //        fwaasHandler.processEvent(ev);
+    }
+
+    @Test
+    public void testSetDependencies() {
+        EventDispatcher eventDispatcher = mock(EventDispatcher.class);
+
+        PowerMockito.mockStatic(ServiceHelper.class);
+        PowerMockito.when(ServiceHelper.getGlobalInstance(EventDispatcher.class, fwaasHandler)).thenReturn(eventDispatcher);
+
+        fwaasHandler.setDependencies(mock(BundleContext.class), mock(ServiceReference.class));
+
+        assertEquals("Error, did not return the correct object", fwaasHandler.eventDispatcher, eventDispatcher);
     }
 }

@@ -71,6 +71,7 @@ public class NeutronL3Adapter implements ConfigInterface {
     private Map<String, String> networkIdToRouterMacCache;
     private Map<String, NeutronRouter_Interface> subnetIdToRouterInterfaceCache;
     private Boolean enabled = false;
+    private Boolean enabledARP = false;
     private Southbound southbound;
 
     public NeutronL3Adapter() {
@@ -94,9 +95,19 @@ public class NeutronL3Adapter implements ConfigInterface {
 
             this.enabled = true;
             logger.info("OVSDB L3 forwarding is enabled");
+
+            if (configurationService.isARPResponderEnabled()) {
+                this.enabledARP = true;
+                logger.info("OVSDB ARP responder is enabled");
+            } else {
+                logger.debug("OVSDB ARP responder is NOT enabled");
+            } 
+
         } else {
             logger.debug("OVSDB L3 forwarding is disabled");
         }
+        
+        
     }
 
     //
@@ -272,8 +283,10 @@ public class NeutronL3Adapter implements ConfigInterface {
                 programL3ForwardingStage1(node, dpid, providerSegmentationId, tenantMac, tenantIpStr, action);
 
                 // Configure distributed ARP responder. Only needed if tenant network exists in node.
-                programStaticArpStage1(node, dpid, providerSegmentationId, tenantMac, tenantIpStr,
+                if (true == this.enabledARP) {
+                    programStaticArpStage1(node, dpid, providerSegmentationId, tenantMac, tenantIpStr,
                                        tenantNetworkPresentInNode ? action : Action.DELETE);
+                }
             }
         }
     }
@@ -404,7 +417,8 @@ public class NeutronL3Adapter implements ConfigInterface {
                                                               true /*isReflexsive*/);
                 }
 
-                programStaticArpStage1(node, dpid, destinationSegmentationId, macAddress, ipStr, actionForNode);
+                    // Enable ARP responder by default, because router interface needs to be responded always. 
+                    programStaticArpStage1(node, dpid, destinationSegmentationId, macAddress, ipStr, actionForNode);
             }
 
             // Compute action to be programmed. In the case of rewrite exclusions, we must never program rules
@@ -829,9 +843,8 @@ public class NeutronL3Adapter implements ConfigInterface {
             programIpRewriteStage1(node, dpid, providerSegmentationId, false /* isInboubd */,
                                    fixedIPAddress, floatingIpAddress, actionForNode);
 
-            // Respond to arps for the floating ip address
-            //
-            programStaticArpStage1(node, dpid, providerSegmentationId, routerMacAddress, floatingIpAddress,
+                // Respond to ARPs for the floating ip address by default
+                programStaticArpStage1(node, dpid, providerSegmentationId, routerMacAddress, floatingIpAddress,
                                    actionForNode);
         }
     }

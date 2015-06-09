@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_669329a4",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/ConfigurationService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-09T20:31:16Z",
+      "side": 1,
+      "message": "hmm... can we \u0027negate\u0027 this config?\nMy thinking is that the majority of use cases would want distributed arp enabled by default. So... it makes more sense to add a knob called \u0027isDistributedArpDisabled()\u0027.\nAnd only if \u0027yes\u0027, we disable that. This would make it more\nbackwards compatible as well, since distributed ARP is currently enabled, always.",
+      "revId": "a1bc5537fc0a8a4c643df83f46ca56d6773ba5bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_06902d94",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-09T20:31:16Z",
+      "side": 1,
+      "message": "please see comment in configurationService",
+      "range": {
+        "startLine": 100,
+        "startChar": 21,
+        "endLine": 100,
+        "endChar": 31
+      },
+      "revId": "a1bc5537fc0a8a4c643df83f46ca56d6773ba5bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_26b6913e",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-09T20:31:16Z",
+      "side": 1,
+      "message": "nitpick please remove extra space",
+      "revId": "a1bc5537fc0a8a4c643df83f46ca56d6773ba5bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_06b90d2e",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-09T20:31:16Z",
+      "side": 1,
+      "message": "please remove these 2 empty lines.",
+      "revId": "a1bc5537fc0a8a4c643df83f46ca56d6773ba5bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

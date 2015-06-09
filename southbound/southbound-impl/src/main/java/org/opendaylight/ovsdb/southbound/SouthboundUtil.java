@@ -10,13 +10,18 @@ package org.opendaylight.ovsdb.southbound;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.Enumeration;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
@@ -87,5 +92,60 @@ public class SouthboundUtil {
             LOG.warn("Failed to get OvsdbNode that manages OvsdbManagedNode {}", mn, e);
             return Optional.absent();
         }
+    }
+
+    public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> Optional<D> readNode(
+            ReadWriteTransaction transaction, final InstanceIdentifier<D> connectionIid) {
+        Optional<D> node = Optional.absent();
+        try {
+            node = transaction.read(LogicalDatastoreType.OPERATIONAL, connectionIid).checkedGet();
+        } catch (final ReadFailedException e) {
+            LOG.warn("Read Operational/DS for Node failed! {}", connectionIid, e);
+        }
+        return node;
+    }
+
+    private static String getLocalControllerHostIpAddress() {
+        String ipaddress = null;
+        try {
+            for (Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces();
+                 ifaces.hasMoreElements();) {
+                NetworkInterface iface = (NetworkInterface) ifaces.nextElement();
+
+                for (Enumeration<InetAddress> inetAddrs = iface.getInetAddresses(); inetAddrs.hasMoreElements();) {
+                    InetAddress inetAddr = (InetAddress) inetAddrs.nextElement();
+                    if (!inetAddr.isLoopbackAddress()) {
+                        if (inetAddr.isSiteLocalAddress()) {
+                            ipaddress = inetAddr.getHostAddress();
+                            break;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOG.warn("Exception while fetching local host ip address ",e);
+        }
+        return ipaddress;
+    }
+
+    public static String getControllerTarget(Node ovsdbNode) {
+        String target = null;
+        String ipAddr = null;
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
+        ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
+        LOG.info("connectionInfo: {}", connectionInfo);
+        if (connectionInfo != null && connectionInfo.getLocalIp() != null) {
+            ipAddr = new String(connectionInfo.getLocalIp().getValue());
+        }
+        if (ipAddr == null) {
+            ipAddr = getLocalControllerHostIpAddress();
+        }
+
+        if (ipAddr != null) {
+            target = SouthboundConstants.OPENFLOW_CONNECTION_PROTOCOL + ":"
+                    + ipAddr + ":" + SouthboundConstants.DEFAULT_OPENFLOW_PORT;
+        }
+
+        return target;
     }
 }

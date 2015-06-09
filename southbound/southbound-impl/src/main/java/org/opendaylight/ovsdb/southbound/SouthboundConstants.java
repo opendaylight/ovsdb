@@ -47,6 +47,8 @@ public class SouthboundConstants {
     public static final String BRIDGE_URI_PREFIX = "bridge";
     public static final String TP_URI_PREFIX = "terminationpoint";
     public static final Integer DEFAULT_OVSDB_PORT = 6640;
+    public static final String DEFAULT_OPENFLOW_PORT = "6653";
+    public static final String OPENFLOW_CONNECTION_PROTOCOL = "tcp";
     public static final String UUID = "uuid";
     public static final ImmutableBiMap<Class<? extends OvsdbBridgeProtocolBase>,String> OVSDB_PROTOCOL_MAP
         = new ImmutableBiMap.Builder<Class<? extends OvsdbBridgeProtocolBase>,String>()

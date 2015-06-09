@@ -1,0 +1,159 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_43237c05",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/PipelineOrchestratorImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-09T01:15:39Z",
+      "side": 1,
+      "message": "this can probably be bumped to debug or trace. Guess we need to do a wholesale cleanse of these levels soon.",
+      "range": {
+        "startLine": 139,
+        "startChar": 19,
+        "endLine": 139,
+        "endChar": 23
+      },
+      "revId": "260bd3193d9d4cc8003687dbbb6f2c45f7448525",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_e31f30b6",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/InboundNatService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-09T01:15:39Z",
+      "side": 1,
+      "message": "unused?",
+      "range": {
+        "startLine": 21,
+        "startChar": 53,
+        "endLine": 21,
+        "endChar": 63
+      },
+      "revId": "260bd3193d9d4cc8003687dbbb6f2c45f7448525",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_031d84bd",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/InboundNatService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-09T01:15:39Z",
+      "side": 1,
+      "message": "could you add a realistic flow example to the comments? Most of the other services have the types of flows listed.",
+      "range": {
+        "startLine": 58,
+        "startChar": 18,
+        "endLine": 58,
+        "endChar": 38
+      },
+      "revId": "260bd3193d9d4cc8003687dbbb6f2c45f7448525",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_a37938fe",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/InboundNatService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-09T01:15:39Z",
+      "side": 1,
+      "message": "is this the code you mentioned about overloading the segmentationId to mean different things? If so, is it possible to just create another method that is more intuitive?",
+      "revId": "260bd3193d9d4cc8003687dbbb6f2c45f7448525",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_c37eace4",
+        "filename": "openstack/net-virt-providers/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/InboundNatServiceTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-09T01:15:39Z",
+      "side": 1,
+      "message": "this related to the overloaded stuff? This magic number is hard to understand so it would be good to refactor this code to be more readable.",
+      "range": {
+        "startLine": 89,
+        "startChar": 39,
+        "endLine": 89,
+        "endChar": 40
+      },
+      "revId": "260bd3193d9d4cc8003687dbbb6f2c45f7448525",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_8388b4e8",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-09T01:15:39Z",
+      "side": 1,
+      "message": "guess we can\u0027t get these strings from the Neutron interface?",
+      "range": {
+        "startLine": 82,
+        "startChar": 44,
+        "endLine": 82,
+        "endChar": 51
+      },
+      "revId": "260bd3193d9d4cc8003687dbbb6f2c45f7448525",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_436a9c1b",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-09T01:15:39Z",
+      "side": 1,
+      "message": "looking like a low-level c programmer...",
+      "range": {
+        "startLine": 390,
+        "startChar": 21,
+        "endLine": 390,
+        "endChar": 46
+      },
+      "revId": "260bd3193d9d4cc8003687dbbb6f2c45f7448525",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

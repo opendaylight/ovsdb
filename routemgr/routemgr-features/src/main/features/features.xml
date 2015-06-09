@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright (c) 2015 Dell, Inc. and others. All rights reserved.
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v1.0 which accompanies this distribution,
+and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<features name="odl-ovsdb-routemgr-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+  <repository>mvn:org.opendaylight.yangtools/features-yangtools/${yangtools.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.controller/features-mdsal/${mdsal.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.controller/features-restconf/${mdsal.version}/xml/features</repository>
+  <feature name='odl-ovsdb-routemgr-api' version='${project.version}' description='OpenDaylight :: routemgr :: api '>
+    <feature version='${yangtools.version}'>odl-yangtools-models</feature>
+    <bundle>mvn:org.opendaylight.ovsdb/routemgr-api/${project.version}</bundle>
+  </feature>
+  <feature name='odl-ovsdb-routemgr-impl' version='${project.version}' description='OpenDaylight :: routemgr :: impl '>
+    <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
+    <feature version='${project.version}'>odl-ovsdb-routemgr-api</feature>
+    <bundle>mvn:org.opendaylight.ovsdb/routemgr-impl/${project.version}</bundle>
+    <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
+    <bundle>mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
+    <bundle>mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
+    <bundle>mvn:com.fasterxml.jackson.datatype/jackson-datatype-json-org/${jackson.version}</bundle>
+    <bundle>wrap:mvn:org.json/json/${org.json.version}</bundle>
+    <bundle>mvn:com.google.code.gson/gson/${gson.version}</bundle>
+    <bundle>mvn:io.netty/netty-buffer/${netty.version}</bundle>
+    <bundle>mvn:io.netty/netty-codec/${netty.version}</bundle>
+    <bundle>mvn:io.netty/netty-codec-http/${netty.version}</bundle>
+    <bundle>mvn:io.netty/netty-common/${netty.version}</bundle>
+    <bundle>mvn:io.netty/netty-handler/${netty.version}</bundle>
+    <bundle>mvn:io.netty/netty-transport/${netty.version}</bundle>
+    <configfile finalname="etc/opendaylight/karaf/routemgr-impl-default-config.xml">mvn:org.opendaylight.ovsdb/routemgr-impl/${project.version}/xml/config</configfile>
+  </feature>
+  <feature name='odl-ovsdb-routemgr-impl-rest' version='${project.version}' description='OpenDaylight :: routemgr :: impl :: REST '>
+    <feature version="${project.version}">odl-ovsdb-routemgr-impl</feature>
+    <feature version="${mdsal.version}">odl-restconf</feature>
+  </feature>
+  <feature name='odl-ovsdb-routemgr-impl-ui' version='${project.version}' description='OpenDaylight :: routemgr :: impl :: UI'>
+    <feature version="${project.version}">odl-ovsdb-routemgr-impl-rest</feature>
+    <feature version="${mdsal.version}">odl-mdsal-apidocs</feature>
+    <feature version="${mdsal.version}">odl-mdsal-xsql</feature>
+  </feature>
+</features>

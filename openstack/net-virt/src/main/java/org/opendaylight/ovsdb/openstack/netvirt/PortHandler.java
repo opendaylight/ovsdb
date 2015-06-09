@@ -9,6 +9,9 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt;
 
+import java.net.HttpURLConnection;
+import java.util.List;
+
 import org.opendaylight.neutron.spi.INeutronPortAware;
 import org.opendaylight.neutron.spi.NeutronPort;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
@@ -25,9 +28,6 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.HttpURLConnection;
-import java.util.List;
-
 /**
  * Handle requests for Neutron Port.
  */
@@ -37,7 +37,6 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware, C
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile NodeCacheManager nodeCacheManager;
     private volatile NeutronL3Adapter neutronL3Adapter;
-    private volatile EventDispatcher eventDispatcher;
     private volatile Southbound southbound;
 
     /**
@@ -188,7 +187,6 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware, C
                 (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
         eventDispatcher.eventHandlerAdded(
                 bundleContext.getServiceReference(INeutronPortAware.class.getName()), this);
-        super.setDispatcher(eventDispatcher);
     }
 
     @Override

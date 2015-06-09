@@ -9,6 +9,8 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt;
 
+import java.net.HttpURLConnection;
+
 import org.opendaylight.neutron.spi.INeutronFirewallAware;
 import org.opendaylight.neutron.spi.INeutronFirewallPolicyAware;
 import org.opendaylight.neutron.spi.INeutronFirewallRuleAware;
@@ -22,8 +24,6 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.HttpURLConnection;
-
 /**
  * Handle requests for OpenStack Neutron v2.0 Port Firewall API calls.
  */
@@ -32,7 +32,6 @@ public class FWaasHandler extends AbstractHandler
         INeutronFirewallPolicyAware, ConfigInterface {
 
     static final Logger logger = LoggerFactory.getLogger(FWaasHandler.class);
-    private volatile EventDispatcher eventDispatcher;
 
     /**
      * Invoked when a Firewall Rules creation is requested
@@ -211,7 +210,6 @@ public class FWaasHandler extends AbstractHandler
                 (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
         eventDispatcher.eventHandlerAdded(
                 bundleContext.getServiceReference(INeutronFirewallAware.class.getName()), this);
-        super.setDispatcher(eventDispatcher);
     }
 
     @Override

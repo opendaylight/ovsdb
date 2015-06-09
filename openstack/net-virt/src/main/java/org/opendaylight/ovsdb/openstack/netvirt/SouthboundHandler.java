@@ -41,7 +41,6 @@ public class SouthboundHandler extends AbstractHandler
     private volatile NetworkingProviderManager networkingProviderManager;
     private volatile NeutronL3Adapter neutronL3Adapter;
     private volatile NodeCacheManager nodeCacheManager;
-    private volatile EventDispatcher eventDispatcher;
     private volatile OvsdbInventoryService ovsdbInventoryService;
     private volatile Southbound southbound;
 
@@ -412,7 +411,6 @@ public class SouthboundHandler extends AbstractHandler
                 (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
         eventDispatcher.eventHandlerAdded(
                 bundleContext.getServiceReference(OvsdbInventoryListener.class.getName()), this);
-        super.setDispatcher(eventDispatcher);
         ovsdbInventoryService =
                 (OvsdbInventoryService) ServiceHelper.getGlobalInstance(OvsdbInventoryService.class, this);
         ovsdbInventoryService.listenerAdded(this);

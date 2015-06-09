@@ -9,6 +9,10 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt;
 
+import java.net.HttpURLConnection;
+import java.util.List;
+import java.util.Map;
+
 import org.opendaylight.neutron.spi.INeutronLoadBalancerCRUD;
 import org.opendaylight.neutron.spi.INeutronLoadBalancerPoolCRUD;
 import org.opendaylight.neutron.spi.INeutronLoadBalancerPoolMemberAware;
@@ -32,10 +36,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
-import java.net.HttpURLConnection;
-import java.util.List;
-import java.util.Map;
-
 /**
  * Handle requests for OpenStack Neutron v2.0 LBaaS API calls for
  * /v2.0/pools/{pool_id}/members
@@ -53,7 +53,6 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
     private volatile INeutronSubnetCRUD neutronSubnetCache;
     private volatile LoadBalancerProvider loadBalancerProvider;
     private volatile NodeCacheManager nodeCacheManager;
-    private volatile EventDispatcher eventDispatcher;
 
     @Override
     public int canCreateNeutronLoadBalancerPoolMember(NeutronLoadBalancerPoolMember neutronLBPoolMember) {
@@ -285,7 +284,6 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
                 (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
         eventDispatcher.eventHandlerAdded(
                 bundleContext.getServiceReference(INeutronLoadBalancerPoolMemberAware.class.getName()), this);
-        super.setDispatcher(eventDispatcher);
     }
 
     @Override

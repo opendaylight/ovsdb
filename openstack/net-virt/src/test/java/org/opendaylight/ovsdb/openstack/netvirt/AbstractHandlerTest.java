@@ -13,24 +13,26 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.net.HttpURLConnection;
 
-import org.junit.*;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mockito;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
 import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
 /**
  * Unit test for {@link AbstractHandler}
  */
-@Ignore
-// TODO SB_MIGRATION
+
 public class AbstractHandlerTest {
 
+    @InjectMocks private AbstractHandler abstractHandler = mock(AbstractHandler.class, Mockito.CALLS_REAL_METHODS);
+
     @Test
-    public void testAbstractHandler() {
+    public void testGetException() {
         Status status = mock(Status.class);
 
         when(status.getCode())
@@ -63,11 +65,11 @@ public class AbstractHandlerTest {
     }
 
     @Test
-    public void testEnqueueEvent(){
+    public void testEnqueueEvent() throws Exception {
         EventDispatcher eventDispatcher = mock(EventDispatcher.class);
+        abstractHandler.setDispatcher(eventDispatcher);
 
-        verifyNoMoreInteractions(eventDispatcher);
-        eventDispatcher.enqueueEvent(mock(AbstractEvent.class));
+        abstractHandler.enqueueEvent(mock(AbstractEvent.class));
         verify(eventDispatcher, times(1)).enqueueEvent(any(AbstractEvent.class));
     }
 }

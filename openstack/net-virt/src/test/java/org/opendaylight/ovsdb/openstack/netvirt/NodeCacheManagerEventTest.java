@@ -28,8 +28,8 @@ public class NodeCacheManagerEventTest {
 
     @Before
     public void setUp() {
-        /* TODO SB_MIGRATION */
-        //nodeCacheManagerEvent = new NodeCacheManagerEvent("nodeIdentifier", Action.ADD);
+//        /* TODO SB_MIGRATION */
+//        nodeCacheManagerEvent = new NodeCacheManagerEvent("nodeIdentifier", Action.ADD);
     }
 
     @Test

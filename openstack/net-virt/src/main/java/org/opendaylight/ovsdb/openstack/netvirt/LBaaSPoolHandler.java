@@ -10,6 +10,10 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt;
 
+import java.net.HttpURLConnection;
+import java.util.List;
+import java.util.Map;
+
 import org.opendaylight.neutron.spi.INeutronLoadBalancerCRUD;
 import org.opendaylight.neutron.spi.INeutronLoadBalancerPoolAware;
 import org.opendaylight.neutron.spi.INeutronNetworkCRUD;
@@ -33,10 +37,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
-import java.net.HttpURLConnection;
-import java.util.List;
-import java.util.Map;
-
 /**
  * Handle requests for OpenStack Neutron v2.0 LBaaS API calls for
  * /v2.0/pools . It is possible that each pool spans multiple subnets.
@@ -55,7 +55,6 @@ public class LBaaSPoolHandler extends AbstractHandler
     private volatile INeutronSubnetCRUD neutronSubnetCache;
     private volatile LoadBalancerProvider loadBalancerProvider;
     private volatile NodeCacheManager nodeCacheManager;
-    private volatile EventDispatcher eventDispatcher;
 
     @Override
     public int canCreateNeutronLoadBalancerPool(NeutronLoadBalancerPool neutronLBPool) {
@@ -278,7 +277,6 @@ public class LBaaSPoolHandler extends AbstractHandler
                 (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
         eventDispatcher.eventHandlerAdded(
                 bundleContext.getServiceReference(INeutronLoadBalancerPoolAware.class.getName()), this);
-        super.setDispatcher(eventDispatcher);
     }
 
     @Override

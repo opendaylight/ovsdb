@@ -7,11 +7,10 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent;
 import org.opendaylight.ovsdb.openstack.netvirt.AbstractHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
@@ -29,6 +28,9 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 /**
  * @author Flavio Fernandes (ffernand@redhat.com)
  * @author Sam Hague (shague@redhat.com)
@@ -38,7 +40,6 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
     private final Object nodeCacheLock = new Object();
     private Map<NodeId, Node> nodeCache = new ConcurrentHashMap<>();
     private Map<Long, NodeCacheListener> handlers = Maps.newHashMap();
-    private volatile EventDispatcher eventDispatcher;
     private volatile Southbound southbound;
 
     @Override
@@ -172,7 +173,6 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
                 (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
         eventDispatcher.eventHandlerAdded(
                 bundleContext.getServiceReference(NodeCacheManager.class.getName()), this);
-        super.setDispatcher(eventDispatcher);
     }
 
     @Override

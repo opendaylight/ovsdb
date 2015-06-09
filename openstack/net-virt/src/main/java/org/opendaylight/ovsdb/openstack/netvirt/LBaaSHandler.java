@@ -10,6 +10,10 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt;
 
+import java.net.HttpURLConnection;
+import java.util.List;
+import java.util.Map;
+
 import org.opendaylight.neutron.spi.INeutronLoadBalancerAware;
 import org.opendaylight.neutron.spi.INeutronLoadBalancerCRUD;
 import org.opendaylight.neutron.spi.INeutronLoadBalancerPoolCRUD;
@@ -23,8 +27,8 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerProvider;
-import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.osgi.framework.BundleContext;
@@ -33,10 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
-
-import java.net.HttpURLConnection;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Handle requests for OpenStack Neutron v2.0 LBaaS API calls for /v2.0/loadbalancers.
@@ -56,7 +56,6 @@ public class LBaaSHandler extends AbstractHandler
     private volatile INeutronSubnetCRUD neutronSubnetCache;
     private volatile LoadBalancerProvider loadBalancerProvider;
     private volatile NodeCacheManager nodeCacheManager;
-    private volatile EventDispatcher eventDispatcher;
 
     @Override
     public int canCreateNeutronLoadBalancer(NeutronLoadBalancer neutronLB) {
@@ -269,7 +268,6 @@ public class LBaaSHandler extends AbstractHandler
                 (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
         eventDispatcher.eventHandlerAdded(
                 bundleContext.getServiceReference(INeutronLoadBalancerAware.class.getName()), this);
-        super.setDispatcher(eventDispatcher);
     }
 
     @Override

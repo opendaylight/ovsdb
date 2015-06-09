@@ -10,20 +10,20 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt;
 
+import java.net.HttpURLConnection;
+
 import org.opendaylight.neutron.spi.INeutronSubnetAware;
 import org.opendaylight.neutron.spi.NeutronSubnet;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
-
-import com.google.common.base.Preconditions;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.HttpURLConnection;
+import com.google.common.base.Preconditions;
 
 public class SubnetHandler extends AbstractHandler implements INeutronSubnetAware, ConfigInterface {
 
@@ -31,7 +31,6 @@ public class SubnetHandler extends AbstractHandler implements INeutronSubnetAwar
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile NeutronL3Adapter neutronL3Adapter;
-    private EventDispatcher eventDispatcher;
 
     @Override
     public int canCreateSubnet(NeutronSubnet subnet) {
@@ -99,7 +98,6 @@ public class SubnetHandler extends AbstractHandler implements INeutronSubnetAwar
                 (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
         eventDispatcher.eventHandlerAdded(
                 bundleContext.getServiceReference(INeutronSubnetAware.class.getName()), this);
-        super.setDispatcher(eventDispatcher);
     }
 
     @Override

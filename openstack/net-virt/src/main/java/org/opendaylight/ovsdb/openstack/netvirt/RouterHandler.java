@@ -9,20 +9,19 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt;
 
+import java.net.HttpURLConnection;
+
 import org.opendaylight.neutron.spi.INeutronRouterAware;
 import org.opendaylight.neutron.spi.NeutronRouter;
 import org.opendaylight.neutron.spi.NeutronRouter_Interface;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
-
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.HttpURLConnection;
 
 /**
  * Handle requests for Neutron Router.
@@ -32,7 +31,6 @@ public class RouterHandler extends AbstractHandler implements INeutronRouterAwar
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile NeutronL3Adapter neutronL3Adapter;
-    private volatile EventDispatcher eventDispatcher;
 
     /**
      * Services provide this interface method to indicate if the specified router can be created
@@ -227,7 +225,6 @@ public class RouterHandler extends AbstractHandler implements INeutronRouterAwar
                 (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
         eventDispatcher.eventHandlerAdded(
                 bundleContext.getServiceReference(INeutronRouterAware.class.getName()), this);
-        super.setDispatcher(eventDispatcher);
     }
 
     @Override

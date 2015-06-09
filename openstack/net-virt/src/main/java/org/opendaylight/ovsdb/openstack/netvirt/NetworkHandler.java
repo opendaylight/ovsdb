@@ -9,6 +9,9 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt;
 
+import java.net.HttpURLConnection;
+import java.util.List;
+
 import org.opendaylight.neutron.spi.INeutronNetworkAware;
 import org.opendaylight.neutron.spi.INeutronNetworkCRUD;
 import org.opendaylight.neutron.spi.NeutronNetwork;
@@ -27,9 +30,6 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.HttpURLConnection;
-import java.util.List;
-
 /**
  * Handle requests for Neutron Network.
  */
@@ -45,7 +45,6 @@ public class NetworkHandler extends AbstractHandler implements INeutronNetworkAw
     private volatile NodeCacheManager nodeCacheManager;
     private volatile INeutronNetworkCRUD neutronNetworkCache;
     private volatile NeutronL3Adapter neutronL3Adapter;
-    private volatile EventDispatcher eventDispatcher;
     private volatile Southbound southbound;
 
     /**
@@ -211,7 +210,6 @@ public class NetworkHandler extends AbstractHandler implements INeutronNetworkAw
                 (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
         eventDispatcher.eventHandlerAdded(
                 bundleContext.getServiceReference(INeutronNetworkAware.class.getName()), this);
-        super.setDispatcher(eventDispatcher);
     }
 
     @Override

@@ -9,19 +9,18 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt;
 
+import java.net.HttpURLConnection;
+
 import org.opendaylight.neutron.spi.INeutronFloatingIPAware;
 import org.opendaylight.neutron.spi.NeutronFloatingIP;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
-
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.HttpURLConnection;
 
 /**
  * Handle requests for Neutron Floating IP.
@@ -33,7 +32,6 @@ public class FloatingIPHandler extends AbstractHandler
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile NeutronL3Adapter neutronL3Adapter;
-    private volatile EventDispatcher eventDispatcher;
 
     /**
      * Services provide this interface method to indicate if the specified floatingIP can be created
@@ -150,7 +148,6 @@ public class FloatingIPHandler extends AbstractHandler
                 (EventDispatcher) ServiceHelper.getGlobalInstance(EventDispatcher.class, this);
         eventDispatcher.eventHandlerAdded(
                 bundleContext.getServiceReference(INeutronFloatingIPAware.class.getName()), this);
-        super.setDispatcher(eventDispatcher);
         neutronL3Adapter =
                 (NeutronL3Adapter) ServiceHelper.getGlobalInstance(NeutronL3Adapter.class, this);
     }

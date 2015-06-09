@@ -81,13 +81,18 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         // TODO use transaction chains to handle ordering issues between disconnected
         // and connected when writing to the operational store
         InetAddress ip = SouthboundMapper.createInetAddress(ovsdbNode.getConnectionInfo().getRemoteIp());
-        OvsdbClient client = OvsdbConnectionService.getService().connect(ip,
-                ovsdbNode.getConnectionInfo().getRemotePort().getValue().intValue());
-        putInstanceIdentifier(ovsdbNode.getConnectionInfo(), iid.firstIdentifierOf(Node.class));
-        // For connections from the controller to the ovs instance, the library doesn't call
-        // this method for us
-        connectedButCallBacksNotRegistered(client);
-        return client;
+        try {
+            OvsdbClient client = OvsdbConnectionService.getService().connect(ip,
+                    ovsdbNode.getConnectionInfo().getRemotePort().getValue().intValue());
+            putInstanceIdentifier(ovsdbNode.getConnectionInfo(), iid.firstIdentifierOf(Node.class));
+            // For connections from the controller to the ovs instance, the library doesn't call
+            // this method for us
+            connectedButCallBacksNotRegistered(client);
+            return client;
+        } catch (Exception e) {
+            LOG.warn("Failed to connect to Ovsdb Node {}", ovsdbNode.getConnectionInfo(), e);
+            throw(new UnknownHostException());
+        }
     }
 
     public void disconnect(OvsdbNodeAugmentation ovsdbNode) throws UnknownHostException {

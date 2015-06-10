@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_b72ba9ea",
+        "filename": "features/ovsdb/src/main/features/features.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-10T20:31:48Z",
+      "side": 1,
+      "message": "nitpick: missing indent on line 79",
+      "revId": "d476b5edb70e287c83a07c6603185e95d7dd5392",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

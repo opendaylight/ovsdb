@@ -73,4 +73,8 @@
     <configfile finalname="etc/opendaylight/karaf/netvirt-impl-default-config.xml">mvn:org.opendaylight.ovsdb/openstack.net-virt/${project.version}/xml/config</configfile>
     <configfile finalname="etc/opendaylight/karaf/netvirt-providers-impl-default-config.xml">mvn:org.opendaylight.ovsdb/openstack.net-virt-providers/${project.version}/xml/config</configfile>
   </feature>
+  <feature name="odl-ovsdb-ui" description="OpenDaylight :: OVSDB :: DLUX Integration Plugin" version='${ovsdb.ui.version}'>
+    <feature version="${dlux.core.version}">odl-dlux-core</feature>
+    <bundle>mvn:org.opendaylight.ovsdb/ovsdb-ui/${ovsdb.ui.version}</bundle>
+</feature>
 </features>

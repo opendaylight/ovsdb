@@ -7,49 +7,57 @@
 */
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.RETURNS_MOCKS;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.RETURNS_MOCKS;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
+import java.lang.reflect.Field;
 import java.util.List;
-import org.junit.runner.RunWith;
+
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbTables;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
+import org.opendaylight.ovsdb.utils.config.ConfigProperties;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Test class for BridgeConfigurationManagerImpl
  *
  * @author Marcus Koontz
- * @author Alexis Adetalhouet
+ * @author Alexis de Talhouet
  * @author Sam Hague (shague@redhat.com)
  */
 @RunWith(PowerMockRunner.class)
+@PrepareForTest({ServiceHelper.class, ConfigProperties.class})
 public class BridgeConfigurationManagerImplTest {
     @Mock private Node node;
     @Mock private OvsdbBridgeAugmentation bridge;
@@ -59,6 +67,7 @@ public class BridgeConfigurationManagerImplTest {
     @Mock private Southbound southbound;
     @InjectMocks public static BridgeConfigurationManagerImpl bridgeConfigurationManagerImpl;
 
+    private static final String ADDRESS = "127.0.0.1";
     private static final String BR_INT = "br-int";
     private static final String ETH1 = "eth1";
     private static final String ETH2 = "eth2";
@@ -197,6 +206,29 @@ public class BridgeConfigurationManagerImplTest {
     }
 
     @Test
+    public void testIsNodeL3Ready() {
+        when(southbound.isBridgeOnOvsdbNode(any(Node.class), anyString())).thenReturn(true);
+        when(southbound.extractTerminationPointAugmentation(any(Node.class), anyString())).thenReturn(mock(OvsdbTerminationPointAugmentation.class));
+        when(southbound.readBridgeNode(any(Node.class), anyString())).thenReturn(mock(Node.class));
+
+        assertTrue("Error, isNodeL3Ready didn't return true", bridgeConfigurationManagerImpl.isNodeL3Ready(node, node));
+    }
+
+    @Test
+    public void testPrepareNode() {
+        when(configurationService.getIntegrationBridgeName()).thenReturn(BR_INT);
+        when(southbound.isBridgeOnOvsdbNode(any(Node.class), anyString())).thenReturn(false);
+
+        PowerMockito.mockStatic(ConfigProperties.class);
+        when(ConfigProperties.getProperty(any(Class.class), anyString())).thenReturn(ADDRESS);
+
+        when(southbound.addBridge(any(Node.class), anyString(), anyString())).thenReturn(true);
+        when(configurationService.isL3ForwardingEnabled()).thenReturn(true);
+
+        bridgeConfigurationManagerImpl.prepareNode(node);
+    }
+
+    @Test
     public void testCreateLocalNetwork() throws Exception {
         NeutronNetwork neutronNetworkMock = mock(NeutronNetwork.class, RETURNS_MOCKS);
         String networkTypes[] = {"vlan", "vxlan", "gre"};
@@ -293,5 +325,29 @@ public class BridgeConfigurationManagerImplTest {
         verify(configurationService, times(2)).getProviderMappingsKey();
         verify(configurationService, times(1)).getDefaultProviderMapping();
         verify(southbound, times(2)).getOtherConfig(any(Node.class), eq(OvsdbTables.OPENVSWITCH), anyString());
+    }
+
+    @Test
+    public void testSetDependencies() throws Exception {
+        ConfigurationService configurationService = mock(ConfigurationService.class);
+        NetworkingProviderManager networkingProviderManager = mock(NetworkingProviderManager.class);
+        Southbound southbound = mock(Southbound.class);
+
+        PowerMockito.mockStatic(ServiceHelper.class);
+        PowerMockito.when(ServiceHelper.getGlobalInstance(ConfigurationService.class, bridgeConfigurationManagerImpl)).thenReturn(configurationService);
+        PowerMockito.when(ServiceHelper.getGlobalInstance(NetworkingProviderManager.class, bridgeConfigurationManagerImpl)).thenReturn(networkingProviderManager);
+        PowerMockito.when(ServiceHelper.getGlobalInstance(Southbound.class, bridgeConfigurationManagerImpl)).thenReturn(southbound);
+
+        bridgeConfigurationManagerImpl.setDependencies(mock(BundleContext.class), mock(ServiceReference.class));
+
+        assertEquals("Error, did not return the correct object", getField("configurationService"), configurationService);
+        assertEquals("Error, did not return the correct object", getField("networkingProviderManager"), networkingProviderManager);
+        assertEquals("Error, did not return the correct object", getField("southbound"), southbound);
+    }
+
+    private Object getField(String fieldName) throws Exception {
+        Field field = BridgeConfigurationManagerImpl.class.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        return field.get(bridgeConfigurationManagerImpl);
     }
 }

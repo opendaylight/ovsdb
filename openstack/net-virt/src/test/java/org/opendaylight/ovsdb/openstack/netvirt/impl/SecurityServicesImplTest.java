@@ -9,57 +9,61 @@ package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.neutron.spi.INeutronPortCRUD;
 import org.opendaylight.neutron.spi.NeutronPort;
 import org.opendaylight.neutron.spi.NeutronSecurityGroup;
-import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Unit test for {@link SecurityServicesImpl}
  */
-/* TODO SB_MIGRATION */ @Ignore
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(ServiceHelper.class)
 public class SecurityServicesImplTest {
 
     @InjectMocks private SecurityServicesImpl securityServicesImpl;
-    @InjectMocks private INeutronPortCRUD neutronPortService = mock(INeutronPortCRUD.class);
 
-    //@Mock Interface intf;
+    @Mock private INeutronPortCRUD neutronPortCache;
+    @Mock private Southbound southbound;
 
-    private List<NeutronSecurityGroup> securityGroups = new ArrayList<NeutronSecurityGroup>();
+    @Mock private NeutronSecurityGroup neutronSecurityGroup;
+
+    private static final String NEUTRON_PORT_ID = "neutronID";
+    private static final String DEVICE_OWNER = "compute";
 
     @Before
     public void setUp(){
         NeutronPort neutronPort = mock(NeutronPort.class);
 
-        Map<String, String> externalIds =new HashMap<String, String>();
-        externalIds.put(Constants.EXTERNAL_ID_INTERFACE_ID, "mapValue");
-        //Column<GenericTableSchema, Map<String, String>> columnMock = mock(Column.class);
-
-        securityGroups.add(mock(NeutronSecurityGroup.class));
-
-        //when(intf.getExternalIdsColumn()).thenReturn(columnMock);
-        //when(columnMock.getData()).thenReturn(externalIds);
+        List<NeutronSecurityGroup> securityGroups = new ArrayList<NeutronSecurityGroup>();
+        securityGroups.add(neutronSecurityGroup);
 
         when(neutronPort.getSecurityGroups()).thenReturn(securityGroups);
-        when(neutronPort.getDeviceOwner()).thenReturn("deviceOwner");
-        when(neutronPortService.getPort(anyString())).thenReturn(neutronPort);
+        when(neutronPort.getDeviceOwner()).thenReturn(DEVICE_OWNER);
+
+        when(southbound.getInterfaceExternalIdsValue(any(OvsdbTerminationPointAugmentation.class), anyString())).thenReturn(NEUTRON_PORT_ID);
+        when(neutronPortCache.getPort(anyString())).thenReturn(neutronPort);
     }
 
     /**
@@ -67,7 +71,7 @@ public class SecurityServicesImplTest {
      */
     @Test
     public void testIsPortSecurityReady(){
-        //assertTrue("Error, did not return expected boolean for isPortSecurityReady", securityServicesImpl.isPortSecurityReady(intf));
+        assertTrue("Error, did not return expected boolean for isPortSecurityReady", securityServicesImpl.isPortSecurityReady(mock(OvsdbTerminationPointAugmentation.class)));
     }
 
     /**
@@ -75,6 +79,31 @@ public class SecurityServicesImplTest {
      */
     @Test
     public void testSecurityGroupInPort(){
-        //assertEquals("Error, did not return the good neutronSecurityGroup of securityGroups", securityGroups.toArray()[0], securityServicesImpl.getSecurityGroupInPort(intf));
+        assertEquals("Error, did not return the good neutronSecurityGroup of securityGroups", neutronSecurityGroup, securityServicesImpl.getSecurityGroupInPort(mock(OvsdbTerminationPointAugmentation.class)));
+    }
+
+    @Test
+    public void testSetDependencies() throws Exception {
+        Southbound southbound = mock(Southbound.class);
+
+        PowerMockito.mockStatic(ServiceHelper.class);
+        PowerMockito.when(ServiceHelper.getGlobalInstance(Southbound.class, securityServicesImpl)).thenReturn(southbound);
+
+        securityServicesImpl.setDependencies(mock(BundleContext.class), mock(ServiceReference.class));
+
+        assertEquals("Error, did not return the correct object", getField("southbound"), southbound);
+    }
+
+    @Test
+    public void testSetDependenciesObject() throws Exception{
+        INeutronPortCRUD neutronPortCache = mock(INeutronPortCRUD.class);
+        securityServicesImpl.setDependencies(neutronPortCache);
+        assertEquals("Error, did not return the correct object", getField("neutronPortCache"), neutronPortCache);
+    }
+
+    private Object getField(String fieldName) throws Exception {
+        Field field = SecurityServicesImpl.class.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        return field.get(securityServicesImpl);
     }
 }

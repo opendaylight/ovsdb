@@ -62,6 +62,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <openflowplugin.version>0.2.0-SNAPSHOT</openflowplugin.version>
     <sal.version>0.10.0-SNAPSHOT</sal.version>
     <yangtools.version>0.8.0-SNAPSHOT</yangtools.version>
+    <dlux.core.version>0.3.0-SNAPSHOT</dlux.core.version>
+    <ovsdb.ui.version>0.1.0-SNAPSHOT</ovsdb.ui.version>
   </properties>
 
   <dependencyManagement>
@@ -312,6 +314,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>features-mdsal</artifactId>
       <type>xml</type>
       <classifier>features</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>ovsdb-ui-bundle</artifactId>
+      <version>${ovsdb.ui.version}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>

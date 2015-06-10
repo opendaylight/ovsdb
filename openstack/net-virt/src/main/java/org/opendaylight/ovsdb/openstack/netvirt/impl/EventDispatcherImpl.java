@@ -135,6 +135,7 @@ public class EventDispatcherImpl implements EventDispatcher, ConfigInterface {
 
         try {
             events.put(event);
+            System.out.println("LA" + events.size());
         } catch (InterruptedException e) {
             logger.error("Thread was interrupted while trying to enqueue event ", e);
         }

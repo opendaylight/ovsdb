@@ -19,36 +19,36 @@ import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent;
 import org.opendaylight.ovsdb.openstack.netvirt.AbstractHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.osgi.framework.ServiceReference;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Unit test for {@link EventDispatcherImpl}
  */
-/* TODO SB_MIGRATION */ @Ignore
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(ServiceHelper.class)
 public class EventDispatcherImplTest {
 
-    @Mock AbstractHandler handler;
-    @InjectMocks EventDispatcherImpl eventDispatcherImpl;
+    @InjectMocks private EventDispatcherImpl eventDispatcherImpl;
+
+    @Mock private AbstractHandler handler;
+    @Mock private ServiceReference<?> ref;
 
     private AbstractEvent.HandlerType handlerTypeObject = AbstractEvent.HandlerType.NEUTRON_FLOATING_IP;
-    private ServiceReference ref = mock(ServiceReference.class);
 
     @Before
     public void setUp() {
         Random r = new Random();
 
-        /* TODO SB_MIGRATION */
-        //eventDispatcherImpl.init();
         eventDispatcherImpl.start();
 
         when(ref.getProperty(org.osgi.framework.Constants.SERVICE_ID)).thenReturn(r.nextLong());
@@ -61,7 +61,7 @@ public class EventDispatcherImplTest {
      */
     @Test
     public void testHandlerAddedAndRemoved() throws Exception{
-        AbstractHandler[] handlers = ( AbstractHandler[]) getClassField("handlers");
+        AbstractHandler[] handlers = ( AbstractHandler[]) getField("handlers");
 
         assertNotEquals("Error, handler should be null", handlers[handlerTypeObject.ordinal()], handler);
 
@@ -77,23 +77,22 @@ public class EventDispatcherImplTest {
     /**
      * Test method {@link EventDispatcherImpl#enqueueEvent(AbstractEvent)}
      */
+    @SuppressWarnings("unchecked")
     @Test
     public void testEnqueueEvent() throws Exception{
-        BlockingQueue<AbstractEvent> events = (BlockingQueue<AbstractEvent>) getClassField("events");
+        BlockingQueue<AbstractEvent> events = (BlockingQueue<AbstractEvent>) getField("events");
 
         assertEquals("Error, did not return the expected size, nothing has been added yet", 0, events.size());
 
         eventDispatcherImpl.enqueueEvent(mock(AbstractEvent.class));
+        eventDispatcherImpl.enqueueEvent(mock(AbstractEvent.class));
+        eventDispatcherImpl.enqueueEvent(mock(AbstractEvent.class));
+        eventDispatcherImpl.enqueueEvent(mock(AbstractEvent.class));
 
-        assertEquals("Error, did not return the expected size", 1, events.size());
+        assertEquals("Error, did not return the expected size", 3, events.size());
     }
 
-    /**
-     * Get the specified field from EventDispatcherImpl using reflection
-     * @param fieldName - the field to retrieve
-     * @return the desired field
-     */
-    private Object getClassField(String fieldName) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException{
+    private Object getField(String fieldName) throws Exception {
         Field field = EventDispatcherImpl.class.getDeclaredField(fieldName);
         field.setAccessible(true);
         return field.get(eventDispatcherImpl);

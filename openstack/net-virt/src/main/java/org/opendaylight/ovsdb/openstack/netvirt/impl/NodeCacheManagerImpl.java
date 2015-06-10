@@ -84,7 +84,7 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
     }
 
     private void processNodeRemoved(Node node) {
-        nodeCache.remove(node);
+        nodeCache.remove(node.getNodeId());
         for (NodeCacheListener handler : handlers.values()) {
             try {
                 handler.notifyNode(node, Action.DELETE);

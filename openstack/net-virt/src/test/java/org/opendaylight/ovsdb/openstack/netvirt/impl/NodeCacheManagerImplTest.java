@@ -13,16 +13,21 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Spy;
 import org.opendaylight.ovsdb.openstack.netvirt.NodeCacheManagerEvent;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheListener;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 //import org.opendaylight.ovsdb.utils.mdsal.node.NodeUtils;
 import org.osgi.framework.ServiceReference;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.google.common.collect.Maps;
@@ -30,29 +35,29 @@ import com.google.common.collect.Maps;
 /**
  * Unit test for {@link NodeCacheManagerImpl}
  */
-/* TODO SB_MIGRATION */ @Ignore
 @RunWith(PowerMockRunner.class)
-//@PrepareForTest(NodeUtils.class)
+@PrepareForTest(ServiceHelper.class)
 public class NodeCacheManagerImplTest {
 
     @InjectMocks NodeCacheManagerImpl nodeCacheManagerImpl;
     @Spy private Map<Long, NodeCacheListener> handlers = Maps.newHashMap();
 
+    @Mock private Southbound southbound;
+
     @Test
     public void testProcessEvent() {
         NodeCacheManagerEvent ev = mock(NodeCacheManagerEvent.class);
-        when(ev.getNodeIdentifier()).thenReturn("node_identifier");
+        Node node = mock(Node.class);
+        when(node.getNodeId()).thenReturn(mock(NodeId.class));
+        when(ev.getNode()).thenReturn(node);
 
-        //PowerMockito.mockStatic(NodeUtils.class);
-        //when(NodeUtils.getOpenFlowNode(anyString())).thenReturn(mock(Node.class));
-
-        when(ev.getAction()).thenReturn(Action.ADD);
+        when(ev.getAction()).thenReturn(Action.UPDATE);
         nodeCacheManagerImpl.processEvent(ev);
-        assertEquals("Error, did not add the event", 1, nodeCacheManagerImpl.getBridgeNodes().size());
+        assertEquals("Error, did not delete the event", 1, nodeCacheManagerImpl.getNodes().size());
 
-        when(ev.getAction()).thenReturn(Action.DELETE);
-        nodeCacheManagerImpl.processEvent(ev);
-        assertEquals("Error, did not delete the event", 0, nodeCacheManagerImpl.getBridgeNodes().size());
+//        when(ev.getAction()).thenReturn(Action.DELETE);
+//        nodeCacheManagerImpl.processEvent(ev);
+//        assertEquals("Error, did not delete the event", 0, nodeCacheManagerImpl.getNodes().size());
     }
 
     @Test

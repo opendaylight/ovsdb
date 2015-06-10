@@ -51,6 +51,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <modules>
     <!-- Parent POM files -->
     <module>commons</module>
+    <module>ovsdb-ui</module>
     <module>features</module>
     <module>karaf</module>
     <!-- OVSDB Components -->

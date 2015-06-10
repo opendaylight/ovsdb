@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright (c) 2015 Inocybe Technologies, and others. All rights reserved.
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v1.0 which accompanies this distribution,
+and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.opendaylight.ovsdb</groupId>
+        <artifactId>commons</artifactId>
+        <version>1.4.0-SNAPSHOT</version>
+        <relativePath>../../commons/parent</relativePath>
+    </parent>
+
+    <artifactId>ovsdb-ui-bundle</artifactId>
+    <version>${ovsdb.ui.version}</version>
+    <packaging>bundle</packaging>
+    <description>The OVSDB Plugin integration project is a project for OpenDaylight that will implement the Open vSwitch Database RFC 7047 management protocol allowing the Southbound configuration of vSwitches and a network virtualization implementation.</description>
+    <licenses>
+        <license>
+            <name>Eclipse Public License v1.0</name>
+            <url>http://www.eclipse.org/legal/epl-v10.html</url>
+        </license>
+    </licenses>
+    <scm>
+        <connection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</connection>
+        <developerConnection>scm:git:ssh://git.opendaylight.org:29418/ovsdb.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
+    </scm>
+    <dependencies>
+        <dependency>
+            <groupId>org.opendaylight.dlux</groupId>
+            <artifactId>loader</artifactId>
+            <version>${dlux.loader.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.ovsdb</groupId>
+          <artifactId>ovsdb-ui-module</artifactId>
+          <version>${ovsdb.ui.version}</version>
+        </dependency>
+    </dependencies>
+    <build>
+        <resources>
+          <resource>
+            <directory>target/generated-resources</directory>
+          </resource>
+          <resource>
+            <directory>src/main/resources</directory>
+         </resource>
+        </resources>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>2.6</version>
+            <executions>
+              <execution>
+                <id>unpack-loader-resources</id>
+                <goals>
+                  <goal>unpack</goal>
+                </goals>
+                <phase>generate-resources</phase>
+                <configuration>
+               <artifactItems>
+                   <artifactItem>
+                      <groupId>org.opendaylight.ovsdb</groupId>
+                      <artifactId>ovsdb-ui-module</artifactId>
+                      <version>${ovsdb.ui.version}</version>
+                      <overWrite>true</overWrite>
+                      <outputDirectory>${project.build.directory}/generated-resources</outputDirectory>
+                    </artifactItem>
+                  </artifactItems>
+                  <excludes>META-INF\/**, ovsdb\/spec\/**, ovsdb\/mocks\/**</excludes>
+                  <ignorePermissions>false</ignorePermissions>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>2.5.3</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Import-Package>org.osgi.service.http,
+                                        org.osgi.framework;version="1.0.0",
+                                        org.opendaylight.dlux.loader,
+                                        org.slf4j
+                        </Import-Package>
+                    <Export-Package></Export-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

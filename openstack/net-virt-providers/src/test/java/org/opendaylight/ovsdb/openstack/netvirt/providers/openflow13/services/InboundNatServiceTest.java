@@ -19,14 +19,12 @@ import static org.mockito.Mockito.when;
 import java.net.InetAddress;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -43,16 +41,15 @@ import com.google.common.util.concurrent.CheckedFuture;
 /**
  * Unit test for {@link InboundNatService}
  */
-@Ignore // TODO SB_MIGRATION
 @RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings("unchecked")
 public class InboundNatServiceTest {
 
     @InjectMocks private InboundNatService inboundNatService = new InboundNatService(Service.ARP_RESPONDER);
 
-    //@Mock private MdsalConsumer mdsalConsumer;
+    @Mock private DataBroker dataBroker;
     @Mock private PipelineOrchestrator orchestrator;
 
-    @Mock private ReadWriteTransaction readWriteTransaction;
     @Mock private WriteTransaction writeTransaction;
     @Mock private CheckedFuture<Void, TransactionCommitFailedException> commitFuture;
 
@@ -61,14 +58,9 @@ public class InboundNatServiceTest {
 
     @Before
     public void setUp() {
-        when(readWriteTransaction.submit()).thenReturn(commitFuture);
         when(writeTransaction.submit()).thenReturn(commitFuture);
 
-        DataBroker dataBroker = mock(DataBroker.class);
-        when(dataBroker.newReadWriteTransaction()).thenReturn(readWriteTransaction);
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(writeTransaction);
-
-        //when(mdsalConsumer.getDataBroker()).thenReturn(dataBroker);
 
         when(orchestrator.getNextServiceInPipeline(any(Service.class))).thenReturn(Service.ARP_RESPONDER);
     }
@@ -87,8 +79,8 @@ public class InboundNatServiceTest {
                 new Status(StatusCode.SUCCESS),
                 inboundNatService.programIpRewriteRule(Long.valueOf(123), "2",
                         matchAddress, rewriteAddress, Action.ADD));
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         assertEquals("Error, did not return the expected StatusCode",
@@ -96,7 +88,7 @@ public class InboundNatServiceTest {
                 inboundNatService.programIpRewriteRule(Long.valueOf(123), "2",
                         matchAddress, rewriteAddress, Action.DELETE));
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above
     }
 
@@ -108,9 +100,9 @@ public class InboundNatServiceTest {
         assertEquals("Error, did not return the expected StatusCode",
                 new Status(StatusCode.SUCCESS),
                 inboundNatService.programIpRewriteExclusion(Long.valueOf(123), "2", HOST_ADDRESS_PREFIX, Action.ADD));
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class),
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class),
                 any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         assertEquals("Error, did not return the expected StatusCode",
@@ -118,7 +110,7 @@ public class InboundNatServiceTest {
                 inboundNatService.programIpRewriteExclusion(Long.valueOf(123), "2",
                         HOST_ADDRESS_PREFIX, Action.DELETE));
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above
     }
 }

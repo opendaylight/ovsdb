@@ -19,14 +19,12 @@ import static org.mockito.Mockito.when;
 import java.net.InetAddress;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -43,16 +41,15 @@ import com.google.common.util.concurrent.CheckedFuture;
 /**
  * Unit test fort {@link L3ForwardingService}
  */
-@Ignore // TODO SB_MIGRATION
 @RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings("unchecked")
 public class L3FowardingServiceTest {
 
     @InjectMocks private L3ForwardingService l3ForwardingService = new L3ForwardingService();
 
-    //@Mock private MdsalConsumer mdsalConsumer;
+    @Mock private DataBroker dataBroker;
     @Mock private PipelineOrchestrator orchestrator;
 
-    @Mock private ReadWriteTransaction readWriteTransaction;
     @Mock private WriteTransaction writeTransaction;
     @Mock private CheckedFuture<Void, TransactionCommitFailedException> commitFuture;
 
@@ -62,14 +59,9 @@ public class L3FowardingServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        when(readWriteTransaction.submit()).thenReturn(commitFuture);
         when(writeTransaction.submit()).thenReturn(commitFuture);
 
-        DataBroker dataBroker = mock(DataBroker.class);
-        when(dataBroker.newReadWriteTransaction()).thenReturn(readWriteTransaction);
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(writeTransaction);
-
-        //when(mdsalConsumer.getDataBroker()).thenReturn(dataBroker);
 
         when(orchestrator.getNextServiceInPipeline(any(Service.class))).thenReturn(Service.ARP_RESPONDER);
     }
@@ -86,9 +78,9 @@ public class L3FowardingServiceTest {
                 new Status(StatusCode.SUCCESS),
                 l3ForwardingService.programForwardingTableEntry(Long.valueOf(123),
                         SEGMENTATION_ID, address, MAC_ADDRESS, Action.ADD));
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class),
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class),
                 any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         assertEquals("Error, did not return the expected StatusCode",
@@ -96,7 +88,7 @@ public class L3FowardingServiceTest {
                 l3ForwardingService.programForwardingTableEntry(Long.valueOf(123),
                         SEGMENTATION_ID, address, MAC_ADDRESS, Action.DELETE));
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above
     }
 

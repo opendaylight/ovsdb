@@ -22,6 +22,30 @@
       "revId": "90258bc94842739b4f319cc9e6a23387d70e75c8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_872512c4",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactInvokerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-11T22:07:49Z",
+      "side": 1,
+      "message": "not in this case, the transactionBuilder.operations is a Lists.newArrayList() so it is valid and size 0",
+      "parentUuid": "9a6a9dd7_c76d4a06",
+      "range": {
+        "startLine": 37,
+        "startChar": 15,
+        "endLine": 37,
+        "endChar": 28
+      },
+      "revId": "90258bc94842739b4f319cc9e6a23387d70e75c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -33,12 +33,15 @@ public class TransactInvokerImpl implements TransactInvoker {
         TransactionBuilder tb = new TransactionBuilder(connectionInstance, dbSchema);
         command.execute(tb);
         ListenableFuture<List<OperationResult>> result = tb.execute();
-        LOG.debug("TransactInvokerImpl: command: {}, tb: {}", command, tb);
-        try {
-            List<OperationResult> got = result.get();
-            LOG.debug("OVSDB transaction result: {}", got);
-        } catch (Exception e) {
-            LOG.warn("Transact execution exception: ",e);
+        LOG.debug("invoke: command: {}, tb: {}", command, tb);
+        if (tb.getOperations().size() > 0) {
+            try {
+                List<OperationResult> got = result.get();
+                LOG.debug("OVSDB transaction result: {}", got);
+            } catch (Exception e) {
+                LOG.warn("Transact execution exception: ", e);
+            }
+            LOG.trace("invoke exit command: {}, tb: {}", command, tb);
         }
     }
 

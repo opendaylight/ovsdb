@@ -74,6 +74,7 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
 
         init(changes);
 
+        LOG.trace("onDataChanged: exit");
     }
 
     private void updateData(

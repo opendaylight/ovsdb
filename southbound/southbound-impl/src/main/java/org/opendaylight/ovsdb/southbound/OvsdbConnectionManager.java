@@ -73,6 +73,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         ConnectionInfo key = SouthboundMapper.createConnectionInfo(client);
         txInvoker.invoke(new OvsdbNodeRemoveCommand(getConnectionInstance(key),null,null));
         clients.remove(key);
+        LOG.trace("OvsdbConnectionManager: disconnected exit");
     }
 
     public OvsdbClient connect(InstanceIdentifier<Node> iid,

@@ -1,5 +1,7 @@
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
+import java.util.List;
+
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
@@ -32,9 +34,12 @@ public class OvsdbNodeRemoveCommand extends AbstractTransactionCommand {
             if (ovsdbNodeOptional.isPresent()) {
                 Node ovsdbNode = ovsdbNodeOptional.get();
                 OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.getAugmentation(OvsdbNodeAugmentation.class);
-                if (ovsdbNodeAugmentation != null && ovsdbNodeAugmentation.getManagedNodeEntry() != null) {
-                    for (ManagedNodeEntry managedNode : ovsdbNodeAugmentation.getManagedNodeEntry()) {
-                        transaction.delete(LogicalDatastoreType.OPERATIONAL, managedNode.getBridgeRef().getValue());
+                if (ovsdbNodeAugmentation != null) {
+                    List<ManagedNodeEntry> managedNodeEntry = ovsdbNodeAugmentation.getManagedNodeEntry();
+                    if (managedNodeEntry != null) {
+                        for (ManagedNodeEntry managedNode : managedNodeEntry) {
+                            transaction.delete(LogicalDatastoreType.OPERATIONAL, managedNode.getBridgeRef().getValue());
+                        }
                     }
                 } else {
                     LOG.warn("{} had no OvsdbNodeAugmentation", ovsdbNode);

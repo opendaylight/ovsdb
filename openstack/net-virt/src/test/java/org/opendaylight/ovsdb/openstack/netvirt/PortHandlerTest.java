@@ -11,45 +11,48 @@ package org.opendaylight.ovsdb.openstack.netvirt;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.neutron.spi.NeutronPort;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
-import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
+import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
-//import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Unit test fort {@link PortHandler}
  */
-@Ignore // TODO SB_MIGRATION
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(ServiceHelper.class)
 public class PortHandlerTest {
 
-    @InjectMocks PortHandler portHandler;
+    @InjectMocks private PortHandler portHandler;
 
     @Mock private NeutronL3Adapter neutronL3Adapter;
+    @Mock private NodeCacheManager nodeCacheManager;
+    @Mock private Southbound southbound;
 
     @Test
     public void testCanCreatePort() {
@@ -66,7 +69,6 @@ public class PortHandlerTest {
         assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_OK, portHandler.canDeletePort(mock(NeutronPort.class)));
     }
 
-    @Ignore
     @Test
     public void testProcessEvent() {
         PortHandler portHandlerSpy = Mockito.spy(portHandler);
@@ -88,37 +90,47 @@ public class PortHandlerTest {
         portHandlerSpy.processEvent(ev);
         verify(neutronL3Adapter, times(1)).handleNeutronPortEvent(neutronPort, Action.UPDATE);
 
+        List<Node> nodes = new ArrayList<Node>();
+        nodes.add(mock(Node.class));
+        when(nodeCacheManager.getNodes()).thenReturn(nodes);
 
-        //Node node = mock(Node.class);
-        //List<Node> nodes = new ArrayList();
-        //nodes.add(node);
-        /* TODO SB_MIGRATION */
-        //when(connectionService.getBridgeNodes()).thenReturn(nodes);
+        List<OvsdbTerminationPointAugmentation> ports = new ArrayList<OvsdbTerminationPointAugmentation>();
+        OvsdbTerminationPointAugmentation port = mock(OvsdbTerminationPointAugmentation.class);
+        ports.add(port);
+        when(southbound.getTerminationPointsOfBridge(any(Node.class))).thenReturn(ports);
 
-        //Row row = mock(Row.class);
-        //ConcurrentMap<String, Row> portRows = new ConcurrentHashMap();
-        //portRows.put("key", row);
-        //when(ovsdbConfigurationService.getRows(any(Node.class), anyString())).thenReturn(portRows );
-
-        //Port port = mock(Port.class);
-        //Column<GenericTableSchema, Set<UUID>> itfaceColumns = mock(Column.class);
-        //when(port.getInterfacesColumn()).thenReturn(itfaceColumns);
-        //Set<UUID> ifaceUUIDs = new HashSet();
-        //ifaceUUIDs.add(mock(UUID.class));
-        //when(itfaceColumns.getData()).thenReturn(ifaceUUIDs );
-        //when(ovsdbConfigurationService.getTypedRow(any(Node.class), same(Port.class), any(Row.class))).thenReturn(port);
-
-        //Interface itface = mock(Interface.class);
-        //Column<GenericTableSchema, Map<String, String>> externalIdColumns = mock(Column.class);
-        Map<String, String> externalIds = new HashMap();
-        externalIds.put(Constants.EXTERNAL_ID_INTERFACE_ID, "portUUID");
-        //when(externalIdColumns.getData()).thenReturn(externalIds);
-        //when(itface.getExternalIdsColumn()).thenReturn(externalIdColumns);
-        //when(ovsdbConfigurationService.getTypedRow(any(Node.class), same(Interface.class), any(Row.class))).thenReturn(itface);
-
+        when(southbound.getInterfaceExternalIdsValue(any(OvsdbTerminationPointAugmentation.class), anyString())).thenReturn("portUUID");
 
         when(ev.getAction()).thenReturn(Action.DELETE);
-        //portHandlerSpy.processEvent(ev);
+        portHandlerSpy.processEvent(ev);
         verify(neutronL3Adapter, times(1)).handleNeutronPortEvent(neutronPort, Action.DELETE);
+        verify(southbound, times(1)).deleteTerminationPoint(any(Node.class), anyString());
+    }
+
+    @Test
+    public void testSetDependencies() throws Exception {
+        NodeCacheManager nodeCacheManager = mock(NodeCacheManager.class);
+        NeutronL3Adapter neutronL3Adapter = mock(NeutronL3Adapter.class);
+        Southbound southbound = mock(Southbound.class);
+        EventDispatcher eventDispatcher = mock(EventDispatcher.class);
+
+        PowerMockito.mockStatic(ServiceHelper.class);
+        PowerMockito.when(ServiceHelper.getGlobalInstance(NodeCacheManager.class, portHandler)).thenReturn(nodeCacheManager);
+        PowerMockito.when(ServiceHelper.getGlobalInstance(NeutronL3Adapter.class, portHandler)).thenReturn(neutronL3Adapter);
+        PowerMockito.when(ServiceHelper.getGlobalInstance(Southbound.class, portHandler)).thenReturn(southbound);
+        PowerMockito.when(ServiceHelper.getGlobalInstance(EventDispatcher.class, portHandler)).thenReturn(eventDispatcher);
+
+        portHandler.setDependencies(mock(BundleContext.class), mock(ServiceReference.class));
+
+        assertEquals("Error, did not return the correct object", getField("nodeCacheManager"), nodeCacheManager);
+        assertEquals("Error, did not return the correct object", getField("neutronL3Adapter"), neutronL3Adapter);
+        assertEquals("Error, did not return the correct object", getField("southbound"), southbound);
+        assertEquals("Error, did not return the correct object", portHandler.eventDispatcher, eventDispatcher);
+    }
+
+    private Object getField(String fieldName) throws Exception {
+        Field field = PortHandler.class.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        return field.get(portHandler);
     }
 }

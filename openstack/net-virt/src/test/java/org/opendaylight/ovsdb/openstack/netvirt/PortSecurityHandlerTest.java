@@ -14,6 +14,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 
 import org.junit.Before;
@@ -21,14 +22,21 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.neutron.spi.NeutronSecurityGroup;
 import org.opendaylight.neutron.spi.NeutronSecurityRule;
+import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Unit test {@link PortSecurityHandler}
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(ServiceHelper.class)
 public class PortSecurityHandlerTest {
 
     @InjectMocks private PortSecurityHandler portSecurityHandler;
@@ -84,6 +92,25 @@ public class PortSecurityHandlerTest {
     @Test
     public void testProcessEvent() {
         // TODO see PortSecurityHandler#processEvent()
+    }
+
+    @Test
+    public void testSetDependencies() throws Exception {
+        EventDispatcher eventDispatcher = mock(EventDispatcher.class);
+
+        PowerMockito.mockStatic(ServiceHelper.class);
+        PowerMockito.when(ServiceHelper.getGlobalInstance(EventDispatcher.class, portSecurityHandler)).thenReturn(eventDispatcher);
+
+        portSecurityHandler.setDependencies(mock(BundleContext.class), mock(ServiceReference.class));
+
+        assertEquals("Error, did not return the correct object", portSecurityHandler.eventDispatcher, eventDispatcher);
+    }
+
+
+    private Object getField(String fieldName) throws Exception {
+        Field field = PortSecurityHandler.class.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        return field.get(portSecurityHandler);
     }
 
 }

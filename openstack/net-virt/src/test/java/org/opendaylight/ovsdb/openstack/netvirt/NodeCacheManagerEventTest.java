@@ -11,30 +11,29 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
-import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 /**
  * Unit test for {@link NodeCacheManagerEvent}
  */
-/* TODO SB_MIGRATION */
-@Ignore
+
+@RunWith(MockitoJUnitRunner.class)
 public class NodeCacheManagerEventTest {
 
-    private NodeCacheManagerEvent nodeCacheManagerEvent;
-
-    @Before
-    public void setUp() {
-        /* TODO SB_MIGRATION */
-        //nodeCacheManagerEvent = new NodeCacheManagerEvent("nodeIdentifier", Action.ADD);
-    }
+    @InjectMocks private NodeCacheManagerEvent nodeCacheManagerEvent;
 
     @Test
     public void testToString() {
-        assertEquals("Error, toString() did not return the correct string", "NodeCacheManagerEvent [action=ADD, nodeIdentifier=nodeIdentifier]", nodeCacheManagerEvent.toString());
+        Node node = mock(Node.class);
+        nodeCacheManagerEvent = new NodeCacheManagerEvent(node, Action.ADD);
+        assertEquals("Error, toString() did not return the correct string", "NodeCacheManagerEvent [action=ADD, node=" + node + "]", nodeCacheManagerEvent.toString());
     }
 
     @Test

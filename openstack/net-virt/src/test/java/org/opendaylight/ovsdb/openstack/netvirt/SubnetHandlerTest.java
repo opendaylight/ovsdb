@@ -14,21 +14,29 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.neutron.spi.NeutronSubnet;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
+import org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher;
 import org.opendaylight.ovsdb.openstack.netvirt.impl.NeutronL3Adapter;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Unit test fort {@link SubnetHandler}
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(ServiceHelper.class)
 public class SubnetHandlerTest {
 
     @InjectMocks private SubnetHandler subnetHandler;
@@ -66,5 +74,26 @@ public class SubnetHandlerTest {
         when(ev.getAction()).thenReturn(Action.UPDATE);
         subnetHandler.processEvent(ev);
         verify(neutronl3Adapter, times(1)).handleNeutronSubnetEvent(ev.getSubnet(), ev.getAction());;
+    }
+
+    @Test
+    public void testSetDependencies() throws Exception {
+        NeutronL3Adapter neutronL3Adapter = mock(NeutronL3Adapter.class);
+        EventDispatcher eventDispatcher = mock(EventDispatcher.class);
+
+        PowerMockito.mockStatic(ServiceHelper.class);
+        PowerMockito.when(ServiceHelper.getGlobalInstance(NeutronL3Adapter.class, subnetHandler)).thenReturn(neutronL3Adapter);
+        PowerMockito.when(ServiceHelper.getGlobalInstance(EventDispatcher.class, subnetHandler)).thenReturn(eventDispatcher);
+
+        subnetHandler.setDependencies(mock(BundleContext.class), mock(ServiceReference.class));
+
+        assertEquals("Error, did not return the correct object", getField("neutronL3Adapter"), neutronL3Adapter);
+        assertEquals("Error, did not return the correct object", subnetHandler.eventDispatcher, eventDispatcher);
+    }
+
+    private Object getField(String fieldName) throws Exception {
+        Field field = SubnetHandler.class.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        return field.get(subnetHandler);
     }
 }

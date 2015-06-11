@@ -13,53 +13,53 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.neutron.spi.INeutronNetworkCRUD;
 import org.opendaylight.neutron.spi.INeutronPortCRUD;
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.neutron.spi.NeutronPort;
-import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.NetworkingProviderManager;
-import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.openstack.netvirt.api.VlanConfigurationCache;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Unit test for {@link TenantNetworkManagerImpl}
  */
-@Ignore // TODO SB_MIGRATION
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(ServiceHelper.class)
 public class TenantNetworkManagerImplTest {
 
-    @Mock private VlanConfigurationCache vlanConfigurationCache;
-    @Mock private INeutronPortCRUD neutronCache;
-    @Mock private NetworkingProviderManager networkingProviderManager;
-
     @InjectMocks private TenantNetworkManagerImpl tenantNetworkManagerImpl;
-    @InjectMocks private INeutronPortCRUD neutronPortCache = mock(INeutronPortCRUD.class);
-    @InjectMocks private INeutronNetworkCRUD neutronNetworkCache = mock(INeutronNetworkCRUD.class);
+
+    @Mock private INeutronPortCRUD neutronPortCache;
+    @Mock private INeutronNetworkCRUD neutronNetworkCache;
+    @Mock private VlanConfigurationCache vlanConfigurationCache;
+    @Mock private NetworkingProviderManager networkingProviderManager;
+    @Mock private Southbound southbound;
 
     private static final String NETWORK_ID= "networkId";
-
+    private static final String SEG_ID = "segId";
+    private static final String INTERFACE_ID = "intId";
     /**
      * Test method {@link TenantNetworkManagerImpl#getInternalVlan(Node, String)}
      */
@@ -80,9 +80,8 @@ public class TenantNetworkManagerImplTest {
     public void testReclaimInternalVlan() {
         when(vlanConfigurationCache.reclaimInternalVlan(any(Node.class), eq(NETWORK_ID))).thenReturn(10);
 
-        /* TODO SB_MIGRATION */
-        //tenantNetworkManagerImpl.reclaimInternalVlan(mock(Node.class), NETWORK_ID, mock(NeutronNetwork.class));
-        //tenantNetworkManagerImpl.reclaimInternalVlan(mock(Node.class), "unexistingNetwork", mock(NeutronNetwork.class));
+        tenantNetworkManagerImpl.reclaimInternalVlan(mock(Node.class), mock(NeutronNetwork.class));
+        tenantNetworkManagerImpl.reclaimInternalVlan(mock(Node.class), mock(NeutronNetwork.class));
 
         verify(vlanConfigurationCache, times(2)).reclaimInternalVlan(any(Node.class), anyString());
     }
@@ -92,20 +91,9 @@ public class TenantNetworkManagerImplTest {
      */
     @Test
     public void testProgramInternalVlan(){
-        //Port port = mock(Port.class);
-        //Row row = mock(Row.class);
-        //GenericTableSchema tableSchema = mock(GenericTableSchema.class);
-        Status status = mock(Status.class);
-
-        //when(port.getRow()).thenReturn(row);
-        //when(port.getSchema()).thenReturn(tableSchema);
-
         when(vlanConfigurationCache.getInternalVlan(any(Node.class), anyString())).thenReturn(10);
-        /* TODO SB_MIGRATION */
-        //when(ovsdbConfigurationService.createTypedRow(any(Node.class), same(Port.class))).thenReturn(port);
-        //when(ovsdbConfigurationService.updateRow(any(Node.class), anyString(), anyString(), anyString(), any(Row.class))).thenReturn(status);
 
-        //tenantNetworkManagerImpl.programInternalVlan(mock(Node.class), NETWORK_ID, mock(NeutronNetwork.class));
+        tenantNetworkManagerImpl.programInternalVlan(mock(Node.class), mock(OvsdbTerminationPointAugmentation.class), mock(NeutronNetwork.class));
 
         verify(vlanConfigurationCache, times(1)).getInternalVlan(any(Node.class), anyString());
     }
@@ -113,52 +101,25 @@ public class TenantNetworkManagerImplTest {
     /**
      * Test method {@link TenantNetworkManagerImpl#isTenantNetworkPresentInNode(Node, String)}
      */
-    /* TODO SB_MIGRATION */
-    @Ignore
     @Test
     public void testIsTenantNetworkPresentInNode() {
-        NetworkingProvider networkingProvider = mock(NetworkingProvider.class);
-
-        //Interface intf = mock(Interface.class);
-        //Column<GenericTableSchema, Map<String, String>> columnMock = mock(Column.class);
-        Map<String, String> externalIds = new HashMap<String, String>();
-        externalIds.put(Constants.EXTERNAL_ID_INTERFACE_ID, "interfaceId");
-
-        //Row row = mock(Row.class);
-        //Bridge bridge = mock(Bridge.class, RETURNS_DEEP_STUBS);
-
-        //ConcurrentHashMap<String, Row> map;
-        //map = new ConcurrentHashMap<>();
-        //map.put("row", row);
-
         NeutronNetwork neutronNetwork = mock(NeutronNetwork.class);
-        NeutronPort neutronPort = mock(NeutronPort.class);
+        when(neutronNetwork.getProviderSegmentationID()).thenReturn(SEG_ID);
+        when(neutronNetwork.getNetworkUUID()).thenReturn(NETWORK_ID);
         ArrayList<NeutronNetwork> listNeutronNetwork = new ArrayList<NeutronNetwork>();
         listNeutronNetwork.add(neutronNetwork);
-
-        when(neutronNetwork.getProviderSegmentationID()).thenReturn("segId");
-        when(neutronNetwork.getNetworkUUID()).thenReturn("networkUUID");
         when(neutronNetworkCache.getAllNetworks()).thenReturn(listNeutronNetwork);
 
-        assertEquals("Error, did not return the UUID of the correct network", listNeutronNetwork.get(0).getNetworkUUID(), tenantNetworkManagerImpl.getNetworkId("segId"));
-
-        when(networkingProviderManager.getProvider(any(Node.class))).thenReturn(networkingProvider);
-        when(networkingProvider.hasPerTenantTunneling()).thenReturn(true);
-
-        when(vlanConfigurationCache.getInternalVlan(any(Node.class), anyString())).thenReturn(10);
-
-        /* TODO SB_MIGRATION */
-        //when(ovsdbConfigurationService.getRows(any(Node.class), anyString())).thenReturn(map);
-        //when(ovsdbConfigurationService.getTypedRow(any(Node.class), same(Interface.class),
-        //        any(Row.class))).thenReturn(intf);
-
-        //when(intf.getExternalIdsColumn()).thenReturn(columnMock);
-        //when(columnMock.getData()).thenReturn(externalIds);
-
+        when(southbound.getInterfaceExternalIdsValue(any(OvsdbTerminationPointAugmentation.class), anyString())).thenReturn(INTERFACE_ID);
+        NeutronPort neutronPort = mock(NeutronPort.class);
+        when(neutronPort.getNetworkUUID()).thenReturn(NETWORK_ID);
         when(neutronPortCache.getPort(anyString())).thenReturn(neutronPort);
-        when(neutronPort.getNetworkUUID()).thenReturn("networkUUID");
 
-        assertTrue("Error, did not return correct boolean for isTenantNetworkPresentInNode", tenantNetworkManagerImpl.isTenantNetworkPresentInNode(mock(Node.class), "segId"));
+        List<OvsdbTerminationPointAugmentation> ports = new ArrayList<OvsdbTerminationPointAugmentation>();
+        ports.add(mock(OvsdbTerminationPointAugmentation.class));
+        when(southbound.getTerminationPointsOfBridge(any(Node.class))).thenReturn(ports);
+
+        assertTrue("Error, did not return correct boolean for isTenantNetworkPresentInNode", tenantNetworkManagerImpl.isTenantNetworkPresentInNode(mock(Node.class), SEG_ID));
     }
 
     /**
@@ -184,25 +145,59 @@ public class TenantNetworkManagerImplTest {
      */
     @Test
     public void testGetTenantNetwork() {
-        //Interface intf = mock(Interface.class);
-        //Column<GenericTableSchema, Map<String, String>> columnMock = mock(Column.class);
-        Map<String, String> externalIds = new HashMap<String, String>();
-        externalIds.put(Constants.EXTERNAL_ID_INTERFACE_ID, "tenantValue");
+        when(southbound.getInterfaceExternalIdsValue(any(OvsdbTerminationPointAugmentation.class), anyString())).thenReturn(INTERFACE_ID);
         NeutronPort neutronPort = mock(NeutronPort.class);
-        NeutronNetwork neutronNetwork = mock(NeutronNetwork.class);
-
-        //when(intf.getExternalIdsColumn()).thenReturn(columnMock);
-        //when(columnMock.getData()).thenReturn(externalIds);
-
-        when(neutronPort.getNetworkUUID()).thenReturn("neutronUUID");
         when(neutronPortCache.getPort(anyString())).thenReturn(neutronPort);
+        NeutronNetwork neutronNetwork = mock(NeutronNetwork.class);
         when(neutronNetworkCache.getNetwork(anyString())).thenReturn(neutronNetwork);
 
-        // TODO SB_MIGRATION
-        //assertEquals("Error, did not return the correct tenant", neutronNetwork, tenantNetworkManagerImpl.getTenantNetwork(intf));
-
-        verify(neutronPortCache, times(1)).getPort(anyString());
-        verify(neutronNetworkCache, times(1)).getNetwork(anyString());
+        assertEquals("Error, did not return the correct tenant", neutronNetwork, tenantNetworkManagerImpl.getTenantNetwork(mock(OvsdbTerminationPointAugmentation.class)));
     }
 
+    @Test
+    public void testGetTenantPort() {
+        when(southbound.getInterfaceExternalIdsValue(any(OvsdbTerminationPointAugmentation.class), anyString())).thenReturn(INTERFACE_ID);
+        NeutronPort neutronPort = mock(NeutronPort.class);
+        when(neutronPortCache.getPort(anyString())).thenReturn(neutronPort);
+
+        assertEquals("Error, did not return the correct tenant", neutronPort, tenantNetworkManagerImpl.getTenantPort(mock(OvsdbTerminationPointAugmentation.class)));
+    }
+
+    @Test
+    public void testNetworkCreated() {
+        tenantNetworkManagerImpl.networkCreated(mock(Node.class), NETWORK_ID);
+        verify(vlanConfigurationCache, times(1)).assignInternalVlan(any(Node.class), anyString());
+    }
+
+    @Test
+    public void testSetDependencies() throws Exception {
+        VlanConfigurationCache vlanConfigurationCache = mock(VlanConfigurationCache.class);
+        Southbound southbound = mock(Southbound.class);
+
+        PowerMockito.mockStatic(ServiceHelper.class);
+        PowerMockito.when(ServiceHelper.getGlobalInstance(VlanConfigurationCache.class, tenantNetworkManagerImpl)).thenReturn(vlanConfigurationCache);
+        PowerMockito.when(ServiceHelper.getGlobalInstance(Southbound.class, tenantNetworkManagerImpl)).thenReturn(southbound);
+
+        tenantNetworkManagerImpl.setDependencies(mock(BundleContext.class), mock(ServiceReference.class));
+
+        assertEquals("Error, did not return the correct object", getField("vlanConfigurationCache"), vlanConfigurationCache);
+        assertEquals("Error, did not return the correct object", getField("southbound"), southbound);
+    }
+
+    @Test
+    public void testSetDependenciesObject() throws Exception{
+        INeutronNetworkCRUD neutronNetworkCache = mock(INeutronNetworkCRUD.class);
+        tenantNetworkManagerImpl.setDependencies(neutronNetworkCache);
+        assertEquals("Error, did not return the correct object", getField("neutronNetworkCache"), neutronNetworkCache);
+
+        INeutronPortCRUD neutronPortCache = mock(INeutronPortCRUD.class);
+        tenantNetworkManagerImpl.setDependencies(neutronPortCache);
+        assertEquals("Error, did not return the correct object", getField("neutronPortCache"), neutronPortCache);
+    }
+
+    private Object getField(String fieldName) throws Exception {
+        Field field = TenantNetworkManagerImpl.class.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        return field.get(tenantNetworkManagerImpl);
+    }
 }

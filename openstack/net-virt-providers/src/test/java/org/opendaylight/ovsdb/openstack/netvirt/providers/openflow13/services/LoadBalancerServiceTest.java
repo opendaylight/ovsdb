@@ -20,26 +20,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
-import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
-import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration.LoadBalancerPoolMember;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
+import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestrator;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
@@ -48,17 +46,15 @@ import com.google.common.util.concurrent.CheckedFuture;
 /**
  * Unit test fort {@link LoadBalancerService}
  */
-/* TODO SB_MIGRATION */
-@Ignore
 @RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings("unchecked")
 public class LoadBalancerServiceTest {
 
     @InjectMocks private LoadBalancerService loadBalancerService = new LoadBalancerService(Service.ARP_RESPONDER);
 
-    //@Mock private MdsalConsumer mdsalConsumer;
+    @Mock private DataBroker dataBroker;
     @Mock private PipelineOrchestrator orchestrator;
 
-    @Mock private ReadWriteTransaction readWriteTransaction;
     @Mock private WriteTransaction writeTransaction;
     @Mock private CheckedFuture<Void, TransactionCommitFailedException> commitFuture;
 
@@ -72,14 +68,9 @@ public class LoadBalancerServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        when(readWriteTransaction.submit()).thenReturn(commitFuture);
         when(writeTransaction.submit()).thenReturn(commitFuture);
 
-        DataBroker dataBroker = mock(DataBroker.class);
-        when(dataBroker.newReadWriteTransaction()).thenReturn(readWriteTransaction);
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(writeTransaction);
-
-        //when(mdsalConsumer.getDataBroker()).thenReturn(dataBroker);
 
         when(orchestrator.getNextServiceInPipeline(any(Service.class))).thenReturn(Service.ARP_RESPONDER);
 
@@ -99,8 +90,7 @@ public class LoadBalancerServiceTest {
         NodeId nodeId = mock(NodeId.class);
         when(nodeId.getValue()).thenReturn("id");
 
-        /* TODO SB_MIGRATION */ // use Topology Node NodeId
-        //when(node.getNodeId()).thenReturn(nodeId);
+        when(node.getNodeId()).thenReturn(nodeId);
     }
     /**
      * Test method {@link LoadBalancerService#programLoadBalancerPoolMemberRules(Node, LoadBalancerConfiguration, LoadBalancerPoolMember, Action)}
@@ -110,13 +100,13 @@ public class LoadBalancerServiceTest {
         assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.BADREQUEST), loadBalancerService.programLoadBalancerPoolMemberRules(node, null, null, Action.ADD));
 
         assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.NOTIMPLEMENTED), loadBalancerService.programLoadBalancerPoolMemberRules(node, lbConfig, member, Action.DELETE));
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.SUCCESS), loadBalancerService.programLoadBalancerPoolMemberRules(node, lbConfig, member, Action.ADD));
-        verify(readWriteTransaction, times(8)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(4)).submit();
+        verify(writeTransaction, times(8)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(4)).submit();
         verify(commitFuture, times(4)).get();
     }
 
@@ -130,13 +120,13 @@ public class LoadBalancerServiceTest {
         assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.NOTIMPLEMENTED), loadBalancerService.programLoadBalancerRules(node, lbConfig, Action.UPDATE));
 
         assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.SUCCESS), loadBalancerService.programLoadBalancerRules(node, lbConfig, Action.ADD));
-        verify(readWriteTransaction, times(6)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(3)).submit();
+        verify(writeTransaction, times(6)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(3)).submit();
         verify(commitFuture, times(3)).get();
 
         assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.SUCCESS), loadBalancerService.programLoadBalancerRules(node, lbConfig, Action.DELETE));
         verify(writeTransaction, times(3)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(writeTransaction, times(3)).submit();
+        verify(writeTransaction, times(6)).submit();
         verify(commitFuture, times(6)).get(); // 3 + 3 before
     }
 }

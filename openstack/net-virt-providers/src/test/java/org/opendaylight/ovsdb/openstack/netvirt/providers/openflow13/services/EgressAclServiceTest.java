@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -31,7 +30,6 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -46,17 +44,16 @@ import com.google.common.util.concurrent.CheckedFuture;
 /**
  * Unit test for {@link EgressAclService}
  */
-@Ignore // TODO SB_MIGRATION
 @RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings("unchecked")
 public class EgressAclServiceTest {
 
     @InjectMocks private EgressAclService egressAclService = new EgressAclService();
     @Spy private EgressAclService egressAclServiceSpy;
 
-    //@Mock private MdsalConsumer mdsalConsumer;
+    @Mock private DataBroker dataBroker;
     @Mock private PipelineOrchestrator orchestrator;
 
-    @Mock private ReadWriteTransaction readWriteTransaction;
     @Mock private WriteTransaction writeTransaction;
     @Mock private CheckedFuture<Void, TransactionCommitFailedException> commitFuture;
 
@@ -70,14 +67,9 @@ public class EgressAclServiceTest {
     public void setUp() {
         egressAclServiceSpy = Mockito.spy(egressAclService);
 
-        when(readWriteTransaction.submit()).thenReturn(commitFuture);
         when(writeTransaction.submit()).thenReturn(commitFuture);
 
-        DataBroker dataBroker = mock(DataBroker.class);
-        when(dataBroker.newReadWriteTransaction()).thenReturn(readWriteTransaction);
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(writeTransaction);
-
-        //when(mdsalConsumer.getDataBroker()).thenReturn(dataBroker);
 
         when(orchestrator.getNextServiceInPipeline(any(Service.class))).thenReturn(Service.ARP_RESPONDER);
 
@@ -85,7 +77,7 @@ public class EgressAclServiceTest {
         when(portSecurityRule.getSecurityRuleEthertype()).thenReturn("IPv4");
         when(portSecurityRule.getSecurityRuleDirection()).thenReturn("egress");
 
-        List<NeutronSecurityRule> portSecurityList = new ArrayList();
+        List<NeutronSecurityRule> portSecurityList = new ArrayList<NeutronSecurityRule>();
         portSecurityList.add(portSecurityRule);
 
         when(securityGroup.getSecurityRules()).thenReturn(portSecurityList);
@@ -104,8 +96,8 @@ public class EgressAclServiceTest {
         egressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup);
         verify(egressAclServiceSpy, times(1)).egressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
         verify(egressAclServiceSpy, times(1)).egressACLTcpPortWithPrefix(anyLong(), anyString(), anyString(), anyBoolean(), anyInt(), anyString(), anyInt());
-        verify(readWriteTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(2)).submit();
+        verify(writeTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get();
     }
 
@@ -122,8 +114,8 @@ public class EgressAclServiceTest {
         egressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup);
         verify(egressAclServiceSpy, times(1)).egressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
         verify(egressAclServiceSpy, times(1)).egressACLTcpPortWithPrefix(anyLong(), anyString(), anyString(), anyBoolean(), anyInt(), anyString(), anyInt());
-        verify(readWriteTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(2)).submit();
+        verify(writeTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get();
     }
 
@@ -140,8 +132,8 @@ public class EgressAclServiceTest {
         egressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup);
         verify(egressAclServiceSpy, times(1)).egressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
         verify(egressAclServiceSpy, times(1)).egressACLPermitAllProto(anyLong(), anyString(), anyString(), anyBoolean(), anyString(), anyInt());
-        verify(readWriteTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(2)).submit();
+        verify(writeTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get();
     }
 
@@ -158,8 +150,8 @@ public class EgressAclServiceTest {
         egressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup);
         verify(egressAclServiceSpy, times(1)).egressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
         verify(egressAclServiceSpy, times(1)).egressACLPermitAllProto(anyLong(), anyString(), anyString(), anyBoolean(), anyString(), anyInt());
-        verify(readWriteTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(2)).submit();
+        verify(writeTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get();
     }
 
@@ -176,8 +168,8 @@ public class EgressAclServiceTest {
         egressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup);
         verify(egressAclServiceSpy, times(1)).egressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
         verify(egressAclServiceSpy, times(1)).egressACLTcpSyn(anyLong(), anyString(), anyString(), anyBoolean(), anyInt(), anyInt());
-        verify(readWriteTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(2)).submit();
+        verify(writeTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get();
     }
 
@@ -194,8 +186,8 @@ public class EgressAclServiceTest {
         egressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup);
         verify(egressAclServiceSpy, times(1)).egressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
         verify(egressAclServiceSpy, times(1)).egressACLTcpSyn(anyLong(), anyString(), anyString(), anyBoolean(), anyInt(), anyInt());
-        verify(readWriteTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(2)).submit();
+        verify(writeTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get();
     }
 
@@ -211,8 +203,8 @@ public class EgressAclServiceTest {
 
         egressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), "2", MAC_ADDRESS, 124, securityGroup);
         verify(egressAclServiceSpy, times(1)).egressAllowProto(anyLong(), anyString(), anyString(), anyBoolean(), anyString(), anyInt());
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
     }
 
@@ -222,13 +214,13 @@ public class EgressAclServiceTest {
     @Test
     public void testEgressACLDefaultTcpDrop() throws Exception {
         egressAclService.egressACLDefaultTcpDrop(Long.valueOf(123), "2", MAC_ADDRESS, 1, true);
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         egressAclService.egressACLDefaultTcpDrop(Long.valueOf(123), "2", MAC_ADDRESS, 1, false);
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above
     }
 
@@ -238,13 +230,13 @@ public class EgressAclServiceTest {
     @Test
     public void testEgressACLTcpPortWithPrefix() throws Exception {
         egressAclService.egressACLTcpPortWithPrefix(Long.valueOf(123), "2", MAC_ADDRESS, true, 1, HOST_ADDRESS, 1);
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         egressAclService.egressACLTcpPortWithPrefix(Long.valueOf(123), "2", MAC_ADDRESS, false, 1, HOST_ADDRESS, 1);
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above
     }
 
@@ -254,13 +246,13 @@ public class EgressAclServiceTest {
     @Test
     public void testEgressAllowProto() throws Exception {
         egressAclService.egressAllowProto(Long.valueOf(123), "2", MAC_ADDRESS, true, HOST_ADDRESS, 1);
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         egressAclService.egressAllowProto(Long.valueOf(123), "2", MAC_ADDRESS, false, HOST_ADDRESS, 1);
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above
     }
 
@@ -270,13 +262,13 @@ public class EgressAclServiceTest {
     @Test
     public void testEgressACLPermitAllProto() throws Exception {
         egressAclService.egressACLPermitAllProto(Long.valueOf(123), "2", MAC_ADDRESS, true, HOST_ADDRESS, 1);
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         egressAclService.egressACLPermitAllProto(Long.valueOf(123), "2", MAC_ADDRESS, false, HOST_ADDRESS, 1);
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above
     }
 
@@ -286,13 +278,13 @@ public class EgressAclServiceTest {
     @Test
     public void testEgressACLTcpSyn() throws Exception {
         egressAclService.egressACLTcpSyn(Long.valueOf(123), "2", MAC_ADDRESS, true, 1, 1);
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         egressAclService.egressACLTcpSyn(Long.valueOf(123), "2", MAC_ADDRESS, false, 1, 1);
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above
     }
 }

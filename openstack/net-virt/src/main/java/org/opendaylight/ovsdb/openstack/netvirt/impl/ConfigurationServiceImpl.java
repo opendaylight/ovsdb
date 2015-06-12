@@ -161,6 +161,12 @@ public class ConfigurationServiceImpl implements ConfigurationService, ConfigInt
     }
 
     @Override
+    public boolean isDistributedArpDisabled() {
+        final String strARPDisabled = ConfigProperties.getProperty(this.getClass(), "ovsdb.l3.arp.responder.disabled");
+        return (strARPDisabled.equalsIgnoreCase("yes"));
+    }
+
+    @Override
     public String getDefaultGatewayMacAddress(Node node) {
         String l3gatewayForNode = null;
         if (node != null) {

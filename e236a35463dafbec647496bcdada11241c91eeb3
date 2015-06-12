@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_0d4b6188",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 415,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-12T10:29:27Z",
+      "side": 1,
+      "message": "nitpick: please remove extra space at end of line",
+      "revId": "e236a35463dafbec647496bcdada11241c91eeb3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

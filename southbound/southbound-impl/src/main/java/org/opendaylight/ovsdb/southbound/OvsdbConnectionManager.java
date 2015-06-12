@@ -76,18 +76,24 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         LOG.trace("OvsdbConnectionManager: disconnected exit");
     }
 
-    public OvsdbClient connect(InstanceIdentifier<Node> iid,
-            OvsdbNodeAugmentation ovsdbNode) throws UnknownHostException {
+    public OvsdbClient connect(InstanceIdentifier<Node> iid, OvsdbNodeAugmentation ovsdbNode)
+            throws UnknownHostException {
         // TODO handle case where we already have a connection
-        // TODO use transaction chains to handle ordering issues between disconnected
+        // TODO use transaction chains to handle ordering issues between
+        // disconnected
         // and connected when writing to the operational store
         InetAddress ip = SouthboundMapper.createInetAddress(ovsdbNode.getConnectionInfo().getRemoteIp());
-        OvsdbClient client = OvsdbConnectionService.getService().connect(ip,
-                ovsdbNode.getConnectionInfo().getRemotePort().getValue().intValue());
-        putInstanceIdentifier(ovsdbNode.getConnectionInfo(), iid.firstIdentifierOf(Node.class));
-        // For connections from the controller to the ovs instance, the library doesn't call
-        // this method for us
-        connectedButCallBacksNotRegistered(client);
+        OvsdbClient client = null;
+        try {
+            client = OvsdbConnectionService.getService().connect(ip,
+                    ovsdbNode.getConnectionInfo().getRemotePort().getValue().intValue());
+            putInstanceIdentifier(ovsdbNode.getConnectionInfo(), iid.firstIdentifierOf(Node.class));
+            // For connections from the controller to the ovs instance, the
+            // library doesn't call this method for us
+            connectedButCallBacksNotRegistered(client);
+        } catch (Exception e) {
+            LOG.error("Failed to connect", e);
+        }
         return client;
     }
 

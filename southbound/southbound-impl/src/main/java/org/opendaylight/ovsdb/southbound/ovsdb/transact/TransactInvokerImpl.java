@@ -34,7 +34,7 @@ public class TransactInvokerImpl implements TransactInvoker {
         command.execute(tb);
         ListenableFuture<List<OperationResult>> result = tb.execute();
         LOG.debug("invoke: command: {}, tb: {}", command, tb);
-        if (tb.getOperations().size() > 0) {
+        if ((tb.getOperations().size() > 0) && (result.isDone())) {
             try {
                 List<OperationResult> got = result.get();
                 LOG.debug("OVSDB transaction result: {}", got);

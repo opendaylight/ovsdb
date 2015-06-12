@@ -126,7 +126,9 @@ public class OvsdbConnectionService implements OvsdbConnection {
                     Executors.newFixedThreadPool(NUM_THREADS));
             return client;
         } catch (InterruptedException e) {
-            System.out.println("Thread was interrupted during connect");
+            logger.warn("Thread was interrupted during connect", e);
+        } catch (Exception e) {
+            logger.warn("bootstrap.connect failed", e);
         }
         return null;
     }

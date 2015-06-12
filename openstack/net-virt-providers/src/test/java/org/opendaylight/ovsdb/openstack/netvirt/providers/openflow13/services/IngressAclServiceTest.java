@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -31,7 +30,6 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -47,17 +45,16 @@ import com.google.common.util.concurrent.CheckedFuture;
 /**
  * Unit test fort {@link IngressAclService}
  */
-@Ignore // TODO SB_MIGRATION
 @RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings("unchecked")
 public class IngressAclServiceTest {
 
     @InjectMocks private IngressAclService ingressAclService = new IngressAclService();
     @Spy private IngressAclService ingressAclServiceSpy;
 
-    //@Mock private MdsalConsumer mdsalConsumer;
+    @Mock private DataBroker dataBroker;
     @Mock private PipelineOrchestrator orchestrator;
 
-    @Mock private ReadWriteTransaction readWriteTransaction;
     @Mock private WriteTransaction writeTransaction;
     @Mock private CheckedFuture<Void, TransactionCommitFailedException> commitFuture;
 
@@ -73,14 +70,9 @@ public class IngressAclServiceTest {
     public void setUp() {
         ingressAclServiceSpy = Mockito.spy(ingressAclService);
 
-        when(readWriteTransaction.submit()).thenReturn(commitFuture);
         when(writeTransaction.submit()).thenReturn(commitFuture);
 
-        DataBroker dataBroker = mock(DataBroker.class);
-        when(dataBroker.newReadWriteTransaction()).thenReturn(readWriteTransaction);
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(writeTransaction);
-
-        //when(mdsalConsumer.getDataBroker()).thenReturn(dataBroker);
 
         when(orchestrator.getNextServiceInPipeline(any(Service.class))).thenReturn(Service.ARP_RESPONDER);
 
@@ -88,7 +80,7 @@ public class IngressAclServiceTest {
         when(portSecurityRule.getSecurityRuleEthertype()).thenReturn("IPv4");
         when(portSecurityRule.getSecurityRuleDirection()).thenReturn("ingress");
 
-        List<NeutronSecurityRule> portSecurityList = new ArrayList();
+        List<NeutronSecurityRule> portSecurityList = new ArrayList<NeutronSecurityRule>();
         portSecurityList.add(portSecurityRule);
 
         when(securityGroup.getSecurityRules()).thenReturn(portSecurityList);
@@ -107,8 +99,8 @@ public class IngressAclServiceTest {
         ingressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), SEGMENTATION_ID, MAC_ADDRESS, 124, securityGroup);
         verify(ingressAclServiceSpy, times(1)).ingressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
         verify(ingressAclServiceSpy, times(1)).ingressACLTcpPortWithPrefix(anyLong(), anyString(), anyString(), anyBoolean(), anyInt(), anyString(), anyInt());
-        verify(readWriteTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(2)).submit();
+        verify(writeTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get();
     }
 
@@ -126,8 +118,8 @@ public class IngressAclServiceTest {
         ingressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), SEGMENTATION_ID, MAC_ADDRESS, 124, securityGroup);
         verify(ingressAclServiceSpy, times(1)).ingressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
         verify(ingressAclServiceSpy, times(1)).ingressACLTcpPortWithPrefix(anyLong(), anyString(), anyString(), anyBoolean(), anyInt(), anyString(), anyInt());
-        verify(readWriteTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(2)).submit();
+        verify(writeTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get();
     }
 
@@ -144,8 +136,8 @@ public class IngressAclServiceTest {
         ingressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), SEGMENTATION_ID, MAC_ADDRESS, 124, securityGroup);
         verify(ingressAclServiceSpy, times(1)).ingressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
         verify(ingressAclServiceSpy, times(1)).ingressACLPermitAllProto(anyLong(), anyString(), anyString(), anyBoolean(), anyString(), anyInt());
-        verify(readWriteTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(2)).submit();
+        verify(writeTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get();
     }
 
@@ -162,8 +154,8 @@ public class IngressAclServiceTest {
         ingressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), SEGMENTATION_ID, MAC_ADDRESS, 124, securityGroup);
         verify(ingressAclServiceSpy, times(1)).ingressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
         verify(ingressAclServiceSpy, times(1)).ingressACLPermitAllProto(anyLong(), anyString(), anyString(), anyBoolean(), anyString(), anyInt());
-        verify(readWriteTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(2)).submit();
+        verify(writeTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get();
     }
 
@@ -180,8 +172,8 @@ public class IngressAclServiceTest {
         ingressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), SEGMENTATION_ID, MAC_ADDRESS, 124, securityGroup);
         verify(ingressAclServiceSpy, times(1)).ingressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
         verify(ingressAclServiceSpy, times(1)).ingressACLTcpSyn(anyLong(), anyString(), anyString(), anyBoolean(), anyInt(), anyInt());
-        verify(readWriteTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(2)).submit();
+        verify(writeTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get();
     }
 
@@ -198,8 +190,8 @@ public class IngressAclServiceTest {
         ingressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), SEGMENTATION_ID, MAC_ADDRESS, 124, securityGroup);
         verify(ingressAclServiceSpy, times(1)).ingressACLDefaultTcpDrop(anyLong(), anyString(), anyString(), anyInt(), anyBoolean());
         verify(ingressAclServiceSpy, times(1)).ingressACLTcpSyn(anyLong(), anyString(), anyString(), anyBoolean(), anyInt(), anyInt());
-        verify(readWriteTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(2)).submit();
+        verify(writeTransaction, times(4)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get();
     }
 
@@ -215,8 +207,8 @@ public class IngressAclServiceTest {
 
         ingressAclServiceSpy.programPortSecurityACL(Long.valueOf(1554), SEGMENTATION_ID, MAC_ADDRESS, 124, securityGroup);
         verify(ingressAclServiceSpy, times(1)).handleIngressAllowProto(anyLong(), anyString(), anyString(), anyBoolean(), anyString(), anyInt());
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
     }
 
@@ -226,13 +218,13 @@ public class IngressAclServiceTest {
     @Test
     public void testIgressACLDefaultTcpDrop() throws Exception {
         ingressAclService.ingressACLDefaultTcpDrop(Long.valueOf(123), SEGMENTATION_ID, MAC_ADDRESS, PRIORITY, true);
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         ingressAclService.ingressACLDefaultTcpDrop(Long.valueOf(123), SEGMENTATION_ID, MAC_ADDRESS, PRIORITY, false);
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above
     }
 
@@ -242,13 +234,13 @@ public class IngressAclServiceTest {
     @Test
     public void testIngressACLTcpPortWithPrefix() throws Exception {
         ingressAclService.ingressACLTcpPortWithPrefix(Long.valueOf(123), SEGMENTATION_ID, MAC_ADDRESS, true, 1, HOST_ADDRESS, PRIORITY);
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         ingressAclService.ingressACLTcpPortWithPrefix(Long.valueOf(123), SEGMENTATION_ID, MAC_ADDRESS, false, 1, HOST_ADDRESS, PRIORITY);
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above
     }
 
@@ -258,13 +250,13 @@ public class IngressAclServiceTest {
     @Test
     public void testIngressAllowProto() throws Exception {
         ingressAclService.handleIngressAllowProto(Long.valueOf(123), SEGMENTATION_ID, MAC_ADDRESS, true, HOST_ADDRESS, PRIORITY);
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         ingressAclService.handleIngressAllowProto(Long.valueOf(123), SEGMENTATION_ID, MAC_ADDRESS, false, HOST_ADDRESS, PRIORITY);
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above
     }
 
@@ -274,13 +266,13 @@ public class IngressAclServiceTest {
     @Test
     public void testIngressACLPermitAllProto() throws Exception {
         ingressAclService.ingressACLPermitAllProto(Long.valueOf(123), SEGMENTATION_ID, MAC_ADDRESS, true, HOST_ADDRESS, PRIORITY);
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         ingressAclService.ingressACLPermitAllProto(Long.valueOf(123), SEGMENTATION_ID, MAC_ADDRESS, false, HOST_ADDRESS, PRIORITY);
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above
     }
 
@@ -290,13 +282,13 @@ public class IngressAclServiceTest {
     @Test
     public void testIngressACLTcpSyn() throws Exception {
         ingressAclService.ingressACLTcpSyn(Long.valueOf(123), SEGMENTATION_ID, MAC_ADDRESS, true, 1, PRIORITY);
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         ingressAclService.ingressACLTcpSyn(Long.valueOf(123), SEGMENTATION_ID, MAC_ADDRESS, false, 1, PRIORITY);
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above
     }
 }

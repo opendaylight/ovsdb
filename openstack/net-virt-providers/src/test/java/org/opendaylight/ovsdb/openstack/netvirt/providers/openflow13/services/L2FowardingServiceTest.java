@@ -16,7 +16,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -24,7 +23,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -40,16 +38,15 @@ import com.google.common.util.concurrent.CheckedFuture;
 /**
  * Unit test fort {@link L2ForwardingService}
  */
-@Ignore // TODO SB_MIGRATION
 @RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings("unchecked")
 public class L2FowardingServiceTest {
 
     @InjectMocks private L2ForwardingService l2ForwardingService = new L2ForwardingService(Service.ARP_RESPONDER);
 
-    //@Mock private MdsalConsumer mdsalConsumer;
+    @Mock private DataBroker dataBroker;
     @Mock private PipelineOrchestrator orchestrator;
 
-    @Mock private ReadWriteTransaction readWriteTransaction;
     @Mock private WriteTransaction writeTransaction;
     @Mock private ReadOnlyTransaction readOnlyTransaction;
     @Mock private CheckedFuture<Void, TransactionCommitFailedException> commitFuture;
@@ -63,11 +60,8 @@ public class L2FowardingServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        when(readWriteTransaction.submit()).thenReturn(commitFuture);
         when(writeTransaction.submit()).thenReturn(commitFuture);
 
-        DataBroker dataBroker = mock(DataBroker.class);
-        when(dataBroker.newReadWriteTransaction()).thenReturn(readWriteTransaction);
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(writeTransaction);
         when(dataBroker.newReadOnlyTransaction()).thenReturn(readOnlyTransaction);
 
@@ -88,13 +82,13 @@ public class L2FowardingServiceTest {
     @Test
     public void testProgramLoacalUcastOut() throws Exception {
         l2ForwardingService.programLocalUcastOut(DPID, SEGMENTATION_ID, LOCAL_PORT, MAC_ADDRESS, true);
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         l2ForwardingService.programLocalUcastOut(DPID, SEGMENTATION_ID, LOCAL_PORT, MAC_ADDRESS, false);
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above
     }
 
@@ -104,13 +98,13 @@ public class L2FowardingServiceTest {
     @Test
     public void testProgramLocalVlanUcastOut() throws Exception {
         l2ForwardingService.programLocalVlanUcastOut(DPID, SEGMENTATION_ID, Long.valueOf(124), MAC_ADDRESS, true);
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         l2ForwardingService.programLocalVlanUcastOut(DPID, SEGMENTATION_ID, LOCAL_PORT, MAC_ADDRESS, false);
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above
     }
 
@@ -120,13 +114,13 @@ public class L2FowardingServiceTest {
     @Test
     public void testProgramLocalBcastOut() throws Exception {
         l2ForwardingService.programLocalBcastOut(DPID, SEGMENTATION_ID, LOCAL_PORT, true);
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         l2ForwardingService.programLocalBcastOut(DPID, SEGMENTATION_ID, LOCAL_PORT, false);
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above
     }
 
@@ -136,13 +130,13 @@ public class L2FowardingServiceTest {
     @Test
     public void testProgramLocalVlanBcastOut() throws Exception {
         l2ForwardingService.programLocalVlanBcastOut(DPID, SEGMENTATION_ID, LOCAL_PORT, ETH_PORT, true);
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         l2ForwardingService.programLocalVlanBcastOut(DPID, SEGMENTATION_ID, LOCAL_PORT, ETH_PORT, false);
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above
     }
 
@@ -152,13 +146,13 @@ public class L2FowardingServiceTest {
     @Test
     public void testProgramLocalTableMiss() throws Exception {
         l2ForwardingService.programLocalTableMiss(DPID, SEGMENTATION_ID, true);
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         l2ForwardingService.programLocalTableMiss(DPID, SEGMENTATION_ID, false);
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above
     }
 
@@ -168,13 +162,13 @@ public class L2FowardingServiceTest {
     @Test
     public void testProgramLocalVlanTableMiss() throws Exception {
         l2ForwardingService.programLocalVlanTableMiss(DPID, SEGMENTATION_ID, true);
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         l2ForwardingService.programLocalVlanTableMiss(DPID, SEGMENTATION_ID, false);
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above
     }
 
@@ -184,13 +178,13 @@ public class L2FowardingServiceTest {
     @Test
     public void testProgramTunnelOut() throws Exception {
         l2ForwardingService.programTunnelOut(DPID, SEGMENTATION_ID, OF_PORT_OUT, MAC_ADDRESS, true);
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         l2ForwardingService.programTunnelOut(DPID, SEGMENTATION_ID, OF_PORT_OUT, MAC_ADDRESS, false);
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above
     }
 
@@ -200,13 +194,13 @@ public class L2FowardingServiceTest {
     @Test
     public void testProgramVlanOut() throws Exception {
         l2ForwardingService.programVlanOut(DPID, SEGMENTATION_ID, ETH_PORT, MAC_ADDRESS, true);
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         l2ForwardingService.programVlanOut(DPID, SEGMENTATION_ID, ETH_PORT, MAC_ADDRESS, false);
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above
     }
 
@@ -216,13 +210,13 @@ public class L2FowardingServiceTest {
     @Test
     public void testProgramTunnelFloodOut() throws Exception {
         l2ForwardingService.programTunnelFloodOut(DPID, SEGMENTATION_ID, OF_PORT_OUT, true);
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         l2ForwardingService.programTunnelFloodOut(DPID, SEGMENTATION_ID, OF_PORT_OUT, false);
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above
     }
 
@@ -232,13 +226,13 @@ public class L2FowardingServiceTest {
     @Test
     public void testProgramVlanFloodOut() throws Exception {
         l2ForwardingService.programVlanFloodOut(DPID, SEGMENTATION_ID, ETH_PORT, true);
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         l2ForwardingService.programVlanFloodOut(DPID, SEGMENTATION_ID, ETH_PORT, false);
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above
     }
 
@@ -248,13 +242,13 @@ public class L2FowardingServiceTest {
    @Test
    public void testProgramTunnelMiss() throws Exception {
        l2ForwardingService.programTunnelMiss(DPID, SEGMENTATION_ID, true);
-       verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-       verify(readWriteTransaction, times(1)).submit();
+       verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+       verify(writeTransaction, times(1)).submit();
        verify(commitFuture, times(1)).get();
 
        l2ForwardingService.programTunnelMiss(DPID, SEGMENTATION_ID, false);
        verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-       verify(readWriteTransaction, times(1)).submit();
+       verify(writeTransaction, times(2)).submit();
        verify(commitFuture, times(2)).get(); // 1 + 1 above
    }
 
@@ -264,13 +258,13 @@ public class L2FowardingServiceTest {
    @Test
    public void testProgramVlanMiss() throws Exception {
        l2ForwardingService.programTunnelMiss(DPID, SEGMENTATION_ID, true);
-       verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-       verify(readWriteTransaction, times(1)).submit();
+       verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+       verify(writeTransaction, times(1)).submit();
        verify(commitFuture, times(1)).get();
 
        l2ForwardingService.programTunnelMiss(DPID, SEGMENTATION_ID, false);
        verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-       verify(readWriteTransaction, times(1)).submit();
+       verify(writeTransaction, times(2)).submit();
        verify(commitFuture, times(2)).get(); // 1 + 1 above
    }
 }

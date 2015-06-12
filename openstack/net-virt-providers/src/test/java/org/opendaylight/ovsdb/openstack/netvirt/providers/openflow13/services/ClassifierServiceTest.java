@@ -10,20 +10,17 @@ package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -37,31 +34,27 @@ import com.google.common.util.concurrent.CheckedFuture;
 /**
  * Unit test for {@link ClassifierService}
  */
-@Ignore // TODO SB_MIGRATION
 @RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings("unchecked")
 public class ClassifierServiceTest {
 
-    @InjectMocks ClassifierService classifierService = new ClassifierService(Service.ARP_RESPONDER);
+    @InjectMocks private ClassifierService classifierService = new ClassifierService(Service.ARP_RESPONDER);
+
+    @Mock private DataBroker dataBroker;
 
     private static final String MAC_ADDRESS = "87:1D:5E:02:40:B7";
 
-    //@Mock private MdsalConsumer mdsalConsumer;
     @Mock private PipelineOrchestrator orchestrator;
 
-    @Mock private ReadWriteTransaction readWriteTransaction;
     @Mock private WriteTransaction writeTransaction;
     @Mock private CheckedFuture<Void, TransactionCommitFailedException> commitFuture;
 
     @Before
     public void setUp() {
-        when(readWriteTransaction.submit()).thenReturn(commitFuture);
+        when(writeTransaction.submit()).thenReturn(commitFuture);
         when(writeTransaction.submit()).thenReturn(commitFuture);
 
-        DataBroker dataBroker = mock(DataBroker.class);
-        when(dataBroker.newReadWriteTransaction()).thenReturn(readWriteTransaction);
         when(dataBroker.newWriteOnlyTransaction()).thenReturn(writeTransaction);
-
-        //when(mdsalConsumer.getDataBroker()).thenReturn(dataBroker);
 
         when(orchestrator.getNextServiceInPipeline(any(Service.class))).thenReturn(Service.ARP_RESPONDER);
     }
@@ -73,8 +66,8 @@ public class ClassifierServiceTest {
     public void testProgramLocalInPort() throws Exception {
         // write
         classifierService.programLocalInPort(Long.valueOf(1212), "2", Long.valueOf(455), MAC_ADDRESS, true);
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         // remove
@@ -90,8 +83,8 @@ public class ClassifierServiceTest {
     public void testProgramLocalInPortSetVlan() throws Exception {
         // write
         classifierService.programLocalInPortSetVlan(Long.valueOf(1212), "2", Long.valueOf(455), MAC_ADDRESS, true);
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         // remove
@@ -107,8 +100,8 @@ public class ClassifierServiceTest {
     public void testProgramDropSrcIface() throws Exception {
         // write
         classifierService.programDropSrcIface(Long.valueOf(1212), Long.valueOf(455), true);
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         // remove
@@ -124,8 +117,8 @@ public class ClassifierServiceTest {
     public void testProgramTunnelIn() throws Exception {
         // write
         classifierService.programTunnelIn(Long.valueOf(1212), "2", Long.valueOf(455), true);
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         // remove
@@ -141,8 +134,8 @@ public class ClassifierServiceTest {
     public void testProgramVlanIn() throws Exception {
         // write
         classifierService.programVlanIn(Long.valueOf(1212), "2", Long.valueOf(455), true);
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
         // remove
@@ -158,8 +151,8 @@ public class ClassifierServiceTest {
     public void testProgramLLDPPuntRule() throws Exception {
         // write
         classifierService.programLLDPPuntRule(Long.valueOf(1212));
-        verify(readWriteTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
-        verify(readWriteTransaction, times(1)).submit();
+        verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
+        verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
     }
 }

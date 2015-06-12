@@ -87,7 +87,9 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         putInstanceIdentifier(ovsdbNode.getConnectionInfo(), iid.firstIdentifierOf(Node.class));
         // For connections from the controller to the ovs instance, the library doesn't call
         // this method for us
-        connectedButCallBacksNotRegistered(client);
+        if (client != null) {
+            connectedButCallBacksNotRegistered(client);
+        }
         return client;
     }
 

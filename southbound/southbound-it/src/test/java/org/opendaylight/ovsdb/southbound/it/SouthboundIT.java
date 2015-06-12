@@ -60,6 +60,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
@@ -384,7 +386,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                             new OvsdbBridgeName(SouthboundITConstants.BRIDGE_NAME));
                     NodeId bridgeNodeId = createManagedNodeId(bridgeIid);
                     addBridge(connectionInfo, bridgeIid, SouthboundITConstants.BRIDGE_NAME, bridgeNodeId, false, null,
-                            true, dpType, null, null);
+                            true, dpType, null, null, null);
 
                     // Verify that the device is netdev
                     OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
@@ -459,6 +461,34 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         //Assume.assumeTrue(disconnectOvsdbNode(connectionInfo));
     }
 
+    @Test
+    public void testOvsdbBridgeControllerInfo() throws InterruptedException {
+        ConnectionInfo connectionInfo = getConnectionInfo(addressStr,portStr);
+        Node ovsdbNode = connectOvsdbNode(connectionInfo);
+        List<ControllerEntry> setControllerEntry = createControllerEntry();
+        Uri setUri = new Uri(addressStr + ":" + portStr);
+        Assert.assertTrue(addBridge(connectionInfo, null, SouthboundITConstants.BRIDGE_NAME,null, true,
+                SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"), true, null, null,
+                setControllerEntry, null));
+        OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
+        Assert.assertNotNull(bridge);
+        Assert.assertNotNull(bridge.getControllerEntry());
+        List<ControllerEntry> getControllerEntries = bridge.getControllerEntry();
+        for (ControllerEntry entry : getControllerEntries) {
+            if (entry.getTarget() != null) {
+                Assert.assertEquals(entry.getTarget().toString(), setUri.toString());
+            }
+        }
+        Assert.assertTrue(deleteBridge(connectionInfo));
+        Assert.assertTrue(disconnectOvsdbNode(connectionInfo));
+    }
+    private List<ControllerEntry> createControllerEntry() {
+        List<ControllerEntry> controllerEntriesList = new ArrayList<ControllerEntry>();
+        controllerEntriesList.add(new ControllerEntryBuilder()
+                .setTarget(new Uri(addressStr + ":" + portStr))
+                .build());
+        return controllerEntriesList;
+    }
     private void setManagedBy(final OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
                               final ConnectionInfo connectionInfo) {
         InstanceIdentifier<Node> connectionNodePath = createInstanceIdentifier(connectionInfo);
@@ -537,6 +567,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             final Class<? extends OvsdbFailModeBase> failMode, final boolean setManagedBy,
             final Class<? extends DatapathTypeBase> dpType,
             final List<BridgeExternalIds> externalIds,
+            final List<ControllerEntry> controllerEntries,
             final List<BridgeOtherConfigs> otherConfigs) throws InterruptedException {
 
         NodeBuilder bridgeNodeBuilder = new NodeBuilder();
@@ -564,6 +595,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         if (externalIds != null) {
             ovsdbBridgeAugmentationBuilder.setBridgeExternalIds(externalIds);
         }
+        if (controllerEntries != null) {
+            ovsdbBridgeAugmentationBuilder.setControllerEntry(controllerEntries);
+        }
         if (otherConfigs != null) {
             ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(otherConfigs);
         }
@@ -580,7 +614,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         throws InterruptedException {
 
         return addBridge(connectionInfo, null, bridgeName, null, true,
-                SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"), true, null, null, null);
+                SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"), true, null, null, null, null);
     }
 
     private OvsdbBridgeAugmentation getBridge(ConnectionInfo connectionInfo) {
@@ -1024,7 +1058,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 // CREATE: Create the test bridge
                 Assert.assertTrue(addBridge(connectionInfo, null,
                         testBridgeName, null, true, SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
-                        true, null, null, null));
+                        true, null, null, null, null));
                 testBridgeNodeId = createManagedNodeId(createInstanceIdentifier(
                         connectionInfo, new OvsdbBridgeName(testBridgeName)));
                 tpCreateAugmentationBuilder = createGenericOvsdbTerminationPointAugmentationBuilder();
@@ -1314,7 +1348,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 // CREATE: Create the test interface
                 Assert.assertTrue(addBridge(connectionInfo, null,
                         testBridgeName, null, true, SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
-                        true, null, null, null));
+                        true, null, null, null, null));
                 testBridgeNodeId = createManagedNodeId(createInstanceIdentifier(
                         connectionInfo, new OvsdbBridgeName(testBridgeName)));
                 tpCreateAugmentationBuilder = createGenericOvsdbTerminationPointAugmentationBuilder();
@@ -1612,7 +1646,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 // CREATE: Create the test interface
                 Assert.assertTrue(addBridge(connectionInfo, null,
                         testBridgeName, null, true, SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
-                        true, null, null, null));
+                        true, null, null, null, null));
                 testBridgeNodeId = createManagedNodeId(createInstanceIdentifier(
                         connectionInfo, new OvsdbBridgeName(testBridgeName)));
                 tpCreateAugmentationBuilder = createGenericOvsdbTerminationPointAugmentationBuilder();
@@ -1909,7 +1943,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 // CREATE: Create the test interface
                 Assert.assertTrue(addBridge(connectionInfo, null,
                         testBridgeName, null, true, SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
-                        true, null, null, null));
+                        true, null, null, null, null));
                 testBridgeNodeId = createManagedNodeId(createInstanceIdentifier(
                         connectionInfo, new OvsdbBridgeName(testBridgeName)));
                 tpCreateAugmentationBuilder = createGenericOvsdbTerminationPointAugmentationBuilder();
@@ -2218,7 +2252,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 // CREATE: Create the test port
                 Assert.assertTrue(addBridge(connectionInfo, null,
                         testBridgeName, null, true, SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
-                        true, null, null, null));
+                        true, null, null, null, null));
                 testBridgeNodeId = createManagedNodeId(createInstanceIdentifier(
                         connectionInfo, new OvsdbBridgeName(testBridgeName)));
                 tpCreateAugmentationBuilder = createGenericOvsdbTerminationPointAugmentationBuilder();
@@ -2789,7 +2823,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 // CREATE: Create the test bridge
                 boolean bridgeAdded = addBridge(connectionInfo, null,
                         testBridgeName, null, true, SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
-                        true, null, null, updateFromInputOtherConfigs);
+                        true, null, null, null, updateFromInputOtherConfigs);
                 Assert.assertTrue(bridgeAdded);
 
                 // READ: Read the test bridge and ensure changes are propagated to the CONFIGURATION data store,
@@ -3040,7 +3074,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 // CREATE: Create the test bridge
                 boolean bridgeAdded = addBridge(connectionInfo, null,
                         testBridgeName, null, true, SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"),
-                        true, null, updateFromInputExternalIds, null);
+                        true, null, updateFromInputExternalIds, null, null);
                 Assert.assertTrue(bridgeAdded);
 
                 // READ: Read the test bridge and ensure changes are propagated to the CONFIGURATION data store,

@@ -89,7 +89,7 @@ public class EventDispatcherImplTest {
         eventDispatcherImpl.enqueueEvent(mock(AbstractEvent.class));
         eventDispatcherImpl.enqueueEvent(mock(AbstractEvent.class));
 
-        assertEquals("Error, did not return the expected size", 3, events.size());
+        assertEquals("Error, did not return the expected size", 4, events.size());
     }
 
     private Object getField(String fieldName) throws Exception {

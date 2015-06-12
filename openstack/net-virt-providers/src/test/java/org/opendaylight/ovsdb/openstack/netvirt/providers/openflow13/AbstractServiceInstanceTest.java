@@ -14,45 +14,39 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.lang.reflect.Field;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
-import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.osgi.framework.ServiceReference;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
@@ -60,50 +54,29 @@ import com.google.common.util.concurrent.CheckedFuture;
 /**
  * Unit test for {@link AbstractServiceInstance}
  */
-@Ignore // TODO SB_MIGRATION
-@RunWith(MockitoJUnitRunner.class)
+//@PrepareForTest(ServiceHelper.class)
+@RunWith(PowerMockRunner.class)
+@SuppressWarnings("unchecked")
 public class AbstractServiceInstanceTest {
 
-    @InjectMocks AbstractServiceInstance abstractServiceInstance = mock(AbstractServiceInstance.class, Mockito.CALLS_REAL_METHODS);
+    @InjectMocks private AbstractServiceInstance abstractServiceInstance = mock(AbstractServiceInstance.class, Mockito.CALLS_REAL_METHODS);
 
-    /* TODO SB_MIGRATION */
-    //@Mock private OvsdbConnectionService connectionService;
+    @Mock private DataBroker dataBroker;
     @Mock private PipelineOrchestrator orchestrator;
+    @Mock private Southbound southbound;
 
     private Service service = Service.L3_FORWARDING;
 
     private final String ID = "5710881121";
     private final String NODE_ID = Constants.INTEGRATION_BRIDGE + ":" +  ID;
-    private final String DPID = "154652161";
 
     /**
      * Test method {@link AbstractServiceInstance#isBridgeInPipeline(String)}
      */
     @Test
     public void testIsBridgeInPipeline() {
-        Node node = mock(Node.class);
-        when(node.getId()).thenReturn(mock(NodeId.class));
-
-        List<Node> nodes = new ArrayList();
-        nodes.add(node);
-        /* TODO SB_MIGRATION */
-        //when(connectionService.getBridgeNodes()).thenReturn(nodes);
-
-        //ConcurrentMap<String, Row> bridges = new ConcurrentHashMap();
-        //bridges.put("key", mock(Row.class));
-        //when(ovsdbConfigService.getRows(any(Node.class), anyString())).thenReturn(bridges);
-
-        //Bridge bridge = mock(Bridge.class);
-        //Column<GenericTableSchema, Set<String>> datapathIdColumn = mock(Column.class);
-        //when(bridge.getDatapathIdColumn()).thenReturn(datapathIdColumn);
-        //when(bridge.getName()).thenReturn(Constants.INTEGRATION_BRIDGE);
-        Set<String> dpids = new HashSet();
-        dpids.add(DPID);
-        //when(datapathIdColumn.getData()).thenReturn(dpids);
-        //when(ovsdbConfigService.getTypedRow(any(Node.class), same(Bridge.class), any(Row.class))).thenReturn(bridge);
-
-        /* TODO SB_MIGRATION */
-        //assertTrue("Error, isBridgeInPipeline() did not return the correct value", abstractServiceInstance.isBridgeInPipeline(NODE_ID));
+        when(southbound.getBridgeName(any(Node.class))).thenReturn(Constants.INTEGRATION_BRIDGE);
+        assertTrue("Error, isBridgeInPipeline() did not return the correct value", abstractServiceInstance.isBridgeInPipeline(mock(Node.class)));
     }
 
     /**
@@ -115,17 +88,24 @@ public class AbstractServiceInstanceTest {
         assertEquals("Error, getTable() did not return the correct value", 70, abstractServiceInstance.getTable());
     }
 
+    @Test
+    public void testGetService() {
+        abstractServiceInstance.setService(service);
+        assertEquals("Error, getService() did not return the correct value", service, abstractServiceInstance.getService());
+    }
+
     /**
      * Test method {@link AbstractServiceInstance#createNodeBuilder(String)}
      */
     @Test
     public void testCreateNodeBuilder() {
-        NodeId id = new NodeId(NODE_ID);
+        NodeId nodeId = mock(NodeId.class);
+        when(nodeId.getValue()).thenReturn(NODE_ID);
 
         NodeBuilder nodeBuilder = abstractServiceInstance.createNodeBuilder(NODE_ID);
         assertNotNull("Error, createNodeBuilder() did not return the correct value", nodeBuilder);
-        assertEquals("Error, createNodeBuilder() did not return the correct ID", id, nodeBuilder.getId());
-        assertEquals("Error, createNodeBuilder() did not return the correct Key", new NodeKey(id), nodeBuilder.getKey());
+        assertEquals("Error, createNodeBuilder() did not return the correct ID", NODE_ID, nodeBuilder.getId().getValue());
+        assertEquals("Error, createNodeBuilder() did not return the correct Key", new NodeKey(nodeBuilder.getId()), nodeBuilder.getKey());
     }
 
     /**
@@ -149,10 +129,8 @@ public class AbstractServiceInstanceTest {
      */
     @Test
     public void testWriteFlow() throws Exception {
-        DataBroker dataBrocker = mock(DataBroker.class);
-        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        when(dataBrocker.newReadWriteTransaction()).thenReturn(transaction);
-        ///when(mdsalConsumer.getDataBroker()).thenReturn(dataBrocker);
+        WriteTransaction transaction = mock(WriteTransaction.class);
+        when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction);
         CheckedFuture<Void, TransactionCommitFailedException> commitFuture = mock(CheckedFuture.class);
         when(transaction.submit()).thenReturn(commitFuture);
 
@@ -173,10 +151,8 @@ public class AbstractServiceInstanceTest {
      */
     @Test
     public void testRemoveFlow() throws Exception {
-        DataBroker dataBrocker = mock(DataBroker.class);
         WriteTransaction transaction = mock(WriteTransaction.class);
-        when(dataBrocker.newWriteOnlyTransaction()).thenReturn(transaction);
-        //when(mdsalConsumer.getDataBroker()).thenReturn(dataBrocker);
+        when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction);
         CheckedFuture<Void, TransactionCommitFailedException> commitFuture = mock(CheckedFuture.class);
         when(transaction.submit()).thenReturn(commitFuture);
 
@@ -196,9 +172,8 @@ public class AbstractServiceInstanceTest {
      */
     @Test
     public void testGetFlow() throws Exception {
-        DataBroker dataBrocker = mock(DataBroker.class);
         ReadOnlyTransaction transaction = mock(ReadOnlyTransaction.class);
-        when(dataBrocker.newReadOnlyTransaction()).thenReturn(transaction);
+        when(dataBroker.newReadOnlyTransaction()).thenReturn(transaction);
         //when(mdsalConsumer.getDataBroker()).thenReturn(dataBrocker);
 
         NodeBuilder nodeBuilder = mock(NodeBuilder.class);
@@ -221,35 +196,49 @@ public class AbstractServiceInstanceTest {
      */
     @Test
     public void testProgramDefaultPipelineRule() {
-        Node node = mock(Node.class);
-        when(node.getId()).thenReturn(mock(NodeId.class));
+        when(southbound.getBridgeName(any(Node.class))).thenReturn(Constants.INTEGRATION_BRIDGE);
+        when(southbound.getDataPathId(any(Node.class))).thenReturn(Long.valueOf(261));
 
-        List<Node> nodes = new ArrayList();
-        nodes.add(node);
-        /* TODO SB_MIGRATION */
-        //when(connectionService.getBridgeNodes()).thenReturn(nodes);
-
-        //ConcurrentMap<String, Row> bridges = new ConcurrentHashMap();
-        //bridges.put("key", mock(Row.class));
-        //when(ovsdbConfigService.getRows(any(Node.class), anyString())).thenReturn(bridges);
-
-        //Bridge bridge = mock(Bridge.class);
-        //Column<GenericTableSchema, Set<String>> datapathIdColumn = mock(Column.class);
-        //when(bridge.getDatapathIdColumn()).thenReturn(datapathIdColumn);
-        //when(bridge.getName()).thenReturn(Constants.INTEGRATION_BRIDGE);
-        Set<String> dpids = new HashSet();
-        dpids.add(DPID);
-        //when(datapathIdColumn.getData()).thenReturn(dpids);
-        /* TODO SB_MIGRATION */
-        //when(ovsdbConfigService.getTypedRow(any(Node.class), same(Bridge.class), any(Row.class))).thenReturn(bridge);
+        when(orchestrator.getNextServiceInPipeline(any(Service.class))).thenReturn(Service.ARP_RESPONDER);
 
         abstractServiceInstance.setService(service);
 
-        /* TODO SB_MIGRATION */ // Need topology Node rather than the NODE_ID
-        //abstractServiceInstance.programDefaultPipelineRule(NODE_ID);
+        WriteTransaction transaction = mock(WriteTransaction.class);
+        when(dataBroker.newWriteOnlyTransaction()).thenReturn(transaction);
+        CheckedFuture<Void, TransactionCommitFailedException> commitFuture = mock(CheckedFuture.class);
+        when(transaction.submit()).thenReturn(commitFuture);
 
-        /* TODO SB_MIGRATION */
-        //verify(abstractServiceInstance, times(1)).isBridgeInPipeline(NODE_ID);
-        //verify(abstractServiceInstance, times(1)).writeFlow(any(FlowBuilder.class), any(NodeBuilder.class));
+        NodeBuilder nodeBuilder = mock(NodeBuilder.class);
+        when(nodeBuilder.getKey()).thenReturn(mock(NodeKey.class));
+
+        FlowBuilder flowBuilder = mock(FlowBuilder.class);
+        when(flowBuilder.getKey()).thenReturn(mock(FlowKey.class));
+
+        abstractServiceInstance.programDefaultPipelineRule(mock(Node.class));
+
+        verify(abstractServiceInstance, times(1)).isBridgeInPipeline(any(Node.class));
+        verify(abstractServiceInstance, times(1)).createNodeBuilder(anyString());
+        verify(abstractServiceInstance, times(1)).writeFlow(any(FlowBuilder.class), any(NodeBuilder.class));
+    }
+
+//    @Test TODO - re-activate test
+    public void testSetDependencies() throws Exception {
+        PipelineOrchestrator pipelineOrchestrator = mock(PipelineOrchestrator.class);
+        Southbound southbound = mock(Southbound.class);
+
+        PowerMockito.mockStatic(ServiceHelper.class);
+        PowerMockito.when(ServiceHelper.getGlobalInstance(PipelineOrchestrator.class, abstractServiceInstance)).thenReturn(pipelineOrchestrator);
+        PowerMockito.when(ServiceHelper.getGlobalInstance(Southbound.class, abstractServiceInstance)).thenReturn(southbound);
+
+        abstractServiceInstance.setDependencies(mock(ServiceReference.class), mock(AbstractServiceInstance.class));
+
+        assertEquals("Error, did not return the correct object", getField("pipelineOrchestrator"), pipelineOrchestrator);
+        assertEquals("Error, did not return the correct object", getField("southbound"), southbound);
+    }
+
+    private Object getField(String fieldName) throws Exception {
+        Field field = AbstractServiceInstance.class.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        return field.get(abstractServiceInstance);
     }
 }

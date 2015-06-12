@@ -10,63 +10,36 @@ package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Ignore;
+import java.lang.reflect.Field;
+import java.util.concurrent.ExecutorService;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Unit test for {@link PipelineOrchestratorImplTest}
  */
-@Ignore //TODO SB_MIGRATION
-@PrepareForTest(PipelineOrchestratorImpl.class)
+@PrepareForTest(ServiceHelper.class)
 @RunWith(PowerMockRunner.class)
 public class PipelineOrchestratorImplTest {
+    @InjectMocks private PipelineOrchestratorImpl orchestrator;
 
-    @Mock
-    private ServiceReference ref;
-    @Mock
-    private ServiceReference ref2;
-    @Mock
-    private AbstractServiceInstance serviceInstance;
-    @Mock
-    private AbstractServiceInstance serviceInstance2;
-
-    @InjectMocks
-    private PipelineOrchestratorImpl orchestrator;
-
-    @Before
-    public void setUp() {
-        //Random r = new Random();
-
-        orchestrator = new PipelineOrchestratorImpl();
-        // TODO SB_MIGRATION
-        //orchestrator.init();
-        orchestrator.start();
-
-        /*when(ref.getProperty(org.osgi.framework.Constants.SERVICE_ID))
-                .thenReturn(r.nextLong());
-        when(ref.getProperty(Constants.EVENT_HANDLER_TYPE_PROPERTY))
-                .thenReturn(handlerTypeObject);
-        when(ref.getProperty(AbstractServiceInstance.SERVICE_PROPERTY))
-                .thenReturn(Service.CLASSIFIER);
-
-        when(ref2.getProperty(org.osgi.framework.Constants.SERVICE_ID))
-                .thenReturn(r.nextLong());
-        when(ref2.getProperty(Constants.EVENT_HANDLER_TYPE_PROPERTY))
-                .thenReturn(handlerTypeObject);
-        when(ref2.getProperty(AbstractServiceInstance.SERVICE_PROPERTY))
-                .thenReturn(Service.INBOUND_NAT);
-
-        when(serviceInstance.getService()).thenReturn(Service.CLASSIFIER);
-        when(serviceInstance2.getService()).thenReturn(Service.INBOUND_NAT);*/
-    }
+    @Mock private ExecutorService eventHandler;
+    @Mock private Southbound southbound;
 
     /***
      * Registers a mock service and verifies the registration by asking the
@@ -74,32 +47,20 @@ public class PipelineOrchestratorImplTest {
      * registry
      */
     @Test
-    public void testRegisterService() {
-        orchestrator.registerService(ref, serviceInstance);
+    public void testRegisterAndUnregisterService() {
+        Service service = Service.CLASSIFIER;
+        ServiceReference<?> serviceReference = mock(ServiceReference.class);
+        when(serviceReference.getProperty(anyString())).thenReturn(service);
+
+        AbstractServiceInstance abstractServiceInstance = mock(AbstractServiceInstance.class);
+
+        orchestrator.registerService(serviceReference, abstractServiceInstance);
         assertEquals("Error, registerService() service registration fails",
-                serviceInstance,
-                orchestrator.getServiceInstance(Service.CLASSIFIER));
-    }
+                abstractServiceInstance,
+                orchestrator.getServiceInstance(service));
 
-    /***
-     * Test method {@link PipelineOrchestratorImplr#registerService(Service)}
-     *
-     * Unregisters a mock service and verifies the process by asking the
-     * pipeline orchestrator to return the associated service from its internal
-     * registry
-     */
-    @Test
-    public void testUnRegisterService() {
-
-        orchestrator = new PipelineOrchestratorImpl();
-        //orchestrator.init();
-        orchestrator.start();
-        orchestrator.registerService(ref, serviceInstance);
-        orchestrator.unregisterService(ref);
-
-        assertEquals("Error, unregisterService() service registration fails",
-                null, orchestrator.getServiceInstance(Service.CLASSIFIER));
-
+        orchestrator.unregisterService(serviceReference);
+        assertNull("Error, unregisterService() didn't delete the service", orchestrator.getServiceInstance(service));
     }
 
     /**
@@ -136,29 +97,26 @@ public class PipelineOrchestratorImplTest {
                 orchestrator.getNextServiceInPipeline(Service.OUTBOUND_NAT),
                 Service.L2_FORWARDING);
         assertNull(orchestrator.getNextServiceInPipeline(Service.L2_FORWARDING));
-
     }
 
-    /**
-     * Test method {@link PipelineOrchestratorImpl#getServiceInstance(Service)}
-     */
-    @Test
-    public void testGetServiceInstance() {
+  @Test
+  public void testSetDependencies() throws Exception {
+      NodeCacheManager nodeCacheManager = mock(NodeCacheManager.class);
+      Southbound southbound = mock(Southbound.class);
 
-        orchestrator = new PipelineOrchestratorImpl();
-        //orchestrator.init();
-        orchestrator.start();
-        orchestrator.registerService(ref, serviceInstance);
-        orchestrator.registerService(ref2, serviceInstance2);
+      PowerMockito.mockStatic(ServiceHelper.class);
+      PowerMockito.when(ServiceHelper.getGlobalInstance(NodeCacheManager.class, orchestrator)).thenReturn(nodeCacheManager);
+      PowerMockito.when(ServiceHelper.getGlobalInstance(Southbound.class, orchestrator)).thenReturn(southbound);
 
-        assertEquals(
-                "Error, getServiceInstance() fails to return an instance of a registered service",
-                serviceInstance,
-                orchestrator.getServiceInstance(Service.CLASSIFIER));
+      orchestrator.setDependencies(mock(BundleContext.class), mock(ServiceReference.class));
 
-        assertEquals(
-                "Error, getServiceInstance() returned an instance of a service that wasn't registered.",
-                null, orchestrator.getServiceInstance(Service.DIRECTOR));
-    }
+//      assertEquals("Error, did not return the correct object", getField("nodeCacheManager"), nodeCacheManager);
+      assertEquals("Error, did not return the correct object", getField("southbound"), southbound);
+  }
 
+  private Object getField(String fieldName) throws Exception {
+      Field field = PipelineOrchestratorImpl.class.getDeclaredField(fieldName);
+      field.setAccessible(true);
+      return field.get(orchestrator);
+  }
 }

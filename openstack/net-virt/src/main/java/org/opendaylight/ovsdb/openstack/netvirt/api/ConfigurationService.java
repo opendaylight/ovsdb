@@ -124,6 +124,12 @@ public interface ConfigurationService {
     public boolean isL3ForwardingEnabled();
 
     /**
+     * Determine if Distributed ARP Responder is enabled
+     * @return true if ovsdb net-virt is configured for distributed arp responder
+     */
+    public boolean isDistributedArpDisabled();
+
+    /**
      * Returns the MacAddress to be used for the default gateway by the {@link L3ForwardingProvider}
      * There is no default.
      * @param node the node to query

@@ -173,8 +173,6 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     public Option[] getLoggingOptions() {
         Option[] options = new Option[] {
                 editConfigurationFilePut(SouthboundITConstants.ORG_OPS4J_PAX_LOGGING_CFG,
-                        //"log4j.logger.org.opendaylight.ovsdb.southbound-impl",
-                        //LogLevelOption.LogLevel.DEBUG.name())
                         "log4j.logger.org.opendaylight.ovsdb",
                         LogLevelOption.LogLevel.TRACE.name())
         };

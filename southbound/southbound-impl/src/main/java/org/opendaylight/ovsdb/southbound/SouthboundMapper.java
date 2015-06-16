@@ -300,10 +300,12 @@ public class SouthboundMapper {
         }
 
         final List<ControllerEntry> controllerEntries = ovsdbBridgeAugmentation.getControllerEntry();
-        for (ControllerEntry controllerEntry : controllerEntries) {
-            final Controller controller = updatedControllerRows.get(
-                    new UUID(controllerEntry.getControllerUuid().getValue()));
-            addControllerEntries(controllerEntriesCreated, controller);
+        if (controllerEntries != null) {
+            for (ControllerEntry controllerEntry : controllerEntries) {
+                final Controller controller = updatedControllerRows.get(
+                        new UUID(controllerEntry.getControllerUuid().getValue()));
+                addControllerEntries(controllerEntriesCreated, controller);
+            }
         }
         LOG.debug("controllerEntries: {}", controllerEntriesCreated);
         return controllerEntriesCreated;

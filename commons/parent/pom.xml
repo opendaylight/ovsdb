@@ -102,6 +102,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <httpcomponents.version>4.2.1</httpcomponents.version>
     <portlet.version>2.0</portlet.version>
     <powermock.version>1.5.2</powermock.version>
+    <ovsdb.ui.version>0.1.0-SNAPSHOT</ovsdb.ui.version>
+    <dlux.loader.version>0.3.0-SNAPSHOT</dlux.loader.version>
+    <dlux.core.version>0.3.0-SNAPSHOT</dlux.core.version>
   </properties>
 
   <dependencyManagement>
@@ -342,6 +345,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <groupId>org.powermock</groupId>
         <artifactId>powermock-core</artifactId>
         <version>${powermock.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.ovsdb</groupId>
+        <artifactId>ovsdb-ui</artifactId>
+        <version>${ovsdb.ui.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

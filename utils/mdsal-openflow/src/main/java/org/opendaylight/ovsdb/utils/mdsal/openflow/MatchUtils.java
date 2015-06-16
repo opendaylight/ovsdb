@@ -999,4 +999,20 @@ public class MatchUtils {
     public static Ipv4Prefix iPv4PrefixFromIPv4Address(String ipv4AddressString) {
         return new Ipv4Prefix(ipv4AddressString + "/32");
     }
+
+    /**
+     * Return Long that represents OF port for strings where OF is explicitly provided
+     *
+     * @param ofPortIdentifier the string with encoded OF port (example format "OFPort|999")
+     * @return the OFport or null
+     */
+    public static Long parseExplicitOFPort(String ofPortIdentifier) {
+        if (ofPortIdentifier != null) {
+            String[] pair = ofPortIdentifier.split("\\|");
+            if ((pair.length > 1) && (pair[0].equalsIgnoreCase("OFPort"))) {
+                return new Long(pair[1]);
+            }
+        }
+        return null;
+    }
 }

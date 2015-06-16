@@ -82,13 +82,13 @@ public class SouthboundHandler extends AbstractHandler
         NeutronNetwork network = tenantNetworkManager.getTenantNetwork(tp);
         if (network != null && !network.getRouterExternal()) {
             logger.trace("handleInterfaceUpdate <{}> <{}> network: {}", node, tp, network.getNetworkUUID());
-            neutronL3Adapter.handleInterfaceEvent(node, tp, network, Action.UPDATE);
             if (bridgeConfigurationManager.createLocalNetwork(node, network)) {
                 networkingProviderManager.getProvider(node).handleInterfaceUpdate(network, node, tp);
             }
         } else {
             logger.debug("No tenant network found on node: <{}> for interface: <{}>", node, tp);
         }
+        neutronL3Adapter.handleInterfaceEvent(node, tp, network, Action.UPDATE);
     }
 
     private void handleInterfaceDelete (Node node, OvsdbTerminationPointAugmentation intf,

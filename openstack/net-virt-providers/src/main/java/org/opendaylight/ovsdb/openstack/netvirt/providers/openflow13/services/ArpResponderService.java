@@ -73,7 +73,15 @@ public class ArpResponderService extends AbstractServiceInstance implements ArpP
         ActionBuilder ab = new ActionBuilder();
         List<org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action> actionList = Lists.newArrayList();
 
-        MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId));
+        if (segmentationId != null) {
+            final Long inPort = MatchUtils.parseExplicitOFPort(segmentationId);
+            if (inPort != null) {
+                MatchUtils.createInPortMatch(matchBuilder, dpid, inPort);
+            } else {
+                MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId));
+            }
+        }
+
         MatchUtils.createEtherTypeMatch(matchBuilder, new EtherType(Constants.ARP_ETHERTYPE));
         MatchUtils.createArpDstIpv4Match(matchBuilder, MatchUtils.iPv4PrefixFromIPv4Address(ipAddress.getHostAddress()));
 

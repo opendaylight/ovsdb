@@ -66,7 +66,7 @@ public class InboundNatServiceTest {
     }
 
     /**
-     * Test method {@link InboundNatService#programIpRewriteRule(Long, String, InetAddress, InetAddress, Action)}
+     * Test method {@link InboundNatService#programIpRewriteRule(Long, Long, InetAddress, InetAddress, Action)}
      */
     @Test
     public void testProgramIpRewriteRule() throws Exception {
@@ -77,7 +77,7 @@ public class InboundNatServiceTest {
 
         assertEquals("Error, did not return the expected StatusCode",
                 new Status(StatusCode.SUCCESS),
-                inboundNatService.programIpRewriteRule(Long.valueOf(123), "2",
+                inboundNatService.programIpRewriteRule(Long.valueOf(123), Long.valueOf(2), "2",  // FIXME: describe params
                         matchAddress, rewriteAddress, Action.ADD));
         verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
         verify(writeTransaction, times(1)).submit();
@@ -85,7 +85,7 @@ public class InboundNatServiceTest {
 
         assertEquals("Error, did not return the expected StatusCode",
                 new Status(StatusCode.SUCCESS),
-                inboundNatService.programIpRewriteRule(Long.valueOf(123), "2",
+                inboundNatService.programIpRewriteRule(Long.valueOf(123), Long.valueOf(2), "2",  // FIXME: describe params
                         matchAddress, rewriteAddress, Action.DELETE));
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
         verify(writeTransaction, times(2)).submit();

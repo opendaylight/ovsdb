@@ -22,24 +22,36 @@ import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.OF13Provider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
+import org.opendaylight.ovsdb.utils.mdsal.openflow.ActionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.apply.actions._case.ApplyActionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 
 import com.google.common.collect.Lists;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg3;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.nicira.action.rev140714.dst.choice.grouping.dst.choice.DstNxRegCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
 public class InboundNatService extends AbstractServiceInstance implements ConfigInterface, InboundNatProvider {
+    public final static long REG_VALUE_NO_INBOUND_REWRITE = 0x0L;
+    public static final Class<? extends NxmNxReg> REG_FIELD = NxmNxReg3.class;
+
     public InboundNatService() {
         super(Service.INBOUND_NAT);
     }
@@ -49,7 +61,7 @@ public class InboundNatService extends AbstractServiceInstance implements Config
     }
 
     @Override
-    public Status programIpRewriteRule(Long dpid, String segmentationId, InetAddress matchAddress,
+    public Status programIpRewriteRule(Long dpid, Long inPort, String destSegId, InetAddress matchAddress,
                                        InetAddress rewriteAddress, Action action) {
         String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpid;
 
@@ -61,11 +73,17 @@ public class InboundNatService extends AbstractServiceInstance implements Config
         List<Instruction> instructions = Lists.newArrayList();
         InstructionBuilder ib = new InstructionBuilder();
 
-        MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId));
+        MatchUtils.createInPortMatch(matchBuilder, dpid, inPort);
         MatchUtils.createDstL3IPv4Match(matchBuilder, MatchUtils.iPv4PrefixFromIPv4Address(matchAddress.getHostAddress()));
 
-        // Set Dest IP address
-        InstructionUtils.createNwDstInstructions(ib, MatchUtils.iPv4PrefixFromIPv4Address(rewriteAddress.getHostAddress()));
+        // Set register to indicate that rewrite took place
+        ActionBuilder actionBuilder = new ActionBuilder();
+        actionBuilder.setAction(ActionUtils.nxLoadRegAction(new DstNxRegCaseBuilder().setNxReg(REG_FIELD).build(),
+                new BigInteger(destSegId)));
+
+        // Set Dest IP address and set REG_FIELD
+        InstructionUtils.createNwDstInstructions(ib,
+                MatchUtils.iPv4PrefixFromIPv4Address(rewriteAddress.getHostAddress()), actionBuilder);
         ib.setOrder(0);
         ib.setKey(new InstructionKey(0));
         instructions.add(ib.build());
@@ -80,7 +98,7 @@ public class InboundNatService extends AbstractServiceInstance implements Config
         flowBuilder.setMatch(matchBuilder.build());
         flowBuilder.setInstructions(isb.setInstruction(instructions).build());
 
-        String flowId = "InboundNAT_" + segmentationId + "_" + rewriteAddress.getHostAddress();
+        String flowId = "InboundNAT_" + inPort + "_" + destSegId + "_" + matchAddress.getHostAddress();
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setBarrier(true);
@@ -146,6 +164,77 @@ public class InboundNatService extends AbstractServiceInstance implements Config
 
         // ToDo: WriteFlow/RemoveFlow should return something we can use to check success
         return new Status(StatusCode.SUCCESS);
+    }
+
+    /**
+     * Program Default Pipeline Flow for Inbound NAT.
+     *
+     * @param node on which the default pipeline flow is programmed.
+     */
+    @Override
+    protected void programDefaultPipelineRule(Node node) {
+        if (!isBridgeInPipeline(node)) {
+            //logger.trace("Bridge is not in pipeline {} ", node);
+            return;
+        }
+        MatchBuilder matchBuilder = new MatchBuilder();
+        FlowBuilder flowBuilder = new FlowBuilder();
+        Long dpid = getDpid(node);
+        if (dpid == 0L) {
+            return;
+        }
+        String nodeName = OPENFLOW + getDpid(node);
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+
+        // Create the OF Actions and Instructions
+        InstructionsBuilder isb = new InstructionsBuilder();
+
+        // Instructions List Stores Individual Instructions
+        List<Instruction> instructions = Lists.newArrayList();
+
+        // Set register to indicate that rewrite did _not_ take place
+        InstructionBuilder ib = new InstructionBuilder();
+        List<org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action> actionList =
+                Lists.newArrayList();
+        ActionBuilder ab = new ActionBuilder();
+        ab.setAction(ActionUtils.nxLoadRegAction(new DstNxRegCaseBuilder().setNxReg(REG_FIELD).build(),
+                BigInteger.valueOf(REG_VALUE_NO_INBOUND_REWRITE)));
+        ab.setOrder(1);
+        ab.setKey(new ActionKey(1));
+        actionList.add(ab.build());
+
+        ApplyActionsBuilder aab = new ApplyActionsBuilder();
+        aab.setAction(actionList);
+
+        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
+        ib.setOrder(0);
+        ib.setKey(new InstructionKey(0));
+        instructions.add(ib.build());
+
+        // Call the InstructionBuilder Methods Containing Actions
+        ib = getMutablePipelineInstructionBuilder();
+        ib.setOrder(1);
+        ib.setKey(new InstructionKey(1));
+        instructions.add(ib.build());
+
+        // Add InstructionBuilder to the Instruction(s)Builder List
+        isb.setInstruction(instructions);
+
+        // Add InstructionsBuilder to FlowBuilder
+        flowBuilder.setInstructions(isb.build());
+
+        String flowId = "CUSTOM_DEFAULT_PIPELINE_FLOW_"+getTable();
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setMatch(matchBuilder.build());
+        flowBuilder.setPriority(0);
+        flowBuilder.setBarrier(true);
+        flowBuilder.setTableId(getTable());
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+        writeFlow(flowBuilder, nodeBuilder);
     }
 
     @Override

@@ -435,9 +435,11 @@ public class InstructionUtils {
      *
      * @param ib        Map InstructionBuilder without any instructions
      * @param prefixdst String containing an IPv4 prefix
+     * @param extraAction (optional) Additional action to be performed in actionList
      * @return ib Map InstructionBuilder with instructions
      */
-    public static InstructionBuilder createNwDstInstructions(InstructionBuilder ib, Ipv4Prefix prefixdst) {
+    public static InstructionBuilder createNwDstInstructions(InstructionBuilder ib, Ipv4Prefix prefixdst,
+                                                             ActionBuilder extraAction) {
 
         List<Action> actionList = Lists.newArrayList();
         ActionBuilder ab = new ActionBuilder();
@@ -450,6 +452,12 @@ public class InstructionUtils {
         ab.setOrder(0);
         ab.setKey(new ActionKey(0));
         actionList.add(ab.build());
+
+        if (extraAction != null) {
+            extraAction.setOrder(1);
+            extraAction.setKey(new ActionKey(1));
+            actionList.add(extraAction.build());
+        }
 
         // Create an Apply Action
         ApplyActionsBuilder aab = new ApplyActionsBuilder();

@@ -79,7 +79,6 @@ public class NeutronL3AdapterTest {
 
     private Set<String> inboundIpRewriteCache;
     private Set<String> outboundIpRewriteCache;
-    private Set<String> inboundIpRewriteExclusionCache;
     private Set<String> outboundIpRewriteExclusionCache;
     private Set<String> routerInterfacesCache;
     private Set<String> staticArpEntryCache;
@@ -111,7 +110,6 @@ public class NeutronL3AdapterTest {
     private void getNeutronL3AdapterFields() throws Exception{
         inboundIpRewriteCache = (Set<String>) getField("inboundIpRewriteCache");
         outboundIpRewriteCache = (Set<String>) getField("outboundIpRewriteCache");
-        inboundIpRewriteExclusionCache = (Set<String>) getField("inboundIpRewriteExclusionCache");
         outboundIpRewriteExclusionCache = (Set<String>) getField("outboundIpRewriteExclusionCache");
         routerInterfacesCache = (Set<String>) getField("routerInterfacesCache");
         staticArpEntryCache = (Set<String>) getField("staticArpEntryCache");
@@ -220,7 +218,6 @@ public class NeutronL3AdapterTest {
         /* TODO SB_MIGRATION */
         //assertEquals("Error, did not return the correct routerInterfacesCache size", 2, routerInterfacesCache.size());
 //        assertEquals("Error, did not return the correct staticArpEntryCache size", 2, staticArpEntryCache.size());
-//        assertEquals("Error, did not return the correct inboundIpRewriteExclusionCache size", 1, inboundIpRewriteExclusionCache.size());
 //        assertEquals("Error, did not return the correct outboundIpRewriteExclusionCache size", 1, outboundIpRewriteExclusionCache.size());
 //        assertEquals("Error, did not return the correct l3ForwardingCache size", 1, l3ForwardingCache.size());
         // Unchanged
@@ -235,7 +232,6 @@ public class NeutronL3AdapterTest {
 //        assertEquals("Error, did not return the correct staticArpEntryCache size", 1, staticArpEntryCache.size());
         // Unchanged
         assertEquals("Error, did not return the correct routerInterfacesCache size", 2, routerInterfacesCache.size());
-        assertEquals("Error, did not return the correct inboundIpRewriteExclusionCache size", 1, inboundIpRewriteExclusionCache.size());
         assertEquals("Error, did not return the correct outboundIpRewriteExclusionCache size", 1, outboundIpRewriteExclusionCache.size());
         assertEquals("Error, did not return the correct l3ForwardingCache size", 1, l3ForwardingCache.size());
         assertEquals("Error, did not return the correct inboundIpRewriteCache size", 0, inboundIpRewriteCache.size());
@@ -264,7 +260,6 @@ public class NeutronL3AdapterTest {
         /* TODO SB_MIGRATION */
         //assertEquals("Error, did not return the correct routerInterfacesCache size", 2, routerInterfacesCache.size());
         assertEquals("Error, did not return the correct staticArpEntryCache size", 2, staticArpEntryCache.size());
-        assertEquals("Error, did not return the correct inboundIpRewriteExclusionCache size", 1, inboundIpRewriteExclusionCache.size());
         assertEquals("Error, did not return the correct outboundIpRewriteExclusionCache size", 1, outboundIpRewriteExclusionCache.size());
         assertEquals("Error, did not return the correct l3ForwardingCache size", 1, l3ForwardingCache.size());
         assertEquals("Error, did not return the correct networkIdToRouterMacCache size", 1, networkIdToRouterMacCache.size());
@@ -281,7 +276,6 @@ public class NeutronL3AdapterTest {
         assertEquals("Error, did not return the correct l3ForwardingCache size", 0, l3ForwardingCache.size());
         // Unchanged
         assertEquals("Error, did not return the correct routerInterfacesCache size", 2, routerInterfacesCache.size());
-        assertEquals("Error, did not return the correct inboundIpRewriteExclusionCache size", 1, inboundIpRewriteExclusionCache.size());
         assertEquals("Error, did not return the correct outboundIpRewriteExclusionCache size", 1, outboundIpRewriteExclusionCache.size());
         assertEquals("Error, did not return the correct networkIdToRouterMacCache size", 1, networkIdToRouterMacCache.size());
         assertEquals("Error, did not return the correct inboundIpRewriteCache size", 0, inboundIpRewriteCache.size());
@@ -313,7 +307,6 @@ public class NeutronL3AdapterTest {
         assertEquals("Error, did not return the correct staticArpEntryCache size", 1, staticArpEntryCache.size());
         // Unchanged
         assertEquals("Error, did not return the correct routerInterfacesCache size", 0, routerInterfacesCache.size());
-        assertEquals("Error, did not return the correct inboundIpRewriteExclusionCache size", 0, inboundIpRewriteExclusionCache.size());
         assertEquals("Error, did not return the correct outboundIpRewriteExclusionCache size", 0, outboundIpRewriteExclusionCache.size());
         assertEquals("Error, did not return the correct subnetIdToRouterInterfaceCache size", 0, subnetIdToRouterInterfaceCache.size());
         assertEquals("Error, did not return the correct l3ForwardingCache size", 0, l3ForwardingCache.size());
@@ -326,7 +319,6 @@ public class NeutronL3AdapterTest {
         assertEquals("Error, did not return the correct outboundIpRewriteCache size", 1, outboundIpRewriteCache.size());
         assertEquals("Error, did not return the correct staticArpEntryCache size", 1, staticArpEntryCache.size());
         assertEquals("Error, did not return the correct routerInterfacesCache size", 0, routerInterfacesCache.size());
-        assertEquals("Error, did not return the correct inboundIpRewriteExclusionCache size", 0, inboundIpRewriteExclusionCache.size());
         assertEquals("Error, did not return the correct outboundIpRewriteExclusionCache size", 0, outboundIpRewriteExclusionCache.size());
         assertEquals("Error, did not return the correct subnetIdToRouterInterfaceCache size", 0, subnetIdToRouterInterfaceCache.size());
         assertEquals("Error, did not return the correct l3ForwardingCache size", 0, l3ForwardingCache.size());

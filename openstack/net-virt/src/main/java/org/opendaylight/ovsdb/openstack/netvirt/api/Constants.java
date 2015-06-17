@@ -20,6 +20,7 @@ public final class Constants {
     public static final String EXTERNAL_ID_VM_ID = "vm-id";
     public static final String EXTERNAL_ID_INTERFACE_ID = "iface-id";
     public static final String EXTERNAL_ID_VM_MAC = "attached-mac";
+    public static final String EXTERNAL_NETWORK = "external";
 
     /*
      * @see http://docs.openstack.org/grizzly/openstack-network/admin/content/ovs_quantum_plugin.html

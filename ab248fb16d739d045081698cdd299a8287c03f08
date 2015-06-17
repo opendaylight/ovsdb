@@ -16,6 +16,24 @@
       "revId": "ab248fb16d739d045081698cdd299a8287c03f08",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_a7bb85c3",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactInvokerImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-06-17T14:45:21Z",
+      "side": 1,
+      "message": "The thread is hanging at get(), checking if the task isDone() before calling get() avoids the hang situation.\n\nget() is a blocking call.",
+      "parentUuid": "7a7fa997_60031b74",
+      "revId": "ab248fb16d739d045081698cdd299a8287c03f08",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

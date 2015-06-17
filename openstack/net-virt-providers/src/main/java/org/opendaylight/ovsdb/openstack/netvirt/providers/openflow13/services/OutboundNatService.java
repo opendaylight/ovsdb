@@ -68,7 +68,8 @@ public class OutboundNatService extends AbstractServiceInstance implements Outbo
 
         // Set Dest IP address
         InstructionUtils.createNwDstInstructions(ib,
-                                                 MatchUtils.iPv4PrefixFromIPv4Address(rewriteAddress.getHostAddress()));
+                MatchUtils.iPv4PrefixFromIPv4Address(rewriteAddress.getHostAddress()),
+                null);
         ib.setOrder(0);
         ib.setKey(new InstructionKey(0));
         instructions.add(ib.build());

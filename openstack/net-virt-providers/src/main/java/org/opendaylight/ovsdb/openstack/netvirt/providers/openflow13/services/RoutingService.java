@@ -72,8 +72,16 @@ public class RoutingService extends AbstractServiceInstance implements RoutingPr
         ActionBuilder ab = new ActionBuilder();
         List<org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action> actionList = Lists.newArrayList();
 
-        String prefixString = address.getHostAddress() + "/" + mask;
-        MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(sourceSegId));
+        if (sourceSegId.equals(Constants.EXTERNAL_NETWORK)) {
+            // If matching on external network, use register reserved for InboundNatService to ensure that
+            // ip rewrite is meant to be consumed by this destination tunnel id.
+            MatchUtils.addNxRegMatch(matchBuilder,
+                    new MatchUtils.RegMatch(InboundNatService.REG_FIELD, Long.valueOf(destSegId)));
+        } else {
+            MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(sourceSegId));
+        }
+
+        final String prefixString = address.getHostAddress() + "/" + mask;
         MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(prefixString));
 
         // Set source Mac address
@@ -111,7 +119,7 @@ public class RoutingService extends AbstractServiceInstance implements RoutingPr
         flowBuilder.setMatch(matchBuilder.build());
         flowBuilder.setInstructions(isb.setInstruction(instructions).build());
 
-        String flowId = "Routing_" + sourceSegId + "_" + prefixString;
+        String flowId = "Routing_" + sourceSegId + "_" + destSegId + "_" + prefixString;
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
         flowBuilder.setBarrier(true);

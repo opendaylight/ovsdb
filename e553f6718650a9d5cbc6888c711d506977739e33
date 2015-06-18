@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "7a7fa997_b30ae4d0",
+        "filename": "resources/robot/README.md",
+        "patchSetId": 9
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-18T20:18:39Z",
+      "side": 1,
+      "message": "please revise, now that rpm is not included.",
+      "range": {
+        "startLine": 6,
+        "startChar": 2,
+        "endLine": 6,
+        "endChar": 7
+      },
+      "revId": "e553f6718650a9d5cbc6888c711d506977739e33",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7fa997_d8053f15",
         "filename": "resources/robot/puppet/manifests/ovsnode.pp",
         "patchSetId": 9

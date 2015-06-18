@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a7fa997_f3729c48",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-18T20:39:34Z",
+      "side": 1,
+      "message": "right, this is addressing 2 things:\nwe want neutronL3Adapter to go last and\nas you noticed, we want it to be called even if there are no\nnetworks. That is so because ovsdb-netvirt pays no attention to external networks, but l3Adapter may.",
+      "parentUuid": "7a7fa997_f3edbcf0",
+      "revId": "62c39be4e55939b4ebf4fbe10467708b10898cd0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7fa997_33925458",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2015-06-18T20:33:08Z",
       "side": 1,
       "message": "network can be null here because of the modification in NeutronL3Adaptor.java, is it okay?",
+      "revId": "62c39be4e55939b4ebf4fbe10467708b10898cd0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_53827001",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-18T20:39:34Z",
+      "side": 1,
+      "message": "that is right, that param (network) is actually not used at all.",
+      "parentUuid": "7a7fa997_33925458",
       "revId": "62c39be4e55939b4ebf4fbe10467708b10898cd0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

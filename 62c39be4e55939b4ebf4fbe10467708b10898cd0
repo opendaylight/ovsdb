@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_f3edbcf0",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-06-18T20:33:08Z",
+      "side": 1,
+      "message": "so is this about the ordering of who should handle the event first ? because now it looks like we want to call NeutronL3Adaptor#handleInterfaceEvent irrespective of whether network is null or not ?",
+      "revId": "62c39be4e55939b4ebf4fbe10467708b10898cd0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_33925458",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-06-18T20:33:08Z",
+      "side": 1,
+      "message": "network can be null here because of the modification in NeutronL3Adaptor.java, is it okay?",
+      "revId": "62c39be4e55939b4ebf4fbe10467708b10898cd0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

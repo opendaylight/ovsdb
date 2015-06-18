@@ -16,6 +16,24 @@
       "revId": "e553f6718650a9d5cbc6888c711d506977739e33",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_333ed4b9",
+        "filename": "resources/robot/puppet/manifests/ovsnode.pp",
+        "patchSetId": 9
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 3848
+      },
+      "writtenOn": "2015-06-18T19:10:38Z",
+      "side": 1,
+      "message": "Yes, it is a lot faster now. Vagrant can create 2 VMs in about 3mins. Actually, I couldn\u0027t find the rpm online. So I ran the ovs build, then pulled the rpm after it was done and pushed it to dropbox. I then changed the script to simply download this build from dropbox. If we need to rebuild or use a different ovs version, we only need to point the Vagrant file to ovsnode_build.pp to create the new rpm.",
+      "parentUuid": "7a7fa997_d8053f15",
+      "revId": "e553f6718650a9d5cbc6888c711d506977739e33",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

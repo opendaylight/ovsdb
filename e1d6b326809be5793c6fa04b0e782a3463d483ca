@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "7a7fa997_d34d20c6",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/InboundNatService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-06-18T21:10:34Z",
+      "side": 1,
+      "message": "cool. Just to raise alarm about the issue we faced where two flows were same if you exclude the match extensions, and then we used cookie value to differentiate the flows. Hopefully we will not get there with these flows :)",
+      "parentUuid": "7a7fa997_f3ee1cb4",
+      "revId": "e1d6b326809be5793c6fa04b0e782a3463d483ca",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7fa997_33a01490",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/RoutingService.java",
         "patchSetId": 1

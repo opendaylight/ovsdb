@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_d8053f15",
+        "filename": "resources/robot/puppet/manifests/ovsnode.pp",
+        "patchSetId": 9
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-06-18T19:00:46Z",
+      "side": 1,
+      "message": "Good one, didn\u0027t know where to get the pre-compiled + pre-packaged rpm for RHEL 7.0, so that should speed up the loading of the image.",
+      "revId": "e553f6718650a9d5cbc6888c711d506977739e33",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

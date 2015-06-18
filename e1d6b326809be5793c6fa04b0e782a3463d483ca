@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_137cf81f",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/InboundNatService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-06-18T20:54:20Z",
+      "side": 1,
+      "message": "are we intentionally setting empty match here ? because i don\u0027t see we set values for matchBuilder anywhere in this method.",
+      "revId": "e1d6b326809be5793c6fa04b0e782a3463d483ca",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_33a01490",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/RoutingService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-06-18T20:54:20Z",
+      "side": 1,
+      "message": "this might be problematic, getHostAddress will give you something like 10.11.12.13 and then you will add mask, it will look like 10.11.12.13/24 or 10.11.12.13/255.255.255.0, but this is not a valid prefix string, valid prefix string is 10.11.12.0/24 or 10.11.12.0/255.255.255.0. But Ipv4Prefix class is happy with it, it should be fine for today atleast.",
+      "revId": "e1d6b326809be5793c6fa04b0e782a3463d483ca",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_33c7b447",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-06-18T20:54:20Z",
+      "side": 1,
+      "message": "extra \u0027t\u0027 in floatingIpAddress.",
+      "revId": "e1d6b326809be5793c6fa04b0e782a3463d483ca",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_d3c3e036",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-06-18T20:54:20Z",
+      "side": 1,
+      "message": "same here, extra \u0027t\u0027.",
+      "revId": "e1d6b326809be5793c6fa04b0e782a3463d483ca",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_f3c05c2c",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-06-18T20:54:20Z",
+      "side": 1,
+      "message": "extra \u0027t\u0027",
+      "revId": "e1d6b326809be5793c6fa04b0e782a3463d483ca",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_13d158fb",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 636,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-06-18T20:54:20Z",
+      "side": 1,
+      "message": "clean up?",
+      "revId": "e1d6b326809be5793c6fa04b0e782a3463d483ca",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_d3da0017",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1194,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-06-18T20:54:20Z",
+      "side": 1,
+      "message": "can you please add what we need to fix here, except putting constant to variable.",
+      "revId": "e1d6b326809be5793c6fa04b0e782a3463d483ca",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

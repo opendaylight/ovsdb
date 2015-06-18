@@ -29,13 +29,13 @@ import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentationBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.DatapathTypeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.DatapathTypeEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.InterfaceTypeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.InterfaceTypeEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchExternalIdsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchExternalIdsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigsBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
@@ -46,6 +46,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,9 +65,15 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
         Map<UUID, OpenVSwitch> updatedOpenVSwitchRows = TyperUtils
                 .extractRowsUpdated(OpenVSwitch.class, getUpdates(),
                         getDbSchema());
+        
+        Map<UUID, OpenVSwitch> deletedOpenVSwitchRows = TyperUtils
+                .extractRowsOld(OpenVSwitch.class, getUpdates(),
+                        getDbSchema());
 
         for (Entry<UUID, OpenVSwitch> entry : updatedOpenVSwitchRows.entrySet()) {
             OpenVSwitch openVSwitch = entry.getValue();
+            
+            OpenVSwitch oldEntry = deletedOpenVSwitchRows.get(entry.getKey());
             final InstanceIdentifier<Node> nodePath = getInstanceIdentifier(openVSwitch);
 
             OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = new OvsdbNodeAugmentationBuilder();
@@ -74,12 +81,11 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
             setVersion(ovsdbNodeBuilder, openVSwitch);
             setDataPathTypes(ovsdbNodeBuilder, openVSwitch);
             setInterfaceTypes(ovsdbNodeBuilder, openVSwitch);
-            setExternalIds(ovsdbNodeBuilder, openVSwitch);
+            setExternalIds(transaction, ovsdbNodeBuilder, oldEntry, openVSwitch);
             setOtherConfig(ovsdbNodeBuilder, openVSwitch);
             ovsdbNodeBuilder.setConnectionInfo(getConnectionInfo());
 
             NodeBuilder nodeBuilder = new NodeBuilder();
-            ConnectionInfo connectionInfo = getConnectionInfo();
             nodeBuilder.setNodeId(getNodeId(openVSwitch));
             nodeBuilder.addAugmentation(OvsdbNodeAugmentation.class,
                     ovsdbNodeBuilder.build());
@@ -108,24 +114,53 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setExternalIds(OvsdbNodeAugmentationBuilder ovsdbNodeBuilder,
-            OpenVSwitch openVSwitch) {
-        Map<String, String> externalIds = openVSwitch.getExternalIdsColumn().getData();
-        if (externalIds != null && !externalIds.isEmpty()) {
-            Set<String> externalIdKeys = externalIds.keySet();
-            List<OpenvswitchExternalIds> externalIdsList = new ArrayList<OpenvswitchExternalIds>();
-            String externalIdValue;
-            for (String externalIdKey : externalIdKeys) {
-                externalIdValue = externalIds.get(externalIdKey);
-                if (externalIdKey != null && externalIdValue != null) {
-                    externalIdsList.add(new OpenvswitchExternalIdsBuilder()
-                            .setExternalIdKey(externalIdKey)
-                            .setExternalIdValue(externalIdValue)
-                            .build());
-                }
-            }
-            ovsdbNodeBuilder.setOpenvswitchExternalIds(externalIdsList);
+    private void setExternalIds(ReadWriteTransaction transaction,
+            OvsdbNodeAugmentationBuilder ovsdbNodeBuilder, OpenVSwitch oldEntry, OpenVSwitch openVSwitch) {
+        Map<String, String> oldExternalIds = null;
+        Map<String, String> externalIds = null;
+
+        if (openVSwitch.getExternalIdsColumn() != null) {
+            externalIds = openVSwitch.getExternalIdsColumn().getData();
         }
+        if (oldEntry != null && oldEntry.getExternalIdsColumn() != null) {
+            oldExternalIds = oldEntry.getExternalIdsColumn().getData();
+        }
+        if ((oldExternalIds == null) || oldExternalIds.isEmpty()) {
+            setNewExternalIds(ovsdbNodeBuilder, externalIds);
+        } else if (externalIds != null && !externalIds.isEmpty()) {
+            removeExternalIds(transaction, oldExternalIds, openVSwitch);
+            setNewExternalIds(ovsdbNodeBuilder, externalIds);
+        }
+    }
+
+    private void removeExternalIds(ReadWriteTransaction transaction, Map<String, String> oldExternalIds,
+            OpenVSwitch ovs) {
+        InstanceIdentifier<OvsdbNodeAugmentation> nodeAugmentataionIid = InstanceIdentifier
+                .create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+                .child(Node.class, new NodeKey(getNodeId(ovs))).augmentation(OvsdbNodeAugmentation.class);
+        Set<String> externalIdKeys = oldExternalIds.keySet();
+        for (String externalIdKey : externalIdKeys) {
+            KeyedInstanceIdentifier<OpenvswitchExternalIds, OpenvswitchExternalIdsKey> externalIid = 
+                    nodeAugmentataionIid
+                    .child(OpenvswitchExternalIds.class, new OpenvswitchExternalIdsKey(externalIdKey));
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, externalIid);
+        }
+    }
+
+    private void setNewExternalIds(OvsdbNodeAugmentationBuilder ovsdbNodeBuilder,
+            Map<String, String> externalIds) {
+        Set<String> externalIdKeys = externalIds.keySet();
+        List<OpenvswitchExternalIds> externalIdsList = new ArrayList<OpenvswitchExternalIds>();
+        String externalIdValue;
+        for (String externalIdKey : externalIdKeys) {
+            externalIdValue = externalIds.get(externalIdKey);
+            if (externalIdKey != null && externalIdValue != null) {
+                externalIdsList.add(new OpenvswitchExternalIdsBuilder().setExternalIdKey(externalIdKey)
+                        .setExternalIdValue(externalIdValue).build());
+            }
+        }
+        ovsdbNodeBuilder.setOpenvswitchExternalIds(externalIdsList);
     }
 
     private void setInterfaceTypes(

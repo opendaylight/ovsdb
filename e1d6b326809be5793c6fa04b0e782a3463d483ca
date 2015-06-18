@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a7fa997_f3ee1cb4",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/InboundNatService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-18T21:04:22Z",
+      "side": 1,
+      "message": "this is a copy of what is in \u0027AbstractServiceInstance\u0027,\nexcept with the extra instruction to set reg3.\n\nso, I\u0027d leave this as is or change it in both places.",
+      "parentUuid": "7a7fa997_137cf81f",
+      "revId": "e1d6b326809be5793c6fa04b0e782a3463d483ca",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7fa997_33a01490",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/RoutingService.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-06-18T20:54:20Z",
       "side": 1,
       "message": "this might be problematic, getHostAddress will give you something like 10.11.12.13 and then you will add mask, it will look like 10.11.12.13/24 or 10.11.12.13/255.255.255.0, but this is not a valid prefix string, valid prefix string is 10.11.12.0/24 or 10.11.12.0/255.255.255.0. But Ipv4Prefix class is happy with it, it should be fine for today atleast.",
+      "revId": "e1d6b326809be5793c6fa04b0e782a3463d483ca",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_b31744a3",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/RoutingService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-18T21:04:22Z",
+      "side": 1,
+      "message": "ack. this is assuming that the check has happened before getting here. this has been this way before, so I\u0027d rather not mess with it in this gerrit.",
+      "parentUuid": "7a7fa997_33a01490",
       "revId": "e1d6b326809be5793c6fa04b0e782a3463d483ca",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "7a7fa997_33233407",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-18T21:04:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a7fa997_33c7b447",
+      "revId": "e1d6b326809be5793c6fa04b0e782a3463d483ca",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7fa997_d3c3e036",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2015-06-18T20:54:20Z",
       "side": 1,
       "message": "same here, extra \u0027t\u0027.",
+      "revId": "e1d6b326809be5793c6fa04b0e782a3463d483ca",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_9379e8fe",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-18T21:04:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a7fa997_d3c3e036",
       "revId": "e1d6b326809be5793c6fa04b0e782a3463d483ca",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "7a7fa997_b37e64e3",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-18T21:04:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a7fa997_f3c05c2c",
+      "revId": "e1d6b326809be5793c6fa04b0e782a3463d483ca",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7fa997_13d158fb",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
         "patchSetId": 1
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "7a7fa997_7388cce7",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 636,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-18T21:04:22Z",
+      "side": 1,
+      "message": "definitely! thanks.",
+      "parentUuid": "7a7fa997_13d158fb",
+      "revId": "e1d6b326809be5793c6fa04b0e782a3463d483ca",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7fa997_d3da0017",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
         "patchSetId": 1
@@ -115,6 +223,24 @@
       "writtenOn": "2015-06-18T20:54:20Z",
       "side": 1,
       "message": "can you please add what we need to fix here, except putting constant to variable.",
+      "revId": "e1d6b326809be5793c6fa04b0e782a3463d483ca",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_f3737c13",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1194,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-18T21:04:22Z",
+      "side": 1,
+      "message": "yup; part of the clean up, actually!",
+      "parentUuid": "7a7fa997_d3da0017",
       "revId": "e1d6b326809be5793c6fa04b0e782a3463d483ca",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

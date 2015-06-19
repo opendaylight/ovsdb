@@ -83,7 +83,6 @@ public class NeutronL3AdapterTest {
     private Set<String> routerInterfacesCache;
     private Set<String> staticArpEntryCache;
     private Set<String> l3ForwardingCache;
-    private Set<String> defaultRouteCache;
     private Map<String, String> networkIdToRouterMacCache;
     private Map<String, NeutronRouter_Interface> subnetIdToRouterInterfaceCache;
 
@@ -115,7 +114,6 @@ public class NeutronL3AdapterTest {
         routerInterfacesCache = (Set<String>) getField("routerInterfacesCache");
         staticArpEntryCache = (Set<String>) getField("staticArpEntryCache");
         l3ForwardingCache = (Set<String>) getField("l3ForwardingCache");
-        defaultRouteCache = (Set<String>) getField("defaultRouteCache");
         networkIdToRouterMacCache = (Map<String, String>) getField("networkIdToRouterMacCache");
         subnetIdToRouterInterfaceCache = (Map<String, NeutronRouter_Interface>) getField("subnetIdToRouterInterfaceCache");
     }
@@ -224,7 +222,6 @@ public class NeutronL3AdapterTest {
         // Unchanged
         assertEquals("Error, did not return the correct inboundIpRewriteCache size", 0, inboundIpRewriteCache.size());
         assertEquals("Error, did not return the correct outboundIpRewriteCache size", 0, outboundIpRewriteCache.size());
-        assertEquals("Error, did not return the correct defaultRouteCache size", 0, defaultRouteCache.size());
 
         neutronL3Adapter.handleNeutronPortEvent(neutronPort, Action.DELETE);
         // Affected by the delete
@@ -237,7 +234,6 @@ public class NeutronL3AdapterTest {
         assertEquals("Error, did not return the correct l3ForwardingCache size", 1, l3ForwardingCache.size());
         assertEquals("Error, did not return the correct inboundIpRewriteCache size", 0, inboundIpRewriteCache.size());
         assertEquals("Error, did not return the correct outboundIpRewriteCache size", 0, outboundIpRewriteCache.size());
-        assertEquals("Error, did not return the correct defaultRouteCache size", 0, defaultRouteCache.size());
     }
 
     /**
@@ -269,7 +265,6 @@ public class NeutronL3AdapterTest {
         // Unchanged
         assertEquals("Error, did not return the correct inboundIpRewriteCache size", 0, inboundIpRewriteCache.size());
         assertEquals("Error, did not return the correct outboundIpRewriteCache size", 0, outboundIpRewriteCache.size());
-        assertEquals("Error, did not return the correct defaultRouteCache size", 0, defaultRouteCache.size());
 
         neutronL3Adapter.handleNeutronPortEvent(neutronPort, Action.DELETE);
         // Affected by the delete
@@ -281,7 +276,6 @@ public class NeutronL3AdapterTest {
         assertEquals("Error, did not return the correct networkIdToRouterMacCache size", 1, networkIdToRouterMacCache.size());
         assertEquals("Error, did not return the correct inboundIpRewriteCache size", 0, inboundIpRewriteCache.size());
         assertEquals("Error, did not return the correct outboundIpRewriteCache size", 0, outboundIpRewriteCache.size());
-        assertEquals("Error, did not return the correct defaultRouteCache size", 0, defaultRouteCache.size());
         // Added above
         assertEquals("Error, did not return the correct subnetIdToRouterInterfaceCache size", 1, subnetIdToRouterInterfaceCache.size());
     }
@@ -311,7 +305,6 @@ public class NeutronL3AdapterTest {
         assertEquals("Error, did not return the correct outboundIpRewriteExclusionCache size", 0, outboundIpRewriteExclusionCache.size());
         assertEquals("Error, did not return the correct subnetIdToRouterInterfaceCache size", 0, subnetIdToRouterInterfaceCache.size());
         assertEquals("Error, did not return the correct l3ForwardingCache size", 0, l3ForwardingCache.size());
-        assertEquals("Error, did not return the correct defaultRouteCache size", 0, defaultRouteCache.size());
 
         neutronL3Adapter.handleNeutronFloatingIPEvent(neutronFloatingIP, Action.DELETE);
         // Unchanged
@@ -323,7 +316,6 @@ public class NeutronL3AdapterTest {
         assertEquals("Error, did not return the correct outboundIpRewriteExclusionCache size", 0, outboundIpRewriteExclusionCache.size());
         assertEquals("Error, did not return the correct subnetIdToRouterInterfaceCache size", 0, subnetIdToRouterInterfaceCache.size());
         assertEquals("Error, did not return the correct l3ForwardingCache size", 0, l3ForwardingCache.size());
-        assertEquals("Error, did not return the correct defaultRouteCache size", 0, defaultRouteCache.size());
     }
 
     @Test

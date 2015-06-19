@@ -56,6 +56,7 @@ public class OutboundNatServiceTest {
     private static final String SEGMENTATION_ID = "2";
     private static final String HOST_ADDRESS = "127.0.0.1";
     private static final String HOST_ADDRESS_PREFIX = "127.0.0.1/24";
+    private static final String MAC_ADDRESS = "87:1D:5E:02:40:B7";
 
     @Before
     public void setUp() throws Exception {
@@ -68,19 +69,25 @@ public class OutboundNatServiceTest {
     }
 
     /**
-     * Test method {@link OutboundNatService#programIpRewriteRule(Long, String, InetAddress, InetAddress, Action)}
+     * Test method {@link OutboundNatService#programIpRewriteRule(Long, String, String, InetAddress, String, String, InetAddress, Long, Action)}
      */
     @Test
     public void testProgramIpRewriteRule() throws Exception {
         InetAddress address = mock(InetAddress.class);
         when(address.getHostAddress()).thenReturn(HOST_ADDRESS);
 
-        assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.SUCCESS), outboundNatService.programIpRewriteRule(Long.valueOf(123), SEGMENTATION_ID, address, address, Action.ADD));
+        assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.SUCCESS),
+                outboundNatService.programIpRewriteRule(Long.valueOf(123), SEGMENTATION_ID, MAC_ADDRESS, address,
+                                                        MAC_ADDRESS, MAC_ADDRESS, address,
+                                                        Long.valueOf(10), Action.ADD));
         verify(writeTransaction, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class), anyBoolean());
         verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
 
-        assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.SUCCESS), outboundNatService.programIpRewriteRule(Long.valueOf(123), SEGMENTATION_ID, address, address, Action.DELETE));
+        assertEquals("Error, did not return the expected StatusCode", new Status(StatusCode.SUCCESS),
+                outboundNatService.programIpRewriteRule(Long.valueOf(123), SEGMENTATION_ID, MAC_ADDRESS, address,
+                                                        MAC_ADDRESS, MAC_ADDRESS, address,
+                                                        Long.valueOf(10), Action.DELETE));
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
         verify(writeTransaction, times(2)).submit();
         verify(commitFuture, times(2)).get(); // 1 + 1 above

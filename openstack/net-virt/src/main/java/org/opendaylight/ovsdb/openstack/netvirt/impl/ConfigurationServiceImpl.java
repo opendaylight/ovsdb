@@ -172,9 +172,9 @@ public class ConfigurationServiceImpl implements ConfigurationService, ConfigInt
         if (node != null) {
             l3gatewayForNode = ConfigProperties.getProperty(this.getClass(),
                     "ovsdb.l3gateway.mac." + node.getNodeId().getValue());
-            if (l3gatewayForNode == null) {
-                l3gatewayForNode = ConfigProperties.getProperty(this.getClass(), "ovsdb.l3gateway.mac");
-            }
+        }
+        if (l3gatewayForNode == null) {
+            l3gatewayForNode = ConfigProperties.getProperty(this.getClass(), "ovsdb.l3gateway.mac");
         }
         return l3gatewayForNode;
     }

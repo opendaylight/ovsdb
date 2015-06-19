@@ -16,8 +16,15 @@ import java.net.InetAddress;
  *  This interface allows NAT flows to be written to devices
  */
 public interface OutboundNatProvider {
-    Status programIpRewriteRule(Long dpid, String segmentationId, InetAddress matchAddress,
-                                InetAddress rewriteAddress, Action action);
+    Status programIpRewriteRule(Long dpidLong,
+                                String matchSegmentationId,
+                                String matchDestMacAddress,
+                                InetAddress matchSrcAddress,
+                                String rewriteSrcMacAddress,
+                                String rewriteDestMacAddress,
+                                InetAddress rewriteSrcAddress,
+                                Long OutPort,
+                                Action action);
 
     Status programIpRewriteExclusion(Long dpid, String segmentationId,
                                      String excludedCidr, Action action);

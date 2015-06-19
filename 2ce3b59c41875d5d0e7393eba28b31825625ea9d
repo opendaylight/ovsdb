@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_0b2fdca2",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/ConfigurationServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-19T13:54:50Z",
+      "side": 1,
+      "message": "can this be called from the constructor since that is also where the fields are set already",
+      "revId": "2ce3b59c41875d5d0e7393eba28b31825625ea9d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

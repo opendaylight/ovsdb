@@ -59,6 +59,22 @@ public class ConfigurationServiceImpl implements ConfigurationService, ConfigInt
         providerMapping = Constants.PROVIDER_MAPPING;
     }
 
+    private void initBridgeNamesFromConfig() {
+        // Check if name of bridges want to be custom, by reading them from custom.properties
+        //
+        final String wantedIntBridgeName =
+                ConfigProperties.getProperty(this.getClass(), "ovsdb.integration.bridge.name");
+        final String wantedExtBridgeName =
+                ConfigProperties.getProperty(this.getClass(), "ovsdb.external.bridge.name");
+
+        if (wantedIntBridgeName != null && !wantedIntBridgeName.isEmpty()) {
+            setIntegrationBridgeName(wantedIntBridgeName);
+        }
+        if (wantedExtBridgeName != null && !wantedExtBridgeName.isEmpty()) {
+            setExternalBridgeName(wantedExtBridgeName);
+        }
+    }
+
     @Override
     public String getIntegrationBridgeName() {
         return integrationBridgeName;
@@ -183,6 +199,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, ConfigInt
     public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
         southbound =
                 (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
+
+        initBridgeNamesFromConfig();
     }
 
     @Override

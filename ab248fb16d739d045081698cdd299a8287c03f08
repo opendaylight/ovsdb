@@ -34,6 +34,24 @@
       "revId": "ab248fb16d739d045081698cdd299a8287c03f08",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_0e34cadc",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TransactInvokerImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-19T14:16:49Z",
+      "side": 1,
+      "message": "Flavio,\n\nI don\u0027t think the isDone does much in the context of the original bug. The issue is that the result.get() is looking for results from the operations, but in this scenario there were no operations (ovsdb calls) so the .get() would hang waiting for future results. So the check for operations.size() \u003e 0 was added to cover that.\n\nThere is similar code in the library which does a for loop over the operations.size, but since there are no operations it is a noop. I guess the operationResult will then just return true for isDone since it did nothing. So adding this check to the size()\u003e0 might not do much. in this case it might no be readable also since it implies you think you did some operations.\n\nI might make more sense to do the size() \u003e 0 check earlier before the tb.execute(). command.execute() is southbound code that adds all the ovsdb operations to the tb. So I think you could check if size() \u003e 0 before doing tb.execute. This would ensure that some work is actually done in tb.execute().",
+      "parentUuid": "7a7fa997_a7bb85c3",
+      "revId": "ab248fb16d739d045081698cdd299a8287c03f08",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

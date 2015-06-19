@@ -16,6 +16,24 @@
       "revId": "2ce3b59c41875d5d0e7393eba28b31825625ea9d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_aeb596ce",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/ConfigurationServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-19T19:17:34Z",
+      "side": 1,
+      "message": "that is right... there is no need to create a new function in this case.\n\nFYI: this was a 2 min experiment to show mskalski [1] how the name of the bridge could be modified.\n\n[1]: https://gist.github.com/adf0c5e1a546208fb5eb",
+      "parentUuid": "7a7fa997_0b2fdca2",
+      "revId": "2ce3b59c41875d5d0e7393eba28b31825625ea9d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

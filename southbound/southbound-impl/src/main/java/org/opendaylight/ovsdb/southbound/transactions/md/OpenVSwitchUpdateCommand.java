@@ -198,11 +198,15 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
             Set<String> iftypes = openVSwitch.getIfaceTypesColumn().getData();
             List<InterfaceTypeEntry> ifEntryList = new ArrayList<InterfaceTypeEntry>();
             for (String ifType : iftypes) {
-                InterfaceTypeEntry ifEntry = new InterfaceTypeEntryBuilder()
-                        .setInterfaceType(
-                                SouthboundMapper.createInterfaceType(ifType))
-                        .build();
-                ifEntryList.add(ifEntry);
+                if (SouthboundMapper.createInterfaceType(ifType) != null) {
+                    InterfaceTypeEntry ifEntry = new InterfaceTypeEntryBuilder()
+                            .setInterfaceType(
+                                    SouthboundMapper.createInterfaceType(ifType))
+                            .build();
+                    ifEntryList.add(ifEntry);
+                } else {
+                    LOG.warn("Interface type {} not present in model", ifType);
+                }
             }
             ovsdbNodeBuilder.setInterfaceTypeEntry(ifEntryList);
         } catch (SchemaVersionMismatchException e) {
@@ -218,11 +222,15 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
                     .getData();
             List<DatapathTypeEntry> dpEntryList = new ArrayList<DatapathTypeEntry>();
             for (String dpType : dptypes) {
-                DatapathTypeEntry dpEntry = new DatapathTypeEntryBuilder()
-                        .setDatapathType(
-                                SouthboundMapper.createDatapathType(dpType))
-                        .build();
-                dpEntryList.add(dpEntry);
+                if (SouthboundMapper.createDatapathType(dpType) != null) {
+                    DatapathTypeEntry dpEntry = new DatapathTypeEntryBuilder()
+                            .setDatapathType(
+                                    SouthboundMapper.createDatapathType(dpType))
+                            .build();
+                    dpEntryList.add(dpEntry);
+                } else {
+                    LOG.warn("Datapath type {} not present in model", dpType);
+                }
             }
             ovsdbNodeBuilder.setDatapathTypeEntry(dpEntryList);
         } catch (SchemaVersionMismatchException e) {

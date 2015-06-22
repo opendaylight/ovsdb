@@ -549,6 +549,11 @@ module ovsdb {
         base interface-type-base;
     }
 
+    identity interface-type-stt {
+        description "Interface type for stt interfaces";
+        base interface-type-base;
+    }
+
     grouping ovsdb-port-interface-attributes {
         leaf port-uuid {
             description "The unique identifier of the OVSDB port";

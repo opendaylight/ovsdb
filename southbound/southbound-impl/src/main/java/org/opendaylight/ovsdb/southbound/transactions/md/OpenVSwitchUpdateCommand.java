@@ -38,6 +38,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchExternalIdsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
@@ -80,7 +81,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
             setDataPathTypes(ovsdbNodeBuilder, openVSwitch);
             setInterfaceTypes(ovsdbNodeBuilder, openVSwitch);
             setExternalIds(transaction, ovsdbNodeBuilder, oldEntry, openVSwitch);
-            setOtherConfig(ovsdbNodeBuilder, openVSwitch);
+            setOtherConfig(transaction, ovsdbNodeBuilder, oldEntry, openVSwitch);
             ovsdbNodeBuilder.setConnectionInfo(getConnectionInfo());
 
             NodeBuilder nodeBuilder = new NodeBuilder();
@@ -92,24 +93,53 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setOtherConfig(OvsdbNodeAugmentationBuilder ovsdbNodeBuilder,
-            OpenVSwitch openVSwitch) {
-        Map<String, String> otherConfigs = openVSwitch.getOtherConfigColumn().getData();
-        if (otherConfigs != null && !otherConfigs.isEmpty()) {
-            Set<String> otherConfigKeys = otherConfigs.keySet();
-            List<OpenvswitchOtherConfigs> otherConfigsList = new ArrayList<OpenvswitchOtherConfigs>();
-            String otherConfigValue;
-            for (String otherConfigKey : otherConfigKeys) {
-                otherConfigValue = otherConfigs.get(otherConfigKey);
-                if (otherConfigKey != null && otherConfigValue != null) {
-                    otherConfigsList.add(new OpenvswitchOtherConfigsBuilder()
-                            .setOtherConfigKey(otherConfigKey)
-                            .setOtherConfigValue(otherConfigValue)
-                            .build());
-                }
-            }
-            ovsdbNodeBuilder.setOpenvswitchOtherConfigs(otherConfigsList);
+    private void setOtherConfig(ReadWriteTransaction transaction,
+            OvsdbNodeAugmentationBuilder ovsdbNodeBuilder, OpenVSwitch oldEntry, OpenVSwitch openVSwitch) {
+        Map<String, String> oldOtherConfigs = null;
+        Map<String, String> otherConfigs = null;
+
+        if (openVSwitch.getOtherConfigColumn() != null) {
+            otherConfigs = openVSwitch.getOtherConfigColumn().getData();
         }
+        if (oldEntry != null && oldEntry.getOtherConfigColumn() != null) {
+            oldOtherConfigs = oldEntry.getOtherConfigColumn().getData();
+        }
+        if ((oldOtherConfigs == null) || oldOtherConfigs.isEmpty()) {
+            setNewOtherConfigs(ovsdbNodeBuilder, otherConfigs);
+        } else if (otherConfigs != null && !otherConfigs.isEmpty()) {
+            removeOldConfigs(transaction, oldOtherConfigs, openVSwitch);
+            setNewOtherConfigs(ovsdbNodeBuilder, otherConfigs);
+        }
+    }
+
+    private void removeOldConfigs(ReadWriteTransaction transaction, Map<String, String> oldOtherConfigs,
+            OpenVSwitch ovs) {
+        InstanceIdentifier<OvsdbNodeAugmentation> nodeAugmentataionIid = InstanceIdentifier
+                .create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+                .child(Node.class, new NodeKey(getNodeId(ovs))).augmentation(OvsdbNodeAugmentation.class);
+        Set<String> otherConfigKeys = oldOtherConfigs.keySet();
+        for (String otherConfigKey : otherConfigKeys) {
+            KeyedInstanceIdentifier<OpenvswitchOtherConfigs, OpenvswitchOtherConfigsKey> externalIid =
+                    nodeAugmentataionIid
+                    .child(OpenvswitchOtherConfigs.class, new OpenvswitchOtherConfigsKey(otherConfigKey));
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, externalIid);
+        }
+    }
+
+    private void setNewOtherConfigs(OvsdbNodeAugmentationBuilder ovsdbNodeBuilder,
+            Map<String, String> otherConfigs) {
+        Set<String> otherConfigKeys = otherConfigs.keySet();
+        List<OpenvswitchOtherConfigs> otherConfigsList = new ArrayList<OpenvswitchOtherConfigs>();
+        String otherConfigValue;
+        for (String otherConfigKey : otherConfigKeys) {
+            otherConfigValue = otherConfigs.get(otherConfigKey);
+            if (otherConfigKey != null && otherConfigValue != null) {
+                otherConfigsList.add(new OpenvswitchOtherConfigsBuilder().setOtherConfigKey(otherConfigKey)
+                        .setOtherConfigValue(otherConfigValue).build());
+            }
+        }
+        ovsdbNodeBuilder.setOpenvswitchOtherConfigs(otherConfigsList);
     }
 
     private void setExternalIds(ReadWriteTransaction transaction,

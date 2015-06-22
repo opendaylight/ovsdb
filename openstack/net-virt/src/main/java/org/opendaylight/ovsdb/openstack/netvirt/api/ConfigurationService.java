@@ -26,52 +26,52 @@ public interface ConfigurationService {
     /**
      * Returns the name configured name of the Integration Bridge
      */
-    public String getIntegrationBridgeName();
+    String getIntegrationBridgeName();
 
     /**
      * Configures the name of the Integration Bridge
      */
-    public void setIntegrationBridgeName(String integrationBridgeName);
+    void setIntegrationBridgeName(String integrationBridgeName);
 
     /**
      * Returns the name configured name of the Network Bridge
      */
-    public String getNetworkBridgeName();
+    String getNetworkBridgeName();
 
     /**
      * Configures the name of the Network Bridge
      */
-    public void setNetworkBridgeName(String networkBridgeName);
+    void setNetworkBridgeName(String networkBridgeName);
 
     /**
      * Returns the name configured name of the ExternalBridge
      */
-    public String getExternalBridgeName();
+    String getExternalBridgeName();
 
     /**
      * Configures the name of the External Bridge
      */
-    public void setExternalBridgeName(String externalBridgeName);
+    void setExternalBridgeName(String externalBridgeName);
 
     /**
      * Returns the key used to access the Tunnel Endpoint configuration from Open vSwitch
      */
-    public String getTunnelEndpointKey();
+    String getTunnelEndpointKey();
 
     /**
      * Sets the key used to access the Tunnel Endpoint configuration from Open vSwitch
      */
-    public void setTunnelEndpointKey(String tunnelEndpointKey);
+    void setTunnelEndpointKey(String tunnelEndpointKey);
 
     /**
      * Returns a Map of patch port names where the key is a tuple of source bridge and destination bridge
      */
-    public Map<Pair<String, String>, String> getPatchPortNames();
+    Map<Pair<String, String>, String> getPatchPortNames();
 
     /**
      * Sets the Map of source/destination bridges to patch port name
      */
-    public void setPatchPortNames(Map<Pair<String, String>, String> patchPortNames);
+    void setPatchPortNames(Map<Pair<String, String>, String> patchPortNames);
 
     /**
      * Get the name of a patch port
@@ -79,27 +79,27 @@ public interface ConfigurationService {
      *                  is the source bridge and R the destination bridge
      * @return the name of the patch port
      */
-    public String getPatchPortName(Pair portTuple);
+    String getPatchPortName(Pair portTuple);
 
     /**
      * Returns the key used to access the Tunnel Endpoint configuration from Open vSwitch
      */
-    public String getProviderMappingsKey();
+    String getProviderMappingsKey();
 
     /**
      * Sets the key used to access the Tunnel Endpoint configuration from Open vSwitch
      */
-    public void setProviderMappingsKey(String providerMappingsKey);
+    void setProviderMappingsKey(String providerMappingsKey);
 
     /**
      * Gets the default provider mapping
      */
-    public String getDefaultProviderMapping();
+    String getDefaultProviderMapping();
 
     /**
      * Sets the default provider mapping
      */
-    public void setDefaultProviderMapping(String providerMapping);
+    void setDefaultProviderMapping(String providerMapping);
 
     /**
      * Gets the tunnel endpoint address for a given Node
@@ -107,7 +107,7 @@ public interface ConfigurationService {
      * @return the tunnel endpoint
      * @see java.net.InetAddress
      */
-    public InetAddress getTunnelEndPoint(Node node);
+    InetAddress getTunnelEndPoint(Node node);
 
     /**
      * Returns the OpenFlow version to be used by the {@link NetworkingProvider}
@@ -115,19 +115,19 @@ public interface ConfigurationService {
      * @param node the node to query
      * @return the OpenFlow version to use
      */
-    public String getOpenflowVersion(Node node);
+    String getOpenflowVersion(Node node);
 
     /**
      * Determine if L3 forwarding is enabled
      * @return true if ovsdb net-virt is configured to perform L3 forwarding
      */
-    public boolean isL3ForwardingEnabled();
+    boolean isL3ForwardingEnabled();
 
     /**
      * Determine if Distributed ARP Responder is enabled
      * @return true if ovsdb net-virt is configured for distributed arp responder
      */
-    public boolean isDistributedArpDisabled();
+    boolean isDistributedArpDisabled();
 
     /**
      * Returns the MacAddress to be used for the default gateway by the {@link L3ForwardingProvider}
@@ -135,5 +135,5 @@ public interface ConfigurationService {
      * @param node the node to query
      * @return the MacAddress to use for the default gateway; or null if none is configured.
      */
-    public String getDefaultGatewayMacAddress(Node node);
+    String getDefaultGatewayMacAddress(Node node);
 }

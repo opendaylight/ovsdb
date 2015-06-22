@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_bab630db",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OpenVSwitchUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 3576
+      },
+      "writtenOn": "2015-06-22T16:22:19Z",
+      "side": 1,
+      "message": "If you\u0027re stepping through a Map when you need to get both the key and value, it is always more efficient to step through the entries, not the keys. That avoids the extra value retrieval.",
+      "revId": "34409a79ad93488c75060fd53e9fe2443dac326e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

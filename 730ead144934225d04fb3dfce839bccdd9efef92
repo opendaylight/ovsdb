@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "7a7fa997_7d25efc0",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/TenantNetworkManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-23T15:54:41Z",
+      "side": 1,
+      "message": "this is in the else case for  neutronPort \u003d\u003d null so the log should say getTenantNetwork did not find neutronport for {}",
+      "parentUuid": "7a7fa997_3d58d755",
+      "range": {
+        "startLine": 131,
+        "startChar": 67,
+        "endLine": 131,
+        "endChar": 70
+      },
+      "revId": "730ead144934225d04fb3dfce839bccdd9efef92",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7fa997_dd49a38c",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/TenantNetworkManagerImpl.java",
         "patchSetId": 1
@@ -78,6 +102,24 @@
       "side": 1,
       "message": "i guess you are saying we should throw an exception here?\n\nwhat is the best thing it should do? My goal is to stop WARN from showing for ports that have no extern-ids (like br-int and patch ports). everything else is groovy to me. ;)",
       "parentUuid": "7a7fa997_dd49a38c",
+      "revId": "730ead144934225d04fb3dfce839bccdd9efef92",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_5d2cb3ab",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/TenantNetworkManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-23T15:54:41Z",
+      "side": 1,
+      "message": "ok, that\u0027s the problem. The log from below was set at warn when it should have been debug. I didn\u0027t realize the warn was copied form below so I thought you wanted to explicitly change the debug to warn. But the log below was from the neutronNetwork not being found which is different than not finding the neutronPort so we need to decide what that means. Your fix to remove the WARN log is really fixed since you removed the code from the bottom of the method.\n\nQuestion still stands though - what does it mean if the port is not found in the portCache? The network not being there makes sense because the external_ids is added to the ovsdb port but the neutron port is created asynchronously from that so we just log at debug level if it wasn\u0027t found since it really isn\u0027t an error. Is the neutron Port guaranteed to be there when we look it up from the ovsdb interface update? if yes, then this is a warning at least.",
+      "parentUuid": "7a7fa997_1d371b01",
       "revId": "730ead144934225d04fb3dfce839bccdd9efef92",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

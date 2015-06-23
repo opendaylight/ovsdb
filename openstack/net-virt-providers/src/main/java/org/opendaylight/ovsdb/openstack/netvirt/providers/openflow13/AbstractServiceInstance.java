@@ -190,7 +190,7 @@ public abstract class AbstractServiceInstance {
         return null;
     }
 
-    protected Long getDpid(Node node) {
+    private Long getDpid(Node node) {
         Long dpid = 0L;
         dpid = southbound.getDataPathId(node);
         if (dpid == 0) {

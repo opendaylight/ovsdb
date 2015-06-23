@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7a7fa997_3d58d755",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/TenantNetworkManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-23T15:44:21Z",
+      "side": 1,
+      "message": "heh, I simply moved what was in line 138.\n\nwhat should it be changed to?",
+      "parentUuid": "7a7fa997_1d507b31",
+      "range": {
+        "startLine": 131,
+        "startChar": 67,
+        "endLine": 131,
+        "endChar": 70
+      },
+      "revId": "730ead144934225d04fb3dfce839bccdd9efef92",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7fa997_dd49a38c",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/TenantNetworkManagerImpl.java",
         "patchSetId": 1
@@ -36,6 +60,24 @@
       "writtenOn": "2015-06-23T15:39:40Z",
       "side": 1,
       "message": "the port should always be in the neutronPortCache for this case - which is why this is bumped to warn?",
+      "revId": "730ead144934225d04fb3dfce839bccdd9efef92",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_1d371b01",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/TenantNetworkManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-23T15:44:21Z",
+      "side": 1,
+      "message": "i guess you are saying we should throw an exception here?\n\nwhat is the best thing it should do? My goal is to stop WARN from showing for ports that have no extern-ids (like br-int and patch ports). everything else is groovy to me. ;)",
+      "parentUuid": "7a7fa997_dd49a38c",
       "revId": "730ead144934225d04fb3dfce839bccdd9efef92",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

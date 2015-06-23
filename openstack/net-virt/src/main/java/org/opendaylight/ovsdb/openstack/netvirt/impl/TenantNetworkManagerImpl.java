@@ -124,18 +124,14 @@ public class TenantNetworkManagerImpl implements ConfigInterface, TenantNetworkM
                 if (neutronNetwork != null) {
                     logger.debug("mapped to {}", neutronNetwork);
                 } else {
-                    logger.debug("getTenantNetwork: did not find neutronNetwork in cache");
+                    logger.debug("getTenantNetwork: did not find neutronNetwork in cache from neutronPort {}",
+                                 neutronPortId);
                 }
             } else {
-                logger.debug("getTenantNetwork: did not find neutronPort in cache");
+                logger.warn("getTenantNetwork did not find network for {}", terminationPointAugmentation.getName());
             }
         } else {
             logger.debug("getTenantNetwork: did not find {} in external_ids", Constants.EXTERNAL_ID_INTERFACE_ID);
-        }
-        if (neutronNetwork != null) {
-            logger.debug("mapped to {}", neutronNetwork);
-        } else {
-            logger.warn("getTenantNetwork did not find network for {}", terminationPointAugmentation.getName());
         }
         return neutronNetwork;
     }

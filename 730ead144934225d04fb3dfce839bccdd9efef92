@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_1d507b31",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/TenantNetworkManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-23T15:39:40Z",
+      "side": 1,
+      "message": "shouldn\u0027t this mention neutronPort and not network?",
+      "range": {
+        "startLine": 131,
+        "startChar": 67,
+        "endLine": 131,
+        "endChar": 70
+      },
+      "revId": "730ead144934225d04fb3dfce839bccdd9efef92",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_dd49a38c",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/TenantNetworkManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-23T15:39:40Z",
+      "side": 1,
+      "message": "the port should always be in the neutronPortCache for this case - which is why this is bumped to warn?",
+      "revId": "730ead144934225d04fb3dfce839bccdd9efef92",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

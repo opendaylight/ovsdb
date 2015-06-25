@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Thanh Ha <thanh.ha@linuxfoundation.org>
+Submitted-by: Thanh Ha <thanh.ha@linuxfoundation.org>
+Submitted-at: Thu, 25 Jun 2015 19:57:14 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/23301
+Project: ovsdb
+Branch: refs/heads/stable/lithium

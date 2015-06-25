@@ -10,11 +10,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <parent>
     <artifactId>commons</artifactId>
     <groupId>org.opendaylight.ovsdb</groupId>
-    <version>1.3.0-Lithium</version>
+    <version>1.3.1-SNAPSHOT</version>
     <relativePath>../commons/parent</relativePath>
   </parent>
   <artifactId>southbound-aggregator</artifactId>
-  <version>1.1.0-Lithium</version>
+  <version>1.1.1-SNAPSHOT</version>
   <name>${project.artifactId}</name>
   <packaging>pom</packaging>
   <description>The OVSDB Plugin integration project is a project for OpenDaylight that will implement the Open vSwitch Database RFC 7047 management protocol allowing the Southbound configuration of vSwitches and a network virtualization implementation.</description>

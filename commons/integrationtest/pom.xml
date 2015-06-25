@@ -14,13 +14,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <parent>
     <groupId>org.opendaylight.ovsdb</groupId>
     <artifactId>commons</artifactId>
-    <version>1.3.0-Lithium</version>
+    <version>1.3.1-SNAPSHOT</version>
     <relativePath>../parent</relativePath>
   </parent>
 
   <artifactId>commons.integrationtest</artifactId>
   <name>${project.artifactId}.parent</name>
-  <version>1.3.0-Lithium</version>
+  <version>1.3.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <description>The OVSDB Plugin integration project is a project for OpenDaylight that will implement the Open vSwitch Database RFC 7047 management protocol allowing the Southbound configuration of vSwitches and a network virtualization implementation.</description>
   <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
@@ -47,39 +47,39 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <properties>
     <!-- Overrides -->
     <!-- Controller Dependencies for Pax Exam -->
-    <arphandler.version>0.6.0-Lithium</arphandler.version>
-    <bundlescanner.implementation.version>0.5.0-Lithium</bundlescanner.implementation.version>
-    <bundlescanner.version>0.5.0-Lithium</bundlescanner.version>
-    <clustering.services_implementation.version>0.5.0-Lithium</clustering.services_implementation.version>
-    <commons.httpclient.version>0.2.0-Lithium</commons.httpclient.version>
-    <configuration.implementation.version>0.5.0-Lithium</configuration.implementation.version>
-    <configuration.version>0.5.0-Lithium</configuration.version>
-    <connectionmanager.version>0.2.0-Lithium</connectionmanager.version>
-    <containermanager.it.version>0.6.0-Lithium</containermanager.it.version>
-    <flowprogrammer.northbound.version>0.5.0-Lithium</flowprogrammer.northbound.version>
-    <forwarding.staticrouting>0.6.0-Lithium</forwarding.staticrouting>
-    <forwarding.staticrouting.northbound.version>0.5.0-Lithium</forwarding.staticrouting.northbound.version>
-    <forwardingrulesmanager.implementation.version>0.5.0-Lithium</forwardingrulesmanager.implementation.version>
-    <hosttracker.api.version>0.6.0-Lithium</hosttracker.api.version>
-    <hosttracker.implementation.version>0.6.0-Lithium</hosttracker.implementation.version>
-    <hosttracker.northbound.version>0.5.0-Lithium</hosttracker.northbound.version>
-    <logging.bridge.version>0.5.0-Lithium</logging.bridge.version>
-    <protocol_plugins.stub.version>0.5.0-Lithium</protocol_plugins.stub.version>
-    <routing.dijkstra_implementation.version>0.5.0-Lithium</routing.dijkstra_implementation.version>
-    <sal.implementation.version>0.5.0-Lithium</sal.implementation.version>
-    <security.version>0.5.0-Lithium</security.version>
-    <statistics.northbound.version>0.5.0-Lithium</statistics.northbound.version>
-    <statisticsmanager.implementation.version>0.5.0-Lithium</statisticsmanager.implementation.version>
-    <statisticsmanager.version>0.6.0-Lithium</statisticsmanager.version>
-    <subnets.northbound.version>0.5.0-Lithium</subnets.northbound.version>
-    <switchmanager.implementation.version>0.5.0-Lithium</switchmanager.implementation.version>
-    <switchmanager.northbound.version>0.5.0-Lithium</switchmanager.northbound.version>
-    <topology.northbound.version>0.5.0-Lithium</topology.northbound.version>
-    <topology.web.version>0.5.0-Lithium</topology.web.version>
-    <topologymanager.version>0.5.0-Lithium</topologymanager.version>
-    <usermanager.implementation.version>0.5.0-Lithium</usermanager.implementation.version>
-    <usermanager.northbound.version>0.1.0-Lithium</usermanager.northbound.version>
-    <usermanager.version>0.5.0-Lithium</usermanager.version>
+    <arphandler.version>0.6.1-SNAPSHOT</arphandler.version>
+    <bundlescanner.implementation.version>0.5.1-SNAPSHOT</bundlescanner.implementation.version>
+    <bundlescanner.version>0.5.1-SNAPSHOT</bundlescanner.version>
+    <clustering.services_implementation.version>0.5.1-SNAPSHOT</clustering.services_implementation.version>
+    <commons.httpclient.version>0.2.1-SNAPSHOT</commons.httpclient.version>
+    <configuration.implementation.version>0.5.1-SNAPSHOT</configuration.implementation.version>
+    <configuration.version>0.5.1-SNAPSHOT</configuration.version>
+    <connectionmanager.version>0.2.1-SNAPSHOT</connectionmanager.version>
+    <containermanager.it.version>0.6.1-SNAPSHOT</containermanager.it.version>
+    <flowprogrammer.northbound.version>0.5.1-SNAPSHOT</flowprogrammer.northbound.version>
+    <forwarding.staticrouting>0.6.1-SNAPSHOT</forwarding.staticrouting>
+    <forwarding.staticrouting.northbound.version>0.5.1-SNAPSHOT</forwarding.staticrouting.northbound.version>
+    <forwardingrulesmanager.implementation.version>0.5.1-SNAPSHOT</forwardingrulesmanager.implementation.version>
+    <hosttracker.api.version>0.6.1-SNAPSHOT</hosttracker.api.version>
+    <hosttracker.implementation.version>0.6.1-SNAPSHOT</hosttracker.implementation.version>
+    <hosttracker.northbound.version>0.5.1-SNAPSHOT</hosttracker.northbound.version>
+    <logging.bridge.version>0.5.1-SNAPSHOT</logging.bridge.version>
+    <protocol_plugins.stub.version>0.5.1-SNAPSHOT</protocol_plugins.stub.version>
+    <routing.dijkstra_implementation.version>0.5.1-SNAPSHOT</routing.dijkstra_implementation.version>
+    <sal.implementation.version>0.5.1-SNAPSHOT</sal.implementation.version>
+    <security.version>0.5.1-SNAPSHOT</security.version>
+    <statistics.northbound.version>0.5.1-SNAPSHOT</statistics.northbound.version>
+    <statisticsmanager.implementation.version>0.5.1-SNAPSHOT</statisticsmanager.implementation.version>
+    <statisticsmanager.version>0.6.1-SNAPSHOT</statisticsmanager.version>
+    <subnets.northbound.version>0.5.1-SNAPSHOT</subnets.northbound.version>
+    <switchmanager.implementation.version>0.5.1-SNAPSHOT</switchmanager.implementation.version>
+    <switchmanager.northbound.version>0.5.1-SNAPSHOT</switchmanager.northbound.version>
+    <topology.northbound.version>0.5.1-SNAPSHOT</topology.northbound.version>
+    <topology.web.version>0.5.1-SNAPSHOT</topology.web.version>
+    <topologymanager.version>0.5.1-SNAPSHOT</topologymanager.version>
+    <usermanager.implementation.version>0.5.1-SNAPSHOT</usermanager.implementation.version>
+    <usermanager.northbound.version>0.1.1-SNAPSHOT</usermanager.northbound.version>
+    <usermanager.version>0.5.1-SNAPSHOT</usermanager.version>
     <!-- 3rd Party Dependencies -->
     <yaml.version>1.10</yaml.version>
   </properties>

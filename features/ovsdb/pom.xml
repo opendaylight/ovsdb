@@ -14,13 +14,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>features-parent</artifactId>
-    <version>1.5.0-SNAPSHOT</version>
+    <version>1.5.0-Lithium</version>
     <relativePath></relativePath>
   </parent>
 
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>features-ovsdb</artifactId>
-  <version>1.1.0-SNAPSHOT</version>
+  <version>1.1.0-Lithium</version>
   <packaging>jar</packaging>
   <description>The OVSDB Plugin integration project is a project for OpenDaylight that will implement the Open vSwitch Database RFC 7047 management protocol allowing the Southbound configuration of vSwitches and a network virtualization implementation.</description>
   <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
@@ -46,34 +46,34 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
   <properties>
     <!-- all this added to work around sun.reflect bug
-    <appauth.version>0.5.0-SNAPSHOT</appauth.version>
-    <bundlescanner.api.version>0.5.0-SNAPSHOT</bundlescanner.api.version>
-    <clustering.services.version>0.6.0-SNAPSHOT</clustering.services.version>
-    <configuration.implementation.version>0.5.0-SNAPSHOT</configuration.implementation.version>
-    <configuration.version>0.5.0-SNAPSHOT</configuration.version>
-    <containermanager.version>0.6.0-SNAPSHOT</containermanager.version>
-    <northbound.commons.version>0.5.0-SNAPSHOT</northbound.commons.version>
-    <switchmanager.api.version>0.8.0-SNAPSHOT</switchmanager.api.version>
-    <topologymanager.version>0.5.0-SNAPSHOT</topologymanager.version>
-    <usermanager.version>0.5.0-SNAPSHOT</usermanager.version>
+    <appauth.version>0.5.0-Lithium</appauth.version>
+    <bundlescanner.api.version>0.5.0-Lithium</bundlescanner.api.version>
+    <clustering.services.version>0.6.0-Lithium</clustering.services.version>
+    <configuration.implementation.version>0.5.0-Lithium</configuration.implementation.version>
+    <configuration.version>0.5.0-Lithium</configuration.version>
+    <containermanager.version>0.6.0-Lithium</containermanager.version>
+    <northbound.commons.version>0.5.0-Lithium</northbound.commons.version>
+    <switchmanager.api.version>0.8.0-Lithium</switchmanager.api.version>
+    <topologymanager.version>0.5.0-Lithium</topologymanager.version>
+    <usermanager.version>0.5.0-Lithium</usermanager.version>
     all this added to work around sun.reflect bug -->
-    <odl.karaf.base.version>1.5.0-SNAPSHOT</odl.karaf.base.version>
-    <mdsal.version>1.2.0-SNAPSHOT</mdsal.version>
-    <networkconfig.neutron.version>0.5.0-SNAPSHOT</networkconfig.neutron.version>
-    <nsf.version>0.5.0-SNAPSHOT</nsf.version>
-    <ovsdb.library.version>1.1.0-SNAPSHOT</ovsdb.library.version>
-    <ovsdb.northbound.version>0.7.0-SNAPSHOT</ovsdb.northbound.version>
-    <openstack.netvirt.version>1.1.0-SNAPSHOT</openstack.netvirt.version>
-    <openstack.netvirt.providers.version>1.1.0-SNAPSHOT</openstack.netvirt.providers.version>
-    <ovsdb.plugin.version>1.1.0-SNAPSHOT</ovsdb.plugin.version>
-    <ovsdb.plugin.compatibility.layer.version>1.1.0-SNAPSHOT</ovsdb.plugin.compatibility.layer.version>
-    <ovsdb.utils.servicehelper.version>1.1.0-SNAPSHOT</ovsdb.utils.servicehelper.version>
-    <plugin.shell.version>1.1.0-SNAPSHOT</plugin.shell.version>
-    <schema.hardwarevtep.version>1.1.0-SNAPSHOT</schema.hardwarevtep.version>
-    <schema.openvswitch.version>1.1.0-SNAPSHOT</schema.openvswitch.version>
-    <openflowplugin.version>0.1.0-SNAPSHOT</openflowplugin.version>
-    <sal.version>0.9.0-SNAPSHOT</sal.version>
-    <yangtools.version>0.7.0-SNAPSHOT</yangtools.version>
+    <odl.karaf.base.version>1.5.0-Lithium</odl.karaf.base.version>
+    <mdsal.version>1.2.0-Lithium</mdsal.version>
+    <networkconfig.neutron.version>0.5.0-Lithium</networkconfig.neutron.version>
+    <nsf.version>0.5.0-Lithium</nsf.version>
+    <ovsdb.library.version>1.1.0-Lithium</ovsdb.library.version>
+    <ovsdb.northbound.version>0.7.0-Lithium</ovsdb.northbound.version>
+    <openstack.netvirt.version>1.1.0-Lithium</openstack.netvirt.version>
+    <openstack.netvirt.providers.version>1.1.0-Lithium</openstack.netvirt.providers.version>
+    <ovsdb.plugin.version>1.1.0-Lithium</ovsdb.plugin.version>
+    <ovsdb.plugin.compatibility.layer.version>1.1.0-Lithium</ovsdb.plugin.compatibility.layer.version>
+    <ovsdb.utils.servicehelper.version>1.1.0-Lithium</ovsdb.utils.servicehelper.version>
+    <plugin.shell.version>1.1.0-Lithium</plugin.shell.version>
+    <schema.hardwarevtep.version>1.1.0-Lithium</schema.hardwarevtep.version>
+    <schema.openvswitch.version>1.1.0-Lithium</schema.openvswitch.version>
+    <openflowplugin.version>0.1.0-Lithium</openflowplugin.version>
+    <sal.version>0.9.0-Lithium</sal.version>
+    <yangtools.version>0.7.0-Lithium</yangtools.version>
   </properties>
 
   <dependencyManagement>

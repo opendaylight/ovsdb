@@ -61,7 +61,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <ovsdb.northbound.version>0.8.0-SNAPSHOT</ovsdb.northbound.version>
     <ovsdb.plugin.version>1.2.0-SNAPSHOT</ovsdb.plugin.version>
     <ovsdb.plugin.compatibility.layer.version>1.2.0-SNAPSHOT</ovsdb.plugin.compatibility.layer.version>
-    <ovsdb.ovssfc.version>0.2.0-SNAPSHOT</ovsdb.ovssfc.version>
     <ovsdb.utils.config.version>1.2.0-SNAPSHOT</ovsdb.utils.config.version>
     <ovsdb.utils.mdsal.node.version>1.2.0-SNAPSHOT</ovsdb.utils.mdsal.node.version>
     <ovsdb.utils.mdsal.openflow.version>1.2.0-SNAPSHOT</ovsdb.utils.mdsal.openflow.version>
@@ -435,7 +434,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <failsOnError>true</failsOnError>
             <includes>**/*.java,**/*.xml,**/*.ini,**/*.sh,**/*.bat</includes>
             <excludes>**/yang/,**/features/,**/integrationtest/,**/northbound/,
-              **/openstack/,**/ovs-sfc/,
+              **/openstack/,
               **/ovsdb-plugin-compatibility-layer/,
               **/plugin/,**/plugin-shell/,
               **/schema/hardwarevtep/,**/schema/openvswitch/,

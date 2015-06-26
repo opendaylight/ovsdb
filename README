@@ -28,8 +28,6 @@ DIRECTORY ORGANIZATION
   +-- net-virt-providers : Mostly contains data-path programming functionality via OpenFlow or potentially
                            other protocols.
 
-- ovs-sfc : SFC implementation using the OVSDB project. Currently it is just a shell.
-
 - plugin : Contains Opendaylight Southbound Plugin APIs and provides a simpler API interface on top of library layer.
            Ideally, this module should also be schema independent. But due to legacy reasons this layer contains some
            deprecated functionality that assumes openvswitch schema.
@@ -79,7 +77,6 @@ Pre-requisites : JDK 1.7+, Maven 3+
    odl-ovsdb-plugin                 | 1.0.0-SNAPSHOT      | x         | ovsdb-1.0.0-SNAPSHOT                  | OpenDaylight :: OVSDB :: Plugin
    odl-ovsdb-northbound             | 0.6.0-SNAPSHOT      |           | ovsdb-1.0.0-SNAPSHOT                  | OpenDaylight :: OVSDB :: Northbound
    odl-ovsdb-openstack              | 1.0.0-SNAPSHOT      | x         | ovsdb-1.0.0-SNAPSHOT                  | OpenDaylight :: OVSDB :: OpenStack Network Virtual
-   odl-ovsdb-ovssfc                 | 0.0.1-SNAPSHOT      |           | ovsdb-0.0.1-SNAPSHOT                  | OpenDaylight :: OVSDB :: OVS Service Function Chai
 
 
 2. Building a bundle and deploying it in an Opendaylight Karaf distribution :

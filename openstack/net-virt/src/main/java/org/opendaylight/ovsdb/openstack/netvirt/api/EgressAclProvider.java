@@ -10,7 +10,6 @@ public interface EgressAclProvider {
     /**
      * Program port security ACL.
      *
-     * @param node the node
      * @param dpid the dpid
      * @param segmentationId the segmentation id
      * @param attachedMac the attached mac

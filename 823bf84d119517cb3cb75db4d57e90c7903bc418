@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_4e3869a0",
+        "filename": "resources/robot/Vagrantfile",
+        "patchSetId": 7
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-28T00:53:47Z",
+      "side": 1,
+      "message": "please improve this so no errors are given if file is not there. Instead print a message like: /etc/timezone no found, assuming EST.",
+      "revId": "823bf84d119517cb3cb75db4d57e90c7903bc418",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -16,6 +16,24 @@
       "revId": "823bf84d119517cb3cb75db4d57e90c7903bc418",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_71f4285b",
+        "filename": "resources/robot/Vagrantfile",
+        "patchSetId": 7
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 3848
+      },
+      "writtenOn": "2015-06-29T13:56:13Z",
+      "side": 1,
+      "message": "I have looked into it. I need to know the host OS VM or use some sort of error handling within the vagrant file to cause this to fail gracefully. Not sure how I can do that right now. If this is not possible, I can either turn it off or simply default the timezone to EST. What do you think?",
+      "parentUuid": "7a7fa997_4e3869a0",
+      "revId": "823bf84d119517cb3cb75db4d57e90c7903bc418",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

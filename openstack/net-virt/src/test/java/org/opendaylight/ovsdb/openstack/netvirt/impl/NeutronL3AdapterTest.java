@@ -10,23 +10,28 @@ package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.opendaylight.neutron.spi.INeutronNetworkCRUD;
 import org.opendaylight.neutron.spi.INeutronPortCRUD;
 import org.opendaylight.neutron.spi.INeutronSubnetCRUD;
@@ -46,33 +51,42 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.NodeCacheManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OutboundNatProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.RoutingProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
-import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
 import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.api.support.membermodification.MemberMatcher;
+import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 
 /**
  * Unit test for {@link NeutronL3Adapter}
  */
-@PrepareForTest({ConfigProperties.class, ServiceHelper.class})
+@PrepareForTest({ConfigProperties.class, ServiceHelper.class, InetAddress.class, NeutronL3Adapter.class})
 @RunWith(PowerMockRunner.class)
 public class NeutronL3AdapterTest {
 
-    @InjectMocks private NeutronL3Adapter neutronL3Adapter;
-
+    @Mock private NeutronL3Adapter neutronL3Adapter;
+//    private NeutronL3Adapter neutronL3AdapterSpy;
     @Mock private ConfigurationService configurationService;
     @Mock private TenantNetworkManager tenantNetworkManager;
     @Mock private INeutronNetworkCRUD neutronNetworkCache;
     @Mock private INeutronSubnetCRUD neutronSubnetCache;
     @Mock private INeutronPortCRUD neutronPortCache;
     @Mock private NodeCacheManager nodeCacheManager;
+    @Mock private L3ForwardingProvider l3ForwardingProvider;
+    @Mock private InboundNatProvider inboundNatProvider;
+    @Mock private OutboundNatProvider outboundNatProvider;
+    @Mock private ArpProvider arpProvider;
+    @Mock private RoutingProvider routingProvider;
     @Mock private Southbound southbound;
 
     @Mock private NeutronPort neutronPort;
@@ -84,239 +98,541 @@ public class NeutronL3AdapterTest {
     private Set<String> staticArpEntryCache;
     private Set<String> l3ForwardingCache;
     private Map<String, String> networkIdToRouterMacCache;
+    private Map<String, List<Neutron_IPs>> networkIdToRouterIpListCache;
     private Map<String, NeutronRouter_Interface> subnetIdToRouterInterfaceCache;
+    private Map<String, Pair<Long, Uuid>> neutronPortToDpIdCache;
 
-    private static final String HOST_ADDRESS = "127.0.0.1";
+    private Map floatIpDataMapCache;
+
+    private static final String ID = "45";
+    private static final String INTF_NAME = "intf-name";
+    private static final String EXTERNAL_ROUTER_MAC_UPDATE = "mac";
+    private static final String UUID = "port-uudi";
+    private static final String FIXED_IP_ADDRESS = "ip";
+    private static final String FLOATING_IP_ADDRESS = "ip";
+    private static final String OWNER_ROUTER_INTERFACE = "network:router_interface";
+    private static final String MAC_ADDRESS = "mac-address";
+    private static final String MAC_ADDRESS_2 = "mac-address-2";
+    private static final String OWNER_FLOATING_IP = "network:floatingip";
+    private static final String PORT_INT = "port_int";
+
+
+    private Class floatingIpClass;
+    private Object floatingIpObject;
 
     @Before
     public void setUp() throws Exception{
-        PowerMockito.mockStatic(ConfigProperties.class);
-        PowerMockito.when(ConfigProperties.getProperty(neutronL3Adapter.getClass(), "ovsdb.l3.fwd.enabled")).thenReturn("yes");
-        PowerMockito.when(ConfigProperties.getProperty(neutronL3Adapter.getClass(), "ovsdb.l3.arp.responder.disabled")).thenReturn("no");
+        neutronL3Adapter = PowerMockito.mock(NeutronL3Adapter.class, Mockito.CALLS_REAL_METHODS);
 
-        when(configurationService.isL3ForwardingEnabled()).thenReturn(true);
+        // init instance variables
+        MemberModifier.field(NeutronL3Adapter.class, "enabled").set(neutronL3Adapter, true);
 
-        this.getMethod("initL3AdapterMembers").invoke(neutronL3Adapter);
+        floatingIpClass = Whitebox.getInnerClassType(NeutronL3Adapter.class, "FloatIpData");
+        floatingIpObject = createFloatingIpObject();
 
-        this.getNeutronL3AdapterFields();
-        this.setUpVar();
+//        PowerMockito.mockStatic(ConfigProperties.class);
+//        PowerMockito.when(ConfigProperties.getProperty(neutronL3Adapter.getClass(), "ovsdb.l3.fwd.enabled")).thenReturn("yes");
+//        PowerMockito.when(ConfigProperties.getProperty(neutronL3Adapter.getClass(), "ovsdb.l3.arp.responder.disabled")).thenReturn("no");
+
+//        when(configurationService.isL3ForwardingEnabled()).thenReturn(true);
+
+        neutronPortToDpIdCache = new HashMap<String, Pair<Long,Uuid>>();
+        subnetIdToRouterInterfaceCache = new HashMap<String, NeutronRouter_Interface>();
+        floatIpDataMapCache = new HashMap();
+        neutronPortToDpIdCache = new HashMap<String, Pair<Long,Uuid>>();
+        networkIdToRouterMacCache = new HashMap<String, String>();
     }
 
     @Test
-    public void test() {
+    public void testUpdateExternalRouterMac() throws Exception {
+        // Suppress the called to these functions
+        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "flushExistingIpRewrite"));
+        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "rebuildExistingIpRewrite"));
 
+        neutronL3Adapter.updateExternalRouterMac(EXTERNAL_ROUTER_MAC_UPDATE);
+
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("flushExistingIpRewrite");
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("rebuildExistingIpRewrite");
     }
 
-    private void getNeutronL3AdapterFields() throws Exception{
-        inboundIpRewriteCache = (Set<String>) getField("inboundIpRewriteCache");
-        outboundIpRewriteCache = (Set<String>) getField("outboundIpRewriteCache");
-        outboundIpRewriteExclusionCache = (Set<String>) getField("outboundIpRewriteExclusionCache");
-        routerInterfacesCache = (Set<String>) getField("routerInterfacesCache");
-        staticArpEntryCache = (Set<String>) getField("staticArpEntryCache");
-        l3ForwardingCache = (Set<String>) getField("l3ForwardingCache");
-        networkIdToRouterMacCache = (Map<String, String>) getField("networkIdToRouterMacCache");
-        subnetIdToRouterInterfaceCache = (Map<String, NeutronRouter_Interface>) getField("subnetIdToRouterInterfaceCache");
+    @Test
+    public void testhandleNeutronSubnetEvent() throws Exception {
+        // Nothing to be done here
+        neutronL3Adapter.handleNeutronSubnetEvent(mock(NeutronSubnet.class), Action.ADD);
     }
 
-    private void setUpVar(){
+    @Test
+    public void testHandleNeutronPortEvent() throws Exception {
+        // Mock variables
         Neutron_IPs neutronIP = mock(Neutron_IPs.class);
-        NeutronRouter neutronRouter = mock(NeutronRouter.class);
-
-        NeutronSubnet neutronSubnet = mock(NeutronSubnet.class);
-        NeutronNetwork neutronNetwork = mock(NeutronNetwork.class);
-        Node node = mock(Node.class);
-        NodeId nodeID = mock(NodeId.class);
-        // TODO SB_MIGRATION
-        //Row row = mock(Row.class);
-        //Bridge bridge = mock(Bridge.class);
-        Status status = mock(Status.class);
-
+        when(neutronIP.getSubnetUUID()).thenReturn(UUID);
         List<Neutron_IPs> list_neutronIP = new ArrayList<Neutron_IPs>();
         list_neutronIP.add(neutronIP);
+        NeutronPort neutronPort = mock(NeutronPort.class);
+        when(neutronPort.getDeviceOwner()).thenReturn(OWNER_ROUTER_INTERFACE);
+        when(neutronPort.getFixedIPs()).thenReturn(list_neutronIP);
 
+        // init instance variables
+        MemberModifier.field(NeutronL3Adapter.class, "neutronPortCache").set(neutronL3Adapter , neutronPortCache);
+        subnetIdToRouterInterfaceCache.put(UUID, mock(NeutronRouter_Interface.class));
+        MemberModifier.field(NeutronL3Adapter.class, "subnetIdToRouterInterfaceCache").set(neutronL3Adapter , subnetIdToRouterInterfaceCache);
+
+        // Suppress the called to these functions
+        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "updateL3ForNeutronPort", NeutronPort.class, boolean.class));
+        Mockito.doNothing().when(neutronL3Adapter).handleNeutronRouterInterfaceEvent(any(NeutronRouter.class), any(NeutronRouter_Interface.class), any(Action.class));
+
+        neutronL3Adapter.handleNeutronPortEvent(neutronPort, Action.ADD);
+        Mockito.verify(neutronL3Adapter).handleNeutronRouterInterfaceEvent(any(NeutronRouter.class), any(NeutronRouter_Interface.class), eq(Action.ADD));
+
+        when(neutronPort.getDeviceOwner()).thenReturn("");
+        neutronL3Adapter.handleNeutronPortEvent(neutronPort, Action.ADD);
+        Mockito.verify(neutronL3Adapter, times(2)).handleNeutronRouterInterfaceEvent(any(NeutronRouter.class), any(NeutronRouter_Interface.class), eq(Action.ADD));
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("updateL3ForNeutronPort", any(NeutronPort.class), eq(false));
+
+        neutronL3Adapter.handleNeutronPortEvent(neutronPort, Action.DELETE);
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("updateL3ForNeutronPort", any(NeutronPort.class), eq(true));
+    }
+
+    @Test
+    public void testhandleNeutronRouterEvent() throws Exception {
+        // Nothing to be done here
+        neutronL3Adapter.handleNeutronRouterEvent(mock(NeutronRouter.class), Action.ADD);
+    }
+
+    @Test
+    public void testHandleNeutronRouterInterfaceEvent() throws Exception {
+        // Mock variables
+        NeutronRouter_Interface neutronRouterInterface = mock(NeutronRouter_Interface.class);
+        when(neutronRouterInterface.getPortUUID()).thenReturn(UUID);
+        when(neutronRouterInterface.getSubnetUUID()).thenReturn(UUID);
+
+        Neutron_IPs neutronIP = mock(Neutron_IPs.class);
+        when(neutronIP.getSubnetUUID()).thenReturn(UUID);
+        NeutronPort neutronPort = mock(NeutronPort.class);
+        List<Neutron_IPs> list_neutronIP = new ArrayList<Neutron_IPs>();
+        list_neutronIP.add(neutronIP);
+        when(neutronPort.getFixedIPs()).thenReturn(list_neutronIP);
         List<NeutronPort> list_neutronPort = new ArrayList<>();
         list_neutronPort.add(neutronPort);
-
-        List<Node> list_nodes = new ArrayList<Node>();
-        list_nodes.add(node);
-
-        //ConcurrentMap<String, Row> rowMap = mock(ConcurrentMap.class);
-        //rowMap.put("key", row);
-
-        //Column<GenericTableSchema, Set<String>> bridgeColumnIds = mock(Column.class);
-        Set<String> dpids = new HashSet();
-        dpids.add("11111");
-
-        when(neutronPort.getFixedIPs()).thenReturn(list_neutronIP);
-        when(neutronPort.getPortUUID()).thenReturn("portUUID");
-        when(neutronPort.getTenantID()).thenReturn("tenantID");
-        when(neutronPort.getNetworkUUID()).thenReturn("networkUUID");
-        when(neutronPort.getMacAddress()).thenReturn("macAddress1").thenReturn("macAddress2");
-
-        when(neutronIP.getSubnetUUID()).thenReturn("subnetUUID");
-        when(neutronIP.getIpAddress()).thenReturn(HOST_ADDRESS);
-
         when(neutronPortCache.getAllPorts()).thenReturn(list_neutronPort);
-        when(neutronPortCache.getPort(anyString())).thenReturn(neutronPort);
 
-        when(neutronSubnetCache.getSubnet(anyString())).thenReturn(neutronSubnet);
+        // init instance variables
+        MemberModifier.field(NeutronL3Adapter.class, "neutronPortCache").set(neutronL3Adapter , neutronPortCache);
 
-        when(neutronSubnet.getNetworkUUID()).thenReturn("networkUUID");
+        // Suppress the called to these functions
+        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programFlowsForNeutronRouterInterface", NeutronRouter_Interface.class, Boolean.class));
+        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "updateL3ForNeutronPort", NeutronPort.class, boolean.class));
 
-        when(neutronNetworkCache.getNetwork(anyString())).thenReturn(neutronNetwork);
+        neutronL3Adapter.handleNeutronRouterInterfaceEvent(mock(NeutronRouter.class), neutronRouterInterface, Action.ADD);
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programFlowsForNeutronRouterInterface", any(NeutronRouter_Interface.class), eq(false));
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("updateL3ForNeutronPort", any(NeutronPort.class), eq(false));
 
-        when(neutronNetwork.getRouterExternal()).thenReturn(false); // default true
-        when(neutronNetwork.getProviderSegmentationID()).thenReturn("providerSegmentationId1","providerSegmentationId2", "providerSegmentationId3");
-        when(neutronNetwork.getTenantID()).thenReturn("tenantId");
-        when(neutronNetwork.getNetworkUUID()).thenReturn("networkUUID");
-
-        when(neutronSubnet.getGatewayIP()).thenReturn("gatewayIp");
-        when(neutronSubnet.getCidr()).thenReturn(HOST_ADDRESS + "/32");
-        when(neutronSubnet.getSubnetUUID()).thenReturn("subnetUUID");
-
-        when(tenantNetworkManager.isTenantNetworkPresentInNode(any(Node.class), anyString())).thenReturn(false);
-        when(tenantNetworkManager.isTenantNetworkPresentInNode(any(Node.class), anyString())).thenReturn(true);
-
-        when(node.getNodeId()).thenReturn(nodeID);
-
-        when(nodeID.getValue()).thenReturn("nodeId");
-
-        when(status.isSuccess()).thenReturn(true);
-
-        /* TODO SB_MIGRATION */
-        //when(connectionService.getBridgeNodes()).thenReturn(list_nodes);
-
-        when(configurationService.getDefaultGatewayMacAddress(any(Node.class))).thenReturn("defaultGatewayMacAddress");
-        when(configurationService.getIntegrationBridgeName()).thenReturn("brName");
-
-        //when(ovsdbConfigurationService.getRows(any(Node.class), anyString())).thenReturn(rowMap);
-        //when(ovsdbConfigurationService.getTypedRow(any(Node.class), same(Bridge.class), any(Row.class))).thenReturn(bridge);
-        //when(ovsdbConfigurationService.getRow(any(Node.class), anyString(), anyString())).thenReturn(row);
-
-        //when(bridge.getName()).thenReturn("brName");
-        //when(bridge.getDatapathIdColumn()).thenReturn(bridgeColumnIds);
-
-        //when(bridgeColumnIds.getData()).thenReturn(dpids);
-
-        when(nodeCacheManager.getBridgeNodes()).thenReturn(list_nodes);
+        neutronL3Adapter.handleNeutronRouterInterfaceEvent(mock(NeutronRouter.class), neutronRouterInterface, Action.DELETE);
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programFlowsForNeutronRouterInterface", any(NeutronRouter_Interface.class), eq(true));
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("updateL3ForNeutronPort", any(NeutronPort.class), eq(true));
     }
 
-
-    /**
-     * Test method {@link NeutronL3Adapter#handleNeutronPortEvent(NeutronPort, Action)}
-     * Device owner = network:router_interface
-     */
-//    @Test
-    public void testHandleNeutronPortEvent1() {
-        when(neutronPort.getDeviceOwner()).thenReturn("network:router_interface");
-
-        neutronL3Adapter.handleNeutronPortEvent(neutronPort, Action.ADD);
-        // Affected by the add
-        assertEquals("Error, did not return the correct networkIdToRouterMacCache size", 1, networkIdToRouterMacCache.size());
-        assertEquals("Error, did not return the correct subnetIdToRouterInterfaceCache size", 1, subnetIdToRouterInterfaceCache.size());
-        /* TODO SB_MIGRATION */
-        //assertEquals("Error, did not return the correct routerInterfacesCache size", 2, routerInterfacesCache.size());
-//        assertEquals("Error, did not return the correct staticArpEntryCache size", 2, staticArpEntryCache.size());
-//        assertEquals("Error, did not return the correct outboundIpRewriteExclusionCache size", 1, outboundIpRewriteExclusionCache.size());
-//        assertEquals("Error, did not return the correct l3ForwardingCache size", 1, l3ForwardingCache.size());
-        // Unchanged
-        assertEquals("Error, did not return the correct inboundIpRewriteCache size", 0, inboundIpRewriteCache.size());
-        assertEquals("Error, did not return the correct outboundIpRewriteCache size", 0, outboundIpRewriteCache.size());
-
-        neutronL3Adapter.handleNeutronPortEvent(neutronPort, Action.DELETE);
-        // Affected by the delete
-        assertEquals("Error, did not return the correct networkIdToRouterMacCache size", 0, networkIdToRouterMacCache.size());
-        assertEquals("Error, did not return the correct subnetIdToRouterInterfaceCache size", 0, subnetIdToRouterInterfaceCache.size());
-//        assertEquals("Error, did not return the correct staticArpEntryCache size", 1, staticArpEntryCache.size());
-        // Unchanged
-        assertEquals("Error, did not return the correct routerInterfacesCache size", 2, routerInterfacesCache.size());
-        assertEquals("Error, did not return the correct outboundIpRewriteExclusionCache size", 1, outboundIpRewriteExclusionCache.size());
-        assertEquals("Error, did not return the correct l3ForwardingCache size", 1, l3ForwardingCache.size());
-        assertEquals("Error, did not return the correct inboundIpRewriteCache size", 0, inboundIpRewriteCache.size());
-        assertEquals("Error, did not return the correct outboundIpRewriteCache size", 0, outboundIpRewriteCache.size());
-    }
-
-    /**
-     * Test method {@link NeutronL3Adapter#handleNeutronPortEvent(NeutronPort, Action)}
-     * Device owner = ""
-     */
-//    @Test
-    public void testHandleNeutronPortEvent2() {
-        when(neutronPort.getDeviceOwner()).thenReturn("");
-
-        // populate subnetIdToRouterInterfaceCache to pass the
-        // if (neutronRouterInterface != null)
-        NeutronRouter_Interface neutronRouterInterface = mock(NeutronRouter_Interface.class);
-        when(neutronRouterInterface.getPortUUID()).thenReturn("portUUID");
-        when(neutronRouterInterface.getSubnetUUID()).thenReturn("subnetUUID");
-        subnetIdToRouterInterfaceCache.put("subnetUUID", neutronRouterInterface);
-
-        /* device owner = "" */
-        neutronL3Adapter.handleNeutronPortEvent(neutronPort, Action.ADD);
-        // Affected by the add
-        /* TODO SB_MIGRATION */
-        //assertEquals("Error, did not return the correct routerInterfacesCache size", 2, routerInterfacesCache.size());
-        assertEquals("Error, did not return the correct staticArpEntryCache size", 2, staticArpEntryCache.size());
-        assertEquals("Error, did not return the correct outboundIpRewriteExclusionCache size", 1, outboundIpRewriteExclusionCache.size());
-        assertEquals("Error, did not return the correct l3ForwardingCache size", 1, l3ForwardingCache.size());
-        assertEquals("Error, did not return the correct networkIdToRouterMacCache size", 1, networkIdToRouterMacCache.size());
-        // Added above
-        assertEquals("Error, did not return the correct subnetIdToRouterInterfaceCache size", 1, subnetIdToRouterInterfaceCache.size());
-        // Unchanged
-        assertEquals("Error, did not return the correct inboundIpRewriteCache size", 0, inboundIpRewriteCache.size());
-        assertEquals("Error, did not return the correct outboundIpRewriteCache size", 0, outboundIpRewriteCache.size());
-
-        neutronL3Adapter.handleNeutronPortEvent(neutronPort, Action.DELETE);
-        // Affected by the delete
-        assertEquals("Error, did not return the correct staticArpEntryCache size", 1, staticArpEntryCache.size());
-        assertEquals("Error, did not return the correct l3ForwardingCache size", 0, l3ForwardingCache.size());
-        // Unchanged
-        assertEquals("Error, did not return the correct routerInterfacesCache size", 2, routerInterfacesCache.size());
-        assertEquals("Error, did not return the correct outboundIpRewriteExclusionCache size", 1, outboundIpRewriteExclusionCache.size());
-        assertEquals("Error, did not return the correct networkIdToRouterMacCache size", 1, networkIdToRouterMacCache.size());
-        assertEquals("Error, did not return the correct inboundIpRewriteCache size", 0, inboundIpRewriteCache.size());
-        assertEquals("Error, did not return the correct outboundIpRewriteCache size", 0, outboundIpRewriteCache.size());
-        // Added above
-        assertEquals("Error, did not return the correct subnetIdToRouterInterfaceCache size", 1, subnetIdToRouterInterfaceCache.size());
-    }
-
-    /**
-     * Test method {@link NeutronL3Adapter#handleNeutronFloatingIPEvent(NeutronFloatingIP, Action)}
-     */
-//    @Test
-    public void testandleNeutronFloatingIPEvent() throws Exception{
+    @Test
+    public void testHandleNeutronFloatingIPEvent() throws Exception {
+        // Mock variables
         NeutronFloatingIP neutronFloatingIP = mock(NeutronFloatingIP.class);
-        when(neutronFloatingIP.getFixedIPAddress()).thenReturn(HOST_ADDRESS);
-        when(neutronFloatingIP.getFloatingIPAddress()).thenReturn(HOST_ADDRESS);
-        when(neutronFloatingIP.getFloatingNetworkUUID()).thenReturn("floatingNetworkUUID");
+        when(neutronFloatingIP.getFixedIPAddress()).thenReturn(FIXED_IP_ADDRESS);
+        when(neutronFloatingIP.getFloatingIPAddress()).thenReturn(FLOATING_IP_ADDRESS);
+        when(neutronFloatingIP.getFloatingIPUUID()).thenReturn(UUID);
 
-        networkIdToRouterMacCache.put("floatingNetworkUUID", "routerMacAddress");
+        // Suppress the called to these functions
+        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programFlowsForFloatingIPArpAdd", NeutronFloatingIP.class));
+        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programFlowsForFloatingIPInbound", NeutronFloatingIP.class, Action.class));
+        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programFlowsForFloatingIPOutbound", NeutronFloatingIP.class, Action.class));
+        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programFlowsForFloatingIPArpDelete", String.class));
 
         neutronL3Adapter.handleNeutronFloatingIPEvent(neutronFloatingIP, Action.ADD);
-        // Added above
-        assertEquals("Error, did not return the correct networkIdToRouterMacCache size", 1, networkIdToRouterMacCache.size());
-        // Affected by the add
-        /* TODO SB_MIGRATION */
-        //assertEquals("Error, did not return the correct inboundIpRewriteCache size", 1, inboundIpRewriteCache.size());
-        assertEquals("Error, did not return the correct outboundIpRewriteCache size", 1, outboundIpRewriteCache.size());
-        assertEquals("Error, did not return the correct staticArpEntryCache size", 1, staticArpEntryCache.size());
-        // Unchanged
-        assertEquals("Error, did not return the correct routerInterfacesCache size", 0, routerInterfacesCache.size());
-        assertEquals("Error, did not return the correct outboundIpRewriteExclusionCache size", 0, outboundIpRewriteExclusionCache.size());
-        assertEquals("Error, did not return the correct subnetIdToRouterInterfaceCache size", 0, subnetIdToRouterInterfaceCache.size());
-        assertEquals("Error, did not return the correct l3ForwardingCache size", 0, l3ForwardingCache.size());
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programFlowsForFloatingIPArpAdd", any(NeutronFloatingIP.class));
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programFlowsForFloatingIPInbound", any(NeutronFloatingIP.class), eq(Action.ADD));
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programFlowsForFloatingIPOutbound", any(NeutronFloatingIP.class), eq(Action.ADD));
 
         neutronL3Adapter.handleNeutronFloatingIPEvent(neutronFloatingIP, Action.DELETE);
-        // Unchanged
-        assertEquals("Error, did not return the correct networkIdToRouterMacCache size", 1, networkIdToRouterMacCache.size());
-        assertEquals("Error, did not return the correct inboundIpRewriteCache size", 1, inboundIpRewriteCache.size());
-        assertEquals("Error, did not return the correct outboundIpRewriteCache size", 1, outboundIpRewriteCache.size());
-        assertEquals("Error, did not return the correct staticArpEntryCache size", 1, staticArpEntryCache.size());
-        assertEquals("Error, did not return the correct routerInterfacesCache size", 0, routerInterfacesCache.size());
-        assertEquals("Error, did not return the correct outboundIpRewriteExclusionCache size", 0, outboundIpRewriteExclusionCache.size());
-        assertEquals("Error, did not return the correct subnetIdToRouterInterfaceCache size", 0, subnetIdToRouterInterfaceCache.size());
-        assertEquals("Error, did not return the correct l3ForwardingCache size", 0, l3ForwardingCache.size());
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programFlowsForFloatingIPArpDelete", anyString());
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programFlowsForFloatingIPInbound", any(NeutronFloatingIP.class), eq(Action.DELETE));
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programFlowsForFloatingIPOutbound", any(NeutronFloatingIP.class), eq(Action.DELETE));
     }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testProgramFlowsForFloatingIPInbound() throws Exception {
+        NeutronFloatingIP neutronFloatingIp = mock(NeutronFloatingIP.class);
+        when(neutronFloatingIp.getID()).thenReturn(ID);
+
+        // init instance variables
+        floatIpDataMapCache.put(ID, floatingIpObject);
+        MemberModifier.field(NeutronL3Adapter.class, "floatIpDataMapCache").set(neutronL3Adapter , floatIpDataMapCache);
+
+        // Suppress the called to these functions
+        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programInboundIpRewriteStage1", Long.class, Long.class, String.class, String.class, String.class, Action.class));
+
+        Whitebox.invokeMethod(neutronL3Adapter, "programFlowsForFloatingIPInbound", neutronFloatingIp, Action.ADD);
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programInboundIpRewriteStage1", anyLong(), anyLong(), anyString(), anyString(), anyString(), eq(Action.ADD));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testProgramFlowsForFloatingIPOutbound() throws Exception {
+        NeutronFloatingIP neutronFloatingIp = mock(NeutronFloatingIP.class);
+        when(neutronFloatingIp.getID()).thenReturn(ID);
+
+        // init instance variables
+        floatIpDataMapCache.put(ID, floatingIpObject);
+        MemberModifier.field(NeutronL3Adapter.class, "floatIpDataMapCache").set(neutronL3Adapter , floatIpDataMapCache);
+
+        // Suppress the called to these functions
+        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programOutboundIpRewriteStage1", floatingIpClass, Action.class));
+
+        Whitebox.invokeMethod(neutronL3Adapter, "programFlowsForFloatingIPOutbound", neutronFloatingIp, Action.ADD);
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programOutboundIpRewriteStage1", any(floatingIpClass), eq(Action.ADD));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testFlushExistingIpRewrite() throws Exception {
+        // init instance variables
+        floatIpDataMapCache.put(ID, floatingIpObject);
+        MemberModifier.field(NeutronL3Adapter.class, "floatIpDataMapCache").set(neutronL3Adapter , floatIpDataMapCache);
+
+        // Suppress the called to these functions
+        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programOutboundIpRewriteStage1", floatingIpClass, Action.class));
+
+        Whitebox.invokeMethod(neutronL3Adapter, "flushExistingIpRewrite");
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programOutboundIpRewriteStage1", any(floatingIpClass), eq(Action.DELETE));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testRebuildExistingIpRewrite() throws Exception {
+        // init instance variables
+        floatIpDataMapCache.put(ID, floatingIpObject);
+        MemberModifier.field(NeutronL3Adapter.class, "floatIpDataMapCache").set(neutronL3Adapter , floatIpDataMapCache);
+
+        // Suppress the called to these functions
+        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programOutboundIpRewriteStage1", floatingIpClass, Action.class));
+
+        Whitebox.invokeMethod(neutronL3Adapter, "rebuildExistingIpRewrite");
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programOutboundIpRewriteStage1", any(floatingIpClass), eq(Action.ADD));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testProgramFlowsForFloatingIPArpAdd() throws Exception {
+        NeutronFloatingIP neutronFloatingIP = mock(NeutronFloatingIP.class);
+        when(neutronFloatingIP.getFixedIPAddress()).thenReturn(FIXED_IP_ADDRESS);
+        when(neutronFloatingIP.getFloatingIPAddress()).thenReturn(FLOATING_IP_ADDRESS);
+        when(neutronFloatingIP.getPortUUID()).thenReturn(UUID);
+        NeutronPort neutronPort = mock(NeutronPort.class);
+        when(neutronPort.getMacAddress()).thenReturn(MAC_ADDRESS);
+        NeutronNetwork neutronNetwork = mock(NeutronNetwork.class);
+        when(neutronNetwork.getProviderSegmentationID()).thenReturn(ID);
+        when(neutronNetwork.getID()).thenReturn(ID);
+
+        // init instance variables
+        floatIpDataMapCache.put(ID, floatingIpObject);
+        neutronPortToDpIdCache.put(UUID, mock(Pair.class));
+        networkIdToRouterMacCache.put(ID, MAC_ADDRESS);
+        when(neutronNetworkCache.getNetwork(anyString())).thenReturn(neutronNetwork);
+        when(neutronPortCache.getPort(anyString())).thenReturn(neutronPort);
+        PowerMockito.doReturn(neutronPort).when(neutronL3Adapter, "findNeutronPortForFloatingIp", anyString());
+        PowerMockito.doReturn(Long.valueOf(15)).when(neutronL3Adapter, "findOFPortForExtPatch", anyLong());
+        MemberModifier.field(NeutronL3Adapter.class, "floatIpDataMapCache").set(neutronL3Adapter , floatIpDataMapCache);
+        MemberModifier.field(NeutronL3Adapter.class, "neutronPortToDpIdCache").set(neutronL3Adapter , neutronPortToDpIdCache);
+        MemberModifier.field(NeutronL3Adapter.class, "neutronPortCache").set(neutronL3Adapter , neutronPortCache);
+        MemberModifier.field(NeutronL3Adapter.class, "neutronNetworkCache").set(neutronL3Adapter , neutronNetworkCache);
+        MemberModifier.field(NeutronL3Adapter.class, "networkIdToRouterMacCache").set(neutronL3Adapter , networkIdToRouterMacCache);
+
+        // Suppress the called to these functions
+        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "findNeutronPortForFloatingIp", String.class));
+        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "findOFPortForExtPatch", Long.class));
+        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programStaticArpStage1", Long.class, String.class, String.class, String.class, Action.class));
+
+        Whitebox.invokeMethod(neutronL3Adapter, "programFlowsForFloatingIPArpAdd", neutronFloatingIP);
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("findNeutronPortForFloatingIp", anyString());
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("findOFPortForExtPatch", anyLong());
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programStaticArpStage1", anyLong(), anyString(), anyString(), anyString(), eq(Action.ADD));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testProgramFlowsForFloatingIPArpDelete() throws Exception {
+     // init instance variables
+        floatIpDataMapCache.put(ID, floatingIpObject);
+        MemberModifier.field(NeutronL3Adapter.class, "floatIpDataMapCache").set(neutronL3Adapter , floatIpDataMapCache);
+
+        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programStaticArpStage1", Long.class, String.class, String.class, String.class, Action.class));
+
+        Whitebox.invokeMethod(neutronL3Adapter, "programFlowsForFloatingIPArpDelete", ID);
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programStaticArpStage1", anyLong(), anyString(), anyString(), anyString(), eq(Action.DELETE));
+    }
+
+    @Test
+    public void testFindNeutronPortForFloatingIp() throws Exception {
+        NeutronPort neutronPort = mock(NeutronPort.class);
+        when(neutronPort.getDeviceOwner()).thenReturn(OWNER_FLOATING_IP);
+        when(neutronPort.getDeviceID()).thenReturn(ID);
+        List<NeutronPort> list_neutronPort = new ArrayList<>();
+        list_neutronPort.add(neutronPort);
+        when(neutronPortCache.getAllPorts()).thenReturn(list_neutronPort);
+
+        MemberModifier.field(NeutronL3Adapter.class, "neutronPortCache").set(neutronL3Adapter , neutronPortCache);
+
+        assertEquals("Error, did not return the correct NeutronPort", neutronPort, Whitebox.invokeMethod(neutronL3Adapter, "findNeutronPortForFloatingIp", ID));
+    }
+
+    @Test
+    public void testFindOFPortForExtPatch() throws Exception {
+
+        when(configurationService.getPatchPortName(any(Pair.class))).thenReturn(PORT_INT);
+        MemberModifier.field(NeutronL3Adapter.class, "configurationService").set(neutronL3Adapter , configurationService);
+        List<Node> nodes = new ArrayList<Node>();
+        nodes.add(mock(Node.class));
+        when(nodeCacheManager.getBridgeNodes()).thenReturn(nodes);
+        MemberModifier.field(NeutronL3Adapter.class, "nodeCacheManager").set(neutronL3Adapter , nodeCacheManager);
+        when(southbound.getDataPathId(any(Node.class))).thenReturn(Long.valueOf(ID));
+        OvsdbTerminationPointAugmentation terminationPointOfBridge = mock(OvsdbTerminationPointAugmentation.class);
+        when(terminationPointOfBridge.getOfport()).thenReturn(Long.valueOf(ID));
+        when(southbound.getTerminationPointOfBridge(any(Node.class), anyString())).thenReturn(terminationPointOfBridge);
+        MemberModifier.field(NeutronL3Adapter.class, "southbound").set(neutronL3Adapter , southbound);
+
+        assertEquals("Error, did not return the correct NeutronPort", Long.valueOf(ID), Whitebox.invokeMethod(neutronL3Adapter, "findOFPortForExtPatch", Long.valueOf(ID)));
+    }
+
+    @Test
+    public void testHandleNeutronNetworkEvent() throws Exception {
+        // Nothing to be done here
+        Whitebox.invokeMethod(neutronL3Adapter, "handleNeutronNetworkEvent", mock(NeutronNetwork.class), Action.ADD);
+    }
+
+    @Test
+    public void testHandleInterfaceEvent() throws Exception {
+        // init instance variables
+        MemberModifier.field(NeutronL3Adapter.class, "tenantNetworkManager").set(neutronL3Adapter , tenantNetworkManager);
+        MemberModifier.field(NeutronL3Adapter.class, "neutronPortToDpIdCache").set(neutronL3Adapter , neutronPortToDpIdCache);
+
+        // Mock variables
+        NodeId nodeId = mock(NodeId.class);
+        when(nodeId.getValue()).thenReturn(ID);
+        Node node = mock(Node.class);
+        when(node.getNodeId()).thenReturn(nodeId);
+
+        OvsdbTerminationPointAugmentation intf = mock(OvsdbTerminationPointAugmentation.class);
+        when(intf.getInterfaceUuid()).thenReturn(mock(Uuid.class));
+        when(intf.getName()).thenReturn(INTF_NAME);
+
+        NeutronPort neutronPort = mock(NeutronPort.class);
+        when(neutronPort.getPortUUID()).thenReturn(UUID);
+
+        when(tenantNetworkManager.getTenantPort(intf)).thenReturn(neutronPort);
+
+        // Suppress the called to these functions
+        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "getDpidForIntegrationBridge", Node.class));
+        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "handleInterfaceEventAdd", String.class, Long.class, Uuid.class));
+        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "handleInterfaceEventDelete", OvsdbTerminationPointAugmentation.class, Long.class));
+
+        PowerMockito.when(neutronL3Adapter, "getDpidForIntegrationBridge", any(Node.class)).thenReturn(Long.valueOf(45));
+        Mockito.doNothing().when(neutronL3Adapter).handleNeutronPortEvent(any(NeutronPort.class), any(Action.class));
+
+        neutronL3Adapter.handleInterfaceEvent(node, intf, mock(NeutronNetwork.class), Action.ADD);
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("getDpidForIntegrationBridge", any(Node.class));
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("handleInterfaceEventAdd", any(String.class), anyLong(), any(Uuid.class));
+        Mockito.verify(neutronL3Adapter).handleNeutronPortEvent(neutronPort, Action.ADD);
+
+        neutronL3Adapter.handleInterfaceEvent(node, intf, mock(NeutronNetwork.class), Action.DELETE);
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("handleInterfaceEventDelete", any(OvsdbTerminationPointAugmentation.class), anyLong());
+        Mockito.verify(neutronL3Adapter).handleNeutronPortEvent(neutronPort, Action.DELETE);
+    }
+
+    @Test
+    public void testHandleInterfaceEventAdd() throws Exception {
+        // init instance variables
+        MemberModifier.field(NeutronL3Adapter.class, "neutronPortToDpIdCache").set(neutronL3Adapter , neutronPortToDpIdCache);
+        int temp = neutronPortToDpIdCache.size();
+
+        Whitebox.invokeMethod(neutronL3Adapter, "handleInterfaceEventAdd", "", Long.valueOf(5), mock(Uuid.class));
+
+        assertEquals("Error, did not add the port", temp+1, neutronPortToDpIdCache.size());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testHandleInterfaceEventDelete() throws Exception {
+        OvsdbTerminationPointAugmentation intf = mock(OvsdbTerminationPointAugmentation.class);
+        Uuid uuid = mock(Uuid.class);
+        when(intf.getInterfaceUuid()).thenReturn(uuid );
+        Pair<Long, Uuid> pair = mock(Pair.class);
+        when(pair.getRight()).thenReturn(uuid);
+
+        // init instance variables
+        neutronPortToDpIdCache.put("key", pair);
+        MemberModifier.field(NeutronL3Adapter.class, "neutronPortToDpIdCache").set(neutronL3Adapter , neutronPortToDpIdCache);
+        int temp = neutronPortToDpIdCache.size();
+
+        Whitebox.invokeMethod(neutronL3Adapter, "handleInterfaceEventDelete", intf, Long.valueOf(ID));
+
+        assertEquals("Error, did not remove the port", temp-1, neutronPortToDpIdCache.size());
+    }
+
+    @Test
+    public void testUpdateL3ForNeutronPort() throws Exception {
+        Neutron_IPs neutronIp = mock(Neutron_IPs.class);
+        when(neutronIp.getIpAddress()).thenReturn(FIXED_IP_ADDRESS);
+        List<Neutron_IPs> neutronIps = new ArrayList<Neutron_IPs>();
+        neutronIps.add(neutronIp);
+        NeutronPort neutronPort = mock(NeutronPort.class);
+        when(neutronPort.getNetworkUUID()).thenReturn(UUID);
+        when(neutronPort.getMacAddress()).thenReturn(MAC_ADDRESS_2);
+        when(neutronPort.getFixedIPs()).thenReturn(neutronIps);
+        NeutronNetwork neutronNetwork = mock(NeutronNetwork.class);
+        when(neutronNetwork.getProviderSegmentationID()).thenReturn(ID);
+        List<Node> nodes = new ArrayList<Node>();
+        nodes.add(mock(Node.class));
+        PowerMockito.doReturn(Long.valueOf(15)).when(neutronL3Adapter, "getDpidForIntegrationBridge", any(Node.class));
+
+        // init instance variables
+        networkIdToRouterMacCache.put(UUID, MAC_ADDRESS);
+        MemberModifier.field(NeutronL3Adapter.class, "networkIdToRouterMacCache").set(neutronL3Adapter , networkIdToRouterMacCache);
+        when(neutronNetworkCache.getNetwork(anyString())).thenReturn(neutronNetwork);
+        MemberModifier.field(NeutronL3Adapter.class, "neutronNetworkCache").set(neutronL3Adapter , neutronNetworkCache);
+        when(nodeCacheManager.getBridgeNodes()).thenReturn(nodes);
+        MemberModifier.field(NeutronL3Adapter.class, "nodeCacheManager").set(neutronL3Adapter , nodeCacheManager);
+        MemberModifier.field(NeutronL3Adapter.class, "flgDistributedARPEnabled").set(neutronL3Adapter , true);
+
+     // Suppress the called to these functions
+        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "getDpidForIntegrationBridge", Node.class));
+        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programL3ForwardingStage1", Node.class, Long.class, String.class, String.class, String.class, Action.class));
+        MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programStaticArpStage1", Long.class, String.class, String.class, String.class, Action.class));
+
+        Whitebox.invokeMethod(neutronL3Adapter, "updateL3ForNeutronPort", neutronPort, false);
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("getDpidForIntegrationBridge", any(Node.class));
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programL3ForwardingStage1", any(Node.class), anyLong(), anyString(), anyString(), anyString(), eq(Action.ADD));
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programStaticArpStage1", anyLong(), anyString(), anyString(), anyString(), eq(Action.ADD));
+
+        Whitebox.invokeMethod(neutronL3Adapter, "updateL3ForNeutronPort", neutronPort, true);
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(2)).invoke("getDpidForIntegrationBridge", any(Node.class));
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programL3ForwardingStage1", any(Node.class), anyLong(), anyString(), anyString(), anyString(), eq(Action.DELETE));
+        PowerMockito.verifyPrivate(neutronL3Adapter, times(1)).invoke("programStaticArpStage1", anyLong(), anyString(), anyString(), anyString(), eq(Action.DELETE));
+
+    }
+
+//    private void updateL3ForNeutronPort() throws Exception {
+//        programL3ForwardingStage1();
+//        programStaticArpStage1();
+//    }
+//
+//    private void programFlowsForNeutronRouterInterface() throws Exception {
+//        getDpidForIntegrationBridge();
+//        programFlowsForNeutronRouterInterfacePair();
+//        programFlowForNetworkFromExternal();
+//        programStaticArpStage1();
+//        programIpRewriteExclusionStage1();
+//    }
+//
+//    private void programFlowForNetworkFromExternal() throws Exception {
+//        programRouterInterfaceStage1();
+//    }
+//
+//    private void programFlowsForNeutronRouterInterfacePair() throws Exception {
+//        programRouterInterfaceStage1();
+//    }
+//
+//    // either add or remove l3ForwardingCache
+//    private void programL3ForwardingStage1() throws Exception {
+//        programL3ForwardingStage2();
+//    }
+//
+//    private void programL3ForwardingStage2() throws Exception {
+//        PowerMockito.mockStatic(InetAddress.class);
+//        InetAddress inetAddress = mock(InetAddress.class);
+//        PowerMockito.when(InetAddress.getByName(anyString())).thenReturn(inetAddress);
+//        when(l3ForwardingProvider.programForwardingTableEntry(anyLong(), anyString(), any(InetAddress.class), anyString(), eq(Action.ADD)));
+//    }
+//
+//    private void programRouterInterfaceStage1() throws Exception {
+//        programRouterInterfaceStage2();
+//    }
+//
+//    // either add or remove routerInterfacesCache
+//    private void programRouterInterfaceStage2() throws Exception {
+//        PowerMockito.mockStatic(InetAddress.class);
+//        InetAddress inetAddress = mock(InetAddress.class);
+//        PowerMockito.when(InetAddress.getByName(anyString())).thenReturn(inetAddress);
+//        when(routingProvider.programRouterInterface(anyLong(), anyString(), anyString(), anyString(), any(InetAddress.class), anyInt(), eq(Action.ADD)));
+//    }
+//
+//    //either add or remove staticArpEntryCache
+//    private void programStaticArpStage1() throws Exception {
+//        programStaticArpStage2();
+//    }
+//
+//    private void programStaticArpStage2() throws Exception {
+//        PowerMockito.mockStatic(InetAddress.class);
+//        InetAddress inetAddress = mock(InetAddress.class);
+//        PowerMockito.when(InetAddress.getByName(anyString())).thenReturn(inetAddress);
+//        when(arpProvider.programStaticArpEntry(anyLong(), anyString(), anyString(), any(InetAddress.class), eq(Action.ADD)));
+//    }
+//
+//    private void verifyProgramStaticArpStage2() {
+//        Mockito.verify(arpProvider).programStaticArpEntry(anyLong(), anyString(), anyString(), any(InetAddress.class), eq(Action.ADD));
+//    }
+//
+//    // either add or remove inboundIpRewriteCache
+//    private void programInboundIpRewriteStage1() throws Exception {
+//        programInboundIpRewriteStage2();
+//    }
+//
+//    private void programInboundIpRewriteStage2() throws Exception {
+//        PowerMockito.mockStatic(InetAddress.class);
+//        InetAddress inetAddress = mock(InetAddress.class);
+//        PowerMockito.when(InetAddress.getByName(anyString())).thenReturn(inetAddress);
+//        when(inboundNatProvider.programIpRewriteRule(anyLong(), anyLong(), anyString(), any(InetAddress.class), any(InetAddress.class), eq(Action.ADD)));
+//    }
+//
+//    private void verifyProgramInboundIpRewriteStage2() {
+//        Mockito.verify(outboundNatProvider, times(1)).programIpRewriteRule(anyLong(), anyString(), anyString(), any(InetAddress.class), anyString(), anyString(), any(InetAddress.class), anyLong(), eq(Action.ADD));
+//    }
+//
+//    // either add or remove outboundIpRewriteExclusionCache
+//    private void programIpRewriteExclusionStage1() {
+//        programIpRewriteExclusionStage2();
+//    }
+//
+//    private void programIpRewriteExclusionStage2() {
+//        when(outboundNatProvider.programIpRewriteExclusion(anyLong(), anyString(), anyString(), eq(Action.ADD)));
+//    }
+//
+//    // either add or remove outboundIpRewriteCache
+//    private void programOutboundIpRewriteStage1() throws Exception{
+//        prepareProgramOutboundIpRewriteStage2();
+//    }
+//
+//    private void prepareProgramOutboundIpRewriteStage2() throws Exception {
+//        PowerMockito.mockStatic(InetAddress.class);
+//        InetAddress inetAddress = mock(InetAddress.class);
+//        PowerMockito.when(InetAddress.getByName(anyString())).thenReturn(inetAddress);
+//        when(outboundNatProvider.programIpRewriteRule(anyLong(), anyString(), anyString(), any(InetAddress.class), anyString(), anyString(), any(InetAddress.class), anyLong(), eq(Action.ADD)));
+//    }
+//
+//    private void verifyProgramOutboundIpRewriteStage2() {
+//        Mockito.verify(outboundNatProvider, times(1)).programIpRewriteRule(anyLong(), anyString(), anyString(), any(InetAddress.class), anyString(), anyString(), any(InetAddress.class), anyLong(), eq(Action.ADD));
+//    }
+//
+//
+//
+//    private void programOutboundIpRewriteStage2() throws Exception {
+//        PowerMockito.mockStatic(InetAddress.class);
+//        InetAddress inetAddress = mock(InetAddress.class);
+//        PowerMockito.when(InetAddress.getByName(anyString())).thenReturn(inetAddress );
+//    }
+//
+//    private void getDpidForIntegrationBridge() {
+//        when(southbound.getBridge(any(Node.class), anyString())).thenReturn(mock(OvsdbBridgeAugmentation.class));
+//        when(southbound.getDatapathId(any(Node.class))).thenReturn("dataPath");
+//    }
 
     @Test
     public void testSetDependencies() throws Exception {
@@ -395,9 +711,11 @@ public class NeutronL3AdapterTest {
         return field.get(neutronL3Adapter);
     }
 
-    private Method getMethod(String methodName) throws Exception {
-        Method method = neutronL3Adapter.getClass().getDeclaredMethod(methodName, new Class[] {});
-        method.setAccessible(true);
-        return method;
+    @SuppressWarnings("rawtypes")
+    private Object createFloatingIpObject() throws Exception{
+        Class clazz = Whitebox.getInnerClassType(NeutronL3Adapter.class, "FloatIpData");
+        Constructor [] constructors = clazz.getConstructors();
+        Constructor c  = constructors[0];
+        return c.newInstance(new NeutronL3Adapter(), Long.valueOf(415), Long.valueOf(415), "", "", "", "", "");
     }
 }

@@ -32,6 +32,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 
 import java.net.InetAddress;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -247,6 +248,14 @@ public class OvsdbConnectionService implements OvsdbConnection {
                                 SSLEngine engine = sslContext.createSSLEngine();
                                 engine.setUseClientMode(false); // work in a server mode
                                 engine.setNeedClientAuth(true); // need client authentication
+                                //Disable SSLv3 and enable all other supported protocols
+                                String[] protocols = {"SSLv2Hello", "TLSv1", "TLSv1.1", "TLSv1.2"};
+                                logger.debug("Set enable protocols {}", Arrays.toString(protocols));
+                                engine.setEnabledProtocols(protocols);
+                                logger.debug("Supported ssl protocols {}",
+                                        Arrays.toString(engine.getSupportedProtocols()));
+                                logger.debug("Enabled ssl protocols {}",
+                                        Arrays.toString(engine.getEnabledProtocols()));
                                 channel.pipeline().addLast("ssl", new SslHandler(engine));
                             }
 

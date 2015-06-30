@@ -10,10 +10,19 @@ package org.opendaylight.ovsdb.openstack.netvirt.impl;
 import com.google.common.collect.Sets;
 import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryListener;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
@@ -29,11 +38,13 @@ public class OvsdbInventoryServiceImpl implements ConfigInterface, OvsdbInventor
     private static DataBroker dataBroker = null;
     private static Set<OvsdbInventoryListener> ovsdbInventoryListeners = Sets.newCopyOnWriteArraySet();
     private OvsdbDataChangeListener ovsdbDataChangeListener = null;
+    private static MdsalUtils mdsalUtils = null;
 
     public OvsdbInventoryServiceImpl(ProviderContext providerContext) {
         dataBroker = providerContext.getSALService(DataBroker.class);
         LOG.info("OvsdbInventoryServiceImpl initialized");
         ovsdbDataChangeListener = new OvsdbDataChangeListener(dataBroker);
+        mdsalUtils = new MdsalUtils(dataBroker);
     }
 
     @Override
@@ -51,6 +62,7 @@ public class OvsdbInventoryServiceImpl implements ConfigInterface, OvsdbInventor
     @Override
     public void providersReady() {
         ovsdbDataChangeListener.start();
+        initializeNetvirtTopology();
     }
 
     public static Set<OvsdbInventoryListener> getOvsdbInventoryListeners() {
@@ -62,4 +74,15 @@ public class OvsdbInventoryServiceImpl implements ConfigInterface, OvsdbInventor
 
     @Override
     public void setDependencies(Object impl) {}
+
+    private void initializeNetvirtTopology() {
+        final TopologyId topologyId = new TopologyId(new Uri(Constants.NETVIRT_TOPOLOGY_ID));
+        InstanceIdentifier<Topology> path =
+                InstanceIdentifier.create(NetworkTopology.class).child(Topology.class, new TopologyKey(topologyId));
+        TopologyBuilder tpb = new TopologyBuilder();
+        tpb.setTopologyId(topologyId);
+        if (! mdsalUtils.put(LogicalDatastoreType.OPERATIONAL, path, tpb.build())) {
+            LOG.error("Error initializing netvirt topology");
+        }
+    }
 }

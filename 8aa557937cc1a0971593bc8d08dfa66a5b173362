@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_7d587956",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/NetworkHandler.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-30T12:59:21Z",
+      "side": 1,
+      "message": "should these changes be extended to the other neutron IAware classes?\n\nIf so, then maybe we could add an abstract class for these classes that implement the IAware pieces? it would also extend AbstractHandler. Thsi would give us a single place where the eventDispatcher could be checked.",
+      "range": {
+        "startLine": 100,
+        "startChar": 12,
+        "endLine": 100,
+        "endChar": 27
+      },
+      "revId": "8aa557937cc1a0971593bc8d08dfa66a5b173362",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

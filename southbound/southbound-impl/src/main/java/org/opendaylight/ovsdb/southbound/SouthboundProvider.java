@@ -91,7 +91,7 @@ public class SouthboundProvider implements BindingAwareProvider, AutoCloseable {
                 transaction.cancel();
             }
         } catch (Exception e) {
-            LOG.error("Error initializing ovsdb topology {}",e);
+            LOG.error("Error initializing ovsdb topology", e);
         }
     }
 

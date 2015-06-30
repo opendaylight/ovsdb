@@ -7,7 +7,6 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
-import com.google.common.base.Preconditions;
 import java.math.BigInteger;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;

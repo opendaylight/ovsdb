@@ -66,6 +66,7 @@ public final class Constants {
      */
 
     public static final String OPENFLOW_NODE_PREFIX = "openflow:";
+    public static final String NETVIRT_TOPOLOGY_ID = "netvirt:1";
 
     /*
      * Ethertypes

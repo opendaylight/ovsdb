@@ -16,6 +16,47 @@
       "revId": "3dc8f03493fa157a14da88c6ed4d198091c3c869",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_527a4789",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SouthboundImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 710,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-30T20:28:48Z",
+      "side": 1,
+      "message": "It isn\u0027t. Me and Flavio went back and forth on this. It just happens that all the mdsal interactions we do so far use the southbound and this is the first to use something else.\n\nmoving it to OvsdbInvenntoryServiceImpl will work and keeps its invocation in the same path as calling it in the OvsdbDataChangeListener.",
+      "parentUuid": "7a7fa997_8fe2f89d",
+      "revId": "3dc8f03493fa157a14da88c6ed4d198091c3c869",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_52532717",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SouthboundImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 717,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-30T20:28:48Z",
+      "side": 1,
+      "message": "can you use the mdsalUtils.put method? It will create the WriteTransaction along with doing the put and submit. Simply replace this try block with the mdsalutils.put(iid, tpb).",
+      "range": {
+        "startLine": 717,
+        "startChar": 8,
+        "endLine": 717,
+        "endChar": 24
+      },
+      "revId": "3dc8f03493fa157a14da88c6ed4d198091c3c869",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

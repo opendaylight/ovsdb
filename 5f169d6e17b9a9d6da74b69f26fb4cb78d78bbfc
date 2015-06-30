@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_12f92fe9",
+        "filename": "resources/robot/scripts/run_robot_tests.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-06-30T21:13:31Z",
+      "side": 1,
+      "message": "Myabe you could wait for this patch: https://git.opendaylight.org/gerrit/#/c/23599/ getting merge, so you can wait for netvirt to be up and running here.\nYou will have to change the URL.",
+      "revId": "5f169d6e17b9a9d6da74b69f26fb4cb78d78bbfc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

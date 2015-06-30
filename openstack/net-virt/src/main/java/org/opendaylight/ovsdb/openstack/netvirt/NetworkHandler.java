@@ -60,6 +60,9 @@ public class NetworkHandler extends AbstractHandler implements INeutronNetworkAw
             logger.error(" Network shared attribute not supported ");
             return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
         }
+        if (eventDispatcher == null) {
+            return HttpURLConnection.HTTP_UNAVAILABLE;
+        }
 
         return HttpURLConnection.HTTP_OK;
     }
@@ -94,6 +97,9 @@ public class NetworkHandler extends AbstractHandler implements INeutronNetworkAw
             logger.error(" Network shared attribute not supported ");
             return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
         }
+        if (eventDispatcher == null) {
+            return HttpURLConnection.HTTP_UNAVAILABLE;
+        }
 
         return HttpURLConnection.HTTP_OK;
     }
@@ -120,6 +126,9 @@ public class NetworkHandler extends AbstractHandler implements INeutronNetworkAw
      */
     @Override
     public int canDeleteNetwork(NeutronNetwork network) {
+        if (eventDispatcher == null) {
+            return HttpURLConnection.HTTP_UNAVAILABLE;
+        }
         return HttpURLConnection.HTTP_OK;
     }
 

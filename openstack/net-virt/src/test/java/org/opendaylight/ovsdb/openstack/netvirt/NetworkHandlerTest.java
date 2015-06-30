@@ -55,6 +55,7 @@ public class NetworkHandlerTest {
     @InjectMocks private NetworkHandler networkHandler;
 
     @Mock private NeutronNetwork neutronNetwork;
+    @Mock protected EventDispatcher eventDispatcher;
 
     @Mock private NeutronL3Adapter neutronL3Adapter;
     @Mock private TenantNetworkManager tenantNetworkManager;

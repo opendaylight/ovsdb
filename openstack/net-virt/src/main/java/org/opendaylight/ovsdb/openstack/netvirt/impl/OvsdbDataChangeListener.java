@@ -20,6 +20,8 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.openstack.netvirt.MdsalHelper;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.OvsdbInventoryListener;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
@@ -58,6 +60,9 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
         LOG.info("netvirt OvsdbDataChangeListener: dataBroker= {}, registration= {}",
                 dataBroker, registration);
         triggerUpdates();
+
+        Southbound southbound = (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
+        southbound.initializeNetvirtTopology();
     }
 
     @Override

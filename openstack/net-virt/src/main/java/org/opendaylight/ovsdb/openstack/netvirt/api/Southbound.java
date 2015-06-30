@@ -76,4 +76,5 @@ public interface Southbound {
     Long getOFPort(OvsdbTerminationPointAugmentation port);
     Long getOFPort(Node bridgeNode, String portName);
     DataBroker getDatabroker();
+    void initializeNetvirtTopology();
 }

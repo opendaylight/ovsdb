@@ -25,6 +25,8 @@ After the VMs are provisioned. ssh into ovs1 to run integration tests for OVSDB
 
 The controller should be running on the host machine before you run the integration tests. The VMs are setup with environmental variable $CONTROLLER with the default IP: 192.168.100.1
 
+Note: Restarting karaf at the begining of each test run probably helps generate fewer false positives.
+
 # Output and log from each test
 
 The output and logs for each test will be left in ovs1 home directory. For convinience of accessing the test results at a later time from the host machine, check "robot/scripts/results" for the result of the current and previous tests. Those are timestamped and cumulated over time. You are responsible for cleaning up this cache.

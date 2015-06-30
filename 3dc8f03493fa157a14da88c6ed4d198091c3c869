@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_8fe2f89d",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SouthboundImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 710,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-06-30T18:04:24Z",
+      "side": 1,
+      "message": "I would suggest having this method under OvsdbInventoryServiceImpl instead of SouthboundImpl?\n\nIt seems to me that this is not related to southbound at all. That is the main reason I\u0027m saying that.\nAlso, OvsdbInventoryServiceImpl seems to be a good match for this method.\n\nWaiting on your thoughts :)",
+      "revId": "3dc8f03493fa157a14da88c6ed4d198091c3c869",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

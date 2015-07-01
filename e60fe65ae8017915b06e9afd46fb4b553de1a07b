@@ -2,6 +2,75 @@
   "comments": [
     {
       "key": {
+        "uuid": "7a7fa997_681af218",
+        "filename": "resources/robot/scripts/run_robot_tests.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-01T15:57:52Z",
+      "side": 1,
+      "message": "does 200 only get returned if the node was found? Or if not found does a 200 get returned to just indicate that the request wasn\u0027t bad?",
+      "range": {
+        "startLine": 28,
+        "startChar": 21,
+        "endLine": 28,
+        "endChar": 24
+      },
+      "revId": "e60fe65ae8017915b06e9afd46fb4b553de1a07b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_28d4fa1e",
+        "filename": "resources/robot/scripts/run_robot_tests.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-01T15:57:52Z",
+      "side": 1,
+      "message": "might as well break this elif from the above if since it really isn\u0027t connected to the above. This if block is just checking if the loop needs to continue",
+      "range": {
+        "startLine": 31,
+        "startChar": 4,
+        "endLine": 31,
+        "endChar": 8
+      },
+      "revId": "e60fe65ae8017915b06e9afd46fb4b553de1a07b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_88174eed",
+        "filename": "resources/robot/scripts/run_robot_tests.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-01T15:57:52Z",
+      "side": 1,
+      "message": "this log should go above the sleep to be accurate",
+      "range": {
+        "startLine": 37,
+        "startChar": 13,
+        "endLine": 37,
+        "endChar": 20
+      },
+      "revId": "e60fe65ae8017915b06e9afd46fb4b553de1a07b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7fa997_0589e7ea",
         "filename": "resources/robot/scripts/run_robot_tests.sh",
         "patchSetId": 5

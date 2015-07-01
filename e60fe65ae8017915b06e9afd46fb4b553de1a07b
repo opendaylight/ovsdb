@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_0589e7ea",
+        "filename": "resources/robot/scripts/run_robot_tests.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-07-01T12:16:50Z",
+      "side": 1,
+      "message": "using the new url, I suspect this \u0027cool down\u0027 is no longer\nneeded at all. can we remove it or make it just a couple of seconds?",
+      "revId": "e60fe65ae8017915b06e9afd46fb4b553de1a07b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

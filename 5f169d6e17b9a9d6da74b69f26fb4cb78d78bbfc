@@ -16,6 +16,29 @@
       "revId": "5f169d6e17b9a9d6da74b69f26fb4cb78d78bbfc",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_528ec72f",
+        "filename": "resources/robot/scripts/run_robot_tests.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-07-01T00:07:08Z",
+      "side": 1,
+      "message": "Please use the newly added url, as Alexis mentioned:\n\nhttp://${ODL_IP}:8080/restconf/operational/network-topology:network-topology/topology/netvirt:1",
+      "range": {
+        "startLine": 25,
+        "startChar": 28,
+        "endLine": 25,
+        "endChar": 33
+      },
+      "revId": "5f169d6e17b9a9d6da74b69f26fb4cb78d78bbfc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -60,6 +60,9 @@ public class JsonRpcServiceBinderHandler extends ChannelInboundHandlerAdapter {
             } else if (jsonNode.hasNonNull("method")) {
                 if (jsonNode.has("id") && !Strings.isNullOrEmpty(jsonNode.get("id").asText())) {
                     factory.processRequest(context, jsonNode);
+                } else {
+                    logger.error("Request with null or empty id field: {} {}", jsonNode.get("method"),
+                            jsonNode.get("params"));
                 }
             }
 

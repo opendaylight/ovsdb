@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_8d02f56d",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 582,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-06T18:51:09Z",
+      "side": 1,
+      "message": "This class implements the interface so it has to have an impl for all the APIs whether it does something or not.",
+      "range": {
+        "startLine": 582,
+        "startChar": 23,
+        "endLine": 582,
+        "endChar": 24
+      },
+      "revId": "eea409e5e2e7cf24371035382c1e608c28742b4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_2df96180",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-06T18:51:09Z",
+      "side": 1,
+      "message": "should these be private?",
+      "range": {
+        "startLine": 103,
+        "startChar": 4,
+        "endLine": 103,
+        "endChar": 10
+      },
+      "revId": "eea409e5e2e7cf24371035382c1e608c28742b4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -10,10 +10,13 @@
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services;
 
 import java.math.BigInteger;
+import java.net.InetAddress;
+import java.util.Iterator;
 import java.util.List;
 
 import org.opendaylight.neutron.spi.NeutronSecurityGroup;
 import org.opendaylight.neutron.spi.NeutronSecurityRule;
+import org.opendaylight.neutron.spi.Neutron_IPs;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.EgressAclProvider;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
@@ -43,6 +46,9 @@ import com.google.common.collect.Lists;
 public class EgressAclService extends AbstractServiceInstance implements EgressAclProvider, ConfigInterface {
 
     static final Logger logger = LoggerFactory.getLogger(EgressAclService.class);
+    final int DHCP_SOURCE_PORT = 67;
+    final int DHCP_DESTINATION_PORT = 68;
+    final String HOST_MASK = "/32";
 
     public EgressAclService() {
         super(Service.EGRESS_ACL);
@@ -215,6 +221,24 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                     continue;
                 }
                 logger.debug("ACL Match combination not found for rule: {}", portSecurityRule);
+            }
+        }
+    }
+
+    @Override
+    public void programFixedSecurityACL(Long dpid, String segmentationId, String attachedMac,
+            long localPort, List<Neutron_IPs> srcAddressList, boolean isLastPortinBridge, boolean isComputePort ,boolean write) {
+        // If it is the only port in the bridge add the rule to allow any DHCP client traffic
+        if (isLastPortinBridge) {
+            egressACLDHCPAllowClientTrafficFromVm(dpid, write, Constants.PROTO_DHCP_CLIENT_TRAFFIC_MATCH_PRIORITY);
+        }
+        if(isComputePort) {
+        // add rule to drop the DHCP server traffic originating from the vm.
+            egressACLDHCPDropServerTrafficfromVM(dpid, localPort, write, Constants.PROTO_DHCP_CLIENT_SPOOF_MATCH_PRIORITY_DROP);
+            //Adds rule to check legitimate ip/mac pair for each packet from the vm
+            for(Neutron_IPs srcAddress : srcAddressList) {
+                String addressWithPrefix = srcAddress.getIpAddress() + HOST_MASK;
+                egressACLAllowTrafficFromVmIpMacPair(dpid, localPort, attachedMac, addressWithPrefix, Constants.PROTO_VM_IP_MAC_MATCH_PRIORITY,write);
             }
         }
     }
@@ -470,6 +494,165 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         }
     }
 
+    /**
+     * Adds flow to allow any DHCP client traffic
+     *
+     * @param dpidLong the dpid
+     * @param write whether to write or delete the flow
+     * @param protoPortMatchPriority the priority
+     */
+    public void egressACLDHCPAllowClientTrafficFromVm(Long dpidLong,
+            boolean write, Integer protoPortMatchPriority) {
+
+        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        flowBuilder.setMatch(MatchUtils.createDHCPMatch(matchBuilder, DHCP_DESTINATION_PORT, DHCP_SOURCE_PORT).build());
+        logger.debug("egressACLDHCPAllowClientTrafficFromVm: MatchBuilder contains: {}", flowBuilder.getMatch());
+        String flowId = "Egress_DHCP_Client"  + "_Permit_";
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setStrict(false);
+        flowBuilder.setPriority(protoPortMatchPriority);
+        flowBuilder.setBarrier(true);
+        flowBuilder.setTableId(this.getTable());
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+
+        if (write) {
+            // Instantiate the Builders for the OF Actions and Instructions
+            InstructionBuilder ib = new InstructionBuilder();
+            InstructionsBuilder isb = new InstructionsBuilder();
+            List<Instruction> instructionsList = Lists.newArrayList();
+
+            ib = this.getMutablePipelineInstructionBuilder();
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            instructionsList.add(ib.build());
+            isb.setInstruction(instructionsList);
+
+            logger.debug("egressACLDHCPAllowClientTrafficFromVm: Instructions contain: {}", ib.getInstruction());
+            // Add InstructionsBuilder to FlowBuilder
+            flowBuilder.setInstructions(isb.build());
+            writeFlow(flowBuilder, nodeBuilder);
+        } else {
+            removeFlow(flowBuilder, nodeBuilder);
+        }
+    }
+
+    /**
+     * Adds rule to prevent DHCP spoofing by the vm attached to the port.
+     *
+     * @param dpidLong the dpid
+     * @param localPort the local port
+     * @param write is write or delete
+     * @param protoPortMatchPriority  the priority
+     */
+    public void egressACLDHCPDropServerTrafficfromVM(Long dpidLong, long localPort,
+            boolean write, Integer protoPortMatchPriority) {
+
+        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+        MatchUtils.createInPortMatch(matchBuilder, dpidLong, localPort);
+        flowBuilder.setMatch(MatchUtils.createDHCPMatch(matchBuilder, DHCP_SOURCE_PORT, DHCP_DESTINATION_PORT).build());
+
+        logger.debug("egressACLDHCPDropServerTrafficfromVM: MatchBuilder contains: {}", flowBuilder.getMatch());
+        String flowId = "Egress_DHCP_Server" + "_" + localPort + "_DROP_";
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setStrict(false);
+        flowBuilder.setPriority(protoPortMatchPriority);
+        flowBuilder.setBarrier(true);
+        flowBuilder.setTableId(this.getTable());
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+
+        if (write) {
+            // Instantiate the Builders for the OF Actions and Instructions
+            InstructionBuilder ib = new InstructionBuilder();
+            InstructionsBuilder isb = new InstructionsBuilder();
+            List<Instruction> instructionsList = Lists.newArrayList();
+
+            InstructionUtils.createDropInstructions(ib);
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            instructionsList.add(ib.build());
+            isb.setInstruction(instructionsList);
+
+            logger.debug("egressACLDHCPDropServerTrafficfromVM: Instructions contain: {}", ib.getInstruction());
+            // Add InstructionsBuilder to FlowBuilder
+            flowBuilder.setInstructions(isb.build());
+            writeFlow(flowBuilder, nodeBuilder);
+        } else {
+            removeFlow(flowBuilder, nodeBuilder);
+        }
+    }
+
+    /**
+     * Adds rule to check legitimate ip/mac pair for each packet from the vm.
+     *
+     * @param dpidLong the dpid
+     * @param localPort the local port
+     * @param srcIp the vm ip address
+     * @param attachedMac the vm mac address
+     * @param protoPortMatchPriority  the priority
+     * @param write is write or delete
+     */
+    public void egressACLAllowTrafficFromVmIpMacPair(Long dpidLong, long localPort,
+             String attachedMac, String srcIp, Integer protoPortMatchPriority, boolean write) {
+
+        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+        MatchUtils.createSrcL3IPv4MatchWithMac(matchBuilder, new Ipv4Prefix(srcIp),new MacAddress(attachedMac));
+        MatchUtils.createInPortMatch(matchBuilder, dpidLong, localPort);
+        flowBuilder.setMatch(matchBuilder.build());
+
+        logger.debug("egressACLAllowTrafficFromVmIpMacPair: MatchBuilder contains: {}", flowBuilder.getMatch());
+        String flowId = "Egress_Allow_VM_IP_MAC" + "_" + localPort + attachedMac + "_Permit_";
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setStrict(false);
+        flowBuilder.setPriority(protoPortMatchPriority);
+        flowBuilder.setBarrier(true);
+        flowBuilder.setTableId(this.getTable());
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+
+        if (write) {
+            // Instantiate the Builders for the OF Actions and Instructions
+            InstructionBuilder ib = new InstructionBuilder();
+            InstructionsBuilder isb = new InstructionsBuilder();
+            List<Instruction> instructionsList = Lists.newArrayList();
+
+            ib = this.getMutablePipelineInstructionBuilder();
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            instructionsList.add(ib.build());
+            isb.setInstruction(instructionsList);
+
+            logger.debug("egressACLAllowTrafficFromVmIpMacPair: Instructions contain: {}", ib.getInstruction());
+            // Add InstructionsBuilder to FlowBuilder
+            flowBuilder.setInstructions(isb.build());
+            writeFlow(flowBuilder, nodeBuilder);
+        } else {
+            removeFlow(flowBuilder, nodeBuilder);
+        }
+    }
     @Override
     public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
         super.setDependencies(bundleContext.getServiceReference(EgressAclProvider.class.getName()), this);

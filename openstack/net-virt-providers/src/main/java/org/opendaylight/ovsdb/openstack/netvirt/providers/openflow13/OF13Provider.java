@@ -14,6 +14,9 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.neutron.spi.NeutronNetwork;
+import org.opendaylight.neutron.spi.NeutronPort;
+import org.opendaylight.neutron.spi.NeutronSecurityGroup;
+import org.opendaylight.neutron.spi.Neutron_IPs;
 import org.opendaylight.ovsdb.openstack.netvirt.MdsalHelper;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
@@ -76,6 +79,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -709,6 +713,29 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
         return dpid;
     }
 
+    /**
+     * Returns true is the network if of type GRE or VXLAN
+     *
+     * @param networkType The type of the network
+     * @return returns true if the network is a tunnel
+     */
+    private boolean isTunnel(String networkType)
+    {
+        return (networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE) || networkType.equalsIgnoreCase
+                (NetworkHandler.NETWORK_TYPE_VXLAN))? true:false;
+    }
+
+    /**
+     * Returns true if the network is of type vlan.
+     *
+     * @param networkType The type of the network
+     * @return returns true if the network is a vlan
+     */
+    private boolean isVlan(String networkType)
+    {
+        return networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)? true:false;
+    }
+
     private void programLocalRules (String networkType, String segmentationId, Node node,
                                     OvsdbTerminationPointAugmentation intf) {
         logger.debug("programLocalRules: node: {}, intf: {}, networkType: {}, segmentationId: {}",
@@ -734,9 +761,34 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
             }
 
             /* Program local rules based on network type */
-            if (networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
+            if (isVlan(networkType)) {
                 logger.debug("Program local vlan rules for interface {}", intf.getName());
                 programLocalVlanRules(node, dpid, segmentationId, attachedMac, localPort);
+            }
+            if ((isTunnel(networkType)|| isVlan(networkType))) {
+                logger.debug("programLocalRules: Program fixed security group rules for interface {}", intf.getName());
+                // Get the DHCP port for the subnet to which  the interface belongs to.
+                NeutronPort dhcpPort = securityServicesManager.getDHCPServerPort(intf);
+                if (null != dhcpPort) {
+                    boolean isComputePort =securityServicesManager.isComputePort(intf);
+                    boolean isLastPortinBridge = securityServicesManager.isLastPortinBridge(node, intf);
+                    boolean isLastPortinSubnet =false;
+                    List<Neutron_IPs> srcAddressList = null;
+                    if(isComputePort) {
+                        isLastPortinSubnet = securityServicesManager.isLastPortinSubnet(node, intf);
+                        srcAddressList = securityServicesManager.getIpAddress(node, intf);
+                        if (null == srcAddressList) {
+                            logger.warn("No Ip address assigned {}", intf);
+                            return;
+                        }
+                    }
+                    ingressAclProvider.programFixedSecurityACL(dpid,segmentationId, dhcpPort.getMacAddress(), localPort,
+                            isLastPortinSubnet,isComputePort,	true);
+                    egressAclProvider.programFixedSecurityACL(dpid, segmentationId, attachedMac, localPort,
+                                                              srcAddressList, isLastPortinBridge, isComputePort,true);
+                } else {
+                    logger.warn("programLocalRules: No DCHP port seen in  network of {}", intf);
+                }
             }
             /* If the network type is tunnel based (VXLAN/GRRE/etc) with Neutron Port Security ACLs */
             /* TODO SB_MIGRATION */
@@ -752,8 +804,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                 egressAclProvider.programPortSecurityACL(dpid, segmentationId, attachedMac, localPort,
                         securityGroupInPort);
             }*/
-            if (networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE) ||
-                    networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN)) {
+            if (isTunnel(networkType)) {
                 logger.debug("Program local bridge rules for interface {}, "
                         + "dpid: {}, segmentationId: {}, attachedMac: {}, localPort: {}",
                         intf.getName(), dpid, segmentationId, attachedMac, localPort);
@@ -788,13 +839,36 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
             }
 
             /* Program local rules based on network type */
-            if (networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
+            if (isVlan(networkType)) {
                 logger.debug("Remove local vlan rules for interface {}", intf.getName());
                 removeLocalVlanRules(node, dpid, segmentationId, attachedMac, localPort);
-            } else if (networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE) ||
-                    networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN)) {
+            } else if (isTunnel(networkType)) {
                 logger.debug("Remove local bridge rules for interface {}", intf.getName());
                 removeLocalBridgeRules(node, dpid, segmentationId, attachedMac, localPort);
+            }
+            if (isTunnel(networkType)|| isVlan(networkType)) {
+                logger.debug("removeLocalRules: Remove fixed security group rules for interface {}", intf.getName());
+                NeutronPort dhcpPort = securityServicesManager.getDHCPServerPort(intf);
+                if (null != dhcpPort) {
+                    List<Neutron_IPs> srcAddressList = securityServicesManager.getIpAddress(node, intf);
+                    if (null == srcAddressList) {
+                        logger.warn("No Ip address assigned {}", intf);
+                        return;
+                    }
+                    boolean isLastPortinBridge = securityServicesManager.isLastPortinBridge(node, intf);
+                    boolean isComputePort =securityServicesManager.isComputePort(intf);
+                    boolean isLastPortinSubnet =false;
+                    if (isComputePort)
+                    {
+                        isLastPortinSubnet = securityServicesManager.isLastPortinSubnet(node, intf);
+                    }
+                    ingressAclProvider.programFixedSecurityACL(dpid,	segmentationId, dhcpPort.getMacAddress(), localPort,
+                            isLastPortinSubnet, isComputePort, false);
+                    egressAclProvider.programFixedSecurityACL(dpid, segmentationId,	attachedMac, localPort,
+                                                              srcAddressList, isLastPortinBridge, isComputePort, false);
+                }else{
+                    logger.warn("removeLocalRules: No DCHP port seen in  network of {}", intf);
+                }
             }
         } catch (Exception e) {
             logger.error("Exception in removing Local Rules for "+intf+" on "+node, e);
@@ -1000,10 +1074,9 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
         Node srcBridgeNode = southbound.getBridgeNode(srcNode, configurationService.getIntegrationBridgeName());
         programLocalRules(networkType, network.getProviderSegmentationID(), srcBridgeNode, intf);
 
-        if (networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
+        if (isVlan(networkType)) {
             programVlanRules(network, srcNode, intf);
-        } else if (networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)
-                || networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN)){
+        } else if (isTunnel(networkType)){
 
             boolean sourceTunnelStatus = false;
             boolean destTunnelStatus = false;
@@ -1084,10 +1157,9 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
             removeLocalRules(network.getProviderNetworkType(), network.getProviderSegmentationID(),
                     srcNode, intf);
 
-            if (network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
+            if (isVlan(network.getProviderNetworkType())) {
                 removeVlanRules(network, srcNode, intf, isLastInstanceOnNode);
-            } else if (network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)
-                    || network.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN)) {
+            } else if (isTunnel(network.getProviderNetworkType())) {
 
                 for (Node dstNode : nodes.values()) {
                     InetAddress src = configurationService.getTunnelEndPoint(srcNode);

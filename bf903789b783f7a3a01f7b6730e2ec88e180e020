@@ -1,0 +1,388 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_72b178e0",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 744,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-06T13:54:07Z",
+      "side": 1,
+      "message": "noticed vlan was added here, but wasn\u0027t in the original code. Does it make a difference since previously it was just for the tunnel cases?",
+      "range": {
+        "startLine": 744,
+        "startChar": 36,
+        "endLine": 744,
+        "endChar": 53
+      },
+      "revId": "bf903789b783f7a3a01f7b6730e2ec88e180e020",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_12a9247b",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 746,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-06T13:54:07Z",
+      "side": 1,
+      "message": "please removes tabs and whitespace",
+      "range": {
+        "startLine": 746,
+        "startChar": 0,
+        "endLine": 746,
+        "endChar": 4
+      },
+      "revId": "bf903789b783f7a3a01f7b6730e2ec88e180e020",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_12c04429",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 762,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-06T13:54:07Z",
+      "side": 1,
+      "message": "Is it possible to reenable this SG code? I realize this is a different functionality so it would go in a different gerrit.\n\nDoes the dhcp sg stuff work without this piece enabled?",
+      "range": {
+        "startLine": 762,
+        "startChar": 17,
+        "endLine": 762,
+        "endChar": 19
+      },
+      "revId": "bf903789b783f7a3a01f7b6730e2ec88e180e020",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_92ebf4af",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 818,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-06T13:54:07Z",
+      "side": 1,
+      "message": "Might want to create a helper method like allSupportedNetworkTypes(networkType) and use it in the two if checks. probably create an isTunnel() and isVlan() and combine the two as needed.",
+      "revId": "bf903789b783f7a3a01f7b6730e2ec88e180e020",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_32d22001",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 825,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-06T13:54:07Z",
+      "side": 1,
+      "message": "fix tab and whitespace issues",
+      "revId": "bf903789b783f7a3a01f7b6730e2ec88e180e020",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_52cd5c5c",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 829,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-06T13:54:07Z",
+      "side": 1,
+      "message": "can you add the method name in the beginning of this debug since the log is the same as reported by the other method? Do the same for both methods. ie. \"programLocalRules: No DHCP\"...",
+      "revId": "bf903789b783f7a3a01f7b6730e2ec88e180e020",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_f24908d1",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-06T13:54:07Z",
+      "side": 1,
+      "message": "does adding the mac to the rule break anything? Seems like we would want to be as specific as possible.",
+      "range": {
+        "startLine": 225,
+        "startChar": 17,
+        "endLine": 225,
+        "endChar": 19
+      },
+      "revId": "bf903789b783f7a3a01f7b6730e2ec88e180e020",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_b22cf003",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 491,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-06T13:54:07Z",
+      "side": 1,
+      "message": "Thanks for adding the javadoc! Can you add the descriptions for the fields just as you did in the other new methods?",
+      "range": {
+        "startLine": 491,
+        "startChar": 11,
+        "endLine": 491,
+        "endChar": 19
+      },
+      "revId": "bf903789b783f7a3a01f7b6730e2ec88e180e020",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_1245a4b2",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 492,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-06T13:54:07Z",
+      "side": 1,
+      "message": "I don\u0027t see segmentationId used in the flow. Also without using the mac\u0027s, what would happen if there are two difrerent segmentationIds both with isLastPort? Can that happen - wasn\u0027t sure what isLastPort means -per segment or bridge?",
+      "revId": "bf903789b783f7a3a01f7b6730e2ec88e180e020",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_72365854",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 504,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-06T13:54:07Z",
+      "side": 1,
+      "message": "can these be constants? or can they just be used in the createDHCPMatch() method so they don\u0027t need to be passed here?",
+      "range": {
+        "startLine": 504,
+        "startChar": 70,
+        "endLine": 504,
+        "endChar": 72
+      },
+      "revId": "bf903789b783f7a3a01f7b6730e2ec88e180e020",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_720df88f",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 547,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-06T13:54:07Z",
+      "side": 1,
+      "message": "looks like attachedMac is not the method definition. should it be or does it need to be removed?\n\nSame comment as in previous method, but would mac in the flow be helpful?",
+      "range": {
+        "startLine": 547,
+        "startChar": 14,
+        "endLine": 547,
+        "endChar": 25
+      },
+      "revId": "bf903789b783f7a3a01f7b6730e2ec88e180e020",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_d2164ca7",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 551,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-06T13:54:07Z",
+      "side": 1,
+      "message": "similar comments for the segmentationId",
+      "revId": "bf903789b783f7a3a01f7b6730e2ec88e180e020",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_928774d7",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IngressAclService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 496,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-06T13:54:07Z",
+      "side": 1,
+      "message": "should be Ingress. probably should change the Proto also since these were for the protocol security group flows. Likley you could just use Ingress_DHCP_ and remove the DHCP from the end. This applies to the new egress methods also.",
+      "range": {
+        "startLine": 496,
+        "startChar": 25,
+        "endLine": 496,
+        "endChar": 41
+      },
+      "revId": "bf903789b783f7a3a01f7b6730e2ec88e180e020",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_d2640c4b",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/SecurityServicesManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-06T13:54:07Z",
+      "side": 1,
+      "message": "tabs...",
+      "range": {
+        "startLine": 51,
+        "startChar": 0,
+        "endLine": 52,
+        "endChar": 13
+      },
+      "revId": "bf903789b783f7a3a01f7b6730e2ec88e180e020",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_5250fc5d",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-06T13:54:07Z",
+      "side": 1,
+      "message": "0 always fixed? is thsi always accurate to use 0?\n\nIs this field an iterator - if so then maybe the getNext form might be more readable since that is what is used everywhere else",
+      "range": {
+        "startLine": 120,
+        "startChar": 52,
+        "endLine": 120,
+        "endChar": 53
+      },
+      "revId": "bf903789b783f7a3a01f7b6730e2ec88e180e020",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_f24ee8c0",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-06T13:54:07Z",
+      "side": 1,
+      "message": "method name is isDHCPServerPort, but then this log says is not a compute host - seems inconsistent.",
+      "range": {
+        "startLine": 154,
+        "startChar": 17,
+        "endLine": 154,
+        "endChar": 21
+      },
+      "revId": "bf903789b783f7a3a01f7b6730e2ec88e180e020",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_124a84ac",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-06T13:54:07Z",
+      "side": 1,
+      "message": "does deviceOwner fir for \"it is a a :{}\"",
+      "range": {
+        "startLine": 155,
+        "startChar": 20,
+        "endLine": 155,
+        "endChar": 31
+      },
+      "revId": "bf903789b783f7a3a01f7b6730e2ec88e180e020",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_d2cbac1c",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-06T13:54:07Z",
+      "side": 1,
+      "message": "isLonePort? should be isLastPort?",
+      "range": {
+        "startLine": 168,
+        "startChar": 16,
+        "endLine": 168,
+        "endChar": 26
+      },
+      "revId": "bf903789b783f7a3a01f7b6730e2ec88e180e020",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

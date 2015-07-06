@@ -127,7 +127,6 @@ public class JsonRpcDecoder extends ByteToMessageDecoder {
                  * in which the controller can crash with an OOM, however seems that we need a really huge
                  * ovs to reach that limit.
                  */
-                //fail(ctx, index - buf.readerIndex());
 
                 //We do not want to issue a log message on every extent of the buffer
                 //hence logging only once

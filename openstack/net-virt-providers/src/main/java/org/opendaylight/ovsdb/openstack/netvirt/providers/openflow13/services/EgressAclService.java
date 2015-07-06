@@ -43,6 +43,8 @@ import com.google.common.collect.Lists;
 public class EgressAclService extends AbstractServiceInstance implements EgressAclProvider, ConfigInterface {
 
     static final Logger logger = LoggerFactory.getLogger(EgressAclService.class);
+    final int DHCP_SOURCE_PORT = 67;
+    final int DHCP_DESTINATION_PORT = 68;
 
     public EgressAclService() {
         super(Service.EGRESS_ACL);
@@ -217,6 +219,18 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                 logger.debug("ACL Match combination not found for rule: {}", portSecurityRule);
             }
         }
+    }
+
+    @Override
+    public void programFixedSecurityACL(Long dpid, String segmentationId, String attachedMac,
+            long localPort, boolean isLastPortinBridge, boolean write) {
+        // If it is the only port in the bridge add the rule to allow any DHCP client traffic
+        if (isLastPortinBridge) {
+            egressACLDHCPAllowClientTrafficFromVm(dpid, write, Constants.PROTO_PORT_MATCH_PRIORITY);
+        }
+        // add rule to drop the DHCP server traffic originating from the vm.
+        egressACLDHCPDropServerTrafficfromVM(dpid, localPort, write, Constants.PROTO_PORT_MATCH_PRIORITY_DROP);
+        /* TODO Other Fixed SG Rules */
     }
 
     public void egressACLDefaultTcpDrop(Long dpidLong, String segmentationId, String attachedMac,
@@ -462,6 +476,110 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
             isb.setInstruction(instructionsList);
 
             logger.debug("Instructions contain: {}", ib.getInstruction());
+            // Add InstructionsBuilder to FlowBuilder
+            flowBuilder.setInstructions(isb.build());
+            writeFlow(flowBuilder, nodeBuilder);
+        } else {
+            removeFlow(flowBuilder, nodeBuilder);
+        }
+    }
+
+    /**
+     * Adds flow to allow any DHCP client traffic
+     *
+     * @param dpidLong the dpid
+     * @param write whether to write or delete the flow
+     * @param protoPortMatchPriority the priority
+     */
+    public void egressACLDHCPAllowClientTrafficFromVm(Long dpidLong,
+            boolean write, Integer protoPortMatchPriority) {
+
+        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        flowBuilder.setMatch(MatchUtils.createDHCPMatch(matchBuilder, DHCP_DESTINATION_PORT, DHCP_SOURCE_PORT).build());
+        logger.debug("egressACLDHCPAllowClientTrafficFromVm: MatchBuilder contains: {}", flowBuilder.getMatch());
+        String flowId = "Egress_DHCP_Client"  + "_Permit_";
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setStrict(false);
+        flowBuilder.setPriority(protoPortMatchPriority);
+        flowBuilder.setBarrier(true);
+        flowBuilder.setTableId(this.getTable());
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+
+        if (write) {
+            // Instantiate the Builders for the OF Actions and Instructions
+            InstructionBuilder ib = new InstructionBuilder();
+            InstructionsBuilder isb = new InstructionsBuilder();
+            List<Instruction> instructionsList = Lists.newArrayList();
+
+            ib = this.getMutablePipelineInstructionBuilder();
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            instructionsList.add(ib.build());
+            isb.setInstruction(instructionsList);
+
+            logger.debug("egressACLDHCPAllowClientTrafficFromVm: Instructions contain: {}", ib.getInstruction());
+            // Add InstructionsBuilder to FlowBuilder
+            flowBuilder.setInstructions(isb.build());
+            writeFlow(flowBuilder, nodeBuilder);
+        } else {
+            removeFlow(flowBuilder, nodeBuilder);
+        }
+    }
+
+    /**
+     * Adds rule to prevent DHCP spoofing by the vm attached to the port.
+     *
+     * @param dpidLong the dpid
+     * @param localPort the local port
+     * @param write is write or delete
+     * @param protoPortMatchPriority  the priority
+     */
+    public void egressACLDHCPDropServerTrafficfromVM(Long dpidLong, long localPort,
+            boolean write, Integer protoPortMatchPriority) {
+
+        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+        MatchUtils.createInPortMatch(matchBuilder, dpidLong, localPort);
+        flowBuilder.setMatch(MatchUtils.createDHCPMatch(matchBuilder, DHCP_SOURCE_PORT, DHCP_DESTINATION_PORT).build());
+
+        logger.debug("egressACLDHCPDropServerTrafficfromVM: MatchBuilder contains: {}", flowBuilder.getMatch());
+        String flowId = "Egress_DHCP_Server" + "_" + localPort + "_Drop_";
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setStrict(false);
+        flowBuilder.setPriority(protoPortMatchPriority);
+        flowBuilder.setBarrier(true);
+        flowBuilder.setTableId(this.getTable());
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+
+        if (write) {
+            // Instantiate the Builders for the OF Actions and Instructions
+            InstructionBuilder ib = new InstructionBuilder();
+            InstructionsBuilder isb = new InstructionsBuilder();
+            List<Instruction> instructionsList = Lists.newArrayList();
+
+            InstructionUtils.createDropInstructions(ib);
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            instructionsList.add(ib.build());
+            isb.setInstruction(instructionsList);
+
+            logger.debug("egressACLDHCPDropServerTrafficfromVM: Instructions contain: {}", ib.getInstruction());
             // Add InstructionsBuilder to FlowBuilder
             flowBuilder.setInstructions(isb.build());
             writeFlow(flowBuilder, nodeBuilder);

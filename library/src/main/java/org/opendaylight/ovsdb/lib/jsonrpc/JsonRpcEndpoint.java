@@ -152,7 +152,8 @@ public class JsonRpcEndpoint {
     public void processRequest(Object context, JsonNode requestJson) {
         JsonRpc10Request request = new JsonRpc10Request(requestJson.get("id").asText());
         request.setMethod(requestJson.get("method").asText());
-        logger.trace("Request : {} {}", requestJson.get("method"), requestJson.get("params"));
+        logger.trace("Request : {} {} {}", requestJson.get("id"), requestJson.get("method"),
+                requestJson.get("params"));
         OvsdbRPC.Callback callback = requestCallbacks.get(context);
         if (callback != null) {
             Method[] methods = callback.getClass().getDeclaredMethods();

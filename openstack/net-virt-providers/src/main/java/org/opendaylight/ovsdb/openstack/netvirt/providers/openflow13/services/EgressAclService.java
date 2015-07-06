@@ -219,6 +219,21 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         }
     }
 
+    @Override
+    public void programFixedSecurityACL(Long dpid, String segmentationId, String attachedMac,
+            long localPort, boolean isLastPort, boolean write) {
+        // If it is the only port in the vm add the rule to allow any DHCP client traffic
+		if (isLastPort) {
+			egressACLDHCPAllowClientTrafficFromVm(dpid, segmentationId, write,
+                    Constants.PROTO_PORT_MATCH_PRIORITY);
+		}
+		// add rule to drop the DHCP server traffic originating from the vm.
+        egressACLDHCPDropServerTrafficfromVM(dpid, segmentationId, localPort,  write,
+                    Constants.PROTO_PORT_MATCH_PRIORITY_DROP);
+
+	    }
+
+
     public void egressACLDefaultTcpDrop(Long dpidLong, String segmentationId, String attachedMac,
                                         int priority, boolean write) {
 
@@ -456,6 +471,114 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
             List<Instruction> instructionsList = Lists.newArrayList();
 
             ib = this.getMutablePipelineInstructionBuilder();
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            instructionsList.add(ib.build());
+            isb.setInstruction(instructionsList);
+
+            logger.debug("Instructions contain: {}", ib.getInstruction());
+            // Add InstructionsBuilder to FlowBuilder
+            flowBuilder.setInstructions(isb.build());
+            writeFlow(flowBuilder, nodeBuilder);
+        } else {
+            removeFlow(flowBuilder, nodeBuilder);
+        }
+    }
+
+	/**
+	 * Adds flow to allow any DHCP client traffic
+	 *
+	 * @param dpidLong
+	 * @param segmentationId
+	 * @param write
+	 * @param protoPortMatchPriority
+	 */
+	public void egressACLDHCPAllowClientTrafficFromVm(Long dpidLong,String segmentationId,
+            boolean write, Integer protoPortMatchPriority) {
+
+        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        flowBuilder.setMatch(MatchUtils.createDHCPMatch(matchBuilder, 68, 67).build());
+        logger.debug("MatchBuilder contains: {}", flowBuilder.getMatch());
+		String flowId = "Egress_Proto_ACL" + segmentationId + "_Permit_"
+				+ "DHCP_Client";
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setStrict(false);
+        flowBuilder.setPriority(protoPortMatchPriority);
+        flowBuilder.setBarrier(true);
+        flowBuilder.setTableId(this.getTable());
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+
+        if (write) {
+            // Instantiate the Builders for the OF Actions and Instructions
+            InstructionBuilder ib = new InstructionBuilder();
+            InstructionsBuilder isb = new InstructionsBuilder();
+            List<Instruction> instructionsList = Lists.newArrayList();
+
+            ib = this.getMutablePipelineInstructionBuilder();
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            instructionsList.add(ib.build());
+            isb.setInstruction(instructionsList);
+
+            logger.debug("Instructions contain: {}", ib.getInstruction());
+            // Add InstructionsBuilder to FlowBuilder
+            flowBuilder.setInstructions(isb.build());
+            writeFlow(flowBuilder, nodeBuilder);
+        } else {
+            removeFlow(flowBuilder, nodeBuilder);
+        }
+    }
+
+    /**
+     * Adds rule to prevent DHCP spoofing by the vm attached to the port.
+     *
+     * @param dpidLong the dpid
+     * @param segmentationId the segmentationId
+     * @param localPort the local port
+     * @param attachedMac the attached mac
+     * @param write is write or delete
+     * @param protoPortMatchPriority prriority
+     */
+    public void egressACLDHCPDropServerTrafficfromVM(Long dpidLong, String segmentationId, long localPort,
+            boolean write, Integer protoPortMatchPriority) {
+
+        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+        MatchUtils.createInPortMatch(matchBuilder, dpidLong, localPort);
+        flowBuilder.setMatch(MatchUtils.createDHCPMatch(matchBuilder, 67, 68).build());
+
+        logger.debug("MatchBuilder contains: {}", flowBuilder.getMatch());
+        String flowId = "Egress_Proto_ACL" + segmentationId + "_" + localPort + "_Drop_" + "DHCP_Server";
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setStrict(false);
+        flowBuilder.setPriority(protoPortMatchPriority);
+        flowBuilder.setBarrier(true);
+        flowBuilder.setTableId(this.getTable());
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+
+        if (write) {
+            // Instantiate the Builders for the OF Actions and Instructions
+            InstructionBuilder ib = new InstructionBuilder();
+            InstructionsBuilder isb = new InstructionsBuilder();
+            List<Instruction> instructionsList = Lists.newArrayList();
+
+            InstructionUtils.createDropInstructions(ib);
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructionsList.add(ib.build());

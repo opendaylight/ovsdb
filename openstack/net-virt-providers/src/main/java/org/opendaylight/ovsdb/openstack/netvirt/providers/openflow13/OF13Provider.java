@@ -14,6 +14,7 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.neutron.spi.NeutronNetwork;
+import org.opendaylight.neutron.spi.NeutronPort;
 import org.opendaylight.ovsdb.openstack.netvirt.MdsalHelper;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
@@ -738,6 +739,24 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                 logger.debug("Program local vlan rules for interface {}", intf.getName());
                 programLocalVlanRules(node, dpid, segmentationId, attachedMac, localPort);
             }
+            if (((networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE) || networkType.equalsIgnoreCase
+                    (NetworkHandler.NETWORK_TYPE_VXLAN)) || networkType.equalsIgnoreCase
+                    (NetworkHandler.NETWORK_TYPE_VLAN))	&& !securityServicesManager.isDHCPServerPort(intf)) {
+                logger.debug("Program fixed scurity group rules for interface {}", intf.getName());
+				// Get the DHCP port for the subnet to which  the interface belongs to.
+				NeutronPort dhcpPort = securityServicesManager
+						.getDHCPServerPort(intf);
+				if (null != dhcpPort) {
+				boolean isLastPort = securityServicesManager.isLastPort(intf);
+
+				ingressAclProvider.programFixedSecurityACL(dpid,segmentationId, dhcpPort.getMacAddress(), localPort,
+						isLastPort,	true);
+				egressAclProvider.programFixedSecurityACL(dpid, segmentationId, attachedMac, localPort, isLastPort, true);
+				} else {
+					logger.warn("No DCHP port seen in  network of {}", intf);
+
+				}
+			}
             /* If the network type is tunnel based (VXLAN/GRRE/etc) with Neutron Port Security ACLs */
             /* TODO SB_MIGRATION */
             /*if ((networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE) || networkType.equalsIgnoreCase
@@ -795,6 +814,20 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                     networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN)) {
                 logger.debug("Remove local bridge rules for interface {}", intf.getName());
                 removeLocalBridgeRules(node, dpid, segmentationId, attachedMac, localPort);
+            }
+            if (networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)|| networkType.equalsIgnoreCase
+                (NetworkHandler.NETWORK_TYPE_VXLAN) || networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)
+                && !securityServicesManager.isDHCPServerPort(intf)) {
+                logger.debug("Remove fixed security group rules for interface {}", intf.getName());
+		        NeutronPort dhcpPort = securityServicesManager.getDHCPServerPort(intf);
+		        if (null != dhcpPort) {
+			        boolean isLastPort = securityServicesManager.isLastPort(intf);
+			        ingressAclProvider.programFixedSecurityACL(dpid,	segmentationId, dhcpPort.getMacAddress(), localPort,
+					                                           isLastPort, false);
+			        egressAclProvider.programFixedSecurityACL(dpid, segmentationId,	attachedMac, localPort, isLastPort, false);
+		        }else{
+			        logger.warn("No DCHP port seen in  network of {}", intf);
+		        }
             }
         } catch (Exception e) {
             logger.error("Exception in removing Local Rules for "+intf+" on "+node, e);

@@ -34,6 +34,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.ArpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.TcpMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.UdpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanIdBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg0;
@@ -891,6 +892,71 @@ public class MatchUtils {
         matchBuilder.setTcpFlagMatch(tcpFlagMatch.build());
 
         return matchBuilder;
+    }
+
+    /**
+     * Create a DHCP match with pot provided
+     *
+     * @param matchBuilder the match builder
+     * @param srcPort the source port
+     * @param dstPort the destination port
+     * @return
+     */
+    public static MatchBuilder createDHCPMatch(MatchBuilder matchBuilder, int srcPort, int dstPort) {
+
+        EthernetMatchBuilder ethernetMatch = new EthernetMatchBuilder();
+        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
+        ethTypeBuilder.setType(new EtherType(0x0800L));
+        ethernetMatch.setEthernetType(ethTypeBuilder.build());
+        matchBuilder.setEthernetMatch(ethernetMatch.build());
+
+        IpMatchBuilder ipmatch = new IpMatchBuilder();
+        ipmatch.setIpProtocol(UDP_SHORT);
+        matchBuilder.setIpMatch(ipmatch.build());
+
+        UdpMatchBuilder udpmatch = new UdpMatchBuilder();
+        udpmatch.setUdpSourcePort(new PortNumber(srcPort));
+        udpmatch.setUdpDestinationPort(new PortNumber(dstPort));
+        matchBuilder.setLayer4Match(udpmatch.build());
+
+        return matchBuilder;
+
+    }
+
+    /**
+     * Creates DHCP server packet match with DHCP mac address and port.
+     *
+     * @param matchBuilder the matchbuilder
+     * @param dhcpServerMac MAc address of the DHCP server of the subnet
+     * @param srcPort the source port
+     * @param dstPort the destination port
+     * @return
+     */
+    public static MatchBuilder createDHCPServerMatch(MatchBuilder matchBuilder, String dhcpServerMac, int srcPort,
+            int dstPort) {
+
+        EthernetMatchBuilder ethernetMatch = new EthernetMatchBuilder();
+        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
+        ethTypeBuilder.setType(new EtherType(0x0800L));
+        ethernetMatch.setEthernetType(ethTypeBuilder.build());
+        matchBuilder.setEthernetMatch(ethernetMatch.build());
+
+        EthernetSourceBuilder ethSourceBuilder = new EthernetSourceBuilder();
+        ethSourceBuilder.setAddress(new MacAddress(dhcpServerMac));
+        ethernetMatch.setEthernetSource(ethSourceBuilder.build());
+        matchBuilder.setEthernetMatch(ethernetMatch.build());
+
+        IpMatchBuilder ipmatch = new IpMatchBuilder();
+        ipmatch.setIpProtocol(UDP_SHORT);
+        matchBuilder.setIpMatch(ipmatch.build());
+
+        UdpMatchBuilder udpmatch = new UdpMatchBuilder();
+        udpmatch.setUdpSourcePort(new PortNumber(srcPort));
+        udpmatch.setUdpDestinationPort(new PortNumber(dstPort));
+        matchBuilder.setLayer4Match(udpmatch.build());
+
+        return matchBuilder;
+
     }
 
     public static class RegMatch {

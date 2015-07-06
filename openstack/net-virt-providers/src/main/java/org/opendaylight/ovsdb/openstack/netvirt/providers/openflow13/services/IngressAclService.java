@@ -207,6 +207,16 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
             }
         }
     }
+    @Override
+    public void programFixedSecurityACL(Long dpid, String segmentationId, String dhcpMacAddress,
+          long localPort, boolean isLastPort, boolean write){
+         //If this port is the only port in the compute node add the DHCP server rule.
+        if (isLastPort) {
+			ingressACLDHCPAllowServerTraffic(dpid, segmentationId,dhcpMacAddress, write,
+					Constants.PROTO_PORT_MATCH_PRIORITY);
+		}
+    }
+
 
     public void ingressACLTcpSyn(Long dpidLong, String segmentationId, String attachedMac, boolean write,
             Integer securityRulePortMin, Integer protoPortMatchPriority) {
@@ -464,6 +474,58 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         }
     }
 
+    /**
+     * Add rule to ensure only DHCP server traffic from the specified mac is allowed.
+     *
+     * @param dpidLong
+     * @param segmentationId
+     * @param dhcpMacAddress
+     * @param write
+     * @param protoPortMatchPriority
+     */
+    private void ingressACLDHCPAllowServerTraffic(Long dpidLong, String segmentationId, String dhcpMacAddress,
+            boolean write, Integer protoPortMatchPriority) {
+
+        String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
+        MatchBuilder matchBuilder = new MatchBuilder();
+        NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
+        FlowBuilder flowBuilder = new FlowBuilder();
+
+        flowBuilder.setMatch(MatchUtils.createDHCPServerMatch(matchBuilder, dhcpMacAddress, 67, 68).build());
+        logger.debug("MatchBuilder contains: {}", flowBuilder.getMatch());
+        String flowId = "Egress_Proto_ACL" + segmentationId + "_" + dhcpMacAddress + "_Permit_" + "DHCP";
+        // Add Flow Attributes
+        flowBuilder.setId(new FlowId(flowId));
+        FlowKey key = new FlowKey(new FlowId(flowId));
+        flowBuilder.setStrict(false);
+        flowBuilder.setPriority(protoPortMatchPriority);
+        flowBuilder.setBarrier(true);
+        flowBuilder.setTableId(this.getTable());
+        flowBuilder.setKey(key);
+        flowBuilder.setFlowName(flowId);
+        flowBuilder.setHardTimeout(0);
+        flowBuilder.setIdleTimeout(0);
+
+        if (write) {
+            // Instantiate the Builders for the OF Actions and Instructions
+            InstructionBuilder ib = new InstructionBuilder();
+            InstructionsBuilder isb = new InstructionsBuilder();
+            List<Instruction> instructionsList = Lists.newArrayList();
+
+            ib = this.getMutablePipelineInstructionBuilder();
+            ib.setOrder(0);
+            ib.setKey(new InstructionKey(0));
+            instructionsList.add(ib.build());
+            isb.setInstruction(instructionsList);
+
+            logger.debug("Instructions contain: {}", ib.getInstruction());
+            // Add InstructionsBuilder to FlowBuilder
+            flowBuilder.setInstructions(isb.build());
+            writeFlow(flowBuilder, nodeBuilder);
+        } else {
+            removeFlow(flowBuilder, nodeBuilder);
+        }
+    }
     @Override
     public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
         super.setDependencies(bundleContext.getServiceReference(IngressAclProvider.class.getName()), this);

@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * @author Sam Hague (shague@redhat.com)
  */
 public class BridgeConfigurationManagerImpl implements BridgeConfigurationManager, ConfigInterface {
-    static final Logger LOGGER = LoggerFactory.getLogger(BridgeConfigurationManagerImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BridgeConfigurationManagerImpl.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile ConfigurationService configurationService;
@@ -180,7 +180,8 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     public boolean createLocalNetwork (Node bridgeNode, NeutronNetwork network) {
         boolean isCreated = false;
         Node ovsdbNode = southbound.readOvsdbNode(bridgeNode);
-        if (ovsdbNode == null) { //this should never happen
+        if (ovsdbNode == null) {
+            //this should never happen
             LOGGER.error("createLocalNetwork could not find ovsdbNode from bridge node " + bridgeNode);
             return false;
         }
@@ -554,11 +555,9 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
 
                 for (Enumeration<InetAddress> inetAddrs = iface.getInetAddresses(); inetAddrs.hasMoreElements();) {
                     InetAddress inetAddr = (InetAddress) inetAddrs.nextElement();
-                    if (!inetAddr.isLoopbackAddress()) {
-                        if (inetAddr.isSiteLocalAddress()) {
-                            ipaddress = inetAddr.getHostAddress();
-                            break;
-                        }
+                    if (!inetAddr.isLoopbackAddress() && inetAddr.isSiteLocalAddress()) {
+                        ipaddress = inetAddr.getHostAddress();
+                        break;
                     }
                 }
             }
@@ -579,5 +578,6 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     }
 
     @Override
-    public void setDependencies(Object impl) {}
+    public void setDependencies(Object impl) {
+    }
 }

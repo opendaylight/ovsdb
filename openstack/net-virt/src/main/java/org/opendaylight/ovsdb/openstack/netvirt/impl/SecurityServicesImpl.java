@@ -8,15 +8,23 @@
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import java.util.List;
+
 import org.opendaylight.neutron.spi.INeutronPortCRUD;
+import org.opendaylight.neutron.spi.INeutronSubnetCRUD;
 import org.opendaylight.neutron.spi.NeutronPort;
 import org.opendaylight.neutron.spi.NeutronSecurityGroup;
+import org.opendaylight.neutron.spi.NeutronSubnet;
+import org.opendaylight.neutron.spi.Neutron_IPs;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.SecurityServicesManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.*;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.node.attributes.SupportingNode;
+import org.opendaylight.yangtools.yang.binding.DataContainer;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
@@ -25,6 +33,7 @@ import org.slf4j.LoggerFactory;
 public class SecurityServicesImpl implements ConfigInterface, SecurityServicesManager {
     static final Logger logger = LoggerFactory.getLogger(TenantNetworkManagerImpl.class);
     private volatile INeutronPortCRUD neutronPortCache;
+    private volatile INeutronSubnetCRUD neutronSubnetCache;
     private volatile Southbound southbound;
 
     /**
@@ -97,6 +106,146 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
     }
 
     @Override
+    public NeutronPort getDHCPServerPort(
+            OvsdbTerminationPointAugmentation terminationPointAugmentation) {
+        if (neutronPortCache == null) {
+            logger.error("getDHCPServerPort: neutron port is null");
+            return null;
+        }
+        logger.trace("getDHCPServerPort for {}",
+                terminationPointAugmentation.getName());
+        String neutronPortId = southbound.getInterfaceExternalIdsValue(
+                terminationPointAugmentation,
+                Constants.EXTERNAL_ID_INTERFACE_ID);
+        if (neutronPortId == null) {
+            return null;
+        }
+        NeutronPort neutronPort = neutronPortCache.getPort(neutronPortId);
+        //Since all the fixed ip assigned to a port should be from the same network, first port is sufficient.
+        List<Neutron_IPs> fixedIps = neutronPort.getFixedIPs();
+        if(null==fixedIps || 0 == fixedIps.size() )
+        {
+            logger.error("getDHCPServerPort: No fixed ip is assigned");
+            return null;
+        }
+        String subnetUUID = fixedIps.iterator().next().getSubnetUUID();
+        NeutronSubnet neutronSubnet = neutronSubnetCache.getSubnet(subnetUUID);
+        List<NeutronPort> ports = neutronSubnet.getPortsInSubnet();
+        for (NeutronPort port : ports) {
+            if (port.getDeviceOwner().contains("dhcp")) {
+                return port;
+            }
+        }
+
+        return null;
+
+    }
+
+    @Override
+    public boolean isComputePort(OvsdbTerminationPointAugmentation terminationPointAugmentation) {
+        if (neutronPortCache == null) {
+            logger.error("neutron port is null");
+            return false;
+        }
+        logger.trace("isDHCPServerPort for {}", terminationPointAugmentation.getName());
+        String neutronPortId = southbound.getInterfaceExternalIdsValue(terminationPointAugmentation,
+                Constants.EXTERNAL_ID_INTERFACE_ID);
+        if (neutronPortId == null) {
+            return false;
+        }
+        NeutronPort neutronPort = neutronPortCache.getPort(neutronPortId);
+        if (neutronPort == null) {
+            return false;
+        }
+        String deviceOwner = neutronPort.getDeviceOwner();
+        if (!deviceOwner.contains("compute")) {
+            logger.debug("isDHCPServerPort : Port {} is not a DHCP server port", neutronPortId,deviceOwner);
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean isLastPortinSubnet(Node node, OvsdbTerminationPointAugmentation terminationPointAugmentation) {
+        if (neutronPortCache == null) {
+            logger.error("isLastPortinSubnet: neutron port is null");
+            return false;
+        }
+        logger.trace("isLastPortinSubnet: for {}", terminationPointAugmentation.getName());
+        String neutronPortId = southbound.getInterfaceExternalIdsValue(terminationPointAugmentation,
+                                                                       Constants.EXTERNAL_ID_INTERFACE_ID);
+        if (neutronPortId == null) {
+            return false;
+        }
+        NeutronPort neutronPort = neutronPortCache.getPort(neutronPortId);
+        List<TerminationPoint> terminationPoints = node.getTerminationPoint();
+        if(terminationPoints != null && !terminationPoints.isEmpty()) {
+            for(TerminationPoint tp : terminationPoints) {
+                OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
+                        tp.getAugmentation(OvsdbTerminationPointAugmentation.class);
+                if (ovsdbTerminationPointAugmentation != null && !ovsdbTerminationPointAugmentation.
+                        getName().equals(Constants.INTEGRATION_BRIDGE)) {
+                    String portId = southbound.getInterfaceExternalIdsValue(ovsdbTerminationPointAugmentation,
+                                                                            Constants.EXTERNAL_ID_INTERFACE_ID);
+                    NeutronPort port = neutronPortCache.getPort(portId);
+                    if(null!=port) {
+                        if(!(port.getID().equals(neutronPort.getID())) && port.getDeviceOwner().contains("compute")) {
+                            List<Neutron_IPs> portFixedIp = port.getFixedIPs();
+                            if(null == portFixedIp || portFixedIp.isEmpty()) {
+                                return false;
+                            }
+                            List<Neutron_IPs> neutronPortFixedIp = neutronPort.getFixedIPs();
+                            if(null == neutronPortFixedIp || neutronPortFixedIp.isEmpty()) {
+                                return false;
+                            }
+                            if(portFixedIp.iterator().next().getSubnetUUID().equals
+                                    (neutronPort.getFixedIPs().iterator().next().getSubnetUUID())) {
+                                return false;   
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean isLastPortinBridge(Node node, OvsdbTerminationPointAugmentation terminationPointAugmentation) {
+        List<TerminationPoint> terminationPoints = node.getTerminationPoint();
+        if(terminationPoints != null && !terminationPoints.isEmpty()){
+            for(TerminationPoint tp : terminationPoints){
+                OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
+                        tp.getAugmentation(OvsdbTerminationPointAugmentation.class);
+                if(!(ovsdbTerminationPointAugmentation.getName().equals(Constants.INTEGRATION_BRIDGE)) 
+                        && !(terminationPointAugmentation.getInterfaceUuid().equals
+                                (ovsdbTerminationPointAugmentation.getInterfaceUuid()))) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public List<Neutron_IPs> getIpAddress(Node node,
+                                OvsdbTerminationPointAugmentation terminationPointAugmentation) {
+        if (neutronPortCache == null) {
+            logger.error("isLastPortinBridge: neutron port is null");
+            return null;
+        }
+        logger.trace("isLastPortinBridge: for {}", terminationPointAugmentation.getName());
+        String neutronPortId = southbound.getInterfaceExternalIdsValue(terminationPointAugmentation,
+                Constants.EXTERNAL_ID_INTERFACE_ID);
+        if (neutronPortId == null) {
+            return null;
+        }
+        NeutronPort neutronPort = neutronPortCache.getPort(neutronPortId);
+        List<Neutron_IPs> fixedIps = neutronPort.getFixedIPs();
+        return fixedIps;
+    }
+
+    @Override
     public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
         southbound =
                 (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
@@ -106,6 +255,9 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
     public void setDependencies(Object impl) {
         if (impl instanceof INeutronPortCRUD) {
             neutronPortCache = (INeutronPortCRUD)impl;
+        }
+        else if (impl instanceof INeutronSubnetCRUD) {
+            neutronSubnetCache = (INeutronSubnetCRUD) impl;
         }
     }
 }

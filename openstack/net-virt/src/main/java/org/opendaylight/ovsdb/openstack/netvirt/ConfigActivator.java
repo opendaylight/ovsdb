@@ -249,6 +249,7 @@ public class ConfigActivator implements BundleActivator {
                     lBaaSHandler.setDependencies(service);
                     lBaaSPoolHandler.setDependencies(service);
                     lBaaSPoolMemberHandler.setDependencies(service);
+                    securityServices.setDependencies(service);
                     neutronL3Adapter.setDependencies(service);
                 }
                 return service;

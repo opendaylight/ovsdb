@@ -162,7 +162,7 @@ public class SouthboundImpl implements Southbound {
         return value;
     }
 
-    public boolean addBridge(Node ovsdbNode, String bridgeName, String target) throws InvalidParameterException {
+    public boolean addBridge(Node ovsdbNode, String bridgeName, String target) {
         boolean result = false;
 
         LOG.info("addBridge: node: {}, bridgeName: {}, target: {}", ovsdbNode, bridgeName, target);
@@ -316,17 +316,14 @@ public class SouthboundImpl implements Southbound {
 
     public OvsdbBridgeAugmentation getBridge(Node node, String name) {
         OvsdbBridgeAugmentation bridge = node.getAugmentation(OvsdbBridgeAugmentation.class);
-        if (bridge != null) {
-            if (!bridge.getBridgeName().getValue().equals(name)) {
-                bridge = null;
-            }
+        if ((bridge != null) && (!bridge.getBridgeName().getValue().equals(name))) {
+            bridge = null;
         }
         return bridge;
     }
 
     public OvsdbBridgeAugmentation getBridge(Node node) {
-        OvsdbBridgeAugmentation bridge = node.getAugmentation(OvsdbBridgeAugmentation.class);
-        return bridge;
+        return node.getAugmentation(OvsdbBridgeAugmentation.class);
     }
 
     public String getBridgeName(Node node) {
@@ -339,7 +336,7 @@ public class SouthboundImpl implements Southbound {
     }
 
     public String extractBridgeName(Node node) {
-        return (node.getAugmentation(OvsdbBridgeAugmentation.class).getBridgeName().getValue());
+        return node.getAugmentation(OvsdbBridgeAugmentation.class).getBridgeName().getValue();
     }
 
     public OvsdbBridgeAugmentation extractBridgeAugmentation(Node node) {

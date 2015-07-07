@@ -295,8 +295,10 @@ public class SouthboundHandler extends AbstractHandler
     private void processPortUpdate(Node node, OvsdbTerminationPointAugmentation port) {
         LOGGER.debug("processPortUpdate <{}> <{}>", node, port);
         NeutronNetwork network = tenantNetworkManager.getTenantNetwork(port);
-        if (network != null && !network.getRouterExternal()) {
-            this.handleInterfaceUpdate(node, port);
+        if (network != null ){
+            if(!network.getRouterExternal()){
+                this.handleInterfaceUpdate(node, port);
+            }
         }
     }
 

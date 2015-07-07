@@ -32,6 +32,7 @@ public class ConfigActivator implements BundleActivator {
     private ServiceTracker outboundNatProviderTracker;
     private ServiceTracker routingProviderTracker;
     private ServiceTracker l3ForwardingProviderTracker;
+    private ServiceTracker gatewayMacResolverProviderTracker;
 
     public ConfigActivator(ProviderContext providerContext) {
         this.providerContext = providerContext;
@@ -403,7 +404,25 @@ public class ConfigActivator implements BundleActivator {
         };
         l3ForwardingProviderTracker.open();
         this.l3ForwardingProviderTracker = l3ForwardingProviderTracker;
+
+        @SuppressWarnings("unchecked")
+        ServiceTracker gatewayMacResolverProviderTracker = new ServiceTracker(context,
+                GatewayMacResolver.class, null) {
+            @Override
+            public Object addingService(ServiceReference reference) {
+                LOG.info("addingService GatwayMacResolverProvider");
+                GatewayMacResolver service =
+                        (GatewayMacResolver) context.getService(reference);
+                if (service != null) {
+                    neutronL3Adapter.setDependencies(service);
+                }
+                return service;
+            }
+        };
+        gatewayMacResolverProviderTracker.open();
+        this.gatewayMacResolverProviderTracker = gatewayMacResolverProviderTracker;
     }
+
 
     @Override
     public void stop(BundleContext context) throws Exception {

@@ -13,6 +13,7 @@ package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
 public enum Service {
 
     CLASSIFIER ((short) 0, "Classifier"),
+    GATEWAY_RESOLVER((short) 0, "External Network Gateway Resolver"),
     DIRECTOR ((short) 10, "Director"),
     ARP_RESPONDER ((short) 20, "Distributed ARP Responder"),
     INBOUND_NAT ((short) 30, "DNAT for inbound floating-ip traffic"),

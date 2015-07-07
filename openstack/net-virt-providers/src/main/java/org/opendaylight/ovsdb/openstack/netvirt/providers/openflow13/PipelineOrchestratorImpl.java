@@ -43,7 +43,8 @@ public class PipelineOrchestratorImpl implements ConfigInterface, NodeCacheListe
             Service.L2_REWRITE,
             Service.INGRESS_ACL,
             Service.OUTBOUND_NAT,
-            Service.L2_FORWARDING
+            Service.L2_FORWARDING,
+            Service.GATEWAY_RESOLVER
     );
     Map<Service, AbstractServiceInstance> serviceRegistry = Maps.newConcurrentMap();
     private volatile BlockingQueue<Node> queue;

@@ -23,7 +23,8 @@ public enum Service {
     L2_REWRITE ((short) 80, "Layer2 rewrite service"),
     INGRESS_ACL ((short) 90, "Ingress Acces-control"),
     OUTBOUND_NAT ((short) 100, "SNAT for traffic accessing external network"),
-    L2_FORWARDING ((short) 110, "Layer2 mac,vlan based forwarding");
+    L2_FORWARDING ((short) 110, "Layer2 mac,vlan based forwarding"),
+    GATEWAY_RESOLVER((short) 0, "External Network Gateway Resolver");
 
     short table;
     String description;

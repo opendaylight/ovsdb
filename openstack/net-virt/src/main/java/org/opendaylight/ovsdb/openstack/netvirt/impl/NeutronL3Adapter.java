@@ -24,11 +24,18 @@ import org.opendaylight.neutron.spi.Neutron_IPs;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.api.*;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
@@ -42,6 +49,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Neutron L3 Adapter implements a hub-like adapter for the various Neutron events. Based on
@@ -99,6 +109,8 @@ public class NeutronL3Adapter implements ConfigInterface {
     private String externalRouterMac;
     private Boolean enabled = false;
     private Southbound southbound;
+    private GatewayMacResolver gatewayMacResolver;
+    private final ExecutorService gatewayMacResolverPool = Executors.newFixedThreadPool(5);
 
     private static final String OWNER_ROUTER_INTERFACE = "network:router_interface";
     private static final String OWNER_ROUTER_INTERFACE_DISTRIBUTED = "network:router_interface_distributed";
@@ -170,6 +182,14 @@ public class NeutronL3Adapter implements ConfigInterface {
         //
         if (neutronPort.getDeviceOwner().equalsIgnoreCase(OWNER_ROUTER_INTERFACE) ||
             neutronPort.getDeviceOwner().equalsIgnoreCase(OWNER_ROUTER_INTERFACE_DISTRIBUTED)) {
+
+            NeutronNetwork externalNetwork = neutronNetworkCache.getNetwork(neutronPort.getNetworkUUID());
+            if(externalNetwork != null){
+                if(externalNetwork.isRouterExternal()){
+
+                }
+            }
+
             for (Neutron_IPs neutronIP : neutronPort.getFixedIPs()) {
                 NeutronRouter_Interface neutronRouterInterface =
                         new NeutronRouter_Interface(neutronIP.getSubnetUUID(), neutronPort.getPortUUID());
@@ -1122,6 +1142,60 @@ public class NeutronL3Adapter implements ConfigInterface {
         return null;
     }
 
+    private Long getDpidForExternalBridge(Node node) {
+        // Check if node is integration bridge; and only then return its dpid
+        if (southbound.getBridge(node, configurationService.getExternalBridgeName()) != null) {
+            return southbound.getDataPathId(node);
+        }
+        return null;
+    }
+
+    public void triggerGatewayMacResolver(Node node, OvsdbTerminationPointAugmentation routerPort ){
+
+        String routerInterface = southbound.getInterfaceExternalIdsValue(routerPort, Constants.EXTERNAL_ID_INTERFACE_ID);
+
+        NeutronPort gatewayPort = neutronPortCache.getPort(routerInterface);
+
+        if (gatewayPort.getDeviceOwner().equalsIgnoreCase(OWNER_ROUTER_INTERFACE) ||
+                gatewayPort.getDeviceOwner().equalsIgnoreCase(OWNER_ROUTER_INTERFACE_DISTRIBUTED)) {
+
+            NeutronNetwork externalNetwork = neutronNetworkCache.getNetwork(gatewayPort.getNetworkUUID());
+
+            if(externalNetwork != null){
+                if(externalNetwork.isRouterExternal()){
+                    final NeutronSubnet externalSubnet = neutronSubnetCache.getSubnet(externalNetwork.getNetworkUUID());
+                    if(externalSubnet != null){
+                        if(externalSubnet.getGatewayIPAllocated()){
+                            logger.info("Trigger MAC resolution for gateway ip {} on Node {}",externalSubnet.getGatewayIP(),node.getNodeId());
+                            ListenableFuture<MacAddress> gatewayMacAddress =
+                                    gatewayMacResolver.resolveMacAddress(getDpidForExternalBridge(node),
+                                            new Ipv4Address(externalSubnet.getGatewayIP()),false);
+
+                            Futures.addCallback(gatewayMacAddress, new FutureCallback<MacAddress>(){
+                                @Override
+                                public void onSuccess(MacAddress result) {
+                                    logger.info("Resolved MAC address for gateway IP {} is {}", externalSubnet.getGatewayIP(),result.getValue());
+                                    externalRouterMac = result.getValue();
+                                }
+
+                                @Override
+                                public void onFailure(Throwable t) {
+                                    logger.warn("MAC address resolution failed for gateway IP {}",externalSubnet.getGatewayIP());
+                                }
+                            }, gatewayMacResolverPool);
+                        }else{
+                            logger.warn("No gateway IP address found for external subnet {}",externalSubnet);
+                        }
+                    }else{
+                        logger.warn("Neutron subnet not found for external network {}",externalNetwork);
+                    }
+                }
+            }else{
+                logger.warn("Neutron network not found for router interface {}",gatewayPort);
+            }
+        }
+    }
+
     /**
      * Return String that represents OF port with marker explicitly provided (reverse of MatchUtils:parseExplicitOFPort)
      *
@@ -1152,7 +1226,8 @@ public class NeutronL3Adapter implements ConfigInterface {
                 (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
         southbound =
                 (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
-
+        gatewayMacResolver =
+                (GatewayMacResolver) ServiceHelper.getGlobalInstance(GatewayMacResolver.class, this);
         initL3AdapterMembers();
     }
 
@@ -1174,6 +1249,8 @@ public class NeutronL3Adapter implements ConfigInterface {
             routingProvider = (RoutingProvider)impl;
         } else if (impl instanceof L3ForwardingProvider) {
             l3ForwardingProvider = (L3ForwardingProvider)impl;
+        }else if (impl instanceof GatewayMacResolver) {
+            gatewayMacResolver = (GatewayMacResolver)impl;
         }
     }
 }

@@ -163,7 +163,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, ConfigInt
     @Override
     public boolean isDistributedArpDisabled() {
         final String strARPDisabled = ConfigProperties.getProperty(this.getClass(), "ovsdb.l3.arp.responder.disabled");
-        return (strARPDisabled.equalsIgnoreCase("yes"));
+        return strARPDisabled != null && (strARPDisabled.equalsIgnoreCase("yes"));
     }
 
     @Override

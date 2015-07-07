@@ -41,8 +41,10 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.CheckedFuture;
+
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -187,6 +189,24 @@ public abstract class AbstractServiceInstance {
         }
 
         logger.debug("Cannot find data for Flow " + flowBuilder.getFlowName());
+        return null;
+    }
+
+    public org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node
+    getOpenFlowNode(String nodeId) {
+
+        ReadOnlyTransaction readTx = dataBroker.newReadOnlyTransaction();
+        try {
+            Optional<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node> data =
+                    readTx.read(LogicalDatastoreType.OPERATIONAL, createNodePath(createNodeBuilder(nodeId))).get();
+            if (data.isPresent()) {
+                return data.get();
+            }
+        } catch (InterruptedException|ExecutionException e) {
+            logger.error(e.getMessage(), e);
+        }
+
+        logger.debug("Cannot find data for Node " + nodeId);
         return null;
     }
 

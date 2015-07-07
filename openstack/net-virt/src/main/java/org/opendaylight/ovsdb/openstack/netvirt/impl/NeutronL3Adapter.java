@@ -24,11 +24,17 @@ import org.opendaylight.neutron.spi.Neutron_IPs;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.api.*;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
@@ -42,6 +48,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Neutron L3 Adapter implements a hub-like adapter for the various Neutron events. Based on
@@ -63,6 +71,7 @@ public class NeutronL3Adapter implements ConfigInterface {
     private volatile OutboundNatProvider outboundNatProvider;
     private volatile ArpProvider arpProvider;
     private volatile RoutingProvider routingProvider;
+    private volatile GatewayMacResolver gatewayMacResolver;
 
     private class FloatIpData {
         private final Long dpid;          // br-int of node where floating ip is associated with tenant port
@@ -100,6 +109,7 @@ public class NeutronL3Adapter implements ConfigInterface {
     private Boolean enabled = false;
     private Boolean flgDistributedARPEnabled = true;
     private Southbound southbound;
+    private final ExecutorService gatewayMacResolverPool = Executors.newFixedThreadPool(5);
 
     private static final String OWNER_ROUTER_INTERFACE = "network:router_interface";
     private static final String OWNER_ROUTER_INTERFACE_DISTRIBUTED = "network:router_interface_distributed";
@@ -193,11 +203,36 @@ public class NeutronL3Adapter implements ConfigInterface {
 
         final boolean isDelete = action == Action.DELETE;
 
+        if (neutronPort.getDeviceOwner().equalsIgnoreCase(OWNER_ROUTER_GATEWAY)){
+            if(!isDelete){
+                Node externalBridgeNode = getExternalBridgeNode();
+                if(externalBridgeNode != null){
+                    LOGGER.info("Port {} is network router gateway interface, "
+                            + "triggering gateway resolution for the attached external network on node {}",neutronPort,externalBridgeNode);
+                    this.triggerGatewayMacResolver(externalBridgeNode, neutronPort);
+                }else{
+                    LOGGER.error("Did not find Node that has external bridge (br-ex), Gateway resolution failed");
+                }
+            }else{
+                NeutronNetwork externalNetwork = neutronNetworkCache.getNetwork(neutronPort.getNetworkUUID());
+
+                if(externalNetwork != null){
+                    if(externalNetwork.isRouterExternal()){
+                        final NeutronSubnet externalSubnet = getExternalNetworkSubnet(neutronPort);
+                        if(externalSubnet != null){
+                            gatewayMacResolver.stopPeriodicReferesh(new Ipv4Address(externalSubnet.getGatewayIP()));
+                        }
+                    }
+                }
+            }
+        }
+
         // Treat the port event as a router interface event if the port belongs to router. This is a
         // helper for handling cases when handleNeutronRouterInterfaceEvent is not available
         //
         if (neutronPort.getDeviceOwner().equalsIgnoreCase(OWNER_ROUTER_INTERFACE) ||
             neutronPort.getDeviceOwner().equalsIgnoreCase(OWNER_ROUTER_INTERFACE_DISTRIBUTED)) {
+
             for (Neutron_IPs neutronIP : neutronPort.getFixedIPs()) {
                 NeutronRouter_Interface neutronRouterInterface =
                         new NeutronRouter_Interface(neutronIP.getSubnetUUID(), neutronPort.getPortUUID());
@@ -623,7 +658,7 @@ public class NeutronL3Adapter implements ConfigInterface {
                                            Action actionForNode) {
         // Based on the local cache, figure out whether programming needs to occur. To do this, we
         // will look at desired action for node.
-        //
+
         final String cacheKey = node.getNodeId().getValue() + ":" + providerSegmentationId + ":" + ipStr;
         final Boolean isProgrammed = l3ForwardingCache.contains(cacheKey);
 
@@ -1205,6 +1240,88 @@ public class NeutronL3Adapter implements ConfigInterface {
         return null;
     }
 
+    private Long getDpidForExternalBridge(Node node) {
+        // Check if node is integration bridge; and only then return its dpid
+        if (southbound.getBridge(node, configurationService.getExternalBridgeName()) != null) {
+            return southbound.getDataPathId(node);
+        }
+        return null;
+    }
+
+    private Node getExternalBridgeNode(){
+        //Pickup the first node that has external bridge (br-ex).
+        //NOTE: We are assuming that all the br-ex are serving one external network and gateway ip of
+        //the external network is reachable from every br-ex
+        // TODO: Consider other deployment scenario, and thing of better solution.
+        List<Node> allBridges = nodeCacheManager.getBridgeNodes();
+        for(Node node : allBridges){
+            if (southbound.getBridge(node, configurationService.getExternalBridgeName()) != null) {
+                return node;
+            }
+        }
+        return null;
+    }
+
+    private NeutronSubnet getExternalNetworkSubnet(NeutronPort gatewayPort){
+        NeutronSubnet extSubnet = null;
+        for (NeutronSubnet subnet : neutronSubnetCache.getAllSubnets()){
+            if(subnet.getPortsInSubnet().contains(gatewayPort)){
+                extSubnet = subnet;
+                break;
+            }
+        }
+        return extSubnet;
+    }
+
+    public void triggerGatewayMacResolver(final Node node, final NeutronPort gatewayPort ){
+
+        Preconditions.checkNotNull(node);
+        Preconditions.checkNotNull(gatewayPort);
+        NeutronNetwork externalNetwork = neutronNetworkCache.getNetwork(gatewayPort.getNetworkUUID());
+
+        if(externalNetwork != null){
+            if(externalNetwork.isRouterExternal()){
+                final NeutronSubnet externalSubnet = getExternalNetworkSubnet(gatewayPort);
+                if(externalSubnet != null){
+                    if(externalSubnet.getGatewayIP() != null){
+                        LOGGER.info("Trigger MAC resolution for gateway ip {} on Node {}",externalSubnet.getGatewayIP(),node.getNodeId());
+
+                        ListenableFuture<MacAddress> gatewayMacAddress =
+                                gatewayMacResolver.resolveMacAddress(getDpidForExternalBridge(node),
+                                        new Ipv4Address(externalSubnet.getGatewayIP()),
+                                        new Ipv4Address(gatewayPort.getFixedIPs().get(0).getIpAddress()),
+                                        new MacAddress(gatewayPort.getMacAddress()),
+                                        false);
+                        if(gatewayMacAddress != null){
+                            Futures.addCallback(gatewayMacAddress, new FutureCallback<MacAddress>(){
+                                @Override
+                                public void onSuccess(MacAddress result) {
+                                    if(result != null){
+                                        updateExternalRouterMac(result.getValue());
+                                        LOGGER.info("Resolved MAC address for gateway IP {} is {}", externalSubnet.getGatewayIP(),result.getValue());
+                                    }else{
+                                        LOGGER.warn("MAC address resolution failed for gateway IP {}",externalSubnet.getGatewayIP());
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Throwable t) {
+                                    LOGGER.warn("MAC address resolution failed for gateway IP {}",externalSubnet.getGatewayIP());
+                                }
+                            }, gatewayMacResolverPool);
+                        }
+                    }else{
+                        LOGGER.warn("No gateway IP address found for external subnet {}",externalSubnet);
+                    }
+                }else{
+                    LOGGER.warn("Neutron subnet not found for external network {}",externalNetwork);
+                }
+            }
+        }else{
+            LOGGER.warn("Neutron network not found for router interface {}",gatewayPort);
+        }
+    }
+
     /**
      * Return String that represents OF port with marker explicitly provided (reverse of MatchUtils:parseExplicitOFPort)
      *
@@ -1235,7 +1352,8 @@ public class NeutronL3Adapter implements ConfigInterface {
                 (NodeCacheManager) ServiceHelper.getGlobalInstance(NodeCacheManager.class, this);
         southbound =
                 (Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
-
+        gatewayMacResolver =
+                (GatewayMacResolver) ServiceHelper.getGlobalInstance(GatewayMacResolver.class, this);
         initL3AdapterMembers();
     }
 
@@ -1257,6 +1375,8 @@ public class NeutronL3Adapter implements ConfigInterface {
             routingProvider = (RoutingProvider)impl;
         } else if (impl instanceof L3ForwardingProvider) {
             l3ForwardingProvider = (L3ForwardingProvider)impl;
+        }else if (impl instanceof GatewayMacResolver) {
+            gatewayMacResolver = (GatewayMacResolver)impl;
         }
     }
 }

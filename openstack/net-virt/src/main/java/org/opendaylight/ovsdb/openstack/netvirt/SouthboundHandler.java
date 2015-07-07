@@ -295,8 +295,14 @@ public class SouthboundHandler extends AbstractHandler
     private void processPortUpdate(Node node, OvsdbTerminationPointAugmentation port) {
         LOGGER.debug("processPortUpdate <{}> <{}>", node, port);
         NeutronNetwork network = tenantNetworkManager.getTenantNetwork(port);
-        if (network != null && !network.getRouterExternal()) {
-            this.handleInterfaceUpdate(node, port);
+        if (network != null ){
+            if(!network.getRouterExternal()){
+                this.handleInterfaceUpdate(node, port);
+            }else{
+                logger.info("Port {} is network router interface, "
+                        + "triggering gateway resolution for the attached external network on node {}",port,node);
+                neutronL3Adapter.triggerGatewayMacResolver(node, port);
+            }
         }
     }
 

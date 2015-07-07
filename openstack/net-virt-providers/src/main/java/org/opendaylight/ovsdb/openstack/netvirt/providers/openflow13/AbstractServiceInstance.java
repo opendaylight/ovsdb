@@ -190,6 +190,23 @@ public abstract class AbstractServiceInstance {
         return null;
     }
 
+    public org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node
+    getOpenFlowNode(String nodeId) {
+        ReadOnlyTransaction readTx = dataBroker.newReadOnlyTransaction();
+        try {
+            Optional<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node> data =
+                    readTx.read(LogicalDatastoreType.OPERATIONAL, createNodePath(createNodeBuilder(nodeId))).get();
+            if (data.isPresent()) {
+                return data.get();
+            }
+        } catch (InterruptedException|ExecutionException e) {
+            logger.error(e.getMessage(), e);
+        }
+
+        logger.debug("Cannot find data for Node " + nodeId);
+        return null;
+    }
+
     private Long getDpid(Node node) {
         Long dpid = 0L;
         dpid = southbound.getDataPathId(node);

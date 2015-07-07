@@ -15,6 +15,7 @@ public class NetvirtProvidersProvider implements BindingAwareProvider, AutoClose
     private BundleContext bundleContext = null;
     private static DataBroker dataBroker = null;
     private ConfigActivator activator;
+    private static ProviderContext providerContextRef = null;
 
     public NetvirtProvidersProvider(BundleContext bundleContext) {
         LOG.info("NetvirtProvidersProvider: bundleContext: {}", bundleContext);
@@ -25,6 +26,10 @@ public class NetvirtProvidersProvider implements BindingAwareProvider, AutoClose
         return dataBroker;
     }
 
+    public static ProviderContext getProviderContext() {
+        return providerContextRef;
+    }
+
     @Override
     public void close() throws Exception {
         activator.stop(bundleContext);
@@ -33,6 +38,7 @@ public class NetvirtProvidersProvider implements BindingAwareProvider, AutoClose
     @Override
     public void onSessionInitiated(ProviderContext providerContext) {
         dataBroker = providerContext.getSALService(DataBroker.class);
+        providerContextRef = providerContext;
         LOG.info("NetvirtProvidersProvider: onSessionInitiated dataBroker: {}", dataBroker);
         this.activator = new ConfigActivator(providerContext);
         try {

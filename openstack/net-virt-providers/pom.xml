@@ -52,6 +52,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <ovsdb.utils.servicehelper.version>1.1.1-SNAPSHOT</ovsdb.utils.servicehelper.version>
     <powermock.version>1.5.2</powermock.version>
     <sonar-jacoco-listeners.version>2.4</sonar-jacoco-listeners.version>
+    <liblldp.version>0.10.0-SNAPSHOT</liblldp.version>
     <root.directory>${env.PWD}</root.directory>
     <sonar.jacoco.itReportPath>${root.directory}/target/code-coverage/jacoco-it.exec</sonar.jacoco.itReportPath>
   </properties>
@@ -151,6 +152,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
+    <dependency>
+       <groupId>org.opendaylight.controller</groupId>
+       <artifactId>liblldp</artifactId>
+       <version>${liblldp.version}</version>
+     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>

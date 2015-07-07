@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
+
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
+import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.*;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.OF13Provider;
@@ -12,6 +14,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrc
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestratorImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.*;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.arp.GatewayMacResolverService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -91,6 +94,12 @@ public class ConfigActivator implements BundleActivator {
         registerService(context, OutboundNatProvider.class.getName(),
                 outboundNatService, Service.OUTBOUND_NAT);
 
+        GatewayMacResolverService gatewayMacResolverService = new GatewayMacResolverService();
+        registerService(context, GatewayMacResolver.class.getName(),
+                gatewayMacResolverService, Service.GATEWAY_RESOLVER);
+        getNotificationProviderService().registerNotificationListener(gatewayMacResolverService);
+
+
         pipelineOrchestrator.setDependencies(context, null);
         outboundNatService.setDependencies(context, null);
         egressAclService.setDependencies(context, null);
@@ -104,6 +113,7 @@ public class ConfigActivator implements BundleActivator {
         arpResponderService.setDependencies(context, null);
         classifierService.setDependencies(context, null);
         of13Provider.setDependencies(context, null);
+        gatewayMacResolverService.setDependencies(context, null);
 
         @SuppressWarnings("unchecked")
         ServiceTracker NetworkingProviderManagerTracker = new ServiceTracker(context,
@@ -152,5 +162,10 @@ public class ConfigActivator implements BundleActivator {
         return registerService(bundleContext,
                 new String[] {AbstractServiceInstance.class.getName(), interfaceClassName},
                 properties, impl);
+    }
+
+    private NotificationProviderService getNotificationProviderService(){
+        return this.providerContext.<NotificationProviderService>getSALService(
+                NotificationProviderService.class);
     }
 }

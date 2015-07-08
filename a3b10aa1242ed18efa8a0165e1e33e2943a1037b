@@ -46,6 +46,30 @@
       "revId": "a3b10aa1242ed18efa8a0165e1e33e2943a1037b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_7485ddab",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/EventDispatcherImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-07-08T20:46:02Z",
+      "side": 1,
+      "message": "ack. i think that with the handler and the type we should be able to better see what went wrong; if it happens.",
+      "parentUuid": "7a7fa997_b49db55b",
+      "range": {
+        "startLine": 110,
+        "startChar": 16,
+        "endLine": 110,
+        "endChar": 19
+      },
+      "revId": "a3b10aa1242ed18efa8a0165e1e33e2943a1037b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

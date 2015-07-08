@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_d97aecf0",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/EventDispatcherImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-07-08T18:25:44Z",
+      "side": 1,
+      "message": "https://gist.github.com/5f330d9f5e03ef3efa20\n\nlooks like the \u0027ref\u0027 has no value, at least in the \u0027info\u0027 case. you agree I should drop that?",
+      "range": {
+        "startLine": 110,
+        "startChar": 16,
+        "endLine": 110,
+        "endChar": 19
+      },
+      "revId": "a3b10aa1242ed18efa8a0165e1e33e2943a1037b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

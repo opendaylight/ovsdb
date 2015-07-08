@@ -109,7 +109,8 @@ public class NorthboundEvent extends AbstractEvent {
 
     @Override
     public String toString() {
-        return "NorthboundEvent [action=" + super.getAction()
+        return "NorthboundEvent [handler=" + super.getHandlerType()
+               + ", action=" + super.getAction()
                + ", port=" + port
                + ", subnet=" + subnet
                + ", router=" + router

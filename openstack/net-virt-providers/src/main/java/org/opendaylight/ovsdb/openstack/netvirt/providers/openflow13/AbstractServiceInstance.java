@@ -202,7 +202,7 @@ public abstract class AbstractServiceInstance {
     /**
      * Program Default Pipeline Flow.
      *
-     * @param Node on which the default pipeline flow is programmed.
+     * @param node on which the default pipeline flow is programmed.
      */
     protected void programDefaultPipelineRule(Node node) {
         if (!isBridgeInPipeline(node)) {

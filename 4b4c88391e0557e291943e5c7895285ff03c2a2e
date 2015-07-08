@@ -22,6 +22,30 @@
       "revId": "4b4c88391e0557e291943e5c7895285ff03c2a2e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_6fabc6d6",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/jsonrpc/JsonRpcServiceBinderHandler.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1018
+      },
+      "writtenOn": "2015-07-08T21:40:54Z",
+      "side": 1,
+      "message": "From ovsdb protocol (RFC7047), id field should be \"nonnull-json-value\" or \"null\"(a string with string content \"null\"). Id field shouldn\u0027t be null or empty. That\u0027s why I put log level error. But log level debug is also ok for me. I don\u0027t have strong opinion as long as the log level is set as debug or higher.",
+      "parentUuid": "7a7fa997_856f29c5",
+      "range": {
+        "startLine": 64,
+        "startChar": 27,
+        "endLine": 64,
+        "endChar": 32
+      },
+      "revId": "4b4c88391e0557e291943e5c7895285ff03c2a2e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

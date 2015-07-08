@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7a7fa997_79f4f886",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/EventDispatcherImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-07-08T18:19:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a7fa997_b945b018",
+      "range": {
+        "startLine": 101,
+        "startChar": 15,
+        "endLine": 101,
+        "endChar": 32
+      },
+      "revId": "110940678a476a28c967ac25e62eb8dba9f40a9b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7fa997_3951a0d8",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/EventDispatcherImpl.java",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2015-07-08T17:36:09Z",
       "side": 1,
       "message": "should add the serviceRef in here since that is the piece which is failing. The wrong ref is coming in which is why we can\u0027t find the Abstract HandlerType",
+      "range": {
+        "startLine": 104,
+        "startChar": 39,
+        "endLine": 104,
+        "endChar": 46
+      },
+      "revId": "110940678a476a28c967ac25e62eb8dba9f40a9b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_19f3849f",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/EventDispatcherImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-07-08T18:19:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a7fa997_3951a0d8",
       "range": {
         "startLine": 104,
         "startChar": 39,

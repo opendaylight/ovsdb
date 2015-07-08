@@ -21,17 +21,17 @@ public class ConfigActivator implements BundleActivator {
     private static final Logger LOG = LoggerFactory.getLogger(ConfigActivator.class);
     private List<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
     private ProviderContext providerContext;
-    private ServiceTracker INeutronNetworkCRUDTracker;
-    private ServiceTracker INeutronPortCRUDTracker;
-    private ServiceTracker INeutronLoadBalancerCRUDTracker;
-    private ServiceTracker INeutronLoadBalancerPoolCRUDTracker;
-    private ServiceTracker INeutronSubnetCRUDTracker;
-    private ServiceTracker LoadBalancerProviderTracker;
-    private ServiceTracker ArpProviderTracker;
-    private ServiceTracker InboundNatProviderTracker;
-    private ServiceTracker OutboundNatProviderTracker;
-    private ServiceTracker RoutingProviderTracker;
-    private ServiceTracker L3ForwardingProviderTracker;
+    private ServiceTracker iNeutronNetworkCRUDTracker;
+    private ServiceTracker iNeutronPortCRUDTracker;
+    private ServiceTracker iNeutronLoadBalancerCRUDTracker;
+    private ServiceTracker iNeutronLoadBalancerPoolCRUDTracker;
+    private ServiceTracker iNeutronSubnetCRUDTracker;
+    private ServiceTracker loadBalancerProviderTracker;
+    private ServiceTracker arpProviderTracker;
+    private ServiceTracker inboundNatProviderTracker;
+    private ServiceTracker outboundNatProviderTracker;
+    private ServiceTracker routingProviderTracker;
+    private ServiceTracker l3ForwardingProviderTracker;
 
     public ConfigActivator(ProviderContext providerContext) {
         this.providerContext = providerContext;
@@ -206,7 +206,7 @@ public class ConfigActivator implements BundleActivator {
         // addingService may not be called if the service is already available when the ServiceTracker
         // is started
         @SuppressWarnings("unchecked")
-        ServiceTracker INeutronNetworkCRUDTracker = new ServiceTracker(context, INeutronNetworkCRUD.class, null) {
+        ServiceTracker iNeutronNetworkCRUDTracker = new ServiceTracker(context, INeutronNetworkCRUD.class, null) {
             @Override
             public Object addingService(ServiceReference reference) {
                 LOG.info("addingService INeutronNetworkCRUD");
@@ -221,26 +221,12 @@ public class ConfigActivator implements BundleActivator {
                 }
                 return service;
             }
-
-            /*@Override
-            public void modifiedService(ServiceReference reference, Object service) {
-                LOG.info("modifiedService INeutronNetworkCRUD");
-                if (service != null) {
-                    tenantNetworkManager.setDependencies(service);
-                    networkHandler.setDependencies(service);
-                    lBaaSHandler.setDependencies(service);
-                    lBaaSPoolHandler.setDependencies(service);
-                    lBaaSPoolMemberHandler.setDependencies(service);
-                    neutronL3Adapter.setDependencies(service);
-                }
-            }*/
-
         };
-        INeutronNetworkCRUDTracker.open();
-        this.INeutronNetworkCRUDTracker = INeutronNetworkCRUDTracker;
+        iNeutronNetworkCRUDTracker.open();
+        this.iNeutronNetworkCRUDTracker = iNeutronNetworkCRUDTracker;
 
         @SuppressWarnings("unchecked")
-        ServiceTracker INeutronSubnetCRUDTracker = new ServiceTracker(context, INeutronSubnetCRUD.class, null) {
+        ServiceTracker iNeutronSubnetCRUDTracker = new ServiceTracker(context, INeutronSubnetCRUD.class, null) {
             @Override
             public Object addingService(ServiceReference reference) {
                 LOG.info("addingService INeutronSubnetCRUD");
@@ -254,11 +240,11 @@ public class ConfigActivator implements BundleActivator {
                 return service;
             }
         };
-        INeutronSubnetCRUDTracker.open();
-        this.INeutronSubnetCRUDTracker = INeutronSubnetCRUDTracker;
+        iNeutronSubnetCRUDTracker.open();
+        this.iNeutronSubnetCRUDTracker = iNeutronSubnetCRUDTracker;
 
         @SuppressWarnings("unchecked")
-        ServiceTracker INeutronPortCRUDTracker = new ServiceTracker(context, INeutronPortCRUD.class, null) {
+        ServiceTracker iNeutronPortCRUDTracker = new ServiceTracker(context, INeutronPortCRUD.class, null) {
             @Override
             public Object addingService(ServiceReference reference) {
                 LOG.info("addingService INeutronPortCRUD");
@@ -274,11 +260,11 @@ public class ConfigActivator implements BundleActivator {
                 return service;
             }
         };
-        INeutronPortCRUDTracker.open();
-        this.INeutronPortCRUDTracker = INeutronPortCRUDTracker;
+        iNeutronPortCRUDTracker.open();
+        this.iNeutronPortCRUDTracker = iNeutronPortCRUDTracker;
 
         @SuppressWarnings("unchecked")
-        ServiceTracker INeutronLoadBalancerCRUDTracker = new ServiceTracker(context,
+        ServiceTracker iNeutronLoadBalancerCRUDTracker = new ServiceTracker(context,
                 INeutronLoadBalancerCRUD.class, null) {
             @Override
             public Object addingService(ServiceReference reference) {
@@ -292,11 +278,11 @@ public class ConfigActivator implements BundleActivator {
                 return service;
             }
         };
-        INeutronLoadBalancerCRUDTracker.open();
-        this.INeutronLoadBalancerCRUDTracker = INeutronLoadBalancerCRUDTracker;
+        iNeutronLoadBalancerCRUDTracker.open();
+        this.iNeutronLoadBalancerCRUDTracker = iNeutronLoadBalancerCRUDTracker;
 
         @SuppressWarnings("unchecked")
-        ServiceTracker INeutronLoadBalancerPoolCRUDTracker = new ServiceTracker(context,
+        ServiceTracker iNeutronLoadBalancerPoolCRUDTracker = new ServiceTracker(context,
                 INeutronLoadBalancerPoolCRUD.class, null) {
             @Override
             public Object addingService(ServiceReference reference) {
@@ -310,11 +296,11 @@ public class ConfigActivator implements BundleActivator {
                 return service;
             }
         };
-        INeutronLoadBalancerPoolCRUDTracker.open();
-        this.INeutronLoadBalancerPoolCRUDTracker = INeutronLoadBalancerPoolCRUDTracker;
+        iNeutronLoadBalancerPoolCRUDTracker.open();
+        this.iNeutronLoadBalancerPoolCRUDTracker = iNeutronLoadBalancerPoolCRUDTracker;
 
         @SuppressWarnings("unchecked")
-        ServiceTracker LoadBalancerProviderTracker = new ServiceTracker(context,
+        ServiceTracker ioadBalancerProviderTracker = new ServiceTracker(context,
                 LoadBalancerProvider.class, null) {
             @Override
             public Object addingService(ServiceReference reference) {
@@ -329,11 +315,11 @@ public class ConfigActivator implements BundleActivator {
                 return service;
             }
         };
-        LoadBalancerProviderTracker.open();
-        this.LoadBalancerProviderTracker = LoadBalancerProviderTracker;
+        ioadBalancerProviderTracker.open();
+        this.loadBalancerProviderTracker = ioadBalancerProviderTracker;
 
         @SuppressWarnings("unchecked")
-        ServiceTracker ArpProviderTracker = new ServiceTracker(context,
+        ServiceTracker arpProviderTracker = new ServiceTracker(context,
                 ArpProvider.class, null) {
             @Override
             public Object addingService(ServiceReference reference) {
@@ -346,11 +332,11 @@ public class ConfigActivator implements BundleActivator {
                 return service;
             }
         };
-        ArpProviderTracker.open();
-        this.ArpProviderTracker = ArpProviderTracker;
+        arpProviderTracker.open();
+        this.arpProviderTracker = arpProviderTracker;
 
         @SuppressWarnings("unchecked")
-        ServiceTracker InboundNatProviderTracker = new ServiceTracker(context,
+        ServiceTracker inboundNatProviderTracker = new ServiceTracker(context,
                 InboundNatProvider.class, null) {
             @Override
             public Object addingService(ServiceReference reference) {
@@ -363,11 +349,11 @@ public class ConfigActivator implements BundleActivator {
                 return service;
             }
         };
-        InboundNatProviderTracker.open();
-        this.InboundNatProviderTracker = InboundNatProviderTracker;
+        inboundNatProviderTracker.open();
+        this.inboundNatProviderTracker = inboundNatProviderTracker;
 
         @SuppressWarnings("unchecked")
-        ServiceTracker OutboundNatProviderTracker = new ServiceTracker(context,
+        ServiceTracker outboundNatProviderTracker = new ServiceTracker(context,
                 OutboundNatProvider.class, null) {
             @Override
             public Object addingService(ServiceReference reference) {
@@ -380,11 +366,11 @@ public class ConfigActivator implements BundleActivator {
                 return service;
             }
         };
-        OutboundNatProviderTracker.open();
-        this.OutboundNatProviderTracker = OutboundNatProviderTracker;
+        outboundNatProviderTracker.open();
+        this.outboundNatProviderTracker = outboundNatProviderTracker;
 
         @SuppressWarnings("unchecked")
-        ServiceTracker RoutingProviderTracker = new ServiceTracker(context,
+        ServiceTracker routingProviderTracker = new ServiceTracker(context,
                 RoutingProvider.class, null) {
             @Override
             public Object addingService(ServiceReference reference) {
@@ -397,11 +383,11 @@ public class ConfigActivator implements BundleActivator {
                 return service;
             }
         };
-        RoutingProviderTracker.open();
-        this.RoutingProviderTracker = RoutingProviderTracker;
+        routingProviderTracker.open();
+        this.routingProviderTracker = routingProviderTracker;
 
         @SuppressWarnings("unchecked")
-        ServiceTracker L3ForwardingProviderTracker = new ServiceTracker(context,
+        ServiceTracker l3ForwardingProviderTracker = new ServiceTracker(context,
                 L3ForwardingProvider.class, null) {
             @Override
             public Object addingService(ServiceReference reference) {
@@ -414,20 +400,20 @@ public class ConfigActivator implements BundleActivator {
                 return service;
             }
         };
-        L3ForwardingProviderTracker.open();
-        this.L3ForwardingProviderTracker = L3ForwardingProviderTracker;
+        l3ForwardingProviderTracker.open();
+        this.l3ForwardingProviderTracker = l3ForwardingProviderTracker;
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
         LOG.info("ConfigActivator stop");
         /* ServiceTrackers and services are already released when bundle stops
-        INeutronNetworkCRUDTracker.close();
-        INeutronPortCRUDTracker.close();
-        INeutronSubnetCRUDTracker.close();
-        INeutronLoadBalancerCRUDTracker.close();
-        INeutronLoadBalancerPoolCRUDTracker.close();
-        LoadBalancerProviderTracker.close();
+        iNeutronNetworkCRUDTracker.close();
+        iNeutronPortCRUDTracker.close();
+        iNeutronSubnetCRUDTracker.close();
+        iNeutronLoadBalancerCRUDTracker.close();
+        iNeutronLoadBalancerPoolCRUDTracker.close();
+        loadBalancerProviderTracker.close();
 
         for (ServiceRegistration registration : registrations) {
             if (registration != null) {

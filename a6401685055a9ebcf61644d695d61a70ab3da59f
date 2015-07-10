@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_20f4f8f0",
+        "filename": "resources/commons/showOvsdbMdsal.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-10T22:33:28Z",
+      "side": 1,
+      "message": "can you call it ovsdb node",
+      "range": {
+        "startLine": 132,
+        "startChar": 16,
+        "endLine": 132,
+        "endChar": 23
+      },
+      "revId": "a6401685055a9ebcf61644d695d61a70ab3da59f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_c08bc466",
+        "filename": "resources/commons/showOvsdbMdsal.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-10T22:33:28Z",
+      "side": 1,
+      "message": "ha ha comment about newline and you get newline whitespace",
+      "range": {
+        "startLine": 168,
+        "startChar": 79,
+        "endLine": 168,
+        "endChar": 80
+      },
+      "revId": "a6401685055a9ebcf61644d695d61a70ab3da59f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_60eaf010",
+        "filename": "resources/commons/showOvsdbMdsal.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 268,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-10T22:33:28Z",
+      "side": 1,
+      "message": "some other whtiespace and in other palces in the file",
+      "range": {
+        "startLine": 268,
+        "startChar": 0,
+        "endLine": 268,
+        "endChar": 4
+      },
+      "revId": "a6401685055a9ebcf61644d695d61a70ab3da59f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

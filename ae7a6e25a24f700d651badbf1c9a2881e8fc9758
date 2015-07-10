@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "7a7fa997_402494ae",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/SouthboundHandler.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-07-10T20:59:09Z",
+      "side": 1,
+      "message": "heh, because ovs ports are not created for router interfaces, this is not going to happen for the external network.",
+      "revId": "ae7a6e25a24f700d651badbf1c9a2881e8fc9758",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7fa997_2ca07942",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
         "patchSetId": 5

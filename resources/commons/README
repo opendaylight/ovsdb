@@ -12,3 +12,6 @@ Contents
 3. OVSDB_Northbound_APIs.json.postman_collection : Collection of REST-APIs detailing on all the ovsdb.northbound APIs.
 
 4. OVSDB_Southbound.postman_collection : Collection of RESTCONF APIs for using the OVSDB MD-SAL Southbound
+
+5. showOvsdbMdsal.py : Dumps mdsal related info from running ODL that is related to ovsdb and netvirt. Use 'showOvsdbMdsal.py -h' for usage
+

@@ -149,6 +149,13 @@ public class NeutronL3Adapter implements ConfigInterface {
     // Callbacks from OVSDB's northbound handlers
     //
 
+    /**
+     * Invoked to configure the mac address for the external gateway in br-ex. ovsdb netvirt needs help in getting
+     * mac for given ip in br-ex (bug 3378). For example, since ovsdb has no real arp, it needs a service in can
+     * subscribe so that the mac address associated to the gateway ip address is available.
+     *
+     * @param externalRouterMacUpdate  The mac address to be associated to the gateway.
+     */
     public void updateExternalRouterMac(final String externalRouterMacUpdate) {
         Preconditions.checkNotNull(externalRouterMacUpdate);
 
@@ -157,6 +164,12 @@ public class NeutronL3Adapter implements ConfigInterface {
         rebuildExistingIpRewrite();
     }
 
+    /**
+     * Process the event.
+     *
+     * @param action the {@link org.opendaylight.ovsdb.openstack.netvirt.api.Action} action to be handled.
+     * @param subnet An instance of NeutronSubnet object.
+     */
     public void handleNeutronSubnetEvent(final NeutronSubnet subnet, Action action) {
         LOGGER.debug("Neutron subnet {} event : {}", action, subnet.toString());
         if (!this.enabled) {
@@ -164,6 +177,14 @@ public class NeutronL3Adapter implements ConfigInterface {
         }
     }
 
+    /**
+     * Process the port event as a router interface event.
+     * For a not delete action, since a port is only create when the tennat uses the subnet, it is required to
+     * verify if all routers across all nodes have the interface for the port's subnet(s) configured.
+     *
+     * @param action the {@link org.opendaylight.ovsdb.openstack.netvirt.api.Action} action to be handled.
+     * @param neutronPort An instance of NeutronPort object.
+     */
     public void handleNeutronPortEvent(final NeutronPort neutronPort, Action action) {
         LOGGER.debug("Neutron port {} event : {}", action, neutronPort.toString());
         if (!this.enabled) {
@@ -204,6 +225,12 @@ public class NeutronL3Adapter implements ConfigInterface {
         }
     }
 
+    /**
+     * Process the event.
+     *
+     * @param action the {@link org.opendaylight.ovsdb.openstack.netvirt.api.Action} action to be handled.
+     * @param neutronRouter An instance of NeutronRouter object.
+     */
     public void handleNeutronRouterEvent(final NeutronRouter neutronRouter, Action action) {
         LOGGER.debug("Neutron router {} event : {}", action, neutronRouter.toString());
         if (!this.enabled) {
@@ -211,6 +238,14 @@ public class NeutronL3Adapter implements ConfigInterface {
         }
     }
 
+    /**
+     * Process the event enforcing actions and verifying dependencies between all router's interface. For example,
+     * delete the ports on the same subnet.
+     *
+     * @param action the {@link org.opendaylight.ovsdb.openstack.netvirt.api.Action} action to be handled.
+     * @param neutronRouter An instance of NeutronRouter object.
+     * @param neutronRouterInterface An instance of NeutronRouter_Interface object.
+     */
     public void handleNeutronRouterInterfaceEvent(final NeutronRouter neutronRouter,
                                                   final NeutronRouter_Interface neutronRouterInterface,
                                                   Action action) {
@@ -244,6 +279,15 @@ public class NeutronL3Adapter implements ConfigInterface {
         }
     }
 
+    /**
+     * Invoked when a neutron message regarding the floating ip association is sent to odl via ml2. If the action is
+     * a creation, it will first add ARP rules for the given floating ip and then configure the DNAT (rewrite the
+     * packets from the floating IP address to the internal fixed ip) rules on OpenFlow Table 30 and SNAT rules (other
+     * way around) on OpenFlow Table 100.
+     *
+     * @param action the {@link org.opendaylight.ovsdb.openstack.netvirt.api.Action} action to be handled.
+     * @param neutronFloatingIP An {@link org.opendaylight.neutron.spi.NeutronFloatingIP} instance of NeutronFloatingIP object.
+     */
     public void handleNeutronFloatingIPEvent(final NeutronFloatingIP neutronFloatingIP,
                                              Action actionIn) {
         Preconditions.checkNotNull(neutronFloatingIP);
@@ -281,6 +325,10 @@ public class NeutronL3Adapter implements ConfigInterface {
         }
     }
 
+    /**
+     * This method performs creation or deletion of in-bound rules into Table 30 for a existing available floating
+     * ip, otherwise for newer one.
+     */
     private void programFlowsForFloatingIPInbound(final NeutronFloatingIP neutronFloatingIP, final Action action) {
         Preconditions.checkNotNull(neutronFloatingIP);
 
@@ -294,6 +342,10 @@ public class NeutronL3Adapter implements ConfigInterface {
                                       action);
     }
 
+    /**
+     * This method performs creation or deletion of out-bound rules into Table 100 for a existing available floating
+     * ip, otherwise for newer one.
+     */
     private void programFlowsForFloatingIPOutbound(final NeutronFloatingIP neutronFloatingIP, final Action action) {
         Preconditions.checkNotNull(neutronFloatingIP);
 
@@ -318,6 +370,11 @@ public class NeutronL3Adapter implements ConfigInterface {
         }
     }
 
+    /**
+     * This method creates ARP response rules into OpenFlow Table 30 for a given floating ip. In order to connect
+     * to br-ex from br-int, a patch-port is used. Thus, the patch-port will be responsible to respond the ARP
+     * requests.
+     */
     private void programFlowsForFloatingIPArpAdd(final NeutronFloatingIP neutronFloatingIP) {
         Preconditions.checkNotNull(neutronFloatingIP);
         Preconditions.checkNotNull(neutronFloatingIP.getFixedIPAddress());
@@ -426,6 +483,12 @@ public class NeutronL3Adapter implements ConfigInterface {
         return null;
     }
 
+    /**
+     * Process the event.
+     *
+     * @param action the {@link org.opendaylight.ovsdb.openstack.netvirt.api.Action} action to be handled.
+     * @param neutronNetwork An {@link org.opendaylight.neutron.spi.NeutronNetwork} instance of NeutronFloatingIP object.
+     */
     public void handleNeutronNetworkEvent(final NeutronNetwork neutronNetwork, Action action) {
         LOGGER.debug("neutronNetwork {}: network: {}", action, neutronNetwork);
         if (!this.enabled) {
@@ -436,6 +499,16 @@ public class NeutronL3Adapter implements ConfigInterface {
     //
     // Callbacks from OVSDB's southbound handler
     //
+    /**
+     * Process the event.
+     *
+     * @param bridgeNode An instance of Node object.
+     * @param intf An {@link org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105
+     * .OvsdbTerminationPointAugmentation} instance of OvsdbTerminationPointAugmentation object.
+     * @param neutronNetwork An {@link org.opendaylight.neutron.spi.NeutronNetwork} instance of NeutronNetwork
+     * object.
+     * @param action the {@link org.opendaylight.ovsdb.openstack.netvirt.api.Action} action to be handled.
+     */
     public void handleInterfaceEvent(final Node bridgeNode, final OvsdbTerminationPointAugmentation intf,
                                      final NeutronNetwork neutronNetwork, Action action) {
         LOGGER.debug("southbound interface {} node:{} interface:{}, neutronNetwork:{}",

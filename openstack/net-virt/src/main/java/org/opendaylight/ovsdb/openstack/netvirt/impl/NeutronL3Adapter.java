@@ -285,7 +285,7 @@ public class NeutronL3Adapter implements ConfigInterface {
      * packets from the floating IP address to the internal fixed ip) rules on OpenFlow Table 30 and SNAT rules (other
      * way around) on OpenFlow Table 100.
      *
-     * @param action the {@link org.opendaylight.ovsdb.openstack.netvirt.api.Action} action to be handled.
+     * @param actionIn the {@link org.opendaylight.ovsdb.openstack.netvirt.api.Action} action to be handled.
      * @param neutronFloatingIP An {@link org.opendaylight.neutron.spi.NeutronFloatingIP} instance of NeutronFloatingIP object.
      */
     public void handleNeutronFloatingIPEvent(final NeutronFloatingIP neutronFloatingIP,

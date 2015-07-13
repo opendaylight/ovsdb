@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7a7fa997_7b1ce577",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/ConfigActivator.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-07-13T08:58:10Z",
+      "side": 1,
+      "message": "This service does very specific job of resolving the mac address of the gateway, so i used specific name. Also there were other services with ArpResponderService etc, so generic name might create confusion.",
+      "parentUuid": "7a7fa997_2042b810",
+      "range": {
+        "startLine": 96,
+        "startChar": 8,
+        "endLine": 96,
+        "endChar": 33
+      },
+      "revId": "792ce7468344799dd58e7bb007c356f5b60693f0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7fa997_e04b6029",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/NetvirtProvidersProvider.java",
         "patchSetId": 6
@@ -36,6 +60,30 @@
       "writtenOn": "2015-07-12T22:58:01Z",
       "side": 1,
       "message": "might as well just call it providerContext since we don\u0027t really use ref anywhere else.",
+      "range": {
+        "startLine": 18,
+        "startChar": 35,
+        "endLine": 18,
+        "endChar": 53
+      },
+      "revId": "792ce7468344799dd58e7bb007c356f5b60693f0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_1b137167",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/NetvirtProvidersProvider.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-07-13T08:58:10Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "7a7fa997_e04b6029",
       "range": {
         "startLine": 18,
         "startChar": 35,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "7a7fa997_fb07951b",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/AbstractServiceInstance.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-07-13T08:58:10Z",
+      "side": 1,
+      "message": "MdsalUtils is in net-virt module, so to use it in provider module, we need to either move it to .api package or expose the .impl package. I remember there was some issue regarding exposing .impl package, so i added this method in this class. This class anyways do the data store operation for flow add/delete/modify",
+      "parentUuid": "7a7fa997_8062acab",
+      "range": {
+        "startLine": 193,
+        "startChar": 15,
+        "endLine": 193,
+        "endChar": 27
+      },
+      "revId": "792ce7468344799dd58e7bb007c356f5b60693f0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7fa997_405c94ed",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/Service.java",
         "patchSetId": 6
@@ -82,6 +154,24 @@
       "writtenOn": "2015-07-12T22:58:01Z",
       "side": 1,
       "message": "would this be more readable if moved above? Everything in here is in ascending order",
+      "revId": "792ce7468344799dd58e7bb007c356f5b60693f0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_9b06a11f",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/Service.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-07-13T08:58:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a7fa997_405c94ed",
       "revId": "792ce7468344799dd58e7bb007c356f5b60693f0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

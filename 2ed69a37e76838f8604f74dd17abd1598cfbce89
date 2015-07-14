@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_c920ccf9",
+        "filename": "southbound/southbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 4313
+      },
+      "writtenOn": "2015-07-14T16:27:02Z",
+      "side": 1,
+      "message": "I think list of switch posts and tunnel_ips is missing which will represent switch VTEP ip address.",
+      "range": {
+        "startLine": 74,
+        "startChar": 0,
+        "endLine": 74,
+        "endChar": 6
+      },
+      "revId": "2ed69a37e76838f8604f74dd17abd1598cfbce89",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_e9726810",
+        "filename": "southbound/southbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 4313
+      },
+      "writtenOn": "2015-07-14T16:27:02Z",
+      "side": 1,
+      "message": "I think UUID is needed for all tables (not sure)",
+      "range": {
+        "startLine": 77,
+        "startChar": 47,
+        "endLine": 77,
+        "endChar": 48
+      },
+      "revId": "2ed69a37e76838f8604f74dd17abd1598cfbce89",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_c94e8cc1",
+        "filename": "southbound/southbound-api/src/main/yang/hwvtep.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 4313
+      },
+      "writtenOn": "2015-07-14T16:27:02Z",
+      "side": 1,
+      "message": "Remove the extra white spaces",
+      "range": {
+        "startLine": 139,
+        "startChar": 0,
+        "endLine": 139,
+        "endChar": 8
+      },
+      "revId": "2ed69a37e76838f8604f74dd17abd1598cfbce89",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

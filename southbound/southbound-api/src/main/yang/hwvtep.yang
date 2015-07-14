@@ -1,0 +1,334 @@
+﻿module hwvtep {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:hwvtep";
+    prefix "southbound";
+
+    import network-topology {prefix "topo"; revision-date "2013-10-21"; }
+    import yang-ext { prefix "ext"; }
+    import ietf-inet-types { prefix inet; revision-date 2010-09-24; }
+    import overlay { prefix overlay; }
+    import ietf-yang-types { prefix yang; revision-date "2013-07-15";}
+    import opendaylight-l2-types { prefix ethertype; revision-date "2013-08-27";}
+
+    revision "2015-01-05" {
+        description "Initial revision of southbound model for hwvtep";
+    }
+
+    typedef ovsdb-termination-point-ref {
+       description "A reference to an ovsdb termination point";
+       type instance-identifier;
+    }
+
+    typedef ovsdb-physical-switch-ref {
+        description "A reference to an ovsdb physical switch";
+        type instance-identifier;
+    }
+
+    typedef ovsdb-logical-switch-ref {
+        description "A reference to an ovsdb logical switch";
+        type instance-identifier;
+    }
+
+    typedef ovsdb-tunnel-ref {
+        description "A reference to an ovsdb tunnel";
+        type instance-identifier;
+    }
+
+    typedef ovsdb-physical-locator-ref {
+        description "A reference to an endpoint to which logical switch traffic may be encapsulated and forwarded";
+        type instance-identifier;
+    }
+
+    typedef ovsdb-physical-locator-set-ref {
+        description "A reference to a set of endpoints to which logical switch traffic may be encapsulated and forwarded via replication";
+        type instance-identifier;
+    }
+
+    typedef ovsdb-node-ref {
+        description "A reference to an ovsdb node";
+        type instance-identifier;
+    }
+
+    typedef ovsdb-physical-switch-name {
+        type string;
+    }
+
+    typedef ovsdb-logical-switch-name {
+        type string;
+    }
+
+    grouping ovsdb-physical-switch-attributes {
+
+        leaf physical-switch-name {
+            description "The name of the physical switch";
+            type ovsdb-physical-switch-name;
+        }
+        leaf physical-switch-description {
+            description "The description of the physical switch";
+            type string;
+        }
+        list management-ips {
+            key "ip-address";
+            leaf ip-address {
+               description "Management IP address of the switch";
+               type inet:ip-address;
+            }
+        }
+
+        leaf managed-by {
+            description "The OVSDB node to which this physical switch belongs to";
+            type ovsdb-node-ref;
+        }
+
+        list tunnel-ips {
+            key "ip-address";
+            leaf ip-address {
+               description "Management IP address of the switch";
+               type inet:ip-address;
+            }
+        }
+    }
+
+    grouping ovsdb-physical-locator-attributes {
+        leaf encapsulation-type {
+            type string;
+            description "Immutable string, must be vxlan_over_ipv4";
+        }
+        leaf dst-ip {
+            type inet:ip-address;
+            description "IP address of the locator";
+        }
+    }
+
+    grouping ovsdb-physical-locator-set-attributes {
+        list locators {
+            uses ovsdb-physical-locator-attributes;
+        }
+    }
+
+    grouping ovsdb-ucast-mac-table-attributes {
+        list mac-table-entry {
+            key "mac-entry";
+            leaf mac-entry {
+               description "MAC address entry";
+               type string;
+            }
+
+            leaf logical-switch-ref {
+               description "the logical switch to which this mapping applies";
+               type ovsdb-logical-switch-ref;
+            }
+
+            leaf locator-ref {
+               description "Reference to the physical locator to reach this entry";
+               type ovsdb-physical-locator-ref;
+            }
+
+            leaf ipaddr {
+               description " Optional ip address associated with the mac";
+               type inet:ip-address;
+            }
+        }
+    }
+
+    grouping ovsdb-mcast-mac-table-attributes {
+        list mac-table-entry {
+            key "mac-entry";
+            leaf mac-entry {
+               description "MAC address entry";
+               type string;
+            }
+
+            leaf logical-switch-ref {
+               description "the logical switch to which this mapping applies";
+               type ovsdb-logical-switch-ref;
+            }
+
+            leaf locator-set-ref {
+               description "Reference to a set of physical locators used for replication";
+               type ovsdb-physical-locator-set-ref;
+            }
+
+            leaf ipaddr {
+               description " Optional ip address associated with the mac";
+               type inet:ip-address;
+            }
+        }
+    }
+
+    grouping ovsdb-logical-switch-attributes {
+        leaf logical-switch-uuid {
+            description "The unique identifier of the logical switch";
+            type yang:uuid;
+        }
+
+        leaf logical-switch-name {
+            description "The name of the logical switch";
+            type ovsdb-logical-switch-name;
+        }
+        leaf logical-switch-description {
+            description "The description of the logical switch";
+            type string;
+        }
+
+        leaf tunnel-key {
+            description "Per Logical Switch tunnel key";
+            type string;
+        }
+
+        container ovsdb-logical-switch-ucast-macs-local {
+            uses ovsdb-ucast-mac-table-attributes;
+        }
+
+        container ovsdb-logical-switch-ucast-macs-remote {
+            uses ovsdb-ucast-mac-table-attributes;
+        }
+
+        container ovsdb-logical-switch-mcast-macs-local {
+            uses ovsdb-mcast-mac-table-attributes;
+        }
+
+        container ovsdb-logical-switch-mcast-macs-remote {
+            uses ovsdb-mcast-mac-table-attributes;
+        }
+    }
+
+
+    grouping ovsdb-connection-info-attributes {
+        leaf remote-ip {
+            type inet:ip-address;
+            description "Ovsdb Connection Remote IP";
+          }
+          leaf remote-port {
+            type inet:port-number;
+            description "Ovsdb Connection Remote Port Number";
+          }
+          leaf local-ip {
+            type inet:ip-address;
+            description "Ovsdb Connection Local IP";
+          }
+          leaf local-port {
+            type inet:port-number;
+            description "Ovsdb Connection Local Port Number IP";
+          }
+    }
+
+    /* should this go as augmentation in ovsdb.yang ? will there be conflicts*/
+    grouping ovsdb-node-attributes {
+        description "";
+        container connection-info{
+            uses ovsdb-connection-info-attributes;
+        }
+
+        leaf db-version {
+            description "The database schema version";
+            type string;
+        }
+
+        list managed-node-entry {
+            key "physical-switch-ref";
+            leaf physical-switch-ref {
+                type ovsdb-physical-switch-ref;
+            }
+        }
+
+        list switch-other-configs {
+            description "Key-value pairs for configuring rarely used features.
+
+            other_config : dscp : optional string
+               contains an integer, in the range 0 - 63. DSCP value to be used when establishing a connection to the switch. Default value of 48 if none specified.";
+            key "other-config-key";
+            leaf other-config-key {
+                description "other-config name/key";
+                type string;
+            }
+            leaf other-config-value {
+                description "other-config value";
+                type string;
+            }
+        }
+
+    }
+
+
+    grouping ovsdb-physical-port-attributes {
+
+        leaf name {
+            description "The name of the OVSDB physical port";
+            type string;
+        }
+
+        leaf description {
+            description "The description of the OVSDB physical port";
+            type string;
+        }
+
+         list vlan-bindings {
+            description "A map of vlan ID to logical switch pairs";
+            key "vlan-id-key";
+            leaf vlan-id-key {
+                description "vlan ids in the range 0 - 4095";
+                type ethertype:vlan-id;
+            }
+            leaf logical-switch {
+                description "reference to logical switch for the vlan";
+                type ovsdb-logical-switch-ref;
+            }
+        }
+    }
+
+    grouping ovsdb-tunnel-attributes {
+        leaf local-physical-locator {
+            description "Reference to the physical locator to reach this entry";
+               type ovsdb-physical-locator-ref;
+        }
+
+        leaf remote-physical-locator {
+            description "Reference to the physical locator to reach this entry";
+               type ovsdb-physical-locator-ref;
+        }
+
+        leaf bfd-config-local {
+            type string;
+        }
+
+        leaf bfd-config-remote {
+            type string;
+        }
+
+        leaf bfd-params {
+            type string;
+        }
+
+    }
+
+    augment "/topo:network-topology/topo:topology/topo:node" {
+        description "Augmentation for physical switch nodes managed by ovsdb";
+        ext:augment-identifier "ovsdb-physwitch-augmentation";
+        uses ovsdb-physical-switch-attributes;
+    }
+
+    augment "/topo:network-topology/topo:topology/topo:node" {
+        description "Augment topology node for an ovsdb node";
+        ext:augment-identifier "ovsdb-node-augmentation";
+        uses ovsdb-node-attributes;
+    }
+
+    augment "/topo:network-topology/topo:topology/topo:node" {
+        description "Augmentation for logical switches for an ovsdb node";
+        ext:augment-identifier "ovsdb-lswitch-augmentation";
+        uses ovsdb-logical-switch-attributes;
+    }
+
+    augment "/topo:network-topology/topo:topology/topo:node/topo:termination-point" {
+        description "Augment topology node termination-point for an ovsdb physical-port";
+        ext:augment-identifier "ovsdb-termination-point-augmentation";
+        uses ovsdb-physical-port-attributes;
+    }
+
+    augment "/topo:network-topology/topo:topology/topo:node/topo:termination-point" {
+        description "Augment topology node termination-point for an ovsdb tunnel";
+        ext:augment-identifier "ovsdb-termination-point-augmentation";
+        uses ovsdb-tunnel-attributes;
+    }
+}

@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_a7f2576d",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/GatewayMacResolverService.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-07-15T14:23:53Z",
+      "side": 1,
+      "message": "javadoc: externalNetworkBridgeDpid",
+      "range": {
+        "startLine": 144,
+        "startChar": 14,
+        "endLine": 144,
+        "endChar": 35
+      },
+      "revId": "c472d154beb430ebf594b5c89b85d7d4b74afa27",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_47e9037f",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/GatewayMacResolverService.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-07-15T14:23:53Z",
+      "side": 1,
+      "message": "question: will the periodic functionality include re-visiting this code? thinking of cases when controller is not connected for br-ex initially, but then it gets connected.",
+      "range": {
+        "startLine": 145,
+        "startChar": 36,
+        "endLine": 145,
+        "endChar": 45
+      },
+      "revId": "c472d154beb430ebf594b5c89b85d7d4b74afa27",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

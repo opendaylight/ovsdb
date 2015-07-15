@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7a7fa997_22d95583",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/GatewayMacResolverService.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-07-15T18:32:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a7fa997_a7f2576d",
+      "range": {
+        "startLine": 144,
+        "startChar": 14,
+        "endLine": 144,
+        "endChar": 35
+      },
+      "revId": "c472d154beb430ebf594b5c89b85d7d4b74afa27",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7fa997_47e9037f",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/GatewayMacResolverService.java",
         "patchSetId": 14
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "7a7fa997_c2e7413f",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/GatewayMacResolverService.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-07-15T18:32:02Z",
+      "side": 1,
+      "message": "we trigger mac resolution when we get the router_gateway port and if none of br-ex exist at that time, we don\u0027t really cache the gateway ip. But i think we should do that. I need to do two enhancement in this 1) Reducing flooding 2) Adding periodic refresh, which i am planning to push end of this week. Is that okay?",
+      "parentUuid": "7a7fa997_47e9037f",
+      "range": {
+        "startLine": 145,
+        "startChar": 36,
+        "endLine": 145,
+        "endChar": 45
+      },
+      "revId": "c472d154beb430ebf594b5c89b85d7d4b74afa27",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7fa997_a799f720",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
         "patchSetId": 14
@@ -59,6 +107,30 @@
       "writtenOn": "2015-07-15T14:29:08Z",
       "side": 1,
       "message": "gatewayMacResolver.resolveMacAddress() may return null.\nin that case this wols cause NPE in futures. Must handle gatewayMacAddress \u003d\u003d null cases.",
+      "range": {
+        "startLine": 1213,
+        "startChar": 44,
+        "endLine": 1213,
+        "endChar": 61
+      },
+      "revId": "c472d154beb430ebf594b5c89b85d7d4b74afa27",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_e2e27d2e",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 1213,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-07-15T18:32:02Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "7a7fa997_a799f720",
       "range": {
         "startLine": 1213,
         "startChar": 44,

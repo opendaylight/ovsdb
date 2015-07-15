@@ -45,6 +45,29 @@
       "revId": "c472d154beb430ebf594b5c89b85d7d4b74afa27",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_a799f720",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 1213,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-07-15T14:29:08Z",
+      "side": 1,
+      "message": "gatewayMacResolver.resolveMacAddress() may return null.\nin that case this wols cause NPE in futures. Must handle gatewayMacAddress \u003d\u003d null cases.",
+      "range": {
+        "startLine": 1213,
+        "startChar": 44,
+        "endLine": 1213,
+        "endChar": 61
+      },
+      "revId": "c472d154beb430ebf594b5c89b85d7d4b74afa27",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

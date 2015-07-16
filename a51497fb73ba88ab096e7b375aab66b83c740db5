@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7a7fa997_5d3f96d6",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-07-16T15:12:06Z",
+      "side": 1,
+      "message": "In the initialisation of operationalNodes (the instance field).",
+      "parentUuid": "7a7fa997_dd53a637",
+      "range": {
+        "startLine": 15,
+        "startChar": 21,
+        "endLine": 15,
+        "endChar": 23
+      },
+      "revId": "a51497fb73ba88ab096e7b375aab66b83c740db5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7fa997_7d4b7287",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeOperationalState.java",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "7a7fa997_9d352ef9",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeOperationalState.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-07-16T15:12:06Z",
+      "side": 1,
+      "message": "Yes, Map.get() returns null if the key isn\u0027t in the map, and Optional.fromNullable() returns absent() if given null, present() if given a value.",
+      "parentUuid": "7a7fa997_7d4b7287",
+      "range": {
+        "startLine": 58,
+        "startChar": 24,
+        "endLine": 58,
+        "endChar": 36
+      },
+      "revId": "a51497fb73ba88ab096e7b375aab66b83c740db5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7fa997_fd5ea244",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeOperationalState.java",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2015-07-16T14:58:03Z",
       "side": 1,
       "message": "can you use nodeoptional.fromNullable() to avoid chcking isPresent()",
+      "range": {
+        "startLine": 64,
+        "startChar": 28,
+        "endLine": 64,
+        "endChar": 40
+      },
+      "revId": "a51497fb73ba88ab096e7b375aab66b83c740db5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_3d3c1ae2",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeOperationalState.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-07-16T15:12:06Z",
+      "side": 1,
+      "message": "Unfortunately not, nodeOptional.get() throws an IllegalStateException if called when the value is absent, so we still need to protect that call.",
+      "parentUuid": "7a7fa997_fd5ea244",
       "range": {
         "startLine": 64,
         "startChar": 28,

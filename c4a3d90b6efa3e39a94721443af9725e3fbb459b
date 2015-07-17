@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_05cc60bb",
+        "filename": "openstack/net-virt-providers/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13ProviderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 518,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-07-17T15:12:50Z",
+      "side": 0,
+      "message": "The test shouldn\u0027t be delete, it should be updated.",
+      "revId": "c4a3d90b6efa3e39a94721443af9725e3fbb459b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_25cf1cb2",
+        "filename": "openstack/net-virt-providers/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13ProviderTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 526,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-07-17T15:12:50Z",
+      "side": 0,
+      "message": "instead of having an assertEquals we could have a \n\nverify(networkingProviderManager, times(1)).providerAdded(any(ServiceReference.class);",
+      "revId": "c4a3d90b6efa3e39a94721443af9725e3fbb459b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

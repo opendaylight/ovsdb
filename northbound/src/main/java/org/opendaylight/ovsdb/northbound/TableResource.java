@@ -84,7 +84,9 @@ public class TableResource {
             return ciTableName;
         }
         for (String tableName : tables) {
-            if (tableName.equalsIgnoreCase(ciTableName)) return tableName;
+            if (tableName.equalsIgnoreCase(ciTableName)) {
+                return tableName;
+            }
         }
         return ciTableName;
     }

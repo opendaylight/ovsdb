@@ -168,12 +168,13 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
 
         // Match Tunnel-ID, VIP, and Reg0==0
         if (lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) ||
-            lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE))
+            lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)) {
             MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(lbConfig.getProviderSegmentationId()));
-        else if (lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN))
+        } else if (lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
             MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(lbConfig.getProviderSegmentationId())), true);
-        else
+        } else {
             return; //Should not get here. TODO: Other types
+        }
 
         MatchUtils.createDstL3IPv4Match(matchBuilder, MatchUtils.iPv4PrefixFromIPv4Address(lbConfig.getVip()));
         MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(REG_FIELD_A, FIRST_PASS_REGA_MATCH_VALUE));
@@ -267,12 +268,13 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
 
         // Match Tunnel-ID, VIP, Reg0==1 and Reg1==Index of member
         if (lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) ||
-            lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE))
+            lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)) {
             MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(lbConfig.getProviderSegmentationId()));
-        else if (lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN))
+        } else if (lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
             MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(lbConfig.getProviderSegmentationId())), true);
-        else
+        } else {
             return; //Should not get here. TODO: Other types
+        }
 
         MatchUtils.createDstL3IPv4Match(matchBuilder, MatchUtils.iPv4PrefixFromIPv4Address(vip));
         MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(REG_FIELD_A, SECOND_PASS_REGA_MATCH_VALUE),
@@ -365,12 +367,13 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
 
         // Match Tunnel-ID, MemberIP, and Protocol/Port
         if (lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) ||
-                   lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE))
+                   lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)) {
             MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(lbConfig.getProviderSegmentationId()));
-        else if (lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN))
+        } else if (lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
             MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(lbConfig.getProviderSegmentationId())), true);
-        else
+        } else {
             return; //Should not get here. TODO: Other types
+        }
 
         MatchUtils.createSrcL3IPv4Match(matchBuilder, MatchUtils.iPv4PrefixFromIPv4Address(member.getIP()));
         MatchUtils.createSetSrcTcpMatch(matchBuilder, new PortNumber(member.getPort()));

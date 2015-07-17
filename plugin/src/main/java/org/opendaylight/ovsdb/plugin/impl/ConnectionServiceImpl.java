@@ -150,7 +150,9 @@ public class ConnectionServiceImpl implements OvsdbConnectionService,
 
         try {
             port = Integer.parseInt(params.get(ConnectionConstants.PORT));
-            if (port == 0) port = DEFAULT_OVSDB_PORT;
+            if (port == 0) {
+                port = DEFAULT_OVSDB_PORT;
+            }
         } catch (Exception e) {
             port = DEFAULT_OVSDB_PORT;
         }
@@ -343,7 +345,9 @@ public class ConnectionServiceImpl implements OvsdbConnectionService,
     @Override
     public void disconnected(OvsdbClient client) {
         Connection connection = ovsdbConnections.get(this.getConnectionIdentifier(client));
-        if (connection == null) return;
+        if (connection == null) {
+            return;
+        }
         this.disconnect(connection.getNode());
     }
 }

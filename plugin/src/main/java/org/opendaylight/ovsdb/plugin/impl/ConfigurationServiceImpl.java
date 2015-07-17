@@ -499,17 +499,23 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
     @Override
     public <T extends TypedBaseTable<?>> String getTableName(Node node, Class<T> typedClass) {
         Connection connection = connectionService.getConnection(node);
-        if (connection == null) return null;
+        if (connection == null) {
+            return null;
+        }
         OvsdbClient client = connection.getClient();
         TypedBaseTable<?> typedTable = client.getTypedRowWrapper(typedClass, null);
-        if (typedTable == null) return null;
+        if (typedTable == null) {
+            return null;
+        }
         return typedTable.getSchema().getName();
     }
 
     @Override
     public <T extends TypedBaseTable<?>> T getTypedRow(Node node, Class<T> typedClass, Row row) {
         Connection connection = connectionService.getConnection(node);
-        if (connection == null) return null;
+        if (connection == null) {
+            return null;
+        }
         OvsdbClient client = connection.getClient();
         return (T)client.getTypedRowWrapper(typedClass, row);
     }
@@ -517,7 +523,9 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
     @Override
     public <T extends TypedBaseTable<?>> T createTypedRow(Node node, Class<T> typedClass) {
         Connection connection = connectionService.getConnection(node);
-        if (connection == null) return null;
+        if (connection == null) {
+            return null;
+        }
         OvsdbClient client = connection.getClient();
         return client.createTypedRowWrapper(typedClass);
     }
@@ -526,7 +534,9 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
 
     private String getTableNameForRowUuid(Node node, String databaseName, UUID rowUuid) {
         ConcurrentMap<String, ConcurrentMap<String, Row>> cache  = ovsdbInventoryService.getCache(node, databaseName);
-        if (cache == null) return null;
+        if (cache == null) {
+            return null;
+        }
         for (String tableName : cache.keySet()) {
             ConcurrentMap<String, Row> rows = cache.get(tableName);
             if (rows.get(rowUuid.toString()) != null) {

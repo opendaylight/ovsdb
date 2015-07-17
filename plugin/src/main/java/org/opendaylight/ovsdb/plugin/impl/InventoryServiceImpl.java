@@ -95,7 +95,9 @@ public class InventoryServiceImpl implements OvsdbInventoryService {
     @Override
     public ConcurrentMap<String, ConcurrentMap<String, Row>> getCache(Node n, String databaseName) {
         NodeDatabase db = dbCache.get(n);
-        if (db == null) return null;
+        if (db == null) {
+            return null;
+        }
         return db.getDatabase(databaseName);
     }
 
@@ -103,7 +105,9 @@ public class InventoryServiceImpl implements OvsdbInventoryService {
     @Override
     public ConcurrentMap<String, Row> getTableCache(Node n, String databaseName, String tableName) {
         NodeDatabase db = dbCache.get(n);
-        if (db == null) return null;
+        if (db == null) {
+            return null;
+        }
         return db.getTableCache(databaseName, tableName);
     }
 
@@ -111,7 +115,9 @@ public class InventoryServiceImpl implements OvsdbInventoryService {
     @Override
     public Row getRow(Node n, String databaseName, String tableName, String uuid) {
         NodeDatabase db = dbCache.get(n);
-        if (db == null) return null;
+        if (db == null) {
+            return null;
+        }
         return db.getRow(databaseName, tableName, uuid);
     }
 
@@ -128,7 +134,9 @@ public class InventoryServiceImpl implements OvsdbInventoryService {
     @Override
     public void removeRow(Node n, String databaseName, String tableName, String uuid) {
         NodeDatabase db = dbCache.get(n);
-        if (db != null) db.removeRow(databaseName, tableName, uuid);
+        if (db != null) {
+            db.removeRow(databaseName, tableName, uuid);
+        }
     }
 
     @Override
@@ -181,7 +189,9 @@ public class InventoryServiceImpl implements OvsdbInventoryService {
                 @Override
                 public void run() {
                     try {
-                        if (ovsdbConfigurationService != null) ovsdbConfigurationService.setOFController(node, uuid.toString());
+                        if (ovsdbConfigurationService != null) {
+                            ovsdbConfigurationService.setOFController(node, uuid.toString());
+                        }
                     } catch (InterruptedException | ExecutionException e) {
                         e.printStackTrace();
                     }

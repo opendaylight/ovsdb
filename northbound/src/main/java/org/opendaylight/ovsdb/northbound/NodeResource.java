@@ -94,7 +94,9 @@ public class NodeResource {
     public Response getNodes() throws JsonProcessingException {
         OvsdbConnectionService connectionService = (OvsdbConnectionService)ServiceHelper.getGlobalInstance(OvsdbConnectionService.class, this);
         List<Node> nodes = connectionService.getNodes();
-        if (nodes == null) return Response.noContent().build();
+        if (nodes == null) {
+            return Response.noContent().build();
+        }
 
         List<String> nodeIds = Lists.newArrayList();
         for (Node node : nodes) {

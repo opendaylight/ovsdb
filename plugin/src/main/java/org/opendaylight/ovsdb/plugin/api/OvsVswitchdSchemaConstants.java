@@ -58,8 +58,7 @@ public final class OvsVswitchdSchemaConstants {
     }
 
     public static boolean shouldConfigureController (String databaseName, String tableName) {
-        if (autoConfigureController && databaseName.equals(DATABASE_NAME) && tableName.equals("Bridge")) return true;
-        return false;
+        return autoConfigureController && databaseName.equals(DATABASE_NAME) && tableName.equals("Bridge");
     }
 
     public enum PortType {

@@ -69,13 +69,17 @@ public class PipelineOrchestratorImpl implements ConfigInterface, NodeCacheListe
     @Override
     public Service getNextServiceInPipeline(Service service) {
         int index = staticPipeline.indexOf(service);
-        if (index >= staticPipeline.size() - 1) return null;
+        if (index >= staticPipeline.size() - 1) {
+            return null;
+        }
         return staticPipeline.get(index + 1);
     }
 
     @Override
     public AbstractServiceInstance getServiceInstance(Service service) {
-        if (service == null) return null;
+        if (service == null) {
+            return null;
+        }
         return serviceRegistry.get(service);
     }
 

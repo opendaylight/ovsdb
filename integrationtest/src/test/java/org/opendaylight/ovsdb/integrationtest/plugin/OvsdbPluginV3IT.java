@@ -244,7 +244,9 @@ public class OvsdbPluginV3IT extends OvsdbIntegrationTestBase {
     public String getOpenVSwitchTableUUID(Connection connection) throws Exception {
         OpenVSwitch openVSwitch = connection.getClient().getTypedRowWrapper(OpenVSwitch.class, null);
         ConcurrentMap<UUID, Row<GenericTableSchema>> rows = ovsdbConfigurationService.getRows(node, databaseName, openVSwitch.getSchema().getName());
-        if (rows == null || rows.size() == 0) return null;
+        if (rows == null || rows.size() == 0) {
+            return null;
+        }
         return rows.keySet().toArray()[0].toString();
     }
 

@@ -77,9 +77,13 @@ public class DatabaseResource {
         OvsdbClient client = NodeResource.getOvsdbClient(nodeId, this);
         try {
             List<String> databases = client.getDatabases().get();
-            if (databases == null) return ciDatabaseName;
+            if (databases == null) {
+                return ciDatabaseName;
+            }
             for (String csDatabaseName : databases) {
-                if (csDatabaseName.equalsIgnoreCase(ciDatabaseName)) return csDatabaseName;
+                if (csDatabaseName.equalsIgnoreCase(ciDatabaseName)) {
+                    return csDatabaseName;
+                }
             }
             return ciDatabaseName;
         } catch (Exception e) {

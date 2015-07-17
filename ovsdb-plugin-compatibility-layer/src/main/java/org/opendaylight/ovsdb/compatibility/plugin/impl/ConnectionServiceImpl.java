@@ -62,9 +62,9 @@ public class ConnectionServiceImpl implements OvsdbConnectionService{
     }
 
     public void unsetOvsdbConnectionService(org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService pluginOvsdbConnectionService){
-        if(this.pluginOvsdbConnectionService != null)
-            this.pluginOvsdbConnectionService = null;
+        this.pluginOvsdbConnectionService = null;
     }
+
     @Override
     public Connection getConnection(Node node) {
         return pluginOvsdbConnectionService.getConnection(NodeUtils.getMdsalNode(node));

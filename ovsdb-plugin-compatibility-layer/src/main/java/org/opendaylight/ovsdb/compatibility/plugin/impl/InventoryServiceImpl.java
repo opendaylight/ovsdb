@@ -87,8 +87,9 @@ public class InventoryServiceImpl implements OvsdbInventoryService,
     }
 
     public void removeOvsdbInventoryListener(OvsdbInventoryListener pluginOvsdbInventoryListener){
-        if(this.ovsdbInventoryListeners.contains(ovsdbInventoryListeners))
+        if(this.ovsdbInventoryListeners.contains(ovsdbInventoryListeners)) {
             this.ovsdbInventoryListeners.remove(ovsdbInventoryListeners);
+        }
     }
 
     @Override
@@ -149,23 +150,26 @@ public class InventoryServiceImpl implements OvsdbInventoryService,
     @Override
     public void nodeAdded(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node node,
                           InetAddress address, int port) {
-        for(OvsdbInventoryListener listener : this.ovsdbInventoryListeners)
+        for(OvsdbInventoryListener listener : this.ovsdbInventoryListeners) {
             listener.nodeAdded(NodeUtils.getSalNode(node), address, port);
+        }
 
     }
 
     @Override
     public void nodeRemoved(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node node) {
-        for(OvsdbInventoryListener listener : this.ovsdbInventoryListeners)
+        for(OvsdbInventoryListener listener : this.ovsdbInventoryListeners) {
             listener.nodeRemoved(NodeUtils.getSalNode(node));
+        }
 
     }
 
     @Override
     public void rowAdded(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node node,
                          String tableName, String uuid, Row row) {
-        for(OvsdbInventoryListener listener : this.ovsdbInventoryListeners)
+        for(OvsdbInventoryListener listener : this.ovsdbInventoryListeners) {
             listener.rowAdded(NodeUtils.getSalNode(node), tableName, uuid, row);
+        }
 
     }
 
@@ -173,8 +177,9 @@ public class InventoryServiceImpl implements OvsdbInventoryService,
     public void rowUpdated(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node node,
                            String tableName, String uuid, Row old,
             Row row) {
-        for(OvsdbInventoryListener listener : this.ovsdbInventoryListeners)
+        for(OvsdbInventoryListener listener : this.ovsdbInventoryListeners) {
             listener.rowUpdated(NodeUtils.getSalNode(node), tableName, uuid, old, row);
+        }
 
     }
 
@@ -182,7 +187,8 @@ public class InventoryServiceImpl implements OvsdbInventoryService,
     public void rowRemoved(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node node,
                            String tableName, String uuid, Row row,
             Object context) {
-        for(OvsdbInventoryListener listener : this.ovsdbInventoryListeners)
+        for(OvsdbInventoryListener listener : this.ovsdbInventoryListeners) {
             listener.rowRemoved(NodeUtils.getSalNode(node), tableName, uuid, row, context);
+        }
     }
 }

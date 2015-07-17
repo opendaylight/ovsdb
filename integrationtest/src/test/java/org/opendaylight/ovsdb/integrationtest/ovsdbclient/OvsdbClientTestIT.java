@@ -122,10 +122,14 @@ public class OvsdbClientTestIT extends OvsdbTestBase {
                 System.out.println("t = " + t);
             }
         });
-        if (updates != null) results.add(updates);
+        if (updates != null) {
+            results.add(updates);
+        }
         for (int i = 0; i < 3 ; i++) { //wait 3 seconds to get a result
             System.out.println("waiting on monitor response for Bridge Table...");
-            if (!results.isEmpty()) break;
+            if (!results.isEmpty()) {
+                break;
+            }
             Thread.sleep(1000);
         }
 
@@ -137,7 +141,9 @@ public class OvsdbClientTestIT extends OvsdbTestBase {
         Assert.assertTrue(update.getRows().size() > 0);
         for (UUID uuid : update.getRows().keySet()) {
             Row<GenericTableSchema> aNew = update.getNew(uuid);
-            if (!aNew.getColumn(name).getData().equals(testBridgeName)) continue;
+            if (!aNew.getColumn(name).getData().equals(testBridgeName)) {
+                continue;
+            }
             if (filter) {
                 Assert.assertEquals(builder.getColumns().size(), aNew.getColumns().size());
             } else {
@@ -326,7 +332,9 @@ public class OvsdbClientTestIT extends OvsdbTestBase {
 
     @After
     public void tearDown() throws InterruptedException, ExecutionException {
-        if (dbSchema == null) return;
+        if (dbSchema == null) {
+            return;
+        }
         TableSchema<GenericTableSchema> bridge = dbSchema.table("Bridge", GenericTableSchema.class);
         ColumnSchema<GenericTableSchema, String> name = bridge.column("name", String.class);
         GenericTableSchema ovsTable = dbSchema.table("Open_vSwitch", GenericTableSchema.class);

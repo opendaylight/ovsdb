@@ -399,10 +399,11 @@ public final class ActionUtils {
         final String HEXES = "0123456789ABCDEF";
         byte[] address = new byte[6];
         String[] macBytes = macAddress.split(":");
-        if (macBytes.length != 6)
+        if (macBytes.length != 6) {
             throw new IllegalArgumentException(
                     "Specified MAC Address must contain 12 hex digits" +
                     " separated pairwise by :'s.");
+        }
         for (int i = 0; i < 6; ++i) {
             address[i] = (byte) ((HEXES.indexOf(macBytes[i].toUpperCase()
                                                         .charAt(0)) << 4) | HEXES.indexOf(macBytes[i].toUpperCase()

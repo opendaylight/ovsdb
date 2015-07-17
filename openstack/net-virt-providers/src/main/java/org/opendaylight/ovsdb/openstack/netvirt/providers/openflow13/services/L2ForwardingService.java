@@ -1024,9 +1024,11 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
             if (in.getInstruction() instanceof ApplyActionsCase) {
                 existingActions = (((ApplyActionsCase) in.getInstruction()).getApplyActions().getAction());
                 // Only include output actions
-                for (Action action : existingActions)
-                    if (action.getAction() instanceof OutputActionCase)
+                for (Action action : existingActions) {
+                    if (action.getAction() instanceof OutputActionCase) {
                         actionList.add(action);
+                    }
+                }
             }
         }
         /* Create output action for this port*/

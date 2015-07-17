@@ -68,8 +68,7 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
     }
 
     public void unsetOvsdbConfigurationService(org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService pluginOvsdbConfigurationService){
-        if(this.pluginOvsdbConfigurationService != null)
-            this.pluginOvsdbConfigurationService = null;
+        this.pluginOvsdbConfigurationService = null;
     }
 
 

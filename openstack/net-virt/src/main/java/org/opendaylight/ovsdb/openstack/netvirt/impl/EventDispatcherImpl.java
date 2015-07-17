@@ -74,8 +74,9 @@ public class EventDispatcherImpl implements EventDispatcher, ConfigInterface {
             if (!eventHandler.awaitTermination(10, TimeUnit.SECONDS)) {
                 eventHandler.shutdownNow();
                 // Wait a while for tasks to respond to being cancelled
-                if (!eventHandler.awaitTermination(10, TimeUnit.SECONDS))
+                if (!eventHandler.awaitTermination(10, TimeUnit.SECONDS)) {
                     logger.error("Dispatcher's event handler did not terminate");
+                }
             }
         } catch (InterruptedException e) {
             // (Re-)Cancel if current thread also interrupted

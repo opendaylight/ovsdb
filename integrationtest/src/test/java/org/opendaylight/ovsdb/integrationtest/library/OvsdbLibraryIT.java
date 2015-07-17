@@ -112,8 +112,7 @@ public class OvsdbLibraryIT extends OvsdbIntegrationTestBase {
         ListenableFuture<List<String>> databases = client.getDatabases();
         List<String> dbNames = databases.get();
         assertNotNull(dbNames);
-        if (dbNames.contains(schema)) return true;
-        return false;
+        return dbNames.contains(schema);
     }
 
     static String testBridgeName = "br_test";

@@ -260,8 +260,9 @@ public class LBaaSPoolHandler extends AbstractHandler
                 }
             }
 
-            if (lbConfig.getMembers().size() > 0)
+            if (lbConfig.getMembers().size() > 0) {
                 lbConfigList.add(lbConfig);
+            }
         }
 
         return lbConfigList;

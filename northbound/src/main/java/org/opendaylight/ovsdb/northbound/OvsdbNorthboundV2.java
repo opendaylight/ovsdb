@@ -685,9 +685,13 @@ public class OvsdbNorthboundV2 {
 
     private String getBackwardCompatibleTableName(OvsdbClient client, String databaseName, String tableName) {
         DatabaseSchema dbSchema = client.getDatabaseSchema(databaseName);
-        if (dbSchema == null || tableName == null) return tableName;
+        if (dbSchema == null || tableName == null) {
+            return tableName;
+        }
         for (String dbTableName : dbSchema.getTables()) {
-            if (dbTableName.equalsIgnoreCase(tableName)) return dbTableName;
+            if (dbTableName.equalsIgnoreCase(tableName)) {
+                return dbTableName;
+            }
         }
         return tableName;
     }

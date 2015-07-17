@@ -1016,18 +1016,21 @@ public class MatchUtils {
                                               MacAddress dstMac,
                                               Long etherType) {
         EthernetMatchBuilder emb = new  EthernetMatchBuilder();
-        if (srcMac != null)
+        if (srcMac != null) {
             emb.setEthernetSource(new EthernetSourceBuilder()
                 .setAddress(srcMac)
                 .build());
-        if (dstMac != null)
+        }
+        if (dstMac != null) {
             emb.setEthernetDestination(new EthernetDestinationBuilder()
                 .setAddress(dstMac)
                 .build());
-        if (etherType != null)
+        }
+        if (etherType != null) {
             emb.setEthernetType(new EthernetTypeBuilder()
                 .setType(new EtherType(etherType))
                 .build());
+        }
         return emb.build();
     }
 

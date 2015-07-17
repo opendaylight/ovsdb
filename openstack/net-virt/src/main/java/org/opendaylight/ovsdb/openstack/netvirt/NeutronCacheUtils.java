@@ -31,8 +31,9 @@ public class NeutronCacheUtils {
      * @return MAC address registered with that IP address
      */
     public static String getMacAddress(INeutronPortCRUD neutronPortsCache, String subnetID, String ipAddr) {
-        if (ipAddr == null || subnetID == null)
+        if (ipAddr == null || subnetID == null) {
             return null;
+        }
 
         List<Neutron_IPs> fixedIPs;
         Iterator<Neutron_IPs> fixedIPIterator;
@@ -47,8 +48,9 @@ public class NeutronCacheUtils {
                 fixedIPIterator = fixedIPs.iterator();
                 while (fixedIPIterator.hasNext()) {
                     ip = fixedIPIterator.next();
-                    if (ip.getIpAddress().equals(ipAddr) && ip.getSubnetUUID().equals(subnetID))
+                    if (ip.getIpAddress().equals(ipAddr) && ip.getSubnetUUID().equals(subnetID)) {
                         return port.getMacAddress();
+                    }
                 }
             }
         }
@@ -73,8 +75,9 @@ public class NeutronCacheUtils {
                 break;
             }
         }
-        if (networkID == null)
+        if (networkID == null) {
             return null;
+        }
 
         List<NeutronNetwork> allNetworks = neutronNetworkCache.getAllNetworks();
         for (NeutronNetwork network: allNetworks) {

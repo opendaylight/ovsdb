@@ -8,14 +8,11 @@
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.neutron.spi.NeutronPort;
-import org.opendaylight.neutron.spi.NeutronSecurityGroup;
 import org.opendaylight.neutron.spi.Neutron_IPs;
 import org.opendaylight.ovsdb.openstack.netvirt.MdsalHelper;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
@@ -38,16 +35,6 @@ import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.NetvirtProvidersProvider;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.InstructionUtils;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.GroupActionCase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.GroupActionCaseBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.OutputActionCase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.OutputActionCaseBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.group.action._case.GroupActionBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.output.action._case.OutputActionBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.Table;
@@ -57,29 +44,13 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.ta
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCaseBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.apply.actions._case.ApplyActionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.BucketId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.GroupId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.GroupTypes;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group.Buckets;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group.BucketsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group.buckets.Bucket;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group.buckets.BucketBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.group.buckets.BucketKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.Group;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.GroupBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.group.types.rev131018.groups.GroupKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -88,7 +59,6 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -108,12 +78,14 @@ import java.util.concurrent.ExecutionException;
  * @author Dave Tucker
  * @author Sam Hague
  */
+// Methods' parameters in this class follow the same pattern to avoid confusion between same-typed parameters
+// The patterns need to be preserved even though not all parameters are used in all methods
+@SuppressWarnings("UnusedParameters")
 public class OF13Provider implements ConfigInterface, NetworkingProvider {
     private static final Logger logger = LoggerFactory.getLogger(OF13Provider.class);
     private static final short TABLE_0_DEFAULT_INGRESS = 0;
     private static final short TABLE_1_ISOLATE_TENANT = 10;
     private static final short TABLE_2_LOCAL_FORWARD = 20;
-    private static Long groupId = 1L;
     private DataBroker dataBroker = null;
 
     private volatile ConfigurationService configurationService;
@@ -127,7 +99,6 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
     private volatile L2ForwardingProvider l2ForwardingProvider;
 
     public static final String NAME = "OF13Provider";
-    private volatile NetworkingProviderManager networkingProviderManager;
     private volatile BundleContext bundleContext;
     private volatile Southbound southbound;
 
@@ -150,6 +121,8 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
         return false;
     }
 
+    // The method is tested for in OF13ProviderTest
+    @SuppressWarnings("unused")
     private Status getTunnelReadinessStatus (Node node, String tunnelKey) {
         InetAddress srcTunnelEndPoint = configurationService.getTunnelEndPoint(node);
         if (srcTunnelEndPoint == null) {
@@ -457,31 +430,6 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
 
         handleLocalVlanUcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId,
                 localPort, attachedMac, true);
-
-        /*
-         * Table(2) Rule #2
-         * ----------------
-         * Match: VLAN ID and dMAC (::::FF:FF)
-         * Action: strip vlan, output to all local ports in this vlan
-         * Example: table=2,priority=16384,vlan_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
-         * actions= strip_vlan, output:2,3,4,5
-         */
-
-        //handleLocalVlanBcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId,
-        //        localPort, ethPort, true);
-        //handleVlanFloodOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD,
-        //        segmentationId, localPort, ethport, true);
-
-        /*
-         * Table(2) Rule #3
-         * ----------------
-         * Match: Any Remaining Flows w/a VLAN ID
-         * Action: Drop w/ a low priority
-         * Example: table=2,priority=8192,vlan_id=0x5 actions=drop
-         */
-
-        //handleLocalVlanTableMiss(dpid, TABLE_2_LOCAL_FORWARD, segmentationId,
-        //        true);
     }
 
     private void removeLocalVlanRules(Node node, Long dpid,
@@ -516,21 +464,6 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
 
         handleLocalVlanUcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId,
                 localPort, attachedMac, false);
-
-        /*
-         * Table(2) Rule #2
-         * ----------------
-         * Match: VLAN ID and dMAC (::::FF:FF)
-         * Action: strip vlan, output to all local ports in this vlan
-         * Example: table=2,priority=16384,vlan_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
-         * actions= strip_vlan, output:2,3,4,5
-         */
-
-        //handleLocalVlanBcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId,
-        //        localPort, ethPort, false);
-        //handleVlanFloodOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD,
-        //        segmentationId, localPort, false);
-
     }
 
     private void programLocalIngressVlanRules(Node node, Long dpid, String segmentationId, String attachedMac,
@@ -557,36 +490,10 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
          */
 
         handleLocalVlanBcastOut(dpid, TABLE_2_LOCAL_FORWARD, segmentationId, localPort, ethPort, true);
-
-        /*
-         * Table(1) Rule #2
-         * ----------------
-         * Match: Match VLAN ID and L2 ::::FF:FF Flooding
-         * Action: Flood to local and remote VLAN members
-         * -------------------------------------------
-         * Example: table=1,priority=16384,vlan_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
-         * actions=output:10 (eth port),goto_table:2
-         */
-
-        //handleVlanFloodOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD,
-        //        segmentationId, ethPort, true);
     }
 
     private void programRemoteEgressVlanRules(Node node, Long dpid, String segmentationId,
                                               String attachedMac, long ethPort) {
-        /*
-         * Table(1) Rule #1
-         * ----------------
-         * Match: Destination MAC is local VM MAC and vlan id
-         * Action: go to table 2
-         * -------------------------------------------
-         * Example: table=1,vlan_id=0x5,dl_dst=00:00:00:00:00:08 \
-         * actions=goto_table:2
-         */
-
-        //handleVlanOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD,
-        //        segmentationId, ethPort, attachedMac, true);
-
         /*
          * Table(1) Rule #3
          * ----------------
@@ -602,19 +509,6 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
 
     private void removeRemoteEgressVlanRules(Node node, Long dpid, String segmentationId,
                                              String attachedMac, long localPort, long ethPort) {
-        /*
-         * Table(1) Rule #1
-         * ----------------
-         * Match: Destination MAC is local VM MAC and vlan id
-         * Action: go to table 2
-         * -------------------------------------------
-         * Example: table=1,vlan_id=0x5,dl_dst=00:00:00:00:00:08 \
-         * actions=goto_table:2
-         */
-
-        //handleVlanOut(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD,
-        //        segmentationId, ethPort, attachedMac, false);
-
         /*
          * Table(1) Rule #2
          * ----------------
@@ -688,26 +582,17 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
         handleVlanMiss(dpid, TABLE_1_ISOLATE_TENANT, TABLE_2_LOCAL_FORWARD, segmentationId, ethPort, false);
     }
 
-    private Long getDpid(Node node) {
-        Long dpid = 0L;
-        dpid = southbound.getDataPathId(node);
+    private long getDpid(Node node) {
+        long dpid = southbound.getDataPathId(node);
         if (dpid == 0) {
             logger.warn("getDpid: dpid not found: {}", node);
         }
         return dpid;
     }
 
-    private Long getIntegrationBridgeOFDPID(Node node) {
-        Long dpid = 0L;
+    private long getIntegrationBridgeOFDPID(Node node) {
+        long dpid = 0L;
         if (southbound.getBridgeName(node).equals(configurationService.getIntegrationBridgeName())) {
-            dpid = getDpid(node);
-        }
-        return dpid;
-    }
-
-    private Long getExternalBridgeDpid(Node node) {
-        Long dpid = 0L;
-        if (southbound.getBridgeName(node).equals(configurationService.getExternalBridgeName())) {
             dpid = getDpid(node);
         }
         return dpid;
@@ -722,7 +607,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
     private boolean isTunnel(String networkType)
     {
         return (networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE) || networkType.equalsIgnoreCase
-                (NetworkHandler.NETWORK_TYPE_VXLAN))? true:false;
+                (NetworkHandler.NETWORK_TYPE_VXLAN));
     }
 
     /**
@@ -733,7 +618,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
      */
     private boolean isVlan(String networkType)
     {
-        return networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)? true:false;
+        return networkType.equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN);
     }
 
     private void programLocalRules (String networkType, String segmentationId, Node node,
@@ -741,7 +626,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
         logger.debug("programLocalRules: node: {}, intf: {}, networkType: {}, segmentationId: {}",
                 node.getNodeId(), intf.getName(), networkType, segmentationId);
         try {
-            Long dpid = getIntegrationBridgeOFDPID(node);
+            long dpid = getIntegrationBridgeOFDPID(node);
             if (dpid == 0L) {
                 logger.debug("programLocalRules: Openflow Datapath-ID not set for the integration bridge in {}",
                         node);
@@ -820,7 +705,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
         logger.debug("removeLocalRules: node: {}, intf: {}, networkType: {}, segmentationId: {}",
                 node.getNodeId(), intf.getName(), networkType, segmentationId);
         try {
-            Long dpid = getIntegrationBridgeOFDPID(node);
+            long dpid = getIntegrationBridgeOFDPID(node);
             if (dpid == 0L) {
                 logger.debug("removeLocalRules: Openflow Datapath-ID not set for the integration bridge in {}", node);
                 return;
@@ -885,7 +770,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                 + "segmentationId: {}, dstAddr: {}",
                 node.getNodeId(), intf.getName(), local, tunnelType, segmentationId, dst.getHostAddress());
         try {
-            Long dpid = getIntegrationBridgeOFDPID(node);
+            long dpid = getIntegrationBridgeOFDPID(node);
             if (dpid == 0L) {
                 logger.debug("programTunnelRules: Openflow Datapath-ID not set for the integration bridge in {}", node);
                 return;
@@ -919,15 +804,12 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                         node.getNodeId().getValue(), intf.getName());
                     programRemoteEgressTunnelBridgeRules(node, dpid, segmentationId, attachedMac,
                             tunnelOFPort, localPort);
-                }
-
-                if (local) {
+                } else {
                     logger.trace("programTunnelRules: program local ingress tunnel rules: node {}, intf {}",
                             node.getNodeId().getValue(), intf.getName());
                     programLocalIngressTunnelBridgeRules(node, dpid, segmentationId, attachedMac,
                             tunnelOFPort, localPort);
                 }
-                return;
             }
         } catch (Exception e) {
             logger.trace("", e);
@@ -941,7 +823,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                         + "segmentationId: {}, dstAddr: {}, isLastinstanceOnNode: {}",
                 node.getNodeId(), intf.getName(), local, tunnelType, segmentationId, dst, isLastInstanceOnNode);
         try {
-            Long dpid = getIntegrationBridgeOFDPID(node);
+            long dpid = getIntegrationBridgeOFDPID(node);
             if (dpid == 0L) {
                 logger.debug("removeTunnelRules: Openflow Datapath-ID not set for the integration bridge in {}", node);
                 return;
@@ -989,7 +871,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
     private void programVlanRules (NeutronNetwork network, Node node, OvsdbTerminationPointAugmentation intf) {
         logger.debug("programVlanRules: node: {}, network: {}, intf: {}",
                 node.getNodeId(), network.getNetworkUUID(), intf.getName());
-        Long dpid = getIntegrationBridgeOFDPID(node);
+        long dpid = getIntegrationBridgeOFDPID(node);
         if (dpid == 0L) {
             logger.debug("programVlanRules: Openflow Datapath-ID not set for the integration bridge in {}", node);
             return;
@@ -1027,7 +909,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
                                   boolean isLastInstanceOnNode) {
         logger.debug("removeVlanRules: node: {}, network: {}, intf: {}, isLastInstanceOnNode",
                 node.getNodeId(), network.getNetworkUUID(), intf.getName(), isLastInstanceOnNode);
-        Long dpid = getIntegrationBridgeOFDPID(node);
+        long dpid = getIntegrationBridgeOFDPID(node);
         if (dpid == 0L) {
             logger.debug("removeVlanRules: Openflow Datapath-ID not set for the integration bridge in {}", node);
             return;
@@ -1078,7 +960,7 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
             programVlanRules(network, srcNode, intf);
         } else if (isTunnel(networkType)){
 
-            boolean sourceTunnelStatus = false;
+            boolean sourceTunnelStatus;
             boolean destTunnelStatus = false;
             for (Node dstNode : nodes.values()) {
                 InetAddress src = configurationService.getTunnelEndPoint(srcNode);
@@ -1361,20 +1243,6 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
     }
 
     /*
-     * (Table:1) Egress VLAN Traffic
-     * Match: Destination Ethernet Addr and VLAN id
-     * Instruction: GOTO Table Table 2
-     * table=1,vlan_id=0x5,dl_dst=00:00:00:00:00:08 \
-     * actions= goto_table:2"
-     */
-
-    private void handleVlanOut(Long dpidLong, Short writeTable,
-            Short goToTableId, String segmentationId,
-            Long ethPort, String attachedMac, boolean write) {
-        l2ForwardingProvider.programVlanOut(dpidLong, segmentationId, ethPort, attachedMac, write);
-    }
-
-    /*
      * (Table:1) Egress Tunnel Traffic
      * Match: Destination Ethernet Addr and Local InPort
      * Instruction: Set TunnelID and GOTO Table Tunnel Table (n)
@@ -1386,20 +1254,6 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
             Short localTable, String segmentationId,
             Long OFPortOut, boolean write) {
         l2ForwardingProvider.programTunnelFloodOut(dpidLong, segmentationId, OFPortOut, write);
-    }
-
-    /*
-     * (Table:1) Egress VLAN Traffic
-     * Match: Destination Ethernet Addr and VLAN id
-     * Instruction: GOTO table 2 and Output port eth interface
-     * Example: table=1,priority=16384,vlan_id=0x5,dl_dst=ff:ff:ff:ff:ff:ff \
-     * actions=output:eth1,goto_table:2
-     */
-
-    private void handleVlanFloodOut(Long dpidLong, Short writeTable,
-            Short localTable, String segmentationId,
-            Long localPort, Long ethPort, boolean write) {
-        //l2ForwardingProvider.programVlanFloodOut(dpidLong, segmentationId, localPort, ethPort, write);
     }
 
     /*
@@ -1494,87 +1348,6 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
         l2ForwardingProvider.programLocalTableMiss(dpidLong, segmentationId, write);
     }
 
-    /*
-     * (Table:1) Local Table Miss
-     * Match: Any Remaining Flows w/a VLAN ID
-     * Action: Drop w/ a low priority
-     * table=2,priority=8192,vlan_id=0x5 actions=drop
-     */
-
-    private void handleLocalVlanTableMiss(Long dpidLong, Short writeTable,
-            String segmentationId, boolean write) {
-        l2ForwardingProvider.programLocalVlanTableMiss(dpidLong, segmentationId, write);
-    }
-
-    private Group getGroup(GroupBuilder groupBuilder, NodeBuilder nodeBuilder) {
-        InstanceIdentifier<Group> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
-                .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Group.class,
-                        new GroupKey(groupBuilder.getGroupId())).build();
-        ReadOnlyTransaction readTx = dataBroker.newReadOnlyTransaction();
-        try {
-            Optional<Group> data = readTx.read(LogicalDatastoreType.CONFIGURATION, path1).get();
-            if (data.isPresent()) {
-                return data.get();
-            }
-        } catch (InterruptedException|ExecutionException e) {
-            logger.error(e.getMessage(), e);
-        }
-
-        logger.debug("Cannot find data for Group " + groupBuilder.getGroupName());
-        return null;
-    }
-
-    private void writeGroup(GroupBuilder groupBuilder, NodeBuilder nodeBuilder) {
-        ReadWriteTransaction modification = dataBroker.newReadWriteTransaction();
-        InstanceIdentifier<Group> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
-                .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Group.class,
-                        new GroupKey(groupBuilder.getGroupId())).build();
-        modification.put(LogicalDatastoreType.CONFIGURATION, path1, groupBuilder.build(), true /*createMissingParents*/);
-
-        CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
-        try {
-            commitFuture.get();  // TODO: Make it async (See bug 1362)
-            logger.debug("Transaction success for write of Group "+groupBuilder.getGroupName());
-        } catch (InterruptedException|ExecutionException e) {
-            logger.error(e.getMessage(), e);
-        }
-    }
-
-    private void removeGroup(GroupBuilder groupBuilder, NodeBuilder nodeBuilder) {
-        WriteTransaction modification = dataBroker.newWriteOnlyTransaction();
-        InstanceIdentifier<Group> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
-                .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Group.class,
-                        new GroupKey(groupBuilder.getGroupId())).build();
-        modification.delete(LogicalDatastoreType.CONFIGURATION, path1);
-        CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
-
-        try {
-            commitFuture.get();  // TODO: Make it async (See bug 1362)
-            logger.debug("Transaction success for deletion of Group "+groupBuilder.getGroupName());
-        } catch (InterruptedException|ExecutionException e) {
-            logger.error(e.getMessage(), e);
-        }
-    }
-
-    private Flow getFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
-        InstanceIdentifier<Flow> path1 = InstanceIdentifier.builder(Nodes.class).child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
-                .rev130819.nodes.Node.class, nodeBuilder.getKey()).augmentation(FlowCapableNode.class).child(Table.class,
-                        new TableKey(flowBuilder.getTableId())).child(Flow.class, flowBuilder.getKey()).build();
-
-        ReadOnlyTransaction readTx = dataBroker.newReadOnlyTransaction();
-        try {
-            Optional<Flow> data = readTx.read(LogicalDatastoreType.CONFIGURATION, path1).get();
-            if (data.isPresent()) {
-                return data.get();
-            }
-        } catch (InterruptedException|ExecutionException e) {
-            logger.error(e.getMessage(), e);
-        }
-
-        logger.debug("Cannot find data for Flow " + flowBuilder.getFlowName());
-        return null;
-    }
-
     private void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
         ReadWriteTransaction modification = dataBroker.newReadWriteTransaction();
         InstanceIdentifier<Flow> path1 =
@@ -1594,305 +1367,6 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
             logger.debug("Transaction success for write of Flow "+flowBuilder.getFlowName());
         } catch (InterruptedException|ExecutionException e) {
             logger.error(e.getMessage(), e);
-        }
-    }
-
-    private void removeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
-        WriteTransaction modification = dataBroker.newWriteOnlyTransaction();
-        InstanceIdentifier<Flow> path1 = InstanceIdentifier.builder(Nodes.class)
-                .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory
-                        .rev130819.nodes.Node.class, nodeBuilder.getKey())
-                        .augmentation(FlowCapableNode.class).child(Table.class,
-                                new TableKey(flowBuilder.getTableId())).child(Flow.class, flowBuilder.getKey()).build();
-        //modification.delete(LogicalDatastoreType.OPERATIONAL, nodeBuilderToInstanceId(nodeBuilder));
-        //modification.delete(LogicalDatastoreType.OPERATIONAL, path1);
-        //modification.delete(LogicalDatastoreType.CONFIGURATION, nodeBuilderToInstanceId(nodeBuilder));
-        modification.delete(LogicalDatastoreType.CONFIGURATION, path1);
-
-        CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
-        try {
-            commitFuture.get();  // TODO: Make it async (See bug 1362)
-            logger.debug("Transaction success for deletion of Flow "+flowBuilder.getFlowName());
-        } catch (InterruptedException|ExecutionException e) {
-            logger.error(e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Create Output Port Group Instruction
-     *
-     * @param ib       Map InstructionBuilder without any instructions
-     * @param dpidLong Long the datapath ID of a switch/node
-     * @param port     Long representing a port on a switch/node
-     * @return ib InstructionBuilder Map with instructions
-     */
-    protected InstructionBuilder createOutputGroupInstructions(NodeBuilder nodeBuilder,
-            InstructionBuilder ib,
-            Long dpidLong, Long port ,
-            List<Instruction> instructions) {
-        NodeConnectorId ncid = new NodeConnectorId(Constants.OPENFLOW_NODE_PREFIX + dpidLong + ":" + port);
-        logger.debug("createOutputGroupInstructions() Node Connector ID is - Type=openflow: DPID={} port={} existingInstructions={}", dpidLong, port, instructions);
-
-        List<Action> actionList = Lists.newArrayList();
-        ActionBuilder ab = new ActionBuilder();
-
-        List<Action> existingActions;
-        if (instructions != null) {
-            for (Instruction in : instructions) {
-                if (in.getInstruction() instanceof ApplyActionsCase) {
-                    existingActions = (((ApplyActionsCase) in.getInstruction()).getApplyActions().getAction());
-                    actionList.addAll(existingActions);
-                }
-            }
-        }
-
-        GroupBuilder groupBuilder = new GroupBuilder();
-        Group group = null;
-
-        /* Create output action for this port*/
-        OutputActionBuilder oab = new OutputActionBuilder();
-        oab.setOutputNodeConnector(ncid);
-        ab.setAction(new OutputActionCaseBuilder().setOutputAction(oab.build()).build());
-        logger.debug("createOutputGroupInstructions(): output action {}", ab.build());
-        boolean addNew = true;
-        boolean groupActionAdded = false;
-
-        /* Find the group action and get the group */
-        for (Action action : actionList) {
-            if (action.getAction() instanceof GroupActionCase) {
-                groupActionAdded = true;
-                GroupActionCase groupAction = (GroupActionCase) action.getAction();
-                Long id = groupAction.getGroupAction().getGroupId();
-                String groupName = groupAction.getGroupAction().getGroup();
-                GroupKey key = new GroupKey(new GroupId(id));
-
-                groupBuilder.setGroupId(new GroupId(id));
-                groupBuilder.setGroupName(groupName);
-                groupBuilder.setGroupType(GroupTypes.GroupAll);
-                groupBuilder.setKey(key);
-                group = getGroup(groupBuilder, nodeBuilder);
-                logger.debug("createOutputGroupInstructions: group {}", group);
-                break;
-            }
-        }
-
-        logger.debug("createOutputGroupInstructions: groupActionAdded {}", groupActionAdded);
-        if (groupActionAdded) {
-            /* modify the action bucket in group */
-            groupBuilder = new GroupBuilder(group);
-            Buckets buckets = groupBuilder.getBuckets();
-            for (Bucket bucket : buckets.getBucket()) {
-                List<Action> bucketActions = bucket.getAction();
-                logger.debug("createOutputGroupInstructions: bucketActions {}", bucketActions);
-                for (Action action : bucketActions) {
-                    if (action.getAction() instanceof OutputActionCase) {
-                        OutputActionCase opAction = (OutputActionCase)action.getAction();
-                        /* If output port action already in the action list of one of the buckets, skip */
-                        if (opAction.getOutputAction().getOutputNodeConnector().equals(new Uri(ncid))) {
-                            addNew = false;
-                            break;
-                        }
-                    }
-                }
-            }
-            logger.debug("createOutputGroupInstructions: addNew {}", addNew);
-            if (addNew) {
-                /* the new output action is not in the bucket, add to bucket */
-                if (!buckets.getBucket().isEmpty()) {
-                    Bucket bucket = buckets.getBucket().get(0);
-                    List<Action> bucketActionList = Lists.newArrayList();
-                    bucketActionList.addAll(bucket.getAction());
-                    /* set order for new action and add to action list */
-                    ab.setOrder(bucketActionList.size());
-                    ab.setKey(new ActionKey(bucketActionList.size()));
-                    bucketActionList.add(ab.build());
-
-                    /* set bucket and buckets list. Reset groupBuilder with new buckets.*/
-                    BucketsBuilder bucketsBuilder = new BucketsBuilder();
-                    List<Bucket> bucketList = Lists.newArrayList();
-                    BucketBuilder bucketBuilder = new BucketBuilder();
-                    bucketBuilder.setBucketId(new BucketId((long) 1));
-                    bucketBuilder.setKey(new BucketKey(new BucketId((long) 1)));
-                    bucketBuilder.setAction(bucketActionList);
-                    bucketList.add(bucketBuilder.build());
-                    bucketsBuilder.setBucket(bucketList);
-                    groupBuilder.setBuckets(bucketsBuilder.build());
-                    logger.debug("createOutputGroupInstructions: bucketList {}", bucketList);
-                }
-            }
-        } else {
-            /* create group */
-            groupBuilder = new GroupBuilder();
-            groupBuilder.setGroupType(GroupTypes.GroupAll);
-            groupBuilder.setGroupId(new GroupId(groupId));
-            groupBuilder.setKey(new GroupKey(new GroupId(groupId)));
-            groupBuilder.setGroupName("Output port group " + groupId);
-            groupBuilder.setBarrier(false);
-
-            BucketsBuilder bucketBuilder = new BucketsBuilder();
-            List<Bucket> bucketList = Lists.newArrayList();
-            BucketBuilder bucket = new BucketBuilder();
-            bucket.setBucketId(new BucketId((long) 1));
-            bucket.setKey(new BucketKey(new BucketId((long) 1)));
-
-            /* put output action to the bucket */
-            List<Action> bucketActionList = Lists.newArrayList();
-            /* set order for new action and add to action list */
-            ab.setOrder(bucketActionList.size());
-            ab.setKey(new ActionKey(bucketActionList.size()));
-            bucketActionList.add(ab.build());
-
-            bucket.setAction(bucketActionList);
-            bucketList.add(bucket.build());
-            bucketBuilder.setBucket(bucketList);
-            groupBuilder.setBuckets(bucketBuilder.build());
-
-            /* Add new group action */
-            GroupActionBuilder groupActionB = new GroupActionBuilder();
-            groupActionB.setGroupId(groupId);
-            groupActionB.setGroup("Output port group " + groupId);
-            ab = new ActionBuilder();
-            ab.setAction(new GroupActionCaseBuilder().setGroupAction(groupActionB.build()).build());
-            ab.setOrder(actionList.size());
-            ab.setKey(new ActionKey(actionList.size()));
-            actionList.add(ab.build());
-
-            groupId++;
-        }
-        logger.debug("createOutputGroupInstructions: group {}", groupBuilder.build());
-        logger.debug("createOutputGroupInstructions: actionList {}", actionList);
-
-        if (addNew) {
-            /* rewrite the group to group table */
-            writeGroup(groupBuilder, nodeBuilder);
-        }
-
-        // Create an Apply Action
-        ApplyActionsBuilder aab = new ApplyActionsBuilder();
-        aab.setAction(actionList);
-        ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
-
-        return ib;
-    }
-
-    /**
-     * Remove Output Port from action list in group bucket
-     *
-     * @param ib       Map InstructionBuilder without any instructions
-     * @param dpidLong Long the datapath ID of a switch/node
-     * @param port     Long representing a port on a switch/node
-     * @return ib InstructionBuilder Map with instructions
-     */
-    protected boolean removeOutputPortFromGroup(NodeBuilder nodeBuilder, InstructionBuilder ib,
-            Long dpidLong, Long port , List<Instruction> instructions) {
-
-        NodeConnectorId ncid = new NodeConnectorId(Constants.OPENFLOW_NODE_PREFIX + dpidLong + ":" + port);
-        logger.debug("removeOutputPortFromGroup() Node Connector ID is - Type=openflow: DPID={} port={} existingInstructions={}", dpidLong, port, instructions);
-
-        List<Action> actionList = Lists.newArrayList();
-        ActionBuilder ab;
-
-        List<Action> existingActions;
-        if (instructions != null) {
-            for (Instruction in : instructions) {
-                if (in.getInstruction() instanceof ApplyActionsCase) {
-                    existingActions = (((ApplyActionsCase) in.getInstruction()).getApplyActions().getAction());
-                    actionList.addAll(existingActions);
-                    break;
-                }
-            }
-        }
-
-        GroupBuilder groupBuilder = new GroupBuilder();
-        Group group = null;
-        boolean groupActionAdded = false;
-        /* Find the group action and get the group */
-        for (Action action : actionList) {
-            if (action.getAction() instanceof GroupActionCase) {
-                groupActionAdded = true;
-                GroupActionCase groupAction = (GroupActionCase) action.getAction();
-                Long id = groupAction.getGroupAction().getGroupId();
-                String groupName = groupAction.getGroupAction().getGroup();
-                GroupKey key = new GroupKey(new GroupId(id));
-
-                groupBuilder.setGroupId(new GroupId(id));
-                groupBuilder.setGroupName(groupName);
-                groupBuilder.setGroupType(GroupTypes.GroupAll);
-                groupBuilder.setKey(key);
-                group = getGroup(groupBuilder, nodeBuilder);
-                break;
-            }
-        }
-
-        if (groupActionAdded) {
-            /* modify the action bucket in group */
-            groupBuilder = new GroupBuilder(group);
-            Buckets buckets = groupBuilder.getBuckets();
-            List<Action> bucketActions = Lists.newArrayList();
-            for (Bucket bucket : buckets.getBucket()) {
-                int index = 0;
-                boolean isPortDeleted = false;
-                bucketActions = bucket.getAction();
-                for (Action action : bucketActions) {
-                    if (action.getAction() instanceof OutputActionCase) {
-                        OutputActionCase opAction = (OutputActionCase)action.getAction();
-                        if (opAction.getOutputAction().getOutputNodeConnector().equals(new Uri(ncid))) {
-                            /* Find the output port in action list and remove */
-                            index = bucketActions.indexOf(action);
-                            bucketActions.remove(action);
-                            isPortDeleted = true;
-                            break;
-                        }
-                    }
-                }
-                if (isPortDeleted && !bucketActions.isEmpty()) {
-                    for (int i = index; i< bucketActions.size(); i++) {
-                        Action action = bucketActions.get(i);
-                        if (action.getOrder() != i) {
-                            /* Shift the action order */
-                            ab = new ActionBuilder();
-                            ab.setAction(action.getAction());
-                            ab.setOrder(i);
-                            ab.setKey(new ActionKey(i));
-                            Action actionNewOrder = ab.build();
-                            bucketActions.remove(action);
-                            bucketActions.add(i, actionNewOrder);
-                        }
-                    }
-
-                } else if (bucketActions.isEmpty()) {
-                    /* remove bucket with empty action list */
-                    buckets.getBucket().remove(bucket);
-                    break;
-                }
-            }
-            if (!buckets.getBucket().isEmpty()) {
-                /* rewrite the group to group table */
-                /* set bucket and buckets list. Reset groupBuilder with new buckets.*/
-                BucketsBuilder bucketsBuilder = new BucketsBuilder();
-                List<Bucket> bucketList = Lists.newArrayList();
-                BucketBuilder bucketBuilder = new BucketBuilder();
-                bucketBuilder.setBucketId(new BucketId((long) 1));
-                bucketBuilder.setKey(new BucketKey(new BucketId((long) 1)));
-                bucketBuilder.setAction(bucketActions);
-                bucketList.add(bucketBuilder.build());
-                bucketsBuilder.setBucket(bucketList);
-                groupBuilder.setBuckets(bucketsBuilder.build());
-                logger.debug("removeOutputPortFromGroup: bucketList {}", bucketList);
-
-                writeGroup(groupBuilder, nodeBuilder);
-                ApplyActionsBuilder aab = new ApplyActionsBuilder();
-                aab.setAction(actionList);
-                ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
-                return false;
-            } else {
-                /* remove group with empty bucket. return true to delete flow */
-                removeGroup(groupBuilder, nodeBuilder);
-                return true;
-            }
-        } else {
-            /* no group for port list. flow can be removed */
-            return true;
         }
     }
 
@@ -1946,9 +1420,9 @@ public class OF13Provider implements ConfigInterface, NetworkingProvider {
     @Override
     public void setDependencies(Object impl) {
         if (impl instanceof NetworkingProviderManager) {
-            networkingProviderManager = (NetworkingProviderManager)impl;
+            NetworkingProviderManager networkingProviderManager = (NetworkingProviderManager) impl;
             networkingProviderManager.providerAdded(
-                    bundleContext.getServiceReference(NetworkingProvider.class.getName()),this);
+                    bundleContext.getServiceReference(NetworkingProvider.class.getName()), this);
         }
     }
 }

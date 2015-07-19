@@ -13,8 +13,12 @@ import org.opendaylight.controller.liblldp.Ethernet;
 import org.opendaylight.controller.liblldp.NetUtils;
 import org.opendaylight.controller.liblldp.PacketException;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.packet.service.rev130709.PacketReceived;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ArpResolverUtils {
+    private static final Logger LOG = LoggerFactory.getLogger(ArpResolverUtils.class);
+
 
     static {
         Ethernet.etherTypeClassMap.put(EtherTypes.ARP.shortValue(), Arp.class);
@@ -26,15 +30,18 @@ public class ArpResolverUtils {
      *
      * @param potentialArp the packet for deserialization
      * @return ARP packet if received packet is ARP and deserialization was successful
-     * @throws PacketException if packet is not ARP or deserialization was not successful
      */
-    public static Arp getArpFrom(PacketReceived potentialArp) throws PacketException {
+    public static Arp getArpFrom(PacketReceived potentialArp) {
         byte[] payload = potentialArp.getPayload();
         Ethernet ethPkt = new Ethernet();
-        ethPkt.deserialize(payload, 0, payload.length * NetUtils.NumBitsInAByte);
+        try {
+            ethPkt.deserialize(payload, 0, payload.length * NetUtils.NumBitsInAByte);
+        } catch (PacketException e) {
+            LOG.trace("Failed to decode the incoming packet. ignoring it.");
+        }
         if (ethPkt.getPayload() instanceof Arp) {
             return (Arp) ethPkt.getPayload();
         }
-        throw new PacketException("Packet is not ARP: " + potentialArp);
+        return null;
     }
 }

@@ -214,9 +214,9 @@ public class NeutronL3Adapter implements ConfigInterface {
 
                 if(externalNetwork != null){
                     if(externalNetwork.isRouterExternal()){
-                        final NeutronSubnet externalSubnet = getExternalNetworkSubnet(neutronPort);
+                        final NeutronSubnet externalSubnet = neutronSubnetCache.getSubnet(neutronPort.getFixedIPs().get(0).getSubnetUUID());
                         if(externalSubnet != null){
-                            gatewayMacResolver.stopPeriodicReferesh(new Ipv4Address(externalSubnet.getGatewayIP()));
+                            gatewayMacResolver.stopPeriodicRefresh(new Ipv4Address(externalSubnet.getGatewayIP()));
                         }
                     }
                 }
@@ -1280,14 +1280,16 @@ public class NeutronL3Adapter implements ConfigInterface {
                                         new Ipv4Address(externalSubnet.getGatewayIP()),
                                         new Ipv4Address(gatewayPort.getFixedIPs().get(0).getIpAddress()),
                                         new MacAddress(gatewayPort.getMacAddress()),
-                                        false);
+                                        true);
                         if(gatewayMacAddress != null){
                             Futures.addCallback(gatewayMacAddress, new FutureCallback<MacAddress>(){
                                 @Override
                                 public void onSuccess(MacAddress result) {
                                     if(result != null){
-                                        updateExternalRouterMac(result.getValue());
-                                        LOG.info("Resolved MAC address for gateway IP {} is {}", externalSubnet.getGatewayIP(), result.getValue());
+                                        if(!result.getValue().equals(externalRouterMac)){
+                                            updateExternalRouterMac(result.getValue());
+                                            LOG.info("Resolved MAC address for gateway IP {} is {}", externalSubnet.getGatewayIP(),result.getValue());
+                                        }
                                     }else{
                                         LOG.warn("MAC address resolution failed for gateway IP {}", externalSubnet.getGatewayIP());
                                     }

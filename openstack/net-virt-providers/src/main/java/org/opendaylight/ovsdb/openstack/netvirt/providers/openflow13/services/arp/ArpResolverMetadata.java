@@ -19,24 +19,21 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.Remo
 
 public final class ArpResolverMetadata {
 
+    private final Ipv4Address gatewayIpAddress;
+    private final Long externalNetworkBridgeDpid;
+    private final Ipv4Address arpRequestSourceIp;
+    private final MacAddress arpRequestSourceMacAddress;
+    private final boolean periodicRefresh;
     private RemoveFlowInput flowToRemove;
-    private Ipv4Address gatewayIpAddress;
     private MacAddress gatewayMacAddress;
-    private boolean periodicRefresh;
 
-    public ArpResolverMetadata(){
-
-    }
-    public ArpResolverMetadata(RemoveFlowInput flowToRemove, Ipv4Address gatewayIpAddress, boolean periodicRefresh){
-        this.flowToRemove = flowToRemove;
+    public ArpResolverMetadata(final Long externalNetworkBridgeDpid,
+            final Ipv4Address gatewayIpAddress, final Ipv4Address arpRequestSourceIp,
+            final MacAddress arpRequestMacAddress, final boolean periodicRefresh){
+        this.externalNetworkBridgeDpid = externalNetworkBridgeDpid;
         this.gatewayIpAddress = gatewayIpAddress;
-        this.periodicRefresh = periodicRefresh;
-    }
-
-    public ArpResolverMetadata(RemoveFlowInput flowToRemove, Ipv4Address gatewayIpAddress, MacAddress gatewayMacAddress, boolean periodicRefresh){
-        this.flowToRemove = flowToRemove;
-        this.gatewayIpAddress = gatewayIpAddress;
-        this.gatewayMacAddress = gatewayMacAddress;
+        this.arpRequestSourceIp = arpRequestSourceIp;
+        this.arpRequestSourceMacAddress = arpRequestMacAddress;
         this.periodicRefresh = periodicRefresh;
     }
 
@@ -46,23 +43,85 @@ public final class ArpResolverMetadata {
     public boolean isPeriodicRefresh() {
         return periodicRefresh;
     }
-    public void setPeriodicRefresh(boolean periodicRefresh) {
-        this.periodicRefresh = periodicRefresh;
-    }
     public void setFlowToRemove(RemoveFlowInput flowToRemove) {
         this.flowToRemove = flowToRemove;
     }
     public Ipv4Address getGatewayIpAddress() {
         return gatewayIpAddress;
     }
-    public void setGatewayIpAddress(Ipv4Address gatewayIpAddress) {
-        this.gatewayIpAddress = gatewayIpAddress;
-    }
     public MacAddress getGatewayMacAddress() {
         return gatewayMacAddress;
     }
     public void setGatewayMacAddress(MacAddress gatewayMacAddress) {
         this.gatewayMacAddress = gatewayMacAddress;
+    }
+
+    public Long getExternalNetworkBridgeDpid() {
+        return externalNetworkBridgeDpid;
+    }
+    public Ipv4Address getArpRequestSourceIp() {
+        return arpRequestSourceIp;
+    }
+    public MacAddress getArpRequestMacAddress() {
+        return arpRequestSourceMacAddress;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime
+                * result
+                + ((arpRequestSourceMacAddress == null) ? 0 : arpRequestSourceMacAddress
+                        .hashCode());
+        result = prime
+                * result
+                + ((arpRequestSourceIp == null) ? 0 : arpRequestSourceIp
+                        .hashCode());
+        result = prime
+                * result
+                + ((externalNetworkBridgeDpid == null) ? 0
+                        : externalNetworkBridgeDpid.hashCode());
+        result = prime
+                * result
+                + ((gatewayIpAddress == null) ? 0 : gatewayIpAddress.hashCode());
+        result = prime * result + (periodicRefresh ? 1231 : 1237);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ArpResolverMetadata other = (ArpResolverMetadata) obj;
+        if (arpRequestSourceMacAddress == null) {
+            if (other.arpRequestSourceMacAddress != null)
+                return false;
+        } else if (!arpRequestSourceMacAddress.equals(other.arpRequestSourceMacAddress))
+            return false;
+        if (arpRequestSourceIp == null) {
+            if (other.arpRequestSourceIp != null)
+                return false;
+        } else if (!arpRequestSourceIp.equals(other.arpRequestSourceIp))
+            return false;
+        if (externalNetworkBridgeDpid == null) {
+            if (other.externalNetworkBridgeDpid != null)
+                return false;
+        } else if (!externalNetworkBridgeDpid
+                .equals(other.externalNetworkBridgeDpid))
+            return false;
+        if (gatewayIpAddress == null) {
+            if (other.gatewayIpAddress != null)
+                return false;
+        } else if (!gatewayIpAddress.equals(other.gatewayIpAddress))
+            return false;
+        if (periodicRefresh != other.periodicRefresh)
+            return false;
+        return true;
     }
 
 }

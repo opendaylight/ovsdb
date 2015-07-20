@@ -13,7 +13,7 @@ package org.opendaylight.ovsdb.openstack.netvirt.api;
  * @author Sam Hague (shague@redhat.com)
  */
 public interface OvsdbInventoryService {
-    public void listenerAdded(OvsdbInventoryListener listener);
-    public void listenerRemoved(OvsdbInventoryListener listener);
-    public void providersReady();
+    void listenerAdded(OvsdbInventoryListener listener);
+    void listenerRemoved(OvsdbInventoryListener listener);
+    void providersReady();
 }

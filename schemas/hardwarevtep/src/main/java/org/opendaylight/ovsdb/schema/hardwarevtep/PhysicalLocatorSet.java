@@ -22,8 +22,8 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 @TypedTable(name="Physical_Locator_Set", database="hardware_vtep", fromVersion="1.0.0")
 public interface PhysicalLocatorSet extends TypedBaseTable<GenericTableSchema> {
     @TypedColumn(name="locators", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<UUID>> getLocatorsColumn();
+    Column<GenericTableSchema, Set<UUID>> getLocatorsColumn();
 
     @TypedColumn(name="locators", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setLocators(Set<UUID> locators);
+    void setLocators(Set<UUID> locators);
 }

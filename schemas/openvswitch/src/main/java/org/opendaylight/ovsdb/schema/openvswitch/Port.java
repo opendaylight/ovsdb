@@ -27,95 +27,95 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 public interface Port extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name="name", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, String> getNameColumn();
+    Column<GenericTableSchema, String> getNameColumn();
     @TypedColumn(name="name", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setName(String name);
+    void setName(String name);
     @TypedColumn(name="name", method=MethodType.GETDATA, fromVersion="1.0.0")
-    public String getName();
+    String getName();
 
     @TypedColumn(name="interfaces", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<UUID>> getInterfacesColumn();
+    Column<GenericTableSchema, Set<UUID>> getInterfacesColumn();
     @TypedColumn(name="interfaces", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setInterfaces(Set<UUID> interfaces);
+    void setInterfaces(Set<UUID> interfaces);
 
     @TypedColumn(name="trunks", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Long>> getTrunksColumn();
+    Column<GenericTableSchema, Set<Long>> getTrunksColumn();
     @TypedColumn(name="trunks", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setTrunks(Set<Long> trunks);
+    void setTrunks(Set<Long> trunks);
 
     @TypedColumn(name="tag", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Long>> getTagColumn();
+    Column<GenericTableSchema, Set<Long>> getTagColumn();
 
     @TypedColumn(name="tag", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setTag(Set<Long> tag);
+    void setTag(Set<Long> tag);
 
     @TypedColumn(name="vlan_mode", method=MethodType.GETCOLUMN, fromVersion="6.1.0")
-    public Column<GenericTableSchema, Set<String>> getVlanModeColumn();
+    Column<GenericTableSchema, Set<String>> getVlanModeColumn();
     @TypedColumn(name="vlan_mode", method=MethodType.SETDATA, fromVersion="6.1.0")
-    public void setVlanMode(Set<String> vlanMode);
+    void setVlanMode(Set<String> vlanMode);
 
     @TypedColumn(name="qos", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<UUID>> getQosColumn();
+    Column<GenericTableSchema, Set<UUID>> getQosColumn();
     @TypedColumn(name="qos", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setQos(Set<UUID> qos);
+    void setQos(Set<UUID> qos);
 
     @TypedColumn(name="mac", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<String>> getMacColumn();
+    Column<GenericTableSchema, Set<String>> getMacColumn();
     @TypedColumn(name="mac", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setMac(Set<String> mac);
+    void setMac(Set<String> mac);
 
     @TypedColumn(name="bond_type", method=MethodType.GETCOLUMN, fromVersion="1.0.2", untilVersion="1.0.3")
-    public Column<GenericTableSchema, Set<String>> getBondTypeColumn();
+    Column<GenericTableSchema, Set<String>> getBondTypeColumn();
     @TypedColumn(name="bond_type", method=MethodType.SETDATA)
-    public void setBondType(Set<String> bond_type);
+    void setBondType(Set<String> bond_type);
 
     @TypedColumn(name="bond_mode", method=MethodType.GETCOLUMN, fromVersion="1.0.4")
-    public Column<GenericTableSchema, Set<String>> getBondModeColumn();
+    Column<GenericTableSchema, Set<String>> getBondModeColumn();
     @TypedColumn(name="bond_mode", method=MethodType.SETDATA, fromVersion="1.0.4")
-    public void setBondMode(Set<String> bond_mode);
+    void setBondMode(Set<String> bond_mode);
 
     @TypedColumn(name="lacp", method=MethodType.GETCOLUMN, fromVersion="1.3.0")
-    public Column<GenericTableSchema, Set<String>> getLacpColumn();
+    Column<GenericTableSchema, Set<String>> getLacpColumn();
     @TypedColumn(name="lacp", method=MethodType.SETDATA, fromVersion="1.3.0")
-    public void setLacp(Set<String> lacp);
+    void setLacp(Set<String> lacp);
 
     @TypedColumn(name="bond_updelay", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Long>> getBondUpDelayColumn();
+    Column<GenericTableSchema, Set<Long>> getBondUpDelayColumn();
     @TypedColumn(name="bond_updelay", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setBondUpDelay(Set<Long> bondUpDelay);
+    void setBondUpDelay(Set<Long> bondUpDelay);
 
     @TypedColumn(name="bond_downdelay", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Long>> getBondDownDelayColumn();
+    Column<GenericTableSchema, Set<Long>> getBondDownDelayColumn();
     @TypedColumn(name="bond_downdelay", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setBondDownDelay(Set<Long> bondDownDelay);
+    void setBondDownDelay(Set<Long> bondDownDelay);
 
     @TypedColumn(name="bond_fake_iface", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Boolean>> getBondFakeInterfaceColumn();
+    Column<GenericTableSchema, Set<Boolean>> getBondFakeInterfaceColumn();
     @TypedColumn(name="bond_fake_iface", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setBondFakeInterface(Set<Boolean> bondFakeInterface);
+    void setBondFakeInterface(Set<Boolean> bondFakeInterface);
 
     @TypedColumn(name="fake_bridge", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Boolean>> getFakeBridgeColumn();
+    Column<GenericTableSchema, Set<Boolean>> getFakeBridgeColumn();
     @TypedColumn(name="fake_bridge", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setFakeBridge(Set<Boolean> fakeBridge);
+    void setFakeBridge(Set<Boolean> fakeBridge);
 
     @TypedColumn(name="status", method=MethodType.GETCOLUMN, fromVersion="6.2.0")
-    public Column<GenericTableSchema, Map<String, String>> getStatusColumn();
+    Column<GenericTableSchema, Map<String, String>> getStatusColumn();
     @TypedColumn(name="status", method=MethodType.SETDATA, fromVersion="6.2.0")
-    public void setStatus(Map<String, String> status);
+    void setStatus(Map<String, String> status);
 
     @TypedColumn(name="statistics", method=MethodType.GETCOLUMN, fromVersion="6.3.0")
-    public Column<GenericTableSchema, Map<String, Long>> getStatisticsColumn();
+    Column<GenericTableSchema, Map<String, Long>> getStatisticsColumn();
     @TypedColumn(name="statistics", method=MethodType.SETDATA)
-    public void setStatistics(Map<String, Long> statistics);
+    void setStatistics(Map<String, Long> statistics);
 
     @TypedColumn(name="other_config", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Map<String, String>> getOtherConfigColumn();
+    Column<GenericTableSchema, Map<String, String>> getOtherConfigColumn();
     @TypedColumn(name="other_config", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setOtherConfig(Map<String, String> otherConfig);
+    void setOtherConfig(Map<String, String> otherConfig);
 
     @TypedColumn(name="external_ids", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn();
+    Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn();
     @TypedColumn(name="external_ids", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setExternalIds(Map<String, String> externalIds);
+    void setExternalIds(Map<String, String> externalIds);
 }

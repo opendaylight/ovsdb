@@ -31,21 +31,21 @@ public interface BridgeConfigurationManager {
      * @param bridgeName the name of the bridge
      * @return the UUID of the bridge
      */
-    public String getBridgeUuid(Node node, String bridgeName);
+    String getBridgeUuid(Node node, String bridgeName);
 
     /**
      * Checks for the existence of the Integration Bridge on a given Node
      * @param node the {@link Node} where the bridge should be configured
      * @return True if the bridge exists, False if it does not
      */
-    public boolean isNodeNeutronReady(Node node);
+    boolean isNodeNeutronReady(Node node);
 
     /**
      * Checks for the existence of the Network Bridge on a given Node
      * @param node the {@link Node} where the bridge should be configured
      * @return True if the bridge exists, False if it does not
      */
-    public boolean isNodeOverlayReady(Node node);
+    boolean isNodeOverlayReady(Node node);
 
     /**
      * Checks for the existence of the Network Bridge on a given Node
@@ -61,7 +61,7 @@ public interface BridgeConfigurationManager {
      * @param ovsdbNode the {@link Node} where the bridge is configured
      * @return True or False
      */
-    public boolean isNodeTunnelReady(Node bridgeNode, Node ovsdbNode);
+    boolean isNodeTunnelReady(Node bridgeNode, Node ovsdbNode);
 
     /* Determine if internal network is ready for vlan network types.
      * - OF 1.0 requires br-int, br-net, a patch connecting them and
@@ -79,7 +79,7 @@ public interface BridgeConfigurationManager {
      * @param network the {@link org.opendaylight.neutron.spi.NeutronNetwork}
      * @return True or False
      */
-    public boolean isNodeVlanReady(Node bridgeNode, Node ovsdbNode, NeutronNetwork network);
+    boolean isNodeVlanReady(Node bridgeNode, Node ovsdbNode, NeutronNetwork network);
 
     /**
      * A helper function to determine if a port exists on a given bridge
@@ -87,7 +87,7 @@ public interface BridgeConfigurationManager {
      * @param portName the name of the port to search for
      * @return True if the port exists, otherwise False
      */
-    public boolean isPortOnBridge (Node node, String portName);
+    boolean isPortOnBridge(Node node, String portName);
 
 
     /**
@@ -97,13 +97,13 @@ public interface BridgeConfigurationManager {
      * @param network the {@link org.opendaylight.neutron.spi.NeutronNetwork}
      * @return True or False
      */
-    public boolean createLocalNetwork(Node node, NeutronNetwork network);
+    boolean createLocalNetwork(Node node, NeutronNetwork network);
 
     /**
      * Prepares the given Node for Neutron Networking by creating the Integration Bridge
      * @param node the {@link Node} to prepare
      */
-    public void prepareNode(Node node);
+    void prepareNode(Node node);
 
     /**
      * Returns the physical interface mapped to the given neutron physical network.
@@ -111,12 +111,12 @@ public interface BridgeConfigurationManager {
      * @param physicalNetwork
      * @return
      */
-    public String getPhysicalInterfaceName (Node node, String physicalNetwork);
+    String getPhysicalInterfaceName(Node node, String physicalNetwork);
 
     /** Returns all physical interfaces configured in the bridge mapping
      * Bridge mappings will be of the following format:
      * @param node the {@link Node} to query
      * @return a List in the format {eth1, eth2} given bridge_mappings=physnet1:eth1,physnet2:eth2
      */
-    public List<String> getAllPhysicalInterfaceNames(Node node);
+    List<String> getAllPhysicalInterfaceNames(Node node);
 }

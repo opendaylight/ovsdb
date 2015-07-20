@@ -20,8 +20,8 @@ import java.lang.annotation.ElementType;;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface TypedTable {
-    public String name();
-    public String database();
-    public String fromVersion() default Version.NULL_VERSION_STRING;
-    public String untilVersion() default Version.NULL_VERSION_STRING;
+    String name();
+    String database();
+    String fromVersion() default Version.NULL_VERSION_STRING;
+    String untilVersion() default Version.NULL_VERSION_STRING;
 }

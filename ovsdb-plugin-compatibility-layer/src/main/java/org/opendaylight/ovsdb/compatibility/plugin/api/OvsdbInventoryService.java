@@ -20,15 +20,15 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Row;
 
 public interface OvsdbInventoryService{
-    public ConcurrentMap<String, ConcurrentMap<String, Row>> getCache(Node n, String databaseName);
-    public ConcurrentMap<String, Row> getTableCache(Node n, String databaseName, String tableName);
-    public Row getRow (Node n, String databaseName, String tableName, String uuid);
-    public void updateRow(Node n, String databaseName, String tableName, String uuid, Row row);
-    public void removeRow(Node n, String databaseName, String tableName, String uuid);
-    public void processTableUpdates(Node n, String databaseName,TableUpdates tableUpdates);
-    public void printCache(Node n);
-    public void addNode(Node n, Set<Property> props);
-    public void notifyNodeAdded(Node n, InetAddress address, int port);
-    public void removeNode(Node n);
-    public void addNodeProperty(Node node, UpdateType type, Set<Property> props);
+    ConcurrentMap<String, ConcurrentMap<String, Row>> getCache(Node n, String databaseName);
+    ConcurrentMap<String, Row> getTableCache(Node n, String databaseName, String tableName);
+    Row getRow(Node n, String databaseName, String tableName, String uuid);
+    void updateRow(Node n, String databaseName, String tableName, String uuid, Row row);
+    void removeRow(Node n, String databaseName, String tableName, String uuid);
+    void processTableUpdates(Node n, String databaseName, TableUpdates tableUpdates);
+    void printCache(Node n);
+    void addNode(Node n, Set<Property> props);
+    void notifyNodeAdded(Node n, InetAddress address, int port);
+    void removeNode(Node n);
+    void addNodeProperty(Node node, UpdateType type, Set<Property> props);
 }

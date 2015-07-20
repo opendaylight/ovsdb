@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_8b0401c1",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/message/OvsdbRPC.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-07-20T15:08:25Z",
+      "side": 1,
+      "message": "Good to know that Interface\u0027s variables are static final by default.",
+      "revId": "3f979683755908e83b082fd77e445d2f361809a8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

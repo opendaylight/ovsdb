@@ -23,28 +23,28 @@ public interface NetworkingProvider {
     /**
      * Returns the name of the NetworkingProvider
      */
-    public String getName();
+    String getName();
 
     /**
      * Return true if the provider supports Network Service Instances
      */
-    public boolean supportsServices();
+    boolean supportsServices();
 
     /**
      * Return true if the provider supports per-tenant or "static" tunneling
      */
-    public boolean hasPerTenantTunneling();
+    boolean hasPerTenantTunneling();
 
     /**
      * Handle Interface Update Callback Method
      */
-    public boolean handleInterfaceUpdate(NeutronNetwork network, Node source, OvsdbTerminationPointAugmentation intf);
+    boolean handleInterfaceUpdate(NeutronNetwork network, Node source, OvsdbTerminationPointAugmentation intf);
 
     /**
      * Handle Interface Delete Callback Method
      */
-    public boolean handleInterfaceDelete(String tunnelType, NeutronNetwork network, Node source,
-                                         OvsdbTerminationPointAugmentation intf, boolean isLastInstanceOnNode);
+    boolean handleInterfaceDelete(String tunnelType, NeutronNetwork network, Node source,
+                                  OvsdbTerminationPointAugmentation intf, boolean isLastInstanceOnNode);
 
     /**
      * Initialize the Flow rules given the OVSDB node.
@@ -52,10 +52,10 @@ public interface NetworkingProvider {
      * that are Openflow Version specific. Hence we have this method in addition to the following
      * Openflow Node specific initialization method.
      */
-    public void initializeFlowRules(Node node);
+    void initializeFlowRules(Node node);
 
     /**
      * Initialize the Flow rules for a given OpenFlow node
      */
-    public void initializeOFFlowRules(Node openflowNode);
+    void initializeOFFlowRules(Node openflowNode);
 }

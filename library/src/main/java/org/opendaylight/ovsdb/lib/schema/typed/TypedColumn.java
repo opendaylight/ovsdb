@@ -20,8 +20,8 @@ import java.lang.annotation.ElementType;;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface TypedColumn {
-    public String name();
-    public MethodType method();
-    public String fromVersion() default Version.NULL_VERSION_STRING;
-    public String untilVersion() default Version.NULL_VERSION_STRING;
+    String name();
+    MethodType method();
+    String fromVersion() default Version.NULL_VERSION_STRING;
+    String untilVersion() default Version.NULL_VERSION_STRING;
 }

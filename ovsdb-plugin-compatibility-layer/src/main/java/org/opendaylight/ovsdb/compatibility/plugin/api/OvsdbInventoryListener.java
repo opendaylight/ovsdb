@@ -15,9 +15,9 @@ import org.opendaylight.ovsdb.lib.notation.Row;
 import java.net.InetAddress;
 
 public interface OvsdbInventoryListener {
-    public void nodeAdded(Node node, InetAddress address, int port );
-    public void nodeRemoved(Node node);
-    public void rowAdded(Node node, String tableName, String uuid, Row row);
-    public void rowUpdated(Node node, String tableName, String uuid, Row old, Row row);
-    public void rowRemoved(Node node, String tableName, String uuid, Row row, Object context);
+    void nodeAdded(Node node, InetAddress address, int port);
+    void nodeRemoved(Node node);
+    void rowAdded(Node node, String tableName, String uuid, Row row);
+    void rowUpdated(Node node, String tableName, String uuid, Row old, Row row);
+    void rowRemoved(Node node, String tableName, String uuid, Row row, Object context);
 }

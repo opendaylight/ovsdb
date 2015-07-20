@@ -16,5 +16,5 @@ import org.opendaylight.ovsdb.lib.notation.Condition;
  */
 public interface ConditionalOperation {
 
-    public void addCondition(Condition condition);
+    void addCondition(Condition condition);
 }

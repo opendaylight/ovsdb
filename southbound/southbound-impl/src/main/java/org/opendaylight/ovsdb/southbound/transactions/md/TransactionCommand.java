@@ -4,6 +4,6 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 
 public interface TransactionCommand {
 
-    public void execute(ReadWriteTransaction transaction);
+    void execute(ReadWriteTransaction transaction);
 
 }

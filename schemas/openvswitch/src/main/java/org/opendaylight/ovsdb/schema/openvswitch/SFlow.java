@@ -25,32 +25,32 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 @TypedTable(name="sFlow", database="Open_vSwitch", fromVersion="1.0.0")
 public interface SFlow extends TypedBaseTable<GenericTableSchema> {
     @TypedColumn(name="targets", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<String>> getTargetsColumn() ;
+    Column<GenericTableSchema, Set<String>> getTargetsColumn() ;
     @TypedColumn(name="targets", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setTargets(Set<String> targets) ;
+    void setTargets(Set<String> targets) ;
 
     @TypedColumn(name="agent", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<String>> getAgentColumn() ;
+    Column<GenericTableSchema, Set<String>> getAgentColumn() ;
     @TypedColumn(name="agent", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setAgent(Set<String> agent) ;
+    void setAgent(Set<String> agent) ;
 
     @TypedColumn(name="external_ids", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn() ;
+    Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn() ;
     @TypedColumn(name="external_ids", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setExternalIds(Map<String, String> externalIds) ;
+    void setExternalIds(Map<String, String> externalIds) ;
 
     @TypedColumn(name="header", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Long>> getHeaderColumn() ;
+    Column<GenericTableSchema, Set<Long>> getHeaderColumn() ;
     @TypedColumn(name="header", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setHeader(Set<Long> header) ;
+    void setHeader(Set<Long> header) ;
 
     @TypedColumn(name="polling", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Long>> getPollingColumn() ;
+    Column<GenericTableSchema, Set<Long>> getPollingColumn() ;
     @TypedColumn(name="polling", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setPolling(Set<Long> polling) ;
+    void setPolling(Set<Long> polling) ;
 
     @TypedColumn(name="sampling", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Long>> getSamplingColumn() ;
+    Column<GenericTableSchema, Set<Long>> getSamplingColumn() ;
     @TypedColumn(name="sampling", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setSampling(Set<Long> sampling) ;
+    void setSampling(Set<Long> sampling) ;
 }

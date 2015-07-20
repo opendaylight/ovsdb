@@ -20,6 +20,6 @@ package org.opendaylight.ovsdb.lib;
  */
 public interface LockAquisitionCallback {
 
-    public void lockAcquired();
+    void lockAcquired();
 
 }

@@ -17,9 +17,9 @@ import org.osgi.framework.ServiceReference;
  * @author Madhu Venugopal
  */
 public interface PipelineOrchestrator {
-    public Service getNextServiceInPipeline(Service service);
+    Service getNextServiceInPipeline(Service service);
     AbstractServiceInstance getServiceInstance(Service service);
-    public void enqueue(Node node);
-    public void registerService(final ServiceReference ref, AbstractServiceInstance serviceInstance);
-    public void unregisterService(final ServiceReference ref);
+    void enqueue(Node node);
+    void registerService(final ServiceReference ref, AbstractServiceInstance serviceInstance);
+    void unregisterService(final ServiceReference ref);
 }

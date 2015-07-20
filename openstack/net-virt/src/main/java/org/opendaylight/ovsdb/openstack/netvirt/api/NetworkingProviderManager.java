@@ -25,6 +25,6 @@ public interface NetworkingProviderManager {
      * @see NetworkingProvider
      */
     NetworkingProvider getProvider(Node ovsdbNode);
-    public void providerAdded(final ServiceReference ref, final NetworkingProvider provider);
-    public void providerRemoved(final ServiceReference ref);
+    void providerAdded(final ServiceReference ref, final NetworkingProvider provider);
+    void providerRemoved(final ServiceReference ref);
 }

@@ -17,8 +17,8 @@ import org.opendaylight.ovsdb.plugin.api.Connection;
 import org.opendaylight.ovsdb.plugin.api.ConnectionConstants;
 
 public interface OvsdbConnectionService {
-    public Connection getConnection(Node node);
-    public List<Node> getNodes();
-    public Node getNode(String identifier);
-    public Node connect(String identifier, Map<ConnectionConstants, String> params);
+    Connection getConnection(Node node);
+    List<Node> getNodes();
+    Node getNode(String identifier);
+    Node connect(String identifier, Map<ConnectionConstants, String> params);
 }

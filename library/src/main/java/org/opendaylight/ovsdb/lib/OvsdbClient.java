@@ -68,16 +68,16 @@ public interface OvsdbClient {
      *                       handle is used to later cancel ({@link #cancelMonitor(MonitorHandle)}) the monitor.
      * @param callback receives the monitor response
      */
-    public <E extends TableSchema<E>> TableUpdates monitor(DatabaseSchema schema,
-                                                           List<MonitorRequest<E>> monitorRequests,
-                                                           MonitorCallBack callback);
+    <E extends TableSchema<E>> TableUpdates monitor(DatabaseSchema schema,
+                                                    List<MonitorRequest<E>> monitorRequests,
+                                                    MonitorCallBack callback);
 
     /**
      * Cancels an existing monitor method.
      * @param handler Handle identifying a specific monitor request that is being cancelled.
      * @throws java.lang.IllegalStateException if there is no outstanding monitor request for this handle
      */
-    public void cancelMonitor(MonitorHandle handler);
+    void cancelMonitor(MonitorHandle handler);
 
     /**
      * ovsdb <a href="http://tools.ietf.org/html/draft-pfaff-ovsdb-proto-04#section-4.1.8">lock</a> operation.
@@ -85,41 +85,41 @@ public interface OvsdbClient {
      * @param lockedCallBack Callback to nofify when the lock is acquired
      * @param stolenCallback Callback to notify when an acquired lock is stolen by another client
      */
-    public void lock(String lockId, LockAquisitionCallback lockedCallBack, LockStolenCallback stolenCallback);
+    void lock(String lockId, LockAquisitionCallback lockedCallBack, LockStolenCallback stolenCallback);
 
     /**
      * ovsdb steal operation, see {@link #lock(String, LockAquisitionCallback, LockStolenCallback)}
      * @param lockId
      * @return
      */
-    public ListenableFuture<Boolean> steal(String lockId);
+    ListenableFuture<Boolean> steal(String lockId);
 
     /**
      * ovsdb unlock operaiton, see {@link #unLock(String)}
      * @param lockId
      * @return
      */
-    public ListenableFuture<Boolean> unLock(String lockId);
+    ListenableFuture<Boolean> unLock(String lockId);
 
     /**
      * Starts the echo service. The {@code callbackFilters} can be used to get notified on the absence of echo
      * notifications from the remote device and control the frequency of such notifications.
      * @param callbackFilters callbacks for notifying the client of missing echo calls from remote.
      */
-    public void startEchoService(EchoServiceCallbackFilters callbackFilters);
+    void startEchoService(EchoServiceCallbackFilters callbackFilters);
 
     /**
      * Stops the echo service, i.e echo requests from the remote would not be acknowledged after this call.
      */
-    public void stopEchoService();
+    void stopEchoService();
 
-    public OvsdbConnectionInfo getConnectionInfo();
+    OvsdbConnectionInfo getConnectionInfo();
 
-    public boolean isActive();
+    boolean isActive();
 
-    public void disconnect();
+    void disconnect();
 
-    public DatabaseSchema getDatabaseSchema(String dbName);
+    DatabaseSchema getDatabaseSchema(String dbName);
 
     /**
      * User friendly convenient methods that make use of TyperUtils.getTypedRowWrapper to create a Typed Row Proxy
@@ -128,7 +128,7 @@ public interface OvsdbClient {
      * @param klazz Typed Interface
      * @return Proxy wrapper for the actual raw Row class.
      */
-    public <T extends TypedBaseTable<?>> T createTypedRowWrapper(Class<T> klazz);
+    <T extends TypedBaseTable<?>> T createTypedRowWrapper(Class<T> klazz);
     /**
      * User friendly convenient methods that make use of getTypedRowWrapper to create a Typed Row Proxy given
      * DatabaseSchema and Typed Table Class.
@@ -137,7 +137,7 @@ public interface OvsdbClient {
      * @param klazz Typed Interface
      * @return Proxy wrapper for the actual raw Row class.
      */
-    public <T extends TypedBaseTable<?>> T createTypedRowWrapper(DatabaseSchema dbSchema, Class<T> klazz);
+    <T extends TypedBaseTable<?>> T createTypedRowWrapper(DatabaseSchema dbSchema, Class<T> klazz);
 
     /**
      * User friendly convenient method to get a Typed Row Proxy given a Typed Table Class and the Row to be wrapped.
@@ -147,7 +147,7 @@ public interface OvsdbClient {
      *            is just interested in getting ColumnSchema.
      * @return Proxy wrapper for the actual raw Row class.
      */
-    public <T extends TypedBaseTable<?>> T getTypedRowWrapper(final Class<T> klazz,
-                                                              final Row<GenericTableSchema> row);
+    <T extends TypedBaseTable<?>> T getTypedRowWrapper(final Class<T> klazz,
+                                                       final Row<GenericTableSchema> row);
 
 }

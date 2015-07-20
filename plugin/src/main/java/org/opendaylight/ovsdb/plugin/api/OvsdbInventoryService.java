@@ -17,13 +17,13 @@ import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 
 public interface OvsdbInventoryService {
-    public ConcurrentMap<String, ConcurrentMap<String, Row>> getCache(Node n, String databaseName);
-    public ConcurrentMap<String, Row> getTableCache(Node n, String databaseName, String tableName);
-    public Row getRow (Node n, String databaseName, String tableName, String uuid);
-    public void updateRow(Node n, String databaseName, String tableName, String uuid, Row row);
-    public void removeRow(Node n, String databaseName, String tableName, String uuid);
-    public void processTableUpdates(Node n, String databaseName,TableUpdates tableUpdates);
-    public void printCache(Node n);
-    public void notifyNodeAdded(Node n, InetAddress address, int port);
-    public void removeNode(Node n);
+    ConcurrentMap<String, ConcurrentMap<String, Row>> getCache(Node n, String databaseName);
+    ConcurrentMap<String, Row> getTableCache(Node n, String databaseName, String tableName);
+    Row getRow(Node n, String databaseName, String tableName, String uuid);
+    void updateRow(Node n, String databaseName, String tableName, String uuid, Row row);
+    void removeRow(Node n, String databaseName, String tableName, String uuid);
+    void processTableUpdates(Node n, String databaseName, TableUpdates tableUpdates);
+    void printCache(Node n);
+    void notifyNodeAdded(Node n, InetAddress address, int port);
+    void removeNode(Node n);
 }

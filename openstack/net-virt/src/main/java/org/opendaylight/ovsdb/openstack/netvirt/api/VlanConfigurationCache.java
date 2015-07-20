@@ -24,7 +24,7 @@ public interface VlanConfigurationCache {
      * @param networkId the Neutron Network ID
      * @return a VLAN ID or 0 in case of an error
      */
-    public Integer assignInternalVlan (Node node, String networkId);
+    Integer assignInternalVlan(Node node, String networkId);
 
     /**
      * Recovers an assigned VLAN ID when it is no longer required
@@ -32,7 +32,7 @@ public interface VlanConfigurationCache {
      * @param networkId the Neutron Network ID
      * @return the reclaimed VLAN ID or 0 in case of an error
      */
-    public Integer reclaimInternalVlan (Node node, String networkId);
+    Integer reclaimInternalVlan(Node node, String networkId);
 
     /**
      * Returns a VLAN ID assigned to a given tenant network
@@ -40,5 +40,5 @@ public interface VlanConfigurationCache {
      * @param networkId the Neutron Network ID
      * @return the VLAN ID or 0 in case of an error
      */
-    public Integer getInternalVlan (Node node, String networkId);
+    Integer getInternalVlan(Node node, String networkId);
 }

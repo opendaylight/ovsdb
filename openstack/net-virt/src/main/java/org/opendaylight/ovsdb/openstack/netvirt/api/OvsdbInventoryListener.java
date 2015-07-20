@@ -4,7 +4,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.DataObject;
 
 public interface OvsdbInventoryListener {
-    public enum OvsdbType {
+    enum OvsdbType {
         NODE,
         ROW,
         OPENVSWITCH,
@@ -12,6 +12,6 @@ public interface OvsdbInventoryListener {
         CONTROLLER,
         PORT
     }
-    public void ovsdbUpdate(Node node, DataObject augmentationDataChanges, OvsdbType type, Action action);
-    public void triggerUpdates();
+    void ovsdbUpdate(Node node, DataObject augmentationDataChanges, OvsdbType type, Action action);
+    void triggerUpdates();
 }

@@ -15,8 +15,8 @@ import java.util.Map;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 
 public interface OvsdbConnectionService {
-    public Connection getConnection(Node node);
-    public List<Node> getNodes();
-    public Node getNode(String identifier);
-    public Node connect(String identifier, Map<ConnectionConstants, String> params);
+    Connection getConnection(Node node);
+    List<Node> getNodes();
+    Node getNode(String identifier);
+    Node connect(String identifier, Map<ConnectionConstants, String> params);
 }

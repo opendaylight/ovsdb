@@ -22,6 +22,6 @@ package org.opendaylight.ovsdb.lib;
  */
 public interface LockStolenCallback {
 
-    public void lockStolen();
+    void lockStolen();
 
 }

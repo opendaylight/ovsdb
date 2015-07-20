@@ -22,14 +22,14 @@ public interface TypedBaseTable<E extends TableSchema<E>> {
     Row<E> getRow();
 
     @TypedColumn(name = "_uuid", method = MethodType.GETDATA)
-    public UUID getUuid();
+    UUID getUuid();
 
     @TypedColumn(name = "_uuid", method = MethodType.GETCOLUMN)
-    public Column<E, UUID> getUuidColumn();
+    Column<E, UUID> getUuidColumn();
 
     @TypedColumn(name = "_version", method = MethodType.GETDATA)
-    public UUID getVersion();
+    UUID getVersion();
 
     @TypedColumn(name = "_version", method = MethodType.GETCOLUMN)
-    public Column<E, UUID> getVersionColumn();
+    Column<E, UUID> getVersionColumn();
 }

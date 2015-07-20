@@ -27,108 +27,108 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 public interface Bridge extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name="name", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, String> getNameColumn();
+    Column<GenericTableSchema, String> getNameColumn();
 
     @TypedColumn(name="name", method=MethodType.GETDATA, fromVersion="1.0.0")
-    public String getName();
+    String getName();
 
     @TypedColumn(name="name", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setName(String name);
+    void setName(String name);
 
     @TypedColumn(name="datapath_type", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, String> getDatapathTypeColumn();
+    Column<GenericTableSchema, String> getDatapathTypeColumn();
 
     @TypedColumn(name="datapath_type", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setDatapathType(String datapathType);
+    void setDatapathType(String datapathType);
 
     @TypedColumn(name="datapath_id", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<String>> getDatapathIdColumn();
+    Column<GenericTableSchema, Set<String>> getDatapathIdColumn();
 
     @TypedColumn(name="datapath_id", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setDatapathId(Set<String> datapathId);
+    void setDatapathId(Set<String> datapathId);
 
     @TypedColumn(name="stp_enable", method=MethodType.GETCOLUMN, fromVersion="6.2.0")
-    public Column<GenericTableSchema, Boolean> getStpEnableColumn();
+    Column<GenericTableSchema, Boolean> getStpEnableColumn();
 
     @TypedColumn(name="stp_enable", method=MethodType.SETDATA, fromVersion="6.2.0")
-    public void setStpEnable(Boolean stp_enable);
+    void setStpEnable(Boolean stp_enable);
 
     @TypedColumn(name="ports", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<UUID>> getPortsColumn();
+    Column<GenericTableSchema, Set<UUID>> getPortsColumn();
 
     @TypedColumn(name="ports", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setPorts(Set<UUID> ports);
+    void setPorts(Set<UUID> ports);
 
     @TypedColumn(name="mirrors", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<UUID>> getMirrorsColumn();
+    Column<GenericTableSchema, Set<UUID>> getMirrorsColumn();
 
     @TypedColumn(name="mirrors", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setMirrors(Set<UUID> mirrors);
+    void setMirrors(Set<UUID> mirrors);
 
     @TypedColumn(name="netflow", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<UUID>> getNetflowColumn();
+    Column<GenericTableSchema, Set<UUID>> getNetflowColumn();
 
     @TypedColumn(name="netflow", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setNetflow(Set<UUID> netflow);
+    void setNetflow(Set<UUID> netflow);
 
     @TypedColumn(name="sflow", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<UUID>> getSflowColumn();
+    Column<GenericTableSchema, Set<UUID>> getSflowColumn();
 
     @TypedColumn(name="sflow", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setSflow(Set<UUID> sflow);
+    void setSflow(Set<UUID> sflow);
 
     @TypedColumn(name="ipfix", method=MethodType.GETCOLUMN, fromVersion="7.1.0")
-    public Column<GenericTableSchema, Set<UUID>> getIpfixColumn();
+    Column<GenericTableSchema, Set<UUID>> getIpfixColumn();
 
     @TypedColumn(name="ipfix", method=MethodType.SETDATA, fromVersion="7.1.0")
-    public void setIpfix(Set<UUID> ipfix);
+    void setIpfix(Set<UUID> ipfix);
 
     @TypedColumn(name="controller", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<UUID>> getControllerColumn();
+    Column<GenericTableSchema, Set<UUID>> getControllerColumn();
 
     @TypedColumn(name="controller", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setController(Set<UUID> controller);
+    void setController(Set<UUID> controller);
 
     @TypedColumn(name="protocols", method=MethodType.GETCOLUMN, fromVersion="6.11.1")
-    public Column<GenericTableSchema, Set<String>> getProtocolsColumn();
+    Column<GenericTableSchema, Set<String>> getProtocolsColumn();
 
     @TypedColumn(name="protocols", method=MethodType.SETDATA, fromVersion="6.11.1")
-    public void setProtocols(Set<String> protocols);
+    void setProtocols(Set<String> protocols);
 
     @TypedColumn(name="fail_mode", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<String>> getFailModeColumn();
+    Column<GenericTableSchema, Set<String>> getFailModeColumn();
 
     @TypedColumn(name="fail_mode", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setFailMode(Set<String> failMode);
+    void setFailMode(Set<String> failMode);
 
     @TypedColumn(name="status", method=MethodType.GETCOLUMN, fromVersion="6.2.0")
-    public Column<GenericTableSchema, Map<String, String>> getStatusColumn();
+    Column<GenericTableSchema, Map<String, String>> getStatusColumn();
 
     @TypedColumn(name="status", method=MethodType.SETDATA, fromVersion="6.2.0")
-    public void setStatus(Map<String, String> status);
+    void setStatus(Map<String, String> status);
 
     @TypedColumn(name="other_config", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Map<String, String>> getOtherConfigColumn();
+    Column<GenericTableSchema, Map<String, String>> getOtherConfigColumn();
 
     @TypedColumn(name="other_config", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setOtherConfig(Map<String, String> otherConfig);
+    void setOtherConfig(Map<String, String> otherConfig);
 
     @TypedColumn(name="external_ids", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn();
+    Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn();
 
     @TypedColumn(name="external_ids", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setExternalIds(Map<String, String> externalIds);
+    void setExternalIds(Map<String, String> externalIds);
 
     @TypedColumn(name="flood_vlans", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Long>> getFloodVlansColumn();
+    Column<GenericTableSchema, Set<Long>> getFloodVlansColumn();
 
     @TypedColumn(name="flood_vlans", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setFloodVlans(Set<Long> vlans);
+    void setFloodVlans(Set<Long> vlans);
 
     @TypedColumn(name="flow_tables", method=MethodType.GETCOLUMN, fromVersion="6.5.0")
-    public Column<GenericTableSchema, Map<Long, UUID>> getFlowTablesColumn();
+    Column<GenericTableSchema, Map<Long, UUID>> getFlowTablesColumn();
 
     @TypedColumn(name="flow_tables", method=MethodType.SETDATA, fromVersion="6.5.0")
-    public void setFlowTables(Map<Long, UUID> flowTables);
+    void setFlowTables(Map<Long, UUID> flowTables);
 
 }

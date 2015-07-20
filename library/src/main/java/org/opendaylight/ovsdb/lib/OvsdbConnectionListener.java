@@ -18,11 +18,11 @@ public interface OvsdbConnectionListener {
      * Event thrown to the connection listener when a new Passive connection is established.
      * @param client OvsdbClient that represents the connection.
      */
-    public void connected(OvsdbClient client);
+    void connected(OvsdbClient client);
 
     /**
      * Event thrown to the connection listener when an existing connection is terminated.
      * @param client OvsdbClient that represents the connection.
      */
-    public void disconnected(OvsdbClient client);
+    void disconnected(OvsdbClient client);
 }

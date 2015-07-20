@@ -18,5 +18,5 @@ import org.osgi.framework.ServiceReference;
  * @author Sam Hague (shague@redhat.com)
  */
 public interface NodeCacheListener {
-    public void notifyNode(Node node, Action action);
+    void notifyNode(Node node, Action action);
 }

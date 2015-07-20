@@ -35,7 +35,7 @@ public interface OvsdbConnection {
      * @param port Layer 4 port on which the remote ovsdb server is listening on.
      * @return OvsDBClient The primary Client interface for the ovsdb connection.
      */
-    public OvsdbClient connect(final InetAddress address, final int port);
+    OvsdbClient connect(final InetAddress address, final int port);
 
     /**
      * connect API can be used by the applications to initiate Active ssl
@@ -45,42 +45,42 @@ public interface OvsdbConnection {
      * @param sslContext Netty sslContext for channel configuration
      * @return OvsDBClient The primary Client interface for the ovsdb connection.
      */
-    public OvsdbClient connectWithSsl(final InetAddress address, final int port,
-                                      final SSLContext sslContext);
+    OvsdbClient connectWithSsl(final InetAddress address, final int port,
+                               final SSLContext sslContext);
 
     /**
      * Method to disconnect an existing connection.
      * @param client that represents the ovsdb connection.
      */
-    public void disconnect(OvsdbClient client);
+    void disconnect(OvsdbClient client);
 
     /**
      * Method to start ovsdb server for passive connection
      */
-    public boolean startOvsdbManager(final int ovsdbListenPort);
+    boolean startOvsdbManager(final int ovsdbListenPort);
 
     /**
      * Method to start ovsdb server for passive connection with SSL
      */
-    public boolean startOvsdbManagerWithSsl(final int ovsdbListenPort,
+    boolean startOvsdbManagerWithSsl(final int ovsdbListenPort,
                                      final SSLContext sslContext);
 
     /**
      * Method to register a Passive Connection Listener with the ConnectionService.
      * @param listener Passive Connection listener interested in Passive OVSDB connection requests.
      */
-    public void registerConnectionListener(OvsdbConnectionListener listener);
+    void registerConnectionListener(OvsdbConnectionListener listener);
 
     /**
      * Method to unregister a Passive Connection Listener with the ConnectionService.
      * @param listener
      */
-    public void unregisterConnectionListener(OvsdbConnectionListener listener);
+    void unregisterConnectionListener(OvsdbConnectionListener listener);
 
     /**
      * Returns a Collection of all the active OVSDB Connections.
      *
      * @return Collection of all the active OVSDB Connections
      */
-    public Collection<OvsdbClient> getConnections();
+    Collection<OvsdbClient> getConnections();
 }

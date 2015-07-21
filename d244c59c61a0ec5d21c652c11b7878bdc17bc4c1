@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_1c283933",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpResolverMetadata.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2015-07-21T18:39:56Z",
+      "side": 1,
+      "message": "Can you make all of these argument declarations \"final\"?",
+      "revId": "d244c59c61a0ec5d21c652c11b7878bdc17bc4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_fc1c5d15",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpResolverUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2015-07-21T18:39:56Z",
+      "side": 1,
+      "message": "Please update the documentation to reflect method signature changes.  This method no longer throws PacketException.\n\nPerhaps explicitly state the case that causes null return value.",
+      "revId": "d244c59c61a0ec5d21c652c11b7878bdc17bc4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_9c1be91a",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/GatewayMacResolverService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2015-07-21T18:39:56Z",
+      "side": 1,
+      "message": "Do we plan on making the number of threads in the pool configurable?  If not, why not just use newSingleThreadScheduledExecutor() and avoid the cost incurred by pooling?",
+      "revId": "d244c59c61a0ec5d21c652c11b7878bdc17bc4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

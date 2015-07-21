@@ -2,6 +2,7 @@ package org.opendaylight.ovsdb.southbound;
 
 import java.net.UnknownHostException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -21,6 +22,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -171,29 +173,31 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                 new HashMap<InstanceIdentifier<Node>,OvsdbConnectionInstance>();
         for ( Entry<InstanceIdentifier<?>, DataObject> created : map.entrySet()) {
             if (created.getValue() instanceof Node) {
+                OvsdbConnectionInstance client = null;
                 LOG.debug("Received request for {}",created.getValue());
                 OvsdbBridgeAugmentation bridge =
                         ((Node)created.getValue()).getAugmentation(OvsdbBridgeAugmentation.class);
                 if (bridge != null) {
-                    OvsdbConnectionInstance client = cm.getConnectionInstance(bridge);
-                    if (client != null) {
-                        LOG.debug("Found client for {}", created.getValue());
-                        result.put((InstanceIdentifier<Node>) created.getKey(), client);
-                    } else {
-                        LOG.debug("Did not find client for {}",created.getValue());
-                    }
+                    client = cm.getConnectionInstance(bridge);
                 } else {
                     OvsdbNodeAugmentation ovsNode =
                             ((Node)created.getValue()).getAugmentation(OvsdbNodeAugmentation.class);
                     if (ovsNode != null && ovsNode.getConnectionInfo() != null) {
-                        OvsdbConnectionInstance client = cm.getConnectionInstance(ovsNode.getConnectionInfo());
-                        if (client != null) {
-                            LOG.debug("Found client for {}", created.getValue());
-                            result.put((InstanceIdentifier<Node>) created.getKey(), client);
-                        } else {
-                            LOG.debug("Did not find client for {}",created.getValue());
+                        client = cm.getConnectionInstance(ovsNode.getConnectionInfo());
+                    } else {
+                        List<TerminationPoint> terminationPoint = ((Node)created.getValue()).getTerminationPoint();
+                        if (!terminationPoint.isEmpty()) {
+                            InstanceIdentifier<Node> nodeIid = SouthboundMapper.
+                                    createInstanceIdentifier(((Node)created.getValue()).getNodeId());
+                            client = cm.getConnectionInstance(nodeIid);
                         }
                     }
+                }
+                if (client != null) {
+                    LOG.debug("Found client for {}", created.getValue());
+                    result.put((InstanceIdentifier<Node>) created.getKey(), client);
+                } else {
+                    LOG.debug("Did not find client for {}",created.getValue());
                 }
             }
         }

@@ -33,6 +33,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     mininet.vm.provider "vmware_fusion" do |vf|
       vf.vmx["memsize"] = "2048"
     end
+    mininet.vm.provider :libvirt do |lv|
+      lv.memory = 2048
+    end
     mininet.vm.provision "puppet" do |puppet|
       puppet.hiera_config_path = "resources/puppet/hiera.yaml"
       puppet.working_directory = "/vagrant/resources/puppet"
@@ -55,6 +58,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
     control.vm.provider "vmware_fusion" do |vf|
       vf.vmx["memsize"] = "4096"
+    end
+    control.vm.provider :libvirt do |lv|
+      lv.memory = 4096
     end
     control.vm.provision "puppet" do |puppet|
       puppet.hiera_config_path = "resources/puppet/hiera.yaml"
@@ -81,6 +87,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       end
       compute.vm.provider "vmware_fusion" do |vf|
         vf.vmx["memsize"] = "4096"
+      end
+      compute.vm.provider :libvirt do |lv|
+        lv.memory = 4096
       end
       compute.vm.provision "puppet" do |puppet|
         puppet.hiera_config_path = "resources/puppet/hiera.yaml"

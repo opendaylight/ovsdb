@@ -1,0 +1,8 @@
+Code-Review+1: Alexis de Talhouët <adetalhouet@inocybe.com>
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Flavio Fernandes <ffernand@redhat.com>
+Submitted-by: Flavio Fernandes <ffernand@redhat.com>
+Submitted-at: Tue, 21 Jul 2015 21:54:50 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/24291
+Project: ovsdb
+Branch: refs/heads/master

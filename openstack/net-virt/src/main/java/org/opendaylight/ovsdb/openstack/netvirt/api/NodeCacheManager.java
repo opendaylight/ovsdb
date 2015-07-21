@@ -22,12 +22,12 @@ import org.osgi.framework.ServiceReference;
  * @author Sam Hague (shague@redhat.com)
  */
 public interface NodeCacheManager {
-    public void nodeAdded(Node node);
-    public void nodeRemoved(Node node);
-    public List<Node> getNodes();
-    public Map<NodeId, Node> getOvsdbNodes();
-    public List<Node> getBridgeNodes();
-    public void cacheListenerAdded(final ServiceReference ref, NodeCacheListener handler);
-    public void cacheListenerRemoved(final ServiceReference ref);
+    void nodeAdded(Node node);
+    void nodeRemoved(Node node);
+    List<Node> getNodes();
+    Map<NodeId, Node> getOvsdbNodes();
+    List<Node> getBridgeNodes();
+    void cacheListenerAdded(final ServiceReference ref, NodeCacheListener handler);
+    void cacheListenerRemoved(final ServiceReference ref);
 
 }

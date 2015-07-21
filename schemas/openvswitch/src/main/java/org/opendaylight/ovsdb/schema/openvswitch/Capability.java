@@ -25,8 +25,8 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 @TypedTable(name="Capability", database="Open_vSwitch")
 public interface Capability extends TypedBaseTable<GenericTableSchema> {
     @TypedColumn(name="details", method=MethodType.GETCOLUMN)
-    public Column<GenericTableSchema, Map<String, String>> getDetailsColumn();
+    Column<GenericTableSchema, Map<String, String>> getDetailsColumn();
 
     @TypedColumn(name="details", method=MethodType.SETDATA)
-    public void setDetails(Map<String, String> details);
+    void setDetails(Map<String, String> details);
 }

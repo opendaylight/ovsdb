@@ -37,7 +37,7 @@ public interface OvsdbConfigurationService {
      * @return UUID of the inserted Row
      */
     @Deprecated
-    public StatusWithUuid insertRow(Node node, String tableName, String parentUuid, Row<GenericTableSchema> row);
+    StatusWithUuid insertRow(Node node, String tableName, String parentUuid, Row<GenericTableSchema> row);
 
     /**
      * insert a Row in a Table of a specified Database Schema. This is a convenience method on top of
@@ -57,8 +57,8 @@ public interface OvsdbConfigurationService {
      * @throws OvsdbPluginException Any failure during the insert transaction will result in a specific exception.
      * @return UUID of the inserted Row
      */
-    public UUID insertRow(Node node, String databaseName, String tableName, UUID parentRowUuid,
-                          Row<GenericTableSchema> row) throws OvsdbPluginException;
+    UUID insertRow(Node node, String databaseName, String tableName, UUID parentRowUuid,
+                   Row<GenericTableSchema> row) throws OvsdbPluginException;
 
     /**
      * insert a Row in a Table of a specified Database Schema.
@@ -77,8 +77,8 @@ public interface OvsdbConfigurationService {
      * @throws OvsdbPluginException Any failure during the insert transaction will result in a specific exception.
      * @return UUID of the inserted Row
      */
-    public UUID insertRow(Node node, String databaseName, String tableName, String parentTable, UUID parentRowUuid,
-                          String parentColumn, Row<GenericTableSchema> row) throws OvsdbPluginException;
+    UUID insertRow(Node node, String databaseName, String tableName, String parentTable, UUID parentRowUuid,
+                   String parentColumn, Row<GenericTableSchema> row) throws OvsdbPluginException;
 
     /**
      * inserts a Tree of Rows in multiple Tables that has parent-child relationships referenced through the OVSDB schema's refTable construct.
@@ -92,8 +92,8 @@ public interface OvsdbConfigurationService {
      * @throws OvsdbPluginException Any failure during the insert transaction will result in a specific exception.
      * @return Returns the row tree with the UUID of every inserted Row populated in the _uuid column of every row in the tree
      */
-    public Row<GenericTableSchema> insertTree(Node node, String databaseName, String tableName, UUID parentRowUuid,
-                                              Row<GenericTableSchema> row) throws OvsdbPluginException;
+    Row<GenericTableSchema> insertTree(Node node, String databaseName, String tableName, UUID parentRowUuid,
+                                       Row<GenericTableSchema> row) throws OvsdbPluginException;
 
     /**
      * inserts a Tree of Rows in multiple Tables that has parent-child relationships referenced through the OVSDB schema's refTable construct
@@ -108,8 +108,8 @@ public interface OvsdbConfigurationService {
      * @throws OvsdbPluginException Any failure during the insert transaction will result in a specific exception.
      * @return Returns the row tree with the UUID of every inserted Row populated in the _uuid column of every row in the tree
      */
-    public Row<GenericTableSchema> insertTree(Node node, String databaseName, String tableName, String parentTable, UUID parentRowUuid,
-                                              String parentColumn, Row<GenericTableSchema> row) throws OvsdbPluginException;
+    Row<GenericTableSchema> insertTree(Node node, String databaseName, String tableName, String parentTable, UUID parentRowUuid,
+                                       String parentColumn, Row<GenericTableSchema> row) throws OvsdbPluginException;
 
     /**
      * @deprecated This version of updateRow is a short-term replacement for the older and now deprecated method of the same name.
@@ -125,7 +125,7 @@ public interface OvsdbConfigurationService {
      * @param row Row of table Content to be Updated. Include just those columns that needs to be updated.
      */
     @Deprecated
-    public Status updateRow (Node node, String tableName, String parentUuid, String rowUuid, Row row);
+    Status updateRow(Node node, String tableName, String parentUuid, String rowUuid, Row row);
 
     /**
      * update or mutate a Row in a Table of a specified Database Schema.
@@ -140,8 +140,8 @@ public interface OvsdbConfigurationService {
      * @throws OvsdbPluginException Any failure during the update operation will result in a specific exception.
      * @return Returns the entire Row after the update operation.
      */
-    public Row<GenericTableSchema> updateRow(Node node, String databaseName, String tableName, UUID rowUuid,
-                            Row<GenericTableSchema> row, boolean overwrite) throws OvsdbPluginException;
+    Row<GenericTableSchema> updateRow(Node node, String databaseName, String tableName, UUID rowUuid,
+                                      Row<GenericTableSchema> row, boolean overwrite) throws OvsdbPluginException;
 
     /**
      * @deprecated This version of deleteRow is a short-term replacement for the older and now deprecated method of the same name.
@@ -154,7 +154,7 @@ public interface OvsdbConfigurationService {
      * @param rowUuid UUID of the row that is being deleted
      */
     @Deprecated
-    public Status deleteRow (Node node, String tableName, String rowUuid);
+    Status deleteRow(Node node, String tableName, String rowUuid);
 
     /**
      * update or mutate a Row in a Table of a specified Database Schema.
@@ -166,7 +166,7 @@ public interface OvsdbConfigurationService {
      * @throws OvsdbPluginException Any failure during the delete operation will result in a specific exception.
      */
 
-    public void deleteRow (Node node, String databaseName, String tableName, UUID rowUuid) throws OvsdbPluginException;
+    void deleteRow(Node node, String databaseName, String tableName, UUID rowUuid) throws OvsdbPluginException;
 
     /**
      * update or mutate a Row in a Table of a specified Database Schema.
@@ -180,8 +180,8 @@ public interface OvsdbConfigurationService {
      * @throws OvsdbPluginException Any failure during the delete operation will result in a specific exception.
      */
 
-    public void deleteRow (Node node, String databaseName, String tableName, String parentTable,
-                           UUID parentRowUuid, String parentColumn, UUID rowUuid) throws OvsdbPluginException;
+    void deleteRow(Node node, String databaseName, String tableName, String parentTable,
+                   UUID parentRowUuid, String parentColumn, UUID rowUuid) throws OvsdbPluginException;
 
     /**
      * @deprecated This version of getRow is a short-term replacement for the older and now deprecated method of the same name.
@@ -195,7 +195,7 @@ public interface OvsdbConfigurationService {
      * @return a row with a list of Column data that corresponds to an unique Row-identifier called uuid in a given table.
      */
     @Deprecated
-    public Row getRow(Node node, String tableName, String uuid);
+    Row getRow(Node node, String tableName, String uuid);
 
     /**
      * Returns a Row from a table for the specified uuid.
@@ -207,7 +207,7 @@ public interface OvsdbConfigurationService {
      * @throws OvsdbPluginException Any failure during the get operation will result in a specific exception.
      * @return a row with a list of Column data that corresponds to an unique Row-identifier called uuid in a given table.
      */
-    public Row<GenericTableSchema> getRow(Node node, String databaseName, String tableName, UUID uuid) throws OvsdbPluginException;
+    Row<GenericTableSchema> getRow(Node node, String databaseName, String tableName, UUID uuid) throws OvsdbPluginException;
 
     /**
      * @deprecated This version of getRows is a short-term replacement for the older and now deprecated method of the same name.
@@ -221,7 +221,7 @@ public interface OvsdbConfigurationService {
      * @return List of rows that makes the entire Table.
      */
     @Deprecated
-    public ConcurrentMap<String, Row> getRows(Node node, String tableName);
+    ConcurrentMap<String, Row> getRows(Node node, String tableName);
 
     /**
      * Returns all rows of a table.
@@ -232,7 +232,7 @@ public interface OvsdbConfigurationService {
      * @throws OvsdbPluginException Any failure during the get operation will result in a specific exception.
      * @return Map of rows to its UUID that makes the entire Table.
      */
-    public ConcurrentMap<UUID, Row<GenericTableSchema>> getRows(Node node, String databaseName, String tableName) throws OvsdbPluginException;
+    ConcurrentMap<UUID, Row<GenericTableSchema>> getRows(Node node, String databaseName, String tableName) throws OvsdbPluginException;
 
     /**
      * Returns all rows of a table filtered by query string.
@@ -244,7 +244,7 @@ public interface OvsdbConfigurationService {
      * @throws OvsdbPluginException Any failure during the get operation will result in a specific exception.
      * @return Map of rows to its UUID that makes the entire Table.
      */
-    public ConcurrentMap<UUID, Row<GenericTableSchema>> getRows(Node node, String databaseName, String tableName, String fiqlQuery) throws OvsdbPluginException;
+    ConcurrentMap<UUID, Row<GenericTableSchema>> getRows(Node node, String databaseName, String tableName, String fiqlQuery) throws OvsdbPluginException;
 
     /**
      * @deprecated Returns all the Tables in a given Ndoe.
@@ -256,7 +256,7 @@ public interface OvsdbConfigurationService {
      * @return List of Table Names that make up Open_vSwitch schema.
      */
     @Deprecated
-    public List<String> getTables(Node node);
+    List<String> getTables(Node node);
 
     /**
      * Returns all the Tables in a given Node.
@@ -266,7 +266,7 @@ public interface OvsdbConfigurationService {
      * @throws OvsdbPluginException Any failure during the get operation will result in a specific exception.
      * @return List of Table Names that make up the schema represented by the databaseName
      */
-    public List<String> getTables(Node node, String databaseName) throws OvsdbPluginException;
+    List<String> getTables(Node node, String databaseName) throws OvsdbPluginException;
 
     /**
      * setOFController is a convenience method used by existing applications to setup Openflow Controller on
@@ -280,9 +280,9 @@ public interface OvsdbConfigurationService {
      * @throws InterruptedException
      * @throws ExecutionException
      */
-    public Boolean setOFController(Node node, String bridgeUUID) throws InterruptedException, ExecutionException;
+    Boolean setOFController(Node node, String bridgeUUID) throws InterruptedException, ExecutionException;
 
-    public <T extends TypedBaseTable<?>> String getTableName(Node node, Class<T> typedClass);
-    public <T extends TypedBaseTable<?>> T getTypedRow(Node node, Class<T> typedClass, Row row);
-    public <T extends TypedBaseTable<?>> T createTypedRow(Node node, Class<T> typedClass);
+    <T extends TypedBaseTable<?>> String getTableName(Node node, Class<T> typedClass);
+    <T extends TypedBaseTable<?>> T getTypedRow(Node node, Class<T> typedClass, Row row);
+    <T extends TypedBaseTable<?>> T createTypedRow(Node node, Class<T> typedClass);
 }

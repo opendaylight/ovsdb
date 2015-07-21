@@ -28,21 +28,21 @@ public interface SecurityServicesManager {
      * @param intf the intf
      * @return the boolean
      */
-    public boolean isPortSecurityReady(OvsdbTerminationPointAugmentation intf);
+    boolean isPortSecurityReady(OvsdbTerminationPointAugmentation intf);
     /**
      * Gets security group in port.
      *
      * @param intf the intf
      * @return the security group in port
      */
-    public NeutronSecurityGroup getSecurityGroupInPort(OvsdbTerminationPointAugmentation intf);
+    NeutronSecurityGroup getSecurityGroupInPort(OvsdbTerminationPointAugmentation intf);
      /**
      * Gets the DHCP server port corresponding to a network.
      *
      * @param intf the intf
      * @return the security group in port
      */
-    public NeutronPort getDHCPServerPort(OvsdbTerminationPointAugmentation intf);
+     NeutronPort getDHCPServerPort(OvsdbTerminationPointAugmentation intf);
 
     /**
      * Is the port a compute port.
@@ -50,7 +50,7 @@ public interface SecurityServicesManager {
      * @param intf the intf
      * @return the security group in port
      */
-    public boolean isComputePort(OvsdbTerminationPointAugmentation intf);
+    boolean isComputePort(OvsdbTerminationPointAugmentation intf);
 
     /**
      * Is this the last port in the subnet to which interface belongs to.
@@ -58,7 +58,7 @@ public interface SecurityServicesManager {
      * @param intf the intf
      * @return the security group in port
      */
-    public boolean isLastPortinSubnet(Node node, OvsdbTerminationPointAugmentation intf);
+    boolean isLastPortinSubnet(Node node, OvsdbTerminationPointAugmentation intf);
 
     /**
      * Is this the last port in the bridge to which interface belongs to.
@@ -66,12 +66,12 @@ public interface SecurityServicesManager {
      * @param intf the intf
      * @return the security group in port
      */
-    public boolean isLastPortinBridge(Node node, OvsdbTerminationPointAugmentation intf);
+    boolean isLastPortinBridge(Node node, OvsdbTerminationPointAugmentation intf);
     /**
      * Returns the  list of ip adddress assigned to the interface.
      *
      * @param intf the intf
      * @return the security group in port
      */
-    public List<Neutron_IPs> getIpAddress(Node node, OvsdbTerminationPointAugmentation intf);
+    List<Neutron_IPs> getIpAddress(Node node, OvsdbTerminationPointAugmentation intf);
 }

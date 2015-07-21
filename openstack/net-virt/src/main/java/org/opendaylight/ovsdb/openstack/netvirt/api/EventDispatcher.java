@@ -24,8 +24,8 @@ public interface EventDispatcher {
      * Enqueue the event.
      * @param event the {@link org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent} event to be handled.
      */
-    public void enqueueEvent(AbstractEvent event);
-    public void eventHandlerAdded(final ServiceReference ref, AbstractHandler handler);
-    public void eventHandlerRemoved(final ServiceReference ref);
+    void enqueueEvent(AbstractEvent event);
+    void eventHandlerAdded(final ServiceReference ref, AbstractHandler handler);
+    void eventHandlerRemoved(final ServiceReference ref);
 }
 

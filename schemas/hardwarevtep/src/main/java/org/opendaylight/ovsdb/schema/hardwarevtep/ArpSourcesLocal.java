@@ -20,17 +20,17 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 @TypedTable(name="Arp_Sources_Local", database="hardware_vtep", fromVersion="1.2.0")
 public interface ArpSourcesLocal extends TypedBaseTable<GenericTableSchema> {
     @TypedColumn(name="src_mac", method=MethodType.GETCOLUMN, fromVersion="1.2.0")
-    public Column<GenericTableSchema, String> getSrcMacColumn();
+    Column<GenericTableSchema, String> getSrcMacColumn();
 
     @TypedColumn(name="src_mac", method=MethodType.GETDATA, fromVersion="1.2.0")
-    public String getSrcMac();
+    String getSrcMac();
 
     @TypedColumn(name="src_mac", method=MethodType.SETDATA, fromVersion="1.2.0")
-    public void setSrcMac(String srcMac);
+    void setSrcMac(String srcMac);
 
     @TypedColumn(name="locator", method=MethodType.GETCOLUMN, fromVersion="1.2.0")
-    public Column<GenericTableSchema, UUID> getLocatorColumn();
+    Column<GenericTableSchema, UUID> getLocatorColumn();
 
     @TypedColumn(name="locator", method=MethodType.SETDATA, fromVersion="1.2.0")
-    public void setLocator(UUID locator);
+    void setLocator(UUID locator);
 }

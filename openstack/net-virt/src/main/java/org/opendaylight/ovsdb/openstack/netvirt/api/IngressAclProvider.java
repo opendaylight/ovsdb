@@ -25,8 +25,8 @@ public interface IngressAclProvider {
      * @param localPort the local port
      * @param securityGroup the security group
      */
-    public void programPortSecurityACL(Long dpid, String segmentationId, String attachedMac,
-            long localPort, NeutronSecurityGroup securityGroup);
+    void programPortSecurityACL(Long dpid, String segmentationId, String attachedMac,
+                                long localPort, NeutronSecurityGroup securityGroup);
     /**
      * Program fixed ingress ACL rules that will be associated with the VM port when a vm is spawned.
      * *
@@ -38,6 +38,6 @@ public interface IngressAclProvider {
      * @param isComputePort indicates whether this port is a compute port or not
      * @param write is this flow writing or deleting
      */
-    public void programFixedSecurityACL(Long dpid, String segmentationId,
-            String attachedMac, long localPort, boolean isLastPortinSubnet, boolean isComputePort, boolean write);
+    void programFixedSecurityACL(Long dpid, String segmentationId,
+                                 String attachedMac, long localPort, boolean isLastPortinSubnet, boolean isComputePort, boolean write);
 }

@@ -24,38 +24,38 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 public interface Manager extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name="target", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, String> getTargetColumn();
+    Column<GenericTableSchema, String> getTargetColumn();
 
     @TypedColumn(name="target", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setTarget(String target);
+    void setTarget(String target);
 
     @TypedColumn(name="max_backoff", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Long>> getMaxBackoffColumn();
+    Column<GenericTableSchema, Set<Long>> getMaxBackoffColumn();
 
     @TypedColumn(name="max_backoff", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setMaxBackoff(Set<Long> maxBackoff);
+    void setMaxBackoff(Set<Long> maxBackoff);
 
     @TypedColumn(name="inactivity_probe", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Long>> getInactivityProbeColumn();
+    Column<GenericTableSchema, Set<Long>> getInactivityProbeColumn();
 
     @TypedColumn(name="inactivity_probe", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setInactivityProbe(Set<Long> inactivityProbe);
+    void setInactivityProbe(Set<Long> inactivityProbe);
 
     @TypedColumn(name="other_config", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Map<String, String>> getOtherConfigColumn();
+    Column<GenericTableSchema, Map<String, String>> getOtherConfigColumn();
 
     @TypedColumn(name="other_config", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setOtherConfig(Map<String, String> otherConfig);
+    void setOtherConfig(Map<String, String> otherConfig);
 
     @TypedColumn(name="is_connected", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Boolean> getIsConnectedColumn();
+    Column<GenericTableSchema, Boolean> getIsConnectedColumn();
 
     @TypedColumn(name="is_connected", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setIsConnectedColumn(Boolean isConnected);
+    void setIsConnectedColumn(Boolean isConnected);
 
     @TypedColumn(name="status", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Map<String, String>> getStatusColumn();
+    Column<GenericTableSchema, Map<String, String>> getStatusColumn();
 
     @TypedColumn(name="status", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setStatus(Map<String, String> status);
+    void setStatus(Map<String, String> status);
 }

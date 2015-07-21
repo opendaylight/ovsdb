@@ -193,6 +193,11 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
                         } else {
                             LOG.debug("Did not find client for {}",created.getValue());
                         }
+                    } else {
+                        InstanceIdentifier<Node> nodeIid = SouthboundMapper.
+                                createInstanceIdentifier(((Node)created.getValue()).getNodeId());
+                        OvsdbConnectionInstance client = cm.getConnectionInstance(nodeIid);
+                        result.put((InstanceIdentifier<Node>) created.getKey(), client);
                     }
                 }
             }

@@ -8,7 +8,6 @@ import java.util.Set;
 
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -34,14 +33,14 @@ public class DataChangesManagedByOvsdbNodeEvent implements
         Map<InstanceIdentifier<?>, DataObject> result
             = new HashMap<InstanceIdentifier<?>, DataObject>();
         for (Entry<InstanceIdentifier<?>, DataObject> entry: data.entrySet()) {
-            if (isManagedBy(entry.getKey())) {
-                result.put(entry.getKey(),entry.getValue());
-            } else {
-                Class<?> type = entry.getKey().getTargetType();
-                if (type.equals(OvsdbNodeAugmentation.class)) {
-                    result.put(entry.getKey(), entry.getValue());
-                }
-            }
+        //    if (isManagedBy(entry.getKey())) {
+            result.put(entry.getKey(),entry.getValue());
+      //      } else {
+      //          Class<?> type = entry.getKey().getTargetType();
+       //         if (type.equals(OvsdbNodeAugmentation.class)) {
+       //             result.put(entry.getKey(), entry.getValue());
+       //         }
+        //    }
         }
         return result;
     }

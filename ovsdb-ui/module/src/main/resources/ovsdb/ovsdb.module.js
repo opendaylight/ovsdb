@@ -12,12 +12,13 @@ define(['angularAMD', 'app/routingConfig', 'Restangular', 'angular-translate', '
   var ovsdb = angular.module('app.ovsdb', ['app.core', 'pascalprecht.translate', 'ui.router.state', 'restangular', 'config']);
   ovsdb.register = ovsdb; // for unit test
 
-  ovsdb.config(function($stateProvider, $compileProvider, $controllerProvider, $provide, NavHelperProvider) {
+  ovsdb.config(function($stateProvider, $compileProvider, $controllerProvider, $provide, $httpProvider, NavHelperProvider) {
     ovsdb.register = {
       controller : $controllerProvider.register,
       directive : $compileProvider.directive,
       factory : $provide.factory,
-      service : $provide.service
+      service : $provide.service,
+      constant: $provide.constant
 
     };
 
@@ -25,10 +26,10 @@ define(['angularAMD', 'app/routingConfig', 'Restangular', 'angular-translate', '
     NavHelperProvider.addToMenu('Ovsdb', {
      "link" : "#/ovsdb/index",
      "active" : "main.ovsdb.*",
-     "title" : "OVSDB",
+     "title" : "Network Virtualization",
      "icon" : "icon-sitemap",
      "page" : {
-        "title" : "OVSDB",
+        "title" : "NetWork Virtualization",
         "description" : "OVSDB"
      }
     });
@@ -39,7 +40,7 @@ define(['angularAMD', 'app/routingConfig', 'Restangular', 'angular-translate', '
       abstract: true,
       views : {
         'content' : {
-          templateUrl: 'src/app/ovsdb/root.tpl.html',
+          templateUrl: 'src/app/ovsdb/views/root.tpl.html',
           controller: 'RootOvsdbCtrl'
         }
       }
@@ -50,11 +51,31 @@ define(['angularAMD', 'app/routingConfig', 'Restangular', 'angular-translate', '
       access: access.admin,
       views: {
         '': {
-          templateUrl: 'src/app/ovsdb/index.tpl.html',
+          templateUrl: 'src/app/ovsdb/views/index.tpl.html',
           controller: 'OvsdbCtrl'
         }
       }
     });
+
+    // nb v2 isnt supported since lithium
+    $httpProvider.interceptors.push(function($q, $window, Base64) {
+      return {
+        request: function(config) {
+          if (config.url.indexOf('controller/nb/v2') != -1) {
+            config.headers = config.headers || {};
+            if ($window.sessionStorage.odlUser && $window.sessionStorage.odlPass) {
+              var encoded = Base64.encode($window.sessionStorage.odlUser + ':' + $window.sessionStorage.odlPass);
+              config.headers.Authorization = 'Basic ' + encoded;
+            }
+          }
+          return config;
+        },
+        response: function(response) {
+          return response || $q.when(response);
+        }
+      };
+    });
+
   });
 
   return ovsdb;

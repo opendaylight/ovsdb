@@ -1,0 +1,168 @@
+/*
+ * Copyright (c) 2015 Inocybe Technologies and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+*/
+
+#errorMessage {
+  display: none;
+}
+.switch-light {
+  width: 140px;
+}
+.switch-light span > span {
+  color: black;
+}
+.link {
+  stroke: #999;
+  stroke-opacity: 0.8;
+}
+.form-inline > span,
+label {
+  padding-right: 15px;
+}
+#list_container {
+  border: 1px solid white;
+  background-color: #414042;
+  height: 600px;
+}
+#list_container label {
+  color: white;
+}
+svg,
+#list_container {
+  width: 100%;
+}
+svg {
+  border: none;
+  border-radius: 0;
+  background-image: none;
+  background-color: white;
+  height: 580px;
+}
+#list_container > .row {
+  margin-left: 15px;
+  margin-right: 15px;
+}
+.container {
+  padding-top: 15px;
+  width: 1200px;
+}
+.row {
+  padding-bottom: 15px;
+}
+.select2-selection__choice {
+  background-color: orange !important;
+  border-color: black !important;
+  color: black !important;
+}
+.select2-selection__choice > span {
+  color: black !important;
+}
+.select2-results {
+  color: black !important;
+}
+.table.table-bordered {
+  background-color: white;
+  color: black;
+}
+#graph_header {
+  width: 100%;
+  height: 20px;
+  background-color: white;
+  border-bottom: 1px solid #ccc;
+}
+.icon-fullscreen,
+.icon-resize-small {
+  margin-right: 5px;
+  margin-top: 2px;
+}
+.bg_rect {
+  fill: #FFA6A6;
+  opacity: .4;
+  stroke: #ff0000;
+}
+kbd {
+  color: #333;
+  border-radius: 3px;
+  padding: 2px 4px;
+  font-size: 90%;
+  background-color: #DDD;
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.25);
+}
+.network_info {
+  text-align: center;
+  width: 170px;
+  height: 80px;
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid black;
+}
+#network_summary {
+  width: auto;
+  height: auto;
+  left: 15px;
+  padding: 5px;
+}
+.graph_window {
+  position: absolute !important;
+  background-color: rgba(255, 255, 255, 0.7);
+  -webkit-box-shadow: 0px 0px 25px 0px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: 0px 0px 25px 0px rgba(0, 0, 0, 0.75);
+  box-shadow: 0px 0px 25px 0px rgba(0, 0, 0, 0.75);
+  padding: 5px;
+  z-index: 2;
+  border-radius: 5px;
+  top: 25px;
+  min-height: 35px;
+  min-width: 100px;
+  overflow: hidden;
+}
+#graph_summary {
+  width: 160px;
+  height: 100px;
+  right: 10px;
+}
+
+div.window_body {
+  height: 80%;
+  font-size:12px;
+  color:#ccc;
+}
+div.window_content {
+  position:relative;
+  height:100%;
+  overflow: auto;
+}
+div.window_header > hr {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+div.window_header > span {
+  width: 100%;
+  display: inline;
+}
+#network_table_window,
+#node_table_window {
+  width: 355px;
+  height: 215px;
+}
+#node_table_window {
+  top: 300px;
+  left: 25px;
+}
+#network_table_window {
+  top: 300px;
+  right: 25px;
+}
+.window-icon {
+  color: black;
+  float: right;
+  margin-right: 5px;
+}
+.window-icon:hover {
+  background-color: #ddd;
+  cursor: pointer;
+}

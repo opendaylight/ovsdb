@@ -5,143 +5,310 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
-define(['app/ovsdb/ovsdb.module'],function(ovsdb) {
+define(['app/ovsdb/ovsdb.module', 'app/ovsdb/OvsCore', 'underscore', 'app/ovsdb/ovsdb.constant'], function(ovsdb, OvsCore, _) {
   'use strict';
 
-  ovsdb.register.factory('TopologyNetworkRestangular', function(Restangular, ENV) {
+  ovsdb.register.factory('OvsdbRestangular', ['Restangular', 'ENV', function(Restangular, ENV) {
     return Restangular.withConfig(function(RestangularConfig) {
-      RestangularConfig.setBaseUrl(ENV.getBaseURL("AD_SAL"));
+      RestangularConfig.setBaseUrl(ENV.getBaseURL("MD_SAL"));
     });
-  });
+  }]);
 
-  ovsdb.register.factory('TopologyNetworkSvc', function(TopologyNetworkRestangular) {
+  // nbv2 support depricated in dlux
+  ovsdb.register.factory('NeutronRestangular', ['Restangular', function(Restangular) {
+    return Restangular.withConfig(function(RestangularConfig) {
+      RestangularConfig.setBaseUrl('localhost:8080/controller/nb/v2/neutron');
+    });
+  }]);
+
+  var TopologySvc = function(OvsdbRestangular, nodeIdentifier, ovsNodeKeys, bridgeNodeKeys, tpKeys, flowInfoKeys, linkIdentifier, $q, $http) {
     var svc = {
-      base: function(name) {
-        return TopologyNetworkRestangular.one('restconf', name).one('network-topology:network-topology');
-      },
-      data : null
+      base: function(type) {
+        return OvsdbRestangular.one('restconf').one(type);
+      }
     };
 
-    svc.getCurrentData = function() {
-      return svc.data;
-    };
+    function parseOvsdbNode(node) {
+      var inetMgr = '',
+        inetNode = '',
+        otherLocalIp = '',
+        otherInfo = null,
+        connectionInfo = null;
 
-    svc.getTopologiesIds = function() {
-      svc.data = svc.base('operational').getList();
-      return svc.data;
-    };
+      connectionInfo = node[ovsNodeKeys.CONNECTION_INFO];
+      otherInfo = node[ovsNodeKeys.OTHER_CONFIG];
 
-    svc.getConfigNode = function(topologyId, nodeId) {
-      return svc.base('config').one('topology', topologyId).one('node', nodeId).get();
-    };
+      if (_.isArray(connectionInfo)) {
+        inetMgr = connectionInfo[ovsNodeKeys.LOCAL_IP] + ':' + connectionInfo[ovsNodeKeys.LOCAL_PORT];
+        inetNode = connectionInfo[ovsNodeKeys.REMOTE_IP] + ':' + connectionInfo[ovsNodeKeys.REMOTE_PORT];
+      }
 
-    svc.addConfigNode = function(topologyId, nodeId, data) {
-      return svc.base('config').one('topology', topologyId).one('node').put(nodeId, data);
-    };
+      if (!_.isArray(otherInfo) && _.isObject(otherInfo)) {
+        _.each(otherInfo, function(value) {
+          if (value[ovsNodeKeys.OTHER_CONFIG_KEY] === 'local_ip') {
+            otherLocalIp = value[ovsNodeKeys.OTHER_CONFIG_VALUE];
+          }
+        });
+      }
 
-    svc.addConfigBridge = function(topologyId, nodeId, data) {
-        return svc.base('config').one('topology', topologyId).put(nodeId, data);
-    };
+      return new OvsCore.OvsNode(node[ovsNodeKeys.NODE_ID], inetMgr, inetNode, otherLocalIp, node[ovsNodeKeys.OVS_VERSION]);
+    }
 
-    svc.removeConfigNode = function(topologyId, nodeId) {
-      return svc.base('config').one('topology', topologyId).one('node', nodeId).remove();
-    };
+    function parseBridgeNode(node) {
+      var bridgeNode = null,
+        controllerTarget = '',
+        controllerConnected = false,
+        tp = node[bridgeNodeKeys.TP],
+        controllerEntries = node[bridgeNodeKeys.CONTROLLER_ENTRY];
 
-    svc.addTerminationPointConfig = function(topologyId, nodeId, terminationId, data) {
-      return svc.base('config').one('topology', topologyId).one('node', nodeId).one('termination-point').put(terminationId, data);
-    };
+      _.each(controllerEntries, function(value) {
+        controllerTarget = value[bridgeNodeKeys.TARGET];
+        controllerEntries = value[bridgeNodeKeys.IS_CONNECTED];
+        return false; // break the anonymus function
+      });
 
-    svc.getTerminationPointConfig = function(topologyId, nodeId, terminationId) {
-      return svc.base('config').one('topology', topologyId).one('node', nodeId).one('termination-point', terminationId).get();
-    };
+      bridgeNode = new OvsCore.BridgeNode(node[bridgeNodeKeys.NODE_ID], node[bridgeNodeKeys.DATA_PATH], node[bridgeNodeKeys.BRIDGE_NAME], controllerTarget, controllerConnected);
 
-    svc.removeTerminationPointConfig = function(topologyId, nodeId, terminationId) {
-      return svc.base('config').one('topology', topologyId).one('node', nodeId).one('termination-point', terminationId).remove();
-    };
-    return svc;
-  });
+      _.each(tp, function(value) {
+        var tp = parseBridgeTP(value);
 
-
-  ovsdb.register.factory('TopologyNetworkFactory', function() {
-
-    var factory = {
-        createOvsdbNodeObject: function(nodeId, nodePort, nodeRemoteIp) {
-            return {
-                "network-topology:node": [
-                    {
-                        "node-id": nodeId,
-                        "connection-info": {
-                            "ovsdb:remote-port": nodePort,
-                            "ovsdb:remote-ip": nodeRemoteIp
-                        }
-                    }
-                ]
-            };
-        },
-        createConfigNode: function(nodeId, bridgeName,datapathId, protocolEntries, controllerEntries, managedBy) {
-            var configNode = {
-                "network-topology:node": [
-                    {
-                        "node-id": nodeId,
-                        "ovsdb:bridge-name": bridgeName,
-                        "ovsdb:datapath-id": datapathId,
-                        "ovsdb:protocol-entry": [ ],
-                        "ovsdb:controller-entry": [ ],
-                        "ovsdb:managed-by": managedBy
-                    }
-                ]
-            };
-
-            for (var protocolEntry in protocolEntries) {
-                configNode[0]['ovsdb:protocal-entry'].push({
-                    "protocol": protocolEntry
-                });
-            }
-
-            for (var controllerEntry in controllerEntries) {
-                configNode[0]['ovsdb:controller-entry'].push({
-                    "protocol" : controllerEntry
-                });
-            }
-
-            return configNode;
-
-        },
-        createEndPoint: function(ovsdb_options, name, interface_type, tp_id, vlan_tag, trunks, vlan_mode) {
-            var termination_point = {
-                "network-topology:termination-point": [
-                    {
-                        "ovsdb:options": [ ],
-                        "ovsdb:name": name,
-                        "ovsdb:interface-type": interface_type,
-                        "tp-id": tp_id,
-                        "vlan-tag": vlan_tag,
-                        "trunks": [ ],
-                        "vlan-mode":vlan_mode
-                    }
-                ]
-            };
-
-            for (var ovsdb_option in ovsdb_options) {
-                   termination_point[0]['ovsdb:options'].push({
-                        "ovsdb:option": ovsdb_option.option,
-                        "ovsdb:value" : ovsdb_option.value
-                   });
-            }
-
-            for (var trunk in trunks) {
-                termination_point[0]['trunks'].push({
-                    "trunk":trunk
-                });
-            }
-
-            return termination_point;
+        if (tp.ofPort == '65534' && (tp.name === 'br-ex' || tp.name === 'br-int')) {
+          return;
+        } else {
+          bridgeNode.addTerminationPoint(tp);
         }
+
+      });
+
+      return bridgeNode;
+    }
+
+    function parseBridgeTP(tp) {
+      var mac = '',
+        ifaceId = '',
+        extInfo = tp['ovsdb:port-external-ids'] || tp['ovsdb:interface-external-ids'];
+
+      _.each(extInfo, function(ext) {
+        if (ext[tpKeys.EXTERNAL_KEY_ID] === tpKeys.ATTACHED_MAC) {
+          mac = ext[tpKeys.EXTERNAL_KEY_VALUE];
+        }
+        if (ext[tpKeys.EXTERNAL_KEY_ID] === tpKeys.IFACE_ID) {
+          ifaceId = extInfo[tpKeys.EXTERNAL_KEY_VALUE] || '';
+        }
+      });
+
+      return new OvsCore.TerminationPoint(tp[tpKeys.NAME], tp[tpKeys.OF_PORT], tp[tpKeys.INTERFACE_TYPE], mac, ifaceId);
+    }
+
+    svc.getTopologies = function(cb) {
+
+      var invNodeDefer = base('operational').one('opendaylight-inventory:nodes').getList();
+      var netTopoDefer = base('operational').one('network-topology:network-topology').getList();
+
+      // be sure all data are loaded
+      $q.all([invNodeDefer.promise, netTopoDefer.promise]).then(function(values) {
+          var invNode = values[0],
+            netTopo = values[1];
+
+          // check if the data look fine in network topology
+          if (!netTopo['network-topology'] || !netTopo['network-topology']['topology']) {
+            throw new Error('Invalid json format while parsing network-topology');
+          }
+
+          // check if the data look fine in inventory node
+          if (!invNode['nodes'] || !invNode['nodes']['node']) {
+            throw new Error('Invalid JSON format while parsing inventory-node');
+          }
+
+          // get all topologies and start looping
+          var topologies = netTopo['network-topology']['topology'],
+            nodes = invNode['nodes']['node'],
+            topo = new OvsCore.Topology();
+
+          _.each(topologies, function(topology, topo_index) {
+            if (!topology.hasOwnProperty('topology-id')) {
+              throw new Error('Invalide JSON format, no topology-id for the topology [' + topo_index + ']');
+            }
+
+            var index_hash = [],
+              i = 0;
+
+            // if there no node it will be an empty array so noop
+            (topology['node'] || []).forEach(function(node) {
+              if (!node[nodeIdentifier.ID]) {
+                throw new Error('Unexpected node : undefined ' + nodeIdentifier.ID + ' key');
+              }
+              index_hash[node[nodeIdentifier.ID]] = i++;
+
+              if (node['ovsdb:bridge-name']) {
+                //bridge Node
+                topo.registerBridgeNode(parseBridgeNode(node));
+              } else if (node['ovsdb:connection-info']) {
+                // obsvdb Node
+                topo.registerOvsdbNode(parseOvsdbNode(node));
+              }
+            });
+
+            // if there no link it will be an empty array so noop
+            (topology['link'] || []).forEach(function(link) {
+
+              var source = link[linkIdentifier.SRC],
+                dest = link[linkIdentifier.DEST],
+                link = new OvsCore.Link(link[linkIdentifier.ID], source[nodeIdentifier.SRC_TP], dest[nodeIdentifier.DEST_TP], source[nodeIdentifier.SRC_NODE],
+                  dest[nodeIdentifier.DEST_NODE]);
+              link.source = index_hash[link.linkSrcNode];
+              link.target = index_hash[link.linkDestNode];
+              topo.registerLink(link);
+
+            });
+
+          });
+
+          topo.updateLink();
+
+          // match info for bridge node
+          _.each(nodes, function(node, index) {
+            if (!node['id']) {
+              return;
+            }
+
+            var bridgeId = node['id'];
+
+            var bridgeNode = _.filter(topo.bridgeNodes, function(bridgeNode) {
+              return bridgeNode.getFLowName() === bridgeId;
+            })[0];
+
+            if (bridgeNode) {
+              bridgeNode.flowInfo['features'] = node[flowInfoKeys.FEATURE];
+              bridgeNode.flowInfo['software'] = node[flowInfoKeys.SOFTWARE];
+              bridgeNode.flowInfo['hardware'] = node[flowInfoKeys.HARDWARE];
+              bridgeNode.flowInfo['manufacturer'] = node[flowInfoKeys.MANUFACTURER];
+              bridgeNode.flowInfo['ip'] = node[flowInfoKeys.IP];
+
+              _.each(node[flowInfoKeys.TABLE], function(entry) {
+                if (entry['id']) {
+                  var tableId = entry['id'];
+                  _.each(entry['flow'], function(flow) {
+                    bridgeNode.flowTable[tableId] = flow['id'];
+                  });
+                }
+              });
+            }
+          });
+
+          // extract tunnel from tp of OvsNode
+          _.each(topo.bridgeNodes, function(node, index) {
+            _.each(node.tPs,function(tp, index) {
+              // tunnel
+              if (tp.name.indexOf('vxlan') != -1) {
+                var destIP = tp.name.replace('vxlan-', '');
+                var destNode = _.filter(topo.bridgeNode, function(node) {
+                  return node.flowInfo['ip']  === destIP;
+                });
+
+                if (_.isEmpty(destNode)) {
+                  return false;
+                }
+                topo.registerLink(new OvsCore.Link(tp.name, '', '', node.getFLowName(), destNode.getFLowName(), 'tunnel', 'green'));
+              }
+            });
+          });
+
+          cb(topo);
+        },
+        function(err) {
+          throw err;
+        }
+      );
+    }
+
+    return svc;
+  };
+  TopologySvc.$inject = ['OvsdbRestangular', 'nodeIdentifier', 'ovsNodeKeys', 'bridgeNodeKeys', 'tpKeys', 'flowInfoKeys', 'linkIdentifier', '$q', '$http'];
+
+  var NeutronSvc = function(NeutronRestangular, $q, $http) {
+    var svc = {
+      base: function(type) {
+        return NeutronRestangular.one(type);
+      }
     };
 
-    return factory;
+    svc.getNetworks = function(cb) {
+      var networkDefer = base('networks').getList();
+      var subnetskDefer = base('subnets').getList();
 
-  });
+      $q.all([subnetskDefer.promise, networkDefer.promise]).then(function(datas) {
+        var subnets = datas[0]['subnets'],
+          networks = datas[1]['networks'],
+          networkArray = [],
+          subnetHash = {};
 
+        if (!networks) {
+          throw new Error('Invalid format from neutron networks');
+        }
+
+        if (!subnets) {
+          throw new Error('Invalid format from neutron subnets');
+        }
+
+        _.each(subnets, function(subnet) {
+            if (!subnetHash[subnet.network_id]) {
+              subnetHash[subnet.network_id] = [];
+            }
+            subnetHash[subnet.network_id].push(new OvsCore.Neutron.SubNet(
+              subnet['id'],
+              subnet['network_id'],
+              subnet['name'],
+              subnet['ip_version'],
+              subnet['cidr'],
+              subnet['gateway_ip']
+            ));
+        });
+
+        _.each(networks, function(network) {
+          var net = new OvsCore.Neutron.Network(
+            network['id'],
+            network['name'],
+            network['shared'],
+            network['status']
+          );
+
+          net.addSubNets(subnetHash[net.id]);
+
+          networkArray.push(net);
+        });
+        cb(networkArray)
+      });
+    };
+
+    svc.getPorts = function(cb) {
+      var portskDefer = base('ports').getList();
+
+      subnetskDefer.promise.then(function(data) {
+          var ports = data['ports'],
+          portArray = [];
+
+          if (!ports) {
+            throw new Error('Invalid format from neutron ports');
+          }
+
+          _.each(ports, function(port) {
+            portArray.push(new OvsCore.Neutron.Port(
+              port['id'],
+              port['network_id'],
+              port['name'],
+              port['tenant_id']
+            ));
+          });
+
+          cb(portArray);
+      });
+    };
+
+    return svc;
+  };
+  NeutronSvc.$inject = ['OvsdbRestangular', '$q', '$http'];
+
+  ovsdb.register.factory('TopologySvc', TopologySvc);
+  ovsdb.register.factory('NeutronSvc', NeutronSvc);
 });

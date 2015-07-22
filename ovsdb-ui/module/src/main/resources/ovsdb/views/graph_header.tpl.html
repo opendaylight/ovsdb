@@ -1,0 +1,32 @@
+<div id="graph_header">
+  <span style="color:black; margin-left:15px;">Network Visualizer</span>
+  <i class="icon-fullscreen" style="float:right;" ng-click="resizeGraph()"></i>
+  <i class="icon-resize-small icon-2" style="float:right" ng-click="minimizeGraph()"></i>
+</div>
+
+<div id="shortcut_helper" style="display:none; position:absolute; z-index:3; left:0; right:0;
+font-size:24px; color:#FAD400; background: rgba(0, 0, 0, 0.5); text-align:center;">
+  <p>Shortcut list</p>
+  <p ng-repeat="c in lstKeyCommand">
+    <kbd>{{c.key}}</kbd>
+    <span>: {{c.desc}}</span>
+  </p>
+</div>
+
+<div id="graph_summary" data-option="false" data-title="Network Summary" nv-window style="text-align:center;">
+  <p style="font-style:italic;">{{nbOpenFlowSwitch}} brides
+    <br/> {{nbOvsNode}} switch</p>
+</div>
+
+
+<div id="network_summary" class="graph_window">
+  <div id="network_1" class="network_info" style="background-color:rgb(42, 127, 255);">
+    <p style="vertical-align: middle;">
+      <img src="src/app/ovsdb/assets/network.png">
+      <span style="color:black; display:inline-block; font-size:14px; font-weight:bold; vertical-align: middle;">192.168.56.10</span>
+      <br/>
+      <span style="display:block; color:black; font-style:italic; font-size:10px;">192.168.56.10</span>
+      <span style="color:black; font-style:italic; font-size:10px;"> Nb switch:  {{nbOvsNode}} </span>
+    </p>
+  </div>
+</div>

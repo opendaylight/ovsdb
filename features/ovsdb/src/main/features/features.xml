@@ -9,6 +9,7 @@
   <repository>mvn:org.opendaylight.neutron/features-neutron/${networkconfig.neutron.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.ovsdb/southbound-features/1.1.2-SNAPSHOT/xml/features</repository>
   <repository>mvn:org.opendaylight.controller/features-mdsal/${mdsal.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.dlux/features-dlux/${dlux.version}/xml/features</repository>
 
   <feature name="odl-ovsdb-all" description="OpenDaylight :: OVSDB :: all"
            version='${project.version}'>
@@ -91,4 +92,8 @@
     <configfile finalname="etc/opendaylight/karaf/netvirt-impl-default-config.xml">mvn:org.opendaylight.ovsdb/openstack.net-virt/${project.version}/xml/config</configfile>
     <configfile finalname="etc/opendaylight/karaf/netvirt-providers-impl-default-config.xml">mvn:org.opendaylight.ovsdb/openstack.net-virt-providers/${project.version}/xml/config</configfile>
   </feature>
+  <feature name="odl-ovsdb-ui" description="OpenDaylight :: OVSDB :: DLUX Integration Plugin" version='${ovsdb.ui.version}'>
+    <feature version="${dlux.version}">odl-dlux-core</feature>
+    <bundle>mvn:org.opendaylight.ovsdb/ovsdb-ui-bundle/${ovsdb.ui.version}</bundle>
+   </feature>
 </features>

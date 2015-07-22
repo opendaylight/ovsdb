@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_4c17dca3",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-22T20:55:35Z",
+      "side": 1,
+      "message": "I wonder if this code should be structured to look for the three different types of : ovsdb node, bridge node and termination point? Or somethgin more generic to simply get a nodeID and get teh conenctioninstance - and just forget checking if it is a bridge or node. Eventually they all go down to some form of getConnectioninstance() and all should return the same value",
+      "range": {
+        "startLine": 200,
+        "startChar": 34,
+        "endLine": 200,
+        "endChar": 36
+      },
+      "revId": "2db0188a59dbdbe60824134c7970893e5162407c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_ec0d8891",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/DataChangesManagedByOvsdbNodeEvent.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-22T20:55:35Z",
+      "side": 1,
+      "message": "is your thinking this is the same problem - isManagedBy tells you it is a bridge, and ovsdbnodeaugmentation tells you it is the ovsdb node. But we need to catch the third case which is the terminationpointaugmentation.\n\ncommenting this out will let the termination points come in, but it will also allow anything to get through.",
+      "range": {
+        "startLine": 40,
+        "startChar": 34,
+        "endLine": 40,
+        "endChar": 55
+      },
+      "revId": "2db0188a59dbdbe60824134c7970893e5162407c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_cc220c01",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointCreateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-22T20:55:35Z",
+      "side": 1,
+      "message": "whitespace",
+      "range": {
+        "startLine": 310,
+        "startChar": 75,
+        "endLine": 310,
+        "endChar": 76
+      },
+      "revId": "2db0188a59dbdbe60824134c7970893e5162407c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

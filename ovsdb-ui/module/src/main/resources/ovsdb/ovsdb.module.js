@@ -17,7 +17,8 @@ define(['angularAMD', 'app/routingConfig', 'Restangular', 'angular-translate', '
       controller : $controllerProvider.register,
       directive : $compileProvider.directive,
       factory : $provide.factory,
-      service : $provide.service
+      service : $provide.service,
+      constant: $provide.constant
 
     };
 
@@ -25,10 +26,10 @@ define(['angularAMD', 'app/routingConfig', 'Restangular', 'angular-translate', '
     NavHelperProvider.addToMenu('Ovsdb', {
      "link" : "#/ovsdb/index",
      "active" : "main.ovsdb.*",
-     "title" : "OVSDB",
+     "title" : "Network Virtualization",
      "icon" : "icon-sitemap",
      "page" : {
-        "title" : "OVSDB",
+        "title" : "NetWork Virtualization",
         "description" : "OVSDB"
      }
     });
@@ -39,7 +40,7 @@ define(['angularAMD', 'app/routingConfig', 'Restangular', 'angular-translate', '
       abstract: true,
       views : {
         'content' : {
-          templateUrl: 'src/app/ovsdb/root.tpl.html',
+          templateUrl: 'src/app/ovsdb/views/root.tpl.html',
           controller: 'RootOvsdbCtrl'
         }
       }
@@ -50,7 +51,7 @@ define(['angularAMD', 'app/routingConfig', 'Restangular', 'angular-translate', '
       access: access.admin,
       views: {
         '': {
-          templateUrl: 'src/app/ovsdb/index.tpl.html',
+          templateUrl: 'src/app/ovsdb/views/index.tpl.html',
           controller: 'OvsdbCtrl'
         }
       }

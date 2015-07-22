@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a7fa997_5c65511c",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpResolverMetadata.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-07-22T05:33:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a7fa997_1c283933",
+      "revId": "d244c59c61a0ec5d21c652c11b7878bdc17bc4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7fa997_fc1c5d15",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpResolverUtils.java",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "7a7fa997_1c6fd9fe",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/ArpResolverUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-07-22T05:33:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a7fa997_fc1c5d15",
+      "revId": "d244c59c61a0ec5d21c652c11b7878bdc17bc4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7fa997_9c1be91a",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/GatewayMacResolverService.java",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2015-07-21T18:39:56Z",
       "side": 1,
       "message": "Do we plan on making the number of threads in the pool configurable?  If not, why not just use newSingleThreadScheduledExecutor() and avoid the cost incurred by pooling?",
+      "revId": "d244c59c61a0ec5d21c652c11b7878bdc17bc4c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_1c3d99de",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/GatewayMacResolverService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-07-22T05:33:06Z",
+      "side": 1,
+      "message": "Yes, gatewayRefresherPool is something that can have more then one threads in future and i am kind of want to keep it open in case in future we need to increase it. But i changed the refreshRequester to newSingleThreadScheduledExecutor() so developer knows that solution intentionally want it to be single threaded. Thanks for the catch.",
+      "parentUuid": "7a7fa997_9c1be91a",
       "revId": "d244c59c61a0ec5d21c652c11b7878bdc17bc4c1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

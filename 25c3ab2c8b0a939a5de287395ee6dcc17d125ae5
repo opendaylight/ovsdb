@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a7fa997_fd7d346f",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/GatewayMacResolverService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-07-23T19:36:51Z",
+      "side": 1,
+      "message": "Not Map, but yes ConcurrentMap. Fixed.",
+      "parentUuid": "7a7fa997_02ec4bc6",
+      "revId": "25c3ab2c8b0a939a5de287395ee6dcc17d125ae5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7fa997_a2d237fe",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/GatewayMacResolverService.java",
         "patchSetId": 4
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "7a7fa997_bd97bc8f",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/GatewayMacResolverService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-07-23T19:36:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a7fa997_a2d237fe",
+      "revId": "25c3ab2c8b0a939a5de287395ee6dcc17d125ae5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7fa997_e2ffcf65",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/GatewayMacResolverService.java",
         "patchSetId": 4
@@ -47,6 +83,24 @@
       "writtenOn": "2015-07-23T14:36:26Z",
       "side": 1,
       "message": "What happens if there are more than ten entries in the map? Is that possible?",
+      "revId": "25c3ab2c8b0a939a5de287395ee6dcc17d125ae5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_dde39803",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/GatewayMacResolverService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-07-23T19:36:51Z",
+      "side": 1,
+      "message": "that should be fine, because we don\u0027t want to execute them in parallel. Gateway resolution is slow pace activity and i expect to have gateways in 10s and not 100s or 1000s so i think resolving all the gateway serially will make it low impact activity.",
+      "parentUuid": "7a7fa997_e2ffcf65",
       "revId": "25c3ab2c8b0a939a5de287395ee6dcc17d125ae5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

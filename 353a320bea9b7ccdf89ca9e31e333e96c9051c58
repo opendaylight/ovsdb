@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_dfcb90a3",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/RoutingService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-07-23T02:58:01Z",
+      "side": 1,
+      "message": "why return success? I\u0027d think that it should return not_supported.",
+      "range": {
+        "startLine": 92,
+        "startChar": 34,
+        "endLine": 92,
+        "endChar": 41
+      },
+      "revId": "353a320bea9b7ccdf89ca9e31e333e96c9051c58",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

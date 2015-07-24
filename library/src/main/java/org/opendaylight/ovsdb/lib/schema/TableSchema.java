@@ -84,7 +84,7 @@ public abstract class TableSchema<E extends TableSchema<E>> {
     public <D> ColumnSchema<E, Set<D>> multiValuedColumn(String column, Class<D> type) {
         //todo exception handling
 
-        ColumnSchema columnSchema = columns.get(column);
+        ColumnSchema<E, Set<D>> columnSchema = columns.get(column);
         columnSchema.validateType(type);
         return columnSchema;
     }
@@ -92,7 +92,7 @@ public abstract class TableSchema<E extends TableSchema<E>> {
     public <K,V> ColumnSchema<E, Map<K,V>> multiValuedColumn(String column, Class<K> keyType, Class<V> valueType) {
         //todo exception handling
 
-        ColumnSchema columnSchema = columns.get(column);
+        ColumnSchema<E, Map<K, V>> columnSchema = columns.get(column);
         columnSchema.validateType(valueType);
         return columnSchema;
     }
@@ -100,7 +100,7 @@ public abstract class TableSchema<E extends TableSchema<E>> {
     public <D> ColumnSchema<E, D> column(String column, Class<D> type) {
         //todo exception handling
 
-        ColumnSchema columnSchema = columns.get(column);
+        ColumnSchema<E, D> columnSchema = columns.get(column);
         if (columnSchema != null) {
             columnSchema.validateType(type);
         }

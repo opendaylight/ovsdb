@@ -182,9 +182,6 @@ public class NeutronL3Adapter implements ConfigInterface {
      */
     public void handleNeutronSubnetEvent(final NeutronSubnet subnet, Action action) {
         LOGGER.debug("Neutron subnet {} event : {}", action, subnet.toString());
-        if (!this.enabled) {
-            return;
-        }
     }
 
     /**
@@ -268,9 +265,6 @@ public class NeutronL3Adapter implements ConfigInterface {
      */
     public void handleNeutronRouterEvent(final NeutronRouter neutronRouter, Action action) {
         LOGGER.debug("Neutron router {} event : {}", action, neutronRouter.toString());
-        if (!this.enabled) {
-            return;
-        }
     }
 
     /**
@@ -489,7 +483,7 @@ public class NeutronL3Adapter implements ConfigInterface {
         }
     }
 
-    private final NeutronPort findNeutronPortForFloatingIp(final String floatingIpUuid) {
+    private NeutronPort findNeutronPortForFloatingIp(final String floatingIpUuid) {
         for (NeutronPort neutronPort : neutronPortCache.getAllPorts()) {
             if (neutronPort.getDeviceOwner().equals(OWNER_FLOATING_IP) &&
                     neutronPort.getDeviceID().equals(floatingIpUuid)) {
@@ -499,7 +493,7 @@ public class NeutronL3Adapter implements ConfigInterface {
         return null;
     }
 
-    private final Long findOFPortForExtPatch(Long dpId) {
+    private Long findOFPortForExtPatch(Long dpId) {
         final String brInt = configurationService.getIntegrationBridgeName();
         final String brExt = configurationService.getExternalBridgeName();
         final String portNameInt = configurationService.getPatchPortName(new ImmutablePair<>(brInt, brExt));
@@ -507,7 +501,7 @@ public class NeutronL3Adapter implements ConfigInterface {
         Preconditions.checkNotNull(dpId);
         Preconditions.checkNotNull(portNameInt);
 
-        final long dpidPrimitive = dpId.longValue();
+        final long dpidPrimitive = dpId;
         for (Node node : nodeCacheManager.getBridgeNodes()) {
             if (dpidPrimitive == southbound.getDataPathId(node)) {
                 final OvsdbTerminationPointAugmentation terminationPointOfBridge =
@@ -526,9 +520,6 @@ public class NeutronL3Adapter implements ConfigInterface {
      */
     public void handleNeutronNetworkEvent(final NeutronNetwork neutronNetwork, Action action) {
         LOGGER.debug("neutronNetwork {}: network: {}", action, neutronNetwork);
-        if (!this.enabled) {
-            return;
-        }
     }
 
     //
@@ -646,7 +637,7 @@ public class NeutronL3Adapter implements ConfigInterface {
                 programL3ForwardingStage1(node, dpid, providerSegmentationId, tenantMac, tenantIpStr, action);
 
                 // Configure distributed ARP responder
-                if (true == flgDistributedARPEnabled) {
+                if (flgDistributedARPEnabled) {
                     programStaticArpStage1(dpid, providerSegmentationId, tenantMac, tenantIpStr, action);
                 }
             }
@@ -725,7 +716,6 @@ public class NeutronL3Adapter implements ConfigInterface {
                                               neutronNetworkCache.getNetwork(subnet.getNetworkUUID()) : null;
         final String destinationSegmentationId = neutronNetwork != null ?
                                                  neutronNetwork.getProviderSegmentationID() : null;
-        final String gatewayIp = subnet != null ? subnet.getGatewayIP() : null;
         final Boolean isExternal = neutronNetwork != null ? neutronNetwork.getRouterExternal() : Boolean.TRUE;
         final String cidr = subnet != null ? subnet.getCidr() : null;
         final int mask = getMaskLenFromCidr(cidr);

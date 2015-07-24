@@ -38,12 +38,9 @@ public class PortSecurityHandler extends AbstractHandler
 
     @Override
     public void neutronSecurityGroupCreated(NeutronSecurityGroup neutronSecurityGroup) {
-        int result = HttpURLConnection.HTTP_BAD_REQUEST;
-
-        result = canCreateNeutronSecurityGroup(neutronSecurityGroup);
+        int result = canCreateNeutronSecurityGroup(neutronSecurityGroup);
         if (result != HttpURLConnection.HTTP_CREATED) {
             logger.debug("Neutron Security Group creation failed {} ", result);
-            return;
         }
     }
 
@@ -54,7 +51,7 @@ public class PortSecurityHandler extends AbstractHandler
 
     @Override
     public void neutronSecurityGroupUpdated(NeutronSecurityGroup neutronSecurityGroup) {
-        return;
+        // Nothing to do
     }
 
     @Override
@@ -68,7 +65,6 @@ public class PortSecurityHandler extends AbstractHandler
         int result = canDeleteNeutronSecurityGroup(neutronSecurityGroup);
         if  (result != HttpURLConnection.HTTP_OK) {
             logger.error(" delete Neutron Security Rule validation failed for result - {} ", result);
-            return;
         }
     }
 
@@ -87,12 +83,9 @@ public class PortSecurityHandler extends AbstractHandler
 
     @Override
     public void neutronSecurityRuleCreated(NeutronSecurityRule neutronSecurityRule) {
-        int result = HttpURLConnection.HTTP_BAD_REQUEST;
-
-        result = canCreateNeutronSecurityRule(neutronSecurityRule);
+        int result = canCreateNeutronSecurityRule(neutronSecurityRule);
         if (result != HttpURLConnection.HTTP_CREATED) {
             logger.debug("Neutron Security Group creation failed {} ", result);
-            return;
         }
     }
 
@@ -103,7 +96,7 @@ public class PortSecurityHandler extends AbstractHandler
 
     @Override
     public void neutronSecurityRuleUpdated(NeutronSecurityRule neutronSecurityRule) {
-        return;
+        // Nothing to do
     }
 
     @Override
@@ -116,7 +109,6 @@ public class PortSecurityHandler extends AbstractHandler
         int result = canDeleteNeutronSecurityRule(neutronSecurityRule);
         if  (result != HttpURLConnection.HTTP_OK) {
             logger.error(" delete Neutron Security Rule validation failed for result - {} ", result);
-            return;
         }
     }
 

@@ -14,7 +14,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
-import io.netty.handler.codec.TooLongFrameException;
 
 import java.io.IOException;
 import java.util.List;
@@ -140,7 +139,6 @@ public class JsonRpcDecoder extends ByteToMessageDecoder {
         // end of stream, save the incomplete record index to avoid reexamining the whole on next run
         if (index >= buf.writerIndex()) {
             lastRecordBytes = buf.readableBytes();
-            return;
         }
     }
 
@@ -159,33 +157,4 @@ public class JsonRpcDecoder extends ByteToMessageDecoder {
         }
     }
 
-
-    private void print(ByteBuf buf, String message) {
-        print(buf, buf.readerIndex(), buf.readableBytes(), message == null ? "buff" : message);
-    }
-
-    private void print(ByteBuf buf, int startPos, int chars, String message) {
-        if (null == message) {
-            message = "";
-        }
-        if (startPos > buf.writerIndex()) {
-            logger.trace("startPos out of bounds");
-        }
-        byte[] bytes = new byte[startPos + chars <= buf.writerIndex() ? chars : buf.writerIndex() - startPos];
-        buf.getBytes(startPos, bytes);
-        logger.trace("{} ={}", message, new String(bytes));
-    }
-
-    // copied from Netty decoder
-    private void fail(ChannelHandlerContext ctx, long frameLength) {
-        if (frameLength > 0) {
-            ctx.fireExceptionCaught(
-                    new TooLongFrameException(
-                            "frame length exceeds " + maxFrameLength + ": " + frameLength + " - discarded"));
-        } else {
-            ctx.fireExceptionCaught(
-                    new TooLongFrameException(
-                            "frame length exceeds " + maxFrameLength + " - discarding"));
-        }
-    }
 }

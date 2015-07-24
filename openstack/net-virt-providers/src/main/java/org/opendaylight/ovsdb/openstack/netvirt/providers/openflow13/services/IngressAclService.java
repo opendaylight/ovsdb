@@ -245,11 +245,10 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
 
         if (write) {
             // Instantiate the Builders for the OF Actions and Instructions
-            InstructionBuilder ib = new InstructionBuilder();
             InstructionsBuilder isb = new InstructionsBuilder();
             List<Instruction> instructionsList = Lists.newArrayList();
 
-            ib = this.getMutablePipelineInstructionBuilder();
+            InstructionBuilder ib = this.getMutablePipelineInstructionBuilder();
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructionsList.add(ib.build());
@@ -297,11 +296,10 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
 
         if (write) {
             // Instantiate the Builders for the OF Actions and Instructions
-            InstructionBuilder ib = new InstructionBuilder();
             InstructionsBuilder isb = new InstructionsBuilder();
 
             List<Instruction> instructionsList = Lists.newArrayList();
-            ib = this.getMutablePipelineInstructionBuilder();
+            InstructionBuilder ib = this.getMutablePipelineInstructionBuilder();
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructionsList.add(ib.build());
@@ -347,11 +345,10 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
 
         if (write) {
             // Instantiate the Builders for the OF Actions and Instructions
-            InstructionBuilder ib = new InstructionBuilder();
             InstructionsBuilder isb = new InstructionsBuilder();
             List<Instruction> instructionsList = Lists.newArrayList();
 
-            ib = this.getMutablePipelineInstructionBuilder();
+            InstructionBuilder ib = this.getMutablePipelineInstructionBuilder();
             ib.setOrder(1);
             ib.setKey(new InstructionKey(1));
             instructionsList.add(ib.build());
@@ -420,7 +417,6 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
             boolean write, String securityRuleIpPrefix, Integer protoPortMatchPriority) {
 
         String nodeName = Constants.OPENFLOW_NODE_PREFIX + dpidLong;
-        Ipv4Prefix srcIpPrefix = new Ipv4Prefix(securityRuleIpPrefix);
         MatchBuilder matchBuilder = new MatchBuilder();
         NodeBuilder nodeBuilder = createNodeBuilder(nodeName);
         FlowBuilder flowBuilder = new FlowBuilder();
@@ -428,6 +424,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         flowBuilder.setMatch(MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId))
                 .build());
         if (securityRuleIpPrefix != null) {
+            Ipv4Prefix srcIpPrefix = new Ipv4Prefix(securityRuleIpPrefix);
             flowBuilder.setMatch(MatchUtils
                     .createDmacIpTcpSynMatch(matchBuilder, new MacAddress(attachedMac), null, srcIpPrefix)
                     .build());
@@ -454,11 +451,10 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
 
         if (write) {
             // Instantiate the Builders for the OF Actions and Instructions
-            InstructionBuilder ib = new InstructionBuilder();
             InstructionsBuilder isb = new InstructionsBuilder();
             List<Instruction> instructionsList = Lists.newArrayList();
 
-            ib = this.getMutablePipelineInstructionBuilder();
+            InstructionBuilder ib = this.getMutablePipelineInstructionBuilder();
             ib.setOrder(1);
             ib.setKey(new InstructionKey(0));
             instructionsList.add(ib.build());
@@ -507,11 +503,10 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
 
         if (write) {
             // Instantiate the Builders for the OF Actions and Instructions
-            InstructionBuilder ib = new InstructionBuilder();
             InstructionsBuilder isb = new InstructionsBuilder();
             List<Instruction> instructionsList = Lists.newArrayList();
 
-            ib = this.getMutablePipelineInstructionBuilder();
+            InstructionBuilder ib = this.getMutablePipelineInstructionBuilder();
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructionsList.add(ib.build());

@@ -219,11 +219,10 @@ public class LBaaSPoolHandler extends AbstractHandler
 
         /* Iterate over all the Loadbalancers created so far and identify VIP
          */
-        String loadBalancerSubnetID, loadBalancerVip=null, loadBalancerName=null;
         for (NeutronLoadBalancer neutronLB: neutronLBCache.getAllNeutronLoadBalancers()) {
-            loadBalancerSubnetID = neutronLB.getLoadBalancerVipSubnetID();
-            loadBalancerName = neutronLB.getLoadBalancerName();
-            loadBalancerVip = neutronLB.getLoadBalancerVipAddress();
+            String loadBalancerSubnetID = neutronLB.getLoadBalancerVipSubnetID();
+            String loadBalancerName = neutronLB.getLoadBalancerName();
+            String loadBalancerVip = neutronLB.getLoadBalancerVipAddress();
 
             LoadBalancerConfiguration lbConfig = new LoadBalancerConfiguration(loadBalancerName, loadBalancerVip);
             Map.Entry<String,String> providerInfo = NeutronCacheUtils.getProviderInformation(neutronNetworkCache, neutronSubnetCache, loadBalancerSubnetID);
@@ -242,13 +241,12 @@ public class LBaaSPoolHandler extends AbstractHandler
             for (NeutronLoadBalancerPoolMember neutronLBPoolMember: neutronLBPool.getLoadBalancerPoolMembers()) {
                 memberAdminStateIsUp = neutronLBPoolMember.getPoolMemberAdminStateIsUp();
                 memberSubnetID = neutronLBPoolMember.getPoolMemberSubnetID();
-                if (memberSubnetID == null || memberAdminStateIsUp == null) {
-                    continue;
-                } else if (memberSubnetID.equals(loadBalancerSubnetID) && memberAdminStateIsUp.booleanValue()) {
+                if (memberSubnetID != null && memberAdminStateIsUp != null &&
+                        memberSubnetID.equals(loadBalancerSubnetID) && memberAdminStateIsUp) {
                     memberID = neutronLBPoolMember.getPoolMemberID();
                     memberIP = neutronLBPoolMember.getPoolMemberAddress();
                     memberPort = neutronLBPoolMember.getPoolMemberProtoPort();
-                    if (memberSubnetID == null || memberID == null || memberIP == null || memberPort == null) {
+                    if (memberID == null || memberIP == null || memberPort == null) {
                         logger.debug("Neutron LB pool member details incomplete: {}", neutronLBPoolMember);
                         continue;
                     }

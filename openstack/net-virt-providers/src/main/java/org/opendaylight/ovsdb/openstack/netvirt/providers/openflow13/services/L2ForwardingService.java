@@ -348,7 +348,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
 
         List<Instruction> instructions = Lists.newArrayList();
         InstructionBuilder ib = new InstructionBuilder();
-        List<Action> actionList = null;
+        List<Action> actionList;
         if (write) {
             if (existingInstructions == null) {
                 /* First time called there should be no instructions.
@@ -375,7 +375,6 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
                 actionList.add(ab.build());
             } else {
                 /* Subsequent calls require appending any new local ports for this tenant. */
-                ApplyActionsCase aac = (ApplyActionsCase) ib.getInstruction();
                 Instruction in = existingInstructions.get(0);
                 actionList = (((ApplyActionsCase) in.getInstruction()).getApplyActions().getAction());
 
@@ -448,7 +447,6 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
         boolean removeFlow = true;
 
         if (instructions != null) {
-            ApplyActionsCase aac = (ApplyActionsCase) ib.getInstruction();
             Instruction in = instructions.get(0);
             List<Action> oldActionList = (((ApplyActionsCase) in.getInstruction()).getApplyActions().getAction());
             NodeConnectorId ncid = new NodeConnectorId(OPENFLOW + dpidLong + ":" + localPort);
@@ -464,7 +462,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
                     OutputActionCase opAction = (OutputActionCase) action.getAction();
                     if (opAction.getOutputAction().getOutputNodeConnector().equals(new Uri(ncidEth))) {
                         actionList.add(action);
-                    } else if (opAction.getOutputAction().getOutputNodeConnector().equals(new Uri(ncid)) == false) {
+                    } else if (!opAction.getOutputAction().getOutputNodeConnector().equals(new Uri(ncid))) {
                         ab.setAction(action.getAction());
                         ab.setOrder(index);
                         ab.setKey(new ActionKey(index));
@@ -480,7 +478,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
             ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
         }
 
-        if (actionList != null && actionList.size() > 2) {
+        if (actionList.size() > 2) {
             // Add InstructionBuilder to the Instruction(s)Builder List
             InstructionsBuilder isb = new InstructionsBuilder();
             isb.setInstruction(instructions);
@@ -898,14 +896,13 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
 
         if (write) {
             // Create the OF Actions and Instructions
-            InstructionBuilder ib = new InstructionBuilder();
             InstructionsBuilder isb = new InstructionsBuilder();
 
             // Instructions List Stores Individual Instructions
             List<Instruction> instructions = Lists.newArrayList();
 
             // Call the InstructionBuilder Methods Containing Actions
-            ib = this.getMutablePipelineInstructionBuilder();
+            InstructionBuilder ib = this.getMutablePipelineInstructionBuilder();
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructions.add(ib.build());

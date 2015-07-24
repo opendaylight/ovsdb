@@ -366,14 +366,13 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
 
         if (write) {
             // Create the OF Actions and Instructions
-            InstructionBuilder ib = new InstructionBuilder();
             InstructionsBuilder isb = new InstructionsBuilder();
 
             // Instructions List Stores Individual Instructions
             List<Instruction> instructions = Lists.newArrayList();
 
             // Append the default pipeline after the first classification
-            ib = this.getMutablePipelineInstructionBuilder();
+            InstructionBuilder ib = this.getMutablePipelineInstructionBuilder();
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructions.add(ib.build());

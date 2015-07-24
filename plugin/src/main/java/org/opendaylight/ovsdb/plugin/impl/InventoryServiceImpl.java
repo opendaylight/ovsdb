@@ -153,7 +153,7 @@ public class InventoryServiceImpl implements OvsdbInventoryService {
             for (UUID uuid : (Set<UUID>)update.getRows().keySet()) {
 
             if (update.getNew(uuid) != null) {
-                boolean isNewRow = (tCache == null || tCache.get(uuid.toString()) == null) ? true : false;
+                boolean isNewRow = (tCache == null || tCache.get(uuid.toString()) == null);
                 db.updateRow(databaseName, tableName, uuid.toString(), update.getNew(uuid));
                 if (isNewRow) {
                     this.handleOpenVSwitchSpecialCase(n, databaseName, tableName, uuid);

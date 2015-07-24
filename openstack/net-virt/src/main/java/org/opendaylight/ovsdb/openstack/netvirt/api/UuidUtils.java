@@ -69,6 +69,13 @@ public final class UuidUtils {
     static final Logger logger = LoggerFactory.getLogger(UuidUtils.class);
 
     /**
+     * Private constructor (utility class).
+     */
+    private UuidUtils() {
+        // Nothing to do
+    }
+
+    /**
      * Convert neutron object id to  key syntax.
      *
      * @param neutronID neutron object id.

@@ -52,7 +52,7 @@ public class PipelineOrchestratorImpl implements ConfigInterface, NodeCacheListe
 
     public PipelineOrchestratorImpl() {
         eventHandler = Executors.newSingleThreadExecutor();
-        this.queue = new LinkedBlockingQueue<Node>();
+        this.queue = new LinkedBlockingQueue<>();
         logger.info("PipelineOrchestratorImpl constructor");
         start();
     }

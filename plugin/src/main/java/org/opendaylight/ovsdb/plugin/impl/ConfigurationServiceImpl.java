@@ -254,7 +254,7 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
     @Deprecated
     public Status updateRow (Node node, String tableName, String parentUUID, String rowUUID, Row row) {
         String databaseName = OvsVswitchdSchemaConstants.DATABASE_NAME;
-        Row<GenericTableSchema> updatedRow = this.updateRow(node, databaseName, tableName, new UUID(rowUUID), row, true);
+        this.updateRow(node, databaseName, tableName, new UUID(rowUUID), row, true);
         return new StatusWithUuid(StatusCode.SUCCESS);
     }
 
@@ -321,8 +321,7 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
     @Override
     @Deprecated
     public ConcurrentMap<String, Row> getRows(Node node, String tableName) {
-        ConcurrentMap<String, Row> ovsTable = ovsdbInventoryService.getTableCache(node, OvsVswitchdSchemaConstants.DATABASE_NAME,  tableName);
-        return ovsTable;
+        return ovsdbInventoryService.getTableCache(node, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName);
     }
 
     @Override
@@ -380,12 +379,11 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
     }
 
     private short getControllerOFPort() {
-        Short defaultOpenFlowPort = 6633;
-        Short openFlowPort = defaultOpenFlowPort;
+        short openFlowPort = (short) 6633;
         String portString = ConfigProperties.getProperty(this.getClass(), "of.listenPort");
         if (portString != null) {
             try {
-                openFlowPort = Short.decode(portString).shortValue();
+                openFlowPort = Short.parseShort(portString);
             } catch (NumberFormatException e) {
                 LOGGER.warn("Invalid port:{}, use default({})", portString,
                         openFlowPort);
@@ -446,8 +444,8 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
             return updateOperationStatus.isSuccess();
         }
 
-        Status status = null;
-        UUID currControllerUuid = null;
+        Status status;
+        UUID currControllerUuid;
         InetAddress ofControllerAddr = this.getControllerIPAddress(connection);
         short ofControllerPort = getControllerOFPort();
         String newControllerTarget = "tcp:"+ofControllerAddr.getHostAddress()+":"+ofControllerPort;
@@ -465,11 +463,8 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
             status = this.insertRow(node, controllerTableName, bridgeUUID, newController.getRow());
         }
 
-        if (status != null) {
-            return status.isSuccess();
-        }
+        return status != null && status.isSuccess();
 
-        return false;
     }
 
 
@@ -717,7 +712,7 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
             }
             for (OperationResult result : operationResults) {
                 if (result.getError() != null) {
-                    throw new OvsdbPluginException("Insert Operation Failed with Error : "+result.getError().toString());
+                    throw new OvsdbPluginException("Insert Operation Failed with Error : " + result.getError());
                 }
             }
             return getNormalizedRow(dbSchema, tableName, row, referencedRows, operationResults, referencedRowsInsertIndex);
@@ -777,14 +772,14 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
                         DatabaseSchema dbSchema = client.getSchema(dbName).get();
                         GenericTableSchema schema = dbSchema.table(refRowObject.getRefTable(), GenericTableSchema.class);
                         Row<GenericTableSchema> refRow = schema.createRow((ObjectNode)refRowObject.getJsonNode());
-                        referencedRows.put(refUuid, new AbstractMap.SimpleEntry<String, Row<GenericTableSchema>>(refRowObject.getRefTable(), refRow));
+                        referencedRows.put(refUuid, new AbstractMap.SimpleEntry<>(refRowObject.getRefTable(), refRow));
                         extractReferencedRows(node, dbName, refRow, referencedRows, namedUuidSuffix);
                     } catch (InterruptedException | ExecutionException e) {
                         LOGGER.error("Exception while extracting multi-level Row references " + e.getLocalizedMessage());
                     }
                 } else if (column.getData() instanceof OvsdbSet) {
                     OvsdbSet<Object> setObject = (OvsdbSet<Object>)column.getData();
-                    OvsdbSet<Object> modifiedSet = new OvsdbSet<Object>();
+                    OvsdbSet<Object> modifiedSet = new OvsdbSet<>();
                     for (Object obj : setObject) {
                         if (obj instanceof ReferencedRow) {
                             ReferencedRow refRowObject = (ReferencedRow)obj;
@@ -794,7 +789,7 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
                                 DatabaseSchema dbSchema = client.getSchema(dbName).get();
                                 GenericTableSchema schema = dbSchema.table(refRowObject.getRefTable(), GenericTableSchema.class);
                                 Row<GenericTableSchema> refRow = schema.createRow((ObjectNode)refRowObject.getJsonNode());
-                                referencedRows.put(refUuid, new AbstractMap.SimpleEntry<String, Row<GenericTableSchema>>(refRowObject.getRefTable(), refRow));
+                                referencedRows.put(refUuid, new AbstractMap.SimpleEntry<>(refRowObject.getRefTable(), refRow));
                                 extractReferencedRows(node, dbName, refRow, referencedRows, namedUuidSuffix);
                             } catch (InterruptedException | ExecutionException e) {
                                 LOGGER.error("Exception while extracting multi-level Row references " + e.getLocalizedMessage());
@@ -830,24 +825,23 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
         TableSchema<GenericTableSchema> primaryRowTableSchema = dbSchema.table(tableName, GenericTableSchema.class);
         ColumnSchema<GenericTableSchema, UUID> uuid = primaryRowTableSchema.column("_uuid", UUID.class);
         if (uuid != null) {
-            Column<GenericTableSchema, UUID> uuidColumn = new Column<GenericTableSchema, UUID>(uuid, primaryRowUuid);
+            Column<GenericTableSchema, UUID> uuidColumn = new Column<>(uuid, primaryRowUuid);
             row.addColumn("_uuid", uuidColumn);
         }
 
         if (referencedRows != null) {
             Collection<Column<GenericTableSchema, ?>> columns = row.getColumns();
-            if (referencedRows != null) {
-                for (int idx=0; idx < referencedRows.keySet().size(); idx++) {
-                    UUID refUuid = (UUID) referencedRows.keySet().toArray()[idx];
-                    for (Column column : columns) {
-                        if (column.getData() != null) {
-                            if ((column.getData() instanceof UUID) && column.getData().equals(refUuid)) {
-                                column.setData(operationResults.get(referencedRowsInsertIndex + idx).getUuid());
-                            } else if ((column.getData() instanceof OvsdbSet) && ((OvsdbSet)column.getData()).contains(refUuid)) {
-                                OvsdbSet<UUID> refSet = (OvsdbSet<UUID>)column.getData();
-                                refSet.remove(refUuid);
-                                refSet.add(operationResults.get(referencedRowsInsertIndex + idx).getUuid());
-                            }
+            Object[] rowKeys = referencedRows.keySet().toArray();
+            for (int idx = 0; idx < rowKeys.length; idx++) {
+                UUID refUuid = (UUID) rowKeys[idx];
+                for (Column column : columns) {
+                    if (column.getData() != null) {
+                        if ((column.getData() instanceof UUID) && column.getData().equals(refUuid)) {
+                            column.setData(operationResults.get(referencedRowsInsertIndex + idx).getUuid());
+                        } else if ((column.getData() instanceof OvsdbSet) && ((OvsdbSet)column.getData()).contains(refUuid)) {
+                            OvsdbSet<UUID> refSet = (OvsdbSet<UUID>)column.getData();
+                            refSet.remove(refUuid);
+                            refSet.add(operationResults.get(referencedRowsInsertIndex + idx).getUuid());
                         }
                     }
                 }
@@ -926,7 +920,7 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
             }
             for (OperationResult result : operationResults) {
                 if (result.getError() != null) {
-                    throw new OvsdbPluginException("Delete Operation Failed with Error : "+result.getError().toString());
+                    throw new OvsdbPluginException("Delete Operation Failed with Error : " + result.getError());
                 }
             }
         } catch (InterruptedException | ExecutionException e) {
@@ -975,7 +969,7 @@ public class ConfigurationServiceImpl implements OvsdbConfigurationService
         if (cache == null) {
             return null;
         } else {
-            return new ArrayList<String>(cache.keySet());
+            return new ArrayList<>(cache.keySet());
         }
     }
 }

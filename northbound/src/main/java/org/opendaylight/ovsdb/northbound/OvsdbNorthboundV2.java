@@ -32,7 +32,6 @@ import org.codehaus.enunciate.jaxrs.StatusCodes;
 import org.codehaus.enunciate.jaxrs.TypeHint;
 import org.opendaylight.controller.northbound.commons.RestMessages;
 import org.opendaylight.controller.northbound.commons.exception.BadRequestException;
-import org.opendaylight.controller.northbound.commons.exception.ResourceConflictException;
 import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
 import org.opendaylight.controller.northbound.commons.exception.UnauthorizedException;
 import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
@@ -87,18 +86,6 @@ public class OvsdbNorthboundV2 {
 
     protected String getUserName() {
         return username;
-    }
-
-    private void handleNameMismatch(String name, String nameinURL) {
-        if (name == null || nameinURL == null) {
-            throw new BadRequestException(RestMessages.INVALIDDATA.toString() + " : Name is null");
-        }
-
-        if (name.equalsIgnoreCase(nameinURL)) {
-            return;
-        }
-        throw new ResourceConflictException(RestMessages.INVALIDDATA.toString()
-                + " : Table Name in URL does not match the row name in request body");
     }
 
     /**
@@ -433,7 +420,7 @@ public class OvsdbNorthboundV2 {
         OvsdbClient client = connectionService.getConnection(node).getClient();
         String bckCompatibleTableName = this.getBackwardCompatibleTableName(client, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName);
 
-        Row row = null;
+        Row row;
         try {
             row = ovsdbTable.getRow(node, bckCompatibleTableName, rowUuid);
         } catch (Exception e) {
@@ -515,7 +502,7 @@ public class OvsdbNorthboundV2 {
         Node node = connectionService.getNode(nodeId);
         OvsdbClient client = connectionService.getConnection(node).getClient();
         String bckCompatibleTableName = this.getBackwardCompatibleTableName(client, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName);
-        Map<String, Row> rows = null;
+        Map<String, Row> rows;
         try {
             rows = ovsdbTable.getRows(node, bckCompatibleTableName);
         } catch (Exception e) {
@@ -596,7 +583,7 @@ public class OvsdbNorthboundV2 {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        Status status = ovsdbTable.updateRow(node, bckCompatibleTableName, localRow.getParentUuid(), rowUuid, localRow.getRow());
+        ovsdbTable.updateRow(node, bckCompatibleTableName, localRow.getParentUuid(), rowUuid, localRow.getRow());
         return NorthboundUtils.getResponse(
                 new org.opendaylight.controller.sal.utils.Status(
                         org.opendaylight.controller.sal.utils.StatusCode.SUCCESS));

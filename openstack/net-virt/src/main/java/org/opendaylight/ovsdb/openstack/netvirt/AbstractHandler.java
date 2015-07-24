@@ -45,28 +45,25 @@ public abstract class AbstractHandler {
      * @param status  manager status
      * @return  An error to be returned to neutron API service.
      */
-    protected static final int getException(Status status) {
-        int result = HttpURLConnection.HTTP_INTERNAL_ERROR;
-
+    protected static int getException(Status status) {
         assert !status.isSuccess();
 
         StatusCode code = status.getCode();
         logger.debug(" Exception code - {}, description - {}",
                 code, status.getDescription());
 
-        if (code == StatusCode.BADREQUEST) {
-            result = HttpURLConnection.HTTP_BAD_REQUEST;
-        } else if (code == StatusCode.CONFLICT) {
-            result = HttpURLConnection.HTTP_CONFLICT;
-        } else if (code == StatusCode.NOTACCEPTABLE) {
-            result = HttpURLConnection.HTTP_NOT_ACCEPTABLE;
-        } else if (code == StatusCode.NOTFOUND) {
-            result = HttpURLConnection.HTTP_NOT_FOUND;
-        } else {
-            result = HttpURLConnection.HTTP_INTERNAL_ERROR;
+        switch(code) {
+            case BADREQUEST:
+                return HttpURLConnection.HTTP_BAD_REQUEST;
+            case CONFLICT:
+                return HttpURLConnection.HTTP_CONFLICT;
+            case NOTACCEPTABLE:
+                return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
+            case NOTFOUND:
+                return HttpURLConnection.HTTP_NOT_FOUND;
+            default:
+                return HttpURLConnection.HTTP_INTERNAL_ERROR;
         }
-
-        return result;
     }
 
     /**

@@ -136,7 +136,7 @@ public class NodeCacheManagerImpl extends AbstractHandler implements NodeCacheMa
 
     @Override
     public Map<NodeId,Node> getOvsdbNodes() {
-        Map<NodeId,Node> ovsdbNodesMap = new ConcurrentHashMap<NodeId,Node>();
+        Map<NodeId,Node> ovsdbNodesMap = new ConcurrentHashMap<>();
         for (Map.Entry<NodeId, Node> ovsdbNodeEntry : nodeCache.entrySet()) {
             if (southbound.extractOvsdbNode(ovsdbNodeEntry.getValue()) != null) {
                 ovsdbNodesMap.put(ovsdbNodeEntry.getKey(), ovsdbNodeEntry.getValue());

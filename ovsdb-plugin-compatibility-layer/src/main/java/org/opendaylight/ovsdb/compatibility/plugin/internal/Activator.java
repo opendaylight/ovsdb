@@ -54,15 +54,14 @@ public class Activator extends ComponentActivatorAbstractBase {
     }
     @Override
     public Object[] getGlobalImplementations() {
-        Object[] res = { ConnectionServiceImpl.class, ConfigurationServiceImpl.class, InventoryServiceImpl.class };
-        return res;
+        return new Object[]{ ConnectionServiceImpl.class, ConfigurationServiceImpl.class, InventoryServiceImpl.class };
     }
 
     @Override
     public void configureGlobalInstance(Component c, Object imp){
         if (imp.equals(ConfigurationServiceImpl.class)) {
             // export the service to be used by SAL
-            Dictionary<String, Object> props = new Hashtable<String, Object>();
+            Dictionary<String, Object> props = new Hashtable<>();
             c.setInterface(new String[] { OvsdbConfigurationService.class.getName()}, props);
             c.add(createServiceDependency()
                     .setService(org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService.class)
@@ -72,7 +71,7 @@ public class Activator extends ComponentActivatorAbstractBase {
 
         if (imp.equals(ConnectionServiceImpl.class)) {
             // export the service to be used by SAL
-            Dictionary<String, Object> props = new Hashtable<String, Object>();
+            Dictionary<String, Object> props = new Hashtable<>();
             c.setInterface(
                     new String[] {OvsdbConnectionService.class.getName()}, props);
             c.add(createServiceDependency()

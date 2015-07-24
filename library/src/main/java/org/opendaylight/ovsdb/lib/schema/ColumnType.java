@@ -182,7 +182,7 @@ public abstract class ColumnType {
 
                 AtomicColumnType atomicColumnType = new AtomicColumnType(baseType);
 
-                JsonNode node = null;
+                JsonNode node;
                 if ((node = json.get("min")) != null) {
                     atomicColumnType.setMin(node.asLong());
                 }
@@ -203,7 +203,7 @@ public abstract class ColumnType {
         @Override
         public Object valueFromJson(JsonNode value) {
             if (isMultiValued()) {
-                OvsdbSet<Object> result = new OvsdbSet<Object>();
+                OvsdbSet<Object> result = new OvsdbSet<>();
                 if (value.isArray()) {
                     if (value.size() == 2) {
                         if (value.get(0).isTextual() && "set".equals(value.get(0).asText())) {
@@ -254,7 +254,7 @@ public abstract class ColumnType {
             BaseType valueType = BaseType.fromJson(json, "value");
 
             KeyValuedColumnType keyValueColumnType = new KeyValuedColumnType(keyType, valueType);
-            JsonNode node = null;
+            JsonNode node;
             if ((node = json.get("min")) != null) {
                 keyValueColumnType.setMin(node.asLong());
             }
@@ -275,7 +275,7 @@ public abstract class ColumnType {
             if (node.isArray()) {
                 if (node.size() == 2) {
                     if (node.get(0).isTextual() && "map".equals(node.get(0).asText())) {
-                        OvsdbMap<Object, Object> map = new OvsdbMap<Object, Object>();
+                        OvsdbMap<Object, Object> map = new OvsdbMap<>();
                         for (JsonNode pairNode : node.get(1)) {
                             if (pairNode.isArray() && node.size() == 2) {
                                 Object key = getKeyType().toValue(pairNode.get(0));

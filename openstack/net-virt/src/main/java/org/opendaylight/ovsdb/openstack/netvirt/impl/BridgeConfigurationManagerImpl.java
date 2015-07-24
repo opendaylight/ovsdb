@@ -240,7 +240,6 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     @Override
     public List<String> getAllPhysicalInterfaceNames(Node node) {
         List<String> phyIfName = Lists.newArrayList();
-        String phyIf = null;
         String providerMaps = southbound.getOtherConfig(node, OvsdbTables.OPENVSWITCH,
                 configurationService.getProviderMappingsKey());
         if (providerMaps == null) {
@@ -494,12 +493,11 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
     }
 
     private short getControllerOFPort() {
-        Short defaultOpenFlowPort = Constants.OPENFLOW_PORT;
-        Short openFlowPort = defaultOpenFlowPort;
+        short openFlowPort = Constants.OPENFLOW_PORT;
         String portString = ConfigProperties.getProperty(this.getClass(), "of.listenPort");
         if (portString != null) {
             try {
-                openFlowPort = Short.decode(portString).shortValue();
+                openFlowPort = Short.parseShort(portString);
             } catch (NumberFormatException e) {
                 LOG.warn("Invalid port:{}, use default({})", portString,
                         openFlowPort);
@@ -510,13 +508,12 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
 
     private String getControllerTarget(Node node) {
         String setControllerStr = null;
-        String controllerIpStr = null;
         short openflowPort = Constants.OPENFLOW_PORT;
         //Look at user configuration.
         //TODO: In case we move to config subsystem to expose these user facing parameter,
         // we will have to modify this code.
 
-        controllerIpStr = getControllerIPAddress();
+        String controllerIpStr = getControllerIPAddress();
 
         if(controllerIpStr == null){
             // Check if ovsdb node has connection info
@@ -551,10 +548,10 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
         String ipaddress = null;
         try{
             for (Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces();ifaces.hasMoreElements();){
-                NetworkInterface iface = (NetworkInterface) ifaces.nextElement();
+                NetworkInterface iface = ifaces.nextElement();
 
                 for (Enumeration<InetAddress> inetAddrs = iface.getInetAddresses(); inetAddrs.hasMoreElements();) {
-                    InetAddress inetAddr = (InetAddress) inetAddrs.nextElement();
+                    InetAddress inetAddr = inetAddrs.nextElement();
                     if (!inetAddr.isLoopbackAddress() && inetAddr.isSiteLocalAddress()) {
                         ipaddress = inetAddr.getHostAddress();
                         break;

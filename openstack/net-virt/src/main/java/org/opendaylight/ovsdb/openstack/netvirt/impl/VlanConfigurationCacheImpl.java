@@ -53,12 +53,10 @@ public class VlanConfigurationCacheImpl implements ConfigInterface, VlanConfigur
 
     private void initializeNodeConfiguration(Node node, String nodeUuid) {
         NodeConfiguration nodeConfiguration = new NodeConfiguration();
-        Integer vlan = 0;
-        String networkId = null;
         List<OvsdbTerminationPointAugmentation> ports = southbound.getTerminationPointsOfBridge(node);
         for (OvsdbTerminationPointAugmentation port : ports) {
-            vlan = port.getVlanTag().getValue();
-            networkId = tenantNetworkManager.getTenantNetwork(port).getNetworkUUID();
+            Integer vlan = port.getVlanTag().getValue();
+            String networkId = tenantNetworkManager.getTenantNetwork(port).getNetworkUUID();
             if (vlan != 0 && networkId != null) {
                 internalVlanInUse(nodeConfiguration, vlan);
                 nodeConfiguration.getTenantVlanMap().put(networkId, vlan);

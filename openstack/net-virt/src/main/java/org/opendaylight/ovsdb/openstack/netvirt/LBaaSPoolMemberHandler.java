@@ -199,7 +199,6 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
         String memberSubnetID = neutronLBPoolMember.getPoolMemberSubnetID();
         Integer memberPort = neutronLBPoolMember.getPoolMemberProtoPort();
         String memberPoolID = neutronLBPoolMember.getPoolID();
-        String memberProtocol = null;
 
         if (memberSubnetID == null || memberID == null || memberPoolID == null) {
             LOG.debug("Neutron LB pool member details incomplete [id={}, pool_id={},subnet_id={}",
@@ -212,7 +211,7 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
             return null;
         }
         NeutronLoadBalancerPool neutronLBPool = neutronLBPoolCache.getNeutronLoadBalancerPool(memberPoolID);
-        memberProtocol = neutronLBPool.getLoadBalancerPoolProtocol();
+        String memberProtocol = neutronLBPool.getLoadBalancerPoolProtocol();
         if (!(memberProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_TCP) ||
                 memberProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTP) ||
                 memberProtocol.equalsIgnoreCase(LoadBalancerConfiguration.PROTOCOL_HTTPS))) {
@@ -259,9 +258,8 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
             otherMemberPort = otherMember.getPoolMemberProtoPort();
             otherMemberProtocol = memberProtocol;
 
-            if (otherMemberIP == null || otherMemberSubnetID == null || otherMemberAdminStateIsUp == null) {
-                continue;
-            } else if (otherMemberAdminStateIsUp.booleanValue()) {
+            if (otherMemberIP != null && otherMemberSubnetID != null && otherMemberAdminStateIsUp != null &&
+                    otherMemberAdminStateIsUp) {
                 otherMemberMAC = NeutronCacheUtils.getMacAddress(neutronPortCache, otherMemberSubnetID, otherMemberIP);
                 if (otherMemberMAC == null) {
                     continue;

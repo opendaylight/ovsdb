@@ -316,8 +316,8 @@ public class InstructionUtils {
             // If port we are asked to delete is not found, this implementation will leave actions
             // alone and not remove the flow, as long as a remaining OutputActionCase is found.
             //
-            for (int i = 0; i < actionList.size(); i++) {
-                if (actionList.get(i).getAction() instanceof OutputActionCase) {
+            for (Action action : actionList) {
+                if (action.getAction() instanceof OutputActionCase) {
                     removeFlow = false;
                     break;
                 }

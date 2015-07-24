@@ -217,7 +217,9 @@ public class NeutronL3Adapter implements ConfigInterface {
                     if(externalNetwork.isRouterExternal()){
                         final List<NeutronSubnet> externalSubnets = getExternalNetworkSubnets(neutronPort);
                         for (final NeutronSubnet externalSubnet : externalSubnets) {
-                            gatewayMacResolver.stopPeriodicReferesh(new Ipv4Address(externalSubnet.getGatewayIP()));
+                            if(externalSubnet.getIpVersion() == 4) {
+                                gatewayMacResolver.stopPeriodicReferesh(new Ipv4Address(externalSubnet.getGatewayIP()));
+                            }
                         }
                     }
                 }
@@ -1274,6 +1276,10 @@ public class NeutronL3Adapter implements ConfigInterface {
 
                 boolean processed = false;
                 for (final NeutronSubnet externalSubnet : externalSubnets) {
+                    // TODO: address IPv6 case.
+                    if (externalSubnet.getIpVersion() != 4) {
+                        continue;
+                    }
                     if(externalSubnet.getGatewayIP() == null) {
                         continue;
                     }

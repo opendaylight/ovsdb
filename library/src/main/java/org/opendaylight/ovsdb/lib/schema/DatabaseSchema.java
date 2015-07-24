@@ -64,7 +64,7 @@ public class DatabaseSchema {
     }
 
     protected <E extends TableSchema<E>> E createTableSchema(Class<E> clazz, TableSchema<E> table) {
-        Constructor<E> declaredConstructor = null;
+        Constructor<E> declaredConstructor;
         try {
             declaredConstructor = clazz.getDeclaredConstructor(TableSchema.class);
         } catch (NoSuchMethodException e) {

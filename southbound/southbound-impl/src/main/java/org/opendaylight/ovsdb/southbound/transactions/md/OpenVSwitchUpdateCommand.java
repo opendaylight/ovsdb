@@ -129,7 +129,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
     private void setNewOtherConfigs(OvsdbNodeAugmentationBuilder ovsdbNodeBuilder,
             Map<String, String> otherConfigs) {
         Set<String> otherConfigKeys = otherConfigs.keySet();
-        List<OpenvswitchOtherConfigs> otherConfigsList = new ArrayList<OpenvswitchOtherConfigs>();
+        List<OpenvswitchOtherConfigs> otherConfigsList = new ArrayList<>();
         String otherConfigValue;
         for (String otherConfigKey : otherConfigKeys) {
             otherConfigValue = otherConfigs.get(otherConfigKey);
@@ -178,7 +178,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
     private void setNewExternalIds(OvsdbNodeAugmentationBuilder ovsdbNodeBuilder,
             Map<String, String> externalIds) {
         Set<String> externalIdKeys = externalIds.keySet();
-        List<OpenvswitchExternalIds> externalIdsList = new ArrayList<OpenvswitchExternalIds>();
+        List<OpenvswitchExternalIds> externalIdsList = new ArrayList<>();
         String externalIdValue;
         for (String externalIdKey : externalIdKeys) {
             externalIdValue = externalIds.get(externalIdKey);
@@ -195,7 +195,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
             OpenVSwitch openVSwitch) {
         try {
             Set<String> iftypes = openVSwitch.getIfaceTypesColumn().getData();
-            List<InterfaceTypeEntry> ifEntryList = new ArrayList<InterfaceTypeEntry>();
+            List<InterfaceTypeEntry> ifEntryList = new ArrayList<>();
             for (String ifType : iftypes) {
                 if (SouthboundMapper.createInterfaceType(ifType) != null) {
                     InterfaceTypeEntry ifEntry = new InterfaceTypeEntryBuilder()
@@ -209,7 +209,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
             }
             ovsdbNodeBuilder.setInterfaceTypeEntry(ifEntryList);
         } catch (SchemaVersionMismatchException e) {
-            LOG.debug("Iface types  not supported by this version of ovsdb",e);;
+            LOG.debug("Iface types  not supported by this version of ovsdb",e);
         }
     }
 
@@ -219,7 +219,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
         try {
             Set<String> dptypes = openVSwitch.getDatapathTypesColumn()
                     .getData();
-            List<DatapathTypeEntry> dpEntryList = new ArrayList<DatapathTypeEntry>();
+            List<DatapathTypeEntry> dpEntryList = new ArrayList<>();
             for (String dpType : dptypes) {
                 if (SouthboundMapper.createDatapathType(dpType) != null) {
                     DatapathTypeEntry dpEntry = new DatapathTypeEntryBuilder()

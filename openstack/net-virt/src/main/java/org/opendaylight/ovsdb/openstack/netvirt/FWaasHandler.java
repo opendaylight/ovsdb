@@ -48,12 +48,10 @@ public class FWaasHandler extends AbstractHandler
     @Override
     public void neutronFirewallCreated(NeutronFirewall neutronFirewall) {
         LOG.debug("Neutron Firewall created by Neutron: {}", neutronFirewall);
-        int result = HttpURLConnection.HTTP_BAD_REQUEST;
 
-        result = canCreateNeutronFirewall(neutronFirewall);
+        int result = canCreateNeutronFirewall(neutronFirewall);
         if (result != HttpURLConnection.HTTP_CREATED) {
             LOG.error("Neutron Firewall creation failed: {} ", result);
-            return;
         }
     }
 
@@ -65,7 +63,6 @@ public class FWaasHandler extends AbstractHandler
     @Override
     public void neutronFirewallUpdated(NeutronFirewall neutronFirewall) {
         LOG.debug("NeutronFirewall updated from Neutron: {}", neutronFirewall);
-        return;
     }
 
     @Override
@@ -79,7 +76,6 @@ public class FWaasHandler extends AbstractHandler
         int result = canDeleteNeutronFirewall(neutronFirewall);
         if  (result != HttpURLConnection.HTTP_OK) {
             LOG.error(" delete Neutron Firewall validation failed for result - {} ", result);
-            return;
         }
     }
 
@@ -99,12 +95,9 @@ public class FWaasHandler extends AbstractHandler
     public void neutronFirewallRuleCreated(NeutronFirewallRule neutronFirewallRule) {
         LOG.debug("NeutronFirewallRule created by Neutron: {}", neutronFirewallRule);
 
-        int result = HttpURLConnection.HTTP_BAD_REQUEST;
-
-        result = canCreateNeutronFirewallRule(neutronFirewallRule);
+        int result = canCreateNeutronFirewallRule(neutronFirewallRule);
         if (result != HttpURLConnection.HTTP_CREATED) {
             LOG.error("Neutron Firewall Rule creation failed {} ", result);
-            return;
         }
     }
 
@@ -116,7 +109,6 @@ public class FWaasHandler extends AbstractHandler
     @Override
     public void neutronFirewallRuleUpdated(NeutronFirewallRule neutronFirewallRule) {
         LOG.debug("Neutron Firewall Rule updated from Neutron: {}", neutronFirewallRule);
-        return;
     }
 
     @Override
@@ -129,7 +121,6 @@ public class FWaasHandler extends AbstractHandler
         int result = canDeleteNeutronFirewallRule(neutronFirewallRule);
         if  (result != HttpURLConnection.HTTP_OK) {
             LOG.error(" delete Neutron Firewall Rule validation failed for result - {} ", result);
-            return;
         }
     }
 
@@ -149,12 +140,9 @@ public class FWaasHandler extends AbstractHandler
     public void neutronFirewallPolicyCreated(NeutronFirewallPolicy neutronFirewallPolicy) {
         LOG.debug("Neutron Firewall Policy created by Neutron: {}", neutronFirewallPolicy);
 
-        int result = HttpURLConnection.HTTP_BAD_REQUEST;
-
-        result = canCreateNeutronFirewallPolicy(neutronFirewallPolicy);
+        int result = canCreateNeutronFirewallPolicy(neutronFirewallPolicy);
         if (result != HttpURLConnection.HTTP_CREATED) {
             LOG.debug("Neutron Firewall Policy creation failed: {} ", result);
-            return;
         }
     }
 
@@ -166,7 +154,6 @@ public class FWaasHandler extends AbstractHandler
     @Override
     public void neutronFirewallPolicyUpdated(NeutronFirewallPolicy neutronFirewallPolicy) {
         LOG.debug("Neutron Firewall Policy updated from Neutron: {}", neutronFirewallPolicy);
-        return;
     }
 
     @Override
@@ -179,7 +166,6 @@ public class FWaasHandler extends AbstractHandler
         int result = canDeleteNeutronFirewallPolicy(neutronFirewallPolicy);
         if  (result != HttpURLConnection.HTTP_OK) {
             LOG.error(" delete Neutron Firewall Policy validation failed for result - {} ", result);
-            return;
         }
     }
 

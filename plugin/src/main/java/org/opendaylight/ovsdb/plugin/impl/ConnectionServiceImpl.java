@@ -99,7 +99,7 @@ public class ConnectionServiceImpl implements OvsdbConnectionService,
         String portString = ConfigProperties.getProperty(OvsdbConnectionService.class, OVSDB_LISTENPORT);
         int ovsdbListenPort = DEFAULT_OVSDB_PORT;
         if (portString != null) {
-            ovsdbListenPort = Integer.decode(portString).intValue();
+            ovsdbListenPort = Integer.parseInt(portString);
         }
 
         if (!connectionLib.startOvsdbManager(ovsdbListenPort)) {
@@ -204,7 +204,7 @@ public class ConnectionServiceImpl implements OvsdbConnectionService,
 
     @Override
     public List<Node> getNodes() {
-        List<Node> nodes = new ArrayList<Node>();
+        List<Node> nodes = new ArrayList<>();
         for (Connection connection : ovsdbConnections.values()) {
             nodes.add(connection.getNode());
         }

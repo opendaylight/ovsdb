@@ -56,22 +56,21 @@ public class NodeResourceTest {
                 .thenReturn(connectionService)
                 .thenReturn(connectionService);
 
-        Node node = null;
         try {
-            node = NodeResource.getOvsdbNode(IDENTIFIER, this);
+            NodeResource.getOvsdbNode(IDENTIFIER, this);
             fail("Expected an ServiceUnavailableException to be thrown");
         } catch (ServiceUnavailableException e) {
             assertSame(ServiceUnavailableException.class, e.getClass());
         }
 
         try {
-            node = NodeResource.getOvsdbNode(BAD_IDENTIFIER, this);
+            NodeResource.getOvsdbNode(BAD_IDENTIFIER, this);
             fail("Expected an ResourceNotFoundException to be thrown");
         } catch (ResourceNotFoundException e) {
             assertSame(ResourceNotFoundException.class, e.getClass());
         }
 
-        node = NodeResource.getOvsdbNode(OVS_IDENTIFIER, this);
+        Node node = NodeResource.getOvsdbNode(OVS_IDENTIFIER, this);
         assertNotNull("Node " + OVS_IDENTIFIER + " is null", node);
     }
 
@@ -87,22 +86,21 @@ public class NodeResourceTest {
                 .thenReturn(connectionService)
                 .thenReturn(connectionService);
 
-        Connection testConnection = null;
         try {
-            testConnection = NodeResource.getOvsdbConnection(IDENTIFIER, this);
+            NodeResource.getOvsdbConnection(IDENTIFIER, this);
             fail("Expected an ServiceUnavailableException to be thrown");
         } catch (ServiceUnavailableException e) {
             assertSame(ServiceUnavailableException.class, e.getClass());
         }
 
         try {
-            testConnection = NodeResource.getOvsdbConnection(BAD_IDENTIFIER, this);
+            NodeResource.getOvsdbConnection(BAD_IDENTIFIER, this);
             fail("Expected an ResourceNotFoundException to be thrown");
         } catch (ResourceNotFoundException e) {
             assertSame(ResourceNotFoundException.class, e.getClass());
         }
 
-        testConnection = NodeResource.getOvsdbConnection(IDENTIFIER, this);
+        Connection testConnection = NodeResource.getOvsdbConnection(IDENTIFIER, this);
         assertNotNull("Connection " + OVS_IDENTIFIER + " is null", testConnection);
     }
 
@@ -123,7 +121,7 @@ public class NodeResourceTest {
             Response response = nodeResource.getNodes();
             assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
             assertNotNull("entity should not be null", response.getEntity());
-            String id = new String();
+            String id = "";
             List<String> ids = Lists.newArrayList();
             ids.add(id);
             assertEquals("there should be no nodes", ids.toString(), response.getEntity());
@@ -139,7 +137,7 @@ public class NodeResourceTest {
             Response response = nodeResource.getNodes();
             assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
             assertNotNull("entity should not be null", response.getEntity());
-            String id = new String("\"" + OVS_IDENTIFIER + "\"");
+            String id = "\"" + OVS_IDENTIFIER + "\"";
             List<String> ids = Lists.newArrayList();
             ids.add(id);
             assertEquals(OVS_IDENTIFIER + " should be found", ids.toString(), response.getEntity());
@@ -155,8 +153,8 @@ public class NodeResourceTest {
             Response response = nodeResource.getNodes();
             assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
             assertNotNull("entity should not be null", response.getEntity());
-            String id = new String("\"" + OVS_IDENTIFIER + "\"");
-            String id2 = new String("\"" + OVS_IDENTIFIER2 + "\"");
+            String id = "\"" + OVS_IDENTIFIER + "\"";
+            String id2 = "\"" + OVS_IDENTIFIER2 + "\"";
             List<String> ids = Lists.newArrayList();
             ids.add(id);
             ids.add(id2);

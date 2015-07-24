@@ -11,11 +11,9 @@ package org.opendaylight.ovsdb.lib.impl;
 
 import io.netty.channel.Channel;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -49,7 +47,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
@@ -66,12 +63,10 @@ public class OvsdbClientImpl implements OvsdbClient {
     private ExecutorService executorService;
     private OvsdbRPC rpc;
     private Map<String, DatabaseSchema> schema = Maps.newHashMap();
-    private HashMap<String, CallbackContext> monitorCallbacks = Maps.newHashMap();
-    private Queue<Throwable> exceptions;
+    private Map<String, CallbackContext> monitorCallbacks = Maps.newHashMap();
     private OvsdbRPC.Callback rpcCallback;
     private OvsdbConnectionInfo connectionInfo;
     private Channel channel;
-    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public OvsdbClientImpl(OvsdbRPC rpc, Channel channel, ConnectionType type, ExecutorService executorService) {
         this.rpc = rpc;
@@ -176,8 +171,7 @@ public class OvsdbClientImpl implements OvsdbClient {
         } catch (InterruptedException | ExecutionException e) {
             return null;
         }
-        TableUpdates updates = transformingCallback(result, dbSchema);
-        return updates;
+        return transformingCallback(result, dbSchema);
     }
 
     private void registerCallback(MonitorHandle monitorHandle, MonitorCallBack callback, DatabaseSchema schema) {
@@ -299,10 +293,6 @@ public class OvsdbClientImpl implements OvsdbClient {
 
     public void setRpc(OvsdbRPC rpc) {
         this.rpc = rpc;
-    }
-
-    public Queue<Throwable> getExceptions() {
-        return exceptions;
     }
 
     static class CallbackContext {

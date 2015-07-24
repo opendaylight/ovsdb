@@ -29,11 +29,10 @@ public class NodeUtils {
     public static Node getOpenFlowNode (String identifier) {
         NodeId nodeId = new NodeId(identifier);
         NodeKey nodeKey = new NodeKey(nodeId);
-        Node node = new NodeBuilder()
+
+        return new NodeBuilder()
                 .setId(nodeId)
                 .setKey(nodeKey)
                 .build();
-
-        return node;
     }
 }

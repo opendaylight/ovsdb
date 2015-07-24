@@ -127,7 +127,7 @@ public class SouthboundHandler extends AbstractHandler
     private void processPortDelete(Node node, OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation,
                                    Object context) {
         LOG.debug("processPortDelete <{}> <{}>", node, ovsdbTerminationPointAugmentation);
-        NeutronNetwork network = null;
+        NeutronNetwork network;
         if (context == null) {
             network = tenantNetworkManager.getTenantNetwork(ovsdbTerminationPointAugmentation);
         } else {
@@ -334,28 +334,6 @@ public class SouthboundHandler extends AbstractHandler
                 processBridgeDelete(ev.getNode(), (OvsdbBridgeAugmentation) ev.getAugmentationData());
                 break;
         }
-    }
-
-    private boolean isMainBridge(Node node, OvsdbBridgeAugmentation bridge) {
-        boolean rv = false;
-        String nodeIdStr = node.getNodeId().getValue();
-        String bridgeName = nodeIdStr.substring(nodeIdStr.lastIndexOf('/') + 1);
-        List<TerminationPoint> terminationPoints = southbound.extractTerminationPoints(node);
-        if (terminationPoints != null && terminationPoints.size() == 1) {
-            // TODO: Either do something or remove this if statement.
-            // If there's only one termination point, is it a 1-port bridge?
-        }
-        OvsdbTerminationPointAugmentation port = southbound.extractTerminationPointAugmentation(node, bridgeName);
-        if (port != null) {
-            String datapathId = southbound.getDatapathId(bridge);
-            // Having a datapathId means the ovsdb node has connected to ODL
-            if (datapathId != null) {
-                rv = true;
-            } else {
-                LOG.info("datapathId not found");
-            }
-        }
-        return rv;
     }
 
     private void processBridgeCreate(Node node, OvsdbBridgeAugmentation bridge) {

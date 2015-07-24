@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_13257faa",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1320,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-07-24T16:11:33Z",
+      "side": 1,
+      "message": "use older\u0027s words as much as possible:\nNo gateway IP address found for external network {}",
+      "range": {
+        "startLine": 1320,
+        "startChar": 33,
+        "endLine": 1320,
+        "endChar": 40
+      },
+      "revId": "d022dc1192b28ee0ba09c7e21c5615fbcb9f00af",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_b33b6bd0",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-07-24T16:11:33Z",
+      "side": 1,
+      "message": "i think not, but that may be getting removed/deprecated from NN as well...",
+      "range": {
+        "startLine": 132,
+        "startChar": 15,
+        "endLine": 132,
+        "endChar": 19
+      },
+      "revId": "d022dc1192b28ee0ba09c7e21c5615fbcb9f00af",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

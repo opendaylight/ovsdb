@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_9d2be093",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/GatewayMacResolverService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-07-24T07:37:41Z",
+      "side": 1,
+      "message": "Thanks. To make the code clearer, how about\n\n    for (final Entry\u003c...\u003e gatewayArpMetadataEntry : ...) {\n        final Ipv4Address gatewayIp \u003d gatewayArpMetadataEntry.getKey();\n        final ArpResolverMetadata ...\n\nThat way the gatewayIp code later stays the same, and the variable names still reflect their values.",
+      "revId": "0d1a027b66e10cc1a59875e66833816040eaf4a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_1d403055",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-07-24T07:37:41Z",
+      "side": 1,
+      "message": "No need for a private getter, is there?",
+      "revId": "0d1a027b66e10cc1a59875e66833816040eaf4a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

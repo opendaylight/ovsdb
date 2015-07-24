@@ -84,10 +84,7 @@ public abstract class AbstractServiceInstance {
 
     public boolean isBridgeInPipeline (Node node){
         String bridgeName = southbound.getBridgeName(node);
-        if (bridgeName != null && Constants.INTEGRATION_BRIDGE.equals(bridgeName)) {
-            return true;
-        }
-        return false;
+        return bridgeName != null && Constants.INTEGRATION_BRIDGE.equals(bridgeName);
     }
 
     public short getTable() {
@@ -109,7 +106,7 @@ public abstract class AbstractServiceInstance {
         return builder;
     }
 
-    private static final InstanceIdentifier<Flow> createFlowPath(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
+    private static InstanceIdentifier<Flow> createFlowPath(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
         return InstanceIdentifier.builder(Nodes.class)
                 .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class,
                         nodeBuilder.getKey())
@@ -118,8 +115,7 @@ public abstract class AbstractServiceInstance {
                 .child(Flow.class, flowBuilder.getKey()).build();
     }
 
-    private static final
-    InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node>
+    private static InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node>
     createNodePath(NodeBuilder nodeBuilder) {
         return InstanceIdentifier.builder(Nodes.class)
                 .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class,
@@ -210,9 +206,8 @@ public abstract class AbstractServiceInstance {
         return null;
     }
 
-    private Long getDpid(Node node) {
-        Long dpid = 0L;
-        dpid = southbound.getDataPathId(node);
+    private long getDpid(Node node) {
+        long dpid = southbound.getDataPathId(node);
         if (dpid == 0) {
             LOG.warn("getDpid: dpid not found: {}", node);
         }
@@ -231,7 +226,7 @@ public abstract class AbstractServiceInstance {
         }
         MatchBuilder matchBuilder = new MatchBuilder();
         FlowBuilder flowBuilder = new FlowBuilder();
-        Long dpid = getDpid(node);
+        long dpid = getDpid(node);
         if (dpid == 0L) {
             LOG.info("could not find dpid: {}", node.getNodeId());
             return;

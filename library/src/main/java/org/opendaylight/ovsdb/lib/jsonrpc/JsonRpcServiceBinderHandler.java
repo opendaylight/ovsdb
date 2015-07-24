@@ -12,22 +12,14 @@ package org.opendaylight.ovsdb.lib.jsonrpc;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
-import com.google.common.util.concurrent.SettableFuture;
 
 public class JsonRpcServiceBinderHandler extends ChannelInboundHandlerAdapter {
     private static final Logger LOG = LoggerFactory.getLogger(JsonRpcServiceBinderHandler.class);
-    Map<Object, SettableFuture<Object>> waitingForReply = Maps.newHashMap();
-    ExecutorService executorService = Executors.newFixedThreadPool(10);
     JsonRpcEndpoint factory = null;
     Object context = null;
 

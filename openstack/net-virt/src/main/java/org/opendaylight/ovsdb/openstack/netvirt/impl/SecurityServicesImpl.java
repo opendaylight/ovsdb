@@ -23,8 +23,6 @@ import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.*;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.node.attributes.SupportingNode;
-import org.opendaylight.yangtools.yang.binding.DataContainer;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
@@ -68,8 +66,6 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
                     neutronPortId);
             return false;
         }
-        String vmPort = southbound.getInterfaceExternalIdsValue(terminationPointAugmentation,
-                Constants.EXTERNAL_ID_VM_MAC);
         LOG.debug("Security Group Check {} DOES contain a Neutron Security Group", neutronPortId);
         return true;
     }
@@ -98,8 +94,7 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
 
         List<NeutronSecurityGroup> neutronSecurityGroups = neutronPort.getSecurityGroups();
         if (neutronSecurityGroups != null) {
-            NeutronSecurityGroup neutronSecurityGroup = (NeutronSecurityGroup) neutronSecurityGroups.toArray()[0];
-            return neutronSecurityGroup;
+            return (NeutronSecurityGroup) neutronSecurityGroups.toArray()[0];
         } else {
             return null;
         }
@@ -247,8 +242,7 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
             return null;
         }
         NeutronPort neutronPort = neutronPortCache.getPort(neutronPortId);
-        List<Neutron_IPs> fixedIps = neutronPort.getFixedIPs();
-        return fixedIps;
+        return neutronPort.getFixedIPs();
     }
 
     @Override

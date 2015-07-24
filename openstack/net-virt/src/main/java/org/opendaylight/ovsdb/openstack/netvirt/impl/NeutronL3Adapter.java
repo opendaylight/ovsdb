@@ -215,8 +215,8 @@ public class NeutronL3Adapter implements ConfigInterface {
 
                 if(externalNetwork != null){
                     if(externalNetwork.isRouterExternal()){
-                        final NeutronSubnet externalSubnet = getExternalNetworkSubnet(neutronPort);
-                        if(externalSubnet != null){
+                        final List<NeutronSubnet> externalSubnets = getExternalNetworkSubnets(neutronPort);
+                        for (final NeutronSubnet externalSubnet : externalSubnets) {
                             gatewayMacResolver.stopPeriodicReferesh(new Ipv4Address(externalSubnet.getGatewayIP()));
                         }
                     }
@@ -1252,15 +1252,14 @@ public class NeutronL3Adapter implements ConfigInterface {
         return null;
     }
 
-    private NeutronSubnet getExternalNetworkSubnet(NeutronPort gatewayPort){
-        NeutronSubnet extSubnet = null;
-        for (NeutronSubnet subnet : neutronSubnetCache.getAllSubnets()){
-            if(subnet.getPortsInSubnet().contains(gatewayPort)){
-                extSubnet = subnet;
-                break;
-            }
+    private List<NeutronSubnet> getExternalNetworkSubnets(NeutronPort gatewayPort){
+        List<NeutronSubnet> extSubnets = new ArrayList<>();
+
+        for (Neutron_IPs neutronIPs : gatewayPort.getFixedIPs()) {
+            String subnetUUID = neutronIPs.getSubnetUUID();
+            extSubnets.add(neutronSubnetCache.getSubnet(subnetUUID));
         }
-        return extSubnet;
+        return extSubnets;
     }
 
     public void triggerGatewayMacResolver(final Node node, final NeutronPort gatewayPort ){
@@ -1271,19 +1270,25 @@ public class NeutronL3Adapter implements ConfigInterface {
 
         if(externalNetwork != null){
             if(externalNetwork.isRouterExternal()){
-                final NeutronSubnet externalSubnet = getExternalNetworkSubnet(gatewayPort);
-                if(externalSubnet != null){
-                    if(externalSubnet.getGatewayIP() != null){
-                        LOG.info("Trigger MAC resolution for gateway ip {} on Node {}", externalSubnet.getGatewayIP(), node.getNodeId());
+                final List<NeutronSubnet> externalSubnets = getExternalNetworkSubnets(gatewayPort);
 
-                        ListenableFuture<MacAddress> gatewayMacAddress =
-                                gatewayMacResolver.resolveMacAddress(getDpidForExternalBridge(node),
-                                        new Ipv4Address(externalSubnet.getGatewayIP()),
-                                        new Ipv4Address(gatewayPort.getFixedIPs().get(0).getIpAddress()),
-                                        new MacAddress(gatewayPort.getMacAddress()),
-                                        false);
-                        if(gatewayMacAddress != null){
-                            Futures.addCallback(gatewayMacAddress, new FutureCallback<MacAddress>(){
+                boolean processed = false;
+                for (final NeutronSubnet externalSubnet : externalSubnets) {
+                    if(externalSubnet.getGatewayIP() == null) {
+                        continue;
+                    }
+
+                    processed = true;
+                    LOG.info("Trigger MAC resolution for gateway ip {} on Node {}",externalSubnet.getGatewayIP(),node.getNodeId());
+
+                    ListenableFuture<MacAddress> gatewayMacAddress =
+                        gatewayMacResolver.resolveMacAddress(getDpidForExternalBridge(node),
+                                                             new Ipv4Address(externalSubnet.getGatewayIP()),
+                                                             new Ipv4Address(gatewayPort.getFixedIPs().get(0).getIpAddress()),
+                                                             new MacAddress(gatewayPort.getMacAddress()),
+                                                             false);
+                    if(gatewayMacAddress != null) {
+                        Futures.addCallback(gatewayMacAddress, new FutureCallback<MacAddress>(){
                                 @Override
                                 public void onSuccess(MacAddress result) {
                                     if(result != null){
@@ -1299,12 +1304,10 @@ public class NeutronL3Adapter implements ConfigInterface {
                                     LOG.warn("MAC address resolution failed for gateway IP {}", externalSubnet.getGatewayIP());
                                 }
                             }, gatewayMacResolverPool);
-                        }
-                    }else{
-                        LOG.warn("No gateway IP address found for external subnet {}", externalSubnet);
                     }
-                }else{
-                    LOG.warn("Neutron subnet not found for external network {}", externalNetwork);
+                }
+                if (!processed) {
+                    LOG.warn("No gateway IP address found for external network {}", externalNetwork);
                 }
             }
         }else{

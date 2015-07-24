@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ConfigurationServiceImpl implements ConfigurationService, ConfigInterface {
-    static final Logger logger = LoggerFactory.getLogger(ConfigurationServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ConfigurationServiceImpl.class);
 
     private String integrationBridgeName;
     private String networkBridgeName;
@@ -141,10 +141,10 @@ public class ConfigurationServiceImpl implements ConfigurationService, ConfigInt
         if (tunnelEndpoint != null) {
             try {
                 address = InetAddress.getByName(tunnelEndpoint);
+                LOG.debug("Tunnel Endpoint for Node {} {}", node, address.getHostAddress());
             } catch (UnknownHostException e) {
-                logger.error("Error populating Tunnel Endpoint for Node {} ", node, e);
+                LOG.error("Error populating Tunnel Endpoint for Node {} ", node, e);
             }
-            logger.debug("Tunnel Endpoint for Node {} {}", node, address.getHostAddress());
         }
         return address;
     }

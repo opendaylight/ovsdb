@@ -13,7 +13,6 @@ import org.opendaylight.ovsdb.lib.error.TyperException;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonUtils;
 import org.opendaylight.ovsdb.lib.notation.OvsdbMap;
 import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -163,7 +162,6 @@ public abstract class ColumnType {
     }
 
     public static class AtomicColumnType extends ColumnType {
-        static final org.slf4j.Logger logger = LoggerFactory.getLogger(AtomicColumnType.class);
         public AtomicColumnType() {
         }
 

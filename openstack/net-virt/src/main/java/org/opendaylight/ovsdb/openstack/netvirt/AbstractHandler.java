@@ -25,18 +25,10 @@ import java.net.HttpURLConnection;
  * handlers.
  */
 public abstract class AbstractHandler {
-    static final Logger logger = LoggerFactory.getLogger(AbstractHandler.class);
-
-    /*public AbstractHandler() {
-        logger.info(">>>>> init {}", this.getClass());
-    }*/
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractHandler.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
     protected volatile EventDispatcher eventDispatcher;
-
-    /*void init() {
-        logger.info(">>>>> init {}", this.getClass());
-    }*/
 
     /**
      * Convert failure status returned by the  manager into
@@ -51,7 +43,7 @@ public abstract class AbstractHandler {
         assert !status.isSuccess();
 
         StatusCode code = status.getCode();
-        logger.debug(" Exception code - {}, description - {}",
+        LOG.debug(" Exception code - {}, description - {}",
                 code, status.getDescription());
 
         if (code == StatusCode.BADREQUEST) {
@@ -76,7 +68,7 @@ public abstract class AbstractHandler {
      * @see org.opendaylight.ovsdb.openstack.netvirt.api.EventDispatcher
      */
     protected void enqueueEvent(AbstractEvent abstractEvent) {
-        logger.info("enqueueEvent: evenDispatcher: {} - {}", eventDispatcher, abstractEvent);
+        LOG.info("enqueueEvent: evenDispatcher: {} - {}", eventDispatcher, abstractEvent);
         Preconditions.checkNotNull(eventDispatcher);
         eventDispatcher.enqueueEvent(abstractEvent);
     }

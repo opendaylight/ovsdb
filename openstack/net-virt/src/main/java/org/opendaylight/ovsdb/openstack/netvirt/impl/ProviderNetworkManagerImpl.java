@@ -29,7 +29,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 
 public class ProviderNetworkManagerImpl implements ConfigInterface, NetworkingProviderManager {
-    static final Logger logger = LoggerFactory.getLogger(ProviderNetworkManagerImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ProviderNetworkManagerImpl.class);
     private HashMap<Long, ProviderEntry> providers = Maps.newHashMap();
     private HashMap<Node, NetworkingProvider> nodeToProviderMapping = Maps.newHashMap();
     private volatile OvsdbInventoryService ovsdbInventoryService;
@@ -51,7 +51,7 @@ public class ProviderNetworkManagerImpl implements ConfigInterface, NetworkingPr
 
         Iterable<ProviderEntry> matchingProviders = Iterables.filter(providers.values(), providerEntryPredicate);
         if (!matchingProviders.iterator().hasNext()) {
-            logger.error("No providers matching {} found", targetVersion);
+            LOG.error("No providers matching {} found", targetVersion);
         }
 
         // Return the first match as only have one matching provider today
@@ -70,7 +70,7 @@ public class ProviderNetworkManagerImpl implements ConfigInterface, NetworkingPr
                 (String) ref.getProperty(Constants.OPENFLOW_VERSION_PROPERTY));
         properties.put(Constants.PROVIDER_TYPE_PROPERTY, (String) ref.getProperty(Constants.PROVIDER_TYPE_PROPERTY));
         providers.put(pid, new ProviderEntry(provider, properties));
-        logger.info("Neutron Networking Provider Registered: {}, with {} and pid={}",
+        LOG.info("Neutron Networking Provider Registered: {}, with {} and pid={}",
                 provider.getClass().getName(), properties.toString(), pid);
 
         ovsdbInventoryService.providersReady();
@@ -79,7 +79,7 @@ public class ProviderNetworkManagerImpl implements ConfigInterface, NetworkingPr
     public void providerRemoved(final ServiceReference ref){
         Long pid = (Long)ref.getProperty(org.osgi.framework.Constants.SERVICE_ID);
         providers.remove(pid);
-        logger.info("Neutron Networking Provider Removed: {}", pid);
+        LOG.info("Neutron Networking Provider Removed: {}", pid);
     }
 
     @Override

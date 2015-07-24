@@ -25,7 +25,7 @@ import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.SettableFuture;
 
 public class JsonRpcServiceBinderHandler extends ChannelInboundHandlerAdapter {
-    protected static final Logger logger = LoggerFactory.getLogger(JsonRpcServiceBinderHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JsonRpcServiceBinderHandler.class);
     Map<Object, SettableFuture<Object>> waitingForReply = Maps.newHashMap();
     ExecutorService executorService = Executors.newFixedThreadPool(10);
     JsonRpcEndpoint factory = null;
@@ -55,13 +55,13 @@ public class JsonRpcServiceBinderHandler extends ChannelInboundHandlerAdapter {
                        ChannelRead is a method invoked during Netty message receive event.
                        The only sane thing we can do is to print a meaningful error message.
                      */
-                    logger.error("NoSuchMethodException when handling {}", msg, e);
+                    LOG.error("NoSuchMethodException when handling {}", msg, e);
                 }
             } else if (jsonNode.hasNonNull("method")) {
                 if (jsonNode.has("id") && !Strings.isNullOrEmpty(jsonNode.get("id").asText())) {
                     factory.processRequest(context, jsonNode);
                 } else {
-                    logger.debug("Request with null or empty id field: {} {}", jsonNode.get("method"),
+                    LOG.debug("Request with null or empty id field: {} {}", jsonNode.get("method"),
                             jsonNode.get("params"));
                 }
             }

@@ -31,7 +31,7 @@ public class FWaasHandler extends AbstractHandler
         implements INeutronFirewallAware, INeutronFirewallRuleAware,
         INeutronFirewallPolicyAware, ConfigInterface {
 
-    static final Logger logger = LoggerFactory.getLogger(FWaasHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FWaasHandler.class);
 
     /**
      * Invoked when a Firewall Rules creation is requested
@@ -47,12 +47,12 @@ public class FWaasHandler extends AbstractHandler
 
     @Override
     public void neutronFirewallCreated(NeutronFirewall neutronFirewall) {
-        logger.debug("Neutron Firewall created by Neutron: {}", neutronFirewall);
+        LOG.debug("Neutron Firewall created by Neutron: {}", neutronFirewall);
         int result = HttpURLConnection.HTTP_BAD_REQUEST;
 
         result = canCreateNeutronFirewall(neutronFirewall);
         if (result != HttpURLConnection.HTTP_CREATED) {
-            logger.error("Neutron Firewall creation failed: {} ", result);
+            LOG.error("Neutron Firewall creation failed: {} ", result);
             return;
         }
     }
@@ -64,7 +64,7 @@ public class FWaasHandler extends AbstractHandler
 
     @Override
     public void neutronFirewallUpdated(NeutronFirewall neutronFirewall) {
-        logger.debug("NeutronFirewall updated from Neutron: {}", neutronFirewall);
+        LOG.debug("NeutronFirewall updated from Neutron: {}", neutronFirewall);
         return;
     }
 
@@ -78,7 +78,7 @@ public class FWaasHandler extends AbstractHandler
         //TODO: Trigger flowmod removals
         int result = canDeleteNeutronFirewall(neutronFirewall);
         if  (result != HttpURLConnection.HTTP_OK) {
-            logger.error(" delete Neutron Firewall validation failed for result - {} ", result);
+            LOG.error(" delete Neutron Firewall validation failed for result - {} ", result);
             return;
         }
     }
@@ -97,13 +97,13 @@ public class FWaasHandler extends AbstractHandler
 
     @Override
     public void neutronFirewallRuleCreated(NeutronFirewallRule neutronFirewallRule) {
-        logger.debug("NeutronFirewallRule created by Neutron: {}", neutronFirewallRule);
+        LOG.debug("NeutronFirewallRule created by Neutron: {}", neutronFirewallRule);
 
         int result = HttpURLConnection.HTTP_BAD_REQUEST;
 
         result = canCreateNeutronFirewallRule(neutronFirewallRule);
         if (result != HttpURLConnection.HTTP_CREATED) {
-            logger.error("Neutron Firewall Rule creation failed {} ", result);
+            LOG.error("Neutron Firewall Rule creation failed {} ", result);
             return;
         }
     }
@@ -115,7 +115,7 @@ public class FWaasHandler extends AbstractHandler
 
     @Override
     public void neutronFirewallRuleUpdated(NeutronFirewallRule neutronFirewallRule) {
-        logger.debug("Neutron Firewall Rule updated from Neutron: {}", neutronFirewallRule);
+        LOG.debug("Neutron Firewall Rule updated from Neutron: {}", neutronFirewallRule);
         return;
     }
 
@@ -128,7 +128,7 @@ public class FWaasHandler extends AbstractHandler
     public void neutronFirewallRuleDeleted(NeutronFirewallRule neutronFirewallRule) {
         int result = canDeleteNeutronFirewallRule(neutronFirewallRule);
         if  (result != HttpURLConnection.HTTP_OK) {
-            logger.error(" delete Neutron Firewall Rule validation failed for result - {} ", result);
+            LOG.error(" delete Neutron Firewall Rule validation failed for result - {} ", result);
             return;
         }
     }
@@ -147,13 +147,13 @@ public class FWaasHandler extends AbstractHandler
 
     @Override
     public void neutronFirewallPolicyCreated(NeutronFirewallPolicy neutronFirewallPolicy) {
-        logger.debug("Neutron Firewall Policy created by Neutron: {}", neutronFirewallPolicy);
+        LOG.debug("Neutron Firewall Policy created by Neutron: {}", neutronFirewallPolicy);
 
         int result = HttpURLConnection.HTTP_BAD_REQUEST;
 
         result = canCreateNeutronFirewallPolicy(neutronFirewallPolicy);
         if (result != HttpURLConnection.HTTP_CREATED) {
-            logger.debug("Neutron Firewall Policy creation failed: {} ", result);
+            LOG.debug("Neutron Firewall Policy creation failed: {} ", result);
             return;
         }
     }
@@ -165,7 +165,7 @@ public class FWaasHandler extends AbstractHandler
 
     @Override
     public void neutronFirewallPolicyUpdated(NeutronFirewallPolicy neutronFirewallPolicy) {
-        logger.debug("Neutron Firewall Policy updated from Neutron: {}", neutronFirewallPolicy);
+        LOG.debug("Neutron Firewall Policy updated from Neutron: {}", neutronFirewallPolicy);
         return;
     }
 
@@ -178,7 +178,7 @@ public class FWaasHandler extends AbstractHandler
     public void neutronFirewallPolicyDeleted(NeutronFirewallPolicy neutronFirewallPolicy) {
         int result = canDeleteNeutronFirewallPolicy(neutronFirewallPolicy);
         if  (result != HttpURLConnection.HTTP_OK) {
-            logger.error(" delete Neutron Firewall Policy validation failed for result - {} ", result);
+            LOG.error(" delete Neutron Firewall Policy validation failed for result - {} ", result);
             return;
         }
     }
@@ -191,7 +191,7 @@ public class FWaasHandler extends AbstractHandler
     @Override
     public void processEvent(AbstractEvent abstractEvent) {
         if (!(abstractEvent instanceof NorthboundEvent)) {
-            logger.error("Unable to process abstract event " + abstractEvent);
+            LOG.error("Unable to process abstract event {}", abstractEvent);
             return;
         }
         NorthboundEvent ev = (NorthboundEvent) abstractEvent;
@@ -199,7 +199,7 @@ public class FWaasHandler extends AbstractHandler
             // TODO: add handling of events here, once callbacks do something
             //       other than logging.
             default:
-                logger.warn("Unable to process event action " + ev.getAction());
+                LOG.warn("Unable to process event action {}", ev.getAction());
                 break;
         }
     }

@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class NodeUtils {
-    protected static final Logger LOG = LoggerFactory.getLogger(NodeUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NodeUtils.class);
 
     public static String getId (String identifier) {
         String id = identifier;

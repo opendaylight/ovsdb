@@ -42,7 +42,7 @@ import com.google.common.collect.Lists;
 
 public class IngressAclService extends AbstractServiceInstance implements IngressAclProvider, ConfigInterface {
 
-    static final Logger logger = LoggerFactory.getLogger(IngressAclService.class);
+    static final Logger LOG = LoggerFactory.getLogger(IngressAclService.class);
 
     public IngressAclService() {
         super(Service.INGRESS_ACL);
@@ -56,7 +56,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
     public void programPortSecurityACL(Long dpid, String segmentationId, String attachedMac,
             long localPort, NeutronSecurityGroup securityGroup) {
 
-        logger.trace("programLocalBridgeRulesWithSec neutronSecurityGroup: {} ", securityGroup);
+        LOG.trace("programLocalBridgeRulesWithSec neutronSecurityGroup: {} ", securityGroup);
         List<NeutronSecurityRule> portSecurityList = securityGroup.getSecurityRules();
         /* Iterate over the Port Security Rules in the Port Security Group bound to the port*/
         for (NeutronSecurityRule portSecurityRule : portSecurityList) {
@@ -71,7 +71,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
              */
             if (portSecurityRule.getSecurityRuleEthertype().equalsIgnoreCase("IPv4") &&
                     portSecurityRule.getSecurityRuleDirection().equalsIgnoreCase("ingress")) {
-                logger.debug("ACL Rule matching IPv4 and ingress is: {} ", portSecurityRule);
+                LOG.debug("ACL Rule matching IPv4 and ingress is: {} ", portSecurityRule);
                 /**
                  * TCP Proto (True), TCP Port Minimum (True), TCP Port Max (True), IP Prefix (True)
                  */
@@ -81,7 +81,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                         (!String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix()).equalsIgnoreCase("null") &&
                                 !String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix())
                                         .equalsIgnoreCase("0.0.0.0/0"))) {
-                    logger.debug("Rule #1 ingress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
+                    LOG.debug("Rule #1 ingress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
                             portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
                             portSecurityRule.getSecurityRulePortMax(),
                             portSecurityRule.getSecurityRuleRemoteIpPrefix());
@@ -102,7 +102,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                         (!String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix()).equalsIgnoreCase("null") &&
                                 !String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix())
                                         .equalsIgnoreCase("0.0.0.0/0"))) {
-                    logger.debug("Rule #2 ingress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
+                    LOG.debug("Rule #2 ingress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
                             portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
                             portSecurityRule.getSecurityRulePortMax(),
                             portSecurityRule.getSecurityRuleRemoteIpPrefix());
@@ -121,7 +121,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                         String.valueOf(portSecurityRule.getSecurityRulePortMin()).equalsIgnoreCase("null") &&
                         String.valueOf(portSecurityRule.getSecurityRulePortMax()).equalsIgnoreCase("null") &&
                         !String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix()).equalsIgnoreCase("null")) {
-                    logger.debug("Rule #3 ingress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
+                    LOG.debug("Rule #3 ingress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
                             portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
                             portSecurityRule.getSecurityRulePortMax(),
                             portSecurityRule.getSecurityRuleRemoteIpPrefix());
@@ -140,7 +140,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                         (!String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix()).equalsIgnoreCase("null") &&
                                 !String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix())
                                         .equalsIgnoreCase("0.0.0.0/0"))) {
-                    logger.debug("Rule #4 ingress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
+                    LOG.debug("Rule #4 ingress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
                             portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
                             portSecurityRule.getSecurityRulePortMax(),
                             portSecurityRule.getSecurityRuleRemoteIpPrefix());
@@ -156,7 +156,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                         !String.valueOf(portSecurityRule.getSecurityRulePortMin()).equalsIgnoreCase("null") &&
                         !String.valueOf(portSecurityRule.getSecurityRulePortMax()).equalsIgnoreCase("null") &&
                         String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix()).equalsIgnoreCase("null")) {
-                    logger.debug("Rule #5 ingress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
+                    LOG.debug("Rule #5 ingress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
                             portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
                             portSecurityRule.getSecurityRulePortMax(),
                             portSecurityRule.getSecurityRuleRemoteIpPrefix());
@@ -174,7 +174,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                         !String.valueOf(portSecurityRule.getSecurityRulePortMin()).equalsIgnoreCase("null") &&
                         String.valueOf(portSecurityRule.getSecurityRulePortMax()).equalsIgnoreCase("null") &&
                         String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix()).equalsIgnoreCase("null")) {
-                    logger.debug("Rule #6 ingress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
+                    LOG.debug("Rule #6 ingress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
                             portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
                             portSecurityRule.getSecurityRulePortMax(),
                             portSecurityRule.getSecurityRuleRemoteIpPrefix());
@@ -193,7 +193,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                         ((String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix()).equalsIgnoreCase("null")) ||
                                 String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix())
                                         .equalsIgnoreCase("0.0.0.0/0"))) {
-                    logger.debug("Rule #7 ingress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
+                    LOG.debug("Rule #7 ingress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
                             portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
                             portSecurityRule.getSecurityRulePortMax(),
                             portSecurityRule.getSecurityRuleRemoteIpPrefix());
@@ -203,7 +203,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                             portSecurityRule.getSecurityRuleProtocol(), Constants.PROTO_MATCH_PRIORITY);
                     continue;
                 }
-                logger.debug("Ingress ACL Match combination not found for rule: {}", portSecurityRule);
+                LOG.debug("Ingress ACL Match combination not found for rule: {}", portSecurityRule);
             }
         }
     }
@@ -229,7 +229,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         flowBuilder.setMatch(MatchUtils.createDmacTcpSynMatch(matchBuilder, attachedMac, tcpPort,
                                                               Constants.TCP_SYN, segmentationId).build());
 
-        logger.debug("ingressACLTcpSyn MatchBuilder contains:  {}", flowBuilder.getMatch());
+        LOG.debug("ingressACLTcpSyn MatchBuilder contains:  {}", flowBuilder.getMatch());
         String flowId = "UcastOut_ACL2_" + segmentationId + "_" + attachedMac + securityRulePortMin;
         // Add Flow Attributes
         flowBuilder.setId(new FlowId(flowId));
@@ -255,7 +255,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
             instructionsList.add(ib.build());
             isb.setInstruction(instructionsList);
 
-            logger.debug("Instructions are: {}", ib.getInstruction());
+            LOG.debug("Instructions are: {}", ib.getInstruction());
             // Add InstructionsBuilder to FlowBuilder
             flowBuilder.setInstructions(isb.build());
             writeFlow(flowBuilder, nodeBuilder);
@@ -280,7 +280,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                 .createDmacTcpSynDstIpPrefixTcpPort(matchBuilder, new MacAddress(attachedMac),
                         tcpPort, Constants.TCP_SYN, segmentationId, srcIpPrefix).build());
 
-        logger.debug(" MatchBuilder contains:  {}", flowBuilder.getMatch());
+        LOG.debug(" MatchBuilder contains:  {}", flowBuilder.getMatch());
         String flowId = "UcastOut2_" + segmentationId + "_" + attachedMac +
                 securityRulePortMin + securityRuleIpPrefix;
         // Add Flow Attributes
@@ -307,7 +307,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
             instructionsList.add(ib.build());
             isb.setInstruction(instructionsList);
 
-            logger.debug("Instructions contain: {}", ib.getInstruction());
+            LOG.debug("Instructions contain: {}", ib.getInstruction());
             // Add InstructionsBuilder to FlowBuilder
             flowBuilder.setInstructions(isb.build());
             writeFlow(flowBuilder, nodeBuilder);
@@ -329,7 +329,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                 .createDmacIpTcpSynMatch(matchBuilder, new MacAddress(attachedMac), null, null).build());
         flowBuilder.setMatch(MatchUtils
                 .createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
-        logger.debug("MatchBuilder contains: {}", flowBuilder.getMatch());
+        LOG.debug("MatchBuilder contains: {}", flowBuilder.getMatch());
 
         String flowId = "UcastOut_" + segmentationId + "_" +
                 attachedMac + "_AllowTCPSynPrefix_" + securityRuleProtcol;
@@ -356,7 +356,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
             ib.setKey(new InstructionKey(1));
             instructionsList.add(ib.build());
             isb.setInstruction(instructionsList);
-            logger.debug("Instructions contain: {}", ib.getInstruction());
+            LOG.debug("Instructions contain: {}", ib.getInstruction());
 
             // Add InstructionsBuilder to FlowBuilder
             flowBuilder.setInstructions(isb.build());
@@ -378,7 +378,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         flowBuilder.setMatch(MatchUtils.createDmacTcpPortWithFlagMatch(matchBuilder,
                 attachedMac, Constants.TCP_SYN, segmentationId).build());
 
-        logger.debug("MatchBuilder contains: {}", flowBuilder.getMatch());
+        LOG.debug("MatchBuilder contains: {}", flowBuilder.getMatch());
         String flowId = "PortSec_TCP_Syn_Default_Drop_" + segmentationId + "_" + attachedMac;
         flowBuilder.setId(new FlowId(flowId));
         FlowKey key = new FlowKey(new FlowId(flowId));
@@ -407,7 +407,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
 
             // Add InstructionBuilder to the Instruction(s)Builder List
             isb.setInstruction(instructions);
-            logger.debug("Instructions contain: {}", ib.getInstruction());
+            LOG.debug("Instructions contain: {}", ib.getInstruction());
             // Add InstructionsBuilder to FlowBuilder
             flowBuilder.setInstructions(isb.build());
             writeFlow(flowBuilder, nodeBuilder);
@@ -437,7 +437,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
                     .build());
         }
 
-        logger.debug("MatchBuilder contains: {}", flowBuilder.getMatch());
+        LOG.debug("MatchBuilder contains: {}", flowBuilder.getMatch());
         String flowId = "IngressProto_ACL_" + segmentationId + "_" +
                 attachedMac + "_Permit_" + securityRuleIpPrefix;
         // Add Flow Attributes
@@ -464,7 +464,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
             instructionsList.add(ib.build());
             isb.setInstruction(instructionsList);
 
-            logger.debug("Instructions contain: {}", ib.getInstruction());
+            LOG.debug("Instructions contain: {}", ib.getInstruction());
             // Add InstructionsBuilder to FlowBuilder
             flowBuilder.setInstructions(isb.build());
             writeFlow(flowBuilder, nodeBuilder);
@@ -491,7 +491,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
         FlowBuilder flowBuilder = new FlowBuilder();
 
         flowBuilder.setMatch(MatchUtils.createDHCPServerMatch(matchBuilder, dhcpMacAddress, 67, 68).build());
-        logger.debug("ingressACLDHCPAllowServerTraffic: MatchBuilder contains: {}", flowBuilder.getMatch());
+        LOG.debug("ingressACLDHCPAllowServerTraffic: MatchBuilder contains: {}", flowBuilder.getMatch());
         String flowId = "Ingress_DHCP_Server" + segmentationId + "_" + dhcpMacAddress + "_Permit_";
         // Add Flow Attributes
         flowBuilder.setId(new FlowId(flowId));
@@ -517,7 +517,7 @@ public class IngressAclService extends AbstractServiceInstance implements Ingres
             instructionsList.add(ib.build());
             isb.setInstruction(instructionsList);
 
-            logger.debug("Instructions contain: {}", ib.getInstruction());
+            LOG.debug("Instructions contain: {}", ib.getInstruction());
             // Add InstructionsBuilder to FlowBuilder
             flowBuilder.setInstructions(isb.build());
             writeFlow(flowBuilder, nodeBuilder);

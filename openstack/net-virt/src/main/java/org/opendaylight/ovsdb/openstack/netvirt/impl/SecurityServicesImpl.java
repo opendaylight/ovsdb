@@ -128,11 +128,11 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
             logger.error("getDHCPServerPort: No fixed ip is assigned");
             return null;
         }
-        String subnetUUID = fixedIps.iterator().next().getSubnetUUID();
-        NeutronSubnet neutronSubnet = neutronSubnetCache.getSubnet(subnetUUID);
-        List<NeutronPort> ports = neutronSubnet.getPortsInSubnet();
-        for (NeutronPort port : ports) {
-            if (port.getDeviceOwner().contains("dhcp")) {
+
+        // too slow?
+        String networkUUID = neutronPort.getNetworkUUID();
+        for (NeutronPort port : neutronPortCache.getAllPorts()) {
+            if (port.getNetworkUUID() == networkUUID && port.getDeviceOwner().contains("dhcp")) {
                 return port;
             }
         }

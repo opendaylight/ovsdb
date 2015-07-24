@@ -53,8 +53,7 @@ import org.slf4j.LoggerFactory;
 
 public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
 
-    private static final Logger LOG = LoggerFactory
-            .getLogger(OpenVSwitchUpdateCommand.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OpenVSwitchUpdateCommand.class);
 
     public OpenVSwitchUpdateCommand(OvsdbConnectionInstance key, TableUpdates updates,
             DatabaseSchema dbSchema) {

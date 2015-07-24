@@ -20,8 +20,6 @@ import org.opendaylight.ovsdb.compatibility.plugin.api.OvsdbInventoryService;
 import org.opendaylight.ovsdb.compatibility.plugin.impl.ConfigurationServiceImpl;
 import org.opendaylight.ovsdb.compatibility.plugin.impl.ConnectionServiceImpl;
 import org.opendaylight.ovsdb.compatibility.plugin.impl.InventoryServiceImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Activator for ovsdb plugin compatibility layer
@@ -29,8 +27,6 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class Activator extends ComponentActivatorAbstractBase {
-    protected static final Logger logger = LoggerFactory
-            .getLogger(Activator.class);
 
     /**
      * Function called when the activator starts just after some initializations

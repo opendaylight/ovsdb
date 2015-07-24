@@ -28,7 +28,7 @@ import com.google.common.reflect.Invokable;
  */
 public class DatabaseSchema {
 
-    public static Logger logger = LoggerFactory.getLogger(DatabaseSchema.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DatabaseSchema.class);
 
     private String name;
 
@@ -96,7 +96,7 @@ public class DatabaseSchema {
         Map<String, TableSchema> tables = new HashMap<>();
         for (Iterator<Map.Entry<String, JsonNode>> iter = json.get("tables").fields(); iter.hasNext(); ) {
             Map.Entry<String, JsonNode> table = iter.next();
-            logger.trace("Read schema for table[{}]:{}", table.getKey(), table.getValue());
+            LOG.trace("Read schema for table[{}]:{}", table.getKey(), table.getValue());
 
             //todo : this needs to done by a factory
             tables.put(table.getKey(), new GenericTableSchema().fromJson(table.getKey(), table.getValue()));

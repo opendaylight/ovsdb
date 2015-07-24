@@ -45,7 +45,7 @@ import com.google.common.collect.Lists;
 
 public class EgressAclService extends AbstractServiceInstance implements EgressAclProvider, ConfigInterface {
 
-    static final Logger logger = LoggerFactory.getLogger(EgressAclService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EgressAclService.class);
     final int DHCP_SOURCE_PORT = 67;
     final int DHCP_DESTINATION_PORT = 68;
     final String HOST_MASK = "/32";
@@ -62,7 +62,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
     public void programPortSecurityACL(Long dpid, String segmentationId, String attachedMac, long localPort,
                                        NeutronSecurityGroup securityGroup) {
 
-        logger.trace("programLocalBridgeRulesWithSec neutronSecurityGroup: {} ", securityGroup);
+        LOG.trace("programLocalBridgeRulesWithSec neutronSecurityGroup: {} ", securityGroup);
         List<NeutronSecurityRule> portSecurityList = securityGroup.getSecurityRules();
         /* Iterate over the Port Security Rules in the Port Security Group bound to the port*/
         for (NeutronSecurityRule portSecurityRule : portSecurityList) {
@@ -77,7 +77,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
              */
             if (portSecurityRule.getSecurityRuleEthertype().equalsIgnoreCase("IPv4") &&
                 portSecurityRule.getSecurityRuleDirection().equalsIgnoreCase("egress")) {
-                logger.debug("Egress IPV4 ACL  Port Security Rule: {} ", portSecurityRule);
+                LOG.debug("Egress IPV4 ACL  Port Security Rule: {} ", portSecurityRule);
                 // ToDo: Implement Port Range
 
                 /**
@@ -89,7 +89,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                     (!String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix()).equalsIgnoreCase("null") &&
                      !String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix())
                              .equalsIgnoreCase("0.0.0.0/0"))) {
-                    logger.debug(
+                    LOG.debug(
                             "Rule #1 egress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
                             portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
                             portSecurityRule.getSecurityRulePortMax(),
@@ -112,7 +112,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                     (!String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix()).equalsIgnoreCase("null") &&
                      !String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix())
                              .equalsIgnoreCase("0.0.0.0/0"))) {
-                    logger.debug(
+                    LOG.debug(
                             "Rule #2 egress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
                             portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
                             portSecurityRule.getSecurityRulePortMax(),
@@ -133,7 +133,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                     String.valueOf(portSecurityRule.getSecurityRulePortMin()).equalsIgnoreCase("null") &&
                     String.valueOf(portSecurityRule.getSecurityRulePortMax()).equalsIgnoreCase("null") &&
                     !String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix()).equalsIgnoreCase("null")) {
-                    logger.debug(
+                    LOG.debug(
                             "Rule #3 egress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
                             portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
                             portSecurityRule.getSecurityRulePortMax(),
@@ -153,7 +153,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                     (!String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix()).equalsIgnoreCase("null") &&
                      !String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix())
                              .equalsIgnoreCase("0.0.0.0/0"))) {
-                    logger.debug(
+                    LOG.debug(
                             "Rule #4 egress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
                             portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
                             portSecurityRule.getSecurityRulePortMax(),
@@ -170,7 +170,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                     !String.valueOf(portSecurityRule.getSecurityRulePortMin()).equalsIgnoreCase("null") &&
                     !String.valueOf(portSecurityRule.getSecurityRulePortMax()).equalsIgnoreCase("null") &&
                     String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix()).equalsIgnoreCase("null")) {
-                    logger.debug(
+                    LOG.debug(
                             "Rule #5 egress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
                             portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
                             portSecurityRule.getSecurityRulePortMax(),
@@ -189,7 +189,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                     !String.valueOf(portSecurityRule.getSecurityRulePortMin()).equalsIgnoreCase("null") &&
                     String.valueOf(portSecurityRule.getSecurityRulePortMax()).equalsIgnoreCase("null") &&
                     String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix()).equalsIgnoreCase("null")) {
-                    logger.debug(
+                    LOG.debug(
                             "Rule #6 egress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
                             portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
                             portSecurityRule.getSecurityRulePortMax(),
@@ -209,7 +209,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                     ((String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix()).equalsIgnoreCase("null")) ||
                      String.valueOf(portSecurityRule.getSecurityRuleRemoteIpPrefix())
                              .equalsIgnoreCase("0.0.0.0/0"))) {
-                    logger.debug(
+                    LOG.debug(
                             "Rule #7 egress PortSec Rule Matches -> TCP Protocol: {}, TCP Port Min: {}, TCP Port Max: {}, IP Prefix: {}",
                             portSecurityRule.getSecurityRuleProtocol(), portSecurityRule.getSecurityRulePortMin(),
                             portSecurityRule.getSecurityRulePortMax(),
@@ -220,7 +220,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                                      portSecurityRule.getSecurityRuleProtocol(), Constants.PROTO_MATCH_PRIORITY);
                     continue;
                 }
-                logger.debug("ACL Match combination not found for rule: {}", portSecurityRule);
+                LOG.debug("ACL Match combination not found for rule: {}", portSecurityRule);
             }
         }
     }
@@ -253,7 +253,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
 
         flowBuilder.setMatch(MatchUtils.createSmacTcpPortWithFlagMatch(matchBuilder,
                                                                        attachedMac, Constants.TCP_SYN, segmentationId).build());
-        logger.debug("MatchBuilder contains: {}", flowBuilder.getMatch());
+        LOG.debug("MatchBuilder contains: {}", flowBuilder.getMatch());
 
         String flowId = "TCP_Syn_Egress_Default_Drop_" + segmentationId + "_" + attachedMac;
         flowBuilder.setId(new FlowId(flowId));
@@ -280,7 +280,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
             // Add InstructionBuilder to the Instruction(s)Builder List
             isb.setInstruction(instructions);
 
-            logger.debug("Instructions contain: {}", ib.getInstruction());
+            LOG.debug("Instructions contain: {}", ib.getInstruction());
             // Add InstructionsBuilder to FlowBuilder
             flowBuilder.setInstructions(isb.build());
             writeFlow(flowBuilder, nodeBuilder);
@@ -303,7 +303,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                                      .createSmacTcpSynDstIpPrefixTcpPort(matchBuilder, new MacAddress(attachedMac),
                                                                          tcpPort, Constants.TCP_SYN, segmentationId, srcIpPrefix).build());
 
-        logger.debug(" MatchBuilder contains:  {}", flowBuilder.getMatch());
+        LOG.debug(" MatchBuilder contains:  {}", flowBuilder.getMatch());
         String flowId = "UcastEgress_" + segmentationId + "_" + attachedMac +
                         securityRulePortMin + securityRuleIpPrefix;
         // Add Flow Attributes
@@ -330,7 +330,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
             instructionsList.add(ib.build());
             isb.setInstruction(instructionsList);
 
-            logger.debug("Instructions contain: {}", ib.getInstruction());
+            LOG.debug("Instructions contain: {}", ib.getInstruction());
             // Add InstructionsBuilder to FlowBuilder
             flowBuilder.setInstructions(isb.build());
             writeFlow(flowBuilder, nodeBuilder);
@@ -354,7 +354,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         flowBuilder.setMatch(MatchUtils
                                      .createTunnelIDMatch(matchBuilder, new BigInteger(segmentationId)).build());
 
-        logger.debug("MatchBuilder contains:  {}", flowBuilder.getMatch());
+        LOG.debug("MatchBuilder contains:  {}", flowBuilder.getMatch());
         String flowId = "EgressAllProto_" + segmentationId + "_" +
                         attachedMac + "_AllowEgressTCPSyn_" + securityRuleProtcol;
         // Add Flow Attributes
@@ -381,7 +381,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
             instructionsList.add(ib.build());
             isb.setInstruction(instructionsList);
 
-            logger.debug("Instructions contain: {}", ib.getInstruction());
+            LOG.debug("Instructions contain: {}", ib.getInstruction());
             // Add InstructionsBuilder to FlowBuilder
             flowBuilder.setInstructions(isb.build());
             writeFlow(flowBuilder, nodeBuilder);
@@ -410,7 +410,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
                                          .createSmacIpTcpSynMatch(matchBuilder, new MacAddress(attachedMac), null, null)
                                          .build());
         }
-        logger.debug("MatchBuilder contains: {}", flowBuilder.getMatch());
+        LOG.debug("MatchBuilder contains: {}", flowBuilder.getMatch());
         String flowId = "Egress_Proto_ACL" + segmentationId + "_" +
                         attachedMac + "_Permit_" + securityRuleIpPrefix;
         // Add Flow Attributes
@@ -437,7 +437,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
             instructionsList.add(ib.build());
             isb.setInstruction(instructionsList);
 
-            logger.debug("Instructions contain: {}", ib.getInstruction());
+            LOG.debug("Instructions contain: {}", ib.getInstruction());
             // Add InstructionsBuilder to FlowBuilder
             flowBuilder.setInstructions(isb.build());
             writeFlow(flowBuilder, nodeBuilder);
@@ -459,7 +459,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         flowBuilder.setMatch(MatchUtils.createSmacTcpSyn(matchBuilder, attachedMac, tcpPort,
                                                          Constants.TCP_SYN, segmentationId).build());
 
-        logger.debug("MatchBuilder contains: {}", flowBuilder.getMatch());
+        LOG.debug("MatchBuilder contains: {}", flowBuilder.getMatch());
         String flowId = "Ucast_this.getTable()" + segmentationId + "_" + attachedMac + securityRulePortMin;
         // Add Flow Attributes
         flowBuilder.setId(new FlowId(flowId));
@@ -485,7 +485,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
             instructionsList.add(ib.build());
             isb.setInstruction(instructionsList);
 
-            logger.debug("Instructions contain: {}", ib.getInstruction());
+            LOG.debug("Instructions contain: {}", ib.getInstruction());
             // Add InstructionsBuilder to FlowBuilder
             flowBuilder.setInstructions(isb.build());
             writeFlow(flowBuilder, nodeBuilder);
@@ -510,7 +510,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         FlowBuilder flowBuilder = new FlowBuilder();
 
         flowBuilder.setMatch(MatchUtils.createDHCPMatch(matchBuilder, DHCP_DESTINATION_PORT, DHCP_SOURCE_PORT).build());
-        logger.debug("egressACLDHCPAllowClientTrafficFromVm: MatchBuilder contains: {}", flowBuilder.getMatch());
+        LOG.debug("egressACLDHCPAllowClientTrafficFromVm: MatchBuilder contains: {}", flowBuilder.getMatch());
         String flowId = "Egress_DHCP_Client"  + "_Permit_";
         // Add Flow Attributes
         flowBuilder.setId(new FlowId(flowId));
@@ -536,7 +536,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
             instructionsList.add(ib.build());
             isb.setInstruction(instructionsList);
 
-            logger.debug("egressACLDHCPAllowClientTrafficFromVm: Instructions contain: {}", ib.getInstruction());
+            LOG.debug("egressACLDHCPAllowClientTrafficFromVm: Instructions contain: {}", ib.getInstruction());
             // Add InstructionsBuilder to FlowBuilder
             flowBuilder.setInstructions(isb.build());
             writeFlow(flowBuilder, nodeBuilder);
@@ -563,7 +563,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         MatchUtils.createInPortMatch(matchBuilder, dpidLong, localPort);
         flowBuilder.setMatch(MatchUtils.createDHCPMatch(matchBuilder, DHCP_SOURCE_PORT, DHCP_DESTINATION_PORT).build());
 
-        logger.debug("egressACLDHCPDropServerTrafficfromVM: MatchBuilder contains: {}", flowBuilder.getMatch());
+        LOG.debug("egressACLDHCPDropServerTrafficfromVM: MatchBuilder contains: {}", flowBuilder.getMatch());
         String flowId = "Egress_DHCP_Server" + "_" + localPort + "_DROP_";
         // Add Flow Attributes
         flowBuilder.setId(new FlowId(flowId));
@@ -589,7 +589,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
             instructionsList.add(ib.build());
             isb.setInstruction(instructionsList);
 
-            logger.debug("egressACLDHCPDropServerTrafficfromVM: Instructions contain: {}", ib.getInstruction());
+            LOG.debug("egressACLDHCPDropServerTrafficfromVM: Instructions contain: {}", ib.getInstruction());
             // Add InstructionsBuilder to FlowBuilder
             flowBuilder.setInstructions(isb.build());
             writeFlow(flowBuilder, nodeBuilder);
@@ -619,7 +619,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
         MatchUtils.createInPortMatch(matchBuilder, dpidLong, localPort);
         flowBuilder.setMatch(matchBuilder.build());
 
-        logger.debug("egressACLAllowTrafficFromVmIpMacPair: MatchBuilder contains: {}", flowBuilder.getMatch());
+        LOG.debug("egressACLAllowTrafficFromVmIpMacPair: MatchBuilder contains: {}", flowBuilder.getMatch());
         String flowId = "Egress_Allow_VM_IP_MAC" + "_" + localPort + attachedMac + "_Permit_";
         // Add Flow Attributes
         flowBuilder.setId(new FlowId(flowId));
@@ -645,7 +645,7 @@ public class EgressAclService extends AbstractServiceInstance implements EgressA
             instructionsList.add(ib.build());
             isb.setInstruction(instructionsList);
 
-            logger.debug("egressACLAllowTrafficFromVmIpMacPair: Instructions contain: {}", ib.getInstruction());
+            LOG.debug("egressACLAllowTrafficFromVmIpMacPair: Instructions contain: {}", ib.getInstruction());
             // Add InstructionsBuilder to FlowBuilder
             flowBuilder.setInstructions(isb.build());
             writeFlow(flowBuilder, nodeBuilder);

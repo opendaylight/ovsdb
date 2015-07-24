@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PipelineOrchestratorImpl implements ConfigInterface, NodeCacheListener, PipelineOrchestrator {
-    private static final Logger logger = LoggerFactory.getLogger(PipelineOrchestratorImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PipelineOrchestratorImpl.class);
     private List<Service> staticPipeline = Lists.newArrayList(
             Service.CLASSIFIER,
             Service.ARP_RESPONDER,
@@ -53,13 +53,13 @@ public class PipelineOrchestratorImpl implements ConfigInterface, NodeCacheListe
     public PipelineOrchestratorImpl() {
         eventHandler = Executors.newSingleThreadExecutor();
         this.queue = new LinkedBlockingQueue<Node>();
-        logger.info("PipelineOrchestratorImpl constructor");
+        LOG.info("PipelineOrchestratorImpl constructor");
         start();
     }
 
     public void registerService(final ServiceReference ref, AbstractServiceInstance serviceInstance){
         Service service = (Service)ref.getProperty(AbstractServiceInstance.SERVICE_PROPERTY);
-        logger.info("registerService {} - {}", serviceInstance, service);
+        LOG.info("registerService {} - {}", serviceInstance, service);
         serviceRegistry.put(service, serviceInstance);
     }
 
@@ -96,11 +96,11 @@ public class PipelineOrchestratorImpl implements ConfigInterface, NodeCacheListe
                          * causes programming issues. Hence delaying the programming by a second to
                          * avoid the clash. This hack/workaround should be removed once Bug 1997 is resolved.
                          */
-                        logger.info(">>>>> dequeue: {}", node);
+                        LOG.info(">>>>> dequeue: {}", node);
                         Thread.sleep(1000);
                         for (Service service : staticPipeline) {
                             AbstractServiceInstance serviceInstance = getServiceInstance(service);
-                            //logger.info("pipeline: {} - {}", service, serviceInstance);
+                            //LOG.info("pipeline: {} - {}", service, serviceInstance);
                             if (serviceInstance != null) {
                                 if (southbound.getBridge(node) != null) {
                                     serviceInstance.programDefaultPipelineRule(node);
@@ -109,7 +109,7 @@ public class PipelineOrchestratorImpl implements ConfigInterface, NodeCacheListe
                         }
                     }
                 } catch (Exception e) {
-                    logger.warn("Processing interrupted, terminating ", e);
+                    LOG.warn("Processing interrupted, terminating ", e);
                 }
 
                 while (!queue.isEmpty()) {
@@ -127,11 +127,11 @@ public class PipelineOrchestratorImpl implements ConfigInterface, NodeCacheListe
 
     @Override
     public void enqueue(Node node) {
-        logger.info(">>>>> enqueue: {}", node);
+        LOG.info(">>>>> enqueue: {}", node);
         try {
             queue.put(node);
         } catch (InterruptedException e) {
-            logger.warn("Failed to enqueue operation {}", node, e);
+            LOG.warn("Failed to enqueue operation {}", node, e);
         }
     }
 
@@ -140,7 +140,7 @@ public class PipelineOrchestratorImpl implements ConfigInterface, NodeCacheListe
         if (action == Action.ADD) {
             enqueue(node);
         } else {
-            logger.info("update ignored: {}", node);
+            LOG.info("update ignored: {}", node);
         }
     }
 

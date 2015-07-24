@@ -62,7 +62,7 @@ import com.google.common.util.concurrent.SettableFuture;
 
 public class OvsdbClientImpl implements OvsdbClient {
 
-    protected static final Logger logger = LoggerFactory.getLogger(OvsdbClientImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OvsdbClientImpl.class);
     private ExecutorService executorService;
     private OvsdbRPC rpc;
     private Map<String, DatabaseSchema> schema = Maps.newHashMap();
@@ -94,7 +94,7 @@ public class OvsdbClientImpl implements OvsdbClient {
                     MonitorCallBack monitorCallBack = callbackContext.monitorCallBack;
                     if (monitorCallBack == null) {
                         //ignore ?
-                        logger.info("callback received with context {}, but no known handler. Ignoring!", key);
+                        LOG.info("callback received with context {}, but no known handler. Ignoring!", key);
                         return;
                     }
                     TableUpdates updates = transformingCallback(updateNotification.getUpdates(),

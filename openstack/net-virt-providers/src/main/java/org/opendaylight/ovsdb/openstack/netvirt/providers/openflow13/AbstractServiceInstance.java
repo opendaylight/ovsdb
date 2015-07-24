@@ -59,7 +59,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractServiceInstance {
     public static final String SERVICE_PROPERTY ="serviceProperty";
-    private static final Logger logger = LoggerFactory.getLogger(AbstractServiceInstance.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractServiceInstance.class);
     public static final String OPENFLOW = "openflow:";
     private DataBroker dataBroker = null;
     // OSGi Services that we are dependent on.
@@ -144,7 +144,7 @@ public abstract class AbstractServiceInstance {
     }
 
     protected void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
-        logger.debug("writeFlow: flowBuilder: {}, nodeBuilder: {}",
+        LOG.debug("writeFlow: flowBuilder: {}, nodeBuilder: {}",
                 flowBuilder.build(), nodeBuilder.build());
         WriteTransaction modification = dataBroker.newWriteOnlyTransaction();
         modification.put(LogicalDatastoreType.CONFIGURATION, createNodePath(nodeBuilder),
@@ -155,9 +155,9 @@ public abstract class AbstractServiceInstance {
         CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
         try {
             commitFuture.get();  // TODO: Make it async (See bug 1362)
-            logger.debug("Transaction success for write of Flow "+flowBuilder.getFlowName());
+            LOG.debug("Transaction success for write of Flow {}", flowBuilder.getFlowName());
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             modification.cancel();
         }
     }
@@ -169,9 +169,9 @@ public abstract class AbstractServiceInstance {
         CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
         try {
             commitFuture.get();  // TODO: Make it async (See bug 1362)
-            logger.debug("Transaction success for deletion of Flow " + flowBuilder.getFlowName());
+            LOG.debug("Transaction success for deletion of Flow {}", flowBuilder.getFlowName());
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             modification.cancel();
         }
     }
@@ -185,10 +185,10 @@ public abstract class AbstractServiceInstance {
                 return data.get();
             }
         } catch (InterruptedException|ExecutionException e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
 
-        logger.debug("Cannot find data for Flow " + flowBuilder.getFlowName());
+        LOG.debug("Cannot find data for Flow {}", flowBuilder.getFlowName());
         return null;
     }
 
@@ -203,10 +203,10 @@ public abstract class AbstractServiceInstance {
                 return data.get();
             }
         } catch (InterruptedException|ExecutionException e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
 
-        logger.debug("Cannot find data for Node " + nodeId);
+        LOG.debug("Cannot find data for Node {}", nodeId);
         return null;
     }
 
@@ -214,7 +214,7 @@ public abstract class AbstractServiceInstance {
         Long dpid = 0L;
         dpid = southbound.getDataPathId(node);
         if (dpid == 0) {
-            logger.warn("getDpid: dpid not found: {}", node);
+            LOG.warn("getDpid: dpid not found: {}", node);
         }
         return dpid;
     }
@@ -226,14 +226,14 @@ public abstract class AbstractServiceInstance {
      */
     protected void programDefaultPipelineRule(Node node) {
         if (!isBridgeInPipeline(node)) {
-            //logger.trace("Bridge is not in pipeline {} ", node);
+            //LOG.trace("Bridge is not in pipeline {} ", node);
             return;
         }
         MatchBuilder matchBuilder = new MatchBuilder();
         FlowBuilder flowBuilder = new FlowBuilder();
         Long dpid = getDpid(node);
         if (dpid == 0L) {
-            logger.info("could not find dpid: {}", node.getNodeId());
+            LOG.info("could not find dpid: {}", node.getNodeId());
             return;
         }
         String nodeName = OPENFLOW + getDpid(node);

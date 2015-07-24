@@ -55,7 +55,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 @RunWith(PaxExam.class)
 public class OvsdbLibraryIT extends OvsdbIntegrationTestBase {
-    private Logger log = LoggerFactory.getLogger(OvsdbLibraryIT.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OvsdbLibraryIT.class);
     @Inject
     private BundleContext bc;
     private OvsdbClient client = null;
@@ -89,13 +89,12 @@ public class OvsdbLibraryIT extends OvsdbIntegrationTestBase {
         for (Bundle element : b) {
             int state = element.getState();
             if (state != Bundle.ACTIVE && state != Bundle.RESOLVED) {
-                log.info("Bundle:" + element.getSymbolicName() + " state:"
-                          + stateToString(state));
+                LOG.info("Bundle: {} state: {}", element.getSymbolicName(), stateToString(state));
                 debugit = true;
             }
         }
         if (debugit) {
-            log.debug("Do some debugging because some bundle is unresolved");
+            LOG.debug("Do some debugging because some bundle is unresolved");
             Thread.sleep(600000);
         }
 

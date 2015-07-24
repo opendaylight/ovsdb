@@ -48,8 +48,6 @@ import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.plugin.api.StatusWithUuid;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -72,7 +70,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 @Path("/v2/")
 @Deprecated
 public class OvsdbNorthboundV2 {
-    protected static final Logger logger = LoggerFactory.getLogger(OvsdbNorthboundV2.class);
 
     @Context
     private UriInfo _uriInfo;

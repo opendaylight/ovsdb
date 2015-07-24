@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TenantNetworkManagerImpl implements ConfigInterface, TenantNetworkManager {
-    static final Logger logger = LoggerFactory.getLogger(TenantNetworkManagerImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TenantNetworkManagerImpl.class);
     private INeutronNetworkCRUD neutronNetworkCache;
     private INeutronPortCRUD neutronPortCache;
     private VlanConfigurationCache vlanConfigurationCache;
@@ -48,18 +48,18 @@ public class TenantNetworkManagerImpl implements ConfigInterface, TenantNetworkM
     public void reclaimInternalVlan(Node node, NeutronNetwork network) {
         int vlan = vlanConfigurationCache.reclaimInternalVlan(node, network.getID());
         if (vlan <= 0) {
-            logger.debug("Unable to get an internalVlan for Network {}", network);
+            LOG.debug("Unable to get an internalVlan for Network {}", network);
             return;
         }
-        logger.debug("Removed Vlan {} on {}", vlan);
+        LOG.debug("Removed Vlan {} on {}", vlan);
     }
 
     @Override
     public void programInternalVlan(Node node, OvsdbTerminationPointAugmentation tp, NeutronNetwork network) {
         int vlan = vlanConfigurationCache.getInternalVlan(node, network.getID());
-        logger.debug("Programming Vlan {} on {}", vlan, tp);
+        LOG.debug("Programming Vlan {} on {}", vlan, tp);
         if (vlan <= 0) {
-            logger.debug("Unable to get an internalVlan for Network {}", network);
+            LOG.debug("Unable to get an internalVlan for Network {}", network);
             return;
         }
 
@@ -70,7 +70,7 @@ public class TenantNetworkManagerImpl implements ConfigInterface, TenantNetworkM
     public boolean isTenantNetworkPresentInNode(Node node, String segmentationId) {
         String networkId = this.getNetworkId(segmentationId);
         if (networkId == null) {
-            logger.debug("Tenant Network not found with Segmenation-id {}",segmentationId);
+            LOG.debug("Tenant Network not found with Segmenation-id {}", segmentationId);
             return false;
         }
 
@@ -79,17 +79,17 @@ public class TenantNetworkManagerImpl implements ConfigInterface, TenantNetworkM
             for (OvsdbTerminationPointAugmentation port : ports) {
                 String ifaceId = southbound.getInterfaceExternalIdsValue(port, Constants.EXTERNAL_ID_INTERFACE_ID);
                 if (ifaceId != null && isInterfacePresentInTenantNetwork(ifaceId, networkId)) {
-                    logger.debug("Tenant Network {} with Segmentation-id {} is present in Node {} / Interface {}",
+                    LOG.debug("Tenant Network {} with Segmentation-id {} is present in Node {} / Interface {}",
                             networkId, segmentationId, node, port);
                     return true;
                 }
             }
         } catch (Exception e) {
-            logger.error("Error while trying to determine if network is present on node", e);
+            LOG.error("Error while trying to determine if network is present on node", e);
             return false;
         }
 
-        logger.debug("Tenant Network {} with Segmenation-id {} is NOT present in Node {}",
+        LOG.debug("Tenant Network {} with Segmenation-id {} is NOT present in Node {}",
                 networkId, segmentationId, node);
 
         return false;
@@ -114,7 +114,7 @@ public class TenantNetworkManagerImpl implements ConfigInterface, TenantNetworkM
         Preconditions.checkNotNull(neutronPortCache);
         NeutronNetwork neutronNetwork = null;
 
-        logger.debug("getTenantNetwork for {}", terminationPointAugmentation);
+        LOG.debug("getTenantNetwork for {}", terminationPointAugmentation);
         String neutronPortId = southbound.getInterfaceExternalIdsValue(terminationPointAugmentation,
                 Constants.EXTERNAL_ID_INTERFACE_ID);
         if (neutronPortId != null) {
@@ -122,17 +122,17 @@ public class TenantNetworkManagerImpl implements ConfigInterface, TenantNetworkM
             if (neutronPort != null) {
                 neutronNetwork = neutronNetworkCache.getNetwork(neutronPort.getNetworkUUID());
                 if (neutronNetwork != null) {
-                    logger.debug("mapped to {}", neutronNetwork);
+                    LOG.debug("mapped to {}", neutronNetwork);
                 } else {
-                    logger.debug("getTenantNetwork: did not find neutronNetwork in cache from neutronPort {}",
+                    LOG.debug("getTenantNetwork: did not find neutronNetwork in cache from neutronPort {}",
                                  neutronPortId);
                 }
             } else {
-                logger.info("getTenantNetwork did not find neutronPort {} from termination point {}",
+                LOG.info("getTenantNetwork did not find neutronPort {} from termination point {}",
                         neutronPortId, terminationPointAugmentation.getName());
             }
         } else {
-            logger.debug("getTenantNetwork: did not find {} in external_ids", Constants.EXTERNAL_ID_INTERFACE_ID);
+            LOG.debug("getTenantNetwork: did not find {} in external_ids", Constants.EXTERNAL_ID_INTERFACE_ID);
         }
         return neutronNetwork;
     }
@@ -142,16 +142,16 @@ public class TenantNetworkManagerImpl implements ConfigInterface, TenantNetworkM
         Preconditions.checkNotNull(neutronPortCache);
         NeutronPort neutronPort = null;
 
-        logger.trace("getTenantPort for {}", terminationPointAugmentation.getName());
+        LOG.trace("getTenantPort for {}", terminationPointAugmentation.getName());
         String neutronPortId = southbound.getInterfaceExternalIdsValue(terminationPointAugmentation,
                 Constants.EXTERNAL_ID_INTERFACE_ID);
         if (neutronPortId != null) {
             neutronPort = neutronPortCache.getPort(neutronPortId);
         }
         if (neutronPort != null) {
-            logger.debug("mapped to {}", neutronPort);
+            LOG.debug("mapped to {}", neutronPort);
         } else {
-            logger.warn("getTenantPort did not find port for {}", terminationPointAugmentation.getName());
+            LOG.warn("getTenantPort did not find port for {}", terminationPointAugmentation.getName());
         }
 
         return neutronPort;

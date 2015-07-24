@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
 
 public class L2ForwardingService extends AbstractServiceInstance implements ConfigInterface, L2ForwardingProvider {
-    private static final Logger logger = LoggerFactory.getLogger(L2ForwardingService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(L2ForwardingService.class);
     public L2ForwardingService() {
         super(Service.L2_FORWARDING);
     }
@@ -1009,7 +1009,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
             Long dpidLong, Long port ,
             List<Instruction> instructions) {
         NodeConnectorId ncid = new NodeConnectorId(OPENFLOW + dpidLong + ":" + port);
-        logger.debug("createOutputPortInstructions() Node Connector ID is - Type=openflow: DPID={} port={} existingInstructions={}", dpidLong, port, instructions);
+        LOG.debug("createOutputPortInstructions() Node Connector ID is - Type=openflow: DPID={} port={} existingInstructions={}", dpidLong, port, instructions);
 
         List<Action> actionList = Lists.newArrayList();
         ActionBuilder ab = new ActionBuilder();
@@ -1055,7 +1055,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
         ApplyActionsBuilder aab = new ApplyActionsBuilder();
         aab.setAction(actionList);
         ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
-        logger.debug("createOutputPortInstructions() : applyAction {}", aab.build());
+        LOG.debug("createOutputPortInstructions() : applyAction {}", aab.build());
         return ib;
     }
 

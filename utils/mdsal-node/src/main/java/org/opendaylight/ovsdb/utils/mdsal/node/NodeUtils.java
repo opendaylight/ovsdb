@@ -13,11 +13,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class NodeUtils {
-    protected static final Logger LOG = LoggerFactory.getLogger(NodeUtils.class);
 
     public static String getId (String identifier) {
         String id = identifier;

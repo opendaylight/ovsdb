@@ -33,13 +33,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(ServiceHelper.class)
 public class NodeResourceTest {
-    static final Logger LOG = LoggerFactory.getLogger(NodeResourceTest.class);
     private static final String OVS = "OVS";
     private static final String IDENTIFIER = "192.168.120.31:45001";
     private static final String IDENTIFIER2 = "192.168.120.31:45002";

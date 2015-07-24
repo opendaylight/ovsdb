@@ -42,8 +42,6 @@ import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -52,7 +50,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 
 public class OvsdbClientTestIT extends OvsdbTestBase {
-    Logger logger = LoggerFactory.getLogger(OvsdbClientTestIT.class);
 
     OvsdbClient ovs;
     DatabaseSchema dbSchema = null;

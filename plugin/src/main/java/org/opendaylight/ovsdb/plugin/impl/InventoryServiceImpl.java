@@ -29,8 +29,6 @@ import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 
 import com.google.common.collect.Sets;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Maps;
 
@@ -40,8 +38,6 @@ import com.google.common.collect.Maps;
  *
  */
 public class InventoryServiceImpl implements OvsdbInventoryService {
-    private static final Logger logger = LoggerFactory
-            .getLogger(InventoryServiceImpl.class);
     private ConcurrentMap<Node, NodeDatabase> dbCache = Maps.newConcurrentMap();
     private ScheduledExecutorService executor;
     private OvsdbConfigurationService ovsdbConfigurationService;

@@ -79,7 +79,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InstructionUtils {
-    private static final Logger logger = LoggerFactory.getLogger(InstructionUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(InstructionUtils.class);
     private static final int IPV4 = 0x8100;
     private static final int MAX_LENGTH = 0xffff;
 
@@ -158,7 +158,7 @@ public class InstructionUtils {
     public static InstructionBuilder createOutputPortInstructions(InstructionBuilder ib, Long dpidLong, Long port) {
 
         NodeConnectorId ncid = new NodeConnectorId("openflow:" + dpidLong + ":" + port);
-        logger.debug("createOutputPortInstructions() Node Connector ID is - Type=openflow: DPID={} inPort={} ",
+        LOG.debug("createOutputPortInstructions() Node Connector ID is - Type=openflow: DPID={} inPort={} ",
                 dpidLong, port);
 
         List<Action> actionList = Lists.newArrayList();
@@ -193,7 +193,7 @@ public class InstructionUtils {
             Long dpidLong, Long port,
             List<Instruction> instructions) {
         NodeConnectorId ncid = new NodeConnectorId("openflow:" + dpidLong + ":" + port);
-        logger.debug(
+        LOG.debug(
                 "addOutputPortInstructions() Node Connector ID is - Type=openflow: DPID={} port={} existingInstructions={}",
                 dpidLong, port, instructions);
 
@@ -239,7 +239,7 @@ public class InstructionUtils {
 
         final NodeConnectorId ncid = new NodeConnectorId("openflow:" + dpidLong + ":" + port);
         final Uri ncidUri = new Uri(ncid);
-        logger.debug(
+        LOG.debug(
                 "removeOutputPortFromInstructions() Node Connector ID is - Type=openflow: DPID={} port={} existingInstructions={}",
                 dpidLong, port, instructions);
 
@@ -300,7 +300,7 @@ public class InstructionUtils {
                 } else if (action.getOrder() == removedActionOrder) {
                     // Sanity: implementation assumes no two actions have the same order
                     //
-                    logger.error("Found action with same order as the action removed for {}, order {} index {}: {}",
+                    LOG.error("Found action with same order as the action removed for {}, order {} index {}: {}",
                             ncid, removedActionOrder, i, action);
                 }
 
@@ -329,7 +329,7 @@ public class InstructionUtils {
             ApplyActionsBuilder aab = new ApplyActionsBuilder();
             aab.setAction(actionList);
             ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
-            logger.debug("removeOutputPortFromInstructions() : applyAction {}", aab.build());
+            LOG.debug("removeOutputPortFromInstructions() : applyAction {}", aab.build());
             return false;
         } else {
             /* if all output ports are removed. Return true to indicate flow remove */

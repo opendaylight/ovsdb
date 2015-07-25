@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 public class PortSecurityHandler extends AbstractHandler
         implements INeutronSecurityGroupAware, INeutronSecurityRuleAware, ConfigInterface {
 
-    static final Logger logger = LoggerFactory.getLogger(PortSecurityHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PortSecurityHandler.class);
 
     @Override
     public int canCreateNeutronSecurityGroup(NeutronSecurityGroup neutronSecurityGroup) {
@@ -42,7 +42,7 @@ public class PortSecurityHandler extends AbstractHandler
 
         result = canCreateNeutronSecurityGroup(neutronSecurityGroup);
         if (result != HttpURLConnection.HTTP_CREATED) {
-            logger.debug("Neutron Security Group creation failed {} ", result);
+            LOG.debug("Neutron Security Group creation failed {} ", result);
             return;
         }
     }
@@ -67,7 +67,7 @@ public class PortSecurityHandler extends AbstractHandler
         //TODO: Trigger flowmod removals
         int result = canDeleteNeutronSecurityGroup(neutronSecurityGroup);
         if  (result != HttpURLConnection.HTTP_OK) {
-            logger.error(" delete Neutron Security Rule validation failed for result - {} ", result);
+            LOG.error(" delete Neutron Security Rule validation failed for result - {} ", result);
             return;
         }
     }
@@ -91,7 +91,7 @@ public class PortSecurityHandler extends AbstractHandler
 
         result = canCreateNeutronSecurityRule(neutronSecurityRule);
         if (result != HttpURLConnection.HTTP_CREATED) {
-            logger.debug("Neutron Security Group creation failed {} ", result);
+            LOG.debug("Neutron Security Group creation failed {} ", result);
             return;
         }
     }
@@ -115,7 +115,7 @@ public class PortSecurityHandler extends AbstractHandler
     public void neutronSecurityRuleDeleted(NeutronSecurityRule neutronSecurityRule) {
         int result = canDeleteNeutronSecurityRule(neutronSecurityRule);
         if  (result != HttpURLConnection.HTTP_OK) {
-            logger.error(" delete Neutron Security Rule validation failed for result - {} ", result);
+            LOG.error(" delete Neutron Security Rule validation failed for result - {} ", result);
             return;
         }
     }
@@ -129,7 +129,7 @@ public class PortSecurityHandler extends AbstractHandler
     @Override
     public void processEvent(AbstractEvent abstractEvent) {
         if (!(abstractEvent instanceof NorthboundEvent)) {
-            logger.error("Unable to process abstract event " + abstractEvent);
+            LOG.error("Unable to process abstract event {}", abstractEvent);
             return;
         }
         NorthboundEvent ev = (NorthboundEvent) abstractEvent;
@@ -137,7 +137,7 @@ public class PortSecurityHandler extends AbstractHandler
             // TODO: add handling of events here, once callbacks do something
             //       other than logging.
             default:
-                logger.warn("Unable to process event action " + ev.getAction());
+                LOG.warn("Unable to process event action {}", ev.getAction());
                 break;
         }
     }

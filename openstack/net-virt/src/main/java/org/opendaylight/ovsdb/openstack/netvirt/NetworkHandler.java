@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * Handle requests for Neutron Network.
  */
 public class NetworkHandler extends AbstractHandler implements INeutronNetworkAware, ConfigInterface {
-    private static final Logger logger = LoggerFactory.getLogger(NetworkHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NetworkHandler.class);
     public static final String NETWORK_TYPE_VXLAN = "vxlan";
     public static final String NETWORK_TYPE_GRE = "gre";
     public static final String NETWORK_TYPE_VLAN = "vlan";
@@ -57,7 +57,7 @@ public class NetworkHandler extends AbstractHandler implements INeutronNetworkAw
     @Override
     public int canCreateNetwork(NeutronNetwork network) {
         if (network.isShared()) {
-            logger.error(" Network shared attribute not supported ");
+            LOG.error(" Network shared attribute not supported ");
             return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
         }
 
@@ -91,7 +91,7 @@ public class NetworkHandler extends AbstractHandler implements INeutronNetworkAw
     public int canUpdateNetwork(NeutronNetwork delta,
                                 NeutronNetwork original) {
         if (delta.isShared()) {
-            logger.error(" Network shared attribute not supported ");
+            LOG.error(" Network shared attribute not supported ");
             return HttpURLConnection.HTTP_NOT_ACCEPTABLE;
         }
 
@@ -140,7 +140,7 @@ public class NetworkHandler extends AbstractHandler implements INeutronNetworkAw
         if (neutronNetworkCache != null) {
             networks = neutronNetworkCache.getAllNetworks();
             if (networks.isEmpty()) {
-                logger.trace("neutronNetworkDeleted: last tenant network, delete tunnel ports...");
+                LOG.trace("neutronNetworkDeleted: last tenant network, delete tunnel ports...");
                 List<Node> nodes = nodeCacheManager.getNodes();
 
                 for (Node node : nodes) {
@@ -149,15 +149,15 @@ public class NetworkHandler extends AbstractHandler implements INeutronNetworkAw
                         List<OvsdbTerminationPointAugmentation> ports = southbound.getTerminationPointsOfBridge(node);
                         for (OvsdbTerminationPointAugmentation port : ports) {
                             if (southbound.isTunnel(port)) {
-                                logger.trace("Delete tunnel interface {}", port.getName());
+                                LOG.trace("Delete tunnel interface {}", port.getName());
                                 southbound.deleteTerminationPoint(node, port.getName());
                             } else if (!phyIfName.isEmpty() && phyIfName.contains(port.getName())) {
-                                logger.trace("Delete physical interface {}", port.getName());
+                                LOG.trace("Delete physical interface {}", port.getName());
                                 southbound.deleteTerminationPoint(node, port.getName());
                             }
                         }
                     } catch (Exception e) {
-                        logger.error("Exception during handlingNeutron network delete", e);
+                        LOG.error("Exception during handlingNeutron network delete", e);
                     }
                 }
             }
@@ -174,7 +174,7 @@ public class NetworkHandler extends AbstractHandler implements INeutronNetworkAw
     @Override
     public void processEvent(AbstractEvent abstractEvent) {
         if (!(abstractEvent instanceof NorthboundEvent)) {
-            logger.error("Unable to process abstract event " + abstractEvent);
+            LOG.error("Unable to process abstract event {}", abstractEvent);
             return;
         }
         NorthboundEvent ev = (NorthboundEvent) abstractEvent;
@@ -189,7 +189,7 @@ public class NetworkHandler extends AbstractHandler implements INeutronNetworkAw
                 doNeutronNetworkDeleted(ev.getNeutronNetwork());
                 break;
             default:
-                logger.warn("Unable to process event action " + ev.getAction());
+                LOG.warn("Unable to process event action {}", ev.getAction());
                 break;
         }
     }

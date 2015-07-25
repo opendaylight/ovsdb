@@ -44,8 +44,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.ni
 import com.google.common.collect.Lists;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ClassifierService extends AbstractServiceInstance implements ClassifierProvider, ConfigInterface {
     public final static long REG_VALUE_FROM_LOCAL = 0x1L;
@@ -59,8 +57,6 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
     public ClassifierService(Service service) {
         super(service);
     }
-
-    private static final Logger logger = LoggerFactory.getLogger(ClassifierService.class);
 
     /*
      * (Table:Classifier) Egress VM Traffic Towards TEP

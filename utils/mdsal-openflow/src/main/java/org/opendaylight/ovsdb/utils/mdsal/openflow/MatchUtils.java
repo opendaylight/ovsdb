@@ -74,7 +74,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 public class MatchUtils {
-    private static final Logger logger = LoggerFactory.getLogger(MatchUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MatchUtils.class);
     public static final short ICMP_SHORT = 1;
     public static final short TCP_SHORT = 6;
     public static final short UDP_SHORT = 17;
@@ -93,7 +93,7 @@ public class MatchUtils {
     public static MatchBuilder createInPortMatch(MatchBuilder matchBuilder, Long dpidLong, Long inPort) {
 
         NodeConnectorId ncid = new NodeConnectorId("openflow:" + dpidLong + ":" + inPort);
-        logger.debug("createInPortMatch() Node Connector ID is - Type=openflow: DPID={} inPort={} ", dpidLong, inPort);
+        LOG.debug("createInPortMatch() Node Connector ID is - Type=openflow: DPID={} inPort={} ", dpidLong, inPort);
         matchBuilder.setInPort(NodeConnectorId.getDefaultInstance(ncid.getValue()));
         matchBuilder.setInPort(ncid);
 

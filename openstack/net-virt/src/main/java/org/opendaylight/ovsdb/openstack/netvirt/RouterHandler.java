@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * Handle requests for Neutron Router.
  */
 public class RouterHandler extends AbstractHandler implements INeutronRouterAware, ConfigInterface {
-    static final Logger logger = LoggerFactory.getLogger(RouterHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RouterHandler.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile NeutronL3Adapter neutronL3Adapter;
@@ -128,7 +128,7 @@ public class RouterHandler extends AbstractHandler implements INeutronRouterAwar
      */
     @Override
     public int canAttachInterface(NeutronRouter router, NeutronRouter_Interface routerInterface) {
-        logger.debug(" Router {} asked if it can attach interface {}. Subnet {}",
+        LOG.debug(" Router {} asked if it can attach interface {}. Subnet {}",
                      router.getName(),
                      routerInterface.getPortUUID(),
                      routerInterface.getSubnetUUID());
@@ -163,7 +163,7 @@ public class RouterHandler extends AbstractHandler implements INeutronRouterAwar
      */
     @Override
     public int canDetachInterface(NeutronRouter router, NeutronRouter_Interface routerInterface) {
-        logger.debug(" Router {} asked if it can detach interface {}. Subnet {}",
+        LOG.debug(" Router {} asked if it can detach interface {}. Subnet {}",
                      router.getName(),
                      routerInterface.getPortUUID(),
                      routerInterface.getSubnetUUID());
@@ -193,7 +193,7 @@ public class RouterHandler extends AbstractHandler implements INeutronRouterAwar
     @Override
     public void processEvent(AbstractEvent abstractEvent) {
         if (!(abstractEvent instanceof NorthboundEvent)) {
-            logger.error("Unable to process abstract event " + abstractEvent);
+            LOG.error("Unable to process abstract event {}", abstractEvent);
             return;
         }
         NorthboundEvent ev = (NorthboundEvent) abstractEvent;
@@ -212,7 +212,7 @@ public class RouterHandler extends AbstractHandler implements INeutronRouterAwar
                 }
                 break;
             default:
-                logger.warn("Unable to process event action " + ev.getAction());
+                LOG.warn("Unable to process event action {}", ev.getAction());
                 break;
         }
     }

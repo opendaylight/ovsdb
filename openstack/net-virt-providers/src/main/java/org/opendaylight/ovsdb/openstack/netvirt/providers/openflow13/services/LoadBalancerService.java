@@ -61,7 +61,7 @@ import com.google.common.collect.Lists;
 
 public class LoadBalancerService extends AbstractServiceInstance implements LoadBalancerProvider, ConfigInterface {
 
-    private static final Logger logger = LoggerFactory.getLogger(LoadBalancerProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoadBalancerProvider.class);
     private static final int DEFAULT_FLOW_PRIORITY = 32768;
     private static final Long FIRST_PASS_REGA_MATCH_VALUE = 0L;
     private static final Long SECOND_PASS_REGA_MATCH_VALUE = 1L;
@@ -88,14 +88,14 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
                                                      LoadBalancerConfiguration lbConfig, LoadBalancerPoolMember member,
                                                      org.opendaylight.ovsdb.openstack.netvirt.api.Action action) {
         if (lbConfig == null || member == null) {
-            logger.error("Null value for LB config {} or Member {}", lbConfig, member);
+            LOG.error("Null value for LB config {} or Member {}", lbConfig, member);
             return new Status(StatusCode.BADREQUEST);
         }
         if (!lbConfig.isValid()) {
-            logger.error("LB config is invalid: {}", lbConfig);
+            LOG.error("LB config is invalid: {}", lbConfig);
             return new Status(StatusCode.BADREQUEST);
         }
-        logger.debug("Performing {} rules for member {} with index {} on LB with VIP {} and total members {}",
+        LOG.debug("Performing {} rules for member {} with index {} on LB with VIP {} and total members {}",
                 action, member.getIP(), member.getIndex(), lbConfig.getVip(), lbConfig.getMembers().size());
 
         NodeBuilder nodeBuilder = new NodeBuilder();
@@ -125,15 +125,11 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
     @Override
     public Status programLoadBalancerRules(Node node, LoadBalancerConfiguration lbConfig,
                                            org.opendaylight.ovsdb.openstack.netvirt.api.Action action) {
-        if (lbConfig == null) {
-            logger.error("LB config is invalid: {}", lbConfig);
+        if (lbConfig == null || !lbConfig.isValid()) {
+            LOG.error("LB config is invalid: {}", lbConfig);
             return new Status(StatusCode.BADREQUEST);
         }
-        if (!lbConfig.isValid()) {
-            logger.error("LB config is invalid: {}", lbConfig);
-            return new Status(StatusCode.BADREQUEST);
-        }
-        logger.debug("Performing {} rules for VIP {} and {} members", action, lbConfig.getVip(), lbConfig.getMembers().size());
+        LOG.debug("Performing {} rules for VIP {} and {} members", action, lbConfig.getVip(), lbConfig.getMembers().size());
 
         NodeBuilder nodeBuilder = new NodeBuilder();
         nodeBuilder.setId(new NodeId(Constants.OPENFLOW_NODE_PREFIX + node.getNodeId().getValue()));

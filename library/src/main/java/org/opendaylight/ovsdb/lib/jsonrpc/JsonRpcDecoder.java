@@ -44,7 +44,7 @@ import com.fasterxml.jackson.databind.MappingJsonFactory;
  */
 public class JsonRpcDecoder extends ByteToMessageDecoder {
 
-    protected static final Logger logger = LoggerFactory.getLogger(JsonRpcDecoder.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JsonRpcDecoder.class);
     private int maxFrameLength;
     //Indicates if the frame limit warning was issued
     private boolean maxFrameLimitWasReached = false;
@@ -67,7 +67,7 @@ public class JsonRpcDecoder extends ByteToMessageDecoder {
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf buf, List<Object> out) throws Exception {
 
-        logger.trace("readable bytes {}, records read {}, incomplete record bytes {}",
+        LOG.trace("readable bytes {}, records read {}, incomplete record bytes {}",
                 buf.readableBytes(), recordsRead, lastRecordBytes);
 
         if (lastRecordBytes == 0) {
@@ -132,7 +132,7 @@ public class JsonRpcDecoder extends ByteToMessageDecoder {
                 //hence logging only once
                 if (!maxFrameLimitWasReached) {
                     maxFrameLimitWasReached = true;
-                    logger.warn("***** OVSDB Frame limit of " + this.maxFrameLength + " bytes has been reached! *****");
+                    LOG.warn("***** OVSDB Frame limit of {} bytes has been reached! *****", this.maxFrameLength);
                 }
             }
         }
@@ -169,11 +169,11 @@ public class JsonRpcDecoder extends ByteToMessageDecoder {
             message = "";
         }
         if (startPos > buf.writerIndex()) {
-            logger.trace("startPos out of bounds");
+            LOG.trace("startPos out of bounds");
         }
         byte[] bytes = new byte[startPos + chars <= buf.writerIndex() ? chars : buf.writerIndex() - startPos];
         buf.getBytes(startPos, bytes);
-        logger.trace("{} ={}", message, new String(bytes));
+        LOG.trace("{} ={}", message, new String(bytes));
     }
 
     // copied from Netty decoder

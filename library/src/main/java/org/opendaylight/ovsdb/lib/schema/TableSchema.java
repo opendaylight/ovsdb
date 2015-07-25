@@ -24,8 +24,6 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.Insert;
 import org.opendaylight.ovsdb.lib.schema.BaseType.UuidBaseType;
 import org.opendaylight.ovsdb.lib.schema.ColumnType.AtomicColumnType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -34,8 +32,6 @@ import com.google.common.collect.Lists;
 
 public abstract class TableSchema<E extends TableSchema<E>> {
 
-
-    protected static final Logger logger = LoggerFactory.getLogger(TableSchema.class);
     private String name;
     private Map<String, ColumnSchema> columns;
 

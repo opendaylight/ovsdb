@@ -15,9 +15,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class Connection {
     private Node node;
     private String identifier;
@@ -32,8 +29,6 @@ public class Connection {
     }
 
     private Long idCounter;
-
-    private static final Logger logger = LoggerFactory.getLogger(Connection.class);
 
     public Connection(String identifier, OvsdbClient client) {
         super();

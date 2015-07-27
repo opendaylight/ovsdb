@@ -28,21 +28,21 @@ public interface SecurityServicesManager {
      * @param intf the intf
      * @return the boolean
      */
-    boolean isPortSecurityReady(OvsdbTerminationPointAugmentation intf);
+    public boolean isPortSecurityReady(OvsdbTerminationPointAugmentation intf);
     /**
      * Gets security group in port.
      *
      * @param intf the intf
      * @return the security group in port
      */
-    NeutronSecurityGroup getSecurityGroupInPort(OvsdbTerminationPointAugmentation intf);
-     /**
+    public NeutronSecurityGroup getSecurityGroupInPort(OvsdbTerminationPointAugmentation intf);
+    /**
      * Gets the DHCP server port corresponding to a network.
      *
      * @param intf the intf
      * @return the security group in port
      */
-     NeutronPort getDHCPServerPort(OvsdbTerminationPointAugmentation intf);
+    public NeutronPort getDHCPServerPort(OvsdbTerminationPointAugmentation intf);
 
     /**
      * Is the port a compute port.
@@ -50,28 +50,36 @@ public interface SecurityServicesManager {
      * @param intf the intf
      * @return the security group in port
      */
-    boolean isComputePort(OvsdbTerminationPointAugmentation intf);
+    public boolean isComputePort(OvsdbTerminationPointAugmentation intf);
 
     /**
      * Is this the last port in the subnet to which interface belongs to.
-     *
+     * @param node The node to which the intf is connected.
      * @param intf the intf
      * @return the security group in port
      */
-    boolean isLastPortinSubnet(Node node, OvsdbTerminationPointAugmentation intf);
+    public boolean isLastPortinSubnet(Node node, OvsdbTerminationPointAugmentation intf);
 
     /**
      * Is this the last port in the bridge to which interface belongs to.
-     *
+     * @param node The node to which the intf is connected. 
      * @param intf the intf
      * @return the security group in port
      */
-    boolean isLastPortinBridge(Node node, OvsdbTerminationPointAugmentation intf);
+    public boolean isLastPortinBridge(Node node, OvsdbTerminationPointAugmentation intf);
     /**
      * Returns the  list of ip adddress assigned to the interface.
-     *
+     * @param node The node to which the intf is connected. 
      * @param intf the intf
      * @return the security group in port
      */
-    List<Neutron_IPs> getIpAddress(Node node, OvsdbTerminationPointAugmentation intf);
+    public List<Neutron_IPs> getIpAddress(Node node, OvsdbTerminationPointAugmentation intf);
+    
+    /**
+     * Get the list of vm belonging to a security group.
+     * @param srcAddressList the address list of the connected vm.
+     * @param securityGroupUUID the UUID of the remote security group. 
+     * @return the list of all vm belonging to the security group UUID passed.
+     */
+    public List<Neutron_IPs> getVMListForSecurityGroup(List<Neutron_IPs> srcAddressList, String securityGroupUUID);
 }

@@ -7,6 +7,7 @@
  */
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.opendaylight.neutron.spi.INeutronPortCRUD;
@@ -23,8 +24,7 @@ import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.*;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.node.attributes.SupportingNode;
-import org.opendaylight.yangtools.yang.binding.DataContainer;
+
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
@@ -36,6 +36,7 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
     private volatile INeutronSubnetCRUD neutronSubnetCache;
     private volatile Southbound southbound;
 
+    @Override
     /**
      * Is security group ready.
      *
@@ -49,7 +50,7 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
         }
         LOG.trace("isPortSecurityReady for {}", terminationPointAugmentation.getName());
         String neutronPortId = southbound.getInterfaceExternalIdsValue(terminationPointAugmentation,
-                Constants.EXTERNAL_ID_INTERFACE_ID);
+                                                                       Constants.EXTERNAL_ID_INTERFACE_ID);
         if (neutronPortId == null) {
             return false;
         }
@@ -65,15 +66,16 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
         List<NeutronSecurityGroup> securityGroups = neutronPort.getSecurityGroups();
         if (securityGroups.isEmpty()) {
             LOG.debug("Check for device: {} does not contain a Security Group for port: {}", deviceOwner,
-                    neutronPortId);
+                      neutronPortId);
             return false;
         }
         String vmPort = southbound.getInterfaceExternalIdsValue(terminationPointAugmentation,
-                Constants.EXTERNAL_ID_VM_MAC);
+                                                                Constants.EXTERNAL_ID_VM_MAC);
         LOG.debug("Security Group Check {} DOES contain a Neutron Security Group", neutronPortId);
         return true;
     }
 
+    @Override
     /**
      * Gets security group in port.
      *
@@ -87,7 +89,7 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
         }
         LOG.trace("isPortSecurityReady for {}", terminationPointAugmentation.getName());
         String neutronPortId = southbound.getInterfaceExternalIdsValue(terminationPointAugmentation,
-                Constants.EXTERNAL_ID_INTERFACE_ID);
+                                                                       Constants.EXTERNAL_ID_INTERFACE_ID);
         if (neutronPortId == null) {
             return null;
         }
@@ -100,23 +102,23 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
         if (neutronSecurityGroups != null) {
             NeutronSecurityGroup neutronSecurityGroup = (NeutronSecurityGroup) neutronSecurityGroups.toArray()[0];
             return neutronSecurityGroup;
-        } else {
-            return null;
         }
+        return null;
+
     }
 
     @Override
     public NeutronPort getDHCPServerPort(
-            OvsdbTerminationPointAugmentation terminationPointAugmentation) {
+                                         OvsdbTerminationPointAugmentation terminationPointAugmentation) {
         if (neutronPortCache == null) {
             LOG.error("getDHCPServerPort: neutron port is null");
             return null;
         }
         LOG.trace("getDHCPServerPort for {}",
-                terminationPointAugmentation.getName());
+                  terminationPointAugmentation.getName());
         String neutronPortId = southbound.getInterfaceExternalIdsValue(
-                terminationPointAugmentation,
-                Constants.EXTERNAL_ID_INTERFACE_ID);
+                                                                       terminationPointAugmentation,
+                                                                       Constants.EXTERNAL_ID_INTERFACE_ID);
         if (neutronPortId == null) {
             return null;
         }
@@ -149,7 +151,7 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
         }
         LOG.trace("isComputePort for {}", terminationPointAugmentation.getName());
         String neutronPortId = southbound.getInterfaceExternalIdsValue(terminationPointAugmentation,
-                Constants.EXTERNAL_ID_INTERFACE_ID);
+                                                                       Constants.EXTERNAL_ID_INTERFACE_ID);
         if (neutronPortId == null) {
             return false;
         }
@@ -159,7 +161,7 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
         }
         String deviceOwner = neutronPort.getDeviceOwner();
         if (!deviceOwner.contains("compute")) {
-            LOG.debug("isComputePort : Port {} is not a DHCP server port", neutronPortId, deviceOwner);
+            LOG.debug("isComputePort : Port {} is not a DHCP server port", neutronPortId,deviceOwner);
             return false;
         }
         return true;
@@ -235,14 +237,14 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
 
     @Override
     public List<Neutron_IPs> getIpAddress(Node node,
-                                OvsdbTerminationPointAugmentation terminationPointAugmentation) {
+                                          OvsdbTerminationPointAugmentation terminationPointAugmentation) {
         if (neutronPortCache == null) {
             LOG.error("getIpAddress: neutron port is null");
             return null;
         }
         LOG.trace("getIpAddress: for {}", terminationPointAugmentation.getName());
         String neutronPortId = southbound.getInterfaceExternalIdsValue(terminationPointAugmentation,
-                Constants.EXTERNAL_ID_INTERFACE_ID);
+                                                                       Constants.EXTERNAL_ID_INTERFACE_ID);
         if (neutronPortId == null) {
             return null;
         }
@@ -251,6 +253,35 @@ public class SecurityServicesImpl implements ConfigInterface, SecurityServicesMa
         return fixedIps;
     }
 
+    @Override
+    public List<Neutron_IPs> getVMListForSecurityGroup(List<Neutron_IPs> srcAddressList, String securityGroupUUID)
+    {
+        List<Neutron_IPs> vmListForSecurityGroup = new ArrayList<Neutron_IPs>();
+        for ( NeutronPort neutronPort:neutronPortCache.getAllPorts())
+        {
+            if (!neutronPort.getDeviceOwner().contains("compute"))
+            {
+                LOG.debug("getVMListForSecurityGroup : the port is not "
+                        + "compute port", neutronPort.getID(), neutronPort.getDeviceOwner());
+                continue;
+            }
+            List<NeutronSecurityGroup> securityGroups = neutronPort.getSecurityGroups();
+            if(null!=securityGroups)
+            {
+                for(NeutronSecurityGroup securityGroup:securityGroups)
+                {
+                    if(securityGroup.getSecurityGroupUUID().equals(securityGroupUUID)
+                            &&!neutronPort.getFixedIPs().containsAll(srcAddressList))
+                    {
+                        vmListForSecurityGroup.addAll(neutronPort.getFixedIPs());
+                    }
+                }
+            }
+
+        }
+        return vmListForSecurityGroup;
+
+    }
     @Override
     public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
         southbound =

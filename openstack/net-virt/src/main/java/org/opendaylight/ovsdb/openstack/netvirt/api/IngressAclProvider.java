@@ -9,7 +9,10 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
+import java.util.List;
+
 import org.opendaylight.neutron.spi.NeutronSecurityGroup;
+import org.opendaylight.neutron.spi.Neutron_IPs;
 
 /**
  *  This interface allows ingress Port Security flows to be written to devices
@@ -24,9 +27,11 @@ public interface IngressAclProvider {
      * @param attachedMac the attached mac
      * @param localPort the local port
      * @param securityGroup the security group
+     * @param srcAddressList the src address associated with the vm port
+     * @param write  is this flow write or delete
      */
     void programPortSecurityACL(Long dpid, String segmentationId, String attachedMac,
-                                long localPort, NeutronSecurityGroup securityGroup);
+                                       long localPort, NeutronSecurityGroup securityGroup,List<Neutron_IPs> srcAddressList, boolean write);
     /**
      * Program fixed ingress ACL rules that will be associated with the VM port when a vm is spawned.
      * *
@@ -39,5 +44,5 @@ public interface IngressAclProvider {
      * @param write is this flow writing or deleting
      */
     void programFixedSecurityACL(Long dpid, String segmentationId,
-                                 String attachedMac, long localPort, boolean isLastPortinSubnet, boolean isComputePort, boolean write);
+                                        String attachedMac, long localPort, boolean isLastPortinSubnet, boolean isComputePort, boolean write);
 }

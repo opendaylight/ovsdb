@@ -960,6 +960,7 @@ public class MatchUtils {
     }
 
     /**
+     * Creates a Match with src ip address mac address set.
      * @param matchBuilder MatchBuilder Object
      * @param srcip String containing an IPv4 prefix
      * @param srcMac The source macAddress
@@ -982,6 +983,99 @@ public class MatchUtils {
         return matchBuilder;
 
     }
+
+    /**
+     * Creates a ether net match with ether type set to 0x0800L
+     * @param matchBuilder MatchBuilder Object
+     * @param srcMac The source macAddress
+     * @param dstMac The destination mac address
+     * @return matchBuilder Map Object with a match
+     */
+    public static MatchBuilder createEtherMatchWithType(MatchBuilder matchBuilder,String srcMac, String dstMac)
+    {
+        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
+        ethTypeBuilder.setType(new EtherType(0x0800L));
+        EthernetMatchBuilder eth = new EthernetMatchBuilder();
+        eth.setEthernetType(ethTypeBuilder.build());
+        if(null!=srcMac)
+        {
+            eth.setEthernetSource(new EthernetSourceBuilder()
+            .setAddress(new MacAddress(srcMac)).build());
+        }
+        if(null!=dstMac)
+        {
+            eth.setEthernetDestination(new EthernetDestinationBuilder()
+                           .setAddress(new MacAddress(dstMac)).build());
+        }
+        matchBuilder.setEthernetMatch(eth.build());
+        return matchBuilder;
+    }
+    /**
+     * Adds remote Ip prefix to existing match
+     * @param matchBuilder The match builder
+     * @param sourceIpPrefix The source IP prefix
+     * @param destIpPrefix The destination IP prefix
+     * @return matchBuilder Map Object with a match
+     */
+    public static MatchBuilder addRemoteIpPrefix(MatchBuilder matchBuilder,
+                                          Ipv4Prefix sourceIpPrefix,Ipv4Prefix destIpPrefix) {
+        Ipv4MatchBuilder ipv4match = new Ipv4MatchBuilder();
+        if(null!=sourceIpPrefix)
+        {
+            ipv4match.setIpv4Source(sourceIpPrefix);
+        }
+        if(null!=destIpPrefix)
+        {
+            ipv4match.setIpv4Destination(destIpPrefix);
+        }
+        matchBuilder.setLayer3Match(ipv4match.build());
+
+        return matchBuilder;
+    }
+    /**
+     * Add a layer4 match to an existing match
+     *
+     * @param matchBuilder Map matchBuilder MatchBuilder Object without a match
+     * @param protocol The layer4 protocol
+     * @param srcPort The src port
+     * @param destPort The destination port
+     * @return matchBuilder Map Object with a match
+     */
+    public static MatchBuilder addLayer4Match(MatchBuilder matchBuilder, int protocol, int srcPort, int destPort) {
+        IpMatchBuilder ipmatch = new IpMatchBuilder();
+        if(TCP_SHORT == protocol)
+        {
+            ipmatch.setIpProtocol(TCP_SHORT);
+            TcpMatchBuilder tcpmatch = new TcpMatchBuilder();
+            if(0 != srcPort)
+            {
+                tcpmatch.setTcpSourcePort(new PortNumber(srcPort));
+            }
+            if(0 != destPort)
+            {
+                tcpmatch.setTcpDestinationPort(new PortNumber(destPort));
+            }
+            matchBuilder.setLayer4Match(tcpmatch.build());
+        }
+        else if(UDP_SHORT == protocol)
+        {
+            ipmatch.setIpProtocol(UDP_SHORT);
+            UdpMatchBuilder udpMatch = new UdpMatchBuilder();
+            if(0 != srcPort)
+            {
+                udpMatch.setUdpSourcePort(new PortNumber(srcPort));
+            }
+            if(0 != destPort)
+            {
+                udpMatch.setUdpDestinationPort(new PortNumber(destPort));
+            }
+            matchBuilder.setLayer4Match(udpMatch.build());
+        }
+        matchBuilder.setIpMatch(ipmatch.build());
+
+        return matchBuilder;
+    }
+
 
     public static class RegMatch {
         final Class<? extends NxmNxReg> reg;

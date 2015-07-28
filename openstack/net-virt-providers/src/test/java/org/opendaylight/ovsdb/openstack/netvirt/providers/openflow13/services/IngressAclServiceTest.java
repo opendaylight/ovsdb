@@ -86,9 +86,9 @@ public class IngressAclServiceTest {
         when(securityGroup.getSecurityRules()).thenReturn(portSecurityList);
     }
 
-    /**
+   /* *//**
      * Rule 1: TCP Proto (True), TCP Port Minimum (True), TCP Port Max (True), IP Prefix (True)
-     */
+     *//*
     @Test
     public void testProgramPortSecurityACLRule1() throws Exception {
         when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
@@ -105,9 +105,9 @@ public class IngressAclServiceTest {
     }
 
 
-    /**
+    *//**
      * Rule 2: TCP Proto (True), TCP Port Minimum (True), TCP Port Max (False), IP Prefix (True)
-     */
+     *//*
     @Test
     public void testProgramPortSecurityACLRule2() throws Exception {
         when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
@@ -123,9 +123,9 @@ public class IngressAclServiceTest {
         verify(commitFuture, times(2)).get();
     }
 
-    /**
+    *//**
      * Rule 3: TCP Proto (True), TCP Port Minimum (False), TCP Port Max (False), IP Prefix (True)
-     */
+     *//*
     @Test
     public void testProgramPortSecurityACLRule3() throws Exception {
         when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
@@ -141,9 +141,9 @@ public class IngressAclServiceTest {
         verify(commitFuture, times(2)).get();
     }
 
-    /**
+    *//**
      * Rule 4: TCP Proto (False), TCP Port Minimum (False), TCP Port Max (False), IP Prefix (True)
-     */
+     *//*
     @Test
     public void testProgramPortSecurityACLRule4() throws Exception {
         when(portSecurityRule.getSecurityRuleProtocol()).thenReturn(null);
@@ -159,9 +159,9 @@ public class IngressAclServiceTest {
         verify(commitFuture, times(2)).get();
     }
 
-    /**
+    *//**
      * Rule 5: TCP Proto (True), TCP Port Minimum (True), TCP Port Max (True), IP Prefix (False)
-     */
+     *//*
     @Test
     public void testProgramPortSecurityACLRule5() throws Exception {
         when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
@@ -177,9 +177,9 @@ public class IngressAclServiceTest {
         verify(commitFuture, times(2)).get();
     }
 
-    /**
+    *//**
      * Rule 6: TCP Proto (True), TCP Port Minimum (True), TCP Port Max (False), IP Prefix (False)
-     */
+     *//*
     @Test
     public void testProgramPortSecurityACLRule6() throws Exception {
         when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
@@ -195,9 +195,9 @@ public class IngressAclServiceTest {
         verify(commitFuture, times(2)).get();
     }
 
-    /**
+    *//**
      * Rule 7: TCP Proto (True), TCP Port Minimum (False), TCP Port Max (False), IP Prefix (False or 0.0.0.0/0)
-     */
+     *//*
     @Test
     public void testProgramPortSecurityACLRule7() throws Exception {
         when(portSecurityRule.getSecurityRuleProtocol()).thenReturn("tcp");
@@ -211,7 +211,7 @@ public class IngressAclServiceTest {
         verify(writeTransaction, times(1)).submit();
         verify(commitFuture, times(1)).get();
     }
-
+*/
     /**
      * Test method {@link IgressAclService#egressACLDefaultTcpDrop(Long, String, String, int, boolean)}
      */

@@ -1259,13 +1259,10 @@ public class NeutronL3Adapter implements ConfigInterface {
         for (Neutron_IPs neutronIPs : gatewayPort.getFixedIPs()) {
             String subnetUUID = neutronIPs.getSubnetUUID();
             NeutronSubnet extSubnet = neutronSubnetCache.getSubnet(subnetUUID);
-            if (extSubnet != null && extSubnet.getGatewayIP() != null) {
-                return extSubnet;
+            if (extSubnet.getGatewayIP() == null) {
+                continue;
             }
-            if (extSubnet == null) {
-                // TODO: when subnet is created, try again.
-                LOG.debug("subnet {} in not found", subnetUUID);
-            }
+            return extSubnet;
         }
         return null;
     }

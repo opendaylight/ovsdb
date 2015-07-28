@@ -36,13 +36,13 @@ public interface SecurityServicesManager {
      * @return the security group in port
      */
     NeutronSecurityGroup getSecurityGroupInPort(OvsdbTerminationPointAugmentation intf);
-     /**
+    /**
      * Gets the DHCP server port corresponding to a network.
      *
      * @param intf the intf
      * @return the security group in port
      */
-     NeutronPort getDHCPServerPort(OvsdbTerminationPointAugmentation intf);
+    NeutronPort getDHCPServerPort(OvsdbTerminationPointAugmentation intf);
 
     /**
      * Is the port a compute port.
@@ -54,7 +54,7 @@ public interface SecurityServicesManager {
 
     /**
      * Is this the last port in the subnet to which interface belongs to.
-     *
+     * @param node The node to which the intf is connected.
      * @param intf the intf
      * @return the security group in port
      */
@@ -62,16 +62,24 @@ public interface SecurityServicesManager {
 
     /**
      * Is this the last port in the bridge to which interface belongs to.
-     *
+     * @param node The node to which the intf is connected.
      * @param intf the intf
      * @return the security group in port
      */
     boolean isLastPortinBridge(Node node, OvsdbTerminationPointAugmentation intf);
     /**
      * Returns the  list of ip adddress assigned to the interface.
-     *
+     * @param node The node to which the intf is connected.
      * @param intf the intf
      * @return the security group in port
      */
     List<Neutron_IPs> getIpAddress(Node node, OvsdbTerminationPointAugmentation intf);
+    /**
+     * Get the list of vm belonging to a security group.
+     * @param srcAddressList the address list of the connected vm.
+     * @param securityGroupUUID the UUID of the remote security group.
+     * @return the list of all vm belonging to the security group UUID passed.
+     */
+    List<Neutron_IPs> getVMListForSecurityGroup(List<Neutron_IPs> srcAddressList,
+                                                String securityGroupUUID);
 }

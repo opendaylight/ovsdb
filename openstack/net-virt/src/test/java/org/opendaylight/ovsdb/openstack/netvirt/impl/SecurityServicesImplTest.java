@@ -75,11 +75,12 @@ public class SecurityServicesImplTest {
     }
 
     /**
-     * Test method {@link SecurityServicesImpl#getSecurityGroupInPort(Interface)}
+     * Test method {@link SecurityServicesImpl#getSecurityGroupInPortList(Interface)}
      */
     @Test
     public void testSecurityGroupInPort(){
-        assertEquals("Error, did not return the good neutronSecurityGroup of securityGroups", neutronSecurityGroup, securityServicesImpl.getSecurityGroupInPort(mock(OvsdbTerminationPointAugmentation.class)));
+        assertEquals("Error, did not return the good neutronSecurityGroup of securityGroups",
+                     neutronSecurityGroup, securityServicesImpl.getSecurityGroupInPortList(mock(OvsdbTerminationPointAugmentation.class)).get(0));
     }
 
     @Test

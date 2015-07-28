@@ -13,11 +13,11 @@ import java.util.List;
 import org.opendaylight.neutron.spi.NeutronPort;
 import org.opendaylight.neutron.spi.NeutronSecurityGroup;
 import org.opendaylight.neutron.spi.Neutron_IPs;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.*;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
 /**
- * Open vSwitch isolates Tenant Networks using VLANs on the Integration Bridge
+ * Open vSwitch isolates Tenant Networks using VLANs on the Integration Bridge.
  * This class manages the provisioning of these VLANs
  */
 public interface SecurityServicesManager {
@@ -32,16 +32,16 @@ public interface SecurityServicesManager {
      * Gets security group in port.
      *
      * @param intf the intf
-     * @return the security group in port
+     * @return the list of security group in port
      */
-    NeutronSecurityGroup getSecurityGroupInPort(OvsdbTerminationPointAugmentation intf);
-     /**
+    List<NeutronSecurityGroup> getSecurityGroupInPort(OvsdbTerminationPointAugmentation intf);
+    /**
      * Gets the DHCP server port corresponding to a network.
      *
      * @param intf the intf
      * @return the security group in port
      */
-     NeutronPort getDHCPServerPort(OvsdbTerminationPointAugmentation intf);
+    NeutronPort getDhcpServerPort(OvsdbTerminationPointAugmentation intf);
 
     /**
      * Is the port a compute port.
@@ -53,7 +53,7 @@ public interface SecurityServicesManager {
 
     /**
      * Is this the last port in the subnet to which interface belongs to.
-     *
+     * @param node The node to which the intf is connected.
      * @param intf the intf
      * @return the security group in port
      */
@@ -61,16 +61,24 @@ public interface SecurityServicesManager {
 
     /**
      * Is this the last port in the bridge to which interface belongs to.
-     *
+     * @param node The node to which the intf is connected.
      * @param intf the intf
      * @return the security group in port
      */
     boolean isLastPortinBridge(Node node, OvsdbTerminationPointAugmentation intf);
     /**
      * Returns the  list of ip adddress assigned to the interface.
-     *
+     * @param node The node to which the intf is connected.
      * @param intf the intf
      * @return the security group in port
      */
     List<Neutron_IPs> getIpAddress(Node node, OvsdbTerminationPointAugmentation intf);
+    /**
+     * Get the list of vm belonging to a security group.
+     * @param srcAddressList the address list of the connected vm.
+     * @param securityGroupUuid the UUID of the remote security group.
+     * @return the list of all vm belonging to the security group UUID passed.
+     */
+    List<Neutron_IPs> getVmListForSecurityGroup(List<Neutron_IPs> srcAddressList,
+                                                String securityGroupUuid);
 }

@@ -33,15 +33,16 @@ import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Action;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration.LoadBalancerPoolMember;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
 import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestrator;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 import com.google.common.util.concurrent.CheckedFuture;
+import org.powermock.api.support.membermodification.MemberModifier;
 
 /**
  * Unit test fort {@link LoadBalancerService}
@@ -74,7 +75,7 @@ public class LoadBalancerServiceTest {
 
         when(orchestrator.getNextServiceInPipeline(any(Service.class))).thenReturn(Service.ARP_RESPONDER);
 
-        Map<String, LoadBalancerPoolMember> members = new HashMap<String, LoadBalancerPoolMember>();
+        Map<String, LoadBalancerPoolMember> members = new HashMap<>();
         members.put("key", member);
 
         when(lbConfig.isValid()).thenReturn(true);
@@ -87,10 +88,9 @@ public class LoadBalancerServiceTest {
         when(member.getIndex()).thenReturn(1);
         when(member.getMAC()).thenReturn(MAC_ADDRESS);
 
-        NodeId nodeId = mock(NodeId.class);
-        when(nodeId.getValue()).thenReturn("id");
-
-        when(node.getNodeId()).thenReturn(nodeId);
+        Southbound southbound = mock(Southbound.class);
+        when(southbound.getDataPathId(any(Node.class))).thenReturn(Long.valueOf(123));
+        MemberModifier.field(LoadBalancerService.class, "southbound").set(loadBalancerService, southbound);
     }
     /**
      * Test method {@link LoadBalancerService#programLoadBalancerPoolMemberRules(Node, LoadBalancerConfiguration, LoadBalancerPoolMember, Action)}

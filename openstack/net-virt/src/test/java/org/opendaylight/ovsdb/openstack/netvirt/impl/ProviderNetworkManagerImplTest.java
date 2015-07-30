@@ -12,7 +12,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,7 +42,7 @@ public class ProviderNetworkManagerImplTest {
 
     @Mock private OvsdbInventoryService ovsdbInventoryService;
 
-    @Spy private HashMap<Node, NetworkingProvider> nodeToProviderMapping = Maps.newHashMap();
+    @Spy private Map<Node, NetworkingProvider> nodeToProviderMapping = Maps.newHashMap();
 
     /**
      * Test method {@link ProviderNetworkManagerImpl#getProvider(Node)}
@@ -63,7 +63,7 @@ public class ProviderNetworkManagerImplTest {
      */
     @Test
     public void testProviderAddedAndRemoved() throws Exception {
-        HashMap<?, ?> map = (HashMap<?, ?>) getField("providers");
+        Map<?, ?> map = (Map<?, ?>) getField("providers");
 
         ServiceReference<?> ref = mock(ServiceReference.class);
         when(ref.getProperty(org.osgi.framework.Constants.SERVICE_ID)).thenReturn(Long.valueOf(1));

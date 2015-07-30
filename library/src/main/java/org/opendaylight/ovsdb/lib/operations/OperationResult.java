@@ -51,7 +51,7 @@ public class OperationResult {
     public void setUuid(List<String> uuidList) {
         this.uuid = new UUID(uuidList.get(1));
     }
-    public ArrayList<Row<GenericTableSchema>> getRows() {
+    public List<Row<GenericTableSchema>> getRows() {
         return rows;
     }
     public void setRows(ArrayList<Row<GenericTableSchema>> rows) {

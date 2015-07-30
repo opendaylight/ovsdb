@@ -1022,11 +1022,10 @@ public class InstructionUtils {
         return ib;
     }
 
-    public static ArrayList<org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action>
-                  actionList (org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action... actions) {
+    public static List<Action>
+                  actionList(org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action... actions) {
 
-        ArrayList<org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action> alist
-            = new ArrayList<>();
+        List<Action> alist = new ArrayList<>();
         int count = 0;
         for (org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action action : actions) {
             alist.add(new ActionBuilder()
@@ -1050,7 +1049,7 @@ public class InstructionUtils {
     }
 
     public static Instructions getInstructions(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.Instruction... instructions) {
-        ArrayList<org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction> ins
+        List<Instruction> ins
             = new ArrayList<>();
         int order = 0;
         for (org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.Instruction i : instructions) {
@@ -1077,7 +1076,7 @@ public class InstructionUtils {
      */
     public static List<Instruction> getInstructionList(
             org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.Instruction... instructions) {
-        ArrayList<org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction> ins
+        List<Instruction> ins
                 = new ArrayList<>();
         int order = 0;
         for (org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.Instruction i : instructions) {

@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.a
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -95,7 +96,7 @@ public class GatewayMacResolverService extends AbstractServiceInstance
     private ArpSender arpSender;
     private SalFlowService flowService;
     private final AtomicLong flowCookie = new AtomicLong();
-    private final ConcurrentHashMap<Ipv4Address, ArpResolverMetadata> arpRemoveFlowInputAndL3EpKeyById =
+    private final Map<Ipv4Address, ArpResolverMetadata> arpRemoveFlowInputAndL3EpKeyById =
             new ConcurrentHashMap<Ipv4Address, ArpResolverMetadata>();
     private final int ARP_WATCH_BROTHERS = 10;
     private final int WAIT_CYCLES = 3;

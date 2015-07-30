@@ -66,7 +66,7 @@ public class OvsdbClientImpl implements OvsdbClient {
     private ExecutorService executorService;
     private OvsdbRPC rpc;
     private Map<String, DatabaseSchema> schema = Maps.newHashMap();
-    private HashMap<String, CallbackContext> monitorCallbacks = Maps.newHashMap();
+    private Map<String, CallbackContext> monitorCallbacks = Maps.newHashMap();
     private Queue<Throwable> exceptions;
     private OvsdbRPC.Callback rpcCallback;
     private OvsdbConnectionInfo connectionInfo;

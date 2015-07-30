@@ -998,7 +998,7 @@ public class MatchUtils {
 
     public static void addNxRegMatch(MatchBuilder match,
                                      RegMatch... matches) {
-        ArrayList<ExtensionList> extensions = new ArrayList<>();
+        List<ExtensionList> extensions = new ArrayList<>();
         for (RegMatch rm : matches) {
             Class<? extends ExtensionKey> key;
             if (NxmNxReg0.class.equals(rm.reg)) {

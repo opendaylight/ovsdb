@@ -8,7 +8,7 @@ see https://git.opendaylight.org/gerrit/#/c/390/
   <parent>
     <groupId>org.opendaylight.ovsdb</groupId>
     <artifactId>commons</artifactId>
-    <version>1.2.4-Helium-SR4</version>
+    <version>1.2.5-SNAPSHOT</version>
     <relativePath>../../commons/parent/</relativePath>
   </parent>
 
@@ -17,8 +17,8 @@ see https://git.opendaylight.org/gerrit/#/c/390/
   <name>OpenDaylight OVSDB Distribution</name>
 
   <properties>
-    <openflowjava.version>0.5.4-Helium-SR4</openflowjava.version>
-    <openflowplugin.version>0.0.7-Helium-SR4</openflowplugin.version>
+    <openflowjava.version>0.5.5-SNAPSHOT</openflowjava.version>
+    <openflowplugin.version>0.0.8-SNAPSHOT</openflowplugin.version>
     <openflowj.version>1.0.2</openflowj.version>
   </properties>
 
@@ -88,12 +88,12 @@ see https://git.opendaylight.org/gerrit/#/c/390/
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>of-extension.nx-ofjava</artifactId>
-      <version>1.0.4-Helium-SR4</version>
+      <version>1.0.5-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>of-extension.nx-sal</artifactId>
-      <version>1.0.4-Helium-SR4</version>
+      <version>1.0.5-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
@@ -139,7 +139,7 @@ see https://git.opendaylight.org/gerrit/#/c/390/
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>distribution.opendaylight</artifactId>
-      <version>0.1.6-Helium-SR4</version>
+      <version>0.1.7-SNAPSHOT</version>
       <classifier>osgipackage</classifier>
       <type>zip</type>
       <!-- Make sure this isn't included on any classpath-->

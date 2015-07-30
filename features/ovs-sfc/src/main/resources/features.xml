@@ -6,7 +6,7 @@
     <repository>mvn:org.opendaylight.controller/features-nsf/${nsf.version}/xml/features</repository>
     <repository>mvn:org.opendaylight.ovsdb/features-openflow-nxm/${openflowplugin.version}/xml/features</repository>
     <repository>mvn:org.opendaylight.ovsdb/features-ovsdb/${ovsdb.library.version}/xml/features</repository>
-    <repository>mvn:org.opendaylight.sfc/features-sfc/0.0.5-Helium-SR4/xml/features</repository>
+    <repository>mvn:org.opendaylight.sfc/features-sfc/0.0.6-SNAPSHOT/xml/features</repository>
 
     <feature name="odl-ovsdb-ovssfc"
              description="OpenDaylight :: OVSDB :: OVS Service Function Chaining"
@@ -14,8 +14,8 @@
         <feature version="${ovsdb.plugin.version}">odl-ovsdb-plugin</feature>
         <feature version="${openflowplugin.version}">odl-openflow-nxm-extensions</feature>
         <feature version="${nsf.version}">odl-nsf-all</feature>
-        <feature version='0.0.5-Helium-SR4'>odl-sfc-provider</feature>
-        <feature version='0.0.5-Helium-SR4'>odl-sfc-model</feature>
+        <feature version='0.0.6-SNAPSHOT'>odl-sfc-provider</feature>
+        <feature version='0.0.6-SNAPSHOT'>odl-sfc-model</feature>
         <bundle>mvn:org.opendaylight.ovsdb/ovssfc/${ovsdb.ovssfc.version}</bundle>
     </feature>
 </features>

@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.opendaylight.ovsdb</groupId>
     <artifactId>commons</artifactId>
-    <version>1.2.4-Helium-SR4</version>
+    <version>1.2.5-SNAPSHOT</version>
     <relativePath>../parent</relativePath>
   </parent>
   <artifactId>commons.integrationtest</artifactId>
   <name>OVSDB Integration Test Parent POM</name>
-  <version>1.2.4-Helium-SR4</version>
+  <version>1.2.5-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <properties>
@@ -17,39 +17,39 @@
     <exam.version>3.5.0</exam.version>
     <url.version>1.6.0</url.version>
     <!-- Controller Dependencies for Pax Exam -->
-    <arphandler.version>0.5.6-Helium-SR4</arphandler.version>
-    <bundlescanner.implementation.version>0.4.6-Helium-SR4</bundlescanner.implementation.version>
-    <bundlescanner.version>0.4.6-Helium-SR4</bundlescanner.version>
-    <clustering.services_implementation.version>0.4.7-Helium-SR4</clustering.services_implementation.version>
-    <commons.httpclient.version>0.1.6-Helium-SR4</commons.httpclient.version>
-    <configuration.implementation.version>0.4.7-Helium-SR4</configuration.implementation.version>
-    <configuration.version>0.4.7-Helium-SR4</configuration.version>
-    <connectionmanager.version>0.1.6-Helium-SR4</connectionmanager.version>
-    <containermanager.it.version>0.5.6-Helium-SR4</containermanager.it.version>
-    <flowprogrammer.northbound.version>0.4.6-Helium-SR4</flowprogrammer.northbound.version>
-    <forwarding.staticrouting>0.5.6-Helium-SR4</forwarding.staticrouting>
-    <forwarding.staticrouting.northbound.version>0.4.6-Helium-SR4</forwarding.staticrouting.northbound.version>
-    <forwardingrulesmanager.implementation.version>0.4.6-Helium-SR4</forwardingrulesmanager.implementation.version>
-    <hosttracker.api.version>0.5.6-Helium-SR4</hosttracker.api.version>
-    <hosttracker.implementation.version>0.5.6-Helium-SR4</hosttracker.implementation.version>
-    <hosttracker.northbound.version>0.4.6-Helium-SR4</hosttracker.northbound.version>
-    <logging.bridge.version>0.4.6-Helium-SR4</logging.bridge.version>
-    <protocol_plugins.stub.version>0.4.6-Helium-SR4</protocol_plugins.stub.version>
-    <routing.dijkstra_implementation.version>0.4.6-Helium-SR4</routing.dijkstra_implementation.version>
-    <sal.implementation.version>0.4.6-Helium-SR4</sal.implementation.version>
-    <security.version>0.4.6-Helium-SR4</security.version>
-    <statistics.northbound.version>0.4.6-Helium-SR4</statistics.northbound.version>
-    <statisticsmanager.implementation.version>0.4.6-Helium-SR4</statisticsmanager.implementation.version>
-    <statisticsmanager.version>0.5.5-Helium-SR4</statisticsmanager.version>
-    <subnets.northbound.version>0.4.6-Helium-SR4</subnets.northbound.version>
-    <switchmanager.implementation.version>0.4.6-Helium-SR4</switchmanager.implementation.version>
-    <switchmanager.northbound.version>0.4.6-Helium-SR4</switchmanager.northbound.version>
-    <topology.northbound.version>0.4.6-Helium-SR4</topology.northbound.version>
-    <topology.web.version>0.4.6-Helium-SR4</topology.web.version>
-    <topologymanager.version>0.4.6-Helium-SR4</topologymanager.version>
-    <usermanager.implementation.version>0.4.6-Helium-SR4</usermanager.implementation.version>
-    <usermanager.northbound.version>0.0.6-Helium-SR4</usermanager.northbound.version>
-    <usermanager.version>0.4.6-Helium-SR4</usermanager.version>
+    <arphandler.version>0.5.7-SNAPSHOT</arphandler.version>
+    <bundlescanner.implementation.version>0.4.7-SNAPSHOT</bundlescanner.implementation.version>
+    <bundlescanner.version>0.4.7-SNAPSHOT</bundlescanner.version>
+    <clustering.services_implementation.version>0.4.8-SNAPSHOT</clustering.services_implementation.version>
+    <commons.httpclient.version>0.1.7-SNAPSHOT</commons.httpclient.version>
+    <configuration.implementation.version>0.4.8-SNAPSHOT</configuration.implementation.version>
+    <configuration.version>0.4.8-SNAPSHOT</configuration.version>
+    <connectionmanager.version>0.1.7-SNAPSHOT</connectionmanager.version>
+    <containermanager.it.version>0.5.7-SNAPSHOT</containermanager.it.version>
+    <flowprogrammer.northbound.version>0.4.7-SNAPSHOT</flowprogrammer.northbound.version>
+    <forwarding.staticrouting>0.5.7-SNAPSHOT</forwarding.staticrouting>
+    <forwarding.staticrouting.northbound.version>0.4.7-SNAPSHOT</forwarding.staticrouting.northbound.version>
+    <forwardingrulesmanager.implementation.version>0.4.7-SNAPSHOT</forwardingrulesmanager.implementation.version>
+    <hosttracker.api.version>0.5.7-SNAPSHOT</hosttracker.api.version>
+    <hosttracker.implementation.version>0.5.7-SNAPSHOT</hosttracker.implementation.version>
+    <hosttracker.northbound.version>0.4.7-SNAPSHOT</hosttracker.northbound.version>
+    <logging.bridge.version>0.4.7-SNAPSHOT</logging.bridge.version>
+    <protocol_plugins.stub.version>0.4.7-SNAPSHOT</protocol_plugins.stub.version>
+    <routing.dijkstra_implementation.version>0.4.7-SNAPSHOT</routing.dijkstra_implementation.version>
+    <sal.implementation.version>0.4.7-SNAPSHOT</sal.implementation.version>
+    <security.version>0.4.7-SNAPSHOT</security.version>
+    <statistics.northbound.version>0.4.7-SNAPSHOT</statistics.northbound.version>
+    <statisticsmanager.implementation.version>0.4.7-SNAPSHOT</statisticsmanager.implementation.version>
+    <statisticsmanager.version>0.5.6-SNAPSHOT</statisticsmanager.version>
+    <subnets.northbound.version>0.4.7-SNAPSHOT</subnets.northbound.version>
+    <switchmanager.implementation.version>0.4.7-SNAPSHOT</switchmanager.implementation.version>
+    <switchmanager.northbound.version>0.4.7-SNAPSHOT</switchmanager.northbound.version>
+    <topology.northbound.version>0.4.7-SNAPSHOT</topology.northbound.version>
+    <topology.web.version>0.4.7-SNAPSHOT</topology.web.version>
+    <topologymanager.version>0.4.7-SNAPSHOT</topologymanager.version>
+    <usermanager.implementation.version>0.4.7-SNAPSHOT</usermanager.implementation.version>
+    <usermanager.northbound.version>0.0.7-SNAPSHOT</usermanager.northbound.version>
+    <usermanager.version>0.4.7-SNAPSHOT</usermanager.version>
     <!-- 3rd Party Dependencies -->
     <yaml.version>1.10</yaml.version>
   </properties>

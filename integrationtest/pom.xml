@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.opendaylight.ovsdb</groupId>
     <artifactId>commons.integrationtest</artifactId>
-    <version>1.2.4-Helium-SR4</version>
+    <version>1.2.5-SNAPSHOT</version>
     <relativePath>../commons/integrationtest</relativePath>
   </parent>
 
   <artifactId>integrationtest</artifactId>
-  <version>1.2.4-Helium-SR4</version>
+  <version>1.2.5-SNAPSHOT</version>
   <name>OpenDaylight OVSDB Integration Tests</name>
   <packaging>jar</packaging>
 

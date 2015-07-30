@@ -16,6 +16,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration.LoadBalancerPoolMember;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
 import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
@@ -23,6 +24,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractSer
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.ActionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
@@ -66,6 +68,8 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
 
     private static final Class<? extends NxmNxReg> REG_FIELD_A = NxmNxReg1.class;
     private static final Class<? extends NxmNxReg> REG_FIELD_B = NxmNxReg2.class;
+    
+    private volatile Southbound southbound;
 
     public LoadBalancerService() {
         super(Service.LOAD_BALANCER);
@@ -75,6 +79,14 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         super(service);
     }
 
+    private String getDpid(Node node) {
+        long dpid = southbound.getDataPathId(node);
+        if (dpid == 0) {
+            logger.warn("getDpid: DPID could not be found for node: {}", node.getNodeId().getValue());
+        }
+        return String.valueOf(dpid);
+    }
+    
     /**
      * When this method is called, we do the following for minimizing flow updates:
      * 1. Overwrite the solo multipath rule that applies to all members
@@ -97,7 +109,7 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
                 action, member.getIP(), member.getIndex(), lbConfig.getVip(), lbConfig.getMembers().size());
 
         NodeBuilder nodeBuilder = new NodeBuilder();
-        nodeBuilder.setId(new NodeId(Constants.OPENFLOW_NODE_PREFIX + node.getNodeId().getValue()));
+        nodeBuilder.setId(new NodeId(Constants.OPENFLOW_NODE_PREFIX + getDpid(node)));
         nodeBuilder.setKey(new NodeKey(nodeBuilder.getId()));
 
         //Update the multipath rule
@@ -130,7 +142,7 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         LOG.debug("Performing {} rules for VIP {} and {} members", action, lbConfig.getVip(), lbConfig.getMembers().size());
 
         NodeBuilder nodeBuilder = new NodeBuilder();
-        nodeBuilder.setId(new NodeId(Constants.OPENFLOW_NODE_PREFIX + node.getNodeId().getValue()));
+        nodeBuilder.setId(new NodeId(Constants.OPENFLOW_NODE_PREFIX + getDpid(node)));
         nodeBuilder.setKey(new NodeKey(nodeBuilder.getId()));
 
         if (action.equals(org.opendaylight.ovsdb.openstack.netvirt.api.Action.ADD)) {
@@ -444,6 +456,7 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
     @Override
     public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
         super.setDependencies(bundleContext.getServiceReference(LoadBalancerProvider.class.getName()), this);
+        southbound =(Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
     }
 
     @Override

@@ -5,7 +5,7 @@
   <parent>
     <artifactId>commons</artifactId>
     <groupId>org.opendaylight.ovsdb</groupId>
-    <version>1.2.4-SNAPSHOT</version>
+    <version>1.2.4-Helium-SR4</version>
     <relativePath>../../commons/parent</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>

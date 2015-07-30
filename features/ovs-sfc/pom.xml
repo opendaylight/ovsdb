@@ -16,12 +16,12 @@
   <parent>
     <groupId>org.opendaylight.ovsdb</groupId>
     <artifactId>commons</artifactId>
-    <version>1.2.4-SNAPSHOT</version>
+    <version>1.2.4-Helium-SR4</version>
     <relativePath>../../commons/parent</relativePath>
   </parent>
   <artifactId>features-ovs-sfc</artifactId>
   <name>OpenDaylight OVSDB OVS Service Function Chaining Karaf Features</name>
-  <version>0.0.5-SNAPSHOT</version>
+  <version>0.0.5-Helium-SR4</version>
   <packaging>jar</packaging>
   <properties>
     <features.file>features.xml</features.file>
@@ -44,7 +44,7 @@
     <dependency>
       <groupId>org.opendaylight.sfc</groupId>
       <artifactId>features-sfc</artifactId>
-      <version>0.0.5-SNAPSHOT</version>
+      <version>0.0.5-Helium-SR4</version>
       <classifier>features</classifier>
       <type>xml</type>
     </dependency>
@@ -117,7 +117,7 @@
           <systemPropertyVariables>
             <karaf.distro.groupId>org.opendaylight.controller</karaf.distro.groupId>
             <karaf.distro.artifactId>opendaylight-karaf-empty</karaf.distro.artifactId>
-            <karaf.distro.version>1.4.6-SNAPSHOT</karaf.distro.version>
+            <karaf.distro.version>1.4.6-Helium-SR4</karaf.distro.version>
           </systemPropertyVariables>
           <dependenciesToScan>
            <dependency>org.opendaylight.yangtools:features-test</dependency>

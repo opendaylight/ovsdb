@@ -7,18 +7,18 @@
     <parent>
         <groupId>org.opendaylight.ovsdb</groupId>
         <artifactId>commons</artifactId>
-        <version>1.2.4-SNAPSHOT</version>
+        <version>1.2.4-Helium-SR4</version>
         <relativePath>../commons/parent</relativePath>
     </parent>
     <artifactId>ovssfc</artifactId>
     <name>OpenDaylight OVS Service Function Chaining</name>
-    <version>0.0.5-SNAPSHOT</version>
+    <version>0.0.5-Helium-SR4</version>
     <packaging>bundle</packaging>
 
     <properties>
         <jmxGeneratorPath>target/generated-sources/config</jmxGeneratorPath>
-        <ietf.model.version>2010.09.24.4.4-SNAPSHOT</ietf.model.version>
-        <ietf.yang.types.version>2013.07.15.1.4-SNAPSHOT</ietf.yang.types.version>
+        <ietf.model.version>2010.09.24.4.4-Helium-SR4</ietf.model.version>
+        <ietf.yang.types.version>2013.07.15.1.4-Helium-SR4</ietf.yang.types.version>
     </properties>
 
     <dependencies>

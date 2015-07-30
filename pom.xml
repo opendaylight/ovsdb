@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.opendaylight.ovsdb</groupId>
     <artifactId>commons</artifactId>
-    <version>1.2.4-SNAPSHOT</version>
+    <version>1.2.4-Helium-SR4</version>
     <relativePath>commons/parent</relativePath>
   </parent>
 
   <artifactId>ovsdb</artifactId>
-  <version>1.0.4-SNAPSHOT</version>
+  <version>1.0.4-Helium-SR4</version>
   <name>ovsdb</name> <!-- Used by Sonar to set project name -->
   <packaging>pom</packaging>
 

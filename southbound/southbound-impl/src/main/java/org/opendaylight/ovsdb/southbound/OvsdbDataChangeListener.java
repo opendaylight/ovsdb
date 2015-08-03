@@ -17,6 +17,7 @@ import org.opendaylight.ovsdb.southbound.ovsdb.transact.DataChangesManagedByOvsd
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactCommandAggregator;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
@@ -60,6 +61,17 @@ public class OvsdbDataChangeListener implements DataChangeListener, AutoCloseabl
     public void onDataChanged(
             AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes) {
         LOG.trace("onDataChanged: {}", changes);
+        for (Entry<InstanceIdentifier<?>, DataObject> created : changes.getCreatedData().entrySet()) {
+            // TODO validate we have the correct kind of InstanceIdentifier
+            if (created.getValue() instanceof OvsdbNodeAugmentation) {
+                OvsdbNodeAugmentation ovsdbNode = (OvsdbNodeAugmentation)created.getValue();
+                ConnectionInfo key = ovsdbNode.getConnectionInfo();
+                InstanceIdentifier<Node> iid = cm.getInstanceIdentifier(key);
+                if ( iid != null) {
+                    return;
+                }
+            }
+        }
         // Connect first if we have to:
         connect(changes);
 

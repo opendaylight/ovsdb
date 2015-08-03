@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a7ca5a3_cf16e1f1",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 4233
+      },
+      "writtenOn": "2015-08-03T18:40:47Z",
+      "side": 1,
+      "message": "Please fix trailing spaces and tabs.",
+      "revId": "e13ebd0b0aa594ac58aea50b2a6cc6f125b89ba3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_6fd30d39",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 4233
+      },
+      "writtenOn": "2015-08-03T18:40:47Z",
+      "side": 1,
+      "message": "Please fix trailing spaces and tabs",
+      "revId": "e13ebd0b0aa594ac58aea50b2a6cc6f125b89ba3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_8fd8e954",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 4233
+      },
+      "writtenOn": "2015-08-03T18:40:47Z",
+      "side": 1,
+      "message": "Please fix trailing spaces and tabs",
+      "revId": "e13ebd0b0aa594ac58aea50b2a6cc6f125b89ba3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_2fdd1543",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 4233
+      },
+      "writtenOn": "2015-08-03T18:40:47Z",
+      "side": 1,
+      "message": "Please fix trailing spaces and tabs",
+      "revId": "e13ebd0b0aa594ac58aea50b2a6cc6f125b89ba3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

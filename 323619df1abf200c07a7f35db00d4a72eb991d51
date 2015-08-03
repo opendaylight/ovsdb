@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a7ca5a3_c4e1e89b",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 4313
+      },
+      "writtenOn": "2015-08-03T09:24:51Z",
+      "side": 1,
+      "message": "I see few blocks of code being commented. Please add a note describing why the code is commented so that the reviewer will understand why it is done.",
+      "revId": "323619df1abf200c07a7f35db00d4a72eb991d51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

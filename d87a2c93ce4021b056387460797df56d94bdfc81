@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5a7ca5a3_3edd4843",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 853,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-08-04T14:30:20Z",
+      "side": 1,
+      "message": "I was not able to use this syntax within the QoS section.",
+      "parentUuid": "5a7ca5a3_3e7c6872",
+      "revId": "d87a2c93ce4021b056387460797df56d94bdfc81",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a7ca5a3_1edacc78",
         "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2015-08-04T13:33:52Z",
       "side": 1,
       "message": "I think this is unit32 [1] : \"map of integer-Queue pairs, key in range 0 to 4,294,967,295\"\n\n[1] http://www.mathworks.com/help/symbolic/uint8.html",
+      "revId": "d87a2c93ce4021b056387460797df56d94bdfc81",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_5e5da4e8",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 869,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-08-04T14:30:20Z",
+      "side": 1,
+      "message": "The type uint64 should be used because java uses signed types.",
+      "parentUuid": "5a7ca5a3_1edacc78",
       "revId": "d87a2c93ce4021b056387460797df56d94bdfc81",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

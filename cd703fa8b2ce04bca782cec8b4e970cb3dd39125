@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5a7ca5a3_43ace4ed",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 558,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-08-06T16:22:17Z",
+      "side": 1,
+      "message": "I would have used choice or enum but got told to use identities over a base identity. Can both htb and hfsc be used at the same time or it\u0027s one or the other ?",
+      "parentUuid": "5a7ca5a3_83251cad",
+      "revId": "cd703fa8b2ce04bca782cec8b4e970cb3dd39125",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a7ca5a3_a32618b9",
         "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
         "patchSetId": 6
@@ -42,6 +60,24 @@
     },
     {
       "key": {
+        "uuid": "5a7ca5a3_e3b8902c",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 566,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-08-06T16:22:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a7ca5a3_a32618b9",
+      "revId": "cd703fa8b2ce04bca782cec8b4e970cb3dd39125",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a7ca5a3_a34db874",
         "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
         "patchSetId": 6
@@ -53,6 +89,24 @@
       "writtenOn": "2015-08-06T15:43:52Z",
       "side": 1,
       "message": "Does adding OVSDB to the description keep it consistent with the other descriptions?",
+      "revId": "cd703fa8b2ce04bca782cec8b4e970cb3dd39125",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_439384a3",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 867,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-08-06T16:22:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a7ca5a3_a34db874",
       "revId": "cd703fa8b2ce04bca782cec8b4e970cb3dd39125",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -76,6 +130,24 @@
     },
     {
       "key": {
+        "uuid": "5a7ca5a3_83aafcd2",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 870,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-08-06T16:22:17Z",
+      "side": 1,
+      "message": "So I used qos-type because type is reserved word in yang.",
+      "parentUuid": "5a7ca5a3_2341a839",
+      "revId": "cd703fa8b2ce04bca782cec8b4e970cb3dd39125",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a7ca5a3_e34ad054",
         "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
         "patchSetId": 6
@@ -87,6 +159,24 @@
       "writtenOn": "2015-08-06T15:43:52Z",
       "side": 1,
       "message": "remove queue-, same for value, same for other fields where there are no conflicts that do not require the prefix to differentiate... I could be totally wrong on this so good to test and see if it compiles to see what comes out.",
+      "revId": "cd703fa8b2ce04bca782cec8b4e970cb3dd39125",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_23968895",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 877,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-08-06T16:22:17Z",
+      "side": 1,
+      "message": "key is a reserved word in yang, and based on the previous key / values defined in ovsdb.yang they use a prefix before key / value.",
+      "parentUuid": "5a7ca5a3_e34ad054",
       "revId": "cd703fa8b2ce04bca782cec8b4e970cb3dd39125",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -110,6 +200,24 @@
     },
     {
       "key": {
+        "uuid": "5a7ca5a3_03b6ec3d",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 888,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-08-06T16:22:17Z",
+      "side": 1,
+      "message": "Good question, I based that design on the previous stuff in ovsdb.yang but I would have used choice with their respective fields.",
+      "parentUuid": "5a7ca5a3_035fcc0f",
+      "revId": "cd703fa8b2ce04bca782cec8b4e970cb3dd39125",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a7ca5a3_e36170d4",
         "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
         "patchSetId": 6
@@ -127,6 +235,24 @@
         "endLine": 914,
         "endChar": 51
       },
+      "revId": "cd703fa8b2ce04bca782cec8b4e970cb3dd39125",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_c3879460",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 914,
+      "author": {
+        "id": 1950
+      },
+      "writtenOn": "2015-08-06T16:22:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a7ca5a3_e36170d4",
       "revId": "cd703fa8b2ce04bca782cec8b4e970cb3dd39125",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "5a7ca5a3_835d1cec",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 558,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-06T16:47:49Z",
+      "side": 1,
+      "message": "The base type is the type from which a derived type was derived. So qos-type-linux-htb and qos-type-linux-hsfc are derived from qos-type-base.\n\nSo In the leaf qos you just need to define the qos-type-base as the indentityref to allow its type to be either qos-type-linux-htb or qos-type-linux-hsfc.",
+      "parentUuid": "5a7ca5a3_43ace4ed",
+      "revId": "cd703fa8b2ce04bca782cec8b4e970cb3dd39125",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a7ca5a3_a32618b9",
         "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
         "patchSetId": 6

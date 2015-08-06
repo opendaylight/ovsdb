@@ -1,0 +1,135 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a7ca5a3_83251cad",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 558,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-06T15:43:52Z",
+      "side": 1,
+      "message": "just curious what the base type does? Is it needed?",
+      "revId": "cd703fa8b2ce04bca782cec8b4e970cb3dd39125",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_a32618b9",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 566,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-06T15:43:52Z",
+      "side": 1,
+      "message": "should be hfsc",
+      "range": {
+        "startLine": 566,
+        "startChar": 27,
+        "endLine": 566,
+        "endChar": 28
+      },
+      "revId": "cd703fa8b2ce04bca782cec8b4e970cb3dd39125",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_a34db874",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 867,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-06T15:43:52Z",
+      "side": 1,
+      "message": "Does adding OVSDB to the description keep it consistent with the other descriptions?",
+      "revId": "cd703fa8b2ce04bca782cec8b4e970cb3dd39125",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_2341a839",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 870,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-06T15:43:52Z",
+      "side": 1,
+      "message": "probably don\u0027t need qos- in the name. port/interface has the prefix since they have different types but I don\u0027t think it is needed here. Probably the same for the qos-uuid since it is the only uuid in the qos list",
+      "revId": "cd703fa8b2ce04bca782cec8b4e970cb3dd39125",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_e34ad054",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 877,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-06T15:43:52Z",
+      "side": 1,
+      "message": "remove queue-, same for value, same for other fields where there are no conflicts that do not require the prefix to differentiate... I could be totally wrong on this so good to test and see if it compiles to see what comes out.",
+      "revId": "cd703fa8b2ce04bca782cec8b4e970cb3dd39125",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_035fcc0f",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 888,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-06T15:43:52Z",
+      "side": 1,
+      "message": "does it matter that the htb and hfsc are combined into one? Should the yang be able to ensure something like burst is not configured for hfsc?",
+      "revId": "cd703fa8b2ce04bca782cec8b4e970cb3dd39125",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_e36170d4",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 914,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-06T15:43:52Z",
+      "side": 1,
+      "message": "linux-hfsc",
+      "range": {
+        "startLine": 914,
+        "startChar": 48,
+        "endLine": 914,
+        "endChar": 51
+      },
+      "revId": "cd703fa8b2ce04bca782cec8b4e970cb3dd39125",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

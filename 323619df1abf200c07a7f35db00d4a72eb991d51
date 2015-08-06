@@ -2,6 +2,125 @@
   "comments": [
     {
       "key": {
+        "uuid": "5a7ca5a3_a3f37972",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 765,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-06T15:07:32Z",
+      "side": 1,
+      "message": "Could this security group programming block be moved into a new method like programLocalSecurityGroupRules()? The code in this method is growing and becoming harder to read so pushing the sg code to a method would make it easier to understand.",
+      "revId": "323619df1abf200c07a7f35db00d4a72eb991d51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_43d145cc",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 781,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-06T15:07:32Z",
+      "side": 1,
+      "message": "this comment can be deleted since dhcpPort was set earlier with getDHCPServerPort and that method is readable",
+      "revId": "323619df1abf200c07a7f35db00d4a72eb991d51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_a39a9912",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 801,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-06T15:07:32Z",
+      "side": 1,
+      "message": "is it possible srcAddressList is null if the earlier block of code did not execute?",
+      "revId": "323619df1abf200c07a7f35db00d4a72eb991d51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_e3f8914b",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 848,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-06T15:07:32Z",
+      "side": 1,
+      "message": "Same comment about moving code to its own method.",
+      "revId": "323619df1abf200c07a7f35db00d4a72eb991d51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_c34d55c6",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 865,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-06T15:07:32Z",
+      "side": 1,
+      "message": "fix whitespace",
+      "revId": "323619df1abf200c07a7f35db00d4a72eb991d51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_83c75d12",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 872,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-06T15:07:32Z",
+      "side": 1,
+      "message": "is this comment accurate? it says update/delete and then a few lines later a comment says Delete the security groups.",
+      "revId": "323619df1abf200c07a7f35db00d4a72eb991d51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_a3c139e6",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-06T15:07:32Z",
+      "side": 1,
+      "message": "should these be private?",
+      "revId": "323619df1abf200c07a7f35db00d4a72eb991d51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a7ca5a3_c4e1e89b",
         "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
         "patchSetId": 2
@@ -13,6 +132,228 @@
       "writtenOn": "2015-08-03T09:24:51Z",
       "side": 1,
       "message": "I see few blocks of code being commented. Please add a note describing why the code is commented so that the reviewer will understand why it is done.",
+      "revId": "323619df1abf200c07a7f35db00d4a72eb991d51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_8363dd19",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-06T15:07:32Z",
+      "side": 1,
+      "message": "How does the code work today with all the other lines commented out? Meaning does everything else still work properly and we are just adding new sg features incrementally or are there any concerns that something is broken along the way?",
+      "revId": "323619df1abf200c07a7f35db00d4a72eb991d51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_23ad2932",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 282,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-06T15:07:32Z",
+      "side": 1,
+      "message": "comment is not needed",
+      "range": {
+        "startLine": 282,
+        "startChar": 19,
+        "endLine": 282,
+        "endChar": 23
+      },
+      "revId": "323619df1abf200c07a7f35db00d4a72eb991d51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_63bb2173",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-06T15:07:32Z",
+      "side": 1,
+      "message": "is this debug needed since writeFlow() has a debug LOG to dump the flows?",
+      "revId": "323619df1abf200c07a7f35db00d4a72eb991d51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_03b02d8a",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 411,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-06T15:07:32Z",
+      "side": 1,
+      "message": "comment isn\u0027t needed since the next line is readable",
+      "range": {
+        "startLine": 411,
+        "startChar": 19,
+        "endLine": 411,
+        "endChar": 38
+      },
+      "revId": "323619df1abf200c07a7f35db00d4a72eb991d51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_a36859f6",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IngressAclService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-06T15:07:32Z",
+      "side": 1,
+      "message": "leave the { on the peevious line. checkstyle rules will blow up over this when we enable them.",
+      "revId": "323619df1abf200c07a7f35db00d4a72eb991d51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_436dc503",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IngressAclService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-06T15:07:32Z",
+      "side": 1,
+      "message": "add spaces between if ( and for ( - checkstyle rules",
+      "revId": "323619df1abf200c07a7f35db00d4a72eb991d51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_637241e7",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IngressAclService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-06T15:07:32Z",
+      "side": 1,
+      "message": "can the value be uppercase? otherwise does equals() match better?\n\nCan the \"tcp\" be a constant? Normally the neutron pojos have these values we can use.",
+      "revId": "323619df1abf200c07a7f35db00d4a72eb991d51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_237449ce",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IngressAclService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-06T15:07:32Z",
+      "side": 1,
+      "message": "Are there other values beyond tcp and udp? Should we log a warn or info if some other value is found?",
+      "revId": "323619df1abf200c07a7f35db00d4a72eb991d51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_c380f58d",
+        "filename": "openstack/net-virt-providers/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclServiceTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-06T15:07:32Z",
+      "side": 1,
+      "message": "do these tests not work anymore? We should try to always have some tests for all code.",
+      "range": {
+        "startLine": 89,
+        "startChar": 4,
+        "endLine": 89,
+        "endChar": 7
+      },
+      "revId": "323619df1abf200c07a7f35db00d4a72eb991d51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_a34ff991",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/EgressAclProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-06T15:07:32Z",
+      "side": 1,
+      "message": "checkstyle will complain about this indenting",
+      "revId": "323619df1abf200c07a7f35db00d4a72eb991d51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_4344e573",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/IngressAclProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-06T15:07:32Z",
+      "side": 1,
+      "message": "checkstyle",
+      "revId": "323619df1abf200c07a7f35db00d4a72eb991d51",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_235be955",
+        "filename": "utils/mdsal-openflow/src/main/java/org/opendaylight/ovsdb/utils/mdsal/openflow/MatchUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1000,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-06T15:07:32Z",
+      "side": 1,
+      "message": "cuddle braces, spaces for checkstyle",
       "revId": "323619df1abf200c07a7f35db00d4a72eb991d51",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

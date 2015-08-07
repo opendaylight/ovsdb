@@ -30,6 +30,7 @@ import io.netty.handler.ssl.SslHandler;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLEngineResult.HandshakeStatus;
 
 import java.net.InetAddress;
 import java.util.Arrays;
@@ -38,6 +39,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
@@ -290,41 +293,91 @@ public class OvsdbConnectionService implements OvsdbConnection {
         }
     }
 
-    private static ExecutorService executorService = Executors.newFixedThreadPool(10);
+    private static ScheduledExecutorService executorService = Executors.newScheduledThreadPool(10);
+    private static int retryPeriod = 100; // retry after 100 milliseconds
     private static void handleNewPassiveConnection(final Channel channel) {
-        executorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                OvsdbClient client = getChannelClient(channel, ConnectionType.PASSIVE,
-                        Executors.newFixedThreadPool(NUM_THREADS));
+        SslHandler sslHandler = (SslHandler) channel.pipeline().get("ssl");
+        if (sslHandler != null) {
+            class HandleNewPassiveSslRunner implements Runnable {
+                public SslHandler sslHandler;
+                public final Channel channel;
+                private int retryTimes;
 
-                SslHandler sslHandler = (SslHandler) channel.pipeline().get("ssl");
-                if (sslHandler != null) {
-                    //Wait until ssl handshake is complete
-                    int count = 0;
-                    LOG.debug("Check if ssl handshake is done");
-                    while (sslHandler.engine().getSession().getCipherSuite()
-                                            .equals("SSL_NULL_WITH_NULL_NULL")
-                                            && count < 10) {
-                        try {
-                            Thread.sleep(100);
-                        } catch (InterruptedException e) {
-                            LOG.error("Exception while checking if ssl handshake is done", e);
-                        }
-                        count++;
-                    }
-                    if (sslHandler.engine().getSession().getCipherSuite()
-                                           .equals("SSL_NULL_WITH_NULL_NULL")) {
-                        LOG.debug("Ssl hanshake is not compelete yet");
-                        return;
-                    }
+                public HandleNewPassiveSslRunner(Channel channel, SslHandler sslHandler) {
+                    this.channel = channel;
+                    this.sslHandler = sslHandler;
+                    this.retryTimes = 3;
                 }
-                LOG.debug("Notify listener");
-                for (OvsdbConnectionListener listener : connectionListeners) {
-                    listener.connected(client);
+                @Override
+                public void run() {
+                    HandshakeStatus status = sslHandler.engine().getHandshakeStatus();
+                    LOG.debug("Handshake status {}", status);
+                    switch (status) {
+                        case FINISHED:
+                        case NOT_HANDSHAKING:
+                            //Handshake done. Notify listener.
+                            OvsdbClient client = getChannelClient(channel, ConnectionType.PASSIVE,
+                                                 Executors.newFixedThreadPool(NUM_THREADS));
+
+                            LOG.debug("Notify listener");
+                            for (OvsdbConnectionListener listener : connectionListeners) {
+                                listener.connected(client);
+                            }
+                            break;
+
+                        case NEED_UNWRAP:
+                        case NEED_TASK:
+                            //Handshake still ongoing. Retry later.
+                            LOG.debug("handshake not done yet {}", status);
+                            executorService.schedule(this,  retryPeriod, TimeUnit.MILLISECONDS);
+                            break;
+
+                        case NEED_WRAP:
+                            if (sslHandler.engine().getSession().getCipherSuite()
+                                    .equals("SSL_NULL_WITH_NULL_NULL")) {
+                                /* peer not authenticated. No need to notify listener in this case. */
+                                LOG.error("Ssl handshake fail. channel {}", channel);
+                            } else {
+                                /*
+                                 * peer is authenticated. Give some time to wait for completion.
+                                 * If status is still NEED_WRAP, client might already disconnect.
+                                 * This happens when the first time client connects to controller in two-way handshake.
+                                 * After obtaining controller certificate, client will disconnect and start
+                                 * new connection with controller certificate it obtained.
+                                 * In this case no need to do anything for the first connection attempt. Just skip
+                                 * since client will reconnect later.
+                                 */
+                                LOG.debug("handshake not done yet {}", status);
+                                if (retryTimes > 0) {
+                                    executorService.schedule(this,  retryPeriod, TimeUnit.MILLISECONDS);
+                                } else {
+                                    LOG.debug("channel closed {}", channel);
+                                }
+                                retryTimes--;
+                            }
+                            break;
+
+                        default:
+                            LOG.error("unknown hadshake status {}", status);
+                    }
                 }
             }
-        });
+            executorService.schedule(new HandleNewPassiveSslRunner(channel, sslHandler),
+                    retryPeriod, TimeUnit.MILLISECONDS);
+        } else {
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    OvsdbClient client = getChannelClient(channel, ConnectionType.PASSIVE,
+                            Executors.newFixedThreadPool(NUM_THREADS));
+
+                    LOG.debug("Notify listener");
+                    for (OvsdbConnectionListener listener : connectionListeners) {
+                        listener.connected(client);
+                    }
+                }
+            });
+        }
     }
 
     public static void channelClosed(final OvsdbClient client) {
@@ -339,3 +392,4 @@ public class OvsdbConnectionService implements OvsdbConnection {
         return connections.keySet();
     }
 }
+

@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a7ca5a3_4c517161",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointCreateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-08-07T23:04:04Z",
+      "side": 1,
+      "message": "I am not a yang expert. Should libQosType be a String instead of Set ?",
+      "revId": "f3362383641bb3c9ed5b39cc171a19652674f8cc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

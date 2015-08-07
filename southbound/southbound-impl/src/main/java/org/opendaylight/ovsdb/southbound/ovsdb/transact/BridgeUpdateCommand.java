@@ -145,7 +145,7 @@ public class BridgeUpdateCommand extends AbstractTransactCommand {
     private void setOpenDaylightOtherConfig(Bridge bridge, OvsdbBridgeAugmentation ovsdbManagedNode) {
         List<BridgeOtherConfigs> bridgeOtherConfig = ovsdbManagedNode.getBridgeOtherConfigs();
         if (bridgeOtherConfig != null) {
-            HashMap<String, String> otherConfigMap = new HashMap<String, String>();
+            Map<String, String> otherConfigMap = new HashMap<String, String>();
             for (BridgeOtherConfigs otherConf : bridgeOtherConfig) {
                 otherConfigMap.put(otherConf.getBridgeOtherConfigKey(), otherConf.getBridgeOtherConfigValue());
             }

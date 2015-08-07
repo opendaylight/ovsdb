@@ -32,7 +32,7 @@ public class TransactionBuilder {
         databaseSchema = schema;
     }
 
-    public ArrayList<Operation> getOperations() {
+    public List<Operation> getOperations() {
         return operations;
     }
 

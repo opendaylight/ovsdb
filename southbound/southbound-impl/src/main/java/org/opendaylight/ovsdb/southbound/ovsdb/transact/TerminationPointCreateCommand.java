@@ -171,7 +171,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
 
         //Configure optional input
         if (terminationPoint.getOptions() != null) {
-            HashMap<String, String> optionsMap = new HashMap<String, String>();
+            Map<String, String> optionsMap = new HashMap<String, String>();
             for (Options option : terminationPoint.getOptions()) {
                 optionsMap.put(option.getOption(), option.getValue());
             }
@@ -190,7 +190,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
         List<InterfaceExternalIds> interfaceExternalIds =
                 terminationPoint.getInterfaceExternalIds();
         if (interfaceExternalIds != null && !interfaceExternalIds.isEmpty()) {
-            HashMap<String, String> externalIdsMap = new HashMap<String, String>();
+            Map<String, String> externalIdsMap = new HashMap<String, String>();
             for (InterfaceExternalIds externalId: interfaceExternalIds) {
                 externalIdsMap.put(externalId.getExternalIdKey(), externalId.getExternalIdValue());
             }
@@ -209,7 +209,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
         List<InterfaceOtherConfigs> interfaceOtherConfigs =
                 terminationPoint.getInterfaceOtherConfigs();
         if (interfaceOtherConfigs != null && !interfaceOtherConfigs.isEmpty()) {
-            HashMap<String, String> otherConfigsMap = new HashMap<String, String>();
+            Map<String, String> otherConfigsMap = new HashMap<String, String>();
             for (InterfaceOtherConfigs interfaceOtherConfig : interfaceOtherConfigs) {
                 otherConfigsMap.put(interfaceOtherConfig.getOtherConfigKey(),
                         interfaceOtherConfig.getOtherConfigValue());
@@ -228,7 +228,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
 
         List<PortExternalIds> portExternalIds = terminationPoint.getPortExternalIds();
         if (portExternalIds != null && !portExternalIds.isEmpty()) {
-            HashMap<String, String> externalIdsMap = new HashMap<String, String>();
+            Map<String, String> externalIdsMap = new HashMap<String, String>();
             for (PortExternalIds externalId: portExternalIds) {
                 externalIdsMap.put(externalId.getExternalIdKey(), externalId.getExternalIdValue());
             }
@@ -284,7 +284,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
         List<PortOtherConfigs> portOtherConfigs =
                 terminationPoint.getPortOtherConfigs();
         if (portOtherConfigs != null && !portOtherConfigs.isEmpty()) {
-            HashMap<String, String> otherConfigsMap = new HashMap<String, String>();
+            Map<String, String> otherConfigsMap = new HashMap<String, String>();
             for (PortOtherConfigs portOtherConfig : portOtherConfigs) {
                 otherConfigsMap.put(portOtherConfig.getOtherConfigKey(),
                         portOtherConfig.getOtherConfigValue());

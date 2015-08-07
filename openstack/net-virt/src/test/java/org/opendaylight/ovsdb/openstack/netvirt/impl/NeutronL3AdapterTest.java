@@ -867,7 +867,7 @@ public class NeutronL3AdapterTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testProgramOutboundIpRewriteStage1() throws Exception{
-        HashSet<String> outboundIpRewriteCache = new HashSet<String>();
+        Set<String> outboundIpRewriteCache = new HashSet<String>();
 
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programOutboundIpRewriteStage2", floatingIpClass, Action.class));
 

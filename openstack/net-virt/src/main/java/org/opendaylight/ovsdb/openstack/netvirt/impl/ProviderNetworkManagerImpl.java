@@ -30,8 +30,8 @@ import com.google.common.collect.Maps;
 
 public class ProviderNetworkManagerImpl implements ConfigInterface, NetworkingProviderManager {
     private static final Logger LOG = LoggerFactory.getLogger(ProviderNetworkManagerImpl.class);
-    private HashMap<Long, ProviderEntry> providers = Maps.newHashMap();
-    private HashMap<Node, NetworkingProvider> nodeToProviderMapping = Maps.newHashMap();
+    private Map<Long, ProviderEntry> providers = Maps.newHashMap();
+    private Map<Node, NetworkingProvider> nodeToProviderMapping = Maps.newHashMap();
     private volatile OvsdbInventoryService ovsdbInventoryService;
 
     @Override

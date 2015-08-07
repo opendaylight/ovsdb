@@ -30,7 +30,7 @@ public interface OvsdbRPC {
 
     ListenableFuture<Response> cancel(String id);
 
-    ListenableFuture<Object> monitor_cancel(Object jsonValue);
+    ListenableFuture<JsonNode> monitor_cancel(Params jsonValue);
 
     ListenableFuture<Object> lock(List<String> id);
 

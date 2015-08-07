@@ -230,4 +230,11 @@ public class OvsdbConnectionInstance implements OvsdbClient {
     public void setInstanceIdentifier(InstanceIdentifier<Node> iid) {
         this.instanceIdentifier = iid;
     }
+
+    @Override
+    public <E extends TableSchema<E>> TableUpdates monitor(
+            DatabaseSchema schema, List<MonitorRequest<E>> monitorRequests,
+            MonitorHandle monitorHandle, MonitorCallBack callback) {
+        return null;
+    }
 }

@@ -30,9 +30,12 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
+import org.opendaylight.ovsdb.schema.openvswitch.Qos;
+import org.opendaylight.ovsdb.schema.openvswitch.Queue;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundProvider;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes.VlanMode;
@@ -43,6 +46,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Trunks;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.port.qos.QosExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.port.qos.QosOtherConfig;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.port.qos.Queues;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -89,7 +95,9 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
                     // Configure port with the above interface details
                     String portUuid = "Port_" + SouthboundMapper.getRandomUUID();
                     Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
-                    createPort(terminationPoint, port, interfaceUuid);
+                    Qos qos = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),Qos.class);
+                    Queue queue = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),Queue.class);
+                    createPort(terminationPoint, port, interfaceUuid, qos, queue);
                     transaction.add(op.insert(port).withId(portUuid));
 
                     //Configure bridge with the above port details
@@ -134,7 +142,10 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
 
     private void createPort(
             final OvsdbTerminationPointAugmentation terminationPoint,
-            final Port port, final String interfaceUuid) {
+            final Port port,
+            final String interfaceUuid,
+            final Qos qos,
+            final Queue queue) {
 
         port.setName(terminationPoint.getName());
         port.setInterfaces(Sets.newHashSet(new UUID(interfaceUuid)));
@@ -143,6 +154,51 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
         createPortVlanTrunk(terminationPoint, port);
         createPortVlanMode(terminationPoint, port);
         createPortExternalIds(terminationPoint, port);
+        createPortQos(terminationPoint, port, qos, queue);
+    }
+
+    private void createPortQos(
+            final OvsdbTerminationPointAugmentation terminationPoint,
+            final Port port,
+            final Qos qos,
+            final Queue queue) {
+        if (terminationPoint.getPortQos() != null && !terminationPoint.getPortQos().isEmpty()) {
+            Map<String, String> libQosExternalIds = new HashMap<String, String>();
+            if (terminationPoint.getPortQos().iterator().next().getQosExternalIds() != null
+                    && !terminationPoint.getPortQos().iterator().next().getQosExternalIds().isEmpty()) {
+                for (QosExternalIds eid: terminationPoint.getPortQos().iterator().next().getQosExternalIds()) {
+                    // We might want to validate the externalIds that the user entered via restconf
+                    libQosExternalIds.put(eid.getQosExternalIdKey(), eid.getQosExternalIdValue());
+                    qos.setExternalIds(libQosExternalIds);
+                }
+            }
+            Map<String, String> libQosOtherConfig = new HashMap<String, String>();
+            if (terminationPoint.getPortQos().iterator().next().getQosOtherConfig() != null
+                    && !terminationPoint.getPortQos().iterator().next().getQosOtherConfig().isEmpty()) {
+                for (QosOtherConfig oc: terminationPoint.getPortQos().iterator().next().getQosOtherConfig()) {
+                    // We might want to validate the otherConfigs that the user entered via restconf
+                    libQosOtherConfig.put(oc.getOtherConfigKey(), oc.getOtherConfigValue());
+                    qos.setOtherConfig(libQosOtherConfig);
+                }
+            }
+            Map<Long, UUID> libQosQueues = new HashMap<Long, UUID>();
+            for (Queues queues: terminationPoint.getPortQos().iterator().next().getQueues()) {
+                Long queueKey = 0L;
+                if (queues.getQueueKey() != null) {
+                    queueKey = queues.getQueueKey().longValue();
+                }
+                Uuid queueUuid = new Uuid(java.util.UUID.randomUUID().toString());
+                if (queues.getQueueValue().iterator().next().getQueueUuid() != null) {
+                    queueUuid = queues.getQueueValue().iterator().next().getQueueUuid();
+                }
+                libQosQueues.put(queueKey, new UUID(queueUuid.toString()));
+            }
+            Set<String> libQosType = new HashSet<String>();
+            libQosType.add(terminationPoint.getPortQos().iterator().next().getQosType().toString());
+            qos.setQueues(libQosQueues);
+            qos.setType(libQosType);
+            terminationPoint.getPortQos().iterator().next().getQosUuid();
+        }
     }
 
     private void createOfPort(

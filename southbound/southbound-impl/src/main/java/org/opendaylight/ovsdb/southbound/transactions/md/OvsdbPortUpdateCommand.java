@@ -8,6 +8,7 @@
 
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -29,6 +30,8 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
+import org.opendaylight.ovsdb.schema.openvswitch.Qos;
+import org.opendaylight.ovsdb.schema.openvswitch.Queue;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
@@ -52,8 +55,15 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortOtherConfigsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortQos;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortQosBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Trunks;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.TrunksBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.port.qos.Queues;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.port.qos.QueuesBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.port.qos.QueuesKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.port.qos.queues.QueueValue;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.port.qos.queues.QueueValueBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
@@ -77,6 +87,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
     private Map<UUID, Interface> interfaceUpdatedRows;
     private Map<UUID, Interface> interfaceOldRows;
     private Map<UUID, Bridge> bridgeUpdatedRows;
+    private Map<UUID, Qos> portQosUpdatedRows;
+    private Map<UUID, Queue> portQueueUpdatedRows;
     public OvsdbPortUpdateCommand(OvsdbConnectionInstance key, TableUpdates updates,
             DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
@@ -85,6 +97,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         interfaceUpdatedRows = TyperUtils.extractRowsUpdated(Interface.class, updates, dbSchema);
         interfaceOldRows = TyperUtils.extractRowsOld(Interface.class, updates, dbSchema);
         bridgeUpdatedRows = TyperUtils.extractRowsUpdated(Bridge.class, updates, dbSchema);
+        portQosUpdatedRows = TyperUtils.extractRowsUpdated(Qos.class, updates, dbSchema);
+        portQueueUpdatedRows = TyperUtils.extractRowsUpdated(Queue.class, updates, dbSchema);
     }
 
     @Override
@@ -238,6 +252,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         updateVlanMode(port, ovsdbTerminationPointBuilder);
         updatePortExternalIds(port, ovsdbTerminationPointBuilder);
         updatePortOtherConfig(port, ovsdbTerminationPointBuilder);
+        updatePortQos(port, ovsdbTerminationPointBuilder);
     }
 
     private void updateInterface(final Interface interf,
@@ -386,6 +401,45 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                 }
             }
             ovsdbTerminationPointBuilder.setPortExternalIds(externalIdsList);
+        }
+    }
+
+    private void updatePortQos(
+            final Port port,
+            final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+        Set<UUID> qosUuid = port.getQosColumn().getData();
+        if (qosUuid != null && !qosUuid.isEmpty()) {
+            List<PortQos> updatedQos = new ArrayList<PortQos>();
+            for (Entry<UUID, Qos> libQos : portQosUpdatedRows.entrySet()) {
+                if (libQos.getKey().equals(qosUuid)) {
+                    Map<Long, UUID> libQueues = libQos.getValue().getQueuesColumn().getData();
+                    List<Queues> modelQueues = new ArrayList<Queues>();
+                    for (Map.Entry<Long, UUID> libQueue: libQueues.entrySet()) {
+                        Queue queueData = portQueueUpdatedRows.get(libQueue.getValue());
+                        QueueValue queueValue = new QueueValueBuilder()
+                                                      .setDscp(queueData.getDscpColumn()
+                                                                .getData().iterator()
+                                                                .next().shortValue())
+                                                      .setQueueUuid(new Uuid(queueData.getUuid().toString()))
+                                                      //.setQueuesOtherConfig(value)
+                                                      .build();
+                        List<QueueValue> modelQueueValue = new ArrayList<QueueValue>();
+                        modelQueueValue.add(queueValue);
+                        Queues queue = new QueuesBuilder()
+                                            .setKey(new QueuesKey(BigInteger.valueOf(libQueue.getKey())))
+                                            .setQueueValue(modelQueueValue)
+                                            .build();
+                        modelQueues.add(queue);
+                    }
+                    PortQos modelQos = new PortQosBuilder()
+                                            .setQueues(modelQueues)
+                                            //.setQosExternalIds(value)
+                                            //.setQosExternalIds(value)
+                                            .build();
+                    updatedQos.add(modelQos);
+                }
+            }
+            ovsdbTerminationPointBuilder.setPortQos(updatedQos);
         }
     }
 

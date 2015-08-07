@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a7ca5a3_89721be4",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-07T19:22:51Z",
+      "side": 1,
+      "message": "what is the reason to switch thread libs?",
+      "range": {
+        "startLine": 296,
+        "startChar": 19,
+        "endLine": 296,
+        "endChar": 43
+      },
+      "revId": "c5982e28192ed0db1a363889a9eaf3b0817f17b8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_297747d6",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 395,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-07T19:22:51Z",
+      "side": 1,
+      "message": "whitespace",
+      "revId": "c5982e28192ed0db1a363889a9eaf3b0817f17b8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

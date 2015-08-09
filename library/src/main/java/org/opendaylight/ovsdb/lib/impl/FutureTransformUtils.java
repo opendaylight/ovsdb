@@ -1,11 +1,9 @@
 /*
- * Copyright (C) 2014 EBay Software Foundation
+ * Copyright (c) 2014, 2015 EBay Software Foundation and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Sudheendra Murthy
  */
 
 package org.opendaylight.ovsdb.lib.impl;

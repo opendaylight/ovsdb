@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "3a79b1b5_ddd0dff9",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1287,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-08-10T08:16:19Z",
+      "side": 1,
+      "message": "please do this check in getExternalNetworkSubnets() method while building the list of NeutronSubnet.This method just need any one subnet that has this port as a gateway port, so no need to run it for all the subnet. Eventual goal of this method is to find the mac address of the gateway ip. If you will run this for each subnet, it will do the same activity multiple times.",
+      "revId": "d022dc1192b28ee0ba09c7e21c5615fbcb9f00af",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7fa997_13257faa",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
         "patchSetId": 1

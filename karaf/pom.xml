@@ -14,7 +14,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>karaf-parent</artifactId>
     <version>1.6.0-SNAPSHOT</version>
-    <relativePath/>
   </parent>
 
   <groupId>org.opendaylight.ovsdb</groupId>

@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3a79b1b5_34dd6543",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/arp/GatewayMacResolverService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-08-11T19:50:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a7fa997_9d2be093",
+      "revId": "0d1a027b66e10cc1a59875e66833816040eaf4a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7fa997_1d403055",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2015-07-24T07:37:41Z",
       "side": 1,
       "message": "No need for a private getter, is there?",
+      "revId": "0d1a027b66e10cc1a59875e66833816040eaf4a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_54b021f4",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-08-11T19:50:02Z",
+      "side": 1,
+      "message": "not really, i think i was doing something in this method for debugging and forgot to remove it.",
+      "parentUuid": "7a7fa997_1d403055",
       "revId": "0d1a027b66e10cc1a59875e66833816040eaf4a4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

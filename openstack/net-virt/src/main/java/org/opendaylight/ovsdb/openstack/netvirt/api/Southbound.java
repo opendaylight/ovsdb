@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.openstack.netvirt.api;
 
 import java.util.List;
 import java.util.Map;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
@@ -76,4 +77,5 @@ public interface Southbound {
     Long getOFPort(OvsdbTerminationPointAugmentation port);
     Long getOFPort(Node bridgeNode, String portName);
     DataBroker getDatabroker();
+    OvsdbBridgeAugmentation getBridgeFromConfig(Node ovsdbNode, String bridgeName);
 }

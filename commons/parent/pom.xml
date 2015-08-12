@@ -72,7 +72,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <!-- Skip Coverage and IT by default -->
     <skip.coverage>true</skip.coverage>
     <skip.distribution>false</skip.distribution>
-    <skip.integrationtest>true</skip.integrationtest>
+    <skip.integrationtest>false</skip.integrationtest>
     <skip.karaf.featureTest>false</skip.karaf.featureTest>
     <!-- The directory where maven was executed TODO see if this can be removed -->
     <root.directory>${env.PWD}</root.directory>

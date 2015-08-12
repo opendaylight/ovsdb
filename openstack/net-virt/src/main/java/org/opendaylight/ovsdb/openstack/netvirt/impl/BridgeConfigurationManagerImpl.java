@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import org.opendaylight.neutron.spi.NeutronNetwork;
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
+import org.opendaylight.ovsdb.openstack.netvirt.MdsalHelper;
 import org.opendaylight.ovsdb.openstack.netvirt.NetworkHandler;
 import org.opendaylight.ovsdb.openstack.netvirt.api.BridgeConfigurationManager;
 import org.opendaylight.ovsdb.openstack.netvirt.api.ConfigurationService;
@@ -459,6 +460,8 @@ public class BridgeConfigurationManagerImpl implements BridgeConfigurationManage
         boolean rv = true;
         if (!southbound.isBridgeOnOvsdbNode(ovsdbNode, bridgeName)) {
             rv = southbound.addBridge(ovsdbNode, bridgeName, getControllerTarget(ovsdbNode));
+        } else if (southbound.getBridgeFromConfig(ovsdbNode, bridgeName) == null) {
+                rv = southbound.addBridge(ovsdbNode, bridgeName, getControllerTarget(ovsdbNode));
         }
         return rv;
     }

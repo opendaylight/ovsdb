@@ -698,4 +698,17 @@ public class SouthboundImpl implements Southbound {
         }
         return ofPort;
     }
+    public OvsdbBridgeAugmentation getBridgeFromConfig(Node node, String bridge) {
+        OvsdbBridgeAugmentation ovsdbBridgeAugmentation = null;
+        ConnectionInfo connectionInfo = getConnectionInfo(node);
+        if (connectionInfo != null) {
+            InstanceIdentifier<Node> bridgeIid =
+            MdsalHelper.createInstanceIdentifier(node.getKey(), bridge);
+            Node bridgeNode = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, bridgeIid);
+            if (bridgeNode != null) {
+                ovsdbBridgeAugmentation = bridgeNode.getAugmentation(OvsdbBridgeAugmentation.class);
+            }
+        }
+        return ovsdbBridgeAugmentation;
+    }
 }

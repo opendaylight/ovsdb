@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2015 Red Hat, Inc. and others. All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
 package org.opendaylight.ovsdb.openstack.netvirt;
 
 import java.util.ArrayList;
@@ -32,6 +40,7 @@ public class ConfigActivator implements BundleActivator {
     private ServiceTracker outboundNatProviderTracker;
     private ServiceTracker routingProviderTracker;
     private ServiceTracker l3ForwardingProviderTracker;
+    private ServiceTracker gatewayMacResolverProviderTracker;
 
     public ConfigActivator(ProviderContext providerContext) {
         this.providerContext = providerContext;
@@ -235,6 +244,7 @@ public class ConfigActivator implements BundleActivator {
                     lBaaSHandler.setDependencies(service);
                     lBaaSPoolHandler.setDependencies(service);
                     lBaaSPoolMemberHandler.setDependencies(service);
+                    securityServices.setDependencies(service);
                     neutronL3Adapter.setDependencies(service);
                 }
                 return service;
@@ -402,7 +412,25 @@ public class ConfigActivator implements BundleActivator {
         };
         l3ForwardingProviderTracker.open();
         this.l3ForwardingProviderTracker = l3ForwardingProviderTracker;
+
+        @SuppressWarnings("unchecked")
+        ServiceTracker gatewayMacResolverProviderTracker = new ServiceTracker(context,
+                GatewayMacResolver.class, null) {
+            @Override
+            public Object addingService(ServiceReference reference) {
+                LOG.info("addingService GatwayMacResolverProvider");
+                GatewayMacResolver service =
+                        (GatewayMacResolver) context.getService(reference);
+                if (service != null) {
+                    neutronL3Adapter.setDependencies(service);
+                }
+                return service;
+            }
+        };
+        gatewayMacResolverProviderTracker.open();
+        this.gatewayMacResolverProviderTracker = gatewayMacResolverProviderTracker;
     }
+
 
     @Override
     public void stop(BundleContext context) throws Exception {

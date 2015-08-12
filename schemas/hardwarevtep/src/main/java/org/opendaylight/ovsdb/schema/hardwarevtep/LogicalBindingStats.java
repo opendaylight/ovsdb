@@ -1,12 +1,11 @@
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Madhu Venugopal
  */
+
 package org.opendaylight.ovsdb.schema.hardwarevtep;
 
 import org.opendaylight.ovsdb.lib.notation.Column;
@@ -20,26 +19,26 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 public interface LogicalBindingStats extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name="bytes_from_local", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Long> getBytesFromLocalColumn();
+    Column<GenericTableSchema, Long> getBytesFromLocalColumn();
 
     @TypedColumn(name="bytes_from_local", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setBytesFromLocal(Long bytesFromLocal);
+    void setBytesFromLocal(Long bytesFromLocal);
 
     @TypedColumn(name="packets_from_local", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Long> getPacketsFromLocalColumn();
+    Column<GenericTableSchema, Long> getPacketsFromLocalColumn();
 
     @TypedColumn(name="packets_from_local", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setPacketsFromLocal(Long packetsFromLocal);
+    void setPacketsFromLocal(Long packetsFromLocal);
 
     @TypedColumn(name="bytes_to_local", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Long> getBytesToLocalColumn();
+    Column<GenericTableSchema, Long> getBytesToLocalColumn();
 
     @TypedColumn(name="bytes_to_local", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setBytesToLocal(Long bytesToLocal);
+    void setBytesToLocal(Long bytesToLocal);
 
     @TypedColumn(name="packets_to_local", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Long> getPacketsToLocalColumn();
+    Column<GenericTableSchema, Long> getPacketsToLocalColumn();
 
     @TypedColumn(name="packets_to_local", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setPacketsToLocal(Long packetsToLocal);
+    void setPacketsToLocal(Long packetsToLocal);
 }

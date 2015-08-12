@@ -1,12 +1,11 @@
 /*
- * Copyright (C) 2014 EBay Software Foundation
+ * Copyright (c) 2014, 2015 EBay Software Foundation and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Ashwin Raveendran
  */
+
 package org.opendaylight.ovsdb.lib.schema;
 
 import java.lang.reflect.Constructor;
@@ -24,8 +23,6 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.Insert;
 import org.opendaylight.ovsdb.lib.schema.BaseType.UuidBaseType;
 import org.opendaylight.ovsdb.lib.schema.ColumnType.AtomicColumnType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -34,8 +31,6 @@ import com.google.common.collect.Lists;
 
 public abstract class TableSchema<E extends TableSchema<E>> {
 
-
-    protected static final Logger logger = LoggerFactory.getLogger(TableSchema.class);
     private String name;
     private Map<String, ColumnSchema> columns;
 
@@ -84,7 +79,7 @@ public abstract class TableSchema<E extends TableSchema<E>> {
     public <D> ColumnSchema<E, Set<D>> multiValuedColumn(String column, Class<D> type) {
         //todo exception handling
 
-        ColumnSchema columnSchema = columns.get(column);
+        ColumnSchema<E, Set<D>> columnSchema = columns.get(column);
         columnSchema.validateType(type);
         return columnSchema;
     }
@@ -92,7 +87,7 @@ public abstract class TableSchema<E extends TableSchema<E>> {
     public <K,V> ColumnSchema<E, Map<K,V>> multiValuedColumn(String column, Class<K> keyType, Class<V> valueType) {
         //todo exception handling
 
-        ColumnSchema columnSchema = columns.get(column);
+        ColumnSchema<E, Map<K, V>> columnSchema = columns.get(column);
         columnSchema.validateType(valueType);
         return columnSchema;
     }
@@ -100,7 +95,7 @@ public abstract class TableSchema<E extends TableSchema<E>> {
     public <D> ColumnSchema<E, D> column(String column, Class<D> type) {
         //todo exception handling
 
-        ColumnSchema columnSchema = columns.get(column);
+        ColumnSchema<E, D> columnSchema = columns.get(column);
         if (columnSchema != null) {
             columnSchema.validateType(type);
         }

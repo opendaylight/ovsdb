@@ -1,12 +1,11 @@
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Madhu Venugopal
  */
+
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services;
 
 import java.math.BigInteger;
@@ -44,8 +43,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowplugin.extension.ni
 import com.google.common.collect.Lists;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ClassifierService extends AbstractServiceInstance implements ClassifierProvider, ConfigInterface {
     public final static long REG_VALUE_FROM_LOCAL = 0x1L;
@@ -59,8 +56,6 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
     public ClassifierService(Service service) {
         super(service);
     }
-
-    private static final Logger logger = LoggerFactory.getLogger(ClassifierService.class);
 
     /*
      * (Table:Classifier) Egress VM Traffic Towards TEP
@@ -366,14 +361,13 @@ public class ClassifierService extends AbstractServiceInstance implements Classi
 
         if (write) {
             // Create the OF Actions and Instructions
-            InstructionBuilder ib = new InstructionBuilder();
             InstructionsBuilder isb = new InstructionsBuilder();
 
             // Instructions List Stores Individual Instructions
             List<Instruction> instructions = Lists.newArrayList();
 
             // Append the default pipeline after the first classification
-            ib = this.getMutablePipelineInstructionBuilder();
+            InstructionBuilder ib = this.getMutablePipelineInstructionBuilder();
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructions.add(ib.build());

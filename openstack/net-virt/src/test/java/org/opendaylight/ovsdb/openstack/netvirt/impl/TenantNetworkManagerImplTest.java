@@ -106,7 +106,7 @@ public class TenantNetworkManagerImplTest {
         NeutronNetwork neutronNetwork = mock(NeutronNetwork.class);
         when(neutronNetwork.getProviderSegmentationID()).thenReturn(SEG_ID);
         when(neutronNetwork.getNetworkUUID()).thenReturn(NETWORK_ID);
-        ArrayList<NeutronNetwork> listNeutronNetwork = new ArrayList<NeutronNetwork>();
+        List<NeutronNetwork> listNeutronNetwork = new ArrayList<NeutronNetwork>();
         listNeutronNetwork.add(neutronNetwork);
         when(neutronNetworkCache.getAllNetworks()).thenReturn(listNeutronNetwork);
 
@@ -128,7 +128,7 @@ public class TenantNetworkManagerImplTest {
     @Test
     public void testGetNetworkId() {
         NeutronNetwork neutronNetwork = mock(NeutronNetwork.class);
-        ArrayList<NeutronNetwork> listNeutronNetwork = new ArrayList<NeutronNetwork>();
+        List<NeutronNetwork> listNeutronNetwork = new ArrayList<NeutronNetwork>();
         listNeutronNetwork.add(neutronNetwork);
 
         when(neutronNetwork.getProviderSegmentationID()).thenReturn("segId");

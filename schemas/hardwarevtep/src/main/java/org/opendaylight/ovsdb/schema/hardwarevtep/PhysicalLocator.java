@@ -1,12 +1,11 @@
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Madhu Venugopal
  */
+
 package org.opendaylight.ovsdb.schema.hardwarevtep;
 
 import java.util.Map;
@@ -21,26 +20,26 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 @TypedTable(name="Physical_Locator", database="hardware_vtep", fromVersion="1.0.0")
 public interface PhysicalLocator extends TypedBaseTable<GenericTableSchema> {
     @TypedColumn(name="encapsulation_type", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, String> getEncapsulationTypeColumn();
+    Column<GenericTableSchema, String> getEncapsulationTypeColumn();
 
     @TypedColumn(name="encapsulation_type", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setEncapsulationType(String encapsulationType);
+    void setEncapsulationType(String encapsulationType);
 
     @TypedColumn(name="dst_ip", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, String> getDstIpColumn();
+    Column<GenericTableSchema, String> getDstIpColumn();
 
     @TypedColumn(name="dst_ip", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setDstIp(String dstIp);
+    void setDstIp(String dstIp);
 
     @TypedColumn(name="bfd", method=MethodType.GETCOLUMN, fromVersion="1.0.0", untilVersion="1.2.0")
-    public Column<GenericTableSchema, Map<String, String>> getBfdColumn();
+    Column<GenericTableSchema, Map<String, String>> getBfdColumn();
 
     @TypedColumn(name="bfd", method=MethodType.SETDATA, fromVersion="1.0.0", untilVersion="1.2.0")
-    public void setBfd(Map<String, String> bfd);
+    void setBfd(Map<String, String> bfd);
 
     @TypedColumn(name="bfd_status", method=MethodType.GETCOLUMN, fromVersion="1.0.0", untilVersion="1.2.0")
-    public Column<GenericTableSchema, Map<String, String>> getBfdStatusColumn();
+    Column<GenericTableSchema, Map<String, String>> getBfdStatusColumn();
 
     @TypedColumn(name="bfd_status", method=MethodType.SETDATA, fromVersion="1.0.0", untilVersion="1.2.0")
-    public void setBfdStatus(Map<String, String> bfdStatus);
+    void setBfdStatus(Map<String, String> bfdStatus);
 }

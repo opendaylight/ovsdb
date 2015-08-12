@@ -1,12 +1,11 @@
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Madhu Venugopal
  */
+
 package org.opendaylight.ovsdb.lib.schema.typed;
 
 import org.opendaylight.ovsdb.lib.notation.Column;
@@ -22,14 +21,14 @@ public interface TypedBaseTable<E extends TableSchema<E>> {
     Row<E> getRow();
 
     @TypedColumn(name = "_uuid", method = MethodType.GETDATA)
-    public UUID getUuid();
+    UUID getUuid();
 
     @TypedColumn(name = "_uuid", method = MethodType.GETCOLUMN)
-    public Column<E, UUID> getUuidColumn();
+    Column<E, UUID> getUuidColumn();
 
     @TypedColumn(name = "_version", method = MethodType.GETDATA)
-    public UUID getVersion();
+    UUID getVersion();
 
     @TypedColumn(name = "_version", method = MethodType.GETCOLUMN)
-    public Column<E, UUID> getVersionColumn();
+    Column<E, UUID> getVersionColumn();
 }

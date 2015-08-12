@@ -1,11 +1,9 @@
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Dave Tucker
  */
 
 package org.opendaylight.ovsdb.openstack.netvirt.api;
@@ -24,7 +22,7 @@ public interface VlanConfigurationCache {
      * @param networkId the Neutron Network ID
      * @return a VLAN ID or 0 in case of an error
      */
-    public Integer assignInternalVlan (Node node, String networkId);
+    Integer assignInternalVlan(Node node, String networkId);
 
     /**
      * Recovers an assigned VLAN ID when it is no longer required
@@ -32,7 +30,7 @@ public interface VlanConfigurationCache {
      * @param networkId the Neutron Network ID
      * @return the reclaimed VLAN ID or 0 in case of an error
      */
-    public Integer reclaimInternalVlan (Node node, String networkId);
+    Integer reclaimInternalVlan(Node node, String networkId);
 
     /**
      * Returns a VLAN ID assigned to a given tenant network
@@ -40,5 +38,5 @@ public interface VlanConfigurationCache {
      * @param networkId the Neutron Network ID
      * @return the VLAN ID or 0 in case of an error
      */
-    public Integer getInternalVlan (Node node, String networkId);
+    Integer getInternalVlan(Node node, String networkId);
 }

@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import java.util.HashMap;
@@ -29,14 +37,10 @@ import com.google.common.util.concurrent.CheckedFuture;
 
 public class BridgeOperationalState {
     private static final Logger LOG = LoggerFactory.getLogger(BridgeOperationalState.class);
-    private DataBroker db;
-    private AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> changes;
-    private Map<InstanceIdentifier<Node>, Node> operationalNodes = new HashMap<InstanceIdentifier<Node>, Node>();
+    private Map<InstanceIdentifier<Node>, Node> operationalNodes = new HashMap<>();
 
     public BridgeOperationalState(DataBroker db, AsyncDataChangeEvent<InstanceIdentifier<?>,
             DataObject> changes) {
-        this.db = db;
-        this.changes = changes;
         ReadOnlyTransaction transaction = db.newReadOnlyTransaction();
         Map<InstanceIdentifier<Node>, Node> nodeCreateOrUpdate =
                 TransactUtils.extractCreatedOrUpdatedOrRemoved(changes, Node.class);
@@ -49,9 +53,7 @@ public class BridgeOperationalState {
                     if (nodeOptional.isPresent()) {
                         operationalNodes.put(entry.getKey(), nodeOptional.get());
                     }
-                } catch (InterruptedException e) {
-                    LOG.warn("Error reading from datastore",e);
-                } catch (ExecutionException e) {
+                } catch (InterruptedException | ExecutionException e) {
                     LOG.warn("Error reading from datastore",e);
                 }
             }
@@ -61,30 +63,27 @@ public class BridgeOperationalState {
 
     public Optional<Node> getBridgeNode(InstanceIdentifier<?> iid) {
         InstanceIdentifier<Node> nodeIid = iid.firstIdentifierOf(Node.class);
-        if (operationalNodes.containsKey(nodeIid)) {
-            return Optional.of(operationalNodes.get(nodeIid));
-        }
-        return Optional.absent();
+        return Optional.fromNullable(operationalNodes.get(nodeIid));
     }
 
     public Optional<OvsdbBridgeAugmentation> getOvsdbBridgeAugmentation(InstanceIdentifier<?> iid) {
         Optional<Node> nodeOptional = getBridgeNode(iid);
-        if (nodeOptional.isPresent() && nodeOptional.get().getAugmentation(OvsdbBridgeAugmentation.class) != null) {
-            return Optional.of(nodeOptional.get().getAugmentation(OvsdbBridgeAugmentation.class));
+        if (nodeOptional.isPresent()) {
+            return Optional.fromNullable(nodeOptional.get().getAugmentation(OvsdbBridgeAugmentation.class));
         }
         return Optional.absent();
     }
 
     public Optional<TerminationPoint> getBridgeTerminationPoint(InstanceIdentifier<?> iid) {
-        Optional<Node> nodeOptional = getBridgeNode(iid);
-        if (nodeOptional.isPresent()
-                && nodeOptional.get().getTerminationPoint() != null
-                && iid != null) {
-            TerminationPointKey key = iid.firstKeyOf(TerminationPoint.class, TerminationPointKey.class);
-            if (key != null) {
-                for (TerminationPoint tp:nodeOptional.get().getTerminationPoint()) {
-                    if (tp.getKey().equals(key)) {
-                        return Optional.of(tp);
+        if (iid != null) {
+            Optional<Node> nodeOptional = getBridgeNode(iid);
+            if (nodeOptional.isPresent() && nodeOptional.get().getTerminationPoint() != null) {
+                TerminationPointKey key = iid.firstKeyOf(TerminationPoint.class, TerminationPointKey.class);
+                if (key != null) {
+                    for (TerminationPoint tp:nodeOptional.get().getTerminationPoint()) {
+                        if (tp.getKey().equals(key)) {
+                            return Optional.of(tp);
+                        }
                     }
                 }
             }
@@ -94,23 +93,22 @@ public class BridgeOperationalState {
 
     public Optional<OvsdbTerminationPointAugmentation> getOvsdbTerminationPointAugmentation(InstanceIdentifier<?> iid) {
         Optional<TerminationPoint> tpOptional = getBridgeTerminationPoint(iid);
-        if (tpOptional.isPresent()
-                && tpOptional.get().getAugmentation(OvsdbTerminationPointAugmentation.class) != null) {
-            return Optional.of(tpOptional.get().getAugmentation(OvsdbTerminationPointAugmentation.class));
+        if (tpOptional.isPresent()) {
+            return Optional.fromNullable(tpOptional.get().getAugmentation(OvsdbTerminationPointAugmentation.class));
         }
         return Optional.absent();
     }
 
     public Optional<ControllerEntry> getControllerEntry(InstanceIdentifier<?> iid) {
-        Optional<OvsdbBridgeAugmentation> ovsdbBridgeOptional = getOvsdbBridgeAugmentation(iid);
-        if (ovsdbBridgeOptional.isPresent()
-                && ovsdbBridgeOptional.get().getControllerEntry() != null
-                && iid != null) {
-            ControllerEntryKey key = iid.firstKeyOf(ControllerEntry.class, ControllerEntryKey.class);
-            if (key != null) {
-                for (ControllerEntry entry: ovsdbBridgeOptional.get().getControllerEntry()) {
-                    if (entry.getKey().equals(key)) {
-                        return Optional.of(entry);
+        if (iid != null) {
+            Optional<OvsdbBridgeAugmentation> ovsdbBridgeOptional = getOvsdbBridgeAugmentation(iid);
+            if (ovsdbBridgeOptional.isPresent() && ovsdbBridgeOptional.get().getControllerEntry() != null) {
+                ControllerEntryKey key = iid.firstKeyOf(ControllerEntry.class, ControllerEntryKey.class);
+                if (key != null) {
+                    for (ControllerEntry entry: ovsdbBridgeOptional.get().getControllerEntry()) {
+                        if (entry.getKey().equals(key)) {
+                            return Optional.of(entry);
+                        }
                     }
                 }
             }
@@ -119,15 +117,15 @@ public class BridgeOperationalState {
     }
 
     public Optional<ProtocolEntry> getProtocolEntry(InstanceIdentifier<ProtocolEntry> iid) {
-        Optional<OvsdbBridgeAugmentation> ovsdbBridgeOptional = getOvsdbBridgeAugmentation(iid);
-        if (ovsdbBridgeOptional.isPresent()
-                && ovsdbBridgeOptional.get().getProtocolEntry() != null
-                && iid != null) {
-            ProtocolEntryKey key = iid.firstKeyOf(ProtocolEntry.class, ProtocolEntryKey.class);
-            if (key != null) {
-                for (ProtocolEntry entry: ovsdbBridgeOptional.get().getProtocolEntry()) {
-                    if (entry.getKey().equals(key)) {
-                        return Optional.of(entry);
+        if (iid != null) {
+            Optional<OvsdbBridgeAugmentation> ovsdbBridgeOptional = getOvsdbBridgeAugmentation(iid);
+            if (ovsdbBridgeOptional.isPresent() && ovsdbBridgeOptional.get().getProtocolEntry() != null) {
+                ProtocolEntryKey key = iid.firstKeyOf(ProtocolEntry.class, ProtocolEntryKey.class);
+                if (key != null) {
+                    for (ProtocolEntry entry: ovsdbBridgeOptional.get().getProtocolEntry()) {
+                        if (entry.getKey().equals(key)) {
+                            return Optional.of(entry);
+                        }
                     }
                 }
             }

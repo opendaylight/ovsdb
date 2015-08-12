@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * @author Sam Hague (shague@redhat.com)
  */
 public class MdsalUtils {
-    private static final Logger LOG = LoggerFactory.getLogger(SouthboundIT.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MdsalUtils.class);
     private DataBroker databroker = null;
 
     /**

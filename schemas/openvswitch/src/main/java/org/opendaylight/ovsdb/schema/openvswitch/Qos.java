@@ -1,12 +1,11 @@
 /*
- * Copyright (C) 2013 Red Hat, Inc.
+ * Copyright (c) 2013, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Madhu Venugopal
  */
+
 package org.opendaylight.ovsdb.schema.openvswitch;
 
 
@@ -28,26 +27,26 @@ import java.util.Set;
 public interface Qos extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn (name="queues", method= MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Map<Long, UUID>> getQueuesColumn() ;
+    Column<GenericTableSchema, Map<Long, UUID>> getQueuesColumn() ;
 
     @TypedColumn (name="queues", method= MethodType.SETDATA, fromVersion="1.0.0")
-    public void setQueues(Map<Long, UUID> queues) ;
+    void setQueues(Map<Long, UUID> queues) ;
 
     @TypedColumn (name="type", method= MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<String>> getTypeColumn() ;
+    Column<GenericTableSchema, Set<String>> getTypeColumn() ;
 
     @TypedColumn (name="type", method= MethodType.SETDATA, fromVersion="1.0.0")
-    public void setType(Set<String> type) ;
+    void setType(Set<String> type) ;
 
     @TypedColumn (name="other_config", method= MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Map<String, String>> getOtherConfigColumn() ;
+    Column<GenericTableSchema, Map<String, String>> getOtherConfigColumn() ;
 
     @TypedColumn (name="other_config", method= MethodType.SETDATA, fromVersion="1.0.0")
-    public void setOtherConfig(Map<String, String> otherConfig) ;
+    void setOtherConfig(Map<String, String> otherConfig) ;
 
     @TypedColumn (name="external_ids", method= MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn() ;
+    Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn() ;
 
     @TypedColumn (name="external_ids", method= MethodType.SETDATA, fromVersion="1.0.0")
-    public void setExternalIds(Map<String, String> externalIds) ;
+    void setExternalIds(Map<String, String> externalIds) ;
 }

@@ -140,6 +140,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <version>${sonar-jacoco-listeners.version}</version>
       <scope>test</scope>
     </dependency>
+    <!-- AbstractConfigTestBase::getKarafDistro() needs this to find its version -->
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>karaf</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>

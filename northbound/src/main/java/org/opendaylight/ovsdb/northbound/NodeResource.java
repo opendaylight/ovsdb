@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
 package org.opendaylight.ovsdb.northbound;
 
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -94,7 +102,9 @@ public class NodeResource {
     public Response getNodes() throws JsonProcessingException {
         OvsdbConnectionService connectionService = (OvsdbConnectionService)ServiceHelper.getGlobalInstance(OvsdbConnectionService.class, this);
         List<Node> nodes = connectionService.getNodes();
-        if (nodes == null) return Response.noContent().build();
+        if (nodes == null) {
+            return Response.noContent().build();
+        }
 
         List<String> nodeIds = Lists.newArrayList();
         for (Node node : nodes) {

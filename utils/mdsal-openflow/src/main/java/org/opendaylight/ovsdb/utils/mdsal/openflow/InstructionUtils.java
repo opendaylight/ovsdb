@@ -1,10 +1,9 @@
 /*
- * Copyright (C) 2013 Red Hat, Inc.
+ * Copyright (c) 2013, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
  */
 
 package org.opendaylight.ovsdb.utils.mdsal.openflow;
@@ -79,7 +78,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InstructionUtils {
-    private static final Logger logger = LoggerFactory.getLogger(InstructionUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(InstructionUtils.class);
     private static final int IPV4 = 0x8100;
     private static final int MAX_LENGTH = 0xffff;
 
@@ -158,7 +157,7 @@ public class InstructionUtils {
     public static InstructionBuilder createOutputPortInstructions(InstructionBuilder ib, Long dpidLong, Long port) {
 
         NodeConnectorId ncid = new NodeConnectorId("openflow:" + dpidLong + ":" + port);
-        logger.debug("createOutputPortInstructions() Node Connector ID is - Type=openflow: DPID={} inPort={} ",
+        LOG.debug("createOutputPortInstructions() Node Connector ID is - Type=openflow: DPID={} inPort={} ",
                 dpidLong, port);
 
         List<Action> actionList = Lists.newArrayList();
@@ -193,7 +192,7 @@ public class InstructionUtils {
             Long dpidLong, Long port,
             List<Instruction> instructions) {
         NodeConnectorId ncid = new NodeConnectorId("openflow:" + dpidLong + ":" + port);
-        logger.debug(
+        LOG.debug(
                 "addOutputPortInstructions() Node Connector ID is - Type=openflow: DPID={} port={} existingInstructions={}",
                 dpidLong, port, instructions);
 
@@ -239,7 +238,7 @@ public class InstructionUtils {
 
         final NodeConnectorId ncid = new NodeConnectorId("openflow:" + dpidLong + ":" + port);
         final Uri ncidUri = new Uri(ncid);
-        logger.debug(
+        LOG.debug(
                 "removeOutputPortFromInstructions() Node Connector ID is - Type=openflow: DPID={} port={} existingInstructions={}",
                 dpidLong, port, instructions);
 
@@ -300,7 +299,7 @@ public class InstructionUtils {
                 } else if (action.getOrder() == removedActionOrder) {
                     // Sanity: implementation assumes no two actions have the same order
                     //
-                    logger.error("Found action with same order as the action removed for {}, order {} index {}: {}",
+                    LOG.error("Found action with same order as the action removed for {}, order {} index {}: {}",
                             ncid, removedActionOrder, i, action);
                 }
 
@@ -316,8 +315,8 @@ public class InstructionUtils {
             // If port we are asked to delete is not found, this implementation will leave actions
             // alone and not remove the flow, as long as a remaining OutputActionCase is found.
             //
-            for (int i = 0; i < actionList.size(); i++) {
-                if (actionList.get(i).getAction() instanceof OutputActionCase) {
+            for (Action action : actionList) {
+                if (action.getAction() instanceof OutputActionCase) {
                     removeFlow = false;
                     break;
                 }
@@ -329,7 +328,7 @@ public class InstructionUtils {
             ApplyActionsBuilder aab = new ApplyActionsBuilder();
             aab.setAction(actionList);
             ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
-            logger.debug("removeOutputPortFromInstructions() : applyAction {}", aab.build());
+            LOG.debug("removeOutputPortFromInstructions() : applyAction {}", aab.build());
             return false;
         } else {
             /* if all output ports are removed. Return true to indicate flow remove */
@@ -1022,8 +1021,8 @@ public class InstructionUtils {
         return ib;
     }
 
-    public static ArrayList<org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action>
-                  actionList (org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action... actions) {
+    public static List<Action>
+                  actionList(org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.Action... actions) {
 
         ArrayList<org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action> alist
             = new ArrayList<>();
@@ -1050,7 +1049,7 @@ public class InstructionUtils {
     }
 
     public static Instructions getInstructions(org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.Instruction... instructions) {
-        ArrayList<org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction> ins
+        List<Instruction> ins
             = new ArrayList<>();
         int order = 0;
         for (org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.Instruction i : instructions) {
@@ -1077,7 +1076,7 @@ public class InstructionUtils {
      */
     public static List<Instruction> getInstructionList(
             org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.Instruction... instructions) {
-        ArrayList<org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction> ins
+        List<Instruction> ins
                 = new ArrayList<>();
         int order = 0;
         for (org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.Instruction i : instructions) {

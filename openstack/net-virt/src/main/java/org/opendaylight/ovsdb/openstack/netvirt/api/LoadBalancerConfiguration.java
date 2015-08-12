@@ -1,11 +1,9 @@
 /*
- * Copyright (C) 2014 SDN Hub, LLC.
+ * Copyright (c) 2014, 2015 SDN Hub, LLC. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Srini Seetharaman
  */
 
 package org.opendaylight.ovsdb.openstack.netvirt.api;
@@ -68,33 +66,44 @@ public class LoadBalancerConfiguration {
          */
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             LoadBalancerPoolMember other = (LoadBalancerPoolMember) obj;
             if (ipAddr == null) {
-                if (other.ipAddr != null)
+                if (other.ipAddr != null) {
                     return false;
-            } else if (!ipAddr.equals(other.ipAddr))
+                }
+            } else if (!ipAddr.equals(other.ipAddr)) {
                 return false;
+            }
             if (macAddr == null) {
-                if (other.macAddr != null)
+                if (other.macAddr != null) {
                     return false;
-            } else if (!macAddr.equals(other.macAddr))
+                }
+            } else if (!macAddr.equals(other.macAddr)) {
                 return false;
+            }
             if (port == null) {
-                if (other.port != null)
+                if (other.port != null) {
                     return false;
-            } else if (!port.equals(other.port))
+                }
+            } else if (!port.equals(other.port)) {
                 return false;
+            }
             if (protocol == null) {
-                if (other.protocol != null)
+                if (other.protocol != null) {
                     return false;
-            } else if (!protocol.equals(other.protocol))
+                }
+            } else if (!protocol.equals(other.protocol)) {
                 return false;
+            }
             return true;
         }
 
@@ -156,8 +165,9 @@ public class LoadBalancerConfiguration {
 
     public Map<String, LoadBalancerPoolMember> addMember(String uuid, LoadBalancerPoolMember member) {
         //If index is not set for this object, update it before inserting
-        if (member.getIndex() == -1)
+        if (member.getIndex() == -1) {
             member.setIndex(members.size());
+        }
         this.members.put(uuid, member);
         return this.members;
     }
@@ -171,16 +181,18 @@ public class LoadBalancerConfiguration {
         /* Update indices of all other members
          */
         int index = 0;
-        for(Map.Entry<String, LoadBalancerPoolMember> entry : this.getMembers().entrySet())
+        for(Map.Entry<String, LoadBalancerPoolMember> entry : this.getMembers().entrySet()) {
             ((LoadBalancerPoolMember) entry.getValue()).setIndex(index++);
+        }
         return this.members;
     }
 
     public boolean isValid() {
-        if (members.size() == 0)
+        if (members.size() == 0) {
             return false;
-        else if (providerNetworkType == null)
+        } else if (providerNetworkType == null) {
             return false;
+        }
         return true;
     }
 

@@ -1,11 +1,9 @@
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Madhu Venugopal
  */
 
 package org.opendaylight.ovsdb.lib.impl;
@@ -74,7 +72,7 @@ import com.google.common.collect.Sets;
  * and a Singleton object in a non-OSGi environment.
  */
 public class OvsdbConnectionService implements OvsdbConnection {
-    private static final Logger logger = LoggerFactory.getLogger(OvsdbConnectionService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionService.class);
     private static final int NUM_THREADS = 3;
 
     // Singleton Service object that can be used in Non-OSGi environment
@@ -127,9 +125,9 @@ public class OvsdbConnectionService implements OvsdbConnection {
                     Executors.newFixedThreadPool(NUM_THREADS));
             return client;
         } catch (InterruptedException e) {
-            logger.warn("Thread was interrupted during connect", e);
+            LOG.warn("Thread was interrupted during connect", e);
         } catch (Exception e) {
-            logger.warn("bootstrap.connect failed", e);
+            LOG.warn("bootstrap.connect failed", e);
         }
         return null;
     }
@@ -242,7 +240,7 @@ public class OvsdbConnectionService implements OvsdbConnection {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         public void initChannel(SocketChannel channel) throws Exception {
-                            logger.debug("New Passive channel created : {}", channel);
+                            LOG.debug("New Passive channel created : {}", channel);
                             if (sslContext != null) {
                                 /* Add SSL handler first if SSL context is provided */
                                 SSLEngine engine = sslContext.createSSLEngine();
@@ -250,17 +248,17 @@ public class OvsdbConnectionService implements OvsdbConnection {
                                 engine.setNeedClientAuth(true); // need client authentication
                                 //Disable SSLv3 and enable all other supported protocols
                                 String[] protocols = {"SSLv2Hello", "TLSv1", "TLSv1.1", "TLSv1.2"};
-                                logger.debug("Set enable protocols {}", Arrays.toString(protocols));
+                                LOG.debug("Set enable protocols {}", Arrays.toString(protocols));
                                 engine.setEnabledProtocols(protocols);
-                                logger.debug("Supported ssl protocols {}",
+                                LOG.debug("Supported ssl protocols {}",
                                         Arrays.toString(engine.getSupportedProtocols()));
-                                logger.debug("Enabled ssl protocols {}",
+                                LOG.debug("Enabled ssl protocols {}",
                                         Arrays.toString(engine.getEnabledProtocols()));
                                 //Set cipher suites
                                 String[] cipherSuites = {"TLS_RSA_WITH_AES_128_CBC_SHA"};
-                                logger.debug("Set enable cipher cuites {}", Arrays.toString(cipherSuites));
+                                LOG.debug("Set enable cipher cuites {}", Arrays.toString(cipherSuites));
                                 engine.setEnabledCipherSuites(cipherSuites);
-                                logger.debug("Enabled cipher suites {}",
+                                LOG.debug("Enabled cipher suites {}",
                                         Arrays.toString(engine.getEnabledCipherSuites()));
                                 channel.pipeline().addLast("ssl", new SslHandler(engine));
                             }
@@ -282,7 +280,7 @@ public class OvsdbConnectionService implements OvsdbConnection {
             // Wait until the server socket is closed.
             serverListenChannel.closeFuture().sync();
         } catch (InterruptedException e) {
-            logger.error("Thread interrupted", e);
+            LOG.error("Thread interrupted", e);
         } finally {
             // Shut down all event loops to terminate all threads.
             bossGroup.shutdownGracefully();
@@ -302,24 +300,24 @@ public class OvsdbConnectionService implements OvsdbConnection {
                 if (sslHandler != null) {
                     //Wait until ssl handshake is complete
                     int count = 0;
-                    logger.debug("Check if ssl handshake is done");
+                    LOG.debug("Check if ssl handshake is done");
                     while (sslHandler.engine().getSession().getCipherSuite()
                                             .equals("SSL_NULL_WITH_NULL_NULL")
                                             && count < 10) {
                         try {
                             Thread.sleep(100);
                         } catch (InterruptedException e) {
-                            logger.error("Exception while checking if ssl handshake is done", e);
+                            LOG.error("Exception while checking if ssl handshake is done", e);
                         }
                         count++;
                     }
                     if (sslHandler.engine().getSession().getCipherSuite()
                                            .equals("SSL_NULL_WITH_NULL_NULL")) {
-                        logger.debug("Ssl hanshake is not compelete yet");
+                        LOG.debug("Ssl hanshake is not compelete yet");
                         return;
                     }
                 }
-                logger.debug("Notify listener");
+                LOG.debug("Notify listener");
                 for (OvsdbConnectionListener listener : connectionListeners) {
                     listener.connected(client);
                 }
@@ -328,7 +326,7 @@ public class OvsdbConnectionService implements OvsdbConnection {
     }
 
     public static void channelClosed(final OvsdbClient client) {
-        logger.info("Connection closed {}", client.getConnectionInfo().toString());
+        LOG.info("Connection closed {}", client.getConnectionInfo().toString());
         connections.remove(client);
         for (OvsdbConnectionListener listener : connectionListeners) {
             listener.disconnected(client);

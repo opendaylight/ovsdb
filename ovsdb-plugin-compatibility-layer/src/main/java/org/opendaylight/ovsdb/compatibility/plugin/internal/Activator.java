@@ -20,8 +20,6 @@ import org.opendaylight.ovsdb.compatibility.plugin.api.OvsdbInventoryService;
 import org.opendaylight.ovsdb.compatibility.plugin.impl.ConfigurationServiceImpl;
 import org.opendaylight.ovsdb.compatibility.plugin.impl.ConnectionServiceImpl;
 import org.opendaylight.ovsdb.compatibility.plugin.impl.InventoryServiceImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Activator for ovsdb plugin compatibility layer
@@ -29,8 +27,6 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class Activator extends ComponentActivatorAbstractBase {
-    protected static final Logger logger = LoggerFactory
-            .getLogger(Activator.class);
 
     /**
      * Function called when the activator starts just after some initializations
@@ -54,15 +50,14 @@ public class Activator extends ComponentActivatorAbstractBase {
     }
     @Override
     public Object[] getGlobalImplementations() {
-        Object[] res = { ConnectionServiceImpl.class, ConfigurationServiceImpl.class, InventoryServiceImpl.class };
-        return res;
+        return new Object[]{ ConnectionServiceImpl.class, ConfigurationServiceImpl.class, InventoryServiceImpl.class };
     }
 
     @Override
     public void configureGlobalInstance(Component c, Object imp){
         if (imp.equals(ConfigurationServiceImpl.class)) {
             // export the service to be used by SAL
-            Dictionary<String, Object> props = new Hashtable<String, Object>();
+            Dictionary<String, Object> props = new Hashtable<>();
             c.setInterface(new String[] { OvsdbConfigurationService.class.getName()}, props);
             c.add(createServiceDependency()
                     .setService(org.opendaylight.ovsdb.plugin.api.OvsdbConfigurationService.class)
@@ -72,7 +67,7 @@ public class Activator extends ComponentActivatorAbstractBase {
 
         if (imp.equals(ConnectionServiceImpl.class)) {
             // export the service to be used by SAL
-            Dictionary<String, Object> props = new Hashtable<String, Object>();
+            Dictionary<String, Object> props = new Hashtable<>();
             c.setInterface(
                     new String[] {OvsdbConnectionService.class.getName()}, props);
             c.add(createServiceDependency()

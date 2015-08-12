@@ -1,11 +1,9 @@
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Madhu Venugopal
  */
 
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
@@ -13,6 +11,7 @@ package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
 public enum Service {
 
     CLASSIFIER ((short) 0, "Classifier"),
+    GATEWAY_RESOLVER((short) 0, "External Network Gateway Resolver"),
     DIRECTOR ((short) 10, "Director"),
     ARP_RESPONDER ((short) 20, "Distributed ARP Responder"),
     INBOUND_NAT ((short) 30, "DNAT for inbound floating-ip traffic"),

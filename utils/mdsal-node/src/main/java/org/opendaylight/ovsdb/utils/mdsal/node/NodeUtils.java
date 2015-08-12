@@ -1,23 +1,19 @@
 /*
- * Copyright (C) 2015 Red Hat, Inc.
+ * Copyright (c) 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Sam Hague
  */
+
 package org.opendaylight.ovsdb.utils.mdsal.node;
 
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class NodeUtils {
-    protected static final Logger LOG = LoggerFactory.getLogger(NodeUtils.class);
 
     public static String getId (String identifier) {
         String id = identifier;
@@ -32,11 +28,10 @@ public class NodeUtils {
     public static Node getOpenFlowNode (String identifier) {
         NodeId nodeId = new NodeId(identifier);
         NodeKey nodeKey = new NodeKey(nodeId);
-        Node node = new NodeBuilder()
+
+        return new NodeBuilder()
                 .setId(nodeId)
                 .setKey(nodeKey)
                 .build();
-
-        return node;
     }
 }

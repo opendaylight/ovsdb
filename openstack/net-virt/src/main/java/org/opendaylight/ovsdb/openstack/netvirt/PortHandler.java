@@ -1,12 +1,11 @@
 /*
- * Copyright (C) 2013 Red Hat, Inc.
+ * Copyright (c) 2013, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Madhu Venugopal, Brent Salisbury
  */
+
 package org.opendaylight.ovsdb.openstack.netvirt;
 
 import java.net.HttpURLConnection;
@@ -32,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * Handle requests for Neutron Port.
  */
 public class PortHandler extends AbstractHandler implements INeutronPortAware, ConfigInterface {
-    static final Logger logger = LoggerFactory.getLogger(PortHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PortHandler.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile NodeCacheManager nodeCacheManager;
@@ -61,8 +60,7 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware, C
         enqueueEvent(new NorthboundEvent(neutronPort, Action.ADD));
     }
     private void doNeutronPortCreated(NeutronPort neutronPort) {
-        logger.debug(" Port-ADD successful for tenant-id - {}," +
-                     " network-id - {}, port-id - {}",
+        LOG.debug(" Port-ADD successful for tenant-id - {}, network-id - {}, port-id - {}",
                      neutronPort.getTenantID(), neutronPort.getNetworkUUID(),
                      neutronPort.getID());
         neutronL3Adapter.handleNeutronPortEvent(neutronPort, Action.ADD);
@@ -94,7 +92,7 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware, C
         enqueueEvent(new NorthboundEvent(neutronPort, Action.UPDATE));
     }
     private void doNeutronPortUpdated(NeutronPort neutronPort) {
-        logger.debug("Handling neutron update port " + neutronPort);
+        LOG.debug("Handling neutron update port {}", neutronPort);
         neutronL3Adapter.handleNeutronPortEvent(neutronPort, Action.UPDATE);
     }
 
@@ -120,7 +118,7 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware, C
         enqueueEvent(new NorthboundEvent(neutronPort, Action.DELETE));
     }
     private void doNeutronPortDeleted(NeutronPort neutronPort) {
-        logger.debug("Handling neutron delete port " + neutronPort);
+        LOG.debug("Handling neutron delete port {}", neutronPort);
         neutronL3Adapter.handleNeutronPortEvent(neutronPort, Action.DELETE);
         //TODO: Need to implement getNodes
         List<Node> nodes = nodeCacheManager.getNodes();
@@ -131,17 +129,16 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware, C
                     String neutronPortId =
                             southbound.getInterfaceExternalIdsValue(port, Constants.EXTERNAL_ID_INTERFACE_ID);
                     if (neutronPortId != null && neutronPortId.equalsIgnoreCase(neutronPort.getPortUUID())) {
-                        logger.trace("neutronPortDeleted: Delete interface {}", port.getName());
+                        LOG.trace("neutronPortDeleted: Delete interface {}", port.getName());
                         southbound.deleteTerminationPoint(node, port.getName());
                         break;
                     }
                 }
             } catch (Exception e) {
-                logger.error("Exception during handlingNeutron port delete", e);
+                LOG.error("Exception during handlingNeutron port delete", e);
             }
         }
-        logger.debug(" PORT delete successful for tenant-id - {}, " +
-                     " network-id - {}, port-id - {}",
+        LOG.debug(" PORT delete successful for tenant-id - {}, network-id - {}, port-id - {}",
                      neutronPort.getTenantID(), neutronPort.getNetworkUUID(),
                      neutronPort.getID());
     }
@@ -155,7 +152,7 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware, C
     @Override
     public void processEvent(AbstractEvent abstractEvent) {
         if (!(abstractEvent instanceof NorthboundEvent)) {
-            logger.error("Unable to process abstract event " + abstractEvent);
+            LOG.error("Unable to process abstract event {}", abstractEvent);
             return;
         }
         NorthboundEvent ev = (NorthboundEvent) abstractEvent;
@@ -170,7 +167,7 @@ public class PortHandler extends AbstractHandler implements INeutronPortAware, C
                 doNeutronPortUpdated(ev.getPort());
                 break;
             default:
-                logger.warn("Unable to process event action " + ev.getAction());
+                LOG.warn("Unable to process event action {}", ev.getAction());
                 break;
         }
     }

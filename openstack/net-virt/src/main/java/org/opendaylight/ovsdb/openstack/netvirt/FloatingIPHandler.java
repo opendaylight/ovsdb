@@ -1,12 +1,11 @@
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Dave Tucker, Flavio Fernandes
  */
+
 package org.opendaylight.ovsdb.openstack.netvirt;
 
 import java.net.HttpURLConnection;
@@ -28,7 +27,7 @@ import org.slf4j.LoggerFactory;
 public class FloatingIPHandler extends AbstractHandler
         implements INeutronFloatingIPAware, ConfigInterface {
 
-    static final Logger logger = LoggerFactory.getLogger(FloatingIPHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FloatingIPHandler.class);
 
     // The implementation for each of these services is resolved by the OSGi Service Manager
     private volatile NeutronL3Adapter neutronL3Adapter;
@@ -124,7 +123,7 @@ public class FloatingIPHandler extends AbstractHandler
     @Override
     public void processEvent(AbstractEvent abstractEvent) {
         if (!(abstractEvent instanceof NorthboundEvent)) {
-            logger.error("Unable to process abstract event " + abstractEvent);
+            LOG.error("Unable to process abstract event {}", abstractEvent);
             return;
         }
         NorthboundEvent ev = (NorthboundEvent) abstractEvent;
@@ -137,7 +136,7 @@ public class FloatingIPHandler extends AbstractHandler
                 neutronL3Adapter.handleNeutronFloatingIPEvent(ev.getNeutronFloatingIP(), ev.getAction());
                 break;
             default:
-                logger.warn("Unable to process event action " + ev.getAction());
+                LOG.warn("Unable to process event action {}", ev.getAction());
                 break;
         }
     }

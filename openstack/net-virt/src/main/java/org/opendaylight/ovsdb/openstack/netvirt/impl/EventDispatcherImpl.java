@@ -1,11 +1,9 @@
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright (c) 2013, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Dave Tucker, Flavio Fernandes
  */
 
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
@@ -28,7 +26,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class EventDispatcherImpl implements EventDispatcher, ConfigInterface {
-    static final Logger logger = LoggerFactory.getLogger(EventDispatcher.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EventDispatcher.class);
     private ExecutorService eventHandler;
     private volatile BlockingQueue<AbstractEvent> events;
     private AbstractHandler[] handlers;
@@ -46,24 +44,24 @@ public class EventDispatcherImpl implements EventDispatcher, ConfigInterface {
             public void run() {
                 Thread t = Thread.currentThread();
                 t.setName("EventDispatcherImpl");
-                logger.info("EventDispatcherImpl: started {}", t.getName());
+                LOG.info("EventDispatcherImpl: started {}", t.getName());
                 while (true) {
                     AbstractEvent ev;
                     try {
                         ev = events.take();
                     } catch (InterruptedException e) {
-                        logger.info("The event handler thread was interrupted, shutting down", e);
+                        LOG.info("The event handler thread was interrupted, shutting down", e);
                         return;
                     }
                     try {
                         dispatchEvent(ev);
                     } catch (Exception e) {
-                        logger.error("Exception in dispatching event "+ev.toString(), e);
+                        LOG.error("Exception in dispatching event {}", ev.toString(), e);
                     }
                 }
             }
         });
-        logger.debug("event dispatcher is started");
+        LOG.debug("event dispatcher is started");
     }
 
     void stop() {
@@ -74,8 +72,9 @@ public class EventDispatcherImpl implements EventDispatcher, ConfigInterface {
             if (!eventHandler.awaitTermination(10, TimeUnit.SECONDS)) {
                 eventHandler.shutdownNow();
                 // Wait a while for tasks to respond to being cancelled
-                if (!eventHandler.awaitTermination(10, TimeUnit.SECONDS))
-                    logger.error("Dispatcher's event handler did not terminate");
+                if (!eventHandler.awaitTermination(10, TimeUnit.SECONDS)) {
+                    LOG.error("Dispatcher's event handler did not terminate");
+                }
             }
         } catch (InterruptedException e) {
             // (Re-)Cancel if current thread also interrupted
@@ -83,13 +82,13 @@ public class EventDispatcherImpl implements EventDispatcher, ConfigInterface {
             // Preserve interrupt status
             Thread.currentThread().interrupt();
         }
-        logger.debug("event dispatcher is stopped");
+        LOG.debug("event dispatcher is stopped");
     }
 
     private void dispatchEvent(AbstractEvent ev) {
         AbstractHandler handler = handlers[ev.getHandlerType().ordinal()];
         if (handler == null) {
-            logger.warn("event dispatcher found no handler for {}", ev);
+            LOG.warn("event dispatcher found no handler for {}", ev);
             return;
         }
 
@@ -100,13 +99,13 @@ public class EventDispatcherImpl implements EventDispatcher, ConfigInterface {
         Long pid = (Long) ref.getProperty(org.osgi.framework.Constants.SERVICE_ID);
         Object handlerTypeObject = ref.getProperty(Constants.EVENT_HANDLER_TYPE_PROPERTY);
         if (!(handlerTypeObject instanceof AbstractEvent.HandlerType)){
-            logger.error("Abstract handler reg failed to provide a valid handler type: {} ref: {} handler: {}",
+            LOG.error("Abstract handler reg failed to provide a valid handler type: {} ref: {} handler: {}",
                     handlerTypeObject, ref.getClass().getName(), handler.getClass().getName());
             return;
         }
         AbstractEvent.HandlerType handlerType = (AbstractEvent.HandlerType) handlerTypeObject;
         handlers[handlerType.ordinal()] = handler;
-        logger.info("eventHandlerAdded: handler: {}, pid: {}, type: {}",
+        LOG.info("eventHandlerAdded: handler: {}, pid: {}, type: {}",
                 handler.getClass().getName(), pid, handlerType);
     }
 
@@ -114,12 +113,12 @@ public class EventDispatcherImpl implements EventDispatcher, ConfigInterface {
         Long pid = (Long) ref.getProperty(org.osgi.framework.Constants.SERVICE_ID);
         Object handlerTypeObject = ref.getProperty(Constants.EVENT_HANDLER_TYPE_PROPERTY);
         if (!(handlerTypeObject instanceof AbstractEvent.HandlerType)){
-            logger.error("Abstract handler unreg failed to provide a valid handler type " + handlerTypeObject);
+            LOG.error("Abstract handler unreg failed to provide a valid handler type {}", handlerTypeObject);
             return;
         }
         AbstractEvent.HandlerType handlerType = (AbstractEvent.HandlerType) handlerTypeObject;
         handlers[handlerType.ordinal()] = null;
-        logger.debug("Event handler for type {} unregistered pid {}", handlerType, pid);
+        LOG.debug("Event handler for type {} unregistered pid {}", handlerType, pid);
     }
 
     /**
@@ -130,14 +129,14 @@ public class EventDispatcherImpl implements EventDispatcher, ConfigInterface {
     @Override
     public void enqueueEvent(AbstractEvent event) {
         if (event == null) {
-            logger.warn("enqueueEvent: event is null");
+            LOG.warn("enqueueEvent: event is null");
             return;
         }
 
         try {
             events.put(event);
         } catch (InterruptedException e) {
-            logger.error("Thread was interrupted while trying to enqueue event ", e);
+            LOG.error("Thread was interrupted while trying to enqueue event ", e);
         }
     }
 

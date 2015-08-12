@@ -1,11 +1,9 @@
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- *  Authors : Dave Tucker
  */
 
 package org.opendaylight.ovsdb.openstack.netvirt.api;
@@ -25,6 +23,6 @@ public interface NetworkingProviderManager {
      * @see NetworkingProvider
      */
     NetworkingProvider getProvider(Node ovsdbNode);
-    public void providerAdded(final ServiceReference ref, final NetworkingProvider provider);
-    public void providerRemoved(final ServiceReference ref);
+    void providerAdded(final ServiceReference ref, final NetworkingProvider provider);
+    void providerRemoved(final ServiceReference ref);
 }

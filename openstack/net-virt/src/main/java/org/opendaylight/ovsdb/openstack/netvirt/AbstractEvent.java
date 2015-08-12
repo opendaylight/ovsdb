@@ -1,11 +1,9 @@
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Dave Tucker, Flavio Fernandes
  */
 
 package org.opendaylight.ovsdb.openstack.netvirt;
@@ -70,23 +68,30 @@ public abstract class AbstractEvent {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         AbstractEvent other = (AbstractEvent) obj;
         if (handlerType == null) {
-            if (other.handlerType != null)
+            if (other.handlerType != null) {
                 return false;
-        } else if (!handlerType.equals(other.handlerType))
+            }
+        } else if (!handlerType.equals(other.handlerType)) {
             return false;
+        }
         if (action == null) {
-            if (other.action != null)
+            if (other.action != null) {
                 return false;
-        } else if (!action.equals(other.action))
+            }
+        } else if (!action.equals(other.action)) {
             return false;
+        }
         return true;
     }
 }

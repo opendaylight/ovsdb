@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
 package org.opendaylight.ovsdb.openstack.netvirt.providers;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -15,6 +23,7 @@ public class NetvirtProvidersProvider implements BindingAwareProvider, AutoClose
     private BundleContext bundleContext = null;
     private static DataBroker dataBroker = null;
     private ConfigActivator activator;
+    private static ProviderContext providerContext = null;
 
     public NetvirtProvidersProvider(BundleContext bundleContext) {
         LOG.info("NetvirtProvidersProvider: bundleContext: {}", bundleContext);
@@ -25,16 +34,21 @@ public class NetvirtProvidersProvider implements BindingAwareProvider, AutoClose
         return dataBroker;
     }
 
+    public static ProviderContext getProviderContext() {
+        return providerContext;
+    }
+
     @Override
     public void close() throws Exception {
         activator.stop(bundleContext);
     }
 
     @Override
-    public void onSessionInitiated(ProviderContext providerContext) {
-        dataBroker = providerContext.getSALService(DataBroker.class);
+    public void onSessionInitiated(ProviderContext providerContextRef) {
+        dataBroker = providerContextRef.getSALService(DataBroker.class);
+        providerContext = providerContextRef;
         LOG.info("NetvirtProvidersProvider: onSessionInitiated dataBroker: {}", dataBroker);
-        this.activator = new ConfigActivator(providerContext);
+        this.activator = new ConfigActivator(providerContextRef);
         try {
             activator.start(bundleContext);
         } catch (Exception e) {

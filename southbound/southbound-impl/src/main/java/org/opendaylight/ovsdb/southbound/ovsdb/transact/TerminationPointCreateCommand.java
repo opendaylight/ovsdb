@@ -15,9 +15,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
 import java.util.Set;
 
+import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.Mutate;
@@ -28,6 +32,7 @@ import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
+import org.opendaylight.ovsdb.southbound.SouthboundProvider;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes.VlanMode;
@@ -48,6 +53,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.CheckedFuture;
 
 public class TerminationPointCreateCommand extends AbstractTransactCommand {
 
@@ -88,14 +94,16 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
 
                     //Configure bridge with the above port details
                     Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
-                    bridge.setName(getBridge(entry.getKey()).getBridgeName().getValue());
-                    bridge.setPorts(Sets.newHashSet(new UUID(portUuid)));
+                    if (getBridge(entry.getKey()) != null) {
+                        bridge.setName(getBridge(entry.getKey()).getBridgeName().getValue());
+                        bridge.setPorts(Sets.newHashSet(new UUID(portUuid)));
 
-                    transaction.add(op.mutate(bridge)
-                            .addMutation(bridge.getPortsColumn().getSchema(),
-                                    Mutator.INSERT,bridge.getPortsColumn().getData())
-                            .where(bridge.getNameColumn().getSchema()
-                                    .opEqual(bridge.getNameColumn().getData())).build());
+                        transaction.add(op.mutate(bridge)
+                                .addMutation(bridge.getPortsColumn().getSchema(),
+                                        Mutator.INSERT,bridge.getPortsColumn().getData())
+                                .where(bridge.getNameColumn().getSchema()
+                                        .opEqual(bridge.getNameColumn().getData())).build());
+                    }
                 }
             }
         }
@@ -163,7 +171,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
 
         //Configure optional input
         if (terminationPoint.getOptions() != null) {
-            HashMap<String, String> optionsMap = new HashMap<String, String>();
+            Map<String, String> optionsMap = new HashMap<String, String>();
             for (Options option : terminationPoint.getOptions()) {
                 optionsMap.put(option.getOption(), option.getValue());
             }
@@ -182,7 +190,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
         List<InterfaceExternalIds> interfaceExternalIds =
                 terminationPoint.getInterfaceExternalIds();
         if (interfaceExternalIds != null && !interfaceExternalIds.isEmpty()) {
-            HashMap<String, String> externalIdsMap = new HashMap<String, String>();
+            Map<String, String> externalIdsMap = new HashMap<String, String>();
             for (InterfaceExternalIds externalId: interfaceExternalIds) {
                 externalIdsMap.put(externalId.getExternalIdKey(), externalId.getExternalIdValue());
             }
@@ -201,7 +209,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
         List<InterfaceOtherConfigs> interfaceOtherConfigs =
                 terminationPoint.getInterfaceOtherConfigs();
         if (interfaceOtherConfigs != null && !interfaceOtherConfigs.isEmpty()) {
-            HashMap<String, String> otherConfigsMap = new HashMap<String, String>();
+            Map<String, String> otherConfigsMap = new HashMap<String, String>();
             for (InterfaceOtherConfigs interfaceOtherConfig : interfaceOtherConfigs) {
                 otherConfigsMap.put(interfaceOtherConfig.getOtherConfigKey(),
                         interfaceOtherConfig.getOtherConfigValue());
@@ -220,7 +228,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
 
         List<PortExternalIds> portExternalIds = terminationPoint.getPortExternalIds();
         if (portExternalIds != null && !portExternalIds.isEmpty()) {
-            HashMap<String, String> externalIdsMap = new HashMap<String, String>();
+            Map<String, String> externalIdsMap = new HashMap<String, String>();
             for (PortExternalIds externalId: portExternalIds) {
                 externalIdsMap.put(externalId.getExternalIdKey(), externalId.getExternalIdValue());
             }
@@ -276,7 +284,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
         List<PortOtherConfigs> portOtherConfigs =
                 terminationPoint.getPortOtherConfigs();
         if (portOtherConfigs != null && !portOtherConfigs.isEmpty()) {
-            HashMap<String, String> otherConfigsMap = new HashMap<String, String>();
+            Map<String, String> otherConfigsMap = new HashMap<String, String>();
             for (PortOtherConfigs portOtherConfig : portOtherConfigs) {
                 otherConfigsMap.put(portOtherConfig.getOtherConfigKey(),
                         portOtherConfig.getOtherConfigValue());
@@ -290,17 +298,29 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
     }
 
     private OvsdbBridgeAugmentation getBridge(InstanceIdentifier<?> key) {
+        OvsdbBridgeAugmentation bridge = null;
         InstanceIdentifier<Node> nodeIid = key.firstIdentifierOf(Node.class);
         Map<InstanceIdentifier<Node>, Node> nodes =
                 TransactUtils.extractCreatedOrUpdated(getChanges(),Node.class);
         if (nodes != null && nodes.get(nodeIid) != null) {
             Node node = nodes.get(nodeIid);
-            OvsdbBridgeAugmentation bridge = node.getAugmentation(OvsdbBridgeAugmentation.class);
-            if (bridge != null) {
-                return bridge;
+            bridge = node.getAugmentation(OvsdbBridgeAugmentation.class);
+            if (bridge == null) {
+                ReadOnlyTransaction transaction = SouthboundProvider.getDb().newReadOnlyTransaction();
+                CheckedFuture<Optional<Node>, ReadFailedException> future =
+                        transaction.read(LogicalDatastoreType.OPERATIONAL, nodeIid);
+                try {
+                    Optional<Node> nodeOptional = future.get();
+                    if (nodeOptional.isPresent()) {
+                        bridge = nodeOptional.get().getAugmentation(OvsdbBridgeAugmentation.class);
+                    }
+                } catch (InterruptedException | ExecutionException e) {
+                    LOG.warn("Error reading from datastore",e);
+                }
+                transaction.close();
             }
         }
-        return null;
+        return bridge;
     }
 
     public static void stampInstanceIdentifier(TransactionBuilder transaction,InstanceIdentifier<TerminationPoint> iid,

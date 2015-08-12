@@ -1,12 +1,11 @@
 /*
- * Copyright (C) 2014 EBay Software Foundation
+ * Copyright (c) 2014, 2015 EBay Software Foundation and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Ashwin Raveendran
  */
+
 package org.opendaylight.ovsdb.lib.schema;
 
 import java.lang.reflect.Constructor;
@@ -28,7 +27,7 @@ import com.google.common.reflect.Invokable;
  */
 public class DatabaseSchema {
 
-    public static Logger logger = LoggerFactory.getLogger(DatabaseSchema.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DatabaseSchema.class);
 
     private String name;
 
@@ -64,7 +63,7 @@ public class DatabaseSchema {
     }
 
     protected <E extends TableSchema<E>> E createTableSchema(Class<E> clazz, TableSchema<E> table) {
-        Constructor<E> declaredConstructor = null;
+        Constructor<E> declaredConstructor;
         try {
             declaredConstructor = clazz.getDeclaredConstructor(TableSchema.class);
         } catch (NoSuchMethodException e) {
@@ -96,7 +95,7 @@ public class DatabaseSchema {
         Map<String, TableSchema> tables = new HashMap<>();
         for (Iterator<Map.Entry<String, JsonNode>> iter = json.get("tables").fields(); iter.hasNext(); ) {
             Map.Entry<String, JsonNode> table = iter.next();
-            logger.trace("Read schema for table[{}]:{}", table.getKey(), table.getValue());
+            LOG.trace("Read schema for table[{}]:{}", table.getKey(), table.getValue());
 
             //todo : this needs to done by a factory
             tables.put(table.getKey(), new GenericTableSchema().fromJson(table.getKey(), table.getValue()));

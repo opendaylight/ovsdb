@@ -1,10 +1,9 @@
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
  */
 
 package org.opendaylight.ovsdb.openstack.netvirt.api;
@@ -25,6 +24,19 @@ public interface IngressAclProvider {
      * @param localPort the local port
      * @param securityGroup the security group
      */
-    public void programPortSecurityACL(Long dpid, String segmentationId, String attachedMac,
-            long localPort, NeutronSecurityGroup securityGroup);
+    void programPortSecurityACL(Long dpid, String segmentationId, String attachedMac,
+                                long localPort, NeutronSecurityGroup securityGroup);
+    /**
+     * Program fixed ingress ACL rules that will be associated with the VM port when a vm is spawned.
+     * *
+     * @param dpid the dpid
+     * @param segmentationId the segmentation id
+     * @param attachedMac the attached mac
+     * @param localPort the local port
+     * @param isLastPortinSubnet is this the last port in the subnet
+     * @param isComputePort indicates whether this port is a compute port or not
+     * @param write is this flow writing or deleting
+     */
+    void programFixedSecurityACL(Long dpid, String segmentationId,
+                                 String attachedMac, long localPort, boolean isLastPortinSubnet, boolean isComputePort, boolean write);
 }

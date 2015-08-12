@@ -1,12 +1,11 @@
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Madhu Venugopal
  */
+
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -41,8 +40,10 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.CheckedFuture;
+
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +58,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractServiceInstance {
     public static final String SERVICE_PROPERTY ="serviceProperty";
-    private static final Logger logger = LoggerFactory.getLogger(AbstractServiceInstance.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractServiceInstance.class);
     public static final String OPENFLOW = "openflow:";
     private DataBroker dataBroker = null;
     // OSGi Services that we are dependent on.
@@ -82,10 +83,7 @@ public abstract class AbstractServiceInstance {
 
     public boolean isBridgeInPipeline (Node node){
         String bridgeName = southbound.getBridgeName(node);
-        if (bridgeName != null && Constants.INTEGRATION_BRIDGE.equals(bridgeName)) {
-            return true;
-        }
-        return false;
+        return bridgeName != null && Constants.INTEGRATION_BRIDGE.equals(bridgeName);
     }
 
     public short getTable() {
@@ -107,7 +105,7 @@ public abstract class AbstractServiceInstance {
         return builder;
     }
 
-    private static final InstanceIdentifier<Flow> createFlowPath(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
+    private static InstanceIdentifier<Flow> createFlowPath(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
         return InstanceIdentifier.builder(Nodes.class)
                 .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class,
                         nodeBuilder.getKey())
@@ -116,8 +114,7 @@ public abstract class AbstractServiceInstance {
                 .child(Flow.class, flowBuilder.getKey()).build();
     }
 
-    private static final
-    InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node>
+    private static InstanceIdentifier<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node>
     createNodePath(NodeBuilder nodeBuilder) {
         return InstanceIdentifier.builder(Nodes.class)
                 .child(org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node.class,
@@ -142,7 +139,7 @@ public abstract class AbstractServiceInstance {
     }
 
     protected void writeFlow(FlowBuilder flowBuilder, NodeBuilder nodeBuilder) {
-        logger.debug("writeFlow: flowBuilder: {}, nodeBuilder: {}",
+        LOG.debug("writeFlow: flowBuilder: {}, nodeBuilder: {}",
                 flowBuilder.build(), nodeBuilder.build());
         WriteTransaction modification = dataBroker.newWriteOnlyTransaction();
         modification.put(LogicalDatastoreType.CONFIGURATION, createNodePath(nodeBuilder),
@@ -153,9 +150,9 @@ public abstract class AbstractServiceInstance {
         CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
         try {
             commitFuture.get();  // TODO: Make it async (See bug 1362)
-            logger.debug("Transaction success for write of Flow "+flowBuilder.getFlowName());
+            LOG.debug("Transaction success for write of Flow {}", flowBuilder.getFlowName());
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             modification.cancel();
         }
     }
@@ -167,9 +164,9 @@ public abstract class AbstractServiceInstance {
         CheckedFuture<Void, TransactionCommitFailedException> commitFuture = modification.submit();
         try {
             commitFuture.get();  // TODO: Make it async (See bug 1362)
-            logger.debug("Transaction success for deletion of Flow " + flowBuilder.getFlowName());
+            LOG.debug("Transaction success for deletion of Flow {}", flowBuilder.getFlowName());
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             modification.cancel();
         }
     }
@@ -183,18 +180,35 @@ public abstract class AbstractServiceInstance {
                 return data.get();
             }
         } catch (InterruptedException|ExecutionException e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
 
-        logger.debug("Cannot find data for Flow " + flowBuilder.getFlowName());
+        LOG.debug("Cannot find data for Flow {}", flowBuilder.getFlowName());
         return null;
     }
 
-    private Long getDpid(Node node) {
-        Long dpid = 0L;
-        dpid = southbound.getDataPathId(node);
+    public org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node
+    getOpenFlowNode(String nodeId) {
+
+        ReadOnlyTransaction readTx = dataBroker.newReadOnlyTransaction();
+        try {
+            Optional<org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node> data =
+                    readTx.read(LogicalDatastoreType.OPERATIONAL, createNodePath(createNodeBuilder(nodeId))).get();
+            if (data.isPresent()) {
+                return data.get();
+            }
+        } catch (InterruptedException|ExecutionException e) {
+            LOG.error(e.getMessage(), e);
+        }
+
+        LOG.debug("Cannot find data for Node {}", nodeId);
+        return null;
+    }
+
+    private long getDpid(Node node) {
+        long dpid = southbound.getDataPathId(node);
         if (dpid == 0) {
-            logger.warn("getDpid: dpid not found: {}", node);
+            LOG.warn("getDpid: dpid not found: {}", node);
         }
         return dpid;
     }
@@ -206,14 +220,14 @@ public abstract class AbstractServiceInstance {
      */
     protected void programDefaultPipelineRule(Node node) {
         if (!isBridgeInPipeline(node)) {
-            //logger.trace("Bridge is not in pipeline {} ", node);
+            //LOG.trace("Bridge is not in pipeline {} ", node);
             return;
         }
         MatchBuilder matchBuilder = new MatchBuilder();
         FlowBuilder flowBuilder = new FlowBuilder();
-        Long dpid = getDpid(node);
+        long dpid = getDpid(node);
         if (dpid == 0L) {
-            logger.info("could not find dpid: {}", node.getNodeId());
+            LOG.info("could not find dpid: {}", node.getNodeId());
             return;
         }
         String nodeName = OPENFLOW + getDpid(node);

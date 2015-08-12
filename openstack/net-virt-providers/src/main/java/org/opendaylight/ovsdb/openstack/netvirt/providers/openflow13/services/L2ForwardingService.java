@@ -1,12 +1,11 @@
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Madhu Venugopal
  */
+
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services;
 
 import java.math.BigInteger;
@@ -52,7 +51,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
 
 public class L2ForwardingService extends AbstractServiceInstance implements ConfigInterface, L2ForwardingProvider {
-    private static final Logger logger = LoggerFactory.getLogger(L2ForwardingService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(L2ForwardingService.class);
     public L2ForwardingService() {
         super(Service.L2_FORWARDING);
     }
@@ -348,7 +347,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
 
         List<Instruction> instructions = Lists.newArrayList();
         InstructionBuilder ib = new InstructionBuilder();
-        List<Action> actionList = null;
+        List<Action> actionList;
         if (write) {
             if (existingInstructions == null) {
                 /* First time called there should be no instructions.
@@ -375,7 +374,6 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
                 actionList.add(ab.build());
             } else {
                 /* Subsequent calls require appending any new local ports for this tenant. */
-                ApplyActionsCase aac = (ApplyActionsCase) ib.getInstruction();
                 Instruction in = existingInstructions.get(0);
                 actionList = (((ApplyActionsCase) in.getInstruction()).getApplyActions().getAction());
 
@@ -448,7 +446,6 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
         boolean removeFlow = true;
 
         if (instructions != null) {
-            ApplyActionsCase aac = (ApplyActionsCase) ib.getInstruction();
             Instruction in = instructions.get(0);
             List<Action> oldActionList = (((ApplyActionsCase) in.getInstruction()).getApplyActions().getAction());
             NodeConnectorId ncid = new NodeConnectorId(OPENFLOW + dpidLong + ":" + localPort);
@@ -464,7 +461,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
                     OutputActionCase opAction = (OutputActionCase) action.getAction();
                     if (opAction.getOutputAction().getOutputNodeConnector().equals(new Uri(ncidEth))) {
                         actionList.add(action);
-                    } else if (opAction.getOutputAction().getOutputNodeConnector().equals(new Uri(ncid)) == false) {
+                    } else if (!opAction.getOutputAction().getOutputNodeConnector().equals(new Uri(ncid))) {
                         ab.setAction(action.getAction());
                         ab.setOrder(index);
                         ab.setKey(new ActionKey(index));
@@ -480,7 +477,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
             ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
         }
 
-        if (actionList != null && actionList.size() > 2) {
+        if (actionList.size() > 2) {
             // Add InstructionBuilder to the Instruction(s)Builder List
             InstructionsBuilder isb = new InstructionsBuilder();
             isb.setInstruction(instructions);
@@ -898,14 +895,13 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
 
         if (write) {
             // Create the OF Actions and Instructions
-            InstructionBuilder ib = new InstructionBuilder();
             InstructionsBuilder isb = new InstructionsBuilder();
 
             // Instructions List Stores Individual Instructions
             List<Instruction> instructions = Lists.newArrayList();
 
             // Call the InstructionBuilder Methods Containing Actions
-            ib = this.getMutablePipelineInstructionBuilder();
+            InstructionBuilder ib = this.getMutablePipelineInstructionBuilder();
             ib.setOrder(0);
             ib.setKey(new InstructionKey(0));
             instructions.add(ib.build());
@@ -1009,7 +1005,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
             Long dpidLong, Long port ,
             List<Instruction> instructions) {
         NodeConnectorId ncid = new NodeConnectorId(OPENFLOW + dpidLong + ":" + port);
-        logger.debug("createOutputPortInstructions() Node Connector ID is - Type=openflow: DPID={} port={} existingInstructions={}", dpidLong, port, instructions);
+        LOG.debug("createOutputPortInstructions() Node Connector ID is - Type=openflow: DPID={} port={} existingInstructions={}", dpidLong, port, instructions);
 
         List<Action> actionList = Lists.newArrayList();
         ActionBuilder ab = new ActionBuilder();
@@ -1024,9 +1020,11 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
             if (in.getInstruction() instanceof ApplyActionsCase) {
                 existingActions = (((ApplyActionsCase) in.getInstruction()).getApplyActions().getAction());
                 // Only include output actions
-                for (Action action : existingActions)
-                    if (action.getAction() instanceof OutputActionCase)
+                for (Action action : existingActions) {
+                    if (action.getAction() instanceof OutputActionCase) {
                         actionList.add(action);
+                    }
+                }
             }
         }
         /* Create output action for this port*/
@@ -1053,7 +1051,7 @@ public class L2ForwardingService extends AbstractServiceInstance implements Conf
         ApplyActionsBuilder aab = new ApplyActionsBuilder();
         aab.setAction(actionList);
         ib.setInstruction(new ApplyActionsCaseBuilder().setApplyActions(aab.build()).build());
-        logger.debug("createOutputPortInstructions() : applyAction {}", aab.build());
+        LOG.debug("createOutputPortInstructions() : applyAction {}", aab.build());
         return ib;
     }
 

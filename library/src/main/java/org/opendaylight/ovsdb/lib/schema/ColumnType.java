@@ -1,19 +1,17 @@
 /*
- * Copyright (C) 2014 EBay Software Foundation
+ * Copyright (c) 2014, 2015 EBay Software Foundation and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Ashwin Raveendran
  */
+
 package org.opendaylight.ovsdb.lib.schema;
 
 import org.opendaylight.ovsdb.lib.error.TyperException;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonUtils;
 import org.opendaylight.ovsdb.lib.notation.OvsdbMap;
 import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -163,7 +161,6 @@ public abstract class ColumnType {
     }
 
     public static class AtomicColumnType extends ColumnType {
-        static final org.slf4j.Logger logger = LoggerFactory.getLogger(AtomicColumnType.class);
         public AtomicColumnType() {
         }
 
@@ -182,7 +179,7 @@ public abstract class ColumnType {
 
                 AtomicColumnType atomicColumnType = new AtomicColumnType(baseType);
 
-                JsonNode node = null;
+                JsonNode node;
                 if ((node = json.get("min")) != null) {
                     atomicColumnType.setMin(node.asLong());
                 }
@@ -203,7 +200,7 @@ public abstract class ColumnType {
         @Override
         public Object valueFromJson(JsonNode value) {
             if (isMultiValued()) {
-                OvsdbSet<Object> result = new OvsdbSet<Object>();
+                OvsdbSet<Object> result = new OvsdbSet<>();
                 if (value.isArray()) {
                     if (value.size() == 2) {
                         if (value.get(0).isTextual() && "set".equals(value.get(0).asText())) {
@@ -254,7 +251,7 @@ public abstract class ColumnType {
             BaseType valueType = BaseType.fromJson(json, "value");
 
             KeyValuedColumnType keyValueColumnType = new KeyValuedColumnType(keyType, valueType);
-            JsonNode node = null;
+            JsonNode node;
             if ((node = json.get("min")) != null) {
                 keyValueColumnType.setMin(node.asLong());
             }
@@ -275,7 +272,7 @@ public abstract class ColumnType {
             if (node.isArray()) {
                 if (node.size() == 2) {
                     if (node.get(0).isTextual() && "map".equals(node.get(0).asText())) {
-                        OvsdbMap<Object, Object> map = new OvsdbMap<Object, Object>();
+                        OvsdbMap<Object, Object> map = new OvsdbMap<>();
                         for (JsonNode pairNode : node.get(1)) {
                             if (pairNode.isArray() && node.size() == 2) {
                                 Object key = getKeyType().toValue(pairNode.get(0));

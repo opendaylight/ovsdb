@@ -1,11 +1,9 @@
 /*
- * Copyright (C) 2014 SDN Hub, LLC.
+ * Copyright (c) 2014, 2015 SDN Hub, LLC. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Srini Seetharaman
  */
 
 package org.opendaylight.ovsdb.openstack.netvirt;
@@ -31,8 +29,9 @@ public class NeutronCacheUtils {
      * @return MAC address registered with that IP address
      */
     public static String getMacAddress(INeutronPortCRUD neutronPortsCache, String subnetID, String ipAddr) {
-        if (ipAddr == null || subnetID == null)
+        if (ipAddr == null || subnetID == null) {
             return null;
+        }
 
         List<Neutron_IPs> fixedIPs;
         Iterator<Neutron_IPs> fixedIPIterator;
@@ -47,8 +46,9 @@ public class NeutronCacheUtils {
                 fixedIPIterator = fixedIPs.iterator();
                 while (fixedIPIterator.hasNext()) {
                     ip = fixedIPIterator.next();
-                    if (ip.getIpAddress().equals(ipAddr) && ip.getSubnetUUID().equals(subnetID))
+                    if (ip.getIpAddress().equals(ipAddr) && ip.getSubnetUUID().equals(subnetID)) {
                         return port.getMacAddress();
+                    }
                 }
             }
         }
@@ -73,8 +73,9 @@ public class NeutronCacheUtils {
                 break;
             }
         }
-        if (networkID == null)
+        if (networkID == null) {
             return null;
+        }
 
         List<NeutronNetwork> allNetworks = neutronNetworkCache.getAllNetworks();
         for (NeutronNetwork network: allNetworks) {

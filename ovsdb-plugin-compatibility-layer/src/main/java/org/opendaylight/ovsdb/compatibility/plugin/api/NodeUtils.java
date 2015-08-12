@@ -1,12 +1,11 @@
 /*
- * Copyright (C) 2015 Red Hat, Inc.
+ * Copyright (c) 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Sam Hague
  */
+
 package org.opendaylight.ovsdb.compatibility.plugin.api;
 
 import java.util.ArrayList;
@@ -20,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class NodeUtils {
-    protected static final Logger LOG = LoggerFactory.getLogger(NodeUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NodeUtils.class);
 
     public static String getId (String identifier) {
         String id = identifier;

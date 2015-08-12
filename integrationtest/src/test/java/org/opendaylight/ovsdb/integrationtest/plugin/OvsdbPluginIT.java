@@ -68,7 +68,7 @@ import javax.inject.Inject;
 
 @RunWith(PaxExam.class)
 public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
-    private Logger log = LoggerFactory.getLogger(OvsdbPluginIT.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OvsdbPluginIT.class);
     @Inject
     private BundleContext bc;
     private OvsdbConfigurationService ovsdbConfigurationService = null;
@@ -110,13 +110,12 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
         for (Bundle element : b) {
             int state = element.getState();
             if (state != Bundle.ACTIVE && state != Bundle.RESOLVED) {
-                log.info("Bundle:" + element.getSymbolicName() + " state:"
-                          + stateToString(state));
+                LOG.info("Bundle: {} state: {}", element.getSymbolicName(), stateToString(state));
                 debugit = true;
             }
         }
         if (debugit) {
-            log.debug("Do some debugging because some bundle is unresolved");
+            LOG.debug("Do some debugging because some bundle is unresolved");
         }
 
         assertFalse(debugit);
@@ -235,7 +234,7 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
 
         final int currControllersSize = bridge.getControllerColumn().getData().size();
 
-        log.debug("Bridge has " + bridge.getControllerColumn().getData().size() + " controllers");
+        LOG.debug("Bridge has {} controllers", currControllersSize);
 
         // ** Note: we assert against 2 or less -- instead of 1 -- to account for the _real_ controller's connection
         assertTrue( "Too few controllers added to bridge object. Is this bug 960?", currControllersSize >= 1 );
@@ -265,7 +264,7 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
             }
             for (Row bridgeRow : bridgeRows.values()) {
                 Bridge bridge = ovsdbConfigurationService.getTypedRow(node, Bridge.class, bridgeRow);
-                log.trace("Test clean up removing Bridge " + bridge.getUuid());
+                LOG.trace("Test clean up removing Bridge {}", bridge.getUuid());
                 Status delStatus = ovsdbConfigurationService.deleteRow(node,
                                                                 bridge.getSchema().getName(),
                                                                 bridge.getUuid().toString());
@@ -275,7 +274,7 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
         }
 
         if (bridgesRemoved > 0) {
-            log.debug("Test clean up removed " + bridgesRemoved + " bridges");
+            LOG.debug("Test clean up removed {} bridges", bridgesRemoved);
             Thread.sleep(2000); // TODO : Remove this Sleep once the Select operation is resolved.
         }
     }
@@ -319,7 +318,9 @@ public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
     public String getOpenVSwitchTableUUID(Connection connection) throws Exception {
         OpenVSwitch openVSwitch = connection.getClient().getTypedRowWrapper(OpenVSwitch.class, null);
         ConcurrentMap<String, Row> row = ovsdbConfigurationService.getRows(node, openVSwitch.getSchema().getName());
-        if (row == null || row.size() == 0) return null;
+        if (row == null || row.size() == 0) {
+            return null;
+        }
         return (String)row.keySet().toArray()[0];
     }
 

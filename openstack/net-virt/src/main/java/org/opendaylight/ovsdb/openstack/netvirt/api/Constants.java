@@ -1,12 +1,11 @@
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Dave Tucker
  */
+
 package org.opendaylight.ovsdb.openstack.netvirt.api;
 
 /**
@@ -77,6 +76,7 @@ public final class Constants {
     /*
      * ACL
      */
+    public static final Integer PROTO_DHCP_CLIENT_SPOOF_MATCH_PRIORITY_DROP = 61011;
     public static final Integer PROTO_MATCH_PRIORITY_DROP = 36006;
     public static final Integer PROTO_PORT_MATCH_PRIORITY_DROP = 36005;
     public static final Integer PREFIX_MATCH_PRIORITY_DROP = 36004;
@@ -84,11 +84,14 @@ public final class Constants {
     public static final Integer PREFIX_PORT_MATCH_PRIORITY_DROP = 36002;
     public static final Integer PROTO_PORT_PREFIX_MATCH_PRIORITY_DROP = 36001;
 
+    public static final Integer PROTO_DHCP_CLIENT_TRAFFIC_MATCH_PRIORITY = 61012;
     public static final Integer PROTO_MATCH_PRIORITY = 61010;
     public static final Integer PREFIX_MATCH_PRIORITY = 61009;
     public static final Integer PROTO_PREFIX_MATCH_PRIORITY = 61008;
     public static final Integer PROTO_PORT_MATCH_PRIORITY = 61007;
     public static final Integer PROTO_PORT_PREFIX_MATCH_PRIORITY = 61007;
+    public static final Integer PROTO_DHCP_SERVER_MATCH_PRIORITY = 61006;
+    public static final Integer PROTO_VM_IP_MAC_MATCH_PRIORITY = 36001;
 
     public static final int TCP_SYN = 0x002;
     public static final short INGRESS_ACL = 40; // Flows Destined to the VM Port go here

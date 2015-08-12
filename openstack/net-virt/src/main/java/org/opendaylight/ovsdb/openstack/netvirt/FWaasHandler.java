@@ -1,10 +1,9 @@
 /*
- * Copyright (C) 2013 Red Hat, Inc.
+ * Copyright (c) 2013, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
  */
 
 package org.opendaylight.ovsdb.openstack.netvirt;
@@ -31,7 +30,7 @@ public class FWaasHandler extends AbstractHandler
         implements INeutronFirewallAware, INeutronFirewallRuleAware,
         INeutronFirewallPolicyAware, ConfigInterface {
 
-    static final Logger logger = LoggerFactory.getLogger(FWaasHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FWaasHandler.class);
 
     /**
      * Invoked when a Firewall Rules creation is requested
@@ -47,13 +46,11 @@ public class FWaasHandler extends AbstractHandler
 
     @Override
     public void neutronFirewallCreated(NeutronFirewall neutronFirewall) {
-        logger.debug("Neutron Firewall created by Neutron: {}", neutronFirewall);
-        int result = HttpURLConnection.HTTP_BAD_REQUEST;
+        LOG.debug("Neutron Firewall created by Neutron: {}", neutronFirewall);
 
-        result = canCreateNeutronFirewall(neutronFirewall);
+        int result = canCreateNeutronFirewall(neutronFirewall);
         if (result != HttpURLConnection.HTTP_CREATED) {
-            logger.error("Neutron Firewall creation failed: {} ", result);
-            return;
+            LOG.error("Neutron Firewall creation failed: {} ", result);
         }
     }
 
@@ -64,8 +61,7 @@ public class FWaasHandler extends AbstractHandler
 
     @Override
     public void neutronFirewallUpdated(NeutronFirewall neutronFirewall) {
-        logger.debug("NeutronFirewall updated from Neutron: {}", neutronFirewall);
-        return;
+        LOG.debug("NeutronFirewall updated from Neutron: {}", neutronFirewall);
     }
 
     @Override
@@ -78,8 +74,7 @@ public class FWaasHandler extends AbstractHandler
         //TODO: Trigger flowmod removals
         int result = canDeleteNeutronFirewall(neutronFirewall);
         if  (result != HttpURLConnection.HTTP_OK) {
-            logger.error(" delete Neutron Firewall validation failed for result - {} ", result);
-            return;
+            LOG.error(" delete Neutron Firewall validation failed for result - {} ", result);
         }
     }
 
@@ -97,14 +92,11 @@ public class FWaasHandler extends AbstractHandler
 
     @Override
     public void neutronFirewallRuleCreated(NeutronFirewallRule neutronFirewallRule) {
-        logger.debug("NeutronFirewallRule created by Neutron: {}", neutronFirewallRule);
+        LOG.debug("NeutronFirewallRule created by Neutron: {}", neutronFirewallRule);
 
-        int result = HttpURLConnection.HTTP_BAD_REQUEST;
-
-        result = canCreateNeutronFirewallRule(neutronFirewallRule);
+        int result = canCreateNeutronFirewallRule(neutronFirewallRule);
         if (result != HttpURLConnection.HTTP_CREATED) {
-            logger.error("Neutron Firewall Rule creation failed {} ", result);
-            return;
+            LOG.error("Neutron Firewall Rule creation failed {} ", result);
         }
     }
 
@@ -115,8 +107,7 @@ public class FWaasHandler extends AbstractHandler
 
     @Override
     public void neutronFirewallRuleUpdated(NeutronFirewallRule neutronFirewallRule) {
-        logger.debug("Neutron Firewall Rule updated from Neutron: {}", neutronFirewallRule);
-        return;
+        LOG.debug("Neutron Firewall Rule updated from Neutron: {}", neutronFirewallRule);
     }
 
     @Override
@@ -128,8 +119,7 @@ public class FWaasHandler extends AbstractHandler
     public void neutronFirewallRuleDeleted(NeutronFirewallRule neutronFirewallRule) {
         int result = canDeleteNeutronFirewallRule(neutronFirewallRule);
         if  (result != HttpURLConnection.HTTP_OK) {
-            logger.error(" delete Neutron Firewall Rule validation failed for result - {} ", result);
-            return;
+            LOG.error(" delete Neutron Firewall Rule validation failed for result - {} ", result);
         }
     }
 
@@ -147,14 +137,11 @@ public class FWaasHandler extends AbstractHandler
 
     @Override
     public void neutronFirewallPolicyCreated(NeutronFirewallPolicy neutronFirewallPolicy) {
-        logger.debug("Neutron Firewall Policy created by Neutron: {}", neutronFirewallPolicy);
+        LOG.debug("Neutron Firewall Policy created by Neutron: {}", neutronFirewallPolicy);
 
-        int result = HttpURLConnection.HTTP_BAD_REQUEST;
-
-        result = canCreateNeutronFirewallPolicy(neutronFirewallPolicy);
+        int result = canCreateNeutronFirewallPolicy(neutronFirewallPolicy);
         if (result != HttpURLConnection.HTTP_CREATED) {
-            logger.debug("Neutron Firewall Policy creation failed: {} ", result);
-            return;
+            LOG.debug("Neutron Firewall Policy creation failed: {} ", result);
         }
     }
 
@@ -165,8 +152,7 @@ public class FWaasHandler extends AbstractHandler
 
     @Override
     public void neutronFirewallPolicyUpdated(NeutronFirewallPolicy neutronFirewallPolicy) {
-        logger.debug("Neutron Firewall Policy updated from Neutron: {}", neutronFirewallPolicy);
-        return;
+        LOG.debug("Neutron Firewall Policy updated from Neutron: {}", neutronFirewallPolicy);
     }
 
     @Override
@@ -178,8 +164,7 @@ public class FWaasHandler extends AbstractHandler
     public void neutronFirewallPolicyDeleted(NeutronFirewallPolicy neutronFirewallPolicy) {
         int result = canDeleteNeutronFirewallPolicy(neutronFirewallPolicy);
         if  (result != HttpURLConnection.HTTP_OK) {
-            logger.error(" delete Neutron Firewall Policy validation failed for result - {} ", result);
-            return;
+            LOG.error(" delete Neutron Firewall Policy validation failed for result - {} ", result);
         }
     }
 
@@ -191,7 +176,7 @@ public class FWaasHandler extends AbstractHandler
     @Override
     public void processEvent(AbstractEvent abstractEvent) {
         if (!(abstractEvent instanceof NorthboundEvent)) {
-            logger.error("Unable to process abstract event " + abstractEvent);
+            LOG.error("Unable to process abstract event {}", abstractEvent);
             return;
         }
         NorthboundEvent ev = (NorthboundEvent) abstractEvent;
@@ -199,7 +184,7 @@ public class FWaasHandler extends AbstractHandler
             // TODO: add handling of events here, once callbacks do something
             //       other than logging.
             default:
-                logger.warn("Unable to process event action " + ev.getAction());
+                LOG.warn("Unable to process event action {}", ev.getAction());
                 break;
         }
     }

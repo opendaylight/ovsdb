@@ -1,11 +1,9 @@
 /*
- * Copyright (C) 2013 Red Hat, Inc.
+ * Copyright (c) 2013, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Madhu Venugopal, Brent Salisbury
  */
 
 package org.opendaylight.ovsdb.openstack.netvirt.api;
@@ -66,7 +64,14 @@ public final class UuidUtils {
     private static final int UUID_TIME_LEN = (UUID_TIME_LOW +
                                               UUID_TIME_MID + UUID_TIME_HIGH_VERSION);
 
-    static final Logger logger = LoggerFactory.getLogger(UuidUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UuidUtils.class);
+
+    /**
+     * Private constructor (utility class).
+     */
+    private UuidUtils() {
+        // Nothing to do
+    }
 
     /**
      * Convert neutron object id to  key syntax.
@@ -80,7 +85,7 @@ public final class UuidUtils {
             return null;
         }
 
-        logger.trace(" neutronID - {}, length - {} ",
+        LOG.trace(" neutronID - {}, length - {} ",
                      neutronID, neutronID.length());
         if (!isValidNeutronID(neutronID)) {
             return null;
@@ -108,7 +113,7 @@ public final class UuidUtils {
             return false;
         }
         boolean isValid;
-        logger.trace("id - {}, length - {} ", id, id.length());
+        LOG.trace("id - {}, length - {} ", id, id.length());
         /**
          * check the string length
          * if length is 36 its a uuid do uuid validation
@@ -121,7 +126,7 @@ public final class UuidUtils {
                 String toUUID = fromUUID.toString();
                 isValid = toUUID.equalsIgnoreCase(id);
             } catch(IllegalArgumentException e) {
-                logger.error(" IllegalArgumentExecption for id - {} ", id);
+                LOG.error(" IllegalArgumentExecption for id - {} ", id, e);
                 isValid = false;
             }
         } else {
@@ -142,7 +147,7 @@ public final class UuidUtils {
         if (id == null) {
             return null;
         }
-        logger.trace("id - {}, length - {} ", id, id.length());
+        LOG.trace("id - {}, length - {} ", id, id.length());
         /**
          * ID must be less than 32 bytes,
          * Shorten UUID string length from 36 to 31 as follows:
@@ -158,7 +163,7 @@ public final class UuidUtils {
             tKey.deleteCharAt(UUID_VERSION_POS);
             key = tKey.toString();
         } catch(IllegalArgumentException ile) {
-            logger.error(" Invalid UUID - {} ", id);
+            LOG.error(" Invalid UUID - {} ", id, ile);
             key = null;
         }
         return key;
@@ -182,7 +187,7 @@ public final class UuidUtils {
          * and reconvert it to  key
          */
 
-        logger.trace(" id - {}, length - {} ", id, id.length());
+        LOG.trace(" id - {}, length - {} ", id, id.length());
         try {
             StringBuilder tKey = new StringBuilder();
             String tmpStr = id.substring(0, UUID_TIME_LOW);
@@ -211,10 +216,10 @@ public final class UuidUtils {
                 key = convertUUIDToKey(tmpStr);
             }
         } catch(IndexOutOfBoundsException ibe) {
-            logger.error(" Exception! Invalid UUID - {} ", id);
+            LOG.error(" Exception! Invalid UUID - {} ", id, ibe);
             key = null;
         } catch (IllegalArgumentException iae) {
-            logger.error(" Exception! Invalid object ID - {} ", id);
+            LOG.error(" Exception! Invalid object ID - {} ", id, iae);
             key = null;
         }
         return key;

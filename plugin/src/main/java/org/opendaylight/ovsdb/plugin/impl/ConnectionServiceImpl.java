@@ -1,12 +1,11 @@
 /*
- * Copyright (C) 2013 Red Hat, Inc.
+ * Copyright (c) 2013, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Madhu Venugopal, Brent Salisbury, Evan Zeller
  */
+
 package org.opendaylight.ovsdb.plugin.impl;
 
 import io.netty.channel.ChannelHandler;
@@ -54,7 +53,7 @@ import com.google.common.collect.Lists;
  */
 public class ConnectionServiceImpl implements OvsdbConnectionService,
                                               OvsdbConnectionListener {
-    protected static final Logger logger = LoggerFactory.getLogger(ConnectionServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ConnectionServiceImpl.class);
 
     // Properties that can be set in config.ini
     private static final Integer DEFAULT_OVSDB_PORT = 6640;
@@ -99,17 +98,17 @@ public class ConnectionServiceImpl implements OvsdbConnectionService,
         String portString = ConfigProperties.getProperty(OvsdbConnectionService.class, OVSDB_LISTENPORT);
         int ovsdbListenPort = DEFAULT_OVSDB_PORT;
         if (portString != null) {
-            ovsdbListenPort = Integer.decode(portString).intValue();
+            ovsdbListenPort = Integer.parseInt(portString);
         }
 
         if (!connectionLib.startOvsdbManager(ovsdbListenPort)) {
-            logger.warn("Start OVSDB manager call from ConnectionService was not necessary");
+            LOG.warn("Start OVSDB manager call from ConnectionService was not necessary");
         }
 
         /* Then get connection clients */
         Collection<OvsdbClient> connections = connectionLib.getConnections();
         for (OvsdbClient client : connections) {
-            logger.info("CONNECT start connected clients client = {}", client);
+            LOG.info("CONNECT start connected clients client = {}", client);
             this.connected(client);
         }
     }
@@ -144,13 +143,15 @@ public class ConnectionServiceImpl implements OvsdbConnectionService,
         try {
             address = InetAddress.getByName(params.get(ConnectionConstants.ADDRESS));
         } catch (Exception e) {
-            logger.error("Unable to resolve " + params.get(ConnectionConstants.ADDRESS), e);
+            LOG.error("Unable to resolve {}", params.get(ConnectionConstants.ADDRESS), e);
             return null;
         }
 
         try {
             port = Integer.parseInt(params.get(ConnectionConstants.PORT));
-            if (port == 0) port = DEFAULT_OVSDB_PORT;
+            if (port == 0) {
+                port = DEFAULT_OVSDB_PORT;
+            }
         } catch (Exception e) {
             port = DEFAULT_OVSDB_PORT;
         }
@@ -159,9 +160,9 @@ public class ConnectionServiceImpl implements OvsdbConnectionService,
             OvsdbClient client = connectionLib.connect(address, port);
             return handleNewConnection(identifier, client);
         } catch (InterruptedException e) {
-            logger.error("Thread was interrupted during connect", e);
+            LOG.error("Thread was interrupted during connect", e);
         } catch (ExecutionException e) {
-            logger.error("ExecutionException in handleNewConnection for identifier " + identifier, e);
+            LOG.error("ExecutionException in handleNewConnection for identifier " + identifier, e);
         }
         return null;
     }
@@ -202,7 +203,7 @@ public class ConnectionServiceImpl implements OvsdbConnectionService,
 
     @Override
     public List<Node> getNodes() {
-        List<Node> nodes = new ArrayList<Node>();
+        List<Node> nodes = new ArrayList<>();
         for (Connection connection : ovsdbConnections.values()) {
             nodes.add(connection.getNode());
         }
@@ -225,10 +226,10 @@ public class ConnectionServiceImpl implements OvsdbConnectionService,
             @Override
             public void run() {
                 try {
-                    logger.info("Initialize inventory for {}", connection.toString());
+                    LOG.info("Initialize inventory for {}", connection.toString());
                     initializeInventoryForNewNode(connection);
                 } catch (InterruptedException | ExecutionException | IOException e) {
-                    logger.error("Failed to initialize inventory for node with identifier " + identifier, e);
+                    LOG.error("Failed to initialize inventory for node with identifier {}", identifier, e);
                     ovsdbConnections.remove(identifier);
                 }
             }
@@ -242,7 +243,7 @@ public class ConnectionServiceImpl implements OvsdbConnectionService,
     }
 
     public void channelClosed(Node node) throws Exception {
-        logger.info("Connection to Node : {} closed", node);
+        LOG.info("Connection to Node : {} closed", node);
         disconnect(node);
         ovsdbInventoryService.removeNode(node);
     }
@@ -254,7 +255,7 @@ public class ConnectionServiceImpl implements OvsdbConnectionService,
 
         List<String> databases = client.getDatabases().get();
         if (databases == null) {
-            logger.error("Unable to get Databases for the ovsdb connection : {}", client.getConnectionInfo());
+            LOG.error("Unable to get Databases for the ovsdb connection : {}", client.getConnectionInfo());
             return;
         }
         for (String database : databases) {
@@ -262,7 +263,7 @@ public class ConnectionServiceImpl implements OvsdbConnectionService,
             TableUpdates updates = this.monitorTables(connection.getNode(), dbSchema);
             ovsdbInventoryService.processTableUpdates(connection.getNode(), dbSchema.getName(), updates);
         }
-        logger.info("Notifying Inventory Listeners for Node Added: {}", connection.getNode().toString());
+        LOG.info("Notifying Inventory Listeners for Node Added: {}", connection.getNode().toString());
         ovsdbInventoryService.notifyNodeAdded(connection.getNode(), address, port);
     }
 
@@ -270,12 +271,12 @@ public class ConnectionServiceImpl implements OvsdbConnectionService,
         Connection connection = getConnection(node);
         OvsdbClient client = connection.getClient();
         if (dbSchema == null) {
-            logger.error("Unable to get Database Schema for the ovsdb connection : {}", client.getConnectionInfo());
+            LOG.error("Unable to get Database Schema for the ovsdb connection : {}", client.getConnectionInfo());
             return null;
         }
         Set<String> tables = dbSchema.getTables();
         if (tables == null) {
-            logger.warn("Database {} without any tables. Strange !", dbSchema.getName());
+            LOG.warn("Database {} without any tables. Strange !", dbSchema.getName());
             return null;
         }
         List<MonitorRequest<GenericTableSchema>> monitorRequests = Lists.newArrayList();
@@ -343,7 +344,9 @@ public class ConnectionServiceImpl implements OvsdbConnectionService,
     @Override
     public void disconnected(OvsdbClient client) {
         Connection connection = ovsdbConnections.get(this.getConnectionIdentifier(client));
-        if (connection == null) return;
+        if (connection == null) {
+            return;
+        }
         this.disconnect(connection.getNode());
     }
 }

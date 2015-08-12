@@ -1,12 +1,11 @@
 /*
- * Copyright (C) 2013 Red Hat, Inc.
+ * Copyright (c) 2013, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Madhu Venugopal, Brent Salisbury, Sam Hague, Dave Tucker
  */
+
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import com.google.common.collect.Maps;
@@ -30,7 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ConfigurationServiceImpl implements ConfigurationService, ConfigInterface {
-    static final Logger logger = LoggerFactory.getLogger(ConfigurationServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ConfigurationServiceImpl.class);
 
     private String integrationBridgeName;
     private String networkBridgeName;
@@ -141,10 +140,10 @@ public class ConfigurationServiceImpl implements ConfigurationService, ConfigInt
         if (tunnelEndpoint != null) {
             try {
                 address = InetAddress.getByName(tunnelEndpoint);
+                LOG.debug("Tunnel Endpoint for Node {} {}", node, address.getHostAddress());
             } catch (UnknownHostException e) {
-                logger.error("Error populating Tunnel Endpoint for Node {} ", node, e);
+                LOG.error("Error populating Tunnel Endpoint for Node {} ", node, e);
             }
-            logger.debug("Tunnel Endpoint for Node {} {}", node, address.getHostAddress());
         }
         return address;
     }

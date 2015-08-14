@@ -246,11 +246,13 @@ public class NeutronL3Adapter implements ConfigInterface {
             // there.
             //
             if (!isDelete) {
-                for (Neutron_IPs neutronIP : neutronPort.getFixedIPs()) {
-                    NeutronRouter_Interface neutronRouterInterface =
+                if (neutronPort.getFixedIPs() != null) {
+                    for (Neutron_IPs neutronIP : neutronPort.getFixedIPs()) {
+                        NeutronRouter_Interface neutronRouterInterface =
                             subnetIdToRouterInterfaceCache.get(neutronIP.getSubnetUUID());
-                    if (neutronRouterInterface != null) {
-                        this.handleNeutronRouterInterfaceEvent(null /*neutronRouter*/, neutronRouterInterface, action);
+                        if (neutronRouterInterface != null) {
+                            this.handleNeutronRouterInterfaceEvent(null /*neutronRouter*/, neutronRouterInterface, action);
+                        }
                     }
                 }
             }

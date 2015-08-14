@@ -198,7 +198,7 @@ public class LBaaSHandler extends AbstractHandler
                 String memberSubnetID = neutronLBPoolMember.getPoolMemberSubnetID();
                 if (memberSubnetID != null && memberAdminStateIsUp != null &&
                         memberSubnetID.equals(loadBalancerSubnetID) && memberAdminStateIsUp) {
-                    String memberID = neutronLBPoolMember.getPoolMemberID();
+                    String memberID = neutronLBPoolMember.getID();
                     String memberIP = neutronLBPoolMember.getPoolMemberAddress();
                     Integer memberPort = neutronLBPoolMember.getPoolMemberProtoPort();
                     if (memberID == null || memberIP == null || memberPort == null) {

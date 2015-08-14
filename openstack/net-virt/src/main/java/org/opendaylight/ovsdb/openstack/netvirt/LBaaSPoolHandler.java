@@ -84,11 +84,11 @@ public class LBaaSPoolHandler extends AbstractHandler
         List<LoadBalancerConfiguration> lbConfigList = extractLBConfiguration(neutronLBPool);
         final List<Node> nodes = nodeCacheManager.getBridgeNodes();
         if (lbConfigList == null) {
-            LOG.debug("Neutron LB configuration invalid for pool {} ", neutronLBPool.getLoadBalancerPoolID());
+            LOG.debug("Neutron LB configuration invalid for pool {} ", neutronLBPool.getID());
         } else if (lbConfigList.size() == 0) {
-            LOG.debug("No Neutron LB VIP not created yet for pool {} ", neutronLBPool.getLoadBalancerPoolID());
+            LOG.debug("No Neutron LB VIP not created yet for pool {} ", neutronLBPool.getID());
         } else if (nodes.isEmpty()) {
-            LOG.debug("Noop with LB pool {} creation because no nodes available.", neutronLBPool.getLoadBalancerPoolID());
+            LOG.debug("Noop with LB pool {} creation because no nodes available.", neutronLBPool.getID());
         } else {
             for (LoadBalancerConfiguration lbConfig: lbConfigList) {
                 if (!lbConfig.isValid()) {
@@ -139,11 +139,11 @@ public class LBaaSPoolHandler extends AbstractHandler
         List<LoadBalancerConfiguration> lbConfigList = extractLBConfiguration(neutronLBPool);
         final List<Node> nodes = nodeCacheManager.getBridgeNodes();
         if (lbConfigList == null) {
-            LOG.debug("Neutron LB configuration invalid for pool {} ", neutronLBPool.getLoadBalancerPoolID());
+            LOG.debug("Neutron LB configuration invalid for pool {} ", neutronLBPool.getID());
         } else if (lbConfigList.size() == 0) {
-            LOG.debug("No Neutron LB VIP not created yet for pool {} ", neutronLBPool.getLoadBalancerPoolID());
+            LOG.debug("No Neutron LB VIP not created yet for pool {} ", neutronLBPool.getID());
         } else if (nodes.isEmpty()) {
-            LOG.debug("Noop with LB pool {} deletion because no nodes available.", neutronLBPool.getLoadBalancerPoolID());
+            LOG.debug("Noop with LB pool {} deletion because no nodes available.", neutronLBPool.getID());
         } else {
             for (LoadBalancerConfiguration lbConfig: lbConfigList) {
                 if (!lbConfig.isValid()) {
@@ -239,7 +239,7 @@ public class LBaaSPoolHandler extends AbstractHandler
                 memberSubnetID = neutronLBPoolMember.getPoolMemberSubnetID();
                 if (memberSubnetID != null && memberAdminStateIsUp != null &&
                         memberSubnetID.equals(loadBalancerSubnetID) && memberAdminStateIsUp) {
-                    memberID = neutronLBPoolMember.getPoolMemberID();
+                    memberID = neutronLBPoolMember.getID();
                     memberIP = neutronLBPoolMember.getPoolMemberAddress();
                     memberPort = neutronLBPoolMember.getPoolMemberProtoPort();
                     if (memberID == null || memberIP == null || memberPort == null) {

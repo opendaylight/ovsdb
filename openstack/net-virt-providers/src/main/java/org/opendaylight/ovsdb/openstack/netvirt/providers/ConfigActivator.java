@@ -35,7 +35,6 @@ public class ConfigActivator implements BundleActivator {
     private static final Logger LOG = LoggerFactory.getLogger(ConfigActivator.class);
     private List<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
     private ProviderContext providerContext;
-    private ServiceTracker NetworkingProviderManagerTracker;
 
     public ConfigActivator(ProviderContext providerContext) {
         this.providerContext = providerContext;
@@ -124,7 +123,7 @@ public class ConfigActivator implements BundleActivator {
         gatewayMacResolverService.setDependencies(context, null);
 
         @SuppressWarnings("unchecked")
-        ServiceTracker NetworkingProviderManagerTracker = new ServiceTracker(context,
+        ServiceTracker networkingProviderManagerTracker = new ServiceTracker(context,
                 NetworkingProviderManager.class, null) {
             @Override
             public Object addingService(ServiceReference reference) {
@@ -137,20 +136,14 @@ public class ConfigActivator implements BundleActivator {
                 return service;
             }
         };
-        NetworkingProviderManagerTracker.open();
-        this.NetworkingProviderManagerTracker = NetworkingProviderManagerTracker;
+        networkingProviderManagerTracker.open();
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
         LOG.info("ConfigActivator stop");
-        /* ServiceTrackers and services are already released when bundle stops
-        NetworkingProviderManagerTracker.close();
-        for (ServiceRegistration registration : registrations) {
-            if (registration != null) {
-                registration.unregister();
-            }
-        }*/
+        // ServiceTrackers and services are already released when bundle stops,
+        // so we don't need to close the trackers or unregister the services
     }
 
     private ServiceRegistration<?> registerService(BundleContext bundleContext, String[] interfaces,
@@ -173,7 +166,6 @@ public class ConfigActivator implements BundleActivator {
     }
 
     private NotificationProviderService getNotificationProviderService(){
-        return this.providerContext.<NotificationProviderService>getSALService(
-                NotificationProviderService.class);
+        return this.providerContext.getSALService(NotificationProviderService.class);
     }
 }

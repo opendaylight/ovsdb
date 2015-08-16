@@ -71,7 +71,7 @@ public class LBaaSPoolMemberHandlerTest {
     @Before
     public void setUp() {
         neutronLBMember = mock(NeutronLoadBalancerPoolMember.class);
-        when(neutronLBMember.getPoolMemberID()).thenReturn("pool_memberID");
+        when(neutronLBMember.getID()).thenReturn("pool_memberID");
         when(neutronLBMember.getPoolMemberAddress()).thenReturn("pool_member_address");
         when(neutronLBMember.getPoolMemberSubnetID()).thenReturn("pool_member_subnetID");
         when(neutronLBMember.getPoolMemberProtoPort()).thenReturn(1);
@@ -89,7 +89,7 @@ public class LBaaSPoolMemberHandlerTest {
         NeutronLoadBalancerPoolMember neutronLBPoolMember = mock(NeutronLoadBalancerPoolMember.class);
         when(neutronLBPoolMember.getPoolMemberAdminStateIsUp()).thenReturn(true);
         when(neutronLBPoolMember.getPoolMemberSubnetID()).thenReturn("subnetID");
-        when(neutronLBPoolMember.getPoolMemberID()).thenReturn("pool_memberID1");
+        when(neutronLBPoolMember.getID()).thenReturn("pool_memberID1");
         when(neutronLBPoolMember.getPoolMemberProtoPort()).thenReturn(1);
         members.add(neutronLBPoolMember);
 

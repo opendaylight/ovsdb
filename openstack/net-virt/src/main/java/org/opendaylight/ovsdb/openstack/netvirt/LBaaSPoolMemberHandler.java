@@ -84,16 +84,16 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
         if (lbConfig == null) {
             LOG.debug("Neutron LB configuration invalid for member {} ", neutronLBPoolMember.getPoolMemberAddress());
         } else if (lbConfig.getVip() == null) {
-            LOG.debug("Neutron LB VIP not created yet for member {} ", neutronLBPoolMember.getPoolMemberID());
+            LOG.debug("Neutron LB VIP not created yet for member {} ", neutronLBPoolMember.getID());
         } else if (!lbConfig.isValid()) {
             LOG.debug("Neutron LB pool configuration invalid for {} ", lbConfig.getName());
         } else if (nodes.isEmpty()) {
-            LOG.debug("Noop with LB pool member {} creation because no nodes available.", neutronLBPoolMember.getPoolMemberID());
+            LOG.debug("Noop with LB pool member {} creation because no nodes available.", neutronLBPoolMember.getID());
         } else {
             for (Node node : nodes) {
                 loadBalancerProvider.programLoadBalancerPoolMemberRules(node,
                         lbConfig,
-                        lbConfig.getMembers().get(neutronLBPoolMember.getPoolMemberID()), Action.ADD);
+                        lbConfig.getMembers().get(neutronLBPoolMember.getID()), Action.ADD);
             }
         }
     }
@@ -135,17 +135,17 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
         if (lbConfig == null) {
             LOG.debug("Neutron LB configuration invalid for member {} ", neutronLBPoolMember.getPoolMemberAddress());
         } else if (lbConfig.getVip() == null) {
-            LOG.debug("Neutron LB VIP not created yet for member {} ", neutronLBPoolMember.getPoolMemberID());
+            LOG.debug("Neutron LB VIP not created yet for member {} ", neutronLBPoolMember.getID());
         } else if (!lbConfig.isValid()) {
             LOG.debug("Neutron LB pool configuration invalid for {} ", lbConfig.getName());
         } else if (nodes.isEmpty()) {
-            LOG.debug("Noop with LB pool member {} deletion because no nodes available.", neutronLBPoolMember.getPoolMemberID());
+            LOG.debug("Noop with LB pool member {} deletion because no nodes available.", neutronLBPoolMember.getID());
         } else {
             /* As of now, deleting a member involves recomputing member indices.
              * This is best done through a complete update of the load balancer instance.
              */
             LoadBalancerConfiguration newLBConfig = new LoadBalancerConfiguration(lbConfig);
-            newLBConfig.removeMember(neutronLBPoolMember.getPoolMemberID());
+            newLBConfig.removeMember(neutronLBPoolMember.getID());
 
             for (Node node : nodes) {
                 loadBalancerProvider.programLoadBalancerRules(node, lbConfig, Action.DELETE);
@@ -193,7 +193,7 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
      * configuration from the neutron LB cache based on member info
      */
     public LoadBalancerConfiguration extractLBConfiguration(NeutronLoadBalancerPoolMember neutronLBPoolMember) {
-        String memberID = neutronLBPoolMember.getPoolMemberID();
+        String memberID = neutronLBPoolMember.getID();
         String memberIP = neutronLBPoolMember.getPoolMemberAddress();
         String memberSubnetID = neutronLBPoolMember.getPoolMemberSubnetID();
         Integer memberPort = neutronLBPoolMember.getPoolMemberProtoPort();
@@ -246,7 +246,7 @@ public class LBaaSPoolMemberHandler extends AbstractHandler
         Integer otherMemberPort;
 
         for (NeutronLoadBalancerPoolMember otherMember: neutronLBPool.getLoadBalancerPoolMembers()) {
-            otherMemberID = otherMember.getPoolMemberID();
+            otherMemberID = otherMember.getID();
             if (otherMemberID.equals(memberID)) {
                 continue; //skip
             }

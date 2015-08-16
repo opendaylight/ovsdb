@@ -190,8 +190,10 @@ public class NeutronL3Adapter implements ConfigInterface {
 
                 if(externalNetwork != null){
                     if(externalNetwork.isRouterExternal()){
-                        final NeutronSubnet externalSubnet = neutronSubnetCache.getSubnet(neutronPort.getFixedIPs().get(0).getSubnetUUID());
-                        if(externalSubnet != null){
+                        final NeutronSubnet externalSubnet = getExternalNetworkSubnet(neutronPort);
+                        // TODO support IPv6
+                        if (externalSubnet != null &&
+                            externalSubnet.getIpVersion() == 4) {
                             gatewayMacResolver.stopPeriodicRefresh(new Ipv4Address(externalSubnet.getGatewayIP()));
                         }
                     }
@@ -1201,7 +1203,9 @@ public class NeutronL3Adapter implements ConfigInterface {
         if(externalNetwork != null){
             if(externalNetwork.isRouterExternal()){
                 final NeutronSubnet externalSubnet = getExternalNetworkSubnet(gatewayPort);
-                if(externalSubnet != null){
+                // TODO: address IPv6 case.
+                if (externalSubnet != null &&
+                    externalSubnet.getIpVersion() == 4) {
                     if(externalSubnet.getGatewayIP() != null){
                         LOGGER.info("Trigger MAC resolution for gateway ip {} on Node {}",externalSubnet.getGatewayIP(),node.getNodeId());
 

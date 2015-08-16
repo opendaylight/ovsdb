@@ -23,7 +23,7 @@ public enum Service {
     L3_FORWARDING ((short) 70, "Layer 3 forwarding/lookup service"),
     L2_REWRITE ((short) 80, "Layer2 rewrite service"),
     INGRESS_ACL ((short) 90, "Ingress Acces-control"),
-    OUTBOUND_NAT ((short) 100, "SNAT for traffic accessing external network"),
+    OUTBOUND_NAT ((short) 100, "DNAT for outbound floating-ip traffic"),
     L2_FORWARDING ((short) 110, "Layer2 mac,vlan based forwarding");
 
     short table;

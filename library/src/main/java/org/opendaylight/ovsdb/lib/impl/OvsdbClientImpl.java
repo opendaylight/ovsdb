@@ -173,14 +173,64 @@ public class OvsdbClientImpl implements OvsdbClient {
         return transformingCallback(result, dbSchema);
     }
 
+    @Override
+    public <E extends TableSchema<E>> TableUpdates monitor(final DatabaseSchema dbSchema,
+                                                           List<MonitorRequest<E>> monitorRequest,
+                                                           final MonitorHandle monitorHandle,
+                                                           final MonitorCallBack callback) {
+
+        final ImmutableMap<String, MonitorRequest<E>> reqMap = Maps.uniqueIndex(monitorRequest,
+                new Function<MonitorRequest<E>, String>() {
+                    @Override
+                    public String apply(MonitorRequest<E> input) {
+                        return input.getTableName();
+                    }
+                });
+
+        registerCallback(monitorHandle, callback, dbSchema);
+
+        ListenableFuture<JsonNode> monitor = rpc.monitor(new Params() {
+            @Override
+            public List<Object> params() {
+                return Lists.<Object>newArrayList(dbSchema.getName(), monitorHandle.getId(), reqMap);
+            }
+        });
+        JsonNode result;
+        try {
+            result = monitor.get();
+        } catch (InterruptedException | ExecutionException e) {
+            return null;
+        }
+        TableUpdates updates = transformingCallback(result, dbSchema);
+        return updates;
+    }
+
     private void registerCallback(MonitorHandle monitorHandle, MonitorCallBack callback, DatabaseSchema schema) {
         this.monitorCallbacks.put(monitorHandle.getId(), new CallbackContext(callback, schema));
         setupUpdateListener();
     }
 
     @Override
-    public void cancelMonitor(MonitorHandle handler) {
-        throw new UnsupportedOperationException("not yet implemented");
+    public void cancelMonitor(final MonitorHandle handler) {
+        ListenableFuture<JsonNode> cancelMonitor = rpc.monitor_cancel(new Params() {
+            @Override
+            public List<Object> params() {
+                return Lists.<Object>newArrayList(handler.getId());
+            }
+        });
+
+        JsonNode result = null;
+        try {
+            result = cancelMonitor.get();
+        } catch (InterruptedException | ExecutionException e) {
+            LOG.error("Exception when canceling monitor handler {}", handler.getId());
+        }
+
+        if (result == null) {
+            LOG.error("Fail to cancel monitor with handler {}", handler.getId());
+        } else {
+            LOG.debug("Successfully cancel monitoring for handler {}", handler.getId());
+        }
     }
 
     @Override

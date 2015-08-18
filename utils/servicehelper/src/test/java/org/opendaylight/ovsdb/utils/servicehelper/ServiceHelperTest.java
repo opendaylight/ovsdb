@@ -38,13 +38,14 @@ public class ServiceHelperTest {
         Bundle bundle = new MockBundle();
 
         PowerMockito.mockStatic(FrameworkUtil.class);
-        PowerMockito.when(FrameworkUtil.getBundle(any(Class.class)))
-                .thenReturn(null)
-                .thenReturn(bundle);
 
+        PowerMockito.when(FrameworkUtil.getBundle(any(Class.class)))
+                .thenReturn(null);
         Object object = ServiceHelper.getGlobalInstance(Test.class, this);
         assertNull("Service should be null", object);
 
+        PowerMockito.when(FrameworkUtil.getBundle(any(Class.class)))
+                .thenReturn(bundle);
         object = ServiceHelper.getGlobalInstance(Test.class, this);
         assertNotNull("Service should not be null", object);
     }

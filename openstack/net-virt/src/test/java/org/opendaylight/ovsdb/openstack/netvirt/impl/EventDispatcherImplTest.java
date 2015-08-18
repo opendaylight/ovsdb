@@ -8,12 +8,13 @@
 
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
-import static org.junit.Assume.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.verifyPrivate;
 
 import java.lang.reflect.Field;
 import java.util.Random;
@@ -36,7 +37,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
  * Unit test for {@link EventDispatcherImpl}
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(ServiceHelper.class)
+@PrepareForTest({ServiceHelper.class, EventDispatcherImpl.class})
 public class EventDispatcherImplTest {
 
     @InjectMocks private EventDispatcherImpl eventDispatcherImpl;
@@ -49,8 +50,6 @@ public class EventDispatcherImplTest {
     @Before
     public void setUp() {
         Random r = new Random();
-
-        eventDispatcherImpl.start();
 
         when(ref.getProperty(org.osgi.framework.Constants.SERVICE_ID)).thenReturn(r.nextLong());
         when(ref.getProperty(Constants.EVENT_HANDLER_TYPE_PROPERTY)).thenReturn(handlerTypeObject);
@@ -85,12 +84,14 @@ public class EventDispatcherImplTest {
 
         assertEquals("Error, did not return the expected size, nothing has been added yet", 0, events.size());
 
-        eventDispatcherImpl.enqueueEvent(mock(AbstractEvent.class));
-        eventDispatcherImpl.enqueueEvent(mock(AbstractEvent.class));
-        eventDispatcherImpl.enqueueEvent(mock(AbstractEvent.class));
-        eventDispatcherImpl.enqueueEvent(mock(AbstractEvent.class));
+        AbstractEvent mockEvent = mock(AbstractEvent.class);
+        when(mockEvent.getHandlerType()).thenReturn(handlerTypeObject);
+        eventDispatcherImpl.enqueueEvent(mockEvent);
+        eventDispatcherImpl.enqueueEvent(mockEvent);
+        eventDispatcherImpl.enqueueEvent(mockEvent);
+        eventDispatcherImpl.enqueueEvent(mockEvent);
 
-        assumeTrue("Error, did not return the expected size", 4 == events.size());
+        verifyPrivate(eventDispatcherImpl, times(4)).invoke("dispatchEvent", mockEvent);
     }
 
     private Object getField(String fieldName) throws Exception {

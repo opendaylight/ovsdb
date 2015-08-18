@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3a79b1b5_61222fbb",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/BridgeConfigurationManagerImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 464,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-08-18T18:28:18Z",
+      "side": 1,
+      "message": "As you said Anil, its good to get an entry in config even though its a no-op.",
+      "parentUuid": "3a79b1b5_200c3842",
+      "revId": "dfb4991079889062f89671f418fde159d9d4a839",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a79b1b5_80174c51",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SouthboundImpl.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-08-16T07:34:10Z",
       "side": 1,
       "message": "do we need this check?",
+      "revId": "dfb4991079889062f89671f418fde159d9d4a839",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_c10543c3",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SouthboundImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 704,
+      "author": {
+        "id": 2837
+      },
+      "writtenOn": "2015-08-18T18:28:18Z",
+      "side": 1,
+      "message": "no, will update.\nmust be left from something else I was doing.",
+      "parentUuid": "3a79b1b5_80174c51",
       "revId": "dfb4991079889062f89671f418fde159d9d4a839",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

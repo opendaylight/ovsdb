@@ -228,6 +228,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <version>${sonar-jacoco-listeners.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>

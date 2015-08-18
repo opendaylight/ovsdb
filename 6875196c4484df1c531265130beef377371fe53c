@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_665b2555",
+        "filename": "openstack/net-virt/src/test/java/org/opendaylight/ovsdb/openstack/netvirt/NetworkHandlerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-18T14:27:23Z",
+      "side": 1,
+      "message": "why not splitting it here also?",
+      "range": {
+        "startLine": 137,
+        "startChar": 80,
+        "endLine": 137,
+        "endChar": 103
+      },
+      "revId": "6875196c4484df1c531265130beef377371fe53c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

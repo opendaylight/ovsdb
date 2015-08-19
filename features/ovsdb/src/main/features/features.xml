@@ -11,7 +11,6 @@
   <feature name="odl-ovsdb-all" description="OpenDaylight :: OVSDB :: all"
            version='${project.version}'>
     <feature version="${ovsdb.library.version}">odl-ovsdb-library</feature>
-    <feature version="${ovsdb.plugin.version}">odl-ovsdb-plugin</feature>
   </feature>
 
   <feature name="odl-ovsdb-library" description="OVSDB :: Library"
@@ -47,16 +46,6 @@
            version='${schema.hardwarevtep.version}'>
     <feature version="${ovsdb.library.version}">odl-ovsdb-library</feature>
     <bundle>mvn:org.opendaylight.ovsdb/schema.hardwarevtep/${schema.hardwarevtep.version}</bundle>
-  </feature>
-
-  <feature name="odl-ovsdb-plugin" description="OpenDaylight :: OVSDB :: Plugin"
-           version='${ovsdb.plugin.version}'>
-    <feature version="${openflowplugin.version}">odl-openflowplugin-nsf-services</feature>
-    <feature version="${ovsdb.library.version}">odl-ovsdb-library</feature>
-    <feature version="${schema.openvswitch.version}">odl-ovsdb-schema-openvswitch</feature>
-    <feature version="${schema.hardwarevtep.version}">odl-ovsdb-schema-hardwarevtep</feature>
-    <bundle>mvn:org.opendaylight.ovsdb/plugin/${ovsdb.plugin.version}</bundle>
-    <bundle>mvn:org.opendaylight.ovsdb/plugin-shell/${plugin.shell.version}</bundle>
   </feature>
 
   <feature name="odl-ovsdb-openstack" description="OpenDaylight :: OVSDB :: OpenStack Network Virtualization"

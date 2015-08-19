@@ -59,9 +59,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <module>southbound</module>
     <module>northbound</module>
     <module>openstack</module>
-    <module>plugin</module>
     <module>ovsdb-artifacts</module>
-    <module>ovsdb-plugin-compatibility-layer</module>
     <module>plugin-shell</module>
     <module>schemas</module>
     <module>utils</module>

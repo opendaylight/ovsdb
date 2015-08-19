@@ -175,12 +175,17 @@ To install fig:
 To run the integration tests:
 
     mvn clean install
+    # The first time you need to set everything up
+    fig up -d
+    # Later runs only need the containers to be started
     fig start
     # OSX
     mvn verify -Pintegrationtest -Dovsdbserver.ipaddress=$(boot2docker ip 2>/dev/null) -Dovsdbserver.port=6640
     # Linux
     mvn verify -Pintegrationtest -Dovsdbserver.ipaddress=127.0.0.1 -Dovsdbserver.port=6640
     fig stop
+
+On Linux you'll generally need to run fig as root (sudo fig ...).
 
 Skipping unit tests and karaf tests
 ====================

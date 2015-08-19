@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3a79b1b5_9bf6d3d6",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2015-08-19T19:39:53Z",
+      "side": 1,
+      "message": "I think you can possibly read the all the OvsdbNodeAugmentation rather then reading the whole Topology will all node types. If you can try that and it works, that\u0027s going to be more efficient.",
+      "parentUuid": "5a7ca5a3_86468a22",
+      "revId": "c2883ef1dd527b2368161bcc716f1f5a84d49f43",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a7ca5a3_264bf62c",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundProvider.java",
         "patchSetId": 2

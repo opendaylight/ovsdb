@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.ovsdb.integrationtest.ConfigurationBundles;
@@ -85,6 +86,7 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Ignore
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerSuite.class)
 public class OpenVSwitchIT extends OvsdbIntegrationTestBase {

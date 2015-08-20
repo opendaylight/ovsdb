@@ -1,0 +1,514 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_c1821c00",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "See my comments regarding String.valueOf() in IngressAclService.",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_e1e2b802",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "The refactoring comment leads me to believe that all the commented code is redundant; if that\u0027s the case, why not delete it? If it isn\u0027t redundant, a TODO documenting what\u0027s supposed to be done with it would be nice.",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_21c0b04f",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 330,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "tcpPort is never used.",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_e1b958ea",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 377,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "udpPort is never used.",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_c1abfc87",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 752,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "Isn\u0027t this redundant?",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_81950442",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IngressAclService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "As a general rule, such constructs are more robust written as\n\n    if (\"IPv4\".equals(portSecurityRule.getSecurityRuleProtocol())\n\n(this avoids some NPEs).",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_e1b078f6",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IngressAclService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "This would be better as\n\n    if (portSecurityRule.getSecurityRuleProtocol() \u003d\u003d null) {",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_a1928055",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IngressAclService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "Likewise, with \"!\u003d\".",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_619c686a",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IngressAclService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "No need to use String.valueOf() here:\n\n    if (MatchUtils.TCP.equals(portSecurityRule.getSecurityRuleProtocol())) {",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_0189f425",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IngressAclService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "Likewise. In fact you could use a switch statement, to make things even clearer!",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_218e702f",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/IngressAclService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "As above.",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_213d1090",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/EgressAclProvider.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "To make API usage easier to read in calling code, please consider adding constants for boolean parameters, and using them in calling code; e.g.\n\n    boolean WRITE \u003d true;\n    boolean DELETE \u003d false;\n\n(this also helps clarify the non-write behavious in this case).",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_c141bc0c",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/EgressAclProvider.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "As above, for all three booleans ideally :-).",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_a148402e",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/IngressAclProvider.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "As for EgressAclProvider, constants for the boolean parameters would be nice.",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_4155acc4",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/SecurityServicesManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "Plural?\n\n    getSecurityGroupsInPort(...)",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_e15dd8ea",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/SecurityServicesManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "The @return comment is wrong here.",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_216430b8",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/SecurityServicesManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "Likewise.",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_615228df",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/SecurityServicesManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "Likewise.",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_015fb4e6",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/SecurityServicesManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "Likewise.",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_a16fe091",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/SecurityServicesManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "Likewise.",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_416ccc9c",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/api/SecurityServicesManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "Plural?\n\n    getIpAddresses(...)",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_210bd0d7",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "More of a matter of taste, but I prefer having annotations just before the method, after the Javadocs.",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_c10f7ce0",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "Since this method returns a collection, does it make sense to return null on errors? An empty list might be better.\n\nIf null is acceptable, then the \u0027if\u0027 just above is effectively useless.\n\nIn either case the Javadoc should mention whether or not null can be returned.",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_a1f600d6",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "Log the exception separately so it gets traced properly:\n\n    LOG.error(\"getDhcpServerPort failed\", e);\n\nSee https://wiki.opendaylight.org/view/Logging_Best_Practices",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_8120a44a",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "deviceOwner isn\u0027t referred to in the log message.",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_a11da011",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "As above:\n\n    LOG.error(\"isLastPortInSubnet failed\", e);",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_411a8c18",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "The log message needs to include \"{}\" to use the parameter.",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_21d99057",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "Missing \"{}\"s.",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_01d4941e",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "Missing \"{}\"s.",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_611788ee",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-20T12:35:36Z",
+      "side": 1,
+      "message": "As above.",
+      "revId": "fdb9d26f09879528550892b6365e82c79d1195d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

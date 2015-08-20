@@ -9,31 +9,21 @@
  */
 package org.opendaylight.ovsdb.integrationtest;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.opendaylight.ovsdb.lib.OvsdbClient;
-import org.opendaylight.ovsdb.lib.OvsdbConnection;
-import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 import org.opendaylight.ovsdb.plugin.api.ConnectionConstants;
 import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 
@@ -58,12 +48,9 @@ public abstract class OvsdbIntegrationTestBase {
     protected final static String DEFAULT_SERVER_PORT = "6640";
 
     private static boolean bundlesReady = false;
-    public final static String OPEN_VSWITCH_SCHEMA = "Open_vSwitch";
-    public final static String HARDWARE_VTEP = "hardware_vtep";
 
     public Properties loadProperties() {
-        Properties props = new Properties(System.getProperties());
-        return props;
+        return System.getProperties();
     }
 
     public Node getPluginTestConnection() throws IOException, InterruptedException, ExecutionException, TimeoutException {
@@ -81,7 +68,7 @@ public abstract class OvsdbIntegrationTestBase {
                 fail(usage());
             }
 
-            Map<ConnectionConstants, String> params = new HashMap<ConnectionConstants, String>();
+            Map<ConnectionConstants, String> params = new HashMap<>();
             params.put(ConnectionConstants.ADDRESS, addressStr);
             params.put(ConnectionConstants.PORT, portStr);
             node = connection.connect(IDENTIFIER, params);
@@ -102,75 +89,10 @@ public abstract class OvsdbIntegrationTestBase {
         return node;
     }
 
-    public OvsdbClient getTestConnection() throws IOException, InterruptedException, ExecutionException, TimeoutException {
-        Properties props = loadProperties();
-        String addressStr = props.getProperty(SERVER_IPADDRESS);
-        String portStr = props.getProperty(SERVER_PORT, DEFAULT_SERVER_PORT);
-        String connectionType = props.getProperty(CONNECTION_TYPE, "active");
-
-        // If the connection type is active, controller connects to the ovsdb-server
-        if (connectionType.equalsIgnoreCase(CONNECTION_TYPE_ACTIVE)) {
-            if (addressStr == null) {
-                fail(usage());
-            }
-
-            InetAddress address;
-            try {
-                address = InetAddress.getByName(addressStr);
-            } catch (Exception e) {
-                System.out.println("Unable to resolve " + addressStr);
-                e.printStackTrace();
-                return null;
-            }
-
-            Integer port;
-            try {
-                port = Integer.parseInt(portStr);
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid port number : " + portStr);
-                e.printStackTrace();
-                return null;
-            }
-
-            OvsdbConnection connection = (OvsdbConnection)ServiceHelper.getGlobalInstance(OvsdbConnection.class, this);
-            return connection.connect(address, port);
-        } else if (connectionType.equalsIgnoreCase(CONNECTION_TYPE_PASSIVE)) {
-            ExecutorService executor = Executors.newFixedThreadPool(1);
-            Future<OvsdbClient> passiveConnection = executor.submit(new PassiveListener());
-            return passiveConnection.get(60, TimeUnit.SECONDS);
-        }
-        fail("Connection parameter ("+CONNECTION_TYPE+") must be either active or passive");
-        return null;
-    }
-
     protected String usage() {
         return "Integration Test needs a valid connection configuration as follows :\n" +
                "active connection : mvn -Pintegrationtest -Dovsdbserver.ipaddress=x.x.x.x -Dovsdbserver.port=yyyy verify\n"+
                "passive connection : mvn -Pintegrationtest -Dovsdbserver.connection=passive verify\n";
-    }
-
-    public class PassiveListener implements Callable<OvsdbClient>, OvsdbConnectionListener {
-        OvsdbClient client = null;
-        @Override
-        public OvsdbClient call() throws Exception {
-            OvsdbConnection connection = (OvsdbConnection)ServiceHelper.getGlobalInstance(OvsdbConnection.class, this);
-            connection.registerConnectionListener(this);
-            while (client == null) {
-                Thread.sleep(500);
-            }
-            return client;
-        }
-
-        @Override
-        public void connected(OvsdbClient client) {
-            this.client = client;
-        }
-
-        @Override
-        public void disconnected(OvsdbClient client) {
-            assertEquals(this.client.getConnectionInfo(), client.getConnectionInfo());
-            this.client = null;
-        }
     }
 
     public String stateToString(int state) {

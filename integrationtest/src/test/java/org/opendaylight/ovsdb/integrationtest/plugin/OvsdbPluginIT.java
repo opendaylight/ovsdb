@@ -20,6 +20,7 @@ import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperty;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
 import org.junit.After;
+import org.junit.Ignore;
 import org.opendaylight.ovsdb.integrationtest.ConfigurationBundles;
 import org.opendaylight.ovsdb.integrationtest.OvsdbIntegrationTestBase;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
@@ -66,6 +67,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import javax.inject.Inject;
 
+@Ignore
 @RunWith(PaxExam.class)
 public class OvsdbPluginIT extends OvsdbIntegrationTestBase {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbPluginIT.class);

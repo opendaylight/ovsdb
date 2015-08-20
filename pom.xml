@@ -52,10 +52,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <!-- Parent POM files -->
     <module>commons</module>
 
+    <module>library</module>
+    <!-- Aggregations -->
     <module>features</module>
     <module>karaf</module>
     <!-- OVSDB Components -->
-    <module>library</module>
     <module>southbound</module>
     <module>northbound</module>
     <module>openstack</module>

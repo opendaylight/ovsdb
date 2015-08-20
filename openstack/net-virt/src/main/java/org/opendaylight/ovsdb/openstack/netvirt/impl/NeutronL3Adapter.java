@@ -1184,14 +1184,18 @@ public class NeutronL3Adapter implements ConfigInterface {
     }
 
     private NeutronSubnet getExternalNetworkSubnet(NeutronPort gatewayPort){
-        NeutronSubnet extSubnet = null;
-        for (NeutronSubnet subnet : neutronSubnetCache.getAllSubnets()){
-            if(subnet.getPortsInSubnet().contains(gatewayPort)){
-                extSubnet = subnet;
-                break;
+        for (Neutron_IPs neutronIPs : gatewayPort.getFixedIPs()) {
+            String subnetUUID = neutronIPs.getSubnetUUID();
+            NeutronSubnet extSubnet = neutronSubnetCache.getSubnet(subnetUUID);
+            if (extSubnet != null && extSubnet.getGatewayIP() != null) {
+                return extSubnet;
+            }
+            if (extSubnet == null) {
+                // TODO: when subnet is created, try again.
+                LOGGER.debug("subnet {} in not found", subnetUUID);
             }
         }
-        return extSubnet;
+        return null;
     }
 
     public void triggerGatewayMacResolver(final Node node, final NeutronPort gatewayPort ){

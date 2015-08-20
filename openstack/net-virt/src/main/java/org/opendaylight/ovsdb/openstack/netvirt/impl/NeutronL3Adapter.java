@@ -1185,8 +1185,11 @@ public class NeutronL3Adapter implements ConfigInterface {
 
     private NeutronSubnet getExternalNetworkSubnet(NeutronPort gatewayPort){
         NeutronSubnet extSubnet = null;
-        for (NeutronSubnet subnet : neutronSubnetCache.getAllSubnets()){
-            if(subnet.getPortsInSubnet().contains(gatewayPort)){
+        for (NeutronSubnet subnet : neutronSubnetCache.getAllSubnets()) {
+            if (subnet == null || subnet.getGatewayIP() == null) {
+                continue;
+	    }
+            if (subnet.getPortsInSubnet().contains(gatewayPort)) {
                 extSubnet = subnet;
                 break;
             }

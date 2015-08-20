@@ -184,7 +184,7 @@ public class GatewayMacResolverService extends AbstractServiceInstance
      * @param periodicRefresh Enable/Disable periodic refresh of the Gateway Mac address
      * NOTE:Periodic refresh is not supported yet.
      * @param gatewayIp  Resolve MAC address of this Gateway Ip
-     * @return Future<MacAddress> Future object
+     * @return Future object
      */
     @Override
     public ListenableFuture<MacAddress> resolveMacAddress( final Long externalNetworkBridgeDpid, final Ipv4Address gatewayIp,

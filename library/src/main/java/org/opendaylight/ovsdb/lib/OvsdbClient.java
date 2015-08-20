@@ -71,7 +71,7 @@ public interface OvsdbClient {
     /**
      * ovsdb <a href="http://tools.ietf.org/html/draft-pfaff-ovsdb-proto-04#section-4.1.5">monitor</a> operation.
      * @param monitorRequests represents what needs to be monitored
-     * @param monitorHandler  A client specified monitor handle. This handle is used to later cancel
+     * @param monitorHandle  A client specified monitor handle. This handle is used to later cancel
      *                       ({@link #cancelMonitor(MonitorHandle)}) the monitor.
      * @param callback receives the monitor response
      */

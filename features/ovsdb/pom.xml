@@ -64,6 +64,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <yangtools.version>0.8.0-SNAPSHOT</yangtools.version>
     <dlux.core.version>0.3.0-SNAPSHOT</dlux.core.version>
     <ovsdb.ui.version>0.1.0-SNAPSHOT</ovsdb.ui.version>
+    <config.version>0.4.0-SNAPSHOT</config.version>
   </properties>
 
   <dependencyManagement>
@@ -326,6 +327,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <version>${project.version}</version>
       <type>xml</type>
       <classifier>features</classifier>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>library</artifactId>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
 </project>

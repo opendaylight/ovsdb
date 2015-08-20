@@ -1,0 +1,9 @@
+module library {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:library";
+    prefix "library";
+
+    revision "2015-01-05" {
+        description "Initial revision of library model";
+    }
+}

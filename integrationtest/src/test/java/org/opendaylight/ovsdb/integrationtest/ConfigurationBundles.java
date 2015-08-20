@@ -199,7 +199,8 @@ public class ConfigurationBundles {
                 TestHelper.configMinumumBundles(),
                 TestHelper.baseModelBundles(),
                 TestHelper.flowCapableModelBundles(),
-                TestHelper.junitAndMockitoBundles()
+                TestHelper.junitAndMockitoBundles(),
+                TestHelper.bindingAwareSalBundles()
         );
     }
 }

@@ -19,7 +19,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   </parent>
 
   <artifactId>schema.openvswitch</artifactId>
-  <version>1.2.0-SNAPSHOT</version>
+  <version>1.2.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <description>The OVSDB Plugin integration project is a project for OpenDaylight that will implement the Open vSwitch Database RFC 7047 management protocol allowing the Southbound configuration of vSwitches and a network virtualization implementation.</description>
   <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
@@ -46,7 +46,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <dependencies>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>library</artifactId>
+      <artifactId>library-impl</artifactId>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

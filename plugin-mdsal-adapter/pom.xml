@@ -19,7 +19,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   </parent>
 
   <artifactId>plugin-mdsal-adapter</artifactId>
-  <version>1.2.0-SNAPSHOT</version>
+  <version>1.2.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <dependencies>
@@ -83,7 +83,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
-      <artifactId>library</artifactId>
+      <artifactId>library-impl</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>

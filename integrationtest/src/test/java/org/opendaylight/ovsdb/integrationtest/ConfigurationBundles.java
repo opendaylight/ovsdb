@@ -168,7 +168,7 @@ public class ConfigurationBundles {
                 mavenBundle("javax.portlet", "portlet-api").versionAsInProject(),
                 mavenBundle("com.google.guava", "guava").versionAsInProject(),
                 mavenBundle("org.opendaylight.ovsdb", "utils.servicehelper").versionAsInProject(),
-                mavenBundle("org.opendaylight.ovsdb", "library").versionAsInProject()
+                mavenBundle("org.opendaylight.ovsdb", "library-impl").versionAsInProject()
         );
     }
 
@@ -199,7 +199,8 @@ public class ConfigurationBundles {
                 TestHelper.configMinumumBundles(),
                 TestHelper.baseModelBundles(),
                 TestHelper.flowCapableModelBundles(),
-                TestHelper.junitAndMockitoBundles()
+                TestHelper.junitAndMockitoBundles(),
+                TestHelper.bindingAwareSalBundles()
         );
     }
 }

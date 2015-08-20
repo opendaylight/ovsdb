@@ -126,7 +126,7 @@ Pre-requisites : JDK 1.7+, Maven 3+
       deployment needs.
 
    2. From the features/ directory, execute "mvn clean install"
-      This will generate a kar file such as "features/target/ovsdb-features-1.2.0-SNAPSHOT.kar"
+      This will generate a kar file such as "features/target/ovsdb-features-1.2.1-SNAPSHOT.kar"
 
    3. Download (or build from controller project) the Karaf distribution :
       http://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/org/opendaylight/controller/distribution.opendaylight-karaf/
@@ -143,14 +143,14 @@ Pre-requisites : JDK 1.7+, Maven 3+
    opendaylight-user@root>kar:list
    KAR Name
    -----------------------------
-   ovsdb-features-1.2.0-SNAPSHOT
+   ovsdb-features-1.2.1-SNAPSHOT
 
    opendaylight-user@root>feature:list | grep ovsdb
-   odl-ovsdb-all | 1.2.0-SNAPSHOT | x | ovsdb-1.2.0-SNAPSHOT | OpenDaylight :: OVSDB :: all
-   odl-ovsdb-library | 1.0.0-SNAPSHOT | x | ovsdb-1.2.0-SNAPSHOT | OVSDB :: Library
-   odl-ovsdb-schema-openvswitch | 1.0.0-SNAPSHOT | x | ovsdb-1.2.0-SNAPSHOT | OVSDB :: Schema :: Open_vSwitch
-   odl-ovsdb-schema-hardwarevtep | 1.0.0-SNAPSHOT | x | ovsdb-1.2.0-SNAPSHOT | OVSDB :: Schema :: hardware_vtep
-   odl-ovsdb-plugin | 1.0.0-SNAPSHOT | x | ovsdb-1.2.0-SNAPSHOT | OpenDaylight :: OVSDB :: Plugin
+   odl-ovsdb-all | 1.2.1-SNAPSHOT | x | ovsdb-1.2.1-SNAPSHOT | OpenDaylight :: OVSDB :: all
+   odl-ovsdb-library | 1.0.0-SNAPSHOT | x | ovsdb-1.2.1-SNAPSHOT | OVSDB :: Library
+   odl-ovsdb-schema-openvswitch | 1.0.0-SNAPSHOT | x | ovsdb-1.2.1-SNAPSHOT | OVSDB :: Schema :: Open_vSwitch
+   odl-ovsdb-schema-hardwarevtep | 1.0.0-SNAPSHOT | x | ovsdb-1.2.1-SNAPSHOT | OVSDB :: Schema :: hardware_vtep
+   odl-ovsdb-plugin | 1.0.0-SNAPSHOT | x | ovsdb-1.2.1-SNAPSHOT | OpenDaylight :: OVSDB :: Plugin
 
    opendaylight-user@root>bundle:list | grep OVSDB
    186 | Active | 80 | 1.0.0.SNAPSHOT | OVSDB Library

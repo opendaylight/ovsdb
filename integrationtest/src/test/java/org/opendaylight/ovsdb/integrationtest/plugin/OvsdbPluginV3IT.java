@@ -30,6 +30,7 @@ import javax.inject.Inject;
 import org.apache.felix.dm.Component;
 import org.apache.felix.dm.DependencyManager;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -67,6 +68,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
+@Ignore
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerSuite.class)
 public class OvsdbPluginV3IT extends OvsdbIntegrationTestBase {

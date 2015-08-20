@@ -193,37 +193,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           <groupId>org.ops4j.pax.exam</groupId>
           <artifactId>pax-exam-container-native</artifactId>
         </dependency>
-        <dependency>
-          <groupId>org.ops4j.pax.exam</groupId>
-          <artifactId>pax-exam-container-karaf</artifactId>
-          <scope>compile</scope>
-        </dependency>
       </dependencies>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-failsafe-plugin</artifactId>
-            <version>${failsafe.version}</version>
-            <configuration>
-            </configuration>
-            <executions>
-              <execution>
-                <id>failsafe-integration-tests</id>
-                <phase>integration-test</phase>
-                <goals>
-                  <goal>integration-test</goal>
-                </goals>
-                <configuration>
-                  <classpathDependencyExcludes>
-                    <classpathDependencyExcludes>org.ops4j.pax.exam:pax-exam-container-karaf</classpathDependencyExcludes>
-                  </classpathDependencyExcludes>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
     </profile>
     <profile>
       <id>karafit</id>

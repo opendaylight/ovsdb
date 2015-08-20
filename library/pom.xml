@@ -12,12 +12,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.opendaylight.ovsdb</groupId>
-    <artifactId>commons</artifactId>
-    <version>1.4.0-SNAPSHOT</version>
-    <relativePath>../commons/parent</relativePath>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>config-parent</artifactId>
+    <version>0.4.0-SNAPSHOT</version>
+    <relativePath/>
   </parent>
 
+  <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>library</artifactId>
   <version>1.2.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
@@ -45,10 +46,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
   <dependencies>
     <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.dependencymanager</artifactId>
-    </dependency>
-    <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
     </dependency>
@@ -71,6 +68,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-all</artifactId>
+      <version>4.0.26.Final</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -85,6 +83,14 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>config-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-binding-api</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
@@ -98,20 +104,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>2.4.0</version>
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Import-Package>org.apache.commons.lang3.builder,
-                org.apache.commons.lang3.tuple,
-                org.apache.felix.dm,
-                org.slf4j,
-                org.eclipse.osgi.framework.console,
-                org.osgi.framework,
-                javax.net.ssl,
-                *</Import-Package>
+            <Embed-Dependency>utils.config;type=!pom;inline=false</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
-            <Bundle-Activator>org.opendaylight.ovsdb.lib.osgi.Activator</Bundle-Activator>
             <Export-Package>
                 org.opendaylight.ovsdb.lib,
                 org.opendaylight.ovsdb.lib.impl,
@@ -121,9 +118,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
                 org.opendaylight.ovsdb.lib.operations,
                 org.opendaylight.ovsdb.lib.message,
                 org.opendaylight.ovsdb.lib.schema,
-                org.opendaylight.ovsdb.lib.schema.typed</Export-Package>
+                org.opendaylight.ovsdb.lib.schema.typed
+            </Export-Package>
           </instructions>
-          <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>
       </plugin>
       <plugin>

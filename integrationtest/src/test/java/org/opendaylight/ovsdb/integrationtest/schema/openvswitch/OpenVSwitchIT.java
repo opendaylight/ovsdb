@@ -9,34 +9,22 @@
  */
 package org.opendaylight.ovsdb.integrationtest.schema.openvswitch;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperty;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.ListenableFuture;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+
 import javax.inject.Inject;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,11 +33,7 @@ import org.opendaylight.ovsdb.integrationtest.OvsdbIntegrationTestBase;
 import org.opendaylight.ovsdb.lib.MonitorCallBack;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
-import org.opendaylight.ovsdb.lib.message.MonitorRequest;
-import org.opendaylight.ovsdb.lib.message.MonitorRequestBuilder;
-import org.opendaylight.ovsdb.lib.message.MonitorSelect;
-import org.opendaylight.ovsdb.lib.message.TableUpdate;
-import org.opendaylight.ovsdb.lib.message.TableUpdates;
+import org.opendaylight.ovsdb.lib.message.*;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -60,21 +44,7 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
-import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
-import org.opendaylight.ovsdb.schema.openvswitch.Controller;
-import org.opendaylight.ovsdb.schema.openvswitch.FlowSampleCollectorSet;
-import org.opendaylight.ovsdb.schema.openvswitch.FlowTable;
-import org.opendaylight.ovsdb.schema.openvswitch.Interface;
-import org.opendaylight.ovsdb.schema.openvswitch.IPFIX;
-import org.opendaylight.ovsdb.schema.openvswitch.Manager;
-import org.opendaylight.ovsdb.schema.openvswitch.Mirror;
-import org.opendaylight.ovsdb.schema.openvswitch.NetFlow;
-import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
-import org.opendaylight.ovsdb.schema.openvswitch.Port;
-import org.opendaylight.ovsdb.schema.openvswitch.Qos;
-import org.opendaylight.ovsdb.schema.openvswitch.Queue;
-import org.opendaylight.ovsdb.schema.openvswitch.SFlow;
-import org.opendaylight.ovsdb.schema.openvswitch.SSL;
+import org.opendaylight.ovsdb.schema.openvswitch.*;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -84,6 +54,9 @@ import org.ops4j.pax.exam.util.PathUtils;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.*;
+import com.google.common.util.concurrent.ListenableFuture;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerSuite.class)
@@ -185,6 +158,7 @@ public class OpenVSwitchIT extends OvsdbIntegrationTestBase {
                 return true;
             }
         } catch (Exception e) {
+            LOG.error("Error checking schema", e);
             fail("Exception : "+e.getMessage());
         }
 

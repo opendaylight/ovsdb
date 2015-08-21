@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3a79b1b5_12d4e01e",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 753,
+      "author": {
+        "id": 4269
+      },
+      "writtenOn": "2015-08-21T16:00:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a79b1b5_0796e4f0",
+      "revId": "6dbb0f5bdc8acecafd808dcdb2544df671cb0098",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a79b1b5_c79f8c02",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2015-08-21T12:50:11Z",
       "side": 1,
       "message": "Why delete the Javadoc? I just meant\n\n    /**\n     * Javadoc...\n     */\n    @Override\n    public boolean isPortSecurityReady(...) {",
+      "revId": "6dbb0f5bdc8acecafd808dcdb2544df671cb0098",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_320b1cd8",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 4269
+      },
+      "writtenOn": "2015-08-21T16:00:51Z",
+      "side": 1,
+      "message": "The javadoc is the duplicate of the one in the interface. All other methods have javadoc only in the interface. So i thought let it be uniform.",
+      "parentUuid": "3a79b1b5_c79f8c02",
       "revId": "6dbb0f5bdc8acecafd808dcdb2544df671cb0098",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "3a79b1b5_d20f48e0",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 4269
+      },
+      "writtenOn": "2015-08-21T16:00:51Z",
+      "side": 1,
+      "message": "The javadoc is the duplicate of the one in the interface. All other methods have javadoc only in the interface. So i thought let it be uniform.",
+      "parentUuid": "3a79b1b5_e7a40859",
+      "revId": "6dbb0f5bdc8acecafd808dcdb2544df671cb0098",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a79b1b5_878994cc",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
         "patchSetId": 4
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "3a79b1b5_1205c079",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 4269
+      },
+      "writtenOn": "2015-08-21T16:00:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a79b1b5_878994cc",
+      "revId": "6dbb0f5bdc8acecafd808dcdb2544df671cb0098",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a79b1b5_a78610b8",
         "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
         "patchSetId": 4
@@ -81,6 +153,24 @@
       "writtenOn": "2015-08-21T12:50:11Z",
       "side": 1,
       "message": "You can drop the if block entirely.",
+      "revId": "6dbb0f5bdc8acecafd808dcdb2544df671cb0098",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_320a3c8b",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 4269
+      },
+      "writtenOn": "2015-08-21T16:00:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a79b1b5_a78610b8",
       "revId": "6dbb0f5bdc8acecafd808dcdb2544df671cb0098",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

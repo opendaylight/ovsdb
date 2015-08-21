@@ -1,25 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-Copyright (c) 2015 Dell, Inc. and others. All rights reserved.
+Copyright (c) 2015 Dell, Inc. and others.  All rights reserved.
+
 This program and the accompanying materials are made available under the
 terms of the Eclipse Public License v1.0 which accompanies this distribution,
-and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
+and is available at http://www.eclipse.org/legal/epl-v10.html
 -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <parent>
-    <groupId>org.opendaylight.controller</groupId>
-    <artifactId>karaf-parent</artifactId>
-    <version>1.6.0-SNAPSHOT</version>
-    <relativePath/>
-  </parent>
+
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.ovsdb</groupId>
-  <artifactId>routemgr-karaf</artifactId>
+  <artifactId>routemgr-artifacts</artifactId>
   <version>1.2.0-SNAPSHOT</version>
-  <name>${project.artifactId}</name>
-  <prerequisites>
-    <maven>3.1.1</maven>
-  </prerequisites>
+  <packaging>pom</packaging>
   <description>The OVSDB routemgr project is a project for OpenDaylight that will implement the routing aspects of Openstack integration, vSwitches and a network virtualization implementation.</description>
   <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
   <licenses>
@@ -41,36 +35,26 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <tag>HEAD</tag>
     <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
   </scm>
-  <properties>
-    <karaf.localFeature>odl-ovsdb-routemgr-impl-ui</karaf.localFeature>
-  </properties>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>routemgr-artifacts</artifactId>
+        <artifactId>routemgr-api</artifactId>
         <version>${project.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>routemgr-impl</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>routemgr-features</artifactId>
+        <version>${project.version}</version>
+        <classifier>features</classifier>
+        <type>xml</type>
       </dependency>
     </dependencies>
   </dependencyManagement>
-  <dependencies>
-    <dependency>
-      <!-- scope is compile so all features (there is only one) are installed
-      into startup.properties and the feature repo itself is not installed -->
-      <groupId>org.apache.karaf.features</groupId>
-      <artifactId>framework</artifactId>
-      <type>kar</type>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>routemgr-features</artifactId>
-      <version>${project.version}</version>
-      <classifier>features</classifier>
-      <type>xml</type>
-      <scope>runtime</scope>
-    </dependency>
-  </dependencies>
 </project>

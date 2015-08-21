@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_6dc1b92d",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1197,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-08-21T20:26:26Z",
+      "side": 1,
+      "message": "why not just\nfor (NeutronSubnet subnet : neutronSubnetCache.getAllSubnets()) {\n if (subnet !\u003d null \u0026\u0026 subnet.getGatewayIP() !\u003d null) {\n  return subnet;\n }\n}\nreturn null;",
+      "range": {
+        "startLine": 1188,
+        "startChar": 0,
+        "endLine": 1197,
+        "endChar": 25
+      },
+      "revId": "0e6f7a6486454e0c833622d16fdb3b141ee0be63",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

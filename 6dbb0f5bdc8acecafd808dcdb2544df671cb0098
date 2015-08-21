@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_0796e4f0",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 753,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-21T12:50:11Z",
+      "side": 1,
+      "message": "That\u0027s not equivalent to what was there before. I meant that the else is redundant:\n\n    InstructionBuilder ib \u003d this.getMutablePipelineInstructionBuilder();\n    if (drop) {\n        InstructionUtils.createDropInstructions(ib);\n    }\n\nand drop the else entirely since it does the same as the initialiser.",
+      "revId": "6dbb0f5bdc8acecafd808dcdb2544df671cb0098",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_c79f8c02",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-21T12:50:11Z",
+      "side": 1,
+      "message": "Why delete the Javadoc? I just meant\n\n    /**\n     * Javadoc...\n     */\n    @Override\n    public boolean isPortSecurityReady(...) {",
+      "revId": "6dbb0f5bdc8acecafd808dcdb2544df671cb0098",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_e7a40859",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-21T12:50:11Z",
+      "side": 1,
+      "message": "Likewise.",
+      "revId": "6dbb0f5bdc8acecafd808dcdb2544df671cb0098",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_878994cc",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-21T12:50:11Z",
+      "side": 1,
+      "message": "There\u0027s still a null return here.",
+      "revId": "6dbb0f5bdc8acecafd808dcdb2544df671cb0098",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_a78610b8",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/SecurityServicesImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-08-21T12:50:11Z",
+      "side": 1,
+      "message": "You can drop the if block entirely.",
+      "revId": "6dbb0f5bdc8acecafd808dcdb2544df671cb0098",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -43,9 +43,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <maven>3.1.1</maven>
   </prerequisites>
   <modules>
+    <module>routemgr-config</module>
     <module>routemgr-api</module>
     <module>routemgr-impl</module>
     <module>routemgr-features</module>
     <module>routemgr-karaf</module>
+    <module>routemgr-artifacts</module>
   </modules>
 </project>

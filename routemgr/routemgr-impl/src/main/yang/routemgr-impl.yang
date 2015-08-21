@@ -47,6 +47,31 @@ module routemgr-impl {
                     }
                 }
             }
+
+            container notification-service {
+               uses config:service-ref {
+                  refine type {
+                    mandatory true;
+                    config:required-identity md-sal-binding:binding-notification-service;
+                  }
+                }
+              }
+              container data-broker {
+                uses config:service-ref {
+                  refine type {
+                    mandatory false;
+                    config:required-identity md-sal-binding:binding-async-data-broker;
+                  }
+                }
+              }
+              container rpc-registry {
+                uses config:service-ref {
+                  refine type {
+                    mandatory true;
+                    config:required-identity md-sal-binding:binding-rpc-registry;
+                  }
+                }
+              }
         }
     }
 }

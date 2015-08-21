@@ -84,19 +84,19 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <classifier>features</classifier>
     </dependency>
     <dependency>
-      <groupId>${project.groupId}</groupId>
+      <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>routemgr-impl</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>routemgr-impl</artifactId>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>routemgr-config</artifactId>
       <version>${project.version}</version>
       <type>xml</type>
       <classifier>config</classifier>
     </dependency>
     <dependency>
-      <groupId>${project.groupId}</groupId>
+      <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>routemgr-api</artifactId>
       <version>${project.version}</version>
     </dependency>

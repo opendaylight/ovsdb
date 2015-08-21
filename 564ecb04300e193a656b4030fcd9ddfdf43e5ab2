@@ -1,0 +1,107 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_d2f3c808",
+        "filename": "features/ovsdb/src/main/features/features.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-21T13:48:25Z",
+      "side": 1,
+      "message": "ovsdb- may not be needed. So far we have not added that prefix.",
+      "range": {
+        "startLine": 37,
+        "startChar": 50,
+        "endLine": 37,
+        "endChar": 55
+      },
+      "revId": "564ecb04300e193a656b4030fcd9ddfdf43e5ab2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_b2dacc76",
+        "filename": "integrationtest/src/test/java/org/opendaylight/ovsdb/integrationtest/schema/openvswitch/OpenVSwitchIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-21T13:48:25Z",
+      "side": 1,
+      "message": "Supposedly we have java guidelines that say nothing should be wildcarded.",
+      "revId": "564ecb04300e193a656b4030fcd9ddfdf43e5ab2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_b2c16c82",
+        "filename": "library/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-21T13:48:25Z",
+      "side": 1,
+      "message": "to bad this isn\u0027t part of odlparent.",
+      "range": {
+        "startLine": 71,
+        "startChar": 36,
+        "endLine": 71,
+        "endChar": 37
+      },
+      "revId": "564ecb04300e193a656b4030fcd9ddfdf43e5ab2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_72bbd40e",
+        "filename": "library/src/main/config/default-config.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-21T13:48:25Z",
+      "side": 1,
+      "message": "same comment about the ovsdb- prefix",
+      "range": {
+        "startLine": 21,
+        "startChar": 16,
+        "endLine": 21,
+        "endChar": 21
+      },
+      "revId": "564ecb04300e193a656b4030fcd9ddfdf43e5ab2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_d241880c",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/ConfigActivator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-21T13:48:25Z",
+      "side": 1,
+      "message": "would really like your thoughts here. goign forward we would have two different apps using this library: the openvswitch southbound and the hwvtep southbound.",
+      "revId": "564ecb04300e193a656b4030fcd9ddfdf43e5ab2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

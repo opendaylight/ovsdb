@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_f2460423",
+        "filename": "library/src/main/java/org/opendaylight/ovsdb/lib/osgi/Activator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-08-21T13:48:25Z",
+      "side": 0,
+      "message": "Is there a way to keep some of thsi osgi stuff? We do have downstream consumers that want to sue the ovsdb library as a standalone. In those cases they would not have config.",
+      "revId": "11fd51c9a9abbda65c0be2dab81c54bf7c69a655",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

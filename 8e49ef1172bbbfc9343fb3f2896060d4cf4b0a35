@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_df88b024",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/OF13Provider.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 764,
+      "author": {
+        "id": 3316
+      },
+      "writtenOn": "2015-08-22T01:43:42Z",
+      "side": 1,
+      "message": "Nice refactoring.\nLet\u0027s move isTunnel , isVlan check into programLocal...()\nbecause it\u0027s also common",
+      "revId": "8e49ef1172bbbfc9343fb3f2896060d4cf4b0a35",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_ff8d6c32",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 3316
+      },
+      "writtenOn": "2015-08-22T01:43:42Z",
+      "side": 1,
+      "message": "Hmm which is more common ACL or Acl?\nLet\u0027s make it consistent with follow up patches.",
+      "revId": "8e49ef1172bbbfc9343fb3f2896060d4cf4b0a35",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_9f8238ff",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 3316
+      },
+      "writtenOn": "2015-08-22T01:43:42Z",
+      "side": 1,
+      "message": "Please remove the code instead of keep them as comment.\n\nDo you have any intention to implement the following logic later?",
+      "revId": "8e49ef1172bbbfc9343fb3f2896060d4cf4b0a35",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_bf87f40e",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 3316
+      },
+      "writtenOn": "2015-08-22T01:43:42Z",
+      "side": 1,
+      "message": "please remove blank lines",
+      "revId": "8e49ef1172bbbfc9343fb3f2896060d4cf4b0a35",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_5f7ca020",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 3316
+      },
+      "writtenOn": "2015-08-22T01:43:42Z",
+      "side": 1,
+      "message": "Please append blank line before new method.",
+      "revId": "8e49ef1172bbbfc9343fb3f2896060d4cf4b0a35",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_7f795c2e",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 404,
+      "author": {
+        "id": 3316
+      },
+      "writtenOn": "2015-08-22T01:43:42Z",
+      "side": 1,
+      "message": "_Permit_ twice?\nSeems like copy-n-paste bug.",
+      "revId": "8e49ef1172bbbfc9343fb3f2896060d4cf4b0a35",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_1f76283f",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 578,
+      "author": {
+        "id": 3316
+      },
+      "writtenOn": "2015-08-22T01:43:42Z",
+      "side": 1,
+      "message": "syncFlow()?",
+      "revId": "8e49ef1172bbbfc9343fb3f2896060d4cf4b0a35",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_3f73e44e",
+        "filename": "openstack/net-virt-providers/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/providers/openflow13/services/EgressAclService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 734,
+      "author": {
+        "id": 3316
+      },
+      "writtenOn": "2015-08-22T01:43:42Z",
+      "side": 1,
+      "message": "Nice refactoring.\nSince there is same loginc in igress side, let\u0027s consolidate them.",
+      "revId": "8e49ef1172bbbfc9343fb3f2896060d4cf4b0a35",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

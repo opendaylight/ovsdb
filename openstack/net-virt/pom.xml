@@ -14,13 +14,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>config-parent</artifactId>
-    <version>0.3.1-SNAPSHOT</version>
+    <version>0.3.1-Lithium-SR1</version>
     <relativePath/>
   </parent>
 
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>openstack.net-virt</artifactId>
-  <version>1.1.1-SNAPSHOT</version>
+  <version>1.1.1-Lithium-SR1</version>
   <packaging>bundle</packaging>
   <description>The OVSDB Plugin integration project is a project for OpenDaylight that will implement the Open vSwitch Database RFC 7047 management protocol allowing the Southbound configuration of vSwitches and a network virtualization implementation.</description>
   <url>https://wiki.opendaylight.org/view/OVSDB_Integration:Main</url>
@@ -45,9 +45,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   </scm>
 
   <properties>
-    <networkconfig.neutron.version>0.5.1-SNAPSHOT</networkconfig.neutron.version>
-    <ovsdb.utils.config.version>1.1.1-SNAPSHOT</ovsdb.utils.config.version>
-    <ovsdb.utils.servicehelper.version>1.1.1-SNAPSHOT</ovsdb.utils.servicehelper.version>
+    <networkconfig.neutron.version>0.5.1-Lithium-SR1</networkconfig.neutron.version>
+    <ovsdb.utils.config.version>1.1.1-Lithium-SR1</ovsdb.utils.config.version>
+    <ovsdb.utils.servicehelper.version>1.1.1-Lithium-SR1</ovsdb.utils.servicehelper.version>
     <powermock.version>1.5.2</powermock.version>
     <sonar-jacoco-listeners.version>2.4</sonar-jacoco-listeners.version>
     <root.directory>${env.PWD}</root.directory>
@@ -102,7 +102,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>
       <artifactId>southbound-api</artifactId>
-      <version>1.1.1-SNAPSHOT</version>
+      <version>1.1.1-Lithium-SR1</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.ovsdb</groupId>

@@ -35,7 +35,6 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration.LoadBalancerPoolMember;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
 import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
-import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestrator;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
@@ -62,12 +61,10 @@ public class LoadBalancerServiceTest {
     @Mock private LoadBalancerConfiguration lbConfig;
     @Mock private LoadBalancerPoolMember member;
     @Mock private Node node;
-    @Mock private Southbound southbound;
 
     private static final String SEGMENTATION_ID = "2";
     private static final String HOST_ADDRESS = "127.0.0.1";
     private static final String MAC_ADDRESS = "87:1D:5E:02:40:B7";
-    private static final long NODE_DPID = 01L;
 
     @Before
     public void setUp() throws Exception {
@@ -94,8 +91,6 @@ public class LoadBalancerServiceTest {
         when(nodeId.getValue()).thenReturn("id");
 
         when(node.getNodeId()).thenReturn(nodeId);
-        when(southbound.getDataPathId(node)).thenReturn(NODE_DPID);
-        
     }
     /**
      * Test method {@link LoadBalancerService#programLoadBalancerPoolMemberRules(Node, LoadBalancerConfiguration, LoadBalancerPoolMember, Action)}

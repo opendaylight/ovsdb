@@ -6,6 +6,7 @@
   <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin/${openflowplugin.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.neutron/features-neutron/${networkconfig.neutron.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.ovsdb/southbound-features/1.2.0-SNAPSHOT/xml/features</repository>
+  <repository>mvn:org.opendaylight.ovsdb/routemgr-features/1.2.0-SNAPSHOT/xml/features</repository>
   <repository>mvn:org.opendaylight.controller/features-mdsal/${mdsal.version}/xml/features</repository>
 
   <feature name="odl-ovsdb-all" description="OpenDaylight :: OVSDB :: all"
@@ -65,6 +66,7 @@
     <feature version="${openflowplugin.version}">odl-openflowplugin-nsf-model</feature>
     <feature version="${networkconfig.neutron.version}">odl-neutron-service</feature>
     <feature version="1.2.0-SNAPSHOT">odl-ovsdb-southbound-impl-ui</feature>
+    <feature version="1.2.0-SNAPSHOT">odl-routemgr-rest</feature>
     <feature version="${openflowplugin.version}">odl-openflowplugin-flow-services</feature>
     <feature version="${openflowplugin.version}">odl-openflowplugin-nxm-extensions</feature>
     <bundle>mvn:org.opendaylight.ovsdb/utils.servicehelper/${ovsdb.utils.servicehelper.version}</bundle>

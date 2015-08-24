@@ -22,6 +22,30 @@
       "revId": "2311f234b6a406563d81f50e12946ac5266fcc34",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_0a5901fe",
+        "filename": "openstack/net-virt/src/main/java/org/opendaylight/ovsdb/openstack/netvirt/impl/NeutronL3Adapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1269,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-08-24T14:05:11Z",
+      "side": 1,
+      "message": "Looks to me that the only reason for not making it one statement is so that log when extSubnet is not present is invoked.",
+      "parentUuid": "3a79b1b5_125f00e7",
+      "range": {
+        "startLine": 1262,
+        "startChar": 12,
+        "endLine": 1269,
+        "endChar": 13
+      },
+      "revId": "2311f234b6a406563d81f50e12946ac5266fcc34",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

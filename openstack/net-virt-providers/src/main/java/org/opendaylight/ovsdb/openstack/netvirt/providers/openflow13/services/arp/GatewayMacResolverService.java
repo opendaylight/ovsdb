@@ -335,10 +335,8 @@ public class GatewayMacResolverService extends AbstractServiceInstance
     }
 
     private FlowId createFlowId(ArpMessageAddress senderAddress, Ipv4Address ipForRequestedMac) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(ARP_REPLY_TO_CONTROLLER_FLOW_NAME);
-        sb.append("|").append(ipForRequestedMac.getValue());
-        return new FlowId(sb.toString());
+        String flowId = ARP_REPLY_TO_CONTROLLER_FLOW_NAME + "|" + ipForRequestedMac.getValue();
+        return new FlowId(flowId);
     }
 
     private static InstanceIdentifier<Flow> createFlowIid(Flow flow, InstanceIdentifier<Node> nodeIid) {

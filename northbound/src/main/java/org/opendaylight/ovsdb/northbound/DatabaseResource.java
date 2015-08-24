@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
 package org.opendaylight.ovsdb.northbound;
 
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -77,9 +85,13 @@ public class DatabaseResource {
         OvsdbClient client = NodeResource.getOvsdbClient(nodeId, this);
         try {
             List<String> databases = client.getDatabases().get();
-            if (databases == null) return ciDatabaseName;
+            if (databases == null) {
+                return ciDatabaseName;
+            }
             for (String csDatabaseName : databases) {
-                if (csDatabaseName.equalsIgnoreCase(ciDatabaseName)) return csDatabaseName;
+                if (csDatabaseName.equalsIgnoreCase(ciDatabaseName)) {
+                    return csDatabaseName;
+                }
             }
             return ciDatabaseName;
         } catch (Exception e) {

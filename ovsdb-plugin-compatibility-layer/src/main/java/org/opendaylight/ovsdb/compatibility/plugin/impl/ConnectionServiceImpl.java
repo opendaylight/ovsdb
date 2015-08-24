@@ -15,8 +15,6 @@ import org.opendaylight.ovsdb.compatibility.plugin.api.NodeUtils;
 import org.opendaylight.ovsdb.compatibility.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.plugin.api.Connection;
 import org.opendaylight.ovsdb.plugin.api.ConnectionConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This is a proxy class for ovsdb plugin's OvsdbConnectionService class
@@ -27,7 +25,6 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class ConnectionServiceImpl implements OvsdbConnectionService{
-    protected static final Logger logger = LoggerFactory.getLogger(ConnectionServiceImpl.class);
 
     private volatile org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService pluginOvsdbConnectionService;
 
@@ -62,9 +59,9 @@ public class ConnectionServiceImpl implements OvsdbConnectionService{
     }
 
     public void unsetOvsdbConnectionService(org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService pluginOvsdbConnectionService){
-        if(this.pluginOvsdbConnectionService != null)
-            this.pluginOvsdbConnectionService = null;
+        this.pluginOvsdbConnectionService = null;
     }
+
     @Override
     public Connection getConnection(Node node) {
         return pluginOvsdbConnectionService.getConnection(NodeUtils.getMdsalNode(node));

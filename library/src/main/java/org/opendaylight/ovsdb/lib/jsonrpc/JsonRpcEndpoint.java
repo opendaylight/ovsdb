@@ -1,12 +1,11 @@
 /*
- * Copyright (C) 2013 EBay Software Foundation
+ * Copyright (c) 2013, 2015 EBay Software Foundation and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Ashwin Raveendran, Madhu Venugopal
  */
+
 package org.opendaylight.ovsdb.lib.jsonrpc;
 
 import io.netty.channel.Channel;
@@ -38,7 +37,7 @@ import com.google.common.util.concurrent.SettableFuture;
 
 public class JsonRpcEndpoint {
 
-    protected static final Logger logger = LoggerFactory.getLogger(JsonRpcEndpoint.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JsonRpcEndpoint.class);
 
     public class CallContext {
         Method method;
@@ -108,7 +107,7 @@ public class JsonRpcEndpoint {
                 }
 
                 String requestString = objectMapper.writeValueAsString(request);
-                logger.trace("getClient Request : {}", requestString);
+                LOG.trace("getClient Request : {}", requestString);
 
                 SettableFuture<Object> sf = SettableFuture.create();
                 methodContext.put(request.getId(), new CallContext(request, method, sf));
@@ -123,7 +122,7 @@ public class JsonRpcEndpoint {
 
     public void processResult(JsonNode response) throws NoSuchMethodException {
 
-        logger.trace("Response : {}", response.toString());
+        LOG.trace("Response : {}", response.toString());
         CallContext returnCtxt = methodContext.get(response.get("id").asText());
         if (returnCtxt == null) {
             return;
@@ -139,7 +138,7 @@ public class JsonRpcEndpoint {
             Object result1 = objectMapper.convertValue(result, javaType);
             JsonNode error = response.get("error");
             if (error != null && !error.isNull()) {
-                logger.error("Error : {}", error.toString());
+                LOG.error("Error : {}", error.toString());
             }
 
             returnCtxt.getFuture().set(result1);
@@ -152,7 +151,7 @@ public class JsonRpcEndpoint {
     public void processRequest(Object context, JsonNode requestJson) {
         JsonRpc10Request request = new JsonRpc10Request(requestJson.get("id").asText());
         request.setMethod(requestJson.get("method").asText());
-        logger.trace("Request : {} {} {}", requestJson.get("id"), requestJson.get("method"),
+        LOG.trace("Request : {} {} {}", requestJson.get("id"), requestJson.get("method"),
                 requestJson.get("params"));
         OvsdbRPC.Callback callback = requestCallbacks.get(context);
         if (callback != null) {
@@ -167,7 +166,7 @@ public class JsonRpcEndpoint {
                         from.setAccessible(true);
                         from.invoke(callback, context, param);
                     } catch (IllegalAccessException | InvocationTargetException e) {
-                        logger.error("Unable to invoke callback " + method.getName(), e);
+                        LOG.error("Unable to invoke callback {}", method.getName(), e);
                     }
                     return;
                 }
@@ -184,7 +183,7 @@ public class JsonRpcEndpoint {
                 jsonString = objectMapper.writeValueAsString(response);
                 nettyChannel.writeAndFlush(jsonString);
             } catch (JsonProcessingException e) {
-                logger.error("Exception while processing JSON string " + jsonString, e );
+                LOG.error("Exception while processing JSON string {}", jsonString, e);
             }
             return;
         }
@@ -198,13 +197,12 @@ public class JsonRpcEndpoint {
                 jsonString = objectMapper.writeValueAsString(response);
                 nettyChannel.writeAndFlush(jsonString);
             } catch (JsonProcessingException e) {
-                logger.error("Exception while processing JSON string " + jsonString, e );
+                LOG.error("Exception while processing JSON string {}", jsonString, e);
             }
             return;
         }
 
-        logger.error("No handler for Request : {} on {}",requestJson.toString(), context);
-        return;
+        LOG.error("No handler for Request : {} on {}", requestJson.toString(), context);
     }
 
     public Map<String, CallContext> getMethodContext() {

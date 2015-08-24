@@ -22,6 +22,7 @@ import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -54,7 +55,8 @@ public class NetworkHandlerTest {
 
     @InjectMocks private NetworkHandler networkHandler;
 
-    @Mock private NeutronNetwork neutronNetwork;
+    @Mock private NeutronNetwork sharedNeutronNetwork;
+    @Mock private NeutronNetwork nonSharedNeutronNetwork;
 
     @Mock private NeutronL3Adapter neutronL3Adapter;
     @Mock private TenantNetworkManager tenantNetworkManager;
@@ -63,16 +65,19 @@ public class NetworkHandlerTest {
     @Mock private NodeCacheManager nodeCacheManager;
     @Mock private Southbound southbound;
 
+    @Before
+    public void setup() {
+        when(sharedNeutronNetwork.isShared()).thenReturn(true);
+        when(nonSharedNeutronNetwork.isShared()).thenReturn(false);
+    }
+
     /**
      * Test method {@link NetworkHandler#canCreateNetwork(NeutronNetwork)}
      */
     @Test
     public void testCanCreateNetwork() {
-        when(neutronNetwork.isShared())
-                                    .thenReturn(true)
-                                    .thenReturn(false);
-        assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_NOT_ACCEPTABLE, networkHandler.canCreateNetwork(neutronNetwork));
-        assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_OK, networkHandler.canCreateNetwork(neutronNetwork));
+        assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_NOT_ACCEPTABLE, networkHandler.canCreateNetwork(sharedNeutronNetwork));
+        assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_OK, networkHandler.canCreateNetwork(nonSharedNeutronNetwork));
     }
 
     /**
@@ -80,11 +85,8 @@ public class NetworkHandlerTest {
      */
     @Test
     public void testCanUpdateNetwork() {
-        when(neutronNetwork.isShared())
-                                    .thenReturn(true)
-                                    .thenReturn(false);
-        assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_NOT_ACCEPTABLE, networkHandler.canUpdateNetwork(neutronNetwork, neutronNetwork));
-        assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_OK, networkHandler.canUpdateNetwork(neutronNetwork, neutronNetwork));
+        assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_NOT_ACCEPTABLE, networkHandler.canUpdateNetwork(sharedNeutronNetwork, sharedNeutronNetwork));
+        assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_OK, networkHandler.canUpdateNetwork(nonSharedNeutronNetwork, nonSharedNeutronNetwork));
     }
 
     /**
@@ -92,7 +94,7 @@ public class NetworkHandlerTest {
      */
     @Test
     public void testCanDeleteNetwork() {
-        assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_OK, networkHandler.canDeleteNetwork(neutronNetwork));
+        assertEquals("Error, did not return the correct HTTP flag", HttpURLConnection.HTTP_OK, networkHandler.canDeleteNetwork(nonSharedNeutronNetwork));
     }
 
     /**
@@ -103,7 +105,7 @@ public class NetworkHandlerTest {
         NetworkHandler networkHandlerSpy = Mockito.spy(networkHandler);
 
         NorthboundEvent ev = mock(NorthboundEvent.class);
-        when(ev.getNeutronNetwork()).thenReturn(neutronNetwork);
+        when(ev.getNeutronNetwork()).thenReturn(nonSharedNeutronNetwork);
 
         when(ev.getAction()).thenReturn(Action.ADD);
         networkHandlerSpy.processEvent(ev);
@@ -115,27 +117,27 @@ public class NetworkHandlerTest {
 
         String portName = "portName";
 
-        List<NeutronNetwork> networks = new ArrayList<NeutronNetwork>();
+        List<NeutronNetwork> networks = new ArrayList<>();
         when(neutronNetworkCache.getAllNetworks()).thenReturn(networks);
 
-        List<Node> nodes = new ArrayList<Node>();
+        List<Node> nodes = new ArrayList<>();
         nodes.add(mock(Node.class));
         when(nodeCacheManager.getNodes()).thenReturn(nodes);
 
-        List<String> phyIfName = new ArrayList<String>();
+        List<String> phyIfName = new ArrayList<>();
         phyIfName.add(portName);
         when(bridgeConfigurationManager.getAllPhysicalInterfaceNames(any(Node.class))).thenReturn(phyIfName );
 
-        List<OvsdbTerminationPointAugmentation> ports = new ArrayList<OvsdbTerminationPointAugmentation>();
+        List<OvsdbTerminationPointAugmentation> ports = new ArrayList<>();
         OvsdbTerminationPointAugmentation port = mock(OvsdbTerminationPointAugmentation.class);
         when(port.getName()).thenReturn(portName);
         ports.add(port);
         when(southbound.getTerminationPointsOfBridge(any(Node.class))).thenReturn(ports);
 
-        when(southbound.isTunnel(any(OvsdbTerminationPointAugmentation.class))).thenReturn(true, false);
-
         when(ev.getAction()).thenReturn(Action.DELETE);
+        when(southbound.isTunnel(any(OvsdbTerminationPointAugmentation.class))).thenReturn(true);
         networkHandlerSpy.processEvent(ev); // test delete with southbound.isTunnel(true)
+        when(southbound.isTunnel(any(OvsdbTerminationPointAugmentation.class))).thenReturn(false);
         networkHandlerSpy.processEvent(ev); // test delete with southbound.isTunnel(false)
         // the functions are called once per call to processEvent()
         verify(neutronL3Adapter, times(2)).handleNeutronNetworkEvent(any(NeutronNetwork.class), same(Action.DELETE));

@@ -1,16 +1,15 @@
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Madhu Venugopal, Dave Tucker
  */
 
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services;
 
 import java.math.BigInteger;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.List;
 
@@ -45,8 +44,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import com.google.common.collect.Lists;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RoutingService extends AbstractServiceInstance implements RoutingProvider, ConfigInterface {
+    private static final Logger LOG = LoggerFactory.getLogger(RoutingService.class);
     public RoutingService() {
         super(Service.ROUTING);
     }
@@ -81,6 +83,13 @@ public class RoutingService extends AbstractServiceInstance implements RoutingPr
             MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(sourceSegId));
         }
 
+        if (address instanceof Inet6Address) {
+            // WORKAROUND: For now ipv6 is not supported
+            // TODO: implement ipv6 case
+            LOG.debug("ipv6 address is not implemented yet. address {}",
+                      address);
+            new Status(StatusCode.NOTIMPLEMENTED);
+        }
         final String prefixString = address.getHostAddress() + "/" + mask;
         MatchUtils.createDstL3IPv4Match(matchBuilder, new Ipv4Prefix(prefixString));
 

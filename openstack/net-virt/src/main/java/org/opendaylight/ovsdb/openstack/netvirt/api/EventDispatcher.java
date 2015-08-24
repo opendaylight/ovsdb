@@ -1,11 +1,9 @@
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Dave Tucker, Flavio Fernandes
  */
 
 package org.opendaylight.ovsdb.openstack.netvirt.api;
@@ -24,8 +22,8 @@ public interface EventDispatcher {
      * Enqueue the event.
      * @param event the {@link org.opendaylight.ovsdb.openstack.netvirt.AbstractEvent} event to be handled.
      */
-    public void enqueueEvent(AbstractEvent event);
-    public void eventHandlerAdded(final ServiceReference ref, AbstractHandler handler);
-    public void eventHandlerRemoved(final ServiceReference ref);
+    void enqueueEvent(AbstractEvent event);
+    void eventHandlerAdded(final ServiceReference ref, AbstractHandler handler);
+    void eventHandlerRemoved(final ServiceReference ref);
 }
 

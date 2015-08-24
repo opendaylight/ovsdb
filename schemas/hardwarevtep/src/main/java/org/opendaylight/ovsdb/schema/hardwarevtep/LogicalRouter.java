@@ -1,12 +1,11 @@
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Madhu Venugopal
  */
+
 package org.opendaylight.ovsdb.schema.hardwarevtep;
 
 import java.util.Map;
@@ -22,35 +21,35 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 @TypedTable(name="Logical_Router", database="hardware_vtep", fromVersion="1.0.0")
 public interface LogicalRouter extends TypedBaseTable<GenericTableSchema> {
     @TypedColumn(name="name", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, String> getNameColumn();
+    Column<GenericTableSchema, String> getNameColumn();
 
     @TypedColumn(name="name", method=MethodType.GETDATA, fromVersion="1.0.0")
-    public String getName();
+    String getName();
 
     @TypedColumn(name="name", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setName(String name);
+    void setName(String name);
 
 
     @TypedColumn(name="description", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, String> getDescriptionColumn();
+    Column<GenericTableSchema, String> getDescriptionColumn();
 
     @TypedColumn(name="description", method=MethodType.GETDATA, fromVersion="1.0.0")
-    public String getDescription();
+    String getDescription();
 
     @TypedColumn(name="description", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setDescription(String description);
+    void setDescription(String description);
 
 
     @TypedColumn(name="switch_binding", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Map<String, UUID>> getSwitchBindingColumn();
+    Column<GenericTableSchema, Map<String, UUID>> getSwitchBindingColumn();
 
     @TypedColumn(name="switch_binding", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setSwitchBinding(Map<String, UUID> switchBinding);
+    void setSwitchBinding(Map<String, UUID> switchBinding);
 
 
     @TypedColumn(name="static_routes", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Map<String, String>> setStaticRoutesColumn();
+    Column<GenericTableSchema, Map<String, String>> setStaticRoutesColumn();
 
     @TypedColumn(name="static_routes", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setStaticRoutes(Map<String, String> staticRoutes);
+    void setStaticRoutes(Map<String, String> staticRoutes);
 }

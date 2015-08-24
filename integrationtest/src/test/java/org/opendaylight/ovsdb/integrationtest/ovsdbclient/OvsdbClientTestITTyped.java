@@ -19,9 +19,8 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import junit.framework.Assert;
-
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
@@ -35,8 +34,6 @@ import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
@@ -44,7 +41,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 public class OvsdbClientTestITTyped extends OvsdbTestBase {
 
-    Logger logger = LoggerFactory.getLogger(OvsdbClientTestITTyped.class);
     OvsdbClient ovs;
     DatabaseSchema dbSchema = null;
     static String testBridgeName = "br_test";

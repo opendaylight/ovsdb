@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -28,14 +28,14 @@ public interface TenantNetworkManager {
      * @param networkId the Neutron Network ID
      * @return the assigned VLAN ID or 0 in case of an error
      */
-    public int getInternalVlan(Node node, String networkId);
+    int getInternalVlan(Node node, String networkId);
 
     /**
      * Reclaim the assigned VLAN for the given Network
      * @param node the {@link Node} to query
      * @param network the Neutron Network ID
      */
-    public void reclaimInternalVlan(Node node, NeutronNetwork network);
+    void reclaimInternalVlan(Node node, NeutronNetwork network);
 
     /**
      * Configures the VLAN for a Tenant Network
@@ -43,7 +43,7 @@ public interface TenantNetworkManager {
      * @param tp the termination point
      * @param network the Neutron Network ID
      */
-    public void programInternalVlan(Node node, OvsdbTerminationPointAugmentation tp, NeutronNetwork network);
+    void programInternalVlan(Node node, OvsdbTerminationPointAugmentation tp, NeutronNetwork network);
 
     /**
      * Check is the given network is present on a Node
@@ -51,22 +51,22 @@ public interface TenantNetworkManager {
      * @param segmentationId the Neutron Segementation ID
      * @return True or False
      */
-    public boolean isTenantNetworkPresentInNode(Node node, String segmentationId);
+    boolean isTenantNetworkPresentInNode(Node node, String segmentationId);
 
     /**
      * Get the Neutron Network ID for a given Segmentation ID
      */
-    public String getNetworkId (String segmentationId);
+    String getNetworkId(String segmentationId);
 
     /**
      * Network Created Callback
      */
-    public int networkCreated (Node node, String networkId);
+    int networkCreated(Node node, String networkId);
 
     /**
      * Network Deleted Callback
      */
-    public void networkDeleted(String id);
+    void networkDeleted(String id);
     NeutronNetwork getTenantNetwork(OvsdbTerminationPointAugmentation terminationPointAugmentation);
-    public NeutronPort getTenantPort(OvsdbTerminationPointAugmentation terminationPointAugmentation);
+    NeutronPort getTenantPort(OvsdbTerminationPointAugmentation terminationPointAugmentation);
 }

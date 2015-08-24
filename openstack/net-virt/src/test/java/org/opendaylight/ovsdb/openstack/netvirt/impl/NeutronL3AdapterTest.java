@@ -212,7 +212,7 @@ public class NeutronL3AdapterTest {
         NeutronFloatingIP neutronFloatingIP = mock(NeutronFloatingIP.class);
         when(neutronFloatingIP.getFixedIPAddress()).thenReturn(FIXED_IP_ADDRESS);
         when(neutronFloatingIP.getFloatingIPAddress()).thenReturn(FLOATING_IP_ADDRESS);
-        when(neutronFloatingIP.getFloatingIPUUID()).thenReturn(UUID);
+        when(neutronFloatingIP.getID()).thenReturn(UUID);
 
         // Suppress the called to these functions
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programFlowsForFloatingIPArpAdd", NeutronFloatingIP.class));
@@ -867,7 +867,7 @@ public class NeutronL3AdapterTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testProgramOutboundIpRewriteStage1() throws Exception{
-        HashSet<String> outboundIpRewriteCache = new HashSet<String>();
+        Set<String> outboundIpRewriteCache = new HashSet<String>();
 
         MemberModifier.suppress(MemberMatcher.method(NeutronL3Adapter.class, "programOutboundIpRewriteStage2", floatingIpClass, Action.class));
 

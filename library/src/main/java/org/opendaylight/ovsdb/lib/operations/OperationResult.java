@@ -1,12 +1,11 @@
 /*
- * Copyright (C) 2013 Red Hat, Inc.
+ * Copyright (c) 2013, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Madhu Venugopal
  */
+
 package org.opendaylight.ovsdb.lib.operations;
 
 import java.util.ArrayList;
@@ -51,7 +50,7 @@ public class OperationResult {
     public void setUuid(List<String> uuidList) {
         this.uuid = new UUID(uuidList.get(1));
     }
-    public ArrayList<Row<GenericTableSchema>> getRows() {
+    public List<Row<GenericTableSchema>> getRows() {
         return rows;
     }
     public void setRows(ArrayList<Row<GenericTableSchema>> rows) {

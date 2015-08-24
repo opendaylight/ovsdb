@@ -1,12 +1,11 @@
 /*
- * Copyright (C) 2014 EBay Software Foundation
+ * Copyright (c) 2014, 2015 EBay Software Foundation and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Ashwin Raveendran
  */
+
 package org.opendaylight.ovsdb.lib.schema;
 
 import java.util.Set;
@@ -212,7 +211,7 @@ public abstract class BaseType<E extends BaseType<E>> {
         @Override
         protected void getConstraints(RealBaseType baseType, JsonNode type) {
 
-            JsonNode node = null;
+            JsonNode node;
 
             if ((node = type.get("maxReal")) != null) {
                 baseType.setMax(node.asLong());
@@ -468,7 +467,8 @@ public abstract class BaseType<E extends BaseType<E>> {
 
 
     public static class UuidBaseType extends BaseType<UuidBaseType> {
-        public static enum RefType { strong, weak }
+        // These enum types correspond to JSON values and need to be in lower-case currently
+        public enum RefType { strong, weak }
 
         String refTable;
         RefType refType;
@@ -493,10 +493,8 @@ public abstract class BaseType<E extends BaseType<E>> {
         @Override
         public Object toValue(JsonNode value) {
             if (value.isArray()) {
-                if (value.size() == 2) {
-                    if (value.get(0).isTextual() && "uuid".equals(value.get(0).asText())) {
-                        return new UUID(value.get(1).asText());
-                    }
+                if (value.size() == 2 && value.get(0).isTextual() && "uuid".equals(value.get(0).asText())) {
+                    return new UUID(value.get(1).asText());
                 }
             } else {
                 /*

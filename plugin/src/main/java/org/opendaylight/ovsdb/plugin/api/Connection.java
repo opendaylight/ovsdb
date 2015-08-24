@@ -1,12 +1,11 @@
 /*
- * Copyright (C) 2013 Red Hat, Inc.
+ * Copyright (c) 2013, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Madhu Venugopal, Brent Salisbury
  */
+
 package org.opendaylight.ovsdb.plugin.api;
 
 import org.opendaylight.ovsdb.lib.OvsdbClient;
@@ -14,9 +13,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Connection {
     private Node node;
@@ -32,8 +28,6 @@ public class Connection {
     }
 
     private Long idCounter;
-
-    private static final Logger logger = LoggerFactory.getLogger(Connection.class);
 
     public Connection(String identifier, OvsdbClient client) {
         super();
@@ -87,13 +81,23 @@ public class Connection {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
         Connection other = (Connection) obj;
         if (identifier == null) {
-            if (other.identifier != null) return false;
-        } else if (!identifier.equals(other.identifier)) return false;
+            if (other.identifier != null) {
+                return false;
+            }
+        } else if (!identifier.equals(other.identifier)) {
+            return false;
+        }
         return true;
     }
 }

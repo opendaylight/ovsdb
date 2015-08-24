@@ -2527,7 +2527,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         final List<Trunks> UPDATED_TRUNKS = buildTrunkList(Sets.newHashSet(2011));
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portStr);
         connectOvsdbNode(connectionInfo);
-        ArrayList<Set<Integer>> vlanSets = generateVlanSets();
+        Iterable<Set<Integer>> vlanSets = generateVlanSets();
         int testCase = 0;
         for (Set<Integer> vlanSet : vlanSets) {
             ++testCase;

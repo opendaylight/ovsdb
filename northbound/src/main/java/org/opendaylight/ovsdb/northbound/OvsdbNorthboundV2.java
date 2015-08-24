@@ -1,12 +1,11 @@
 /*
- * Copyright (C) 2014 Red Hat, Inc. and others
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Madhu Venugopal, Brent Salisbury, Dave Tucker
  */
+
 package org.opendaylight.ovsdb.northbound;
 
 import java.io.IOException;
@@ -32,7 +31,6 @@ import org.codehaus.enunciate.jaxrs.StatusCodes;
 import org.codehaus.enunciate.jaxrs.TypeHint;
 import org.opendaylight.controller.northbound.commons.RestMessages;
 import org.opendaylight.controller.northbound.commons.exception.BadRequestException;
-import org.opendaylight.controller.northbound.commons.exception.ResourceConflictException;
 import org.opendaylight.controller.northbound.commons.exception.ServiceUnavailableException;
 import org.opendaylight.controller.northbound.commons.exception.UnauthorizedException;
 import org.opendaylight.controller.northbound.commons.utils.NorthboundUtils;
@@ -48,8 +46,6 @@ import org.opendaylight.ovsdb.plugin.api.OvsdbConnectionService;
 import org.opendaylight.ovsdb.plugin.api.StatusWithUuid;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -72,7 +68,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 @Path("/v2/")
 @Deprecated
 public class OvsdbNorthboundV2 {
-    protected static final Logger logger = LoggerFactory.getLogger(OvsdbNorthboundV2.class);
 
     @Context
     private UriInfo _uriInfo;
@@ -87,18 +82,6 @@ public class OvsdbNorthboundV2 {
 
     protected String getUserName() {
         return username;
-    }
-
-    private void handleNameMismatch(String name, String nameinURL) {
-        if (name == null || nameinURL == null) {
-            throw new BadRequestException(RestMessages.INVALIDDATA.toString() + " : Name is null");
-        }
-
-        if (name.equalsIgnoreCase(nameinURL)) {
-            return;
-        }
-        throw new ResourceConflictException(RestMessages.INVALIDDATA.toString()
-                + " : Table Name in URL does not match the row name in request body");
     }
 
     /**
@@ -433,7 +416,7 @@ public class OvsdbNorthboundV2 {
         OvsdbClient client = connectionService.getConnection(node).getClient();
         String bckCompatibleTableName = this.getBackwardCompatibleTableName(client, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName);
 
-        Row row = null;
+        Row row;
         try {
             row = ovsdbTable.getRow(node, bckCompatibleTableName, rowUuid);
         } catch (Exception e) {
@@ -515,7 +498,7 @@ public class OvsdbNorthboundV2 {
         Node node = connectionService.getNode(nodeId);
         OvsdbClient client = connectionService.getConnection(node).getClient();
         String bckCompatibleTableName = this.getBackwardCompatibleTableName(client, OvsVswitchdSchemaConstants.DATABASE_NAME, tableName);
-        Map<String, Row> rows = null;
+        Map<String, Row> rows;
         try {
             rows = ovsdbTable.getRows(node, bckCompatibleTableName);
         } catch (Exception e) {
@@ -596,7 +579,7 @@ public class OvsdbNorthboundV2 {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        Status status = ovsdbTable.updateRow(node, bckCompatibleTableName, localRow.getParentUuid(), rowUuid, localRow.getRow());
+        ovsdbTable.updateRow(node, bckCompatibleTableName, localRow.getParentUuid(), rowUuid, localRow.getRow());
         return NorthboundUtils.getResponse(
                 new org.opendaylight.controller.sal.utils.Status(
                         org.opendaylight.controller.sal.utils.StatusCode.SUCCESS));
@@ -685,9 +668,13 @@ public class OvsdbNorthboundV2 {
 
     private String getBackwardCompatibleTableName(OvsdbClient client, String databaseName, String tableName) {
         DatabaseSchema dbSchema = client.getDatabaseSchema(databaseName);
-        if (dbSchema == null || tableName == null) return tableName;
+        if (dbSchema == null || tableName == null) {
+            return tableName;
+        }
         for (String dbTableName : dbSchema.getTables()) {
-            if (dbTableName.equalsIgnoreCase(tableName)) return dbTableName;
+            if (dbTableName.equalsIgnoreCase(tableName)) {
+                return dbTableName;
+            }
         }
         return tableName;
     }

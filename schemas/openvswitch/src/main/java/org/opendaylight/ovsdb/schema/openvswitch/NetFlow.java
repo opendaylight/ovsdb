@@ -1,12 +1,11 @@
 /*
- * Copyright (C) 2013 Red Hat, Inc.
+ * Copyright (c) 2013, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Madhu Venugopal
  */
+
 package org.opendaylight.ovsdb.schema.openvswitch;
 
 import java.util.Map;
@@ -26,45 +25,45 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 public interface NetFlow extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name="targets", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<String>> getTargetsColumn();
+    Column<GenericTableSchema, Set<String>> getTargetsColumn();
 
     @TypedColumn(name="targets", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setTargets(Set<String> targets);
+    void setTargets(Set<String> targets);
 
     @TypedColumn(name="active_timeout", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Long>> getActiveTimeoutColumn();
+    Column<GenericTableSchema, Set<Long>> getActiveTimeoutColumn();
 
     @TypedColumn(name="active_timeout", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setActiveTimeout(Long activeTimeout);
+    void setActiveTimeout(Long activeTimeout);
 
     @TypedColumn(name="engine_type", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Long>> getEngineTypeColumn();
+    Column<GenericTableSchema, Set<Long>> getEngineTypeColumn();
 
     @TypedColumn(name="engine_type", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setEngineType(Set<Long> engineType);
+    void setEngineType(Set<Long> engineType);
 
     @TypedColumn(name="external_ids", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn();
+    Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn();
 
     @TypedColumn(name="external_ids", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setExternalIds(Map<String, String> externalIds);
+    void setExternalIds(Map<String, String> externalIds);
 
     @TypedColumn(name="active_timeout", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Long>> getActivityTimeoutColumn();
+    Column<GenericTableSchema, Set<Long>> getActivityTimeoutColumn();
 
     @TypedColumn(name="active_timeout", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setActivityTimeout(Set<Long> activityTimeout);
+    void setActivityTimeout(Set<Long> activityTimeout);
 
     @TypedColumn(name="add_id_to_interface", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Boolean>> getAddIdToInterfaceColumn();
+    Column<GenericTableSchema, Set<Boolean>> getAddIdToInterfaceColumn();
 
     @TypedColumn(name="add_id_to_interface", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setAddIdToInterface(Boolean addIdToInterface);
+    void setAddIdToInterface(Boolean addIdToInterface);
 
     @TypedColumn(name="engine_id", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Long>> getEngineIdColumn();
+    Column<GenericTableSchema, Set<Long>> getEngineIdColumn();
 
     @TypedColumn(name="engine_id", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setEngineId(Set<Long> engineId);
+    void setEngineId(Set<Long> engineId);
 
 }

@@ -55,7 +55,7 @@ public class OvsdbNodeUpdateCommand implements TransactCommand {
 
             // OpenVSwitchPart
             OpenVSwitch ovs = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), OpenVSwitch.class);
-            HashMap<String, String> externalIdsMap = new HashMap<String, String>();
+            Map<String, String> externalIdsMap = new HashMap<String, String>();
 
             List<OpenvswitchExternalIds> externalIds = ovsdbNode.getOpenvswitchExternalIds();
 
@@ -82,7 +82,7 @@ public class OvsdbNodeUpdateCommand implements TransactCommand {
 
             List<OpenvswitchOtherConfigs> otherConfigs = ovsdbNode.getOpenvswitchOtherConfigs();
             if (otherConfigs != null) {
-                HashMap<String, String> otherConfigsMap = new HashMap<String, String>();
+                Map<String, String> otherConfigsMap = new HashMap<String, String>();
                 for (OpenvswitchOtherConfigs otherConfig : otherConfigs) {
                     otherConfigsMap.put(otherConfig.getOtherConfigKey(), otherConfig.getOtherConfigValue());
                 }

@@ -1,12 +1,11 @@
 /*
- * Copyright (C) 2013 EBay Software Foundation
+ * Copyright (c) 2013, 2015 EBay Software Foundation and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Ashwin Raveendran, Madhu Venugopal
  */
+
 package org.opendaylight.ovsdb.lib.jsonrpc;
 
 
@@ -14,7 +13,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
-import io.netty.handler.codec.TooLongFrameException;
 
 import java.io.IOException;
 import java.util.List;
@@ -44,7 +42,7 @@ import com.fasterxml.jackson.databind.MappingJsonFactory;
  */
 public class JsonRpcDecoder extends ByteToMessageDecoder {
 
-    protected static final Logger logger = LoggerFactory.getLogger(JsonRpcDecoder.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JsonRpcDecoder.class);
     private int maxFrameLength;
     //Indicates if the frame limit warning was issued
     private boolean maxFrameLimitWasReached = false;
@@ -67,7 +65,7 @@ public class JsonRpcDecoder extends ByteToMessageDecoder {
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf buf, List<Object> out) throws Exception {
 
-        logger.trace("readable bytes {}, records read {}, incomplete record bytes {}",
+        LOG.trace("readable bytes {}, records read {}, incomplete record bytes {}",
                 buf.readableBytes(), recordsRead, lastRecordBytes);
 
         if (lastRecordBytes == 0) {
@@ -132,7 +130,7 @@ public class JsonRpcDecoder extends ByteToMessageDecoder {
                 //hence logging only once
                 if (!maxFrameLimitWasReached) {
                     maxFrameLimitWasReached = true;
-                    logger.warn("***** OVSDB Frame limit of " + this.maxFrameLength + " bytes has been reached! *****");
+                    LOG.warn("***** OVSDB Frame limit of {} bytes has been reached! *****", this.maxFrameLength);
                 }
             }
         }
@@ -140,7 +138,6 @@ public class JsonRpcDecoder extends ByteToMessageDecoder {
         // end of stream, save the incomplete record index to avoid reexamining the whole on next run
         if (index >= buf.writerIndex()) {
             lastRecordBytes = buf.readableBytes();
-            return;
         }
     }
 
@@ -159,33 +156,4 @@ public class JsonRpcDecoder extends ByteToMessageDecoder {
         }
     }
 
-
-    private void print(ByteBuf buf, String message) {
-        print(buf, buf.readerIndex(), buf.readableBytes(), message == null ? "buff" : message);
-    }
-
-    private void print(ByteBuf buf, int startPos, int chars, String message) {
-        if (null == message) {
-            message = "";
-        }
-        if (startPos > buf.writerIndex()) {
-            logger.trace("startPos out of bounds");
-        }
-        byte[] bytes = new byte[startPos + chars <= buf.writerIndex() ? chars : buf.writerIndex() - startPos];
-        buf.getBytes(startPos, bytes);
-        logger.trace("{} ={}", message, new String(bytes));
-    }
-
-    // copied from Netty decoder
-    private void fail(ChannelHandlerContext ctx, long frameLength) {
-        if (frameLength > 0) {
-            ctx.fireExceptionCaught(
-                    new TooLongFrameException(
-                            "frame length exceeds " + maxFrameLength + ": " + frameLength + " - discarded"));
-        } else {
-            ctx.fireExceptionCaught(
-                    new TooLongFrameException(
-                            "frame length exceeds " + maxFrameLength + " - discarding"));
-        }
-    }
 }

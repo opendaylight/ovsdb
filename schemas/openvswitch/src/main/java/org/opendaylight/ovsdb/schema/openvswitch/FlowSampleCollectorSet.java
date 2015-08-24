@@ -1,11 +1,9 @@
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- *  Authors : Dave Tucker
  */
 
 package org.opendaylight.ovsdb.schema.openvswitch;
@@ -27,26 +25,26 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 public interface FlowSampleCollectorSet extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name="id", method=MethodType.GETCOLUMN, fromVersion="7.1.0")
-    public Column<GenericTableSchema, Long> getIdColumn();
+    Column<GenericTableSchema, Long> getIdColumn();
 
     @TypedColumn(name="id", method=MethodType.SETDATA, fromVersion="7.1.0")
-    public void setId(Long id);
+    void setId(Long id);
 
     @TypedColumn(name="bridge", method=MethodType.GETCOLUMN, fromVersion="7.1.0")
-    public Column<GenericTableSchema, UUID> getBridgeColumn();
+    Column<GenericTableSchema, UUID> getBridgeColumn();
 
     @TypedColumn(name="bridge", method=MethodType.SETDATA, fromVersion="7.1.0")
-    public void setBridge(UUID bridge);
+    void setBridge(UUID bridge);
 
     @TypedColumn(name="ipfix", method=MethodType.GETCOLUMN, fromVersion="7.1.0")
-    public Column<GenericTableSchema, UUID> getIpfixColumn();
+    Column<GenericTableSchema, UUID> getIpfixColumn();
 
     @TypedColumn(name="ipfix", method=MethodType.SETDATA, fromVersion="7.1.0")
-    public void setIpfix(UUID ipfix);
+    void setIpfix(UUID ipfix);
 
     @TypedColumn(name="external_ids", method=MethodType.GETCOLUMN, fromVersion="7.1.0")
-    public Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn();
+    Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn();
 
     @TypedColumn(name="external_ids", method=MethodType.SETDATA, fromVersion="7.1.0")
-    public void setExternalIds(Map<String, String> externalIds);
+    void setExternalIds(Map<String, String> externalIds);
 }

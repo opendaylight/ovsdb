@@ -1,11 +1,9 @@
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Madhu Venugopal
  */
 
 package org.opendaylight.ovsdb.lib;
@@ -18,11 +16,11 @@ public interface OvsdbConnectionListener {
      * Event thrown to the connection listener when a new Passive connection is established.
      * @param client OvsdbClient that represents the connection.
      */
-    public void connected(OvsdbClient client);
+    void connected(OvsdbClient client);
 
     /**
      * Event thrown to the connection listener when an existing connection is terminated.
      * @param client OvsdbClient that represents the connection.
      */
-    public void disconnected(OvsdbClient client);
+    void disconnected(OvsdbClient client);
 }

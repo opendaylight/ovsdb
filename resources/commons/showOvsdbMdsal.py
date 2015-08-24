@@ -459,13 +459,10 @@ def showPrettyNamesMap():
     prtLn('aliasMap:', 0)
     resultMap = {}
     for bridge in state.bridgeNodes.values():
-        resultMap[ bridge.alias ] = bridge.getOpenflowName()
+        resultMap[ bridge.alias ] = '{0: <25} {1: <7} {2}'.format(bridge.getOpenflowName(), bridge.name, bridge.dpId)
 
-    resultMapKeys = resultMap.keys()
-    resultMapKeys.sort()
-
-    for resultMapKey in resultMapKeys:
-        prtLn('{0}{1: <10} -> {2}'.format(spc, resultMapKey, resultMap[resultMapKey]), 0)
+    for resultMapKey in sorted(resultMap):
+        prtLn('{0}{1: <10} ->  {2}'.format(spc, resultMapKey, resultMap[resultMapKey]), 0)
     prtLn('', 0)
 
 # --

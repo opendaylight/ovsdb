@@ -1,11 +1,9 @@
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Madhu Venugopal
  */
 
 package org.opendaylight.ovsdb.schema.hardwarevtep;
@@ -24,14 +22,14 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 public interface Global extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name="managers", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<UUID>> getManagersColumn();
+    Column<GenericTableSchema, Set<UUID>> getManagersColumn();
 
     @TypedColumn(name="managers", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setManagers(Set<UUID> managers);
+    void setManagers(Set<UUID> managers);
 
     @TypedColumn(name="switches", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<UUID>> getSwitchesColumn();
+    Column<GenericTableSchema, Set<UUID>> getSwitchesColumn();
 
     @TypedColumn(name="switches", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setSwitches(Set<UUID> switches);
+    void setSwitches(Set<UUID> switches);
 }

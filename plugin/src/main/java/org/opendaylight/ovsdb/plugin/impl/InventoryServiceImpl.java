@@ -1,12 +1,11 @@
 /*
- * Copyright (C) 2013 Red Hat, Inc.
+ * Copyright (c) 2013, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Madhu Venugopal, Brent Salisbury
  */
+
 package org.opendaylight.ovsdb.plugin.impl;
 
 import java.net.InetAddress;
@@ -29,8 +28,6 @@ import org.opendaylight.ovsdb.plugin.api.OvsdbInventoryService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 
 import com.google.common.collect.Sets;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Maps;
 
@@ -40,8 +37,6 @@ import com.google.common.collect.Maps;
  *
  */
 public class InventoryServiceImpl implements OvsdbInventoryService {
-    private static final Logger logger = LoggerFactory
-            .getLogger(InventoryServiceImpl.class);
     private ConcurrentMap<Node, NodeDatabase> dbCache = Maps.newConcurrentMap();
     private ScheduledExecutorService executor;
     private OvsdbConfigurationService ovsdbConfigurationService;
@@ -95,7 +90,9 @@ public class InventoryServiceImpl implements OvsdbInventoryService {
     @Override
     public ConcurrentMap<String, ConcurrentMap<String, Row>> getCache(Node n, String databaseName) {
         NodeDatabase db = dbCache.get(n);
-        if (db == null) return null;
+        if (db == null) {
+            return null;
+        }
         return db.getDatabase(databaseName);
     }
 
@@ -103,7 +100,9 @@ public class InventoryServiceImpl implements OvsdbInventoryService {
     @Override
     public ConcurrentMap<String, Row> getTableCache(Node n, String databaseName, String tableName) {
         NodeDatabase db = dbCache.get(n);
-        if (db == null) return null;
+        if (db == null) {
+            return null;
+        }
         return db.getTableCache(databaseName, tableName);
     }
 
@@ -111,7 +110,9 @@ public class InventoryServiceImpl implements OvsdbInventoryService {
     @Override
     public Row getRow(Node n, String databaseName, String tableName, String uuid) {
         NodeDatabase db = dbCache.get(n);
-        if (db == null) return null;
+        if (db == null) {
+            return null;
+        }
         return db.getRow(databaseName, tableName, uuid);
     }
 
@@ -128,7 +129,9 @@ public class InventoryServiceImpl implements OvsdbInventoryService {
     @Override
     public void removeRow(Node n, String databaseName, String tableName, String uuid) {
         NodeDatabase db = dbCache.get(n);
-        if (db != null) db.removeRow(databaseName, tableName, uuid);
+        if (db != null) {
+            db.removeRow(databaseName, tableName, uuid);
+        }
     }
 
     @Override
@@ -145,7 +148,7 @@ public class InventoryServiceImpl implements OvsdbInventoryService {
             for (UUID uuid : (Set<UUID>)update.getRows().keySet()) {
 
             if (update.getNew(uuid) != null) {
-                boolean isNewRow = (tCache == null || tCache.get(uuid.toString()) == null) ? true : false;
+                boolean isNewRow = (tCache == null || tCache.get(uuid.toString()) == null);
                 db.updateRow(databaseName, tableName, uuid.toString(), update.getNew(uuid));
                 if (isNewRow) {
                     this.handleOpenVSwitchSpecialCase(n, databaseName, tableName, uuid);
@@ -181,7 +184,9 @@ public class InventoryServiceImpl implements OvsdbInventoryService {
                 @Override
                 public void run() {
                     try {
-                        if (ovsdbConfigurationService != null) ovsdbConfigurationService.setOFController(node, uuid.toString());
+                        if (ovsdbConfigurationService != null) {
+                            ovsdbConfigurationService.setOFController(node, uuid.toString());
+                        }
                     } catch (InterruptedException | ExecutionException e) {
                         e.printStackTrace();
                     }

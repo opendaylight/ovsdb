@@ -70,7 +70,7 @@ import com.google.common.collect.Sets;
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerSuite.class)
 public class OvsdbPluginV3IT extends OvsdbIntegrationTestBase {
-    private Logger log = LoggerFactory.getLogger(OvsdbPluginV3IT.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OvsdbPluginV3IT.class);
     @Inject
     private BundleContext bc;
     private OvsdbConfigurationService ovsdbConfigurationService = null;
@@ -140,7 +140,7 @@ public class OvsdbPluginV3IT extends OvsdbIntegrationTestBase {
             identifier = connectionInfo.getRemoteAddress().getHostAddress()+":"+connectionInfo.getRemotePort();
         }
         assertEquals(node, connectionService.getNode("OVS|" + identifier));
-        log.info("Nodes = "+ connectionService.getNodes());
+        LOG.info("Nodes = {}", connectionService.getNodes());
         /*
          * Test sequence :
          * 1. Print Cache and Assert to make sure the bridge is not created yet.
@@ -204,7 +204,7 @@ public class OvsdbPluginV3IT extends OvsdbIntegrationTestBase {
         Row bridgeRow = ovsdbConfigurationService.getRow(node, databaseName, bridge.getSchema().getName(), status.getUuid());
         assertNotNull(bridgeRow);
         bridge = connection.getClient().getTypedRowWrapper(Bridge.class, bridgeRow);
-        log.info("Bridge UUID "+bridge.getUuid()+" Status Uuid "+status.getUuid());
+        LOG.info("Bridge UUID {} Status Uuid {}", bridge.getUuid(), status.getUuid());
         assertEquals(bridge.getUuid(), status.getUuid());
 
         bridge = connection.getClient().createTypedRowWrapper(Bridge.class);
@@ -244,18 +244,20 @@ public class OvsdbPluginV3IT extends OvsdbIntegrationTestBase {
     public String getOpenVSwitchTableUUID(Connection connection) throws Exception {
         OpenVSwitch openVSwitch = connection.getClient().getTypedRowWrapper(OpenVSwitch.class, null);
         ConcurrentMap<UUID, Row<GenericTableSchema>> rows = ovsdbConfigurationService.getRows(node, databaseName, openVSwitch.getSchema().getName());
-        if (rows == null || rows.size() == 0) return null;
+        if (rows == null || rows.size() == 0) {
+            return null;
+        }
         return rows.keySet().toArray()[0].toString();
     }
 
     public void printCache() throws Exception {
         List<String> tables = ovsdbConfigurationService.getTables(node, databaseName);
-        log.info("Tables = "+tables);
+        LOG.info("Tables = {}", tables);
         assertNotNull(tables);
         for (String table : tables) {
-            log.info("Table "+table);
+            LOG.info("Table {}", table);
             ConcurrentMap<UUID, Row<GenericTableSchema>> rows = ovsdbConfigurationService.getRows(node, databaseName, table);
-            log.info(rows.toString());
+            LOG.info(rows.toString());
         }
     }
 

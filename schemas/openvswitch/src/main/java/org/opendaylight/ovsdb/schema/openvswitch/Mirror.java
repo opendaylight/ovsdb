@@ -1,12 +1,11 @@
 /*
- * Copyright (C) 2013 Red Hat, Inc.
+ * Copyright (c) 2013, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Madhu Venugopal
  */
+
 package org.opendaylight.ovsdb.schema.openvswitch;
 
 import org.opendaylight.ovsdb.lib.notation.Column;
@@ -27,59 +26,59 @@ import java.util.Set;
 public interface Mirror extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name="name", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, String> getNameColumn();
+    Column<GenericTableSchema, String> getNameColumn();
 
     @TypedColumn(name="name", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setName(Set<String> name);
+    void setName(Set<String> name);
 
     @TypedColumn(name="name", method=MethodType.GETDATA, fromVersion="1.0.0")
-    public Set<String> getName();
+    Set<String> getName();
 
     @TypedColumn(name="select_src_port", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<UUID>> getSelectSrcPortColumn();
+    Column<GenericTableSchema, Set<UUID>> getSelectSrcPortColumn();
 
     @TypedColumn(name="select_src_port", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setSelectSrcPort(Set<UUID> selectSrcPort);
+    void setSelectSrcPort(Set<UUID> selectSrcPort);
 
     @TypedColumn(name="select_dst_port", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<UUID>> getSelectDstPortColumn();
+    Column<GenericTableSchema, Set<UUID>> getSelectDstPortColumn();
 
     @TypedColumn(name="select_dst_port", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setSelectDstPort(Set<UUID> selectDstPrt);
+    void setSelectDstPort(Set<UUID> selectDstPrt);
 
     @TypedColumn(name="select_vlan", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Long>> getSelectVlanColumn();
+    Column<GenericTableSchema, Set<Long>> getSelectVlanColumn();
 
     @TypedColumn(name="select_vlan", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setSelectVlan(Set<Long> selectVlan);
+    void setSelectVlan(Set<Long> selectVlan);
 
     @TypedColumn(name="output_port", method=MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<UUID>> getOutputPortColumn();
+    Column<GenericTableSchema, Set<UUID>> getOutputPortColumn();
 
     @TypedColumn(name="output_port", method=MethodType.SETDATA, fromVersion="1.0.0")
-    public void setOutputPort(Set<UUID> outputPort);
+    void setOutputPort(Set<UUID> outputPort);
 
     @TypedColumn (name="output_vlan", method= MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Set<Long>> getOutputVlanColumn();
+    Column<GenericTableSchema, Set<Long>> getOutputVlanColumn();
 
     @TypedColumn (name="output_vlan", method= MethodType.SETDATA, fromVersion="1.0.0")
-    public void setOutputVlan(Set<Long> outputVlan);
+    void setOutputVlan(Set<Long> outputVlan);
 
     @TypedColumn (name="statistics", method= MethodType.GETCOLUMN, fromVersion="6.4.0")
-    public Column<GenericTableSchema, Map<String, Long>> getStatisticsColumn();
+    Column<GenericTableSchema, Map<String, Long>> getStatisticsColumn();
 
     @TypedColumn (name="statistics", method= MethodType.SETDATA, fromVersion="6.4.0")
-    public void setStatistics(Map<String, Long> statistics);
+    void setStatistics(Map<String, Long> statistics);
 
     @TypedColumn (name="external_ids", method= MethodType.GETCOLUMN, fromVersion="1.0.0")
-    public Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn();
+    Column<GenericTableSchema, Map<String, String>> getExternalIdsColumn();
 
     @TypedColumn (name="external_ids", method= MethodType.SETDATA, fromVersion="1.0.0")
-    public void setExternalIds(Map<String, String> externalIds);
+    void setExternalIds(Map<String, String> externalIds);
 
     @TypedColumn (name="select_all", method= MethodType.GETCOLUMN, fromVersion="6.2.0")
-    public Column<GenericTableSchema, Boolean> getSelectAllColumn();
+    Column<GenericTableSchema, Boolean> getSelectAllColumn();
 
     @TypedColumn (name="select_all", method= MethodType.SETDATA, fromVersion="6.2.0")
-    public void setSelectAll(Boolean selectAll);
+    void setSelectAll(Boolean selectAll);
 }

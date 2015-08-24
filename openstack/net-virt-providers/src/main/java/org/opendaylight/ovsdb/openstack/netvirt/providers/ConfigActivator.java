@@ -1,10 +1,20 @@
+/*
+ * Copyright (c) 2015 Red Hat, Inc. and others. All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
 package org.opendaylight.ovsdb.openstack.netvirt.providers;
 
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
+
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
+import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.ovsdb.openstack.netvirt.api.*;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractServiceInstance;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.OF13Provider;
@@ -12,6 +22,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrc
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.PipelineOrchestratorImpl;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.*;
+import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services.arp.GatewayMacResolverService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -24,7 +35,6 @@ public class ConfigActivator implements BundleActivator {
     private static final Logger LOG = LoggerFactory.getLogger(ConfigActivator.class);
     private List<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
     private ProviderContext providerContext;
-    private ServiceTracker NetworkingProviderManagerTracker;
 
     public ConfigActivator(ProviderContext providerContext) {
         this.providerContext = providerContext;
@@ -91,6 +101,12 @@ public class ConfigActivator implements BundleActivator {
         registerService(context, OutboundNatProvider.class.getName(),
                 outboundNatService, Service.OUTBOUND_NAT);
 
+        GatewayMacResolverService gatewayMacResolverService = new GatewayMacResolverService();
+        registerService(context, GatewayMacResolver.class.getName(),
+                gatewayMacResolverService, Service.GATEWAY_RESOLVER);
+        getNotificationProviderService().registerNotificationListener(gatewayMacResolverService);
+
+
         pipelineOrchestrator.setDependencies(context, null);
         outboundNatService.setDependencies(context, null);
         egressAclService.setDependencies(context, null);
@@ -104,9 +120,10 @@ public class ConfigActivator implements BundleActivator {
         arpResponderService.setDependencies(context, null);
         classifierService.setDependencies(context, null);
         of13Provider.setDependencies(context, null);
+        gatewayMacResolverService.setDependencies(context, null);
 
         @SuppressWarnings("unchecked")
-        ServiceTracker NetworkingProviderManagerTracker = new ServiceTracker(context,
+        ServiceTracker networkingProviderManagerTracker = new ServiceTracker(context,
                 NetworkingProviderManager.class, null) {
             @Override
             public Object addingService(ServiceReference reference) {
@@ -119,20 +136,14 @@ public class ConfigActivator implements BundleActivator {
                 return service;
             }
         };
-        NetworkingProviderManagerTracker.open();
-        this.NetworkingProviderManagerTracker = NetworkingProviderManagerTracker;
+        networkingProviderManagerTracker.open();
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
         LOG.info("ConfigActivator stop");
-        /* ServiceTrackers and services are already released when bundle stops
-        NetworkingProviderManagerTracker.close();
-        for (ServiceRegistration registration : registrations) {
-            if (registration != null) {
-                registration.unregister();
-            }
-        }*/
+        // ServiceTrackers and services are already released when bundle stops,
+        // so we don't need to close the trackers or unregister the services
     }
 
     private ServiceRegistration<?> registerService(BundleContext bundleContext, String[] interfaces,
@@ -152,5 +163,9 @@ public class ConfigActivator implements BundleActivator {
         return registerService(bundleContext,
                 new String[] {AbstractServiceInstance.class.getName(), interfaceClassName},
                 properties, impl);
+    }
+
+    private NotificationProviderService getNotificationProviderService(){
+        return this.providerContext.getSALService(NotificationProviderService.class);
     }
 }

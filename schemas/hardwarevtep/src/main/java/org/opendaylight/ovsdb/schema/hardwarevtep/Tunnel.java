@@ -1,12 +1,11 @@
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Madhu Venugopal
  */
+
 package org.opendaylight.ovsdb.schema.hardwarevtep;
 
 import java.util.Map;
@@ -22,38 +21,38 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 @TypedTable(name="Tunnel", database="hardware_vtep", fromVersion="1.3.0")
 public interface Tunnel extends TypedBaseTable<GenericTableSchema> {
     @TypedColumn(name="local", method=MethodType.GETCOLUMN, fromVersion="1.3.0")
-    public Column<GenericTableSchema, UUID> getLocalColumn();
+    Column<GenericTableSchema, UUID> getLocalColumn();
 
     @TypedColumn(name="local", method=MethodType.SETDATA, fromVersion="1.3.0")
-    public void setLocal(UUID local);
+    void setLocal(UUID local);
 
     @TypedColumn(name="remote", method=MethodType.GETCOLUMN, fromVersion="1.3.0")
-    public Column<GenericTableSchema, UUID> getRemoteColumn();
+    Column<GenericTableSchema, UUID> getRemoteColumn();
 
     @TypedColumn(name="remote", method=MethodType.SETDATA, fromVersion="1.3.0")
-    public void setRemote(UUID remote);
+    void setRemote(UUID remote);
 
     @TypedColumn(name="bfd_config_local", method=MethodType.GETCOLUMN, fromVersion="1.3.0")
-    public Column<GenericTableSchema, Map<String, String>> getBfdConfigLocalColumn();
+    Column<GenericTableSchema, Map<String, String>> getBfdConfigLocalColumn();
 
     @TypedColumn(name="bfd_config_local", method=MethodType.SETDATA, fromVersion="1.3.0")
-    public void setBfdConfigLocal(Map<String, String> bfdConfigLocal);
+    void setBfdConfigLocal(Map<String, String> bfdConfigLocal);
 
     @TypedColumn(name="bfd_config_remote", method=MethodType.GETCOLUMN, fromVersion="1.3.0")
-    public Column<GenericTableSchema, Map<String, String>> getBfdConfigRemoteColumn();
+    Column<GenericTableSchema, Map<String, String>> getBfdConfigRemoteColumn();
 
     @TypedColumn(name="bfd_config_remote", method=MethodType.SETDATA, fromVersion="1.3.0")
-    public void setBfdConfigRemote(Map<String, String> bfdConfigRemote);
+    void setBfdConfigRemote(Map<String, String> bfdConfigRemote);
 
     @TypedColumn(name="bfd_params", method=MethodType.GETCOLUMN, fromVersion="1.3.0")
-    public Column<GenericTableSchema, Map<String, String>> getBfdParamsColumn();
+    Column<GenericTableSchema, Map<String, String>> getBfdParamsColumn();
 
     @TypedColumn(name="bfd_params", method=MethodType.SETDATA, fromVersion="1.3.0")
-    public void setBfdParams(Map<String, String> bfdParams);
+    void setBfdParams(Map<String, String> bfdParams);
 
     @TypedColumn(name="bfd_status", method=MethodType.GETCOLUMN, fromVersion="1.3.0")
-    public Column<GenericTableSchema, Map<String, String>> getBfdStatusColumn();
+    Column<GenericTableSchema, Map<String, String>> getBfdStatusColumn();
 
     @TypedColumn(name="bfd_status", method=MethodType.SETDATA, fromVersion="1.3.0")
-    public void setBfdStatus(Map<String, String> bfdStatus);
+    void setBfdStatus(Map<String, String> bfdStatus);
 }

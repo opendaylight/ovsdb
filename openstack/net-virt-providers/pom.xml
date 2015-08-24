@@ -52,14 +52,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <ovsdb.utils.servicehelper.version>1.2.0-SNAPSHOT</ovsdb.utils.servicehelper.version>
     <powermock.version>1.5.2</powermock.version>
     <sonar-jacoco-listeners.version>2.4</sonar-jacoco-listeners.version>
+    <liblldp.version>0.9.1-SNAPSHOT</liblldp.version>
     <root.directory>${env.PWD}</root.directory>
     <sonar.jacoco.itReportPath>${root.directory}/target/code-coverage/jacoco-it.exec</sonar.jacoco.itReportPath>
   </properties>
   <dependencies>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.dependencymanager</artifactId>
-    </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
@@ -83,14 +80,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-common-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-common-util</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-core-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller.model</groupId>
@@ -148,8 +137,50 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>opendaylight-l2-types</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>utils.servicehelper</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>concepts</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools.model</groupId>
+      <artifactId>ietf-topology</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.ovsdb</groupId>
+      <artifactId>southbound-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.openflowplugin</groupId>
+      <artifactId>openflowplugin-api</artifactId>
+      <version>${openflowplugin.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+       <groupId>org.opendaylight.controller</groupId>
+       <artifactId>liblldp</artifactId>
+       <version>${liblldp.version}</version>
+     </dependency>
+    <dependency>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>jsr305</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-buffer</artifactId>
+      <!-- Should be in a parent POM -->
+      <version>4.0.26.Final</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
@@ -175,6 +206,18 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.powermock</groupId>
+      <artifactId>powermock-api-support</artifactId>
+      <version>${powermock.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.powermock</groupId>
+      <artifactId>powermock-reflect</artifactId>
+      <version>${powermock.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
@@ -183,6 +226,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <groupId>org.codehaus.sonar-plugins.java</groupId>
       <artifactId>sonar-jacoco-listeners</artifactId>
       <version>${sonar-jacoco-listeners.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

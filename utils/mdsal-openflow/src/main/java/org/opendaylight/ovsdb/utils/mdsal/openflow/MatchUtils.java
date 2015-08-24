@@ -1,10 +1,9 @@
 /*
- * Copyright (C) 2013 Red Hat, Inc.
+ * Copyright (c) 2013, 2015 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
  */
 
 package org.opendaylight.ovsdb.utils.mdsal.openflow;
@@ -34,6 +33,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.ArpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.TcpMatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._4.match.UdpMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.vlan.match.fields.VlanIdBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflowjava.nx.match.rev140421.NxmNxReg0;
@@ -73,7 +73,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 public class MatchUtils {
-    private static final Logger logger = LoggerFactory.getLogger(MatchUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MatchUtils.class);
     public static final short ICMP_SHORT = 1;
     public static final short TCP_SHORT = 6;
     public static final short UDP_SHORT = 17;
@@ -92,7 +92,7 @@ public class MatchUtils {
     public static MatchBuilder createInPortMatch(MatchBuilder matchBuilder, Long dpidLong, Long inPort) {
 
         NodeConnectorId ncid = new NodeConnectorId("openflow:" + dpidLong + ":" + inPort);
-        logger.debug("createInPortMatch() Node Connector ID is - Type=openflow: DPID={} inPort={} ", dpidLong, inPort);
+        LOG.debug("createInPortMatch() Node Connector ID is - Type=openflow: DPID={} inPort={} ", dpidLong, inPort);
         matchBuilder.setInPort(NodeConnectorId.getDefaultInstance(ncid.getValue()));
         matchBuilder.setInPort(ncid);
 
@@ -893,6 +893,95 @@ public class MatchUtils {
         return matchBuilder;
     }
 
+    /**
+     * Create a DHCP match with pot provided
+     *
+     * @param matchBuilder the match builder
+     * @param srcPort the source port
+     * @param dstPort the destination port
+     * @return the DHCP match
+     */
+    public static MatchBuilder createDHCPMatch(MatchBuilder matchBuilder, int srcPort, int dstPort) {
+
+        EthernetMatchBuilder ethernetMatch = new EthernetMatchBuilder();
+        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
+        ethTypeBuilder.setType(new EtherType(0x0800L));
+        ethernetMatch.setEthernetType(ethTypeBuilder.build());
+        matchBuilder.setEthernetMatch(ethernetMatch.build());
+
+        IpMatchBuilder ipmatch = new IpMatchBuilder();
+        ipmatch.setIpProtocol(UDP_SHORT);
+        matchBuilder.setIpMatch(ipmatch.build());
+
+        UdpMatchBuilder udpmatch = new UdpMatchBuilder();
+        udpmatch.setUdpSourcePort(new PortNumber(srcPort));
+        udpmatch.setUdpDestinationPort(new PortNumber(dstPort));
+        matchBuilder.setLayer4Match(udpmatch.build());
+
+        return matchBuilder;
+
+    }
+
+    /**
+     * Creates DHCP server packet match with DHCP mac address and port.
+     *
+     * @param matchBuilder the matchbuilder
+     * @param dhcpServerMac MAc address of the DHCP server of the subnet
+     * @param srcPort the source port
+     * @param dstPort the destination port
+     * @return the DHCP server match
+     */
+    public static MatchBuilder createDHCPServerMatch(MatchBuilder matchBuilder, String dhcpServerMac, int srcPort,
+            int dstPort) {
+
+        EthernetMatchBuilder ethernetMatch = new EthernetMatchBuilder();
+        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
+        ethTypeBuilder.setType(new EtherType(0x0800L));
+        ethernetMatch.setEthernetType(ethTypeBuilder.build());
+        matchBuilder.setEthernetMatch(ethernetMatch.build());
+
+        EthernetSourceBuilder ethSourceBuilder = new EthernetSourceBuilder();
+        ethSourceBuilder.setAddress(new MacAddress(dhcpServerMac));
+        ethernetMatch.setEthernetSource(ethSourceBuilder.build());
+        matchBuilder.setEthernetMatch(ethernetMatch.build());
+
+        IpMatchBuilder ipmatch = new IpMatchBuilder();
+        ipmatch.setIpProtocol(UDP_SHORT);
+        matchBuilder.setIpMatch(ipmatch.build());
+
+        UdpMatchBuilder udpmatch = new UdpMatchBuilder();
+        udpmatch.setUdpSourcePort(new PortNumber(srcPort));
+        udpmatch.setUdpDestinationPort(new PortNumber(dstPort));
+        matchBuilder.setLayer4Match(udpmatch.build());
+
+        return matchBuilder;
+
+    }
+
+    /**
+     * @param matchBuilder MatchBuilder Object
+     * @param srcip String containing an IPv4 prefix
+     * @param srcMac The source macAddress
+     * @return matchBuilder Map Object with a match
+     */
+    public static MatchBuilder createSrcL3IPv4MatchWithMac(MatchBuilder matchBuilder, Ipv4Prefix srcip, MacAddress srcMac) {
+
+        Ipv4MatchBuilder ipv4MatchBuilder = new Ipv4MatchBuilder();
+        ipv4MatchBuilder.setIpv4Source(new Ipv4Prefix(srcip));
+        EthernetTypeBuilder ethTypeBuilder = new EthernetTypeBuilder();
+        ethTypeBuilder.setType(new EtherType(0x0800L));
+        EthernetMatchBuilder eth = new EthernetMatchBuilder();
+        eth.setEthernetType(ethTypeBuilder.build());
+        eth.setEthernetSource(new EthernetSourceBuilder()
+                .setAddress(srcMac)
+                .build());
+
+        matchBuilder.setLayer3Match(ipv4MatchBuilder.build());
+        matchBuilder.setEthernetMatch(eth.build());
+        return matchBuilder;
+
+    }
+
     public static class RegMatch {
         final Class<? extends NxmNxReg> reg;
         final Long value;
@@ -908,7 +997,7 @@ public class MatchUtils {
 
     public static void addNxRegMatch(MatchBuilder match,
                                      RegMatch... matches) {
-        ArrayList<ExtensionList> extensions = new ArrayList<>();
+        List<ExtensionList> extensions = new ArrayList<>();
         for (RegMatch rm : matches) {
             Class<? extends ExtensionKey> key;
             if (NxmNxReg0.class.equals(rm.reg)) {
@@ -1016,18 +1105,21 @@ public class MatchUtils {
                                               MacAddress dstMac,
                                               Long etherType) {
         EthernetMatchBuilder emb = new  EthernetMatchBuilder();
-        if (srcMac != null)
+        if (srcMac != null) {
             emb.setEthernetSource(new EthernetSourceBuilder()
                 .setAddress(srcMac)
                 .build());
-        if (dstMac != null)
+        }
+        if (dstMac != null) {
             emb.setEthernetDestination(new EthernetDestinationBuilder()
                 .setAddress(dstMac)
                 .build());
-        if (etherType != null)
+        }
+        if (etherType != null) {
             emb.setEthernetType(new EthernetTypeBuilder()
                 .setType(new EtherType(etherType))
                 .build());
+        }
         return emb.build();
     }
 

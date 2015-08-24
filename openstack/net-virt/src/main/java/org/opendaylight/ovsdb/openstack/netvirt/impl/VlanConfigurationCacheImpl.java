@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2013 Hewlett-Packard Development Company, L.P. and others
+ * Copyright (c) 2013, 2015 Hewlett-Packard Development Company, L.P. and others. All rights reserved.
  *
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
-*/
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
 package org.opendaylight.ovsdb.openstack.netvirt.impl;
 
 import org.opendaylight.ovsdb.openstack.netvirt.ConfigInterface;
@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * @author Sam Hague
  */
 public class VlanConfigurationCacheImpl implements ConfigInterface, VlanConfigurationCache {
-    static final Logger logger = LoggerFactory.getLogger(VlanConfigurationCacheImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(VlanConfigurationCacheImpl.class);
     private Map<String, NodeConfiguration> configurationCache = Maps.newConcurrentMap();
     private volatile TenantNetworkManager tenantNetworkManager;
     private volatile Southbound southbound;
@@ -53,17 +53,15 @@ public class VlanConfigurationCacheImpl implements ConfigInterface, VlanConfigur
 
     private void initializeNodeConfiguration(Node node, String nodeUuid) {
         NodeConfiguration nodeConfiguration = new NodeConfiguration();
-        Integer vlan = 0;
-        String networkId = null;
         List<OvsdbTerminationPointAugmentation> ports = southbound.getTerminationPointsOfBridge(node);
         for (OvsdbTerminationPointAugmentation port : ports) {
-            vlan = port.getVlanTag().getValue();
-            networkId = tenantNetworkManager.getTenantNetwork(port).getNetworkUUID();
+            Integer vlan = port.getVlanTag().getValue();
+            String networkId = tenantNetworkManager.getTenantNetwork(port).getNetworkUUID();
             if (vlan != 0 && networkId != null) {
                 internalVlanInUse(nodeConfiguration, vlan);
                 nodeConfiguration.getTenantVlanMap().put(networkId, vlan);
             } else {
-                logger.debug("Node: {} initialized without a vlan", node);
+                LOG.debug("Node: {} initialized without a vlan", node);
             }
         }
         configurationCache.put(nodeUuid, nodeConfiguration);

@@ -1,11 +1,9 @@
 /*
- * Copyright (C) 2014 SDN Hub, LLC.
+ * Copyright (c) 2014 SDN Hub, LLC. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Srini Seetharaman, Madhu Venugopal
  */
 package org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.services;
 
@@ -18,6 +16,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.Constants;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerConfiguration.LoadBalancerPoolMember;
 import org.opendaylight.ovsdb.openstack.netvirt.api.LoadBalancerProvider;
+import org.opendaylight.ovsdb.openstack.netvirt.api.Southbound;
 import org.opendaylight.ovsdb.openstack.netvirt.api.Status;
 import org.opendaylight.ovsdb.openstack.netvirt.api.StatusCode;
 import org.opendaylight.ovsdb.openstack.netvirt.providers.ConfigInterface;
@@ -25,6 +24,7 @@ import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.AbstractSer
 import org.opendaylight.ovsdb.openstack.netvirt.providers.openflow13.Service;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.ActionUtils;
 import org.opendaylight.ovsdb.utils.mdsal.openflow.MatchUtils;
+import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
@@ -61,13 +61,15 @@ import com.google.common.collect.Lists;
 
 public class LoadBalancerService extends AbstractServiceInstance implements LoadBalancerProvider, ConfigInterface {
 
-    private static final Logger logger = LoggerFactory.getLogger(LoadBalancerProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoadBalancerProvider.class);
     private static final int DEFAULT_FLOW_PRIORITY = 32768;
     private static final Long FIRST_PASS_REGA_MATCH_VALUE = 0L;
     private static final Long SECOND_PASS_REGA_MATCH_VALUE = 1L;
 
     private static final Class<? extends NxmNxReg> REG_FIELD_A = NxmNxReg1.class;
     private static final Class<? extends NxmNxReg> REG_FIELD_B = NxmNxReg2.class;
+    
+    private volatile Southbound southbound;
 
     public LoadBalancerService() {
         super(Service.LOAD_BALANCER);
@@ -77,6 +79,14 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
         super(service);
     }
 
+    private String getDpid(Node node) {
+        long dpid = southbound.getDataPathId(node);
+        if (dpid == 0) {
+            LOG.warn("getDpid: DPID could not be found for node: {}", node.getNodeId().getValue());
+        }
+        return String.valueOf(dpid);
+    }
+    
     /**
      * When this method is called, we do the following for minimizing flow updates:
      * 1. Overwrite the solo multipath rule that applies to all members
@@ -88,18 +98,18 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
                                                      LoadBalancerConfiguration lbConfig, LoadBalancerPoolMember member,
                                                      org.opendaylight.ovsdb.openstack.netvirt.api.Action action) {
         if (lbConfig == null || member == null) {
-            logger.error("Null value for LB config {} or Member {}", lbConfig, member);
+            LOG.error("Null value for LB config {} or Member {}", lbConfig, member);
             return new Status(StatusCode.BADREQUEST);
         }
         if (!lbConfig.isValid()) {
-            logger.error("LB config is invalid: {}", lbConfig);
+            LOG.error("LB config is invalid: {}", lbConfig);
             return new Status(StatusCode.BADREQUEST);
         }
-        logger.debug("Performing {} rules for member {} with index {} on LB with VIP {} and total members {}",
+        LOG.debug("Performing {} rules for member {} with index {} on LB with VIP {} and total members {}",
                 action, member.getIP(), member.getIndex(), lbConfig.getVip(), lbConfig.getMembers().size());
 
         NodeBuilder nodeBuilder = new NodeBuilder();
-        nodeBuilder.setId(new NodeId(Constants.OPENFLOW_NODE_PREFIX + node.getNodeId().getValue()));
+        nodeBuilder.setId(new NodeId(Constants.OPENFLOW_NODE_PREFIX + getDpid(node)));
         nodeBuilder.setKey(new NodeKey(nodeBuilder.getId()));
 
         //Update the multipath rule
@@ -125,18 +135,14 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
     @Override
     public Status programLoadBalancerRules(Node node, LoadBalancerConfiguration lbConfig,
                                            org.opendaylight.ovsdb.openstack.netvirt.api.Action action) {
-        if (lbConfig == null) {
-            logger.error("LB config is invalid: {}", lbConfig);
+        if (lbConfig == null || !lbConfig.isValid()) {
+            LOG.error("LB config is invalid: {}", lbConfig);
             return new Status(StatusCode.BADREQUEST);
         }
-        if (!lbConfig.isValid()) {
-            logger.error("LB config is invalid: {}", lbConfig);
-            return new Status(StatusCode.BADREQUEST);
-        }
-        logger.debug("Performing {} rules for VIP {} and {} members", action, lbConfig.getVip(), lbConfig.getMembers().size());
+        LOG.debug("Performing {} rules for VIP {} and {} members", action, lbConfig.getVip(), lbConfig.getMembers().size());
 
         NodeBuilder nodeBuilder = new NodeBuilder();
-        nodeBuilder.setId(new NodeId(Constants.OPENFLOW_NODE_PREFIX + node.getNodeId().getValue()));
+        nodeBuilder.setId(new NodeId(Constants.OPENFLOW_NODE_PREFIX + getDpid(node)));
         nodeBuilder.setKey(new NodeKey(nodeBuilder.getId()));
 
         if (action.equals(org.opendaylight.ovsdb.openstack.netvirt.api.Action.ADD)) {
@@ -168,12 +174,13 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
 
         // Match Tunnel-ID, VIP, and Reg0==0
         if (lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) ||
-            lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE))
+            lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)) {
             MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(lbConfig.getProviderSegmentationId()));
-        else if (lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN))
+        } else if (lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
             MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(lbConfig.getProviderSegmentationId())), true);
-        else
+        } else {
             return; //Should not get here. TODO: Other types
+        }
 
         MatchUtils.createDstL3IPv4Match(matchBuilder, MatchUtils.iPv4PrefixFromIPv4Address(lbConfig.getVip()));
         MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(REG_FIELD_A, FIRST_PASS_REGA_MATCH_VALUE));
@@ -267,12 +274,13 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
 
         // Match Tunnel-ID, VIP, Reg0==1 and Reg1==Index of member
         if (lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) ||
-            lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE))
+            lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)) {
             MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(lbConfig.getProviderSegmentationId()));
-        else if (lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN))
+        } else if (lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
             MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(lbConfig.getProviderSegmentationId())), true);
-        else
+        } else {
             return; //Should not get here. TODO: Other types
+        }
 
         MatchUtils.createDstL3IPv4Match(matchBuilder, MatchUtils.iPv4PrefixFromIPv4Address(vip));
         MatchUtils.addNxRegMatch(matchBuilder, new MatchUtils.RegMatch(REG_FIELD_A, SECOND_PASS_REGA_MATCH_VALUE),
@@ -365,12 +373,13 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
 
         // Match Tunnel-ID, MemberIP, and Protocol/Port
         if (lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VXLAN) ||
-                   lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE))
+                   lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_GRE)) {
             MatchUtils.createTunnelIDMatch(matchBuilder, new BigInteger(lbConfig.getProviderSegmentationId()));
-        else if (lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN))
+        } else if (lbConfig.getProviderNetworkType().equalsIgnoreCase(NetworkHandler.NETWORK_TYPE_VLAN)) {
             MatchUtils.createVlanIdMatch(matchBuilder, new VlanId(Integer.valueOf(lbConfig.getProviderSegmentationId())), true);
-        else
+        } else {
             return; //Should not get here. TODO: Other types
+        }
 
         MatchUtils.createSrcL3IPv4Match(matchBuilder, MatchUtils.iPv4PrefixFromIPv4Address(member.getIP()));
         MatchUtils.createSetSrcTcpMatch(matchBuilder, new PortNumber(member.getPort()));
@@ -447,6 +456,7 @@ public class LoadBalancerService extends AbstractServiceInstance implements Load
     @Override
     public void setDependencies(BundleContext bundleContext, ServiceReference serviceReference) {
         super.setDependencies(bundleContext.getServiceReference(LoadBalancerProvider.class.getName()), this);
+        southbound =(Southbound) ServiceHelper.getGlobalInstance(Southbound.class, this);
     }
 
     @Override

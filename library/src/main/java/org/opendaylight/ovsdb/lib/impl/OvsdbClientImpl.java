@@ -1,21 +1,18 @@
 /*
- * Copyright (C) 2014 EBay Software Foundation
+ * Copyright (c) 2014, 2015 EBay Software Foundation and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
- *
- * Authors : Ashwin Raveendran, Madhu Venugopal
  */
+
 package org.opendaylight.ovsdb.lib.impl;
 
 import io.netty.channel.Channel;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -49,7 +46,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
@@ -62,16 +58,14 @@ import com.google.common.util.concurrent.SettableFuture;
 
 public class OvsdbClientImpl implements OvsdbClient {
 
-    protected static final Logger logger = LoggerFactory.getLogger(OvsdbClientImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OvsdbClientImpl.class);
     private ExecutorService executorService;
     private OvsdbRPC rpc;
     private Map<String, DatabaseSchema> schema = Maps.newHashMap();
-    private HashMap<String, CallbackContext> monitorCallbacks = Maps.newHashMap();
-    private Queue<Throwable> exceptions;
+    private Map<String, CallbackContext> monitorCallbacks = Maps.newHashMap();
     private OvsdbRPC.Callback rpcCallback;
     private OvsdbConnectionInfo connectionInfo;
     private Channel channel;
-    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public OvsdbClientImpl(OvsdbRPC rpc, Channel channel, ConnectionType type, ExecutorService executorService) {
         this.rpc = rpc;
@@ -94,7 +88,7 @@ public class OvsdbClientImpl implements OvsdbClient {
                     MonitorCallBack monitorCallBack = callbackContext.monitorCallBack;
                     if (monitorCallBack == null) {
                         //ignore ?
-                        logger.info("callback received with context {}, but no known handler. Ignoring!", key);
+                        LOG.info("callback received with context {}, but no known handler. Ignoring!", key);
                         return;
                     }
                     TableUpdates updates = transformingCallback(updateNotification.getUpdates(),
@@ -176,6 +170,37 @@ public class OvsdbClientImpl implements OvsdbClient {
         } catch (InterruptedException | ExecutionException e) {
             return null;
         }
+        return transformingCallback(result, dbSchema);
+    }
+
+    @Override
+    public <E extends TableSchema<E>> TableUpdates monitor(final DatabaseSchema dbSchema,
+                                                           List<MonitorRequest<E>> monitorRequest,
+                                                           final MonitorHandle monitorHandle,
+                                                           final MonitorCallBack callback) {
+
+        final ImmutableMap<String, MonitorRequest<E>> reqMap = Maps.uniqueIndex(monitorRequest,
+                new Function<MonitorRequest<E>, String>() {
+                    @Override
+                    public String apply(MonitorRequest<E> input) {
+                        return input.getTableName();
+                    }
+                });
+
+        registerCallback(monitorHandle, callback, dbSchema);
+
+        ListenableFuture<JsonNode> monitor = rpc.monitor(new Params() {
+            @Override
+            public List<Object> params() {
+                return Lists.<Object>newArrayList(dbSchema.getName(), monitorHandle.getId(), reqMap);
+            }
+        });
+        JsonNode result;
+        try {
+            result = monitor.get();
+        } catch (InterruptedException | ExecutionException e) {
+            return null;
+        }
         TableUpdates updates = transformingCallback(result, dbSchema);
         return updates;
     }
@@ -186,8 +211,26 @@ public class OvsdbClientImpl implements OvsdbClient {
     }
 
     @Override
-    public void cancelMonitor(MonitorHandle handler) {
-        throw new UnsupportedOperationException("not yet implemented");
+    public void cancelMonitor(final MonitorHandle handler) {
+        ListenableFuture<JsonNode> cancelMonitor = rpc.monitor_cancel(new Params() {
+            @Override
+            public List<Object> params() {
+                return Lists.<Object>newArrayList(handler.getId());
+            }
+        });
+
+        JsonNode result = null;
+        try {
+            result = cancelMonitor.get();
+        } catch (InterruptedException | ExecutionException e) {
+            LOG.error("Exception when canceling monitor handler {}", handler.getId());
+        }
+
+        if (result == null) {
+            LOG.error("Fail to cancel monitor with handler {}", handler.getId());
+        } else {
+            LOG.debug("Successfully cancel monitoring for handler {}", handler.getId());
+        }
     }
 
     @Override
@@ -299,10 +342,6 @@ public class OvsdbClientImpl implements OvsdbClient {
 
     public void setRpc(OvsdbRPC rpc) {
         this.rpc = rpc;
-    }
-
-    public Queue<Throwable> getExceptions() {
-        return exceptions;
     }
 
     static class CallbackContext {

@@ -16,8 +16,10 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyShort;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
@@ -52,7 +54,6 @@ import org.opendaylight.ovsdb.openstack.netvirt.api.TenantNetworkManager;
 import org.opendaylight.ovsdb.utils.servicehelper.ServiceHelper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
-//import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -347,7 +348,7 @@ public class OF13ProviderTest {
         NeutronNetwork neutronNetwork = mock(NeutronNetwork.class);
         when(neutronNetwork.getProviderNetworkType()).thenReturn(NetworkHandler.NETWORK_TYPE_VLAN, NetworkHandler.NETWORK_TYPE_GRE);
         NodeCacheManager nodeCacheManager = mock(NodeCacheManager.class);
-        Map<NodeId, Node> nodes = new HashMap<NodeId, Node>();
+        Map<NodeId, Node> nodes = new HashMap<>();
         nodes.put(mock(NodeId.class), mock(Node.class));
         when(nodeCacheManager.getOvsdbNodes()).thenReturn(nodes);
         Southbound southbound = mock(Southbound.class);
@@ -388,7 +389,7 @@ public class OF13ProviderTest {
         when(nodeId.getValue()).thenReturn(ID);
         Node node = mock(Node.class);
         when(node.getNodeId()).thenReturn(nodeId);
-        Map<NodeId, Node> nodes = new HashMap<NodeId, Node>();
+        Map<NodeId, Node> nodes = new HashMap<>();
         nodes.put(mock(NodeId.class), node);
         when(nodeCacheManager.getOvsdbNodes()).thenReturn(nodes);
         Southbound southbound = mock(Southbound.class);
@@ -397,7 +398,7 @@ public class OF13ProviderTest {
         when(southbound.getOptionsValue(any(List.class), anyString())).thenReturn(IP);
         OvsdbTerminationPointAugmentation intf = mock(OvsdbTerminationPointAugmentation.class);
         when(intf.getName()).thenReturn(INTF);
-        List<String> intfs = new ArrayList<String>();
+        List<String> intfs = new ArrayList<>();
         intfs.add(INTF);
         BridgeConfigurationManager bridgeConfigurationManager = mock(BridgeConfigurationManager.class);
         when(bridgeConfigurationManager.getAllPhysicalInterfaceNames(any(Node.class))).thenReturn(intfs);
@@ -520,11 +521,11 @@ public class OF13ProviderTest {
         BundleContext bundleContext = mock(BundleContext.class);
         when(bundleContext.getServiceReference(NetworkingProvider.class.getName())).thenReturn(mock(ServiceReference.class));
 
-        MemberModifier.field(OF13Provider.class, "bundleContext").set(of13Provider , bundleContext);
+        MemberModifier.field(OF13Provider.class, "bundleContext").set(of13Provider, bundleContext);
 
         of13Provider.setDependencies(networkingProviderManager);
-        assertEquals("Error, did not return the correct object", getField("networkingProviderManager"), networkingProviderManager);
-}
+        verify(networkingProviderManager).providerAdded(any(ServiceReference.class), same(of13Provider));
+    }
 
     private Object getField(String fieldName) throws Exception {
         Field field = OF13Provider.class.getDeclaredField(fieldName);

@@ -23,6 +23,10 @@ module routemgr-impl {
     augment "/config:modules/config:module/config:configuration" {
         case routemgr-impl {
             when "/config:modules/config:module/config:type = 'routemgr-impl'";
+
+ 	    leaf routemgr-dummy {
+            	 type uint8;
+            }
             container broker {
                 uses config:service-ref {
                     refine type {
@@ -47,7 +51,6 @@ module routemgr-impl {
                     }
                 }
             }
-
             container notification-service {
                uses config:service-ref {
                   refine type {
